@@ -1,0 +1,177 @@
+<title>Connexion VIGIE HSE</title>
+<meta name="description" content="Connexion au centre de pilotage HSE de la collectivité.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-violet:#A991E8;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --danger:#DD7A7A; --danger-rgb:221,122,122;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.05); --shadow-md:0 12px 40px rgba(38,52,61,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-violet:#BBA5EF;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --danger:#E8938F; --danger-rgb:232,147,143;
+      --shadow-sm:0 4px 20px rgba(0,0,0,.28); --shadow-md:0 16px 44px rgba(0,0,0,.36);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-violet:#BBA5EF;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --danger:#E8938F; --danger-rgb:232,147,143;
+    --shadow-sm:0 4px 20px rgba(0,0,0,.28); --shadow-md:0 16px 44px rgba(0,0,0,.36);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:
+      radial-gradient(560px 360px at 14% 8%, rgba(var(--accent-rgb),.10), transparent 60%),
+      radial-gradient(520px 340px at 86% 92%, rgba(169,145,232,.10), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; }
+  .eyebrow{ font-family:"Barlow Condensed",sans-serif; font-weight:600; letter-spacing:.1em; text-transform:uppercase; font-size:11.5px; color:var(--text-muted); }
+
+  .wrap{ width:100%; max-width:380px; display:flex; flex-direction:column; align-items:center; gap:24px; }
+  .brand{ display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; }
+  .brand-mark{
+    width:52px; height:52px; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(150deg, rgba(var(--accent-rgb),.16), rgba(169,145,232,.16));
+    border:1px solid var(--border); color:var(--accent);
+  }
+  .brand-title{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:26px; letter-spacing:.01em; }
+  .brand-sub{ color:var(--text-muted); font-size:12.5px; max-width:280px; line-height:1.5; }
+
+  .card{
+    width:100%; background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg);
+    box-shadow:var(--shadow-md); padding:28px 26px 24px;
+  }
+  .f{ display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+  .f label{ font-size:12px; color:var(--text-muted); font-weight:500; }
+  input[type="text"], input[type="password"]{
+    background:var(--surface); border:1px solid var(--border); color:var(--text);
+    font:500 14px "IBM Plex Sans",sans-serif; padding:11px 13px; border-radius:var(--r-sm); width:100%;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  input:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  input:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+
+  .error{
+    display:none; align-items:center; gap:8px; margin:-2px 0 16px; padding:10px 12px;
+    border-radius:var(--r-sm); background:rgba(var(--danger-rgb),.10); border:1px solid rgba(var(--danger-rgb),.28);
+    color:var(--danger); font-size:12.5px; font-weight:500;
+  }
+  .error.show{ display:flex; }
+  .error::before{ content:"!"; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:var(--danger); color:#fff; font-size:10px; font-weight:800; flex-shrink:0; }
+
+  .btn-primary{
+    width:100%; border:none; color:#fff; font:600 13.5px "IBM Plex Sans",sans-serif; padding:12px 18px;
+    border-radius:var(--r-sm); cursor:pointer; background:linear-gradient(135deg, var(--accent), var(--accent-violet));
+    box-shadow:0 8px 20px -8px rgba(var(--accent-rgb),.55); transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary:hover{ transform:translateY(-1px); box-shadow:0 10px 24px -8px rgba(var(--accent-rgb),.6); }
+  .btn-primary:active{ transform:translateY(0); }
+
+  .footnote{ font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.6; max-width:340px; }
+</style>
+
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>
+    </div>
+    <div class="eyebrow">Collectivité territoriale</div>
+    <div class="brand-title">VIGIE HSE</div>
+    <div class="brand-sub">Centre de pilotage hygiène, sécurité et environnement au travail</div>
+  </div>
+
+  <div class="card">
+    <form id="loginForm" novalidate>
+      <div class="f">
+        <label for="username">Identifiant</label>
+        <input type="text" id="username" name="username" autocomplete="username" placeholder="ex. RH1 ou admin@verchamps.fr" required autofocus>
+      </div>
+      <div class="f">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" placeholder="••••" required>
+      </div>
+      <div class="error" id="loginError">Identifiant ou mot de passe incorrect.</div>
+      <button type="submit" class="btn-primary">Se connecter</button>
+    </form>
+  </div>
+
+  <p class="footnote">Authentification de démonstration côté navigateur — à remplacer par le dispositif d'identification sécurisé de la collectivité lors du raccordement à l'architecture back-end.</p>
+</div>
+
+<script>
+  const SESSION_KEY = "vigie_hse_session";
+  const USERS_KEY = "vigie_hse_users";
+
+  function defaultUsers(){
+    return [
+      { id:"u-rh1", nom:"", prenom:"", email:"RH1", username:"RH1", password:"1234", role:"rh", services:["*"], active:true },
+      { id:"u-rh2", nom:"", prenom:"", email:"RH2", username:"RH2", password:"1234", role:"rh", services:["*"], active:true },
+      { id:"u-ag1", nom:"", prenom:"", email:"AG1", username:"AG1", password:"1234", role:"ag", services:["*"], active:true },
+      { id:"u-ag2", nom:"", prenom:"", email:"AG2", username:"AG2", password:"1234", role:"ag", services:["*"], active:true },
+      { id:"u-admin", nom:"Verchamps", prenom:"Admin", email:"admin@verchamps.fr", username:"admin@verchamps.fr", password:"admin1234", role:"admin", services:["*"], active:true },
+      { id:"u-manager", nom:"Verchamps", prenom:"Manager", email:"manager@verchamps.fr", username:"manager@verchamps.fr", password:"manager1234", role:"manager", services:["Voirie","Espace Vert"], active:true },
+    ];
+  }
+  function loadUsers(){
+    let stored = [];
+    try {
+      const raw = localStorage.getItem(USERS_KEY);
+      if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; }
+    } catch(e){}
+    if (stored.length === 0){
+      stored = defaultUsers();
+      try { localStorage.setItem(USERS_KEY, JSON.stringify(stored)); } catch(e){}
+    }
+    return stored;
+  }
+
+  try {
+    const existing = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null");
+    if (existing && existing.user) location.href = "index.html";
+  } catch(e){}
+
+  const form = document.getElementById("loginForm");
+  const errorBox = document.getElementById("loginError");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const idInput = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value;
+    const users = loadUsers();
+    const idLower = idInput.toLowerCase();
+    const account = users.find(u =>
+      (String(u.username || "").toLowerCase() === idLower || String(u.email || "").toLowerCase() === idLower)
+    );
+    if (account && account.active !== false && account.password === pass){
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+        user: account.username || account.email,
+        role: account.role,
+        email: account.email,
+        services: account.services || ["*"],
+      }));
+      location.href = "index.html";
+    } else if (account && account.active === false){
+      errorBox.textContent = "Ce compte a été désactivé. Contactez un administrateur.";
+      errorBox.classList.add("show");
+      document.getElementById("password").value = "";
+    } else {
+      errorBox.textContent = "Identifiant ou mot de passe incorrect.";
+      errorBox.classList.add("show");
+      document.getElementById("password").value = "";
+      document.getElementById("password").focus();
+    }
+  });
+</script>

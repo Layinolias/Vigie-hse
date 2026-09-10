@@ -1,0 +1,775 @@
+<title>Plan d'Actions</title>
+<meta name="description" content="Suivi des actions correctives issues du Document Unique et du Registre AT/MP.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B; --critical-rgb:201,94,107;
+    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px; --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item .icon{ width:17px; height:17px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .role-chip.ag{ background:rgba(var(--accent-blue-rgb),.16); color:var(--accent-blue); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+  .hero{ margin-bottom:22px; } .hero h1{ font-size:25px; } .hero p{ margin:6px 0 0; color:var(--text-muted); font-size:13px; max-width:70ch; line-height:1.55; }
+
+  /* ===== Compact sticky page summary (icon + titre + description + KPI sur une ligne) ===== */
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .page-summary-kpis{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ps-kpi{ display:flex; align-items:center; gap:7px; padding:5px 11px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); }
+  .ps-kpi-icon{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ps-kpi-icon .icon{ width:12px; height:12px; }
+  .ps-kpi-icon.blue{ background:rgba(var(--accent-rgb),.14); color:var(--accent); }
+  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
+  .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+  .ps-kpi-icon.critical{ background:rgba(var(--critical-rgb),.14); color:var(--critical); }
+  .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .ps-kpi-value .unit{ font-size:10px; color:var(--text-muted); font-weight:500; margin-left:1px; }
+  .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } .ps-kpi-label{ display:none; } }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn .icon{ width:15px; height:15px; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+
+  .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:18px; }
+  @media (max-width:1180px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .kpi-row{ grid-template-columns:1fr; } }
+  .kpi{ padding:16px 18px; display:flex; flex-direction:column; gap:8px; }
+  .kpi-top{ display:flex; align-items:center; justify-content:space-between; }
+  .kpi-icon{ width:30px; height:30px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; }
+  .kpi-icon.blue{ background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+  .kpi-label{ font-size:11.5px; color:var(--text-muted); font-weight:500; }
+  .kpi-value{ font-size:26px; font-weight:600; letter-spacing:-.01em; }
+  .kpi-sub{ font-size:11.5px; color:var(--text-faint); } .kpi-sub b{ color:var(--text); font-weight:600; }
+
+  .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
+  select, input[type="text"], input[type="date"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:170px; cursor:pointer;
+  }
+  select:hover, input:hover, textarea:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:64px; width:100%; font-weight:400; line-height:1.5; }
+  .result-count{ align-self:center; margin-left:auto; font-size:12px; color:var(--text-faint); }
+  .result-count b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-title{ font-size:16.5px; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+
+  .form-panel{ padding:20px 22px 22px; margin-bottom:18px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px 16px; }
+  .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; }
+  @media (max-width:680px){ .form-grid .span2, .form-grid .span3{ grid-column:span 1; } }
+  .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+
+  .table-panel{ overflow:auto; max-height:70vh; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:1180px; }
+  table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr{ border-left:3px solid transparent; transition:background .12s ease; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg tbody tr.overdue{ border-left-color:var(--danger); background:rgba(var(--danger-rgb),.04); }
+  table.reg tbody td.wrap{ white-space:normal; min-width:200px; }
+  table.reg thead th#thActions{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
+  table.reg tbody td.actions-float{ position:sticky; right:0; z-index:1; background:var(--surface-el); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); white-space:nowrap; }
+  table.reg tbody tr:hover td.actions-float{ background:var(--bg-2); }
+
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.p-critique{ color:var(--danger); background:var(--danger-bg); } .chip.p-critique::before{ background:var(--danger); }
+  .chip.p-haute{ color:var(--critical); background:rgba(var(--critical-rgb),.12); } .chip.p-haute::before{ background:var(--critical); }
+  .chip.p-moyenne{ color:var(--warning); background:var(--warning-bg); } .chip.p-moyenne::before{ background:var(--warning); }
+  .chip.p-basse{ color:var(--text-muted); background:var(--bg-2); } .chip.p-basse::before{ background:var(--text-faint); }
+  .origine-chip{ display:inline-block; padding:3px 9px; border-radius:var(--r-sm); font-size:10.5px; font-weight:600; font-family:"IBM Plex Mono",monospace; border:1px solid; white-space:nowrap; }
+  .origine-chip.duerp{ color:var(--accent); border-color:rgba(var(--accent-rgb),.35); background:rgba(var(--accent-rgb),.09); }
+  .origine-chip.manuel{ color:var(--accent-blue); border-color:rgba(var(--accent-blue-rgb),.4); background:rgba(var(--accent-blue-rgb),.1); }
+  .origine-chip.inspection{ color:var(--warning); border-color:rgba(var(--warning-rgb),.4); background:rgba(var(--warning-rgb),.1); }
+  .statut-select{ min-width:118px; padding:6px 28px 6px 10px; font-size:12px; }
+  .echeance-overdue{ color:var(--danger); font-weight:600; }
+  .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
+  .act-del:hover{ text-decoration:underline; }
+  .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="index.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="index.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre Santé &amp; Sécurité</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item active" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+      </div>
+      <div class="nav-section" id="navRh">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item" href="saisie-rh.html"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" href="saisie-duerp.html"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section" id="navAdmin" style="display:none;">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item" href="administration.html"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Suivi / <b>Plan d'Actions</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Plan d'Actions</h1>
+            <p>Suivi des actions correctives — générées automatiquement depuis les évaluations Élevé/Critique du Document Unique, et complétées manuellement par les équipes RH.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Total actions</span></div>
+          </div>
+          <span id="kpiTotalSub" style="display:none">—</span>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiRetard">–</span><span class="ps-kpi-label">En retard</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-activity"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEnCours">–</span><span class="ps-kpi-label">En cours</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-shield-check"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiFait">–</span><span class="ps-kpi-label">Terminées</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="panel console">
+        <div class="field"><span class="flabel">Collectivité</span>
+          <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+        </div>
+        <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
+        <div class="field"><span class="flabel">Statut</span>
+          <select id="fStatut"><option value="all">Tous</option><option value="À faire">À faire</option><option value="En cours">En cours</option><option value="Fait">Fait</option></select>
+        </div>
+        <div class="field"><span class="flabel">Priorité</span>
+          <select id="fPriorite"><option value="all">Toutes</option><option value="Critique">Critique</option><option value="Haute">Haute</option><option value="Moyenne">Moyenne</option><option value="Basse">Basse</option></select>
+        </div>
+        <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
+        <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> actions</span>
+      </div>
+
+      <div class="panel form-panel" id="formPanel" style="display:none;">
+        <div class="panel-head"><h3 class="panel-title" id="formTitle">Nouvelle action</h3></div>
+        <form id="actionForm">
+          <input type="hidden" id="fId">
+          <div class="form-grid">
+            <div class="span2"><label for="fTitre">Titre</label><input type="text" id="fTitre" required></div>
+            <div><label for="fCollectiviteForm">Collectivité</label>
+              <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+            </div>
+            <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
+            <div><label for="fRisqueLie">Risque lié</label><input type="text" id="fRisqueLie" placeholder="ex. Chute de plain-pied"></div>
+            <div><label for="fResponsable">Responsable</label><input type="text" id="fResponsable" placeholder="Nom du responsable"></div>
+            <div><label for="fEcheance">Échéance</label><input type="date" id="fEcheance" required></div>
+            <div><label for="fPrioriteForm">Priorité</label>
+              <select id="fPrioriteForm"><option value="Critique">Critique</option><option value="Haute">Haute</option><option value="Moyenne" selected>Moyenne</option><option value="Basse">Basse</option></select>
+            </div>
+            <div><label for="fStatutForm">Statut</label>
+              <select id="fStatutForm"><option value="À faire">À faire</option><option value="En cours">En cours</option><option value="Fait">Fait</option></select>
+            </div>
+            <div class="span3"><label for="fDescription">Description / mesures</label><textarea id="fDescription" placeholder="Détail de l'action corrective à mener…"></textarea></div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="button" class="btn btn-ghost" id="btnCancelForm">Annuler</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Actions correctives</h3>
+          <div class="panel-actions" id="panelActionsBtns"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg">
+            <thead>
+              <tr>
+                <th>Titre</th><th>Service</th><th>Origine</th><th>Responsable</th><th>Échéance</th><th>Priorité</th><th>Statut</th>
+                <th id="thActions"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Les actions issues du Document Unique sont générées automatiquement pour les risques Élevé/Critique disposant de mesures proposées ; les autres actions sont créées manuellement par les équipes RH/Administration.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const role = (session && session.role) || "ag";
+  const canEdit = role === "rh" || role === "admin";
+  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const myServices = (session && session.services) || ["*"];
+  const isScoped = !myServices.includes("*");
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("roleChip").textContent = role.toUpperCase();
+  if (!canEdit){ $("roleChip").classList.add("ag"); $("navRh").style.display = "none"; }
+  if (role === "admin"){ $("navAdmin").style.display = ""; }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(module, type, description){
+    try {
+      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
+      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
+  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth()) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+
+  // ---------- Référentiels partagés (services) ----------
+  const REF_KEY = "vigie_hse_referentials";
+  const REF_DEFAULTS = {
+    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
+    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+  };
+  function loadReferentials(){
+    let stored = {};
+    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    const merged = Object.assign({}, stored);
+    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
+    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  const REF = loadReferentials();
+  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+
+  // ---------- Dataset DUERP (lecture pour générer les actions) ----------
+  const SEED_DUERP = [
+    // --- EEJ · Salle polyvalente (DUERP 17 EEJ Salle polyvalente.xlsx) ---
+    { collectivite:"Ville", service:"EEJ", risque:"Chute de plain-pied", taches:"Salle polyvalente — Lors de l'entretien des sols ou humidité du sol", danger:"Sol glissant", frequence:2, gravite:2, moyensPrevention:"", mesuresProposees:"Signaler les zones humides lors de l'entretien des sols par le panneau de danger « Sol glissant ».", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Chute de plain-pied", taches:"Salle polyvalente — Activités en extérieur", danger:"Objets au sol et activités en extérieur", frequence:2, gravite:1, moyensPrevention:"", mesuresProposees:"Mettre en place une procédure de rangement (entre chaque vacances).", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Activité Physique (TMS)", taches:"Salle polyvalente — Durant les activités", danger:"Port de charges lourdes", frequence:1, gravite:2, moyensPrevention:"", mesuresProposees:"S'organiser en équipe pour porter toutes charges lourdes.", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Activité Physique (TMS)", taches:"Salle polyvalente — Entretien des locaux", danger:"Gestes répétitifs et postures contraignantes.", frequence:4, gravite:2, moyensPrevention:"", mesuresProposees:"Mettre en place une formation aux gestes et postures pour les agents techniques (2018).", maitrise:"INSUFFISANT" },
+    { collectivite:"Ville", service:"EEJ", risque:"Routiers", taches:"Salle polyvalente — Activités en extérieur (mini-bus)", danger:"1 animateur utilisant le mini-bus avec les enfants", frequence:1, gravite:3, moyensPrevention:"", mesuresProposees:"S'organiser en binôme lors de l'utilisation du mini-bus (1 agent conduit, 1 agent s'occupe des jeunes).", maitrise:"INSUFFISANT" },
+    { collectivite:"Ville", service:"EEJ", risque:"Produits chimiques", taches:"Salle polyvalente — Entretien des locaux", danger:"Mélange des produits d'entretien", frequence:2, gravite:1, moyensPrevention:"", mesuresProposees:"Mettre à disposition des agents techniques une centrale afin de mélanger les produits (2017).", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Biologique", taches:"Salle polyvalente — Contact du public", danger:"Maladies contagieuses", frequence:2, gravite:1, moyensPrevention:"", mesuresProposees:"Effectuer une visite médicale tous les 2 ans et vérifier la tenue à jour des vaccins. (Effectué — RH)", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Biologique", taches:"Salle polyvalente — Entretien des locaux", danger:"Allergies aux produits", frequence:1, gravite:1, moyensPrevention:"", mesuresProposees:"", maitrise:"INSUFFISANT" },
+    { collectivite:"Ville", service:"EEJ", risque:"Effondrements et aux chutes d'objets", taches:"Salle polyvalente — Intervention dans le local de rangement", danger:"Objets situés dans le local de rangement.", frequence:1, gravite:1, moyensPrevention:"", mesuresProposees:"Mettre en place une procédure de rangement et un inventaire (entre chaque vacances).", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Bruit", taches:"Salle polyvalente — Activités à l'intérieur", danger:"Murs non insonorisés + public jeune", frequence:3, gravite:1, moyensPrevention:"", mesuresProposees:"Effectuer une étude d'ambiance sonore (2018).", maitrise:"INSUFFISANT" },
+    { collectivite:"Ville", service:"EEJ", risque:"Ambiance thermique", taches:"Salle polyvalente — Activités en intérieur", danger:"Chauffage non réglable + fenêtres.", frequence:2, gravite:1, moyensPrevention:"", mesuresProposees:"Mettre à disposition des ventilateurs en été (2017-2018) ; mettre en place un système de régulation du chauffage en hiver.", maitrise:"INSUFFISANT" },
+    { collectivite:"Ville", service:"EEJ", risque:"Travail sur écran", taches:"Salle polyvalente — Activités sur ordinateur", danger:"Travail devant un écran + bureau de travail inadapté", frequence:3, gravite:1, moyensPrevention:"", mesuresProposees:"Mettre en place des outils de sensibilisation concernant l'ergonomie pour le travail de bureau (2018).", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Incendie et Explosion", taches:"Salle polyvalente", danger:"Départ de feu + méconnaissance de l'utilisation des extincteurs", frequence:1, gravite:3, moyensPrevention:"", mesuresProposees:"Faire passer la formation à l'utilisation des extincteurs à l'ensemble des agents ; faire le tour de l'établissement une fois par an pour présenter les moyens de secours (2018).", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Electrique", taches:"Salle polyvalente — Entretien des locaux + activités nécessitant des appareils électriques.", danger:"Utilisation d'appareils électriques", frequence:2, gravite:4, moyensPrevention:"", mesuresProposees:"Sensibilisation des agents (mains sèches, pieds secs…) (2018) ; signaler au responsable les outils détériorés ; vérifier le matériel avant/après chaque utilisation.", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"RPS", taches:"Salle polyvalente — Contact avec le public", danger:"Tensions avec le public", frequence:2, gravite:1, moyensPrevention:"", mesuresProposees:"Signaler au responsable toutes les tensions rencontrées durant le temps de travail.", maitrise:"INSUFFISANT" },
+
+    // --- EEJ · Service administratif (DUERP 17 EEJ Service administratif.xlsx) ---
+    { collectivite:"Ville", service:"EEJ", risque:"Chute de plain-pied", taches:"Service administratif — Déplacements au sein du service.", danger:"Les fils et cartons par terre.", frequence:1, gravite:1, moyensPrevention:"", mesuresProposees:"Assurer le rangement du matériel à chaque fin de journée.", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Chute de hauteur", taches:"Service administratif — Atteindre des dossiers situés en hauteur.", danger:"Utilisation de l'escabeau.", frequence:1, gravite:2, moyensPrevention:"", mesuresProposees:"Mettre en place une procédure de rangement du matériel afin de faciliter la prise en main (2017).", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Activité Physique (TMS)", taches:"Service administratif — Travail de bureau.", danger:"Position assise durant toute la journée de travail.", frequence:4, gravite:2, moyensPrevention:"", mesuresProposees:"Effectuer une série d'étirements de 4 minutes dès qu'une sensation d'engourdissement se fait sentir, ou marcher un peu.", maitrise:"OPTIMAL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Routiers", taches:"Service administratif — Activités en dehors du service.", danger:"Déplacement professionnel au cours d'une journée de travail.", frequence:1, gravite:3, moyensPrevention:"", mesuresProposees:"Utiliser les voitures de fonction.", maitrise:"OPTIMAL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Produits chimiques", taches:"Service administratif — Lavage de linge pour les écoles si besoin.", danger:"Utilisation de produits d'entretien.", frequence:1, gravite:1, moyensPrevention:"", mesuresProposees:"Mettre à disposition les FDS (fiches de données de sécurité). (Immédiat)", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Ambiance thermique", taches:"Service administratif — Travail en bureau.", danger:"Variation de température en été.", frequence:3, gravite:1, moyensPrevention:"", mesuresProposees:"Mettre à disposition des ventilateurs pour tous les agents le nécessitant (2017).", maitrise:"OPTIMAL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Travail sur écran", taches:"Service administratif — Activité sur écran.", danger:"Travail sur écran toute la journée pouvant induire des TMS : syndrome du canal carpien, douleurs cervicales, lombalgies.", frequence:4, gravite:2, moyensPrevention:"", mesuresProposees:"Formation aux bonnes postures pour le travail de bureau + fiche synthèse affichée à chaque poste (2018).", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"Incendie et Explosion", taches:"Service administratif", danger:"Départ de feu + méconnaissance de l'utilisation des moyens de secours.", frequence:1, gravite:3, moyensPrevention:"", mesuresProposees:"Formation à l'utilisation des extincteurs pour l'ensemble des agents (2017-2018).", maitrise:"PARTIEL" },
+    { collectivite:"Ville", service:"EEJ", risque:"RPS", taches:"Service administratif — Accueil du public", danger:"Tensions avec le public", frequence:2, gravite:1, moyensPrevention:"", mesuresProposees:"Mettre en place un climat de confiance avec le public via une communication appropriée, ou faire appel à un responsable.", maitrise:"PARTIEL" },
+
+    // --- Propreté Déchet (Agglomération) · Gestion de la déchetterie (DU_UT_déchetterie_V3.xlsm) ---
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Chute de plain-pied", taches:"Déchetterie — Utiliser l'escalier", danger:"Agent utilisant les escaliers de la déchetterie en étant déconcentré (téléphone par exemple) — Conséquences : chute en montée ou descente, blessures articulaires (foulure, entorse, fracture).", frequence:3, gravite:2, moyensPrevention:"Rampe d'escalier et marches antidérapantes.", mesuresProposees:"", maitrise:"OPTIMAL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Chute de plain-pied", taches:"Déchetterie — Déplacement sur quai", danger:"Déplacement fréquent sur un sol encombré (véhicules, déchets) ou glissant (huiles, eau) — Conséquences : chute ou trébuchement (foulure, entorse, fracture).", frequence:4, gravite:2, moyensPrevention:"EPI (chaussures de sécurité), formation.", mesuresProposees:"", maitrise:"OPTIMAL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Chute de plain-pied", taches:"Déchetterie — Aider les usagers", danger:"Agent qui déplace des objets, déchets ou encombrants en voulant aider les usagers — Conséquences : chute ou trébuchement par manque de visibilité ou gêne du déchet.", frequence:2, gravite:2, moyensPrevention:"EPI (chaussures de sécurité), agent non censé aider l'usager, fiche sécurité n°4.", mesuresProposees:"Installer un panneau informatif sur ce que n'est pas censé faire l'agent.", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Chute de hauteur", taches:"Déchetterie — Nettoyer le quai", danger:"Travail de balayage à proximité des bennes — Conséquences : chute ou trébuchement à proximité d'une benne, chute dans la benne ou en partie basse du quai.", frequence:3, gravite:3, moyensPrevention:"Ridelles de benne pour diminuer le risque de chute.", mesuresProposees:"Remise aux normes de la déchetterie à prévoir (installation d'un muret).", maitrise:"OPTIMAL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Chute de hauteur", taches:"Déchetterie — Récupérer dans une benne", danger:"Récupération d'un objet/élément important dans la benne (téléphone, clés, animal…) — Conséquences : glissade sur l'échelle, gravité selon la hauteur de chute et le déchet récepteur.", frequence:1, gravite:3, moyensPrevention:"Échelle, agent non censé descendre dans la benne, perche métallique avec crochet.", mesuresProposees:"Installer un panneau informatif sur ce que n'est pas censé faire l'agent.", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Chute de hauteur", taches:"Déchetterie — Aider les usagers (abords de benne)", danger:"Agent qui déplace des objets, déchets ou encombrants aux abords de la benne en voulant aider les usagers — Conséquences : chute ou trébuchement dans une benne par manque de visibilité ou gêne du déchet.", frequence:3, gravite:3, moyensPrevention:"EPI (chaussures de sécurité), agent non censé aider l'usager, fiche sécurité n°4.", mesuresProposees:"Installer un panneau informatif sur ce que n'est pas censé faire l'agent.", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Manutention Mécanique", taches:"Déchetterie — Gestion espaces verts", danger:"Utilisation de la tondeuse ou de la débroussailleuse pour l'entretien des espaces verts — Conséquences : coupure, projection oculaire, vibration, TMS.", frequence:1, gravite:3, moyensPrevention:"EPI (lunettes, casque anti-bruit, combinaison, harnais, gants).", mesuresProposees:"", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Circulations Internes", taches:"Déchetterie — Gestion du site (quai)", danger:"Déplacement de l'agent sur le quai, avec divers automobilistes et véhicules en circulation — Conséquences : heurt/collision/écrasement (VL, remorque, fourgon), gravité selon la vitesse.", frequence:4, gravite:4, moyensPrevention:"Plan de circulation, panneaux de signalisation, vitesse limitée à 30 km/h.", mesuresProposees:"Installer une barrière automatique à l'entrée pour réguler le flux et orienter les usagers, ainsi qu'un second dos d'âne à l'entrée.", maitrise:"INSUFFISANT" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Circulations Internes", taches:"Déchetterie — Gestion du site (rampe d'accès)", danger:"L'agent traverse la rampe d'accès à l'arrière du local sans prêter attention aux automobilistes — Conséquences : heurt/collision/écrasement, gravité selon la vitesse.", frequence:1, gravite:4, moyensPrevention:"Plan de circulation, panneaux de signalisation, vitesse limitée à 30 km/h.", mesuresProposees:"Installer une barrière automatique à l'entrée pour réguler le flux et orienter les usagers, ainsi qu'un second dos d'âne à l'entrée.", maitrise:"INSUFFISANT" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Activité Physique (TMS)", taches:"Déchetterie — Gestion du site (rythme samedi)", danger:"Rythme de travail intense le samedi — Conséquences : manque de concentration, perte de vigilance, mauvaise orientation des usagers, stress, oppression.", frequence:3, gravite:2, moyensPrevention:"Formation sur la gestion de la charge de travail.", mesuresProposees:"Installer une barrière automatique à l'entrée pour réguler le flux.", maitrise:"INSUFFISANT" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Activité Physique (TMS)", taches:"Déchetterie — Manipulation d'encombrants", danger:"Manutention de charges lourdes, d'objets encombrants ou contondants — Conséquences : douleur aiguë ou chronique des lombaires, heurt des membres.", frequence:2, gravite:2, moyensPrevention:"Formation PRAP, fiche sécurité n°4, diable.", mesuresProposees:"Ceinture de manutention.", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Routiers", taches:"Déchetterie — Trajet domicile-lieu de travail", danger:"Trajet entre domicile et lieu de travail, impliquant un accident de la route — Conséquences : gravité selon plusieurs facteurs (vitesse, localisation…).", frequence:3, gravite:2, moyensPrevention:"", mesuresProposees:"Campagne d'affichage et de prévention (sécurité routière).", maitrise:"INSUFFISANT" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Produits chimiques", taches:"Déchetterie — Exposition aux DMS (déchets ménagers spéciaux)", danger:"Les déchets dangereux lors de leur manipulation peuvent laisser échapper produits chimiques, produits volatils (gaz, solvants) ou poussières ; manipulation de batteries, huiles, acides, produits phytosanitaires et d'entretien — Conséquences : produits corrosifs, toxiques, cancérigènes, irritation, brûlure, problème respiratoire, intoxication si ingestion.", frequence:4, gravite:3, moyensPrevention:"EPI (masque à cartouche, lunettes, gants spécifiques, tablier), douche et lavabo à disposition, formation aux produits dangereux.", mesuresProposees:"", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Produits chimiques", taches:"Déchetterie — Nettoyage et entretien", danger:"Utilisation de produits dangereux (désinfectants/détergents) — Conséquences : produits corrosifs, irritation, brûlure, problème respiratoire, intoxication si ingestion.", frequence:1, gravite:1, moyensPrevention:"EPI, douche et lavabo à disposition, formation aux produits dangereux.", mesuresProposees:"", maitrise:"OPTIMAL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Produits chimiques", taches:"Déchetterie — Stockage des DMS", danger:"La plupart des déchets du local de stockage sont en hauteur et peuvent se déverser ou se projeter sur l'agent ; risque d'explosion (récipient sous vide), de départ de feu (acide-base…) ou de vapeurs — Conséquences : projection cutanée ou oculaire, irritation, brûlure, problème respiratoire.", frequence:4, gravite:3, moyensPrevention:"Bacs de rétention, extincteur, local aéré.", mesuresProposees:"Agrandir le local, actuellement assez restreint.", maitrise:"OPTIMAL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Produits chimiques", taches:"Déchetterie — Gestion générale", danger:"Exposition à des pics de fortes odeurs produites par la zone industrielle environnante (méthaniseur, station d'épuration COVALREC) — Conséquences : désagréments de l'odorat, inconfort, respiration prolongée de particules odorantes.", frequence:4, gravite:1, moyensPrevention:"Se mettre dans le bureau en fermant la porte.", mesuresProposees:"", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Biologique", taches:"Déchetterie — Hygiène du bureau", danger:"Pollution de l'air et contact avec le mobilier (poignées, fax, téléphone, frigo…) ; stockage de certains déchets récupérés — Conséquences : développement de bactéries et virus aéroportés ou manuportés, transmission d'éléments pathogènes.", frequence:4, gravite:1, moyensPrevention:"Possibilité d'aérer le bureau, gel hydroalcoolique.", mesuresProposees:"Faire passer la technicienne de surface plus régulièrement.", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Biologique", taches:"Déchetterie — Gestion générale", danger:"Piqûre par des insectes : guêpes, frelons (puces, tiques lors de l'entretien) — Conséquences : allergie, gonflement, œdème, éruption cutanée, transmission de maladies (maladie de Lyme).", frequence:2, gravite:3, moyensPrevention:"EPI, aspivenin dans la trousse à pharmacie.", mesuresProposees:"", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Biologique", taches:"Déchetterie — Gestion générale", danger:"Contact avec animaux à potentiel infectieux (rats, pigeons, animaux morts…) — Conséquences : maladies infectieuses, leptospirose par les rats.", frequence:1, gravite:3, moyensPrevention:"EPI, vaccinations, outils de préhension.", mesuresProposees:"", maitrise:"OPTIMAL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Biologique", taches:"Déchetterie — Gestion générale", danger:"Contact des mains non lavées ou souillées avec les muqueuses (boire, manger, se gratter/moucher, toilettes, fumer…) — Conséquences : infection, transmission d'éléments pathogènes.", frequence:3, gravite:3, moyensPrevention:"Formation.", mesuresProposees:"Faire des rappels réguliers aux agents.", maitrise:"INSUFFISANT" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Biologique", taches:"Déchetterie — Gestion générale", danger:"Piqûre (aiguille, agrafe, clou), coupure par objet tranchant (métal, verre), projection sur muqueuse ou peau lésée d'agents pathogènes (bactérie, microbe, virus, moisissure) — Conséquences : risque d'infection (tétanos, hépatite, SIDA…), saignement, coupure.", frequence:1, gravite:3, moyensPrevention:"EPI (gants), trousse à pharmacie, formation, fiches sécurité n°5 et n°10, vaccinations.", mesuresProposees:"", maitrise:"INSUFFISANT" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Equipement de travail", taches:"Déchetterie — Enlèvement des bennes", danger:"Lors de l'enlèvement des bennes, l'agent relève les ridelles métalliques de la benne concernée et s'expose à des coincements — Conséquences : coincement de membre entre benne et mur/sol et ridelle.", frequence:2, gravite:1, moyensPrevention:"Formation à la gestion de la déchetterie.", mesuresProposees:"", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Equipement de travail", taches:"Déchetterie — Gestion des bennes", danger:"Vérin d'un capot de benne (protection pluie) qui en fuyant peut céder — Conséquences : coincement de membre entre benne et capot.", frequence:1, gravite:2, moyensPrevention:"Système de commande d'ouverture/fermeture situé en bas de benne, à distance du capot.", mesuresProposees:"", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Effondrements et aux chutes d'objets", taches:"Déchetterie — Nettoyage du quai inférieur", danger:"Balayage ou soufflage en bas de quai pour nettoyer ; un usager peut inconsciemment jeter/lancer des déchets — Conséquences : divers traumatismes selon le déchet.", frequence:1, gravite:3, moyensPrevention:"Pas de benne lors du nettoyage, chaîne bloquant l'accès à la benne pour le signaler à l'usager.", mesuresProposees:"Nettoyer le bas de quai seulement quand la déchetterie est fermée et sans usagers.", maitrise:"INSUFFISANT" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Bruit", taches:"Déchetterie — Gestion générale", danger:"Ambiance sonore bruyante (bourdonnement des moteurs), circulation sur place et à proximité (bennes chez Trigone et COVALREC), manipulation d'objets bruyants (métal) — Conséquences : sifflements, bourdonnements, acouphènes.", frequence:4, gravite:1, moyensPrevention:"Bouchons d'oreille (complexe pour l'échange avec les usagers), étude de bruit conforme.", mesuresProposees:"", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Ambiance thermique", taches:"Déchetterie — Gestion générale (froid)", danger:"Travail en ambiance thermique froide, exposition au vent et à l'humidité — Conséquences : engelures, rhume, hypothermie, perte de dextérité, troubles vasculaires.", frequence:4, gravite:1, moyensPrevention:"EPI (bonnet, vêtements chauds), local chauffé, toit de protection à l'extérieur.", mesuresProposees:"", maitrise:"PARTIEL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Ambiance thermique", taches:"Déchetterie — Gestion générale (chaleur)", danger:"Travail en ambiance thermique chaude, exposition aux UV, au rayonnement solaire et à la réverbération — Conséquences : déshydratation, malaise, insolation, coup de chaleur.", frequence:4, gravite:2, moyensPrevention:"EPI (casquette, gourde), local climatisé, toit de protection à l'extérieur, fiche sécurité n°7, lunettes de soleil, évier.", mesuresProposees:"Mettre à disposition de la crème solaire, adapter les horaires en période de canicule.", maitrise:"OPTIMAL" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Incendie et Explosion", taches:"Déchetterie — Locaux de stockage", danger:"Apport d'une source de chaleur dans le local de stockage des déchets dangereux ou celui de la débroussailleuse/tondeuse — Conséquences : départ d'incendie, brûlure superficielle à grave, explosion.", frequence:1, gravite:4, moyensPrevention:"Extincteur contrôlé, local aéré et interdit au public.", mesuresProposees:"Exercices de prévention avec le SDIS, panneaux « interdiction de fumer » supplémentaires.", maitrise:"INSUFFISANT" },
+    { collectivite:"Agglomération", service:"Propreté Déchet", risque:"Incendie et Explosion", taches:"Déchetterie — Stockage des DMS", danger:"Mélange de différents produits incompatibles et dangereux selon le mode de présentation des usagers ou dans le local de stockage (acide-base…) — Conséquences : départ d'incendie, brûlure superficielle à grave, explosion.", frequence:1, gravite:4, moyensPrevention:"Bacs de rétention, local adapté (revêtement et surélévation du sol), produits rangés selon compatibilité, identification des bacs par pictogrammes.", mesuresProposees:"Exercices de prévention avec le SDIS, panneaux « interdiction de fumer » supplémentaires.", maitrise:"INSUFFISANT" },
+  ];
+  const DUERP_STORAGE_KEY = "vigie_hse_duerp_dataset";
+  function loadDuerpDataset(){
+    let stored = [];
+    try { const raw = localStorage.getItem(DUERP_STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    stored.forEach(r => {
+      if (r.service === "Propreté Urbaine" && r.taches && r.taches.startsWith("Déchetterie")){ r.service = "Propreté Déchet"; r.collectivite = "Agglomération"; }
+    });
+    const storedById = new Map(stored.map(r => [r.id, r]));
+    const seeded = SEED_DUERP.map((r,i) => { const id = "du-" + (i+1); return storedById.has(id) ? storedById.get(id) : { id, ...r }; });
+    const seedIds = new Set(seeded.map(r => r.id));
+    const userExtra = stored.filter(r => !seedIds.has(r.id));
+    const merged = seeded.concat(userExtra);
+    try { localStorage.setItem(DUERP_STORAGE_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  function riskCls(score){ if (score <= 3) return "faible"; if (score <= 6) return "modere"; if (score <= 12) return "eleve"; return "critique"; }
+
+  function generateActionSeeds(){
+    const duerp = loadDuerpDataset();
+    const out = [];
+    duerp.forEach(r => {
+      const score = (r.frequence||1) * (r.gravite||1);
+      const cls = riskCls(score);
+      if ((cls === "eleve" || cls === "critique") && r.mesuresProposees && String(r.mesuresProposees).trim()){
+        const isCritique = cls === "critique";
+        const today = new Date();
+        const echeance = new Date(today);
+        echeance.setDate(echeance.getDate() + (isCritique ? 15 : 45));
+        out.push({
+          id: "pa-" + r.id,
+          titre: r.risque + " — " + r.service,
+          description: r.mesuresProposees,
+          service: r.service,
+          collectivite: r.collectivite || "Ville",
+          risqueLie: r.risque,
+          origine: "DUERP",
+          responsable: "",
+          echeance: echeance.toISOString().slice(0,10),
+          priorite: isCritique ? "Critique" : "Haute",
+          statut: "À faire",
+          dateCreation: today.toISOString().slice(0,10),
+        });
+      }
+    });
+    return out;
+  }
+
+  // ---------- Actions issues des inspections (Inspection / Audit) ----------
+  const INSPECTIONS_KEY = "vigie_hse_inspections";
+  function generateInspectionActionSeeds(){
+    let inspections = [];
+    try { const raw = localStorage.getItem(INSPECTIONS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) inspections = p; } } catch(e){}
+    const out = [];
+    const today = new Date();
+    inspections.forEach(insp => {
+      (insp.reponses || []).forEach(rep => {
+        if (rep.statut === "Non conforme"){
+          const echeance = new Date(today);
+          echeance.setDate(echeance.getDate() + 30);
+          out.push({
+            id: "pa-insp-" + insp.id + "-" + rep.pointId,
+            titre: (insp.trameNom || "Inspection") + " — " + rep.libelle,
+            description: rep.commentaire && rep.commentaire.trim() ? rep.commentaire : "Non-conformité relevée lors de l'inspection.",
+            service: insp.service,
+            collectivite: insp.collectivite || "Ville",
+            risqueLie: rep.libelle,
+            origine: "Inspection",
+            responsable: "",
+            echeance: echeance.toISOString().slice(0,10),
+            priorite: "Haute",
+            statut: "À faire",
+            dateCreation: today.toISOString().slice(0,10),
+          });
+        }
+      });
+    });
+    return out;
+  }
+
+  // ---------- Dataset Plan d'Actions (always-merge) ----------
+  const STORAGE_KEY = "vigie_hse_actions";
+  function genId(){ return "man-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
+  function loadDataset(){
+    let stored = [];
+    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds());
+    const storedById = new Map(stored.map(r => [r.id, r]));
+    const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
+    const seedIds = new Set(seeded.map(r => r.id));
+    const userExtra = stored.filter(r => !seedIds.has(r.id));
+    const merged = seeded.concat(userExtra);
+    saveDataset(merged);
+    return merged;
+  }
+  let DATASET = loadDataset();
+  if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
+
+  function isOverdue(a){ return a.statut !== "Fait" && a.echeance && a.echeance < new Date().toISOString().slice(0,10); }
+
+  // ---------- Filtres ----------
+  const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatut = $("fStatut"), fPriorite = $("fPriorite");
+  function fillServiceOptions(){
+    const col = fCollectivite.value;
+    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const current = fService.value;
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.value = list.includes(current) ? current : "all";
+  }
+  fillServiceOptions();
+
+  function render(){
+    const col = fCollectivite.value, svc = fService.value, st = fStatut.value, pr = fPriorite.value;
+    let rows = DATASET.filter(a =>
+      (col === "all" || a.collectivite === col) &&
+      (svc === "all" || a.service === svc) &&
+      (st === "all" || a.statut === st) &&
+      (pr === "all" || a.priorite === pr)
+    );
+    rows = rows.slice().sort((a,b) => (a.echeance || "").localeCompare(b.echeance || ""));
+
+    $("kpiTotal").textContent = DATASET.length;
+    $("kpiTotalSub").innerHTML = `<b>${DATASET.filter(a=>a.origine==='DUERP').length}</b> issues du DUERP`;
+    $("kpiRetard").textContent = DATASET.filter(isOverdue).length;
+    $("kpiEnCours").textContent = DATASET.filter(a => a.statut === "En cours").length;
+    $("kpiFait").textContent = DATASET.filter(a => a.statut === "Fait").length;
+    $("resultCount").textContent = rows.length;
+    $("totalCount").textContent = DATASET.length;
+
+    const tbody = $("tbody");
+    const colspan = canEdit ? 8 : 7;
+    if (rows.length === 0){
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">${DATASET.length === 0 ? "Aucune action pour le moment." : "Aucune action ne correspond aux filtres sélectionnés."}</td></tr>`;
+      return;
+    }
+    const prioCls = { "Critique":"p-critique", "Haute":"p-haute", "Moyenne":"p-moyenne", "Basse":"p-basse" };
+    tbody.innerHTML = rows.map(a => `
+      <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${a.id}">
+        <td class="wrap">${a.titre}</td>
+        <td>${a.service}</td>
+        <td><span class="origine-chip ${a.origine === 'DUERP' ? 'duerp' : (a.origine === 'Inspection' ? 'inspection' : 'manuel')}">${a.origine}</span></td>
+        <td>${a.responsable || '<span style="color:var(--text-faint)">—</span>'}</td>
+        <td class="${isOverdue(a) ? 'echeance-overdue' : ''}">${a.echeance || '—'}</td>
+        <td><span class="chip ${prioCls[a.priorite] || 'p-basse'}">${a.priorite}</span></td>
+        <td>${canEdit
+          ? `<select class="statut-select" data-id="${a.id}"><option ${a.statut==='À faire'?'selected':''}>À faire</option><option ${a.statut==='En cours'?'selected':''}>En cours</option><option ${a.statut==='Fait'?'selected':''}>Fait</option></select>`
+          : a.statut}</td>
+        ${canEdit ? `<td class="actions-float">
+          <button type="button" class="act-edit" data-edit="${a.id}">Modifier</button>
+          <button type="button" class="act-del" data-id="${a.id}">Suppr.</button>
+        </td>` : ''}
+      </tr>`).join("");
+  }
+
+  fCollectivite.addEventListener("change", () => { fillServiceOptions(); render(); });
+  fService.addEventListener("change", render);
+  fStatut.addEventListener("change", render);
+  fPriorite.addEventListener("change", render);
+  $("btnReset").addEventListener("click", () => {
+    fCollectivite.value = "all"; fillServiceOptions(); fStatut.value = "all"; fPriorite.value = "all"; render();
+  });
+
+  if (canEdit){
+    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle action</button>`;
+
+    const formPanel = $("formPanel"), form = $("actionForm");
+    function fillFormServiceOptions(col){
+      const list = servicesForCollectivite(col);
+      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+    }
+    fillFormServiceOptions("Ville");
+    $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
+
+    function openForm(rec){
+      form.reset();
+      if (rec){
+        $("formTitle").textContent = "Modifier l'action";
+        $("fId").value = rec.id;
+        $("fTitre").value = rec.titre;
+        $("fCollectiviteForm").value = rec.collectivite;
+        fillFormServiceOptions(rec.collectivite);
+        $("fServiceForm").value = rec.service;
+        $("fRisqueLie").value = rec.risqueLie || "";
+        $("fResponsable").value = rec.responsable || "";
+        $("fEcheance").value = rec.echeance || "";
+        $("fPrioriteForm").value = rec.priorite || "Moyenne";
+        $("fStatutForm").value = rec.statut || "À faire";
+        $("fDescription").value = rec.description || "";
+      } else {
+        $("formTitle").textContent = "Nouvelle action";
+        $("fId").value = "";
+        fillFormServiceOptions("Ville");
+        $("fEcheance").value = new Date().toISOString().slice(0,10);
+      }
+      formPanel.style.display = "";
+      formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+    $("btnNew").addEventListener("click", () => openForm(null));
+    $("btnCancelForm").addEventListener("click", () => { formPanel.style.display = "none"; form.reset(); });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = $("fId").value;
+      const isNew = !id;
+      const rec = {
+        id: id || genId(),
+        titre: $("fTitre").value.trim(),
+        description: $("fDescription").value.trim(),
+        service: $("fServiceForm").value,
+        collectivite: $("fCollectiviteForm").value,
+        risqueLie: $("fRisqueLie").value.trim(),
+        origine: isNew ? "Manuel" : (DATASET.find(d => d.id === id) || {}).origine || "Manuel",
+        responsable: $("fResponsable").value.trim(),
+        echeance: $("fEcheance").value,
+        priorite: $("fPrioriteForm").value,
+        statut: $("fStatutForm").value,
+        dateCreation: isNew ? new Date().toISOString().slice(0,10) : (DATASET.find(d => d.id === id) || {}).dateCreation || new Date().toISOString().slice(0,10),
+      };
+      const idx = DATASET.findIndex(d => d.id === rec.id);
+      if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);
+      saveDataset(DATASET);
+      logAudit("Plan d'Actions", isNew ? "Création" : "Modification", `Action « ${rec.titre} » — ${rec.service}`);
+      formPanel.style.display = "none";
+      form.reset();
+      render();
+    });
+
+    $("tbody").addEventListener("click", (e) => {
+      const editBtn = e.target.closest(".act-edit");
+      if (editBtn){ const rec = DATASET.find(d => d.id === editBtn.dataset.edit); if (rec) openForm(rec); return; }
+      const delBtn = e.target.closest(".act-del");
+      if (delBtn){
+        const rec = DATASET.find(d => d.id === delBtn.dataset.id);
+        if (!rec) return;
+        if (confirm(`Supprimer l'action « ${rec.titre} » ?`)){
+          DATASET = DATASET.filter(d => d.id !== rec.id);
+          saveDataset(DATASET);
+          logAudit("Plan d'Actions", "Suppression", `Action « ${rec.titre} » — ${rec.service}`);
+          render();
+        }
+      }
+    });
+
+    $("tbody").addEventListener("change", (e) => {
+      const sel = e.target.closest(".statut-select");
+      if (!sel) return;
+      const rec = DATASET.find(d => d.id === sel.dataset.id);
+      if (!rec) return;
+      rec.statut = sel.value;
+      saveDataset(DATASET);
+      logAudit("Plan d'Actions", "Modification", `Statut de « ${rec.titre} » → ${rec.statut}`);
+      render();
+    });
+  }
+
+  render();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

@@ -1,0 +1,907 @@
+<title>Inspection / Audit</title>
+<meta name="description" content="Planification et réalisation d'inspections HSE à partir de trames de contrôle réutilisables, avec remontée des non-conformités vers le Plan d'Actions.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B; --critical-rgb:201,94,107;
+    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px; --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item .icon{ width:17px; height:17px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .role-chip.ag{ background:rgba(var(--accent-blue-rgb),.16); color:var(--accent-blue); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+  .hero{ margin-bottom:22px; } .hero h1{ font-size:25px; } .hero p{ margin:6px 0 0; color:var(--text-muted); font-size:13px; max-width:76ch; line-height:1.55; }
+
+  /* ===== Compact sticky page summary (icon + titre + description + KPI sur une ligne) ===== */
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .page-summary-kpis{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ps-kpi{ display:flex; align-items:center; gap:7px; padding:5px 11px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); }
+  .ps-kpi-icon{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ps-kpi-icon .icon{ width:12px; height:12px; }
+  .ps-kpi-icon.blue{ background:rgba(var(--accent-rgb),.14); color:var(--accent); }
+  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
+  .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+  .ps-kpi-icon.critical{ background:rgba(var(--critical-rgb),.14); color:var(--critical); }
+  .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } .ps-kpi-label{ display:none; } }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn .icon{ width:15px; height:15px; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+  .btn-secondary{ background:var(--surface-el); border-color:var(--border); color:var(--text); }
+  .btn-secondary:hover{ border-color:rgba(var(--accent-rgb),.5); color:var(--accent); }
+
+  .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:18px; }
+  @media (max-width:1180px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .kpi-row{ grid-template-columns:1fr; } }
+  .kpi{ padding:16px 18px; display:flex; flex-direction:column; gap:8px; }
+  .kpi-top{ display:flex; align-items:center; justify-content:space-between; }
+  .kpi-icon{ width:30px; height:30px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; }
+  .kpi-icon.blue{ background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+  .kpi-label{ font-size:11.5px; color:var(--text-muted); font-weight:500; }
+  .kpi-value{ font-size:26px; font-weight:600; letter-spacing:-.01em; }
+  .kpi-sub{ font-size:11.5px; color:var(--text-faint); } .kpi-sub b{ color:var(--text); font-weight:600; }
+
+  .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
+  select, input[type="text"], input[type="date"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:170px; cursor:pointer;
+  }
+  select:hover, input:hover, textarea:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:64px; width:100%; font-weight:400; line-height:1.5; }
+  .result-count{ align-self:center; margin-left:auto; font-size:12px; color:var(--text-faint); }
+  .result-count b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-title{ font-size:16.5px; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+
+  .form-panel{ padding:20px 22px 22px; margin-bottom:18px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px 16px; }
+  .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; }
+  @media (max-width:680px){ .form-grid .span2, .form-grid .span3{ grid-column:span 1; } }
+  .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); flex-wrap:wrap; }
+
+  .table-panel{ overflow:auto; max-height:70vh; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:1080px; }
+  table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr{ border-left:3px solid transparent; transition:background .12s ease; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg tbody tr.nonconforme{ border-left-color:var(--critical); }
+  table.reg tbody td.wrap{ white-space:normal; min-width:180px; }
+  table.reg thead th#thActions{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
+  table.reg tbody td.actions-float{ position:sticky; right:0; z-index:1; background:var(--surface-el); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); white-space:nowrap; }
+  table.reg tbody tr:hover td.actions-float{ background:var(--bg-2); }
+
+  .status-chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .status-chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .status-chip.s-conforme{ color:var(--success); background:var(--success-bg); } .status-chip.s-conforme::before{ background:var(--success); }
+  .status-chip.s-reserves{ color:var(--warning); background:var(--warning-bg); } .status-chip.s-reserves::before{ background:var(--warning); }
+  .status-chip.s-non{ color:var(--danger); background:var(--danger-bg); } .status-chip.s-non::before{ background:var(--danger); }
+  .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
+  .act-del:hover{ text-decoration:underline; }
+  .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+
+  /* ---- Points de contrôle (formulaire d'inspection) ---- */
+  .point-row{ border:1px solid var(--border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:10px; background:var(--bg-2); }
+  .point-row:last-child{ margin-bottom:0; }
+  .point-label{ font-size:12.8px; font-weight:600; margin-bottom:8px; }
+  .point-radios{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px; }
+  .point-radios label{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:500; color:var(--text-muted); cursor:pointer; margin:0; }
+  .point-radios input{ width:15px; height:15px; accent-color:var(--accent); cursor:pointer; }
+  .point-row textarea{ min-height:44px; font-size:12.5px; }
+
+  /* ---- Gestion des trames ---- */
+  .trame-card{ border:1px solid var(--border); border-radius:var(--r-sm); padding:14px 16px; margin-bottom:10px; }
+  .trame-card:last-child{ margin-bottom:0; }
+  .trame-card-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .trame-card-name{ font-size:14px; font-weight:600; }
+  .trame-card-desc{ font-size:12px; color:var(--text-muted); margin-top:3px; }
+  .trame-points-list{ margin-top:9px; padding-top:9px; border-top:1px solid var(--border); font-size:12px; color:var(--text-muted); line-height:1.7; }
+  .trame-points-list span{ display:inline-block; padding:2px 9px; margin:0 6px 6px 0; border-radius:var(--r-pill); background:var(--bg-2); font-size:11px; }
+  .point-input-row{ display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+  .point-input-row input{ flex:1; }
+  .point-input-row button{ flex-shrink:0; }
+  .icon-btn{ background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .icon-btn:hover{ background:var(--bg-2); color:var(--danger); border-color:rgba(var(--danger-rgb),.4); }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="index.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="index.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre Santé &amp; Sécurité</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item active" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+      </div>
+      <div class="nav-section" id="navRh">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item" href="saisie-rh.html"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" href="saisie-duerp.html"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section" id="navAdmin" style="display:none;">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item" href="administration.html"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Suivi / <b>Inspection / Audit</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-search"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Inspection / Audit</h1>
+            <p>Planification d'inspections HSE à partir de trames de contrôle réutilisables ; les non-conformités relevées alimentent automatiquement le Plan d'Actions, comme le fait déjà le Document Unique.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTrames">–</span><span class="ps-kpi-label">Trames actives</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-search"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Inspections réalisées</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiReserves">–</span><span class="ps-kpi-label">Avec réserves / NC</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEnAttente">–</span><span class="ps-kpi-label">Points NC en attente</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="panel console">
+        <div class="field"><span class="flabel">Collectivité</span>
+          <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+        </div>
+        <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
+        <div class="field"><span class="flabel">Trame</span><select id="fTrame"></select></div>
+        <div class="field"><span class="flabel">Statut global</span>
+          <select id="fStatut"><option value="all">Tous</option><option value="Conforme">Conforme</option><option value="Avec réserves">Avec réserves</option><option value="Non conforme">Non conforme</option></select>
+        </div>
+        <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
+        <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> inspections</span>
+      </div>
+
+      <div class="panel form-panel" id="formPanel" style="display:none;">
+        <div class="panel-head"><h3 class="panel-title" id="formTitle">Nouvelle inspection</h3></div>
+        <form id="inspForm">
+          <input type="hidden" id="fId">
+          <div class="form-grid">
+            <div><label for="fTrameForm">Trame</label><select id="fTrameForm" required></select></div>
+            <div><label for="fCollectiviteForm">Collectivité</label>
+              <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+            </div>
+            <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
+            <div><label for="fDateForm">Date</label><input type="date" id="fDateForm" required></div>
+            <div><label for="fInspecteur">Inspecteur</label><input type="text" id="fInspecteur" required placeholder="Nom de l'inspecteur"></div>
+          </div>
+          <div id="pointsContainer" style="margin-top:16px;"></div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Enregistrer l'inspection</button>
+            <button type="button" class="btn btn-ghost" id="btnCancelForm">Annuler</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px; margin-bottom:18px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Inspections</h3>
+          <div class="panel-actions" id="panelActionsBtns"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg">
+            <thead>
+              <tr>
+                <th>Date</th><th>Trame</th><th>Service</th><th>Inspecteur</th><th>Statut global</th><th>Points NC</th>
+                <th id="thActions"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="trameManagerPanel" style="padding:20px 22px 22px; display:none;">
+        <div class="panel-head">
+          <h3 class="panel-title">Gérer les trames de contrôle</h3>
+          <button type="button" class="btn btn-secondary" id="btnNewTrame"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle trame</button>
+        </div>
+        <div id="trameForm" style="display:none; margin-bottom:16px; padding:14px 16px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--bg-2);">
+          <div class="form-grid">
+            <div class="span2"><label for="tNom">Nom de la trame</label><input type="text" id="tNom" required placeholder="ex. Inspection Ateliers"></div>
+            <div class="span3"><label for="tDescription">Description</label><input type="text" id="tDescription" placeholder="Objet de cette trame de contrôle"></div>
+          </div>
+          <div style="margin-top:12px;">
+            <label style="font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:8px;">Points de contrôle</label>
+            <div id="tPointsList"></div>
+            <button type="button" class="btn btn-ghost" id="btnAddPoint" style="margin-top:6px;"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un point</button>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="btnSaveTrame">Enregistrer la trame</button>
+            <button type="button" class="btn btn-ghost" id="btnCancelTrame">Annuler</button>
+          </div>
+        </div>
+        <div id="tramesList"></div>
+      </div>
+
+      <p class="footnote">Les points relevés « Non conforme » génèrent automatiquement une action dans le Plan d'Actions (échéance à 30 jours, priorité Haute).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const role = (session && session.role) || "ag";
+  const canEdit = role === "rh" || role === "admin";
+  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const myServices = (session && session.services) || ["*"];
+  const isScoped = !myServices.includes("*");
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("roleChip").textContent = role.toUpperCase();
+  if (!canEdit){ $("roleChip").classList.add("ag"); $("navRh").style.display = "none"; }
+  if (role === "admin"){ $("navAdmin").style.display = ""; }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(module, type, description){
+    try {
+      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
+      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
+  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth()) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+
+  // ---------- Référentiels partagés (services) ----------
+  const REF_KEY = "vigie_hse_referentials";
+  const REF_DEFAULTS = {
+    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
+    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+  };
+  function loadReferentials(){
+    let stored = {};
+    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    const merged = Object.assign({}, stored);
+    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
+    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  const REF = loadReferentials();
+  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+
+  // ---------- Trames (always-merge) ----------
+  const TRAMES_KEY = "vigie_hse_inspection_trames";
+  function genTrameId(){ return "trm-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function genPointId(){ return "pt-" + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+  const SEED_TRAMES = [
+    { id:"tr-1", nom:"Inspection Espaces Verts", description:"Contrôle des conditions de travail et du matériel pour les équipes d'entretien des espaces verts.",
+      points:[
+        { id:"tr1-p1", libelle:"Rangement et état des outils tranchants", categorie:"Outillage" },
+        { id:"tr1-p2", libelle:"Port des EPI (gants anti-coupure, protections auditives)", categorie:"EPI" },
+        { id:"tr1-p3", libelle:"État des machines (tondeuses, débroussailleuses)", categorie:"Équipement" },
+        { id:"tr1-p4", libelle:"Stockage des produits phytosanitaires", categorie:"Produits chimiques" },
+        { id:"tr1-p5", libelle:"Signalisation de chantier mobile", categorie:"Circulation" },
+        { id:"tr1-p6", libelle:"Trousse de secours à disposition", categorie:"Secours" },
+      ] },
+    { id:"tr-2", nom:"Inspection Atelier / Mécanique", description:"Contrôle des conditions de sécurité dans les ateliers mécaniques et de maintenance.",
+      points:[
+        { id:"tr2-p1", libelle:"État des extincteurs et accès dégagé", categorie:"Incendie" },
+        { id:"tr2-p2", libelle:"Rangement des outils", categorie:"Outillage" },
+        { id:"tr2-p3", libelle:"État électrique des équipements", categorie:"Électrique" },
+        { id:"tr2-p4", libelle:"Ventilation de l'atelier", categorie:"Ambiance" },
+        { id:"tr2-p5", libelle:"Port des EPI (lunettes, gants)", categorie:"EPI" },
+        { id:"tr2-p6", libelle:"Stockage des produits inflammables", categorie:"Produits chimiques" },
+      ] },
+    { id:"tr-3", nom:"Inspection Locaux administratifs", description:"Contrôle des conditions de sécurité et d'ergonomie dans les locaux de bureau.",
+      points:[
+        { id:"tr3-p1", libelle:"Dégagement des issues de secours", categorie:"Incendie" },
+        { id:"tr3-p2", libelle:"État des extincteurs", categorie:"Incendie" },
+        { id:"tr3-p3", libelle:"Ergonomie des postes de travail (écrans, sièges)", categorie:"Ergonomie" },
+        { id:"tr3-p4", libelle:"Rangement et câblage électrique", categorie:"Électrique" },
+        { id:"tr3-p5", libelle:"Affichage des consignes de sécurité", categorie:"Affichage" },
+      ] },
+  ];
+  function saveTrames(ds){ try { localStorage.setItem(TRAMES_KEY, JSON.stringify(ds)); } catch(e){} }
+  function loadTrames(){
+    let stored = [];
+    try { const raw = localStorage.getItem(TRAMES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    const storedById = new Map(stored.map(r => [r.id, r]));
+    const seeded = SEED_TRAMES.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
+    const seedIds = new Set(seeded.map(r => r.id));
+    const userExtra = stored.filter(r => !seedIds.has(r.id));
+    const merged = seeded.concat(userExtra);
+    saveTrames(merged);
+    return merged;
+  }
+  let TRAMES = loadTrames();
+
+  // ---------- Inspections (always-merge) ----------
+  const STORAGE_KEY = "vigie_hse_inspections";
+  function genId(){ return "insp-man-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function daysAgoISO(n){ const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); }
+  function computeStatutGlobal(reponses){
+    const nc = reponses.filter(r => r.statut === "Non conforme").length;
+    if (nc >= 3) return "Non conforme";
+    if (nc >= 1) return "Avec réserves";
+    return "Conforme";
+  }
+  function buildReponses(trameId, overrides){
+    const trame = SEED_TRAMES.find(t => t.id === trameId);
+    if (!trame) return [];
+    return trame.points.map(p => {
+      const o = (overrides || {})[p.id] || {};
+      return { pointId:p.id, libelle:p.libelle, statut:o.statut || "Conforme", commentaire:o.commentaire || "" };
+    });
+  }
+  const SEED_INSPECTIONS_RAW = [
+    { id:"insp-1", trameId:"tr-1", offset:25, collectivite:"Ville", service:"Espace Vert", inspecteur:"RH1", createur:"RH1",
+      overrides:{ "tr1-p5":{ statut:"NA" } } },
+    { id:"insp-2", trameId:"tr-2", offset:18, collectivite:"Ville", service:"Mécanique", inspecteur:"RH2", createur:"RH2",
+      overrides:{
+        "tr2-p1":{ statut:"Non conforme", commentaire:"Extincteur périmé, accès partiellement obstrué par du matériel." },
+        "tr2-p2":{ statut:"Non conforme", commentaire:"Outils tranchants laissés hors de leur rangement dédié." },
+        "tr2-p6":{ statut:"Non conforme", commentaire:"Bidons de solvant stockés hors de l'armoire ventilée." },
+      } },
+    { id:"insp-3", trameId:"tr-3", offset:40, collectivite:"Ville", service:"Admin Générale", inspecteur:"RH1", createur:"RH1",
+      overrides:{ "tr3-p3":{ statut:"Non conforme", commentaire:"Plusieurs sièges non réglables signalés par les agents." } } },
+    { id:"insp-4", trameId:"tr-2", offset:12, collectivite:"Agglomération", service:"Propreté Déchet", inspecteur:"RH2", createur:"RH2",
+      overrides:{
+        "tr2-p4":{ statut:"Non conforme", commentaire:"Local mal ventilé lors du stockage des déchets ménagers spéciaux." },
+        "tr2-p3":{ statut:"Non conforme", commentaire:"Câblage apparent détérioré sur une prise." },
+      } },
+    { id:"insp-5", trameId:"tr-3", offset:5, collectivite:"Agglomération", service:"Direction Générale", inspecteur:"RH1", createur:"RH1",
+      overrides:{} },
+  ];
+  function buildSeedInspections(){
+    return SEED_INSPECTIONS_RAW.map(r => {
+      const trame = SEED_TRAMES.find(t => t.id === r.trameId);
+      const reponses = buildReponses(r.trameId, r.overrides);
+      return {
+        id: r.id,
+        trameId: r.trameId,
+        trameNom: trame ? trame.nom : "",
+        service: r.service,
+        collectivite: r.collectivite,
+        dateInspection: daysAgoISO(r.offset),
+        inspecteur: r.inspecteur,
+        reponses,
+        statutGlobal: computeStatutGlobal(reponses),
+        createur: r.createur,
+      };
+    });
+  }
+  function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
+  function loadDataset(){
+    let stored = [];
+    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    const seedList = buildSeedInspections();
+    const storedById = new Map(stored.map(r => [r.id, r]));
+    const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
+    const seedIds = new Set(seeded.map(r => r.id));
+    const userExtra = stored.filter(r => !seedIds.has(r.id));
+    const merged = seeded.concat(userExtra);
+    saveDataset(merged);
+    return merged;
+  }
+  let DATASET = loadDataset();
+  if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
+
+  // ---------- Lien vers le Plan d'Actions (lecture seule) ----------
+  function countPendingNonConformites(){
+    let actions = [];
+    try { const raw = localStorage.getItem("vigie_hse_actions"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) actions = p; } } catch(e){}
+    const actionsById = new Map(actions.map(a => [a.id, a]));
+    let pending = 0;
+    DATASET.forEach(insp => {
+      (insp.reponses || []).forEach(rep => {
+        if (rep.statut === "Non conforme"){
+          const actionId = "pa-insp-" + insp.id + "-" + rep.pointId;
+          const action = actionsById.get(actionId);
+          if (!action || action.statut !== "Fait") pending++;
+        }
+      });
+    });
+    return pending;
+  }
+
+  // ---------- Filtres ----------
+  const fCollectivite = $("fCollectivite"), fService = $("fService"), fTrame = $("fTrame"), fStatut = $("fStatut");
+  function fillServiceOptions(){
+    const col = fCollectivite.value;
+    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const current = fService.value;
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.value = list.includes(current) ? current : "all";
+  }
+  fillServiceOptions();
+  fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+
+  const statutCls = { "Conforme":"s-conforme", "Avec réserves":"s-reserves", "Non conforme":"s-non" };
+
+  function render(){
+    const col = fCollectivite.value, svc = fService.value, tr = fTrame.value, st = fStatut.value;
+    let rows = DATASET.filter(d =>
+      (col === "all" || d.collectivite === col) &&
+      (svc === "all" || d.service === svc) &&
+      (tr === "all" || d.trameId === tr) &&
+      (st === "all" || d.statutGlobal === st)
+    );
+    rows = rows.slice().sort((a,b) => (b.dateInspection || "").localeCompare(a.dateInspection || ""));
+
+    $("kpiTrames").textContent = TRAMES.length;
+    $("kpiTotal").textContent = DATASET.length;
+    $("kpiReserves").textContent = DATASET.filter(d => d.statutGlobal !== "Conforme").length;
+    $("kpiEnAttente").textContent = countPendingNonConformites();
+    $("resultCount").textContent = rows.length;
+    $("totalCount").textContent = DATASET.length;
+
+    const tbody = $("tbody");
+    const colspan = canEdit ? 7 : 6;
+    if (rows.length === 0){
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">${DATASET.length === 0 ? "Aucune inspection réalisée pour le moment." : "Aucune inspection ne correspond aux filtres sélectionnés."}</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(d => {
+      const ncCount = (d.reponses || []).filter(r => r.statut === "Non conforme").length;
+      return `
+      <tr class="${d.statutGlobal === 'Non conforme' ? 'nonconforme' : ''}" data-id="${d.id}">
+        <td>${d.dateInspection || '—'}</td>
+        <td class="wrap">${d.trameNom}</td>
+        <td>${d.service}</td>
+        <td>${d.inspecteur}</td>
+        <td><span class="status-chip ${statutCls[d.statutGlobal] || 's-conforme'}">${d.statutGlobal}</span></td>
+        <td>${ncCount}</td>
+        ${canEdit ? `<td class="actions-float">
+          <button type="button" class="act-edit" data-edit="${d.id}">Modifier</button>
+          <button type="button" class="act-del" data-id="${d.id}">Suppr.</button>
+        </td>` : ''}
+      </tr>`;
+    }).join("");
+  }
+
+  fCollectivite.addEventListener("change", () => { fillServiceOptions(); render(); });
+  fService.addEventListener("change", render);
+  fTrame.addEventListener("change", render);
+  fStatut.addEventListener("change", render);
+  $("btnReset").addEventListener("click", () => {
+    fCollectivite.value = "all"; fillServiceOptions(); fTrame.value = "all"; fStatut.value = "all"; render();
+  });
+
+  if (canEdit){
+    $("panelActionsBtns").innerHTML = `
+      <button type="button" class="btn btn-secondary" id="btnToggleTrames">Gérer les trames</button>
+      <button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle inspection</button>
+    `;
+
+    const formPanel = $("formPanel"), form = $("inspForm"), pointsContainer = $("pointsContainer");
+    $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+    function fillFormServiceOptions(col){
+      const list = servicesForCollectivite(col);
+      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+    }
+    fillFormServiceOptions("Ville");
+    $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
+
+    function renderPoints(trameId, existingReponses){
+      const trame = TRAMES.find(t => t.id === trameId);
+      if (!trame){ pointsContainer.innerHTML = ""; return; }
+      const byId = new Map((existingReponses || []).map(r => [r.pointId, r]));
+      pointsContainer.innerHTML = trame.points.map(p => {
+        const existing = byId.get(p.id) || { statut:"Conforme", commentaire:"" };
+        return `
+        <div class="point-row" data-point-id="${p.id}" data-point-label="${p.libelle.replace(/"/g,'&quot;')}">
+          <div class="point-label">${p.libelle} <span style="color:var(--text-faint); font-weight:500;">· ${p.categorie}</span></div>
+          <div class="point-radios">
+            <label><input type="radio" name="pt-${p.id}" value="Conforme" ${existing.statut === 'Conforme' ? 'checked' : ''}> Conforme</label>
+            <label><input type="radio" name="pt-${p.id}" value="Non conforme" ${existing.statut === 'Non conforme' ? 'checked' : ''}> Non conforme</label>
+            <label><input type="radio" name="pt-${p.id}" value="NA" ${existing.statut === 'NA' ? 'checked' : ''}> N/A</label>
+          </div>
+          <textarea placeholder="Commentaire (optionnel)">${existing.commentaire || ''}</textarea>
+        </div>`;
+      }).join("");
+    }
+    $("fTrameForm").addEventListener("change", (e) => renderPoints(e.target.value, null));
+
+    function openForm(rec){
+      form.reset();
+      if (rec){
+        $("formTitle").textContent = "Modifier l'inspection";
+        $("fId").value = rec.id;
+        $("fTrameForm").value = rec.trameId;
+        $("fCollectiviteForm").value = rec.collectivite;
+        fillFormServiceOptions(rec.collectivite);
+        $("fServiceForm").value = rec.service;
+        $("fDateForm").value = rec.dateInspection || "";
+        $("fInspecteur").value = rec.inspecteur || "";
+        renderPoints(rec.trameId, rec.reponses);
+      } else {
+        $("formTitle").textContent = "Nouvelle inspection";
+        $("fId").value = "";
+        fillFormServiceOptions("Ville");
+        $("fTrameForm").value = TRAMES[0] ? TRAMES[0].id : "";
+        $("fDateForm").value = new Date().toISOString().slice(0,10);
+        renderPoints($("fTrameForm").value, null);
+      }
+      $("trameManagerPanel").style.display = "none";
+      formPanel.style.display = "";
+      formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+    $("btnNew").addEventListener("click", () => openForm(null));
+    $("btnCancelForm").addEventListener("click", () => { formPanel.style.display = "none"; form.reset(); });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = $("fId").value;
+      const isNew = !id;
+      const trameId = $("fTrameForm").value;
+      const trame = TRAMES.find(t => t.id === trameId);
+      const reponses = Array.from(pointsContainer.querySelectorAll(".point-row")).map(row => {
+        const pointId = row.dataset.pointId;
+        const libelle = row.dataset.pointLabel;
+        const checked = row.querySelector('input[type="radio"]:checked');
+        const commentaire = row.querySelector("textarea").value.trim();
+        return { pointId, libelle, statut: checked ? checked.value : "Conforme", commentaire };
+      });
+      const rec = {
+        id: id || genId(),
+        trameId,
+        trameNom: trame ? trame.nom : "",
+        service: $("fServiceForm").value,
+        collectivite: $("fCollectiviteForm").value,
+        dateInspection: $("fDateForm").value,
+        inspecteur: $("fInspecteur").value.trim(),
+        reponses,
+        statutGlobal: computeStatutGlobal(reponses),
+        createur: (session && session.user) || "—",
+      };
+      const idx = DATASET.findIndex(d => d.id === rec.id);
+      if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);
+      saveDataset(DATASET);
+      logAudit("Inspection / Audit", isNew ? "Création" : "Modification", `Inspection « ${rec.trameNom} » — ${rec.service}`);
+      formPanel.style.display = "none";
+      form.reset();
+      render();
+    });
+
+    $("tbody").addEventListener("click", (e) => {
+      const editBtn = e.target.closest(".act-edit");
+      if (editBtn){ const rec = DATASET.find(d => d.id === editBtn.dataset.edit); if (rec) openForm(rec); return; }
+      const delBtn = e.target.closest(".act-del");
+      if (delBtn){
+        const rec = DATASET.find(d => d.id === delBtn.dataset.id);
+        if (!rec) return;
+        if (confirm(`Supprimer l'inspection « ${rec.trameNom} » (${rec.service}) ?`)){
+          DATASET = DATASET.filter(d => d.id !== rec.id);
+          saveDataset(DATASET);
+          logAudit("Inspection / Audit", "Suppression", `Inspection « ${rec.trameNom} » — ${rec.service}`);
+          render();
+        }
+      }
+    });
+
+    // ---------- Gestion des trames ----------
+    const trameManagerPanel = $("trameManagerPanel"), trameForm = $("trameForm"), tPointsList = $("tPointsList");
+    let editingTrameId = null;
+
+    function renderTramesList(){
+      $("tramesList").innerHTML = TRAMES.map(t => `
+        <div class="trame-card" data-id="${t.id}">
+          <div class="trame-card-head">
+            <div>
+              <div class="trame-card-name">${t.nom}</div>
+              <div class="trame-card-desc">${t.description || ''}</div>
+            </div>
+            <div class="panel-actions">
+              <button type="button" class="act-edit" data-edit-trame="${t.id}">Modifier</button>
+              <button type="button" class="act-del" data-del-trame="${t.id}">Suppr.</button>
+            </div>
+          </div>
+          <div class="trame-points-list">${t.points.map(p => `<span>${p.libelle}</span>`).join("")}</div>
+        </div>`).join("");
+    }
+    renderTramesList();
+
+    function addPointInputRow(libelle, categorie){
+      const row = document.createElement("div");
+      row.className = "point-input-row";
+      row.innerHTML = `
+        <input type="text" class="tp-libelle" placeholder="Libellé du point de contrôle" value="${(libelle||'').replace(/"/g,'&quot;')}">
+        <input type="text" class="tp-categorie" placeholder="Catégorie" value="${(categorie||'').replace(/"/g,'&quot;')}" style="max-width:150px;">
+        <button type="button" class="icon-btn" aria-label="Supprimer ce point"><svg class="icon" style="width:15px;height:15px"><use href="#i-trash"/></svg></button>
+      `;
+      row.querySelector("button").addEventListener("click", () => row.remove());
+      tPointsList.appendChild(row);
+    }
+    $("btnAddPoint").addEventListener("click", () => addPointInputRow("", ""));
+
+    function openTrameForm(trame){
+      tPointsList.innerHTML = "";
+      if (trame){
+        editingTrameId = trame.id;
+        $("tNom").value = trame.nom;
+        $("tDescription").value = trame.description || "";
+        trame.points.forEach(p => addPointInputRow(p.libelle, p.categorie));
+      } else {
+        editingTrameId = null;
+        $("tNom").value = "";
+        $("tDescription").value = "";
+        addPointInputRow("", "");
+      }
+      formPanel.style.display = "none";
+      trameForm.style.display = "";
+    }
+    $("btnNewTrame").addEventListener("click", () => openTrameForm(null));
+    $("btnCancelTrame").addEventListener("click", () => { trameForm.style.display = "none"; });
+
+    $("btnSaveTrame").addEventListener("click", () => {
+      const nom = $("tNom").value.trim();
+      if (!nom){ alert("Le nom de la trame est requis."); return; }
+      const points = Array.from(tPointsList.querySelectorAll(".point-input-row")).map(row => ({
+        id: genPointId(),
+        libelle: row.querySelector(".tp-libelle").value.trim(),
+        categorie: row.querySelector(".tp-categorie").value.trim(),
+      })).filter(p => p.libelle);
+      if (points.length === 0){ alert("Ajoutez au moins un point de contrôle."); return; }
+      const isNew = !editingTrameId;
+      if (isNew){
+        TRAMES.push({ id: genTrameId(), nom, description: $("tDescription").value.trim(), points });
+      } else {
+        const idx = TRAMES.findIndex(t => t.id === editingTrameId);
+        if (idx >= 0){
+          const existingPoints = TRAMES[idx].points;
+          TRAMES[idx] = { id: editingTrameId, nom, description: $("tDescription").value.trim(), points: points.map((p, i) => existingPoints[i] ? Object.assign(p, { id: existingPoints[i].id }) : p) };
+        }
+      }
+      saveTrames(TRAMES);
+      logAudit("Inspection / Audit", isNew ? "Création" : "Modification", `Trame « ${nom} »`);
+      trameForm.style.display = "none";
+      renderTramesList();
+      $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+      fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+    });
+
+    $("tramesList").addEventListener("click", (e) => {
+      const editBtn = e.target.closest("[data-edit-trame]");
+      if (editBtn){ const t = TRAMES.find(x => x.id === editBtn.dataset.editTrame); if (t) openTrameForm(t); return; }
+      const delBtn = e.target.closest("[data-del-trame]");
+      if (delBtn){
+        const t = TRAMES.find(x => x.id === delBtn.dataset.delTrame);
+        if (!t) return;
+        if (confirm(`Supprimer la trame « ${t.nom} » ? Les inspections déjà réalisées avec cette trame ne seront pas affectées.`)){
+          TRAMES = TRAMES.filter(x => x.id !== t.id);
+          saveTrames(TRAMES);
+          logAudit("Inspection / Audit", "Suppression", `Trame « ${t.nom} »`);
+          renderTramesList();
+          $("fTrameForm").innerHTML = TRAMES.map(x => `<option value="${x.id}">${x.nom}</option>`).join("");
+          fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(x => `<option value="${x.id}">${x.nom}</option>`).join("");
+        }
+      }
+    });
+
+    $("btnToggleTrames").addEventListener("click", () => {
+      formPanel.style.display = "none";
+      const showing = trameManagerPanel.style.display !== "none";
+      trameManagerPanel.style.display = showing ? "none" : "";
+      if (!showing) trameManagerPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+  }
+
+  render();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

@@ -1,0 +1,1064 @@
+<title>Administration</title>
+<meta name="description" content="Panneau d'administration VIGIE HSE — utilisateurs, référentiels, flash info et journal des modifications.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B;
+    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px;
+    --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985;
+      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985;
+    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; font-variant-numeric:tabular-nums; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item .icon{ width:17px; height:17px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:var(--danger-bg); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .content{ padding:26px 28px 60px; max-width:1200px; width:100%; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  /* ===== Sidebar auto-collapsible (desktop) ===== */
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name,
+    .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label,
+    .app-shell.sidebar-collapsed .nav-item-badge,
+    .app-shell.sidebar-collapsed .user-meta{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+  .hero{ margin-bottom:20px; } .hero h1{ font-size:25px; } .hero p{ margin:6px 0 0; color:var(--text-muted); font-size:13px; }
+
+  /* ===== Compact sticky page summary (icon + titre + description sur une ligne) ===== */
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn .icon{ width:15px; height:15px; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-secondary{ background:var(--surface-el); border-color:var(--border); color:var(--text); }
+  .btn-secondary:hover{ border-color:rgba(var(--accent-rgb),.5); color:var(--accent); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+  .btn-danger{ background:var(--danger-bg); border-color:rgba(var(--danger-rgb),.3); color:var(--danger); }
+  .btn-danger:hover{ background:rgba(var(--danger-rgb),.18); }
+  .btn-sm{ padding:6px 11px; font-size:11.5px; }
+
+  /* Tabs */
+  .admin-tabs{ display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .admin-tab{ display:flex; align-items:center; gap:7px; padding:10px 15px; font:600 13px "IBM Plex Sans",sans-serif; color:var(--text-muted); background:none; border:none; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  .admin-tab:hover{ color:var(--text); }
+  .admin-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .admin-tab .icon{ width:15px; height:15px; }
+  .tab-panel{ display:none; }
+  .tab-panel.show{ display:block; }
+
+  select, input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="file"], textarea{
+    appearance:none; -webkit-appearance:none; background:var(--surface); border:1px solid var(--border); color:var(--text);
+    font:500 13px "IBM Plex Sans",sans-serif; padding:9px 12px; border-radius:var(--r-sm); width:100%;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  textarea{ resize:vertical; min-height:70px; font-weight:400; line-height:1.5; }
+  select{
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>');
+    background-repeat:no-repeat; background-position:right 12px center; padding-right:32px; cursor:pointer;
+  }
+  select:hover, input:hover, textarea:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  .f{ display:flex; flex-direction:column; gap:6px; }
+  .f label{ font-size:11.5px; color:var(--text-muted); font-weight:500; }
+  .field-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px 16px; }
+  .field-grid .span2{ grid-column:span 2; } .field-grid .span3{ grid-column:span 3; }
+  @media (max-width:640px){ .field-grid .span2, .field-grid .span3{ grid-column:span 1; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .panel-title{ font-size:16.5px; }
+  .panel-note{ font-size:11.5px; color:var(--text-faint); }
+  .section-block{ margin-bottom:22px; }
+  .section-block:last-child{ margin-bottom:0; }
+
+  table.admin{ border-collapse:collapse; width:100%; }
+  table.admin thead th{ text-align:left; color:var(--text-muted); font-weight:600; font-size:11px; padding:9px 12px; border-bottom:1px solid var(--border); white-space:nowrap; text-transform:uppercase; letter-spacing:.04em; }
+  table.admin tbody td{ padding:10px 12px; font-size:12.5px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  table.admin tbody tr:hover{ background:var(--bg-2); }
+  table.admin tbody td.wrap{ white-space:normal; }
+  .table-wrap{ overflow-x:auto; }
+
+  .chip{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:var(--r-pill); font-size:10.5px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.admin{ color:var(--accent-violet); background:rgba(var(--accent-violet-rgb),.14); } .chip.admin::before{ background:var(--accent-violet); }
+  .chip.rh{ color:var(--accent); background:rgba(var(--accent-rgb),.12); } .chip.rh::before{ background:var(--accent); }
+  .chip.manager{ color:var(--warning); background:var(--warning-bg); } .chip.manager::before{ background:var(--warning); }
+  .chip.ag{ color:var(--accent-blue); background:rgba(var(--accent-blue-rgb),.15); } .chip.ag::before{ background:var(--accent-blue); }
+  .chip.active-yes{ color:var(--success); background:var(--success-bg); } .chip.active-yes::before{ background:var(--success); }
+  .chip.active-no{ color:var(--danger); background:var(--danger-bg); } .chip.active-no::before{ background:var(--danger); }
+  .svc-tags{ display:flex; flex-wrap:wrap; gap:4px; max-width:260px; }
+  .svc-tag{ font-size:10px; padding:2px 7px; border-radius:6px; background:var(--bg-2); color:var(--text-muted); border:1px solid var(--border); }
+
+  .checkbox-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:6px 12px; max-height:180px; overflow-y:auto; padding:10px 12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface); }
+  .checkbox-row{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); }
+  .checkbox-row input{ width:auto; accent-color:var(--accent); }
+
+  .list-editor{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+  .list-row{ display:flex; align-items:center; gap:8px; }
+  .list-row input{ flex:1; }
+  .list-row .list-desc{ flex:2; }
+  .add-row{ display:flex; gap:8px; padding-top:10px; border-top:1px dashed var(--border); }
+  .add-row input{ flex:1; }
+
+  .news-admin-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; margin-bottom:20px; }
+  .news-admin-card{ border:1px solid var(--border); border-radius:var(--r-md); padding:13px 14px; background:var(--bg-2); display:flex; flex-direction:column; gap:6px; }
+  .news-admin-card img{ width:100%; height:80px; object-fit:cover; border-radius:8px; }
+  .news-admin-title{ font-size:13px; font-weight:600; }
+  .news-admin-text{ font-size:11.5px; color:var(--text-muted); line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .news-admin-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:6px; }
+  .news-admin-date{ font-size:10.5px; color:var(--text-faint); }
+  .news-admin-actions{ display:flex; gap:8px; }
+  .news-admin-actions button{ background:none; border:none; cursor:pointer; font-size:11.5px; font-weight:600; padding:0; }
+  .act-edit-btn{ color:var(--accent); } .act-edit-btn:hover{ text-decoration:underline; }
+  .act-del-btn{ color:var(--danger); } .act-del-btn:hover{ text-decoration:underline; }
+
+  .banner{ display:none; align-items:center; gap:8px; margin-bottom:16px; padding:11px 14px; border-radius:var(--r-sm); background:var(--success-bg); color:var(--success); font-size:12.5px; font-weight:500; }
+  .banner.show{ display:flex; }
+  .banner::before{ content:"✓"; font-weight:700; }
+  .banner.info{ background:rgba(var(--accent-rgb),.10); color:var(--accent); } .banner.info::before{ content:"i"; }
+
+  .empty-hint{ font-size:12.5px; color:var(--text-faint); text-align:center; padding:22px 8px; }
+  .footnote{ margin-top:22px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user){ location.href = "login.html"; return; }
+      if (s.role !== "admin"){ location.href = "index.html"; }
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+  <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M7 13v5a2 2 0 0 0 4 0v-3"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 9 9 9"/><polyline points="12 7 12 12 16 14"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5L19 11"/><path d="M17.5 5.5L21 9"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="index.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="index.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre Santé &amp; Sécurité</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item" href="saisie-rh.html"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" href="saisie-duerp.html"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item active" href="administration.html"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role">Administrateur</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Pilotage / <b>Administration</b></div>
+      <div class="topbar-right">
+        <span class="role-chip">ADMIN</span>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-settings"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Administration</h1>
+            <p>Utilisateurs &amp; accès, référentiels de l'application, flash info et journal des modifications.</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="users"><svg class="icon"><use href="#i-users"/></svg> Utilisateurs</button>
+        <button class="admin-tab" data-tab="ref"><svg class="icon"><use href="#i-list"/></svg> Référentiels</button>
+        <button class="admin-tab" data-tab="news"><svg class="icon"><use href="#i-megaphone"/></svg> Flash Info</button>
+        <button class="admin-tab" data-tab="audit"><svg class="icon"><use href="#i-history"/></svg> Journal des modifications</button>
+      </div>
+
+      <!-- ===================== A. UTILISATEURS ===================== -->
+      <section class="tab-panel show" id="tab-users">
+        <div class="banner" id="userBanner"></div>
+
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head"><h3 class="panel-title">Comptes existants</h3><span class="panel-note"><b id="userCount" class="mono">0</b> compte(s)</span></div>
+          <div class="table-wrap">
+            <table class="admin">
+              <thead><tr><th>Identifiant</th><th>Nom</th><th>Rôle</th><th>Services</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head"><h3 class="panel-title" id="userFormTitle">Créer un utilisateur</h3></div>
+          <form id="userForm">
+            <input type="hidden" id="uId" value="">
+            <div class="field-grid">
+              <div class="f"><label for="uNom">Nom</label><input type="text" id="uNom" required autocomplete="off"></div>
+              <div class="f"><label for="uPrenom">Prénom</label><input type="text" id="uPrenom" required autocomplete="off"></div>
+              <div class="f"><label for="uEmail">Email</label><input type="email" id="uEmail" required autocomplete="off" placeholder="prenom.nom@verchamps.fr"></div>
+              <div class="f">
+                <label for="uRole">Rôle</label>
+                <select id="uRole">
+                  <option value="rh">RH — création/édition complète</option>
+                  <option value="manager">Manager — lecture, services rattachés</option>
+                  <option value="ag">Agent — lecture, tous services</option>
+                  <option value="admin">Administrateur — accès total</option>
+                </select>
+              </div>
+              <div class="f span2">
+                <label for="uPassword">Mot de passe</label>
+                <div style="display:flex; gap:8px;">
+                  <input type="text" id="uPassword" autocomplete="off" placeholder="Cliquer sur « Générer » ou saisir un mot de passe" required>
+                  <button type="button" class="btn btn-secondary btn-sm" id="uGenPassBtn" style="flex-shrink:0;">Générer</button>
+                </div>
+              </div>
+              <div class="f span3" id="uServicesWrap">
+                <label>Rattachement aux services (pour un profil Manager)</label>
+                <div class="checkbox-grid" id="uServicesGrid"></div>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:16px;">
+              <button type="submit" class="btn btn-primary" id="userSubmitBtn">Créer l'utilisateur</button>
+              <button type="button" class="btn btn-ghost" id="userCancelBtn" style="display:none;">Annuler la modification</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ===================== B. RÉFÉRENTIELS ===================== -->
+      <section class="tab-panel" id="tab-ref">
+        <div class="banner" id="refBanner"></div>
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Éditeur de listes déroulantes</h3>
+            <span class="panel-note">Les modifications s'appliquent aux formulaires RH dès leur prochaine ouverture</span>
+          </div>
+          <div class="f" style="max-width:360px; margin-bottom:16px;">
+            <label for="refSelect">Liste à modifier</label>
+            <select id="refSelect">
+              <option value="risquesATMP">Risques (Registre AT/MP)</option>
+              <option value="sieges">Sièges de lésion</option>
+              <option value="natures">Natures de lésion</option>
+              <option value="statutsRH">Statuts RH</option>
+              <option value="servicesVille">Services — Ville</option>
+              <option value="servicesAgglo">Services — Agglomération</option>
+              <option value="risqueFamillesDUERP">Familles de risque (Document Unique)</option>
+            </select>
+          </div>
+          <div id="refEditorHost"></div>
+        </div>
+      </section>
+
+      <!-- ===================== C. FLASH INFO ===================== -->
+      <section class="tab-panel" id="tab-news">
+        <div class="banner" id="newsBanner"></div>
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head"><h3 class="panel-title">Actualités publiées</h3><span class="panel-note">Visibles sur le Cockpit de tous les agents</span></div>
+          <div class="news-admin-grid" id="newsAdminGrid"></div>
+        </div>
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head"><h3 class="panel-title" id="newsFormTitle">Publier une actualité</h3></div>
+          <form id="newsForm">
+            <input type="hidden" id="nId" value="">
+            <div class="field-grid">
+              <div class="f span2"><label for="nTitre">Titre</label><input type="text" id="nTitre" required autocomplete="off" placeholder="ex. Vigilance canicule — rappel EPI"></div>
+              <div class="f"><label for="nDate">Date</label><input type="date" id="nDate" required></div>
+              <div class="f span3"><label for="nTexte">Message</label><textarea id="nTexte" required placeholder="Message de prévention…"></textarea></div>
+              <div class="f span2"><label for="nImage">Image (facultatif)</label><input type="file" id="nImage" accept="image/*"></div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:16px;">
+              <button type="submit" class="btn btn-primary" id="newsSubmitBtn">Publier</button>
+              <button type="button" class="btn btn-ghost" id="newsCancelBtn" style="display:none;">Annuler la modification</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ===================== D. JOURNAL DES MODIFICATIONS ===================== -->
+      <section class="tab-panel" id="tab-audit">
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Journal des modifications</h3>
+            <span class="panel-note"><b id="auditCount" class="mono">0</b> entrée(s)</span>
+          </div>
+          <div class="field-grid" style="margin-bottom:14px; max-width:520px;">
+            <div class="f"><label for="auditModule">Module</label><select id="auditModule"><option value="all">Tous les modules</option></select></div>
+            <div class="f">
+              <label for="auditType">Type d'action</label>
+              <select id="auditType">
+                <option value="all">Tous les types</option>
+                <option value="Création">Création</option>
+                <option value="Modification">Modification</option>
+                <option value="Suppression">Suppression</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="admin">
+              <thead><tr><th>Date &amp; heure</th><th>Utilisateur</th><th>Module</th><th>Type</th><th>Description</th></tr></thead>
+              <tbody id="auditBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <p class="footnote">Panneau d'administration — les données sont stockées localement dans ce navigateur (aucun serveur connecté à ce stade du prototype).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+
+  // ---------- Sidebar auto-collapse (desktop) ----------
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){
+    clearTimeout(collapseTimer);
+    if (appShell) appShell.classList.remove("sidebar-collapsed");
+  }
+  function sidebarCollapse(delay){
+    clearTimeout(collapseTimer);
+    if (!isDesktopWidth()) return;
+    collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0);
+  }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){
+    mainEl.addEventListener("mouseenter", () => sidebarCollapse(200));
+    mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+  }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+
+  // ---------- Tabs ----------
+  document.querySelectorAll(".admin-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".admin-tab").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("show"));
+      btn.classList.add("active");
+      $("tab-" + btn.dataset.tab).classList.add("show");
+    });
+  });
+
+  function flashBanner(el, msg, cls, sticky){
+    clearTimeout(el._t);
+    if (sticky){
+      el.innerHTML = `<span>${msg}</span><button type="button" aria-label="Fermer" style="margin-left:auto; background:none; border:none; cursor:pointer; font:600 13px inherit; color:inherit; opacity:.7;">✕</button>`;
+      el.className = "banner show" + (cls ? " " + cls : "");
+      el.querySelector("button").addEventListener("click", () => el.classList.remove("show"));
+    } else {
+      el.textContent = msg;
+      el.className = "banner show" + (cls ? " " + cls : "");
+      el._t = setTimeout(() => el.classList.remove("show"), 4500);
+    }
+  }
+
+  // ---------- Audit log (partagé avec le reste de l'application) ----------
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(module, type, description){
+    try {
+      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
+      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function loadAudit(){
+    try { const v = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]"); return Array.isArray(v) ? v : []; }
+    catch(e){ return []; }
+  }
+
+  // ---------- Référentiels partagés ----------
+  const REF_KEY = "vigie_hse_referentials";
+  const RISK_TAXONOMY_DEFAULT = [
+    ["Agressions verbales / physique","Risque de violence externe (de la part de clients, usagers ou tiers) ou interne (entre collègues ou hiérarchie), se traduisant par des insultes, des menaces, des intimidations ou des coups, générant un impact sévère sur la santé mentale et physique."],
+    ["Chute de plain-pied","Le risque de blessure résulte de la chute elle-même ou du heurt d'un objet, d'une partie de machine ou de mobilier. Sols glissants, inégaux ou encombrés, passages étroits, stockage inadapté dans les zones de passage."],
+    ["Chute de hauteur","Le risque de blessure résulte d'une chute avec dénivelé ou du heurt d'un objet en contrebas. Zones en contrebas, accès en hauteur, équipements mobiles (échelles, escabeaux, échafaudages), moyens de fortune."],
+    ["Effondrements et aux chutes d'objets","Chute d'objets stockés en hauteur, effondrement de structures ou ensellement. Marchandises en vrac ou en hauteur instable, charges mal arrimées, coactivité sur plusieurs niveaux."],
+    ["Circulations Internes","Heurt d'une personne par un véhicule/engin, ou collision entre véhicules/engins et obstacles, à l'intérieur des locaux ou sur sites extérieurs."],
+    ["Déplacement dans les locaux","Exiguïté des locaux ou objets encombrants rendant la circulation difficile. Risque permanent de choc contre les éléments fixes."],
+    ["Routiers","Accident lié aux déplacements professionnels (missions) ou au trajet domicile-travail. Kilométrage important, dispersion des chantiers, urgence, téléphone au volant, véhicule inadapté."],
+    ["Vibrations","Transmission de vibrations mécaniques au corps humain (outils électroportatifs ou engins). Atteintes vasculaires, nerveuses ou articulaires en cas d'exposition prolongée."],
+    ["Bruit","Inconfort, fatigue mentale, gêne à la communication ; surdité professionnelle irréversible en cas d'exposition prolongée au-delà de 80dB(A) en continu ou 130dB(C) en impulsif."],
+    ["Activité Physique (TMS)","Blessure ou pathologie chronique (TMS) liée aux efforts physiques, chocs, gestes répétitifs ou postures contraignantes. Charges lourdes, rythme élevé, absence d'aides à la manutention."],
+    ["Equipement de travail","Blessure grave par l'action mécanique des machines, d'éléments mobiles ou d'outils portatifs. Absence de protections, projections, non-consignation lors de la maintenance."],
+    ["Biologique","Contamination par agents biologiques (virus, bactéries, parasites, moisissures) ou contact avec fluides corporels/déchets. Inclut agressions par insectes vecteurs et allergies."],
+    ["Produits chimiques","Intoxication, allergie ou brûlure par inhalation, ingestion ou contact cutané avec des substances dangereuses. Étiquetage, gaz, solvants, poussières, fumées."],
+    ["Conduites addictives","Consommation de substances psychoactives sur le lieu de travail, altérant vigilance, réflexes et discernement."],
+    ["Manutention Mécanique","Blessure liée à la charge manutentionnée ou au moyen de levage/transport (chariot, transpalette, pont roulant). Matériel inadapté, charges mal réparties, vitesse excessive."],
+    ["Ambiance thermique","Inconfort et fatigue pouvant porter atteinte à la santé (coups de chaleur, déshydratation, gelures, malaises). Températures inadaptées, hygrométrie, courants d'air."],
+    ["Incendie et Explosion","Brûlure, asphyxie ou traumatisme par onde de choc. Substances inflammables/comburantes/explosives, atmosphères ATEX, mélanges incompatibles."],
+    ["Electrique","Choc électrique ou brûlure thermique par contact avec pièces sous tension. Matériel défectueux, absence de consignation, non-respect des distances de sécurité."],
+    ["Ambiance Lumineuse","Fatigue, erreurs et chutes favorisées par un éclairage insuffisant, l'éblouissement, les reflets ou les zones de passage mal éclairées."],
+    ["Rayonnements","Atteinte à la santé par exposition à des rayonnements ionisants, optiques (IR, UV, lasers) ou électromagnétiques."],
+    ["Travail de nuit","Perturbation des rythmes circadiens, troubles du sommeil, altération de la vie sociale, risques métaboliques et cardiovasculaires à long terme."],
+    ["RPS","Gêne, stress chronique ou traumatismes psychologiques liés à des conditions de travail dégradées : surcharge, manque d'autonomie, conflits, insécurité de l'emploi."],
+    ["Animaux","Exposition à des animaux sauvages, errants ou domestiques lors d'interventions en extérieur : traumatismes (morsures, griffures) ou zoonoses."],
+    ["Coactivité","Interférence entre activités, équipements et personnel de la structure et d'entreprises extérieures intervenant simultanément. Absence d'inspection commune et de plan de prévention partagé."],
+    ["Fluide sous pression","Blessure par projection, éclatement ou fuite sur réseaux sous pression (air comprimé, vapeur, hydraulique). Corrosion, soupapes défectueuses, raccords non conformes."],
+    ["Travail isolé","Salarié hors de vue ou de portée de voix d'autrui, sans recours immédiat en cas de détresse — aggravateur majeur des conséquences d'un accident."],
+    ["Travail sur écran","Fatigue visuelle, maux de tête, TMS (nuque, épaules, lombaires) liés à une position assise prolongée devant un poste mal réglé."],
+    ["Amiante et aux fibres inhalables","Inhalation de fibres pouvant provoquer des pathologies graves à long terme (asbestose, cancers) — critique en bâtiment, rénovation, maintenance."],
+    ["Nanomatériaux et nanoparticules","Exposition à des substances à l'échelle nanométrique dont la toxicité par inhalation ou pénétration cutanée est encore mal cernée."],
+    ["télétravail et à l'hyperconnexion","Isolement à domicile, flou vie privée/professionnelle, difficulté à déconnecter, ergonomie inadaptée du poste à domicile."],
+    ["Noyade","Submersion, hydrocution ou noyade lors de travaux/déplacements à proximité de cours d'eau, plans d'eau, bassins ou ouvrages hydrauliques non sécurisés."],
+    ["VSST","Agissements sexistes ou actes de harcèlement/agression sexuelle de la part de l'entourage professionnel ou de tiers."],
+    ["Autres","Risques divers non listés spécifiquement dans la nomenclature standard, identifiés lors de l'analyse de situations de travail particulières."],
+  ];
+  const REF_DEFAULTS = {
+    risquesATMP: ["Activité Physique","Autres","Chute de hauteur","Chute de plain pied","Chute d'objet","Déplacement","Equipement de travail","Routier","RPS"],
+    sieges: ["Autres","Bras","Cervical","Cheville","Cuisse","Dos","Epaule","Genoux","Main","Mollet","Multiple","Oreilles","Pieds","Poignée","Rps","Thorax","Ventre","Visage","Yeux"],
+    natures: ["Autres","Brulure","Contusion","Douleur","Entorse","Inflammation","Lombalgie","Malaise","Multiple","Plaie","Psy"],
+    statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
+    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
+    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+    risqueFamillesDUERP: RISK_TAXONOMY_DEFAULT,
+  };
+  function loadReferentials(){
+    let stored = {};
+    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    const merged = {};
+    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
+    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  function saveReferentials(ref){ try { localStorage.setItem(REF_KEY, JSON.stringify(ref)); } catch(e){} }
+  let REF = loadReferentials();
+  const REF_LABELS = {
+    risquesATMP:"Risques (Registre AT/MP)", sieges:"Sièges de lésion", natures:"Natures de lésion", statutsRH:"Statuts RH",
+    servicesVille:"Services — Ville", servicesAgglo:"Services — Agglomération", risqueFamillesDUERP:"Familles de risque (Document Unique)",
+  };
+
+  function allServices(){ return [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')); }
+
+  // ===================================================================
+  // A. UTILISATEURS
+  // ===================================================================
+  const USERS_KEY = "vigie_hse_users";
+  function genPassword(){
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    let s = ""; for (let i=0;i<10;i++) s += chars[Math.floor(Math.random()*chars.length)];
+    return s;
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function defaultUsers(){
+    return [
+      { id:"u-rh1", nom:"", prenom:"", email:"RH1", username:"RH1", password:"1234", role:"rh", services:["*"], active:true },
+      { id:"u-rh2", nom:"", prenom:"", email:"RH2", username:"RH2", password:"1234", role:"rh", services:["*"], active:true },
+      { id:"u-ag1", nom:"", prenom:"", email:"AG1", username:"AG1", password:"1234", role:"ag", services:["*"], active:true },
+      { id:"u-ag2", nom:"", prenom:"", email:"AG2", username:"AG2", password:"1234", role:"ag", services:["*"], active:true },
+      { id:"u-admin", nom:"Verchamps", prenom:"Admin", email:"admin@verchamps.fr", username:"admin@verchamps.fr", password:"admin1234", role:"admin", services:["*"], active:true },
+      { id:"u-manager", nom:"Verchamps", prenom:"Manager", email:"manager@verchamps.fr", username:"manager@verchamps.fr", password:"manager1234", role:"manager", services:["Voirie","Espace Vert"], active:true },
+    ];
+  }
+  function loadUsers(){
+    let stored = [];
+    try { const raw = localStorage.getItem(USERS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    if (stored.length === 0){ stored = defaultUsers(); saveUsers(stored); }
+    return stored;
+  }
+  function saveUsers(u){ try { localStorage.setItem(USERS_KEY, JSON.stringify(u)); } catch(e){} }
+  let USERS = loadUsers();
+
+  const ROLE_CHIP_LABEL = { admin:"Administrateur", rh:"RH", manager:"Manager", ag:"Agent" };
+
+  function renderServicesCheckboxes(){
+    const grid = $("uServicesGrid");
+    grid.innerHTML = allServices().map(s => `
+      <label class="checkbox-row"><input type="checkbox" value="${s}"> ${s}</label>
+    `).join("");
+  }
+  renderServicesCheckboxes();
+  $("uRole").addEventListener("change", () => {
+    $("uServicesWrap").style.display = $("uRole").value === "manager" ? "" : "none";
+  });
+  $("uServicesWrap").style.display = "none";
+
+  function renderUsers(){
+    $("userCount").textContent = USERS.length;
+    $("usersBody").innerHTML = USERS.map(u => {
+      const svcHtml = (u.services && u.services.includes("*"))
+        ? `<span class="svc-tag">Tous services</span>`
+        : `<div class="svc-tags">${(u.services||[]).map(s => `<span class="svc-tag">${s}</span>`).join("") || '<span class="svc-tag">Aucun</span>'}</div>`;
+      return `
+      <tr data-id="${u.id}">
+        <td class="mono">${u.username || u.email}</td>
+        <td>${(u.nom || u.prenom) ? `${u.prenom} ${u.nom}` : "—"}</td>
+        <td><span class="chip ${u.role}">${ROLE_CHIP_LABEL[u.role] || u.role}</span></td>
+        <td>${svcHtml}</td>
+        <td><span class="chip ${u.active !== false ? 'active-yes' : 'active-no'}">${u.active !== false ? "Actif" : "Désactivé"}</span></td>
+        <td>
+          <button type="button" class="btn btn-ghost btn-sm act-edit-user" data-id="${u.id}"><svg class="icon"><use href="#i-settings"/></svg> Modifier</button>
+          <button type="button" class="btn btn-ghost btn-sm act-reset" data-id="${u.id}"><svg class="icon"><use href="#i-key"/></svg> Réinit. MdP</button>
+          <button type="button" class="btn btn-ghost btn-sm act-toggle" data-id="${u.id}">${u.active !== false ? "Désactiver" : "Activer"}</button>
+          <button type="button" class="btn btn-danger btn-sm act-delete" data-id="${u.id}"><svg class="icon"><use href="#i-trash"/></svg> Supprimer</button>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+  renderUsers();
+
+  let editingUserId = null;
+  function resetUserForm(){
+    editingUserId = null;
+    $("userForm").reset();
+    $("uId").value = "";
+    $("userFormTitle").textContent = "Créer un utilisateur";
+    $("userSubmitBtn").textContent = "Créer l'utilisateur";
+    $("userCancelBtn").style.display = "none";
+    $("uPassword").placeholder = "Cliquer sur « Générer » ou saisir un mot de passe";
+    $("uPassword").required = true;
+    $("uPassword").value = genPassword();
+    $("uServicesWrap").style.display = "none";
+    renderServicesCheckboxes();
+  }
+  resetUserForm();
+
+  $("uGenPassBtn").addEventListener("click", () => { $("uPassword").value = genPassword(); });
+
+  $("usersBody").addEventListener("click", (e) => {
+    const editBtn = e.target.closest(".act-edit-user");
+    const resetBtn = e.target.closest(".act-reset");
+    const toggleBtn = e.target.closest(".act-toggle");
+    const deleteBtn = e.target.closest(".act-delete");
+    if (editBtn){
+      const u = USERS.find(x => x.id === editBtn.dataset.id);
+      if (!u) return;
+      editingUserId = u.id;
+      $("uId").value = u.id;
+      $("uNom").value = u.nom || "";
+      $("uPrenom").value = u.prenom || "";
+      $("uEmail").value = u.email || "";
+      $("uRole").value = u.role || "rh";
+      $("uServicesWrap").style.display = u.role === "manager" ? "" : "none";
+      renderServicesCheckboxes();
+      if (u.role === "manager" && u.services){
+        $("uServicesGrid").querySelectorAll("input").forEach(cb => { cb.checked = u.services.includes(cb.value); });
+      }
+      $("uPassword").value = "";
+      $("uPassword").placeholder = "Laisser vide pour conserver le mot de passe actuel";
+      $("uPassword").required = false;
+      $("userFormTitle").textContent = `Modifier — ${u.username || u.email}`;
+      $("userSubmitBtn").textContent = "Enregistrer les modifications";
+      $("userCancelBtn").style.display = "";
+      window.scrollTo({ top: document.body.scrollHeight, behavior:"smooth" });
+    }
+    if (resetBtn){
+      const u = USERS.find(x => x.id === resetBtn.dataset.id);
+      if (!u) return;
+      const newPass = genPassword();
+      u.password = newPass;
+      saveUsers(USERS);
+      logAudit("Utilisateurs", "Modification", `Mot de passe réinitialisé pour ${u.username || u.email}`);
+      flashBanner($("userBanner"), `Nouveau mot de passe pour ${u.username || u.email} : ${newPass} (à communiquer à l'agent)`, "info", true);
+    }
+    if (toggleBtn){
+      const u = USERS.find(x => x.id === toggleBtn.dataset.id);
+      if (!u) return;
+      u.active = u.active === false ? true : false;
+      saveUsers(USERS);
+      logAudit("Utilisateurs", "Modification", `Compte ${u.username || u.email} ${u.active ? "réactivé" : "désactivé"}`);
+      renderUsers();
+      flashBanner($("userBanner"), `Compte ${u.username || u.email} ${u.active ? "réactivé" : "désactivé"}.`);
+    }
+    if (deleteBtn){
+      const u = USERS.find(x => x.id === deleteBtn.dataset.id);
+      if (!u) return;
+      if (session && (u.username === session.user || u.email === session.user)){
+        flashBanner($("userBanner"), "Impossible de supprimer le compte actuellement connecté.", "info");
+        return;
+      }
+      if (confirm(`Supprimer le compte ${u.username || u.email} ? Cette action est définitive.`)){
+        USERS = USERS.filter(x => x.id !== u.id);
+        saveUsers(USERS);
+        logAudit("Utilisateurs", "Suppression", `Compte supprimé : ${u.username || u.email}`);
+        if (editingUserId === u.id) resetUserForm();
+        renderUsers();
+        flashBanner($("userBanner"), `Compte ${u.username || u.email} supprimé.`);
+      }
+    }
+  });
+
+  $("userCancelBtn").addEventListener("click", resetUserForm);
+
+  $("userForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const nom = $("uNom").value.trim(), prenom = $("uPrenom").value.trim(), email = $("uEmail").value.trim();
+    const role = $("uRole").value;
+    const passwordInput = $("uPassword").value.trim();
+
+    if (editingUserId){
+      const u = USERS.find(x => x.id === editingUserId);
+      if (!u) return;
+      if (USERS.some(x => x.id !== u.id && (x.email||"").toLowerCase() === email.toLowerCase())){
+        flashBanner($("userBanner"), "Un autre compte existe déjà avec cet email.", "info");
+        return;
+      }
+      u.nom = nom; u.prenom = prenom; u.email = email; u.username = email; u.role = role;
+      u.services = role === "manager"
+        ? Array.from($("uServicesGrid").querySelectorAll("input:checked")).map(i => i.value)
+        : ["*"];
+      if (passwordInput) u.password = passwordInput;
+      saveUsers(USERS);
+      logAudit("Utilisateurs", "Modification", `Compte modifié : ${email} (rôle ${ROLE_CHIP_LABEL[role]})`);
+      renderUsers();
+      resetUserForm();
+      flashBanner($("userBanner"), `Compte ${email} mis à jour${passwordInput ? " — mot de passe changé : " + passwordInput : ""}.`, "info", !!passwordInput);
+      return;
+    }
+
+    if (USERS.some(u => (u.email||"").toLowerCase() === email.toLowerCase())){
+      flashBanner($("userBanner"), "Un compte existe déjà avec cet email.", "info");
+      return;
+    }
+    if (!passwordInput){
+      flashBanner($("userBanner"), "Indiquez un mot de passe ou cliquez sur « Générer ».", "info");
+      return;
+    }
+    const services = role === "manager"
+      ? Array.from($("uServicesGrid").querySelectorAll("input:checked")).map(i => i.value)
+      : ["*"];
+    const user = { id: genId("u"), nom, prenom, email, username: email, password: passwordInput, role, services, active: true };
+    USERS.push(user);
+    saveUsers(USERS);
+    logAudit("Utilisateurs", "Création", `Compte créé : ${email} (rôle ${ROLE_CHIP_LABEL[role]})`);
+    renderUsers();
+    renderAuditModuleOptions();
+    flashBanner($("userBanner"), `Compte créé pour ${email} — identifiant : ${email} — mot de passe : ${passwordInput}`, "info", true);
+    resetUserForm();
+  });
+
+  // ===================================================================
+  // B. RÉFÉRENTIELS
+  // ===================================================================
+  function renderRefEditor(){
+    const key = $("refSelect").value;
+    const host = $("refEditorHost");
+    if (key === "risqueFamillesDUERP"){
+      const items = REF[key];
+      host.innerHTML = `
+        <div class="list-editor" id="refListRows"></div>
+        <div class="add-row">
+          <input type="text" id="refNewLabel" placeholder="Nouvelle famille de risque…">
+          <input type="text" id="refNewDesc" class="list-desc" placeholder="Description…">
+          <button type="button" class="btn btn-primary btn-sm" id="refAddBtn">Ajouter</button>
+        </div>`;
+      const rows = $("refListRows");
+      rows.innerHTML = items.length ? items.map((item, i) => `
+        <div class="list-row" data-i="${i}">
+          <input type="text" class="ref-label" value="${(item[0]||"").replace(/"/g,'&quot;')}">
+          <input type="text" class="ref-desc list-desc" value="${(item[1]||"").replace(/"/g,'&quot;')}">
+          <button type="button" class="btn btn-ghost btn-sm ref-save" aria-label="Enregistrer"><svg class="icon"><use href="#i-shield-check"/></svg></button>
+          <button type="button" class="btn btn-danger btn-sm ref-del" aria-label="Supprimer"><svg class="icon"><use href="#i-trash"/></svg></button>
+        </div>`).join("") : `<div class="empty-hint">Ce référentiel est vide — ajoutez une première entrée ci-dessous.</div>`;
+      rows.addEventListener("click", (e) => {
+        const row = e.target.closest(".list-row"); if (!row) return;
+        const i = Number(row.dataset.i);
+        if (e.target.closest(".ref-save")){
+          const label = row.querySelector(".ref-label").value.trim();
+          const desc = row.querySelector(".ref-desc").value.trim();
+          if (!label) return;
+          REF[key][i] = [label, desc];
+          saveReferentials(REF);
+          logAudit("Référentiels", "Modification", `Référentiel « ${REF_LABELS[key]} » — entrée modifiée : ${label}`);
+          flashBanner($("refBanner"), "Modification enregistrée.");
+        }
+        if (e.target.closest(".ref-del")){
+          if (!confirm("Supprimer cette entrée du référentiel ?")) return;
+          const removed = REF[key][i];
+          REF[key].splice(i,1);
+          saveReferentials(REF);
+          logAudit("Référentiels", "Suppression", `Référentiel « ${REF_LABELS[key]} » — entrée supprimée : ${removed[0]}`);
+          renderRefEditor();
+          flashBanner($("refBanner"), "Entrée supprimée.");
+        }
+      });
+      $("refAddBtn").addEventListener("click", () => {
+        const label = $("refNewLabel").value.trim(), desc = $("refNewDesc").value.trim();
+        if (!label) return;
+        if (items.some(it => it[0].toLowerCase() === label.toLowerCase())){
+          flashBanner($("refBanner"), "Cette entrée existe déjà.", "info"); return;
+        }
+        REF[key].push([label, desc]);
+        saveReferentials(REF);
+        logAudit("Référentiels", "Création", `Référentiel « ${REF_LABELS[key]} » — nouvelle entrée : ${label}`);
+        renderRefEditor();
+        flashBanner($("refBanner"), "Entrée ajoutée.");
+      });
+      return;
+    }
+
+    const list = REF[key];
+    host.innerHTML = `
+      <div class="list-editor" id="refListRows"></div>
+      <div class="add-row">
+        <input type="text" id="refNewLabel" placeholder="Nouvelle valeur…">
+        <button type="button" class="btn btn-primary btn-sm" id="refAddBtn">Ajouter</button>
+      </div>`;
+    const rows = $("refListRows");
+    rows.innerHTML = list.length ? list.map((val, i) => `
+      <div class="list-row" data-i="${i}">
+        <input type="text" class="ref-label" value="${String(val).replace(/"/g,'&quot;')}">
+        <button type="button" class="btn btn-ghost btn-sm ref-save" aria-label="Enregistrer"><svg class="icon"><use href="#i-shield-check"/></svg></button>
+        <button type="button" class="btn btn-danger btn-sm ref-del" aria-label="Supprimer"><svg class="icon"><use href="#i-trash"/></svg></button>
+      </div>`).join("") : `<div class="empty-hint">Ce référentiel est vide — ajoutez une première entrée ci-dessous.</div>`;
+    rows.addEventListener("click", (e) => {
+      const row = e.target.closest(".list-row"); if (!row) return;
+      const i = Number(row.dataset.i);
+      if (e.target.closest(".ref-save")){
+        const val = row.querySelector(".ref-label").value.trim();
+        if (!val) return;
+        REF[key][i] = val;
+        saveReferentials(REF);
+        logAudit("Référentiels", "Modification", `Référentiel « ${REF_LABELS[key]} » — entrée modifiée : ${val}`);
+        flashBanner($("refBanner"), "Modification enregistrée.");
+        if (key === "servicesVille" || key === "servicesAgglo"){ renderServicesCheckboxes(); }
+      }
+      if (e.target.closest(".ref-del")){
+        if (!confirm("Supprimer cette entrée du référentiel ?")) return;
+        const removed = REF[key][i];
+        REF[key].splice(i,1);
+        saveReferentials(REF);
+        logAudit("Référentiels", "Suppression", `Référentiel « ${REF_LABELS[key]} » — entrée supprimée : ${removed}`);
+        renderRefEditor();
+        flashBanner($("refBanner"), "Entrée supprimée.");
+        if (key === "servicesVille" || key === "servicesAgglo"){ renderServicesCheckboxes(); }
+      }
+    });
+    $("refAddBtn").addEventListener("click", () => {
+      const val = $("refNewLabel").value.trim();
+      if (!val) return;
+      if (list.some(v => String(v).toLowerCase() === val.toLowerCase())){
+        flashBanner($("refBanner"), "Cette valeur existe déjà.", "info"); return;
+      }
+      REF[key].push(val);
+      saveReferentials(REF);
+      logAudit("Référentiels", "Création", `Référentiel « ${REF_LABELS[key]} » — nouvelle entrée : ${val}`);
+      renderRefEditor();
+      flashBanner($("refBanner"), "Entrée ajoutée.");
+      if (key === "servicesVille" || key === "servicesAgglo"){ renderServicesCheckboxes(); }
+    });
+  }
+  $("refSelect").addEventListener("change", renderRefEditor);
+  renderRefEditor();
+
+  // ===================================================================
+  // C. FLASH INFO
+  // ===================================================================
+  const NEWS_KEY = "vigie_hse_news";
+  function defaultNews(){
+    return [
+      { id:"n-1", titre:"Vigilance canicule — rappel EPI", texte:"Avec les fortes chaleurs annoncées, pensez à vous hydrater régulièrement et à porter les EPI adaptés (casquette, protection solaire) pour les équipes en extérieur : espaces verts, voirie, déchetterie.", date: new Date().toISOString().slice(0,10), image:"", auteur:"Administrateur" },
+      { id:"n-2", titre:"Port des chaussures de sécurité obligatoire", texte:"Rappel : le port des chaussures de sécurité est obligatoire sur l'ensemble des interventions de voirie, espaces verts et déchetterie.", date:"2026-08-20", image:"", auteur:"Administrateur" },
+      { id:"n-3", titre:"Exercice incendie — Hôtel de Ville", texte:"Un exercice d'évacuation incendie aura lieu prochainement à l'Hôtel de Ville. Merci de vous familiariser avec les issues de secours de votre bâtiment.", date:"2026-07-02", image:"", auteur:"Administrateur" },
+    ];
+  }
+  function loadNews(){
+    let stored = null;
+    try { const raw = localStorage.getItem(NEWS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    if (stored === null){ stored = defaultNews(); saveNews(stored); }
+    return stored;
+  }
+  function saveNews(n){ try { localStorage.setItem(NEWS_KEY, JSON.stringify(n)); } catch(e){} }
+  let NEWS = loadNews();
+  function fmtDateFr(iso){ if (!iso) return ""; const [y,m,d] = String(iso).split("-"); return (y && m && d) ? `${d}/${m}/${y}` : String(iso); }
+
+  function renderNewsAdmin(){
+    const grid = $("newsAdminGrid");
+    const sorted = NEWS.slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
+    grid.innerHTML = sorted.length === 0
+      ? `<div class="empty-hint">Aucune actualité publiée.</div>`
+      : sorted.map(n => `
+        <div class="news-admin-card" data-id="${n.id}">
+          ${n.image ? `<img src="${n.image}" alt="">` : ``}
+          <div class="news-admin-title">${n.titre}</div>
+          <div class="news-admin-text">${n.texte}</div>
+          <div class="news-admin-foot">
+            <span class="news-admin-date">${fmtDateFr(n.date)}</span>
+            <div class="news-admin-actions">
+              <button type="button" class="act-edit-btn" data-id="${n.id}">Modifier</button>
+              <button type="button" class="act-del-btn" data-id="${n.id}">Supprimer</button>
+            </div>
+          </div>
+        </div>`).join("");
+  }
+  renderNewsAdmin();
+  $("nDate").value = new Date().toISOString().slice(0,10);
+
+  let editingNewsId = null;
+  $("newsAdminGrid").addEventListener("click", (e) => {
+    const editBtn = e.target.closest(".act-edit-btn");
+    const delBtn = e.target.closest(".act-del-btn");
+    if (editBtn){
+      const n = NEWS.find(x => x.id === editBtn.dataset.id);
+      if (!n) return;
+      editingNewsId = n.id;
+      $("nId").value = n.id;
+      $("nTitre").value = n.titre;
+      $("nTexte").value = n.texte;
+      $("nDate").value = n.date;
+      $("newsFormTitle").textContent = "Modifier l'actualité";
+      $("newsSubmitBtn").textContent = "Enregistrer les modifications";
+      $("newsCancelBtn").style.display = "";
+      window.scrollTo({ top: document.body.scrollHeight, behavior:"smooth" });
+    }
+    if (delBtn){
+      const n = NEWS.find(x => x.id === delBtn.dataset.id);
+      if (!n) return;
+      if (confirm(`Supprimer l'actualité « ${n.titre} » ?`)){
+        NEWS = NEWS.filter(x => x.id !== n.id);
+        saveNews(NEWS);
+        logAudit("Flash Info", "Suppression", `Actualité supprimée : ${n.titre}`);
+        renderNewsAdmin();
+        flashBanner($("newsBanner"), "Actualité supprimée.");
+      }
+    }
+  });
+  $("newsCancelBtn").addEventListener("click", () => {
+    editingNewsId = null;
+    $("newsForm").reset();
+    $("nId").value = "";
+    $("nDate").value = new Date().toISOString().slice(0,10);
+    $("newsFormTitle").textContent = "Publier une actualité";
+    $("newsSubmitBtn").textContent = "Publier";
+    $("newsCancelBtn").style.display = "none";
+  });
+
+  function readImageFile(file){
+    return new Promise((resolve) => {
+      if (!file){ resolve(""); return; }
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => resolve("");
+      reader.readAsDataURL(file);
+    });
+  }
+
+  $("newsForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const titre = $("nTitre").value.trim();
+    const texte = $("nTexte").value.trim();
+    const date = $("nDate").value;
+    const file = $("nImage").files[0];
+    const imageDataUrl = file ? await readImageFile(file) : "";
+
+    if (editingNewsId){
+      const n = NEWS.find(x => x.id === editingNewsId);
+      if (n){
+        n.titre = titre; n.texte = texte; n.date = date;
+        if (imageDataUrl) n.image = imageDataUrl;
+        saveNews(NEWS);
+        logAudit("Flash Info", "Modification", `Actualité modifiée : ${titre}`);
+        flashBanner($("newsBanner"), "Actualité mise à jour.");
+      }
+      editingNewsId = null;
+      $("nId").value = "";
+      $("newsFormTitle").textContent = "Publier une actualité";
+      $("newsSubmitBtn").textContent = "Publier";
+      $("newsCancelBtn").style.display = "none";
+    } else {
+      const item = { id: genId("n"), titre, texte, date, image: imageDataUrl, auteur: session.user || "Administrateur" };
+      NEWS.push(item);
+      saveNews(NEWS);
+      logAudit("Flash Info", "Création", `Actualité publiée : ${titre}`);
+      flashBanner($("newsBanner"), "Actualité publiée sur le Cockpit.");
+    }
+    renderNewsAdmin();
+    e.target.reset();
+    $("nDate").value = new Date().toISOString().slice(0,10);
+  });
+
+  // ===================================================================
+  // D. JOURNAL DES MODIFICATIONS
+  // ===================================================================
+  function fmtDateTimeFr(iso){
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (isNaN(d)) return String(iso);
+    return d.toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+  function renderAuditModuleOptions(){
+    const log = loadAudit();
+    const modules = [...new Set(log.map(l => l.module).filter(Boolean))].sort((a,b) => a.localeCompare(b,'fr'));
+    const current = $("auditModule").value;
+    $("auditModule").innerHTML = `<option value="all">Tous les modules</option>` + modules.map(m => `<option value="${m}">${m}</option>`).join("");
+    if (modules.includes(current)) $("auditModule").value = current;
+  }
+  function renderAudit(){
+    const log = loadAudit().slice().sort((a,b) => (b.timestamp||"").localeCompare(a.timestamp||""));
+    const mod = $("auditModule").value, typ = $("auditType").value;
+    const rows = log.filter(l => (mod === "all" || l.module === mod) && (typ === "all" || l.type === typ));
+    $("auditCount").textContent = rows.length;
+    $("auditBody").innerHTML = rows.length === 0
+      ? `<tr><td colspan="5" style="text-align:center;color:var(--text-faint);padding:24px;">Aucune entrée ne correspond aux filtres sélectionnés.</td></tr>`
+      : rows.map(l => `
+        <tr>
+          <td class="mono">${fmtDateTimeFr(l.timestamp)}</td>
+          <td>${l.utilisateur || "—"}</td>
+          <td>${l.module || "—"}</td>
+          <td><span class="chip ${l.type === 'Création' ? 'active-yes' : l.type === 'Suppression' ? 'active-no' : 'manager'}">${l.type || "—"}</span></td>
+          <td class="wrap">${l.description || ""}</td>
+        </tr>`).join("");
+  }
+  renderAuditModuleOptions();
+  renderAudit();
+  $("auditModule").addEventListener("change", renderAudit);
+  $("auditType").addEventListener("change", renderAudit);
+</script>

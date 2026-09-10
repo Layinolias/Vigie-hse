@@ -1,0 +1,677 @@
+<title>Gestion des produits chimiques</title>
+<meta name="description" content="Inventaire des produits chimiques par service, pictogrammes de danger CLP, et suivi des Fiches de Données de Sécurité (FDS).">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B; --critical-rgb:201,94,107;
+    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px; --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item .icon{ width:17px; height:17px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .role-chip.ag{ background:rgba(var(--accent-blue-rgb),.16); color:var(--accent-blue); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+  .hero{ margin-bottom:22px; } .hero h1{ font-size:25px; } .hero p{ margin:6px 0 0; color:var(--text-muted); font-size:13px; max-width:76ch; line-height:1.55; }
+
+  /* ===== Compact sticky page summary (icon + titre + description + KPI sur une ligne) ===== */
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .page-summary-kpis{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ps-kpi{ display:flex; align-items:center; gap:7px; padding:5px 11px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); }
+  .ps-kpi-icon{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ps-kpi-icon .icon{ width:12px; height:12px; }
+  .ps-kpi-icon.blue{ background:rgba(var(--accent-rgb),.14); color:var(--accent); }
+  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
+  .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+  .ps-kpi-icon.critical{ background:rgba(var(--critical-rgb),.14); color:var(--critical); }
+  .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } .ps-kpi-label{ display:none; } }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn .icon{ width:15px; height:15px; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+
+  .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:18px; }
+  @media (max-width:1180px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .kpi-row{ grid-template-columns:1fr; } }
+  .kpi{ padding:16px 18px; display:flex; flex-direction:column; gap:8px; }
+  .kpi-top{ display:flex; align-items:center; justify-content:space-between; }
+  .kpi-icon{ width:30px; height:30px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; }
+  .kpi-icon.blue{ background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+  .kpi-label{ font-size:11.5px; color:var(--text-muted); font-weight:500; }
+  .kpi-value{ font-size:26px; font-weight:600; letter-spacing:-.01em; }
+  .kpi-sub{ font-size:11.5px; color:var(--text-faint); } .kpi-sub b{ color:var(--text); font-weight:600; }
+
+  .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
+  select, input[type="text"], input[type="date"], input[type="number"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:170px; cursor:pointer;
+  }
+  select:hover, input:hover, textarea:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:64px; width:100%; font-weight:400; line-height:1.5; }
+  .result-count{ align-self:center; margin-left:auto; font-size:12px; color:var(--text-faint); }
+  .result-count b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-title{ font-size:16.5px; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+
+  .form-panel{ padding:20px 22px 22px; margin-bottom:18px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px 16px; }
+  .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; }
+  @media (max-width:680px){ .form-grid .span2, .form-grid .span3{ grid-column:span 1; } }
+  .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+  .pictos-check{ display:flex; flex-wrap:wrap; gap:8px; }
+  .pictos-check label{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:var(--r-sm); border:1px solid var(--border); font-size:11.5px; font-weight:500; color:var(--text-muted); cursor:pointer; margin:0; }
+  .pictos-check input{ width:14px; height:14px; accent-color:var(--accent); cursor:pointer; }
+  .pictos-check input:checked + span{ color:var(--text); font-weight:600; }
+
+  .table-panel{ overflow:auto; max-height:70vh; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:1180px; }
+  table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr{ border-left:3px solid transparent; transition:background .12s ease; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg tbody tr.fds-old{ border-left-color:var(--warning); }
+  table.reg tbody td.wrap{ white-space:normal; min-width:170px; }
+  table.reg tbody td.pictos{ white-space:normal; min-width:160px; }
+  table.reg thead th#thActions{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
+  table.reg tbody td.actions-float{ position:sticky; right:0; z-index:1; background:var(--surface-el); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); white-space:nowrap; }
+  table.reg tbody tr:hover td.actions-float{ background:var(--bg-2); }
+
+  .ghs-badge{ display:inline-flex; align-items:center; padding:2px 8px; border-radius:var(--r-sm); font-size:10px; font-weight:700; font-family:"IBM Plex Mono",monospace; margin:0 4px 4px 0; border:1px solid; white-space:nowrap; }
+  .ghs-badge.ghs-warn{ color:var(--warning); border-color:rgba(var(--warning-rgb),.4); background:var(--warning-bg); }
+  .ghs-badge.ghs-danger{ color:var(--danger); border-color:rgba(var(--danger-rgb),.4); background:var(--danger-bg); }
+  .fds-flag{ color:var(--warning); font-weight:600; }
+  .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
+  .act-del:hover{ text-decoration:underline; }
+  .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="index.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="index.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre Santé &amp; Sécurité</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item active" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+      </div>
+      <div class="nav-section" id="navRh">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item" href="saisie-rh.html"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" href="saisie-duerp.html"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section" id="navAdmin" style="display:none;">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item" href="administration.html"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Sécurité &amp; Risques / <b>Produits chimiques</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-flask"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Gestion des produits chimiques</h1>
+            <p>Inventaire des produits chimiques par service, avec pictogrammes de danger CLP et suivi des FDS — complète le risque « Produits chimiques » déjà présent dans la taxonomie du Document Unique.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-flask"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Produits référencés</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiCmr">–</span><span class="ps-kpi-label">CMR / dangereux</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-activity"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiFdsOld">–</span><span class="ps-kpi-label">FDS à mettre à jour</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiServices">–</span><span class="ps-kpi-label">Services concernés</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="panel console">
+        <div class="field"><span class="flabel">Collectivité</span>
+          <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+        </div>
+        <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
+        <div class="field"><span class="flabel">Pictogramme</span><select id="fPicto"></select></div>
+        <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
+        <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> produits</span>
+      </div>
+
+      <div class="panel form-panel" id="formPanel" style="display:none;">
+        <div class="panel-head"><h3 class="panel-title" id="formTitle">Nouveau produit</h3></div>
+        <form id="prodForm">
+          <input type="hidden" id="fId">
+          <div class="form-grid">
+            <div class="span2"><label for="fNom">Nom du produit</label><input type="text" id="fNom" required></div>
+            <div><label for="fFournisseur">Fournisseur</label><input type="text" id="fFournisseur"></div>
+            <div><label for="fCollectiviteForm">Collectivité</label>
+              <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+            </div>
+            <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
+            <div><label for="fQuantite">Quantité stockée</label><input type="number" id="fQuantite" min="0" step="0.1"></div>
+            <div><label for="fUnite">Unité</label><input type="text" id="fUnite" placeholder="ex. L, kg, bidons"></div>
+            <div><label for="fDateMajFDS">Dernière mise à jour FDS</label><input type="date" id="fDateMajFDS"></div>
+            <div class="span2"><label for="fLienFDS">Lien / référence FDS</label><input type="text" id="fLienFDS" placeholder="URL ou référence du classeur FDS"></div>
+            <div class="span3">
+              <label>Pictogrammes de danger (CLP)</label>
+              <div class="pictos-check" id="pictosCheck"></div>
+            </div>
+            <div class="span3"><label for="fMesures">Mesures de prévention</label><textarea id="fMesures" placeholder="EPI, ventilation, stockage, incompatibilités…"></textarea></div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="button" class="btn btn-ghost" id="btnCancelForm">Annuler</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Inventaire</h3>
+          <div class="panel-actions" id="panelActionsBtns"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg">
+            <thead>
+              <tr>
+                <th>Produit</th><th>Fournisseur</th><th>Service</th><th>Quantité</th><th>Pictogrammes</th><th>Dernière MAJ FDS</th>
+                <th id="thActions"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Seuil illustratif « FDS à mettre à jour » : dernière mise à jour de plus de 3 ans. À adapter selon la politique de renouvellement documentaire de la collectivité.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const role = (session && session.role) || "ag";
+  const canEdit = role === "rh" || role === "admin";
+  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const myServices = (session && session.services) || ["*"];
+  const isScoped = !myServices.includes("*");
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("roleChip").textContent = role.toUpperCase();
+  if (!canEdit){ $("roleChip").classList.add("ag"); $("navRh").style.display = "none"; }
+  if (role === "admin"){ $("navAdmin").style.display = ""; }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(module, type, description){
+    try {
+      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
+      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
+  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth()) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+
+  // ---------- Référentiels partagés (services) ----------
+  const REF_KEY = "vigie_hse_referentials";
+  const REF_DEFAULTS = {
+    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
+    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+  };
+  function loadReferentials(){
+    let stored = {};
+    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    const merged = Object.assign({}, stored);
+    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
+    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  const REF = loadReferentials();
+  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+
+  // ---------- Pictogrammes CLP ----------
+  const PICTOGRAMMES = [
+    { code:"GHS01", label:"Explosif" },
+    { code:"GHS02", label:"Inflammable" },
+    { code:"GHS03", label:"Comburant" },
+    { code:"GHS04", label:"Gaz sous pression" },
+    { code:"GHS05", label:"Corrosif" },
+    { code:"GHS06", label:"Toxique" },
+    { code:"GHS07", label:"Nocif / Irritant" },
+    { code:"GHS08", label:"Danger santé (CMR)" },
+    { code:"GHS09", label:"Danger environnement" },
+  ];
+  const DANGEROUS_CODES = ["GHS06", "GHS08"];
+  function badgeCls(code){ return DANGEROUS_CODES.includes(code) ? "ghs-danger" : "ghs-warn"; }
+
+  // ---------- Génération de l'inventaire illustratif ----------
+  function hashStr(s){ let h = 0; for (let i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) | 0; } return Math.abs(h); }
+  const SEED_PRODUCTS_RAW = [
+    { nom:"Détergent désinfectant surfaces", fournisseur:"Diversey", service:"Cuisine Centrale", collectivite:"Ville", quantite:25, unite:"L", pictos:["GHS05","GHS07"] },
+    { nom:"Détartrant lave-vaisselle industriel", fournisseur:"Diversey", service:"Cuisine Centrale", collectivite:"Ville", quantite:10, unite:"L", pictos:["GHS05"] },
+    { nom:"Désherbant à base de glyphosate", fournisseur:"Phyteurop", service:"Espace Vert", collectivite:"Ville", quantite:15, unite:"L", pictos:["GHS06","GHS09"] },
+    { nom:"Insecticide horticole", fournisseur:"Bayer Agri", service:"Espace Vert", collectivite:"Ville", quantite:8, unite:"L", pictos:["GHS06","GHS09"] },
+    { nom:"Peinture marquage routier", fournisseur:"Signaux Girod", service:"Voirie", collectivite:"Ville", quantite:60, unite:"L", pictos:["GHS02","GHS08"] },
+    { nom:"Dégraissant industriel", fournisseur:"Würth", service:"Voirie", collectivite:"Ville", quantite:20, unite:"L", pictos:["GHS02","GHS07"] },
+    { nom:"Peinture glycéro", fournisseur:"Seigneurie", service:"Batiment", collectivite:"Ville", quantite:40, unite:"L", pictos:["GHS02","GHS08"] },
+    { nom:"Solvant de nettoyage", fournisseur:"Würth", service:"Batiment", collectivite:"Ville", quantite:12, unite:"L", pictos:["GHS02","GHS07"] },
+    { nom:"Huile moteur", fournisseur:"Total Energies", service:"Mécanique", collectivite:"Ville", quantite:100, unite:"L", pictos:["GHS09"] },
+    { nom:"Liquide de refroidissement / antigel", fournisseur:"Total Energies", service:"Mécanique", collectivite:"Ville", quantite:30, unite:"L", pictos:["GHS07","GHS09"] },
+    { nom:"Carburant diesel (cuve engins)", fournisseur:"Avia", service:"Propreté Déchet", collectivite:"Agglomération", quantite:800, unite:"L", pictos:["GHS02","GHS08"] },
+    { nom:"Huiles usagées collectées", fournisseur:"—", service:"Propreté Déchet", collectivite:"Agglomération", quantite:150, unite:"L", pictos:["GHS08","GHS09"] },
+  ];
+  function buildProductSeeds(){
+    return SEED_PRODUCTS_RAW.map(p => {
+      const h = hashStr(p.nom + "|" + p.service);
+      const yearsAgo = 1 + (h % 4);
+      const d = new Date();
+      d.setFullYear(d.getFullYear() - yearsAgo);
+      d.setMonth(h % 12);
+      return {
+        id: "pc-" + h.toString(36),
+        nom: p.nom,
+        fournisseur: p.fournisseur,
+        service: p.service,
+        collectivite: p.collectivite,
+        quantiteStockee: p.quantite,
+        unite: p.unite,
+        pictogrammes: p.pictos,
+        dateMajFDS: d.toISOString().slice(0,10),
+        lienFDS: "",
+        mesuresPrevention: p.pictos.includes("GHS06") || p.pictos.includes("GHS08")
+          ? "EPI complets (gants, lunettes, protection respiratoire si besoin), stockage ventilé, fiche de données de sécurité à disposition."
+          : "EPI adaptés, respect des consignes de stockage et d'incompatibilité produit.",
+      };
+    });
+  }
+
+  // ---------- Dataset (always-merge) ----------
+  const STORAGE_KEY = "vigie_hse_produits_chimiques";
+  function genId(){ return "prod-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
+  function loadDataset(){
+    let stored = [];
+    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    const seedList = buildProductSeeds();
+    const storedById = new Map(stored.map(r => [r.id, r]));
+    const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
+    const seedIds = new Set(seeded.map(r => r.id));
+    const userExtra = stored.filter(r => !seedIds.has(r.id));
+    const merged = seeded.concat(userExtra);
+    saveDataset(merged);
+    return merged;
+  }
+  let DATASET = loadDataset();
+  if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
+
+  function isFdsOld(p){
+    if (!p.dateMajFDS) return false;
+    const threshold = new Date(); threshold.setFullYear(threshold.getFullYear() - 3);
+    return new Date(p.dateMajFDS) < threshold;
+  }
+  function isDangereux(p){ return (p.pictogrammes || []).some(c => DANGEROUS_CODES.includes(c)); }
+
+  // ---------- Filtres ----------
+  const fCollectivite = $("fCollectivite"), fService = $("fService"), fPicto = $("fPicto");
+  function fillServiceOptions(){
+    const col = fCollectivite.value;
+    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const current = fService.value;
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.value = list.includes(current) ? current : "all";
+  }
+  fillServiceOptions();
+  fPicto.innerHTML = `<option value="all">Tous</option>` + PICTOGRAMMES.map(p => `<option value="${p.code}">${p.code} — ${p.label}</option>`).join("");
+
+  function render(){
+    const col = fCollectivite.value, svc = fService.value, pic = fPicto.value;
+    let rows = DATASET.filter(p =>
+      (col === "all" || p.collectivite === col) &&
+      (svc === "all" || p.service === svc) &&
+      (pic === "all" || (p.pictogrammes || []).includes(pic))
+    );
+    rows = rows.slice().sort((a,b) => a.nom.localeCompare(b.nom, 'fr'));
+
+    $("kpiTotal").textContent = DATASET.length;
+    $("kpiCmr").textContent = DATASET.filter(isDangereux).length;
+    $("kpiFdsOld").textContent = DATASET.filter(isFdsOld).length;
+    $("kpiServices").textContent = new Set(DATASET.map(p => p.service)).size;
+    $("resultCount").textContent = rows.length;
+    $("totalCount").textContent = DATASET.length;
+
+    const tbody = $("tbody");
+    const colspan = canEdit ? 7 : 6;
+    if (rows.length === 0){
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">${DATASET.length === 0 ? "Aucun produit référencé pour le moment." : "Aucun produit ne correspond aux filtres sélectionnés."}</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(p => `
+      <tr class="${isFdsOld(p) ? 'fds-old' : ''}" data-id="${p.id}">
+        <td class="wrap">${p.nom}</td>
+        <td>${p.fournisseur || '—'}</td>
+        <td>${p.service}</td>
+        <td>${p.quantiteStockee != null ? p.quantiteStockee + ' ' + (p.unite || '') : '—'}</td>
+        <td class="pictos">${(p.pictogrammes || []).map(c => `<span class="ghs-badge ${badgeCls(c)}">${c}</span>`).join("") || '<span style="color:var(--text-faint)">—</span>'}</td>
+        <td class="${isFdsOld(p) ? 'fds-flag' : ''}">${p.dateMajFDS || '—'}${isFdsOld(p) ? ' ⚠' : ''}</td>
+        ${canEdit ? `<td class="actions-float">
+          <button type="button" class="act-edit" data-edit="${p.id}">Modifier</button>
+          <button type="button" class="act-del" data-id="${p.id}">Suppr.</button>
+        </td>` : ''}
+      </tr>`).join("");
+  }
+
+  fCollectivite.addEventListener("change", () => { fillServiceOptions(); render(); });
+  fService.addEventListener("change", render);
+  fPicto.addEventListener("change", render);
+  $("btnReset").addEventListener("click", () => {
+    fCollectivite.value = "all"; fillServiceOptions(); fPicto.value = "all"; render();
+  });
+
+  if (canEdit){
+    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouveau produit</button>`;
+
+    const formPanel = $("formPanel"), form = $("prodForm");
+    $("pictosCheck").innerHTML = PICTOGRAMMES.map(p => `
+      <label><input type="checkbox" class="picto-cb" value="${p.code}"><span>${p.code} — ${p.label}</span></label>
+    `).join("");
+    function fillFormServiceOptions(col){
+      const list = servicesForCollectivite(col);
+      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+    }
+    fillFormServiceOptions("Ville");
+    $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
+
+    function openForm(rec){
+      form.reset();
+      document.querySelectorAll(".picto-cb").forEach(cb => cb.checked = false);
+      if (rec){
+        $("formTitle").textContent = "Modifier le produit";
+        $("fId").value = rec.id;
+        $("fNom").value = rec.nom;
+        $("fFournisseur").value = rec.fournisseur || "";
+        $("fCollectiviteForm").value = rec.collectivite;
+        fillFormServiceOptions(rec.collectivite);
+        $("fServiceForm").value = rec.service;
+        $("fQuantite").value = rec.quantiteStockee != null ? rec.quantiteStockee : "";
+        $("fUnite").value = rec.unite || "";
+        $("fDateMajFDS").value = rec.dateMajFDS || "";
+        $("fLienFDS").value = rec.lienFDS || "";
+        $("fMesures").value = rec.mesuresPrevention || "";
+        (rec.pictogrammes || []).forEach(code => {
+          const cb = document.querySelector(`.picto-cb[value="${code}"]`);
+          if (cb) cb.checked = true;
+        });
+      } else {
+        $("formTitle").textContent = "Nouveau produit";
+        $("fId").value = "";
+        fillFormServiceOptions("Ville");
+        $("fDateMajFDS").value = new Date().toISOString().slice(0,10);
+      }
+      formPanel.style.display = "";
+      formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+    $("btnNew").addEventListener("click", () => openForm(null));
+    $("btnCancelForm").addEventListener("click", () => { formPanel.style.display = "none"; form.reset(); });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = $("fId").value;
+      const isNew = !id;
+      const pictogrammes = Array.from(document.querySelectorAll(".picto-cb:checked")).map(cb => cb.value);
+      const rec = {
+        id: id || genId(),
+        nom: $("fNom").value.trim(),
+        fournisseur: $("fFournisseur").value.trim(),
+        service: $("fServiceForm").value,
+        collectivite: $("fCollectiviteForm").value,
+        quantiteStockee: $("fQuantite").value ? Number($("fQuantite").value) : null,
+        unite: $("fUnite").value.trim(),
+        pictogrammes,
+        dateMajFDS: $("fDateMajFDS").value,
+        lienFDS: $("fLienFDS").value.trim(),
+        mesuresPrevention: $("fMesures").value.trim(),
+      };
+      const idx = DATASET.findIndex(d => d.id === rec.id);
+      if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);
+      saveDataset(DATASET);
+      logAudit("Produits Chimiques", isNew ? "Création" : "Modification", `${rec.nom} — ${rec.service}`);
+      formPanel.style.display = "none";
+      form.reset();
+      render();
+    });
+
+    $("tbody").addEventListener("click", (e) => {
+      const editBtn = e.target.closest(".act-edit");
+      if (editBtn){ const rec = DATASET.find(d => d.id === editBtn.dataset.edit); if (rec) openForm(rec); return; }
+      const delBtn = e.target.closest(".act-del");
+      if (delBtn){
+        const rec = DATASET.find(d => d.id === delBtn.dataset.id);
+        if (!rec) return;
+        if (confirm(`Supprimer « ${rec.nom} » (${rec.service}) ?`)){
+          DATASET = DATASET.filter(d => d.id !== rec.id);
+          saveDataset(DATASET);
+          logAudit("Produits Chimiques", "Suppression", `${rec.nom} — ${rec.service}`);
+          render();
+        }
+      }
+    });
+  }
+
+  render();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

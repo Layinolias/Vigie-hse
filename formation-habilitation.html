@@ -1,0 +1,686 @@
+<title>Formation / Habilitation</title>
+<meta name="description" content="Suivi des habilitations et certifications obligatoires des agents (CACES, habilitation électrique, SST, permis…).">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B; --critical-rgb:201,94,107;
+    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px; --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item .icon{ width:17px; height:17px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .role-chip.ag{ background:rgba(var(--accent-blue-rgb),.16); color:var(--accent-blue); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+  .hero{ margin-bottom:22px; } .hero h1{ font-size:25px; } .hero p{ margin:6px 0 0; color:var(--text-muted); font-size:13px; max-width:76ch; line-height:1.55; }
+
+  /* ===== Compact sticky page summary (icon + titre + description + KPI sur une ligne) ===== */
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .page-summary-kpis{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ps-kpi{ display:flex; align-items:center; gap:7px; padding:5px 11px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); }
+  .ps-kpi-icon{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ps-kpi-icon .icon{ width:12px; height:12px; }
+  .ps-kpi-icon.blue{ background:rgba(var(--accent-rgb),.14); color:var(--accent); }
+  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
+  .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+  .ps-kpi-icon.critical{ background:rgba(var(--critical-rgb),.14); color:var(--critical); }
+  .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .ps-kpi-value .unit{ font-size:10px; color:var(--text-muted); font-weight:500; margin-left:1px; }
+  .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } .ps-kpi-label{ display:none; } }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn .icon{ width:15px; height:15px; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+
+  .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+  @media (max-width:1180px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .kpi-row{ grid-template-columns:1fr; } }
+  .kpi{ padding:14px 16px; display:flex; flex-direction:column; gap:7px; }
+  .kpi-top{ display:flex; align-items:center; justify-content:space-between; }
+  .kpi-icon{ width:28px; height:28px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; }
+  .kpi-icon .icon{ width:15px; height:15px; }
+  .kpi-icon.blue{ background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+  .kpi-icon.critical{ background:rgba(var(--critical-rgb),.12); color:var(--critical); }
+  .kpi-label{ font-size:11px; color:var(--text-muted); font-weight:500; }
+  .kpi-value{ font-size:23px; font-weight:600; letter-spacing:-.01em; }
+
+  .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
+  select, input[type="text"], input[type="date"], input[type="number"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:170px; cursor:pointer;
+  }
+  select:hover, input:hover, textarea:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:64px; width:100%; font-weight:400; line-height:1.5; }
+  .result-count{ align-self:center; margin-left:auto; font-size:12px; color:var(--text-faint); }
+  .result-count b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-title{ font-size:16.5px; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+
+  .form-panel{ padding:20px 22px 22px; margin-bottom:18px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px 16px; }
+  .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; }
+  @media (max-width:680px){ .form-grid .span2, .form-grid .span3{ grid-column:span 1; } }
+  .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+
+  .table-panel{ overflow:auto; max-height:70vh; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:1180px; }
+  table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr{ border-left:3px solid transparent; transition:background .12s ease; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg tbody tr.late{ border-left-color:var(--danger); background:rgba(var(--danger-rgb),.04); }
+  table.reg tbody td.wrap{ white-space:normal; min-width:180px; }
+  table.reg thead th#thActions{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
+  table.reg tbody td.actions-float{ position:sticky; right:0; z-index:1; background:var(--surface-el); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); white-space:nowrap; }
+  table.reg tbody tr:hover td.actions-float{ background:var(--bg-2); }
+
+  .status-chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .status-chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .status-chip.ok{ color:var(--success); background:var(--success-bg); } .status-chip.ok::before{ background:var(--success); }
+  .status-chip.soon{ color:var(--warning); background:var(--warning-bg); } .status-chip.soon::before{ background:var(--warning); }
+  .status-chip.late{ color:var(--danger); background:var(--danger-bg); } .status-chip.late::before{ background:var(--danger); }
+  .echeance-overdue{ color:var(--danger); font-weight:600; }
+  .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
+  .act-del:hover{ text-decoration:underline; }
+  .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="index.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="index.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre Santé &amp; Sécurité</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item active" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+      </div>
+      <div class="nav-section" id="navRh">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item" href="saisie-rh.html"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" href="saisie-duerp.html"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section" id="navAdmin" style="display:none;">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item" href="administration.html"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Suivi / <b>Formation / Habilitation</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-award"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Formation / Habilitation</h1>
+            <p>Suivi des habilitations et certifications obligatoires des agents (CACES, habilitation électrique, SST, permis…). Roster de départ dérivé des agents déjà présents dans le Registre AT/MP (aucun fichier source dédié aux habilitations n'existe à ce stade) — complétez et corrigez librement chaque fiche depuis cette page.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-award"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Habilitations</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-shield-check"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiOk">–</span><span class="ps-kpi-label">À jour</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-activity"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiSoon">–</span><span class="ps-kpi-label">À renouveler</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiLate">–</span><span class="ps-kpi-label">Expirées</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="panel console">
+        <div class="field"><span class="flabel">Collectivité</span>
+          <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+        </div>
+        <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
+        <div class="field"><span class="flabel">Type d'habilitation</span><select id="fType"></select></div>
+        <div class="field"><span class="flabel">Statut</span>
+          <select id="fStatut"><option value="all">Tous</option><option value="À jour">À jour</option><option value="À renouveler">À renouveler</option><option value="Expirée">Expirée</option></select>
+        </div>
+        <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
+        <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> habilitations</span>
+      </div>
+
+      <div class="panel form-panel" id="formPanel" style="display:none;">
+        <div class="panel-head"><h3 class="panel-title" id="formTitle">Nouvelle habilitation</h3></div>
+        <form id="habForm">
+          <input type="hidden" id="fId">
+          <div class="form-grid">
+            <div><label for="fNom">Nom</label><input type="text" id="fNom" required></div>
+            <div><label for="fPrenom">Prénom</label><input type="text" id="fPrenom" required></div>
+            <div><label for="fCollectiviteForm">Collectivité</label>
+              <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+            </div>
+            <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
+            <div><label for="fTypeForm">Type d'habilitation</label><select id="fTypeForm" required></select></div>
+            <div><label for="fOrganisme">Organisme formateur</label><input type="text" id="fOrganisme" placeholder="ex. AFPA, Cnfpt…"></div>
+            <div><label for="fDateObtention">Date d'obtention</label><input type="date" id="fDateObtention" required></div>
+            <div><label for="fDuree">Durée de validité (mois)</label><input type="number" id="fDuree" min="1" required></div>
+            <div class="span3"><label for="fCommentaire">Commentaire</label><textarea id="fCommentaire" placeholder="Observations, session de recyclage prévue…"></textarea></div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="button" class="btn btn-ghost" id="btnCancelForm">Annuler</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Habilitations des agents</h3>
+          <div class="panel-actions" id="panelActionsBtns"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg">
+            <thead>
+              <tr>
+                <th>Nom</th><th>Prénom</th><th>Service</th><th>Type</th><th>Organisme</th><th>Obtention</th><th>Expiration</th><th>Statut</th>
+                <th id="thActions"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Durées de validité standard appliquées par type d'habilitation ; à ajuster selon les prescriptions spécifiques de chaque organisme de formation.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const role = (session && session.role) || "ag";
+  const canEdit = role === "rh" || role === "admin";
+  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const myServices = (session && session.services) || ["*"];
+  const isScoped = !myServices.includes("*");
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("roleChip").textContent = role.toUpperCase();
+  if (!canEdit){ $("roleChip").classList.add("ag"); }
+  if (role !== "rh" && role !== "admin"){ $("navRh").style.display = "none"; }
+  if (role === "admin"){ $("navAdmin").style.display = ""; }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(module, type, description){
+    try {
+      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
+      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
+  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth()) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+
+  // ---------- Référentiels partagés (services) ----------
+  const REF_KEY = "vigie_hse_referentials";
+  const REF_DEFAULTS = {
+    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
+    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+  };
+  function loadReferentials(){
+    let stored = {};
+    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    const merged = Object.assign({}, stored);
+    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
+    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  const REF = loadReferentials();
+  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+
+  // ---------- Types d'habilitation & durées de validité standard ----------
+  const HAB_TYPES = [
+    ["CACES", 60],
+    ["Habilitation électrique", 36],
+    ["SST (Sauveteur Secouriste du Travail)", 24],
+    ["Permis de conduire poids lourd / remorque", 60],
+    ["AIPR (Autorisation d'Intervention à Proximité des Réseaux)", 60],
+    ["Habilitation travail en hauteur", 12],
+  ];
+  const HAB_DUREE = Object.fromEntries(HAB_TYPES);
+
+  // ---------- Roster de départ (dérivé du Registre AT/MP) ----------
+  const SEED_ATMP = [{"collectivite":"Ville","dateAT":"2025-12-15","dateMois":"2025-12-15","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"LEFEVRE","prenom":"JULIEN","dateNaissance":"2002-01-15","age":24,"serviceDetail":"STP_Police Municipale","service":"Sécurité Tranquilité Publique","categorie":"Catégorie C","filiere":"Filière Sécurité (Police Municipale)","cadreEmploi":"Agents de police municipale","typeAtMp":"Accident de travail","arret":true,"joursArret":12,"circonstances":"Douleur à la cuisse en poursuivant un individu","grade":"Brigadier-chef Pal","etat":"AT","risque":"Activité Physique","siege":"Cuisse","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-11-24","dateMois":"2025-11-24","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"MOREAU","prenom":"CAMILLE","dateNaissance":"1973-07-15","age":53,"serviceDetail":"Ressources Humaines et Cond de travail","service":"DRHCT","categorie":"Catégorie A","filiere":"Filière administrative","cadreEmploi":"Attachés Territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":18,"circonstances":"En se baissant pour récuperer sa bouteille d\u0027eau, l\u0027agent s\u0027est bloqué le dos","grade":"Attaché Pal","etat":"AT","risque":"Activité Physique","siege":"Dos","nature":"Lombalgie","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-11-14","dateMois":"2025-11-14","jour":"vendredi","statut":"Détaché FPT","civilite":"Monsieur","nom":"GIRARD","prenom":"NICOLAS","dateNaissance":"1972-10-15","age":54,"serviceDetail":"STP_Police Municipale","service":"Sécurité Tranquilité Publique","categorie":"Catégorie C","filiere":"Filière Sécurité (Police Municipale)","cadreEmploi":"Agents de police municipale","typeAtMp":"Accident de travail","arret":true,"joursArret":15,"circonstances":"En service d\u0027entrainement , l\u0027agt effectue une percussion, quand il a senti son épaule droite bougée de gauche à droite","grade":"Gardien-brigadier","etat":"AT","risque":"Activité Physique","siege":"Epaule","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-11-14","dateMois":"2025-11-14","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"BONNET","prenom":"THOMAS","dateNaissance":"1998-09-15","age":28,"serviceDetail":"STP_Police Municipale","service":"Sécurité Tranquilité Publique","categorie":"Catégorie C","filiere":"Filière Sécurité (Police Municipale)","cadreEmploi":"Agents de police municipale","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Lors d\u0027une mise en situation prof de mise au sol, un collègue qui effectuait la technique sur moi, est tombé, coude en avant sur moi au niveau des côtes côté gauche  vive douleur","grade":"Brigadier-chef Pal","etat":"Bénin","risque":"Activité Physique","siege":"Thorax","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-09-09","dateMois":"2025-09-09","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"DUMAS","prenom":"ANTOINE","dateNaissance":"1994-07-15","age":32,"serviceDetail":"Cuisine Centrale","service":"Cuisine Centrale","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":7,"circonstances":"En voulant récupérer des poche, l\u0027agent s\u0027est baissé et en se relevant a ressenti une douleur dans le dos","grade":"Adjt tech","etat":"AT","risque":"Activité Physique","siege":"Dos","nature":"Lombalgie","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-07-31","dateMois":"2025-07-31","jour":"jeudi","statut":"Stagiaire","civilite":"Monsieur","nom":"LAMBERT","prenom":"MAXIME","dateNaissance":"1995-05-15","age":31,"serviceDetail":"INF_Régie Voirie","service":"Voirie","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"en manipulant un gabarit, l\u0027agent s\u0027est fait mal au dos.","grade":"Adjt tech","etat":"Bénin","risque":"Activité Physique","siege":"Dos","nature":"Lombalgie","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-07-23","dateMois":"2025-07-23","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"FAURE","prenom":"ALEXANDRE","dateNaissance":"1996-01-15","age":30,"serviceDetail":"Espaces verts - terrain régie","service":"Espace Vert","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"Manipulation d\u0027une tondeuse à gazon l\u0027agent s\u0027est tordu le pouce droit","grade":"Adjt tech Pal 1Cl","etat":"AT","risque":"Activité Physique","siege":"Main","nature":"Contusion","elementMateriel":"AUTRE OUTIL MECANIQUE GUIDE A LA MAIN"},{"collectivite":"Ville","dateAT":"2025-07-15","dateMois":"2025-07-15","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"ANDRE","prenom":"VINCENT","dateNaissance":"1999-09-15","age":27,"serviceDetail":"BMO_Fêtes et cérémonies","service":"Manifestation","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"douleur à l\u0027épaule et au dos en chargeant des barrières","grade":"Adjt tech","etat":"Bénin","risque":"Activité Physique","siege":"Dos","nature":"Lombalgie","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-07-08","dateMois":"2025-07-08","jour":"mardi","statut":"CONT - Emploi Vacant","civilite":"Monsieur","nom":"MERCIER","prenom":"MATHIEU","dateNaissance":"1997-11-15","age":29,"serviceDetail":"BMO_Régie Bâtiments communaux","service":"Batiment","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"L\u0027agent a recu le panneau de bois sur son bust en voulant le porter. Douleur multiple","grade":"Adjt tech","etat":"Bénin","risque":"Activité Physique","siege":"Multiple","nature":"Douleur","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-07-07","dateMois":"2025-07-07","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"BLANC","prenom":"CHLOE","dateNaissance":"1969-05-15","age":57,"serviceDetail":"EEJ_Ecoles Elémentaires","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"En sortant une caisse, l\u0027agent a ressenti une douleur au trapeze et au poignet","grade":"Adjt tech Pal 2Cl","etat":"Bénin","risque":"Activité Physique","siege":"Multiple","nature":"Douleur","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-06-26","dateMois":"2025-06-26","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"GUERIN","prenom":"LAURA","dateNaissance":"2000-07-15","age":26,"serviceDetail":"Pôle Administratif EEJ","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Agent a heurté le plafond du véhicule en rangeant du matériel , douleur cervicale et dos","grade":"Adjt tech Pal 2Cl","etat":"Bénin","risque":"Activité Physique","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-06-20","dateMois":"2025-06-20","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"MULLER","prenom":"GUILLAUME","dateNaissance":"1990-09-15","age":36,"serviceDetail":"ENV_Achat / Mécanique","service":"Mécanique","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":20,"circonstances":"Douleur au dos manipulation tuyau","grade":"Adjt tech","etat":"AT","risque":"Activité Physique","siege":"Dos","nature":"Lombalgie","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-05-17","dateMois":"2025-05-17","jour":"samedi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"HENRY","prenom":"BENJAMIN","dateNaissance":"1981-08-15","age":45,"serviceDetail":"BMO_Fêtes et cérémonies","service":"Manifestation","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":44,"circonstances":"En portant une enceinte (20/25kg) pour la mettre sur son trépied, l\u0027agent a senti une douleur au dos.","grade":"Adjt tech Pal 1Cl","etat":"AT","risque":"Activité Physique","siege":"Dos","nature":"Douleur","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-05-13","dateMois":"2025-05-13","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"ROUSSEL","prenom":"KEVIN","dateNaissance":"1974-09-15","age":52,"serviceDetail":"BMO_Fêtes et cérémonies","service":"Manifestation","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":55,"circonstances":"En rentrant dans la cathédrale pour récupérer des chaises, l\u0027agent s\u0027est bloqué le genou droit (un genou qui a été opéré) en descendant la marche de l\u0027entrée.","grade":"Adjt tech","etat":"AT","risque":"Activité Physique","siege":"Genoux","nature":"Douleur","elementMateriel":"NON PRECISE, CHUTE OU GLISSADE EN DENIVELE OU HAUTEUR (DESCENTE DE BUS, ESCALIER, ESCABEAU, MARCHES)"},{"collectivite":"Ville","dateAT":"2025-04-29","dateMois":"2025-04-29","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"FONTAINE","prenom":"SEBASTIEN","dateNaissance":"1988-03-15","age":38,"serviceDetail":"Cuisine Centrale","service":"Cuisine Centrale","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":6,"circonstances":"Lors d\u0027une prise du cuvier, avec le poids l\u0027agent s\u0027est tordu le doigt (annulaire) droit","grade":"Adjt tech Pal 2Cl","etat":"AT","risque":"Activité Physique","siege":"Main","nature":"Contusion","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-02-24","dateMois":"2025-02-24","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"CHEVALIER","prenom":"DAMIEN","dateNaissance":"1976-03-15","age":50,"serviceDetail":"Equipements sportifs","service":"Sport","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":153,"circonstances":"En manipulant un container, l\u0027agent s\u0027est fait mal à l\u0027épaule droite","grade":"Adjt tech Pal 1Cl","etat":"AT","risque":"Activité Physique","siege":"Epaule","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-01-08","dateMois":"2025-01-08","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"HENRY","prenom":"BENJAMIN","dateNaissance":"1981-08-15","age":45,"serviceDetail":"BMO_Fêtes et cérémonies","service":"Manifestation","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de trajet","arret":true,"joursArret":32,"circonstances":"effort de soulèvement","grade":"Adjt tech Pal 1Cl","etat":"AT","risque":"Activité Physique","siege":"Dos","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-08-04","dateMois":"2025-08-04","jour":"lundi","statut":"CONT - Remplaçant","civilite":"Madame","nom":"ROBIN","prenom":"MANON","dateNaissance":"1983-06-15","age":43,"serviceDetail":"COM_Communication Supports","service":"Communication","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Malaise, douleur poitrine en travaillant","grade":"Adjt tech","etat":"Bénin","risque":"Autres","siege":"Autres","nature":"Malaise","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-07-29","dateMois":"2025-07-29","jour":"mardi","statut":"Stagiaire","civilite":"Madame","nom":"MASSON","prenom":"EMILIE","dateNaissance":"1994-10-15","age":32,"serviceDetail":"RH_Accueil - Gestion Administrative","service":"DRHCT","categorie":"Catégorie C","filiere":"Filière administrative","cadreEmploi":"Adjoints administratifs territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"L\u0027agent a ressenti une douleur à la poitrine, fourmillement doigt et jambe. ","grade":"Adjt adm","etat":"Bénin","risque":"Autres","siege":"Autres","nature":"Malaise","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-02-11","dateMois":"2025-02-11","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"SANCHEZ","prenom":"AURELIE","dateNaissance":"2004-06-15","age":22,"serviceDetail":"EEJ_Entretien Bâtiments communaux","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":6,"circonstances":"Chute de plain pied avec malaise","grade":"Adjt tech Pal 1Cl","etat":"AT","risque":"Autres","siege":"Multiple","nature":"Malaise","elementMateriel":"NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED"},{"collectivite":"Ville","dateAT":"2025-11-18","dateMois":"2025-11-18","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"GAUTHIER","prenom":"CELINE","dateNaissance":"1986-06-15","age":40,"serviceDetail":"RH_Emploi-formation","service":"DRHCT","categorie":"Catégorie C","filiere":"Filière administrative","cadreEmploi":"Adjoints administratifs territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"L\u0027agent a glissé dans les escaliers et s\u0027est tordu la cheville","grade":"Adjt adm","etat":"Bénin","risque":"Chute de hauteur","siege":"Cheville","nature":"Entorse","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-08-21","dateMois":"2025-08-21","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"ROY","prenom":"FLORIAN","dateNaissance":"1975-06-15","age":51,"serviceDetail":"PUR_Nettoiement manuel","service":"Propreté Urbaine","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":21,"circonstances":"En montant sur le marche pied l\u0027agent a glissé et a chuté sur le coté droit / douleur multiple","grade":"Adjt tech","etat":"AT","risque":"Chute de hauteur","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-11-27","dateMois":"2025-11-27","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"VASSEUR","prenom":"SOPHIE","dateNaissance":"1993-04-15","age":33,"serviceDetail":"EEJ_Entretien Bâtiments communaux","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"L\u0027agent s\u0027est pris les pieds dans une cagette posé au sol et a chuté. Douleur au genoux ","grade":"Adjt tech Pal 2Cl","etat":"AT","risque":"Chute de plain pied","siege":"Genoux","nature":"Douleur","elementMateriel":"NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED"},{"collectivite":"Ville","dateAT":"2025-08-18","dateMois":"2025-08-18","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"PERRIN","prenom":"JULIE","dateNaissance":"1978-04-15","age":48,"serviceDetail":"DST_Administratif et financier","service":"SAF","categorie":"Catégorie C","filiere":"Filière administrative","cadreEmploi":"Adjoints administratifs territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"EN revenant au bureau l\u0027agent à loupé la marche et est tombé sur ces genoux, hématome","grade":"Adjt adm Pal 1Cl","etat":"Bénin","risque":"Chute de plain pied","siege":"Genoux","nature":"Contusion","elementMateriel":"NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED"},{"collectivite":"Ville","dateAT":"2025-06-16","dateMois":"2025-06-16","jour":"lundi","statut":"CONT - Remplaçant","civilite":"Madame","nom":"MEUNIER","prenom":"MARION","dateNaissance":"1989-11-15","age":37,"serviceDetail":"EEJ_Entretien Bâtiments communaux","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Chute de plain pied en étant attiré par ma machine hématome dos","grade":"Adjt tech","etat":"Bénin","risque":"Chute de plain pied","siege":"Dos","nature":"Contusion","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-04-16","dateMois":"2025-04-16","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"VASSEUR","prenom":"SOPHIE","dateNaissance":"1993-04-15","age":33,"serviceDetail":"EEJ_Entretien Bâtiments communaux","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de trajet","arret":true,"joursArret":27,"circonstances":"L\u0027agent marchait pour aller travailler et a trébuché sur la marche du trottoir. Elle chute au sol en avant.","grade":"Adjt tech Pal 2Cl","etat":"AT","risque":"Chute de plain pied","siege":"Multiple","nature":"Contusion","elementMateriel":"NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED"},{"collectivite":"Ville","dateAT":"2025-01-18","dateMois":"2025-01-18","jour":"samedi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"RENARD","prenom":"ROMAIN","dateNaissance":"1997-11-15","age":29,"serviceDetail":"PUR_Nettoiement manuel","service":"Propreté Urbaine","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Glissade sur une plaque de verglas","grade":"Adjt tech","etat":"Bénin","risque":"Chute de plain pied","siege":"Multiple","nature":"Douleur","elementMateriel":"EMPLACEMENTS ET SURFACES POUR ACCIDENT DE PLAIN-PIED NON PRECISES"},{"collectivite":"Ville","dateAT":"2025-01-15","dateMois":"2025-01-15","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"BARBIER","prenom":"CEDRIC","dateNaissance":"1978-08-15","age":48,"serviceDetail":"PUR_Nettoiement manuel","service":"Propreté Urbaine","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":9,"circonstances":"Chute de plain pied, douleur cuisse","grade":"Adjt tech Pal 1Cl","etat":"AT","risque":"Chute de plain pied","siege":"Cuisse","nature":"Douleur","elementMateriel":"NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED"},{"collectivite":"Ville","dateAT":"2025-12-29","dateMois":"2025-12-29","jour":"lundi","statut":"CONT - Remplaçant","civilite":"Madame","nom":"BRUN","prenom":"CHARLOTTE","dateNaissance":"1986-06-15","age":40,"serviceDetail":"EEJ_Entretien Bâtiments communaux","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"L\u0027agent s\u0027est cogné sur le mécanisme de fermeture de la fenetre, blessure à l\u0027œil et au nez","grade":"Adjt tech","etat":"Bénin","risque":"Déplacement","siege":"Multiple","nature":"Multiple","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-04-08","dateMois":"2025-04-08","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"DUMONT","prenom":"JEROME","dateNaissance":"2003-07-15","age":23,"serviceDetail":"PUR_Travaux spécifiques / remplacements","service":"Propreté Urbaine","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Sur le plafond dans la cellule de la camionnette, il y a un support de roue de secours, sans la roue de secours.\nL\u0027agent en récupérant une poche au sol, en se relevant, sa tête a cogné le support de roue.","grade":"Adjt tech","etat":"Bénin","risque":"Déplacement","siege":"Multiple","nature":"Douleur","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-01-13","dateMois":"2025-01-13","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"MARCHAL","prenom":"ELODIE","dateNaissance":"1975-01-15","age":51,"serviceDetail":"EEJ_Entretien Bâtiments communaux","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de trajet","arret":true,"joursArret":420,"circonstances":"L\u0027agent marchait en direction de son travail et a ressenti une forte douleur au niveau du talon d\u0027Achille gauche","grade":"Adjt tech Pal 1Cl","etat":"AT","risque":"Déplacement","siege":"Cheville","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-11-19","dateMois":"2025-11-19","jour":"mercredi","statut":"CONT - Remplaçant","civilite":"Madame","nom":"LECLERC","prenom":"SANDRINE","dateNaissance":"1966-03-15","age":60,"serviceDetail":"EEJ_Ecoles Elémentaires","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":19,"circonstances":"L\u0027agent s\u0027est assis sur une chaise et celle-ci s\u0027est cassé, l\u0027agent a chuté au sol . Douleur à la cuisse","grade":"Adjt tech","etat":"AT","risque":"Equipement de travail","siege":"Cuisse","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-10-15","dateMois":"2025-10-15","jour":"mercredi","statut":"CONT - Remplaçant","civilite":"Madame","nom":"GAILLARD","prenom":"NATHALIE","dateNaissance":"2001-06-15","age":25,"serviceDetail":"Cuisine Centrale","service":"Cuisine Centrale","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":22,"circonstances":"L\u0027agent s\u0027est coupé le doigt en nettoyant la lame du couteau","grade":"Adjt tech","etat":"AT","risque":"Equipement de travail","siege":"Main","nature":"Plaie","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-09-19","dateMois":"2025-09-19","jour":"vendredi","statut":"CONT - Remplaçant","civilite":"Madame","nom":"RENAULT","prenom":"STEPHANIE","dateNaissance":"1991-01-15","age":35,"serviceDetail":"EEJ_Entretien Bâtiments communaux","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"En sortant un plat dans le fond du four, l\u0027agent s\u0027est brulé au niveau de l\u0027avant bras droit","grade":"Adjt tech","etat":"Bénin","risque":"Equipement de travail","siege":"Bras","nature":"Brulure","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-07-30","dateMois":"2025-07-30","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"AUBRY","prenom":"LOIC","dateNaissance":"1971-01-15","age":55,"serviceDetail":"BMO_Régie Bâtiments communaux","service":"Batiment","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"tailler le pouce gauche avec le cutter","grade":"Adjt tech Pal 1Cl","etat":"Bénin","risque":"Equipement de travail","siege":"Main","nature":"Plaie","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-07-29","dateMois":"2025-07-29","jour":"mardi","statut":"Stagiaire","civilite":"Monsieur","nom":"COLIN","prenom":"BAPTISTE","dateNaissance":"1969-09-15","age":57,"serviceDetail":"Equipements sportifs","service":"Sport","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":76,"circonstances":"L\u0027agent était entrain de tracer le terrain avec le cordeau, la sardine a lâché et a percuté le ventre de l\u0027agent","grade":"Adjt tech","etat":"AT","risque":"Equipement de travail","siege":"Ventre","nature":"Plaie","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-07-07","dateMois":"2025-07-07","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"CARON","prenom":"QUENTIN","dateNaissance":"1973-05-15","age":53,"serviceDetail":"Cuisine Centrale","service":"Cuisine Centrale","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":8,"circonstances":"Coupure doigt en coupant les légumes","grade":"Adjt tech","etat":"AT","risque":"Equipement de travail","siege":"Main","nature":"Plaie","elementMateriel":"AUTRE OUTIL MECANIQUE GUIDE A LA MAIN"},{"collectivite":"Ville","dateAT":"2025-06-26","dateMois":"2025-06-26","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"AUBRY","prenom":"LOIC","dateNaissance":"1971-01-15","age":55,"serviceDetail":"BMO_Régie Bâtiments communaux","service":"Batiment","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"en fermant la portière l\u0027agent a refermé celle-ci sur son pouce","grade":"Adjt tech Pal 1Cl","etat":"Bénin","risque":"Equipement de travail","siege":"Main","nature":"Plaie","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-06-13","dateMois":"2025-06-13","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"CHARPENTIER","prenom":"HUGO","dateNaissance":"1974-09-15","age":52,"serviceDetail":"Espaces verts - terrain régie","service":"Espace Vert","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"l\u0027agent a glissé et s\u0027est planté la lame du sécateur dans la main ","grade":"Adjt tech Pal 2Cl","etat":"AT","risque":"Equipement de travail","siege":"Main","nature":"Plaie","elementMateriel":"NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED"},{"collectivite":"Ville","dateAT":"2025-04-08","dateMois":"2025-04-08","jour":"mardi","statut":"CONT - Emploi Vacant","civilite":"Monsieur","nom":"MERCIER","prenom":"MATHIEU","dateNaissance":"1997-11-15","age":29,"serviceDetail":"BMO_Régie Bâtiments communaux","service":"Batiment","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"L\u0027agent a reçu une limaille dans l\u0027œil ","grade":"Adjt tech","etat":"AT","risque":"Equipement de travail","siege":"Yeux","nature":"Inflammation","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-04-04","dateMois":"2025-04-04","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"BOULANGER","prenom":"AMANDINE","dateNaissance":"1986-05-15","age":40,"serviceDetail":"EEJ_Ecoles Elémentaires","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Agents de maîtrise Territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Plaie à l\u0027ongle de l\u0027index main gauche","grade":"Agent maitrise","etat":"Bénin","risque":"Equipement de travail","siege":"Main","nature":"Plaie","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-03-21","dateMois":"2025-03-21","jour":"vendredi","statut":"Stagiaire","civilite":"Monsieur","nom":"COLIN","prenom":"BAPTISTE","dateNaissance":"1969-09-15","age":57,"serviceDetail":"Equipements sportifs","service":"Sport","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":0,"circonstances":"Projection de matière d\u0027un caillou lors de désherbage thermique, projection dans l\u0027œil et douleur","grade":"Adjt tech","etat":"AT","risque":"Equipement de travail","siege":"Yeux","nature":"Inflammation","elementMateriel":"OUTIL MECANIQUE TENU OU GUIDE A LA MAIN NON PRECISE"},{"collectivite":"Ville","dateAT":"2025-03-14","dateMois":"2025-03-14","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"SANCHEZ","prenom":"AURELIE","dateNaissance":"2004-06-15","age":22,"serviceDetail":"EEJ_Entretien Bâtiments communaux","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"L\u0027agent s\u0027est brûlée en se renversant du café sur le dessus de la main gauche (pouce et poignée).","grade":"Adjt tech Pal 1Cl","etat":"Bénin","risque":"Equipement de travail","siege":"Main","nature":"Brulure","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-01-28","dateMois":"2025-01-28","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"LEROUX","prenom":"CLAIRE","dateNaissance":"1978-08-15","age":48,"serviceDetail":"EEJ_Entretien Bâtiments communaux","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":4,"circonstances":"Brulure thermique en sortant la barquette du four , brulure doigt","grade":"Adjt tech Pal 1Cl","etat":"AT","risque":"Equipement de travail","siege":"Main","nature":"Brulure","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Ville","dateAT":"2025-12-30","dateMois":"2025-12-30","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"FERNANDEZ","prenom":"LUCAS","dateNaissance":"1994-01-15","age":32,"serviceDetail":"INF_Régie Voirie","service":"Voirie","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"L\u0027agent a glissé sur le gravier avec son vélo. Mains droite et gauche écorchées","grade":"Adjt tech","etat":"Bénin","risque":"Routier","siege":"Main","nature":"Plaie","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-11-04","dateMois":"2025-11-04","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"RODRIGUEZ","prenom":"PAULINE","dateNaissance":"2002-04-15","age":24,"serviceDetail":"EEJ_Ecoles maternelles","service":"EEJ","categorie":"Catégorie C","filiere":"Filière Sociale","cadreEmploi":"Agents ter.spécialis. écoles maternelles","typeAtMp":"Accident de trajet","arret":true,"joursArret":17,"circonstances":"Accident routier , douleur multiple","grade":"ATSEM Pal 1Cl","etat":"AT","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-09-04","dateMois":"2025-09-04","jour":"jeudi","statut":"CONT - Saisonnier","civilite":"Monsieur","nom":"MARTIN","prenom":"THEO","dateNaissance":"1994-11-15","age":32,"serviceDetail":"BMO_Fêtes et cérémonies","service":"Manifestation","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de trajet","arret":true,"joursArret":4,"circonstances":"Lors du trajet domicile travail, l\u0027agent a eu un accident de voiture, il a glissé sur la chaussé et a heurté un arbre","grade":"Adjt tech","etat":"AT","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-06-20","dateMois":"2025-06-20","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"BERNARD","prenom":"NATHAN","dateNaissance":"1981-07-15","age":45,"serviceDetail":"ADMG_Accueil","service":"Admin Générale","categorie":"Catégorie C","filiere":"Filière administrative","cadreEmploi":"Adjoints administratifs territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"Accident routier. Douleur certvicale et dos","grade":"Adjt adm Pal 2Cl","etat":"AT","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-05-16","dateMois":"2025-05-16","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"THOMAS","prenom":"JUSTINE","dateNaissance":"1980-01-15","age":46,"serviceDetail":"STP_Police Municipale","service":"Sécurité Tranquilité Publique","categorie":"Catégorie C","filiere":"Filière Sécurité (Police Municipale)","cadreEmploi":"Agents de police municipale","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"Choc VL/VL - L\u0027agent était dans son véhicule en intervention. Une collision avec un autre véhicule a eu lieu. Choc à l\u0027avant droit du véhicule. Douleur genoux","grade":"Gardien-brigadier","etat":"AT","risque":"Routier","siege":"Genoux","nature":"Contusion","elementMateriel":"VEHICULE ROUTIER"},{"collectivite":"Ville","dateAT":"2025-05-16","dateMois":"2025-05-16","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"PETIT","prenom":"LOUIS","dateNaissance":"1973-01-15","age":53,"serviceDetail":"STP_Stationnement Marchés de plein vent","service":"Sécurité Tranquilité Publique","categorie":"Catégorie C","filiere":"Filière Sécurité (Police Municipale)","cadreEmploi":"Agents de police municipale","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Choc VL/VL - L\u0027agent était dans son véhicule en intervention. Une collision avec un autre véhicule a eu lieu. Choc à l\u0027avant droit du véhicule.","grade":"Gardien-brigadier","etat":"Bénin","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":"VEHICULE ROUTIER"},{"collectivite":"Ville","dateAT":"2025-05-16","dateMois":"2025-05-16","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"DURAND","prenom":"GABRIEL","dateNaissance":"1986-09-15","age":40,"serviceDetail":"STP_Police Municipale","service":"Sécurité Tranquilité Publique","categorie":"Catégorie C","filiere":"Filière Sécurité (Police Municipale)","cadreEmploi":"Agents de police municipale","typeAtMp":"Accident de travail","arret":true,"joursArret":225,"circonstances":"Choc VL/VL - L\u0027agent était dans son véhicule en intervention. Une collision avec un autre véhicule a eu lieu. Choc à l\u0027avant droit du véhicule. Douleur epaule ","grade":"Brigadier-chef Pal","etat":"AT","risque":"Routier","siege":"Epaule","nature":"Douleur","elementMateriel":"VEHICULE ROUTIER"},{"collectivite":"Ville","dateAT":"2025-01-29","dateMois":"2025-01-29","jour":"mercredi","statut":"CONT - Remplaçant","civilite":"Madame","nom":"LEROY","prenom":"MELANIE","dateNaissance":"2002-12-15","age":24,"serviceDetail":"EEJ_Ecoles Elémentaires","service":"EEJ","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":3,"circonstances":"Accident de la route, douleur multiple","grade":"Adjt tech","etat":"AT","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-12-15","dateMois":"2025-12-15","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"ANDRE","prenom":"VINCENT","dateNaissance":"1999-09-15","age":27,"serviceDetail":"BMO_Fêtes et cérémonies","service":"Manifestation","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Situation de mal être au travail","grade":"Adjt tech","etat":"Bénin","risque":"RPS","siege":"Rps","nature":"Autres","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-12-15","dateMois":"2025-12-15","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"MICHEL","prenom":"ARTHUR","dateNaissance":"1982-04-15","age":44,"serviceDetail":"STP_Police Municipale","service":"Sécurité Tranquilité Publique","categorie":"Catégorie C","filiere":"Filière Sécurité (Police Municipale)","cadreEmploi":"Agents de police municipale","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Lors d\u0027une interpellation, l\u0027individu frappe l\u0027agent au visage avec une batterie externe, douleur au menton","grade":"Gardien-brigadier","etat":"Bénin","risque":"RPS","siege":"Visage","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-09-30","dateMois":"2025-09-30","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"GARCIA","prenom":"RAPHAEL","dateNaissance":"1988-04-15","age":38,"serviceDetail":"BMO_Cimetière","service":"Espace Vert","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":259,"circonstances":"Altercation avec la hiérarchie et mal être au travail","grade":"Adjt tech Pal 1Cl","etat":"AT","risque":"RPS","siege":"Rps","nature":"Psy","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-09-02","dateMois":"2025-09-02","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"SIMON","prenom":"ADRIEN","dateNaissance":"2000-04-15","age":26,"serviceDetail":"Espaces verts - terrain régie","service":"Espace Vert","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":331,"circonstances":"mal être au travail","grade":"Adjt tech Pal 2Cl","etat":"AT","risque":"RPS","siege":"Rps","nature":"Psy","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-08-29","dateMois":"2025-08-29","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"LAURENT","prenom":"CLEMENT","dateNaissance":"1986-08-15","age":40,"serviceDetail":"Espaces verts - terrain régie","service":"Espace Vert","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":311,"circonstances":"accrochage verbal avec son supérieur hiérarchique,","grade":"Adjt tech","etat":"AT","risque":"RPS","siege":"Rps","nature":"Psy","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-07-31","dateMois":"2025-07-31","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"DAVID","prenom":"PIERRE","dateNaissance":"1987-08-15","age":39,"serviceDetail":"Espaces verts - terrain régie","service":"Espace Vert","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Agents de maîtrise Territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":4,"circonstances":"Agression physique et verbale de l\u0027agent par un usager. Dépôt de plainte effectué","grade":"Agent maitrise Pal","etat":"AT","risque":"RPS","siege":"Rps","nature":"Douleur","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-05-15","dateMois":"2025-05-15","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"RENARD","prenom":"ROMAIN","dateNaissance":"1997-11-15","age":29,"serviceDetail":"PUR_Nettoiement manuel","service":"Propreté Urbaine","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":298,"circonstances":"L\u0027agent déclare un mal-être au travail, qui dure depuis plusieurs semaines. Il déclare ne plus être en capacité d\u0027exercer son travail.","grade":"Adjt tech","etat":"AT","risque":"RPS","siege":"Rps","nature":"Psy","elementMateriel":""},{"collectivite":"Ville","dateAT":"2025-05-06","dateMois":"2025-05-06","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"BERTRAND","prenom":"PAUL","dateNaissance":"2001-10-15","age":25,"serviceDetail":"PRU_Nettoiement mécanisé","service":"Propreté Urbaine","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":263,"circonstances":"L\u0027agent a été agressé verbalement par un commerçant (Mr. Lalanne - Le MASSENA). ","grade":"Adjt tech","etat":"AT","risque":"RPS","siege":"Rps","nature":"Psy","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-01-17","dateMois":"2025-01-17","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"MOREL","prenom":"AURORE","dateNaissance":"2000-12-15","age":26,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":true,"joursArret":20,"circonstances":"Agression  verbale par un parent d\u0027élève","grade":"Adjt ter anim Pal 2Cl","etat":"En cours","risque":"RPS","siege":"Rps","nature":"Psy","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-03-04","dateMois":"2025-03-04","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"FOURNIER","prenom":"MARC","dateNaissance":"1997-01-15","age":29,"serviceDetail":"SPORTS","service":"Sport ","categorie":"Catégorie B","filiere":"Filière sportive","cadreEmploi":"Educateurs territoriaux des APS","typeAtMp":"Accident de trajet","arret":true,"joursArret":4,"circonstances":"Accident de la route","grade":"Educateur APS Pal 2Cl","etat":"En cours","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-03-10","dateMois":"2025-03-10","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"NICOLAS","prenom":"DELPHINE","dateNaissance":"1970-05-15","age":56,"serviceDetail":"","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":true,"joursArret":8,"circonstances":"Douleur au pouce droit en manipulant","grade":"Adjt ter animation","etat":"En cours","risque":"Activité Physique","siege":"Main","nature":"Contusion","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-03-20","dateMois":"2025-03-20","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"ROUX","prenom":"ISABELLE","dateNaissance":"1993-08-15","age":33,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":true,"joursArret":3,"circonstances":"Marie était assise, elle s\u0027est relevée et s\u0027est coincée le dos au niveau des lombaires ","grade":"Adjt ter anim Pal 2Cl","etat":"Guéri","risque":"Activité Physique","siege":"Dos","nature":"Lombalgie","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-03-22","dateMois":"2025-03-22","jour":"samedi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"VINCENT","prenom":"CAROLINE","dateNaissance":"1964-08-15","age":62,"serviceDetail":"BIB_Secrétariat","service":"Médiathèque","categorie":"Catégorie C","filiere":"Filière administrative","cadreEmploi":"Adjoints administratifs territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Chute de plain pied","grade":"Adjt adm Pal 1Cl","etat":"En cours","risque":"Chute de plain pied","siege":"Multiple","nature":"Douleur","elementMateriel":"NON PRECISE, NE RENTRANT PAS DANS UNE DE CES CATEGORIES. A PRECISER"},{"collectivite":"Agglomération","dateAT":"2025-04-02","dateMois":"2025-04-02","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"LEGRAND","prenom":"VIRGINIE","dateNaissance":"1967-03-15","age":59,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":true,"joursArret":436,"circonstances":"Effort de soulèvement","grade":"Adjt ter anim Pal 1Cl","etat":"En cours","risque":"Activité Physique","siege":"Dos","nature":"Douleur","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Agglomération","dateAT":"2025-04-08","dateMois":"2025-04-08","jour":"mardi","statut":"Détaché FPT","civilite":"Monsieur","nom":"GARNIER","prenom":"LUC","dateNaissance":"1970-10-15","age":56,"serviceDetail":"Directeur Général des Services Adjoint","service":"Direction Générale","categorie":"Catégorie A","filiere":"Filière administrative","cadreEmploi":"Emplois fonctionnels administratifs","typeAtMp":"Accident de travail","arret":true,"joursArret":24,"circonstances":"malaise","grade":"Dir.adj.ets pub.","etat":"En cours","risque":"Autres","siege":"Autres","nature":"Malaise","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-04-14","dateMois":"2025-04-14","jour":"lundi","statut":"CONT - Saisonnier","civilite":"Monsieur","nom":"CHEVALLIER","prenom":"YVES","dateNaissance":"1988-09-15","age":38,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Sans categorie","filiere":"Sans filière","cadreEmploi":"Cadre d\u0027emploi animateurs temporaires","typeAtMp":"Accident de travail","arret":true,"joursArret":14,"circonstances":"L\u0027agent jouait au foot avec les enfants, il s\u0027est tordu la cheville","grade":"Animateur","etat":"En cours","risque":"Activité Physique","siege":"Cheville","nature":"Entorse","elementMateriel":"NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED"},{"collectivite":"Agglomération","dateAT":"2025-04-16","dateMois":"2025-04-16","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"FRANCOIS","prenom":"FRANCK","dateNaissance":"1994-11-15","age":32,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Chute de pain pied sur la rampe d\u0027accès PMR devant le service EEJ, il pleuvait et l\u0027agt transportait un four","grade":"Adjt ter animation","etat":"Sans suite","risque":"Chute de plain pied","siege":"Bras","nature":"Douleur","elementMateriel":"NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED"},{"collectivite":"Agglomération","dateAT":"2025-05-04","dateMois":"2025-05-04","jour":"dimanche","statut":"Titulaire (FPT)","civilite":"Madame","nom":"LEGROS","prenom":"LAETITIA","dateNaissance":"1993-01-15","age":33,"serviceDetail":"Ecole de Musique","service":"Ecole de musique","categorie":"Catégorie B","filiere":"Filière administrative","cadreEmploi":"Rédacteurs Territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"Pendant un déplacement en bus avec des enfants, en direction de Toulouse, l\u0027agent devait donner des badges d\u0027identification aux enfants.\nPendant qu\u0027elle circulait dans le couloir entre deux sièges, son genou a cogné au réceptacle de la ceinture de sécurité","grade":"Rédacteur Pal 1Cl","etat":"Guéri","risque":"Routier","siege":"Genoux","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-05-06","dateMois":"2025-05-06","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"PAGES","prenom":"SARAH","dateNaissance":"1992-10-15","age":34,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":true,"joursArret":148,"circonstances":"mal être au travail","grade":"Adjt ter animation","etat":"En cours","risque":"RPS","siege":"Rps","nature":"Psy","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-05-06","dateMois":"2025-05-06","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"GAUTIER","prenom":"ANAIS","dateNaissance":"1998-03-15","age":28,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"En jouant dans la cour à un match de football avec les enfants, l\u0027agent s\u0027est fait mal au mollet droit.","grade":"Adjt ter anim Pal 1Cl","etat":"En cours","risque":"Activité Physique","siege":"Mollet","nature":"Douleur","elementMateriel":"NON PRECISE EFFORT INTENSE"},{"collectivite":"Agglomération","dateAT":"2025-05-15","dateMois":"2025-05-15","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"GERMAIN","prenom":"MARGAUX","dateNaissance":"1964-05-15","age":62,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":true,"joursArret":8,"circonstances":"Effort intense  à l\u0027occasion d\u0027un tractage de mannequin à la piscine pendant sa formation BSB","grade":"Adjt ter anim Pal 2Cl","etat":"En cours","risque":"Activité Physique","siege":"Cuisse","nature":"Douleur","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Agglomération","dateAT":"2025-05-16","dateMois":"2025-05-16","jour":"vendredi","statut":"Stagiaire","civilite":"Madame","nom":"MARIN","prenom":"LEA","dateNaissance":"1982-01-15","age":44,"serviceDetail":"PE_Tendres Galipettes","service":"Petite Enfance","categorie":"Catégorie B","filiere":"Filière médico-sociale","cadreEmploi":"Auxiliaires de puériculture territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"L\u0027agt était assise, les jambes tendues quand un enfant a sauté sur son genou droit pour s\u0027assoir dessus ","grade":"Auxiliaire puér Cl N","etat":"Sans suite","risque":"Autres","siege":"Genoux","nature":"Entorse","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-05-16","dateMois":"2025-05-16","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"NOEL","prenom":"MARIE","dateNaissance":"1979-06-15","age":47,"serviceDetail":"DST_Urbanisme","service":"Urbanisme","categorie":"Catégorie B","filiere":"Filière technique","cadreEmploi":"Techniciens territoriaux","typeAtMp":"Accident de trajet","arret":false,"joursArret":0,"circonstances":"Trajet domicile / travail\nEn voulant éviter un choc avec un animal, l\u0027agent a percuté un mur (côté gauche du véhicule)","grade":"Technicien","etat":"Guéri","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":"VEHICULE ROUTIER"},{"collectivite":"Agglomération","dateAT":"2025-05-17","dateMois":"2025-05-17","jour":"samedi","statut":"Stagiaire","civilite":"Madame","nom":"REY","prenom":"ANNE","dateNaissance":"1969-08-15","age":57,"serviceDetail":"PE_Accueil Familial les Petits loups","service":"Petite Enfance","categorie":"Catégorie A","filiere":"Filière médico-sociale","cadreEmploi":"Puéricultrices territoriales","typeAtMp":"Accident de trajet","arret":true,"joursArret":7,"circonstances":"Accident de circulation","grade":"Puér","etat":"En cours","risque":"Routier","siege":"Cervical","nature":"Entorse","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-05-19","dateMois":"2025-05-19","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"ADAM","prenom":"DAVID","dateNaissance":"1972-10-15","age":54,"serviceDetail":"ENV_Propreté déchets","service":"Propreté Déchet","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":15,"circonstances":"En ramassant un aquarium cassé pour le jeter dans le conteneur, l\u0027agent s\u0027est coupé le doigt.","grade":"Adjt tech Pal 2Cl","etat":"En cours","risque":"Equipement de travail","siege":"Main","nature":"Plaie","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-05-22","dateMois":"2025-05-22","jour":"jeudi","statut":"CONT - Catégorie A","civilite":"Madame","nom":"FABRE","prenom":"CATHERINE","dateNaissance":"1987-09-15","age":39,"serviceDetail":"PE_Maison Petite Enfance","service":"Petite Enfance","categorie":"Catégorie A","filiere":"Filière Sociale","cadreEmploi":"Educateurs terr. de jeunes enfants","typeAtMp":"Accident de travail","arret":true,"joursArret":2,"circonstances":"En se baissant, jambes tendues, pour parler à un enfant qui souhaite être porté, l\u0027agent a ressenti une douleur aigue dans le bas du dos côté droit.","grade":"Educateur Jeunes Enfants","etat":"En cours","risque":"Activité Physique","siege":"Dos","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-05-23","dateMois":"2025-05-23","jour":"vendredi","statut":"CONT - Remplaçant","civilite":"Monsieur","nom":"RIVIERE","prenom":"ERIC","dateNaissance":"1968-09-15","age":58,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"Ballon en mouvement","grade":"Adjt ter animation","etat":"En cours","risque":"Activité Physique","siege":"Cuisse","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-06-03","dateMois":"2025-06-03","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"BRUNET","prenom":"PASCAL","dateNaissance":"1997-01-15","age":29,"serviceDetail":"ENV_Propreté déchets","service":"Propreté Déchet","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"Morsures légères par un chien","grade":"Adjt tech Pal 1Cl","etat":"Sans suite","risque":"Autres","siege":"Mollet","nature":"Plaie","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-06-11","dateMois":"2025-06-11","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"BOURGEOIS","prenom":"CHRISTINE","dateNaissance":"1987-06-15","age":39,"serviceDetail":"PE_Boule de Gomme","service":"Petite Enfance","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":22,"circonstances":"L\u0027agent s\u0027est plaint de douleurs à la tête et à la poitrine avec des vertiges","grade":"Adjt tech","etat":"Guéri","risque":"Autres","siege":"Autres","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-06-19","dateMois":"2025-06-19","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"LECOMTE","prenom":"VALERIE","dateNaissance":"1966-11-15","age":60,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Accident de voiture","grade":"Adjt ter anim Pal 2Cl","etat":"Sans suite","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-06-23","dateMois":"2025-06-23","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"LOPEZ","prenom":"SYLVIE","dateNaissance":"1990-03-15","age":36,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Chute de hauteur","grade":"Adjt ter animation","etat":"Sans suite","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-06-24","dateMois":"2025-06-24","jour":"mardi","statut":"CONT - Remplaçant","civilite":"Monsieur","nom":"DUBOIS","prenom":"LAURENT","dateNaissance":"1986-04-15","age":40,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":true,"joursArret":38,"circonstances":"Douleur d\u0027effort au dos en manutentionnant les chaises","grade":"Adjt ter animation","etat":"Guéri","risque":"Activité Physique","siege":"Dos","nature":"Lombalgie","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Agglomération","dateAT":"2025-06-27","dateMois":"2025-06-27","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"LEMOINE","prenom":"NADEGE","dateNaissance":"1970-09-15","age":56,"serviceDetail":"PE_Maison Petite Enfance","service":"Petite Enfance","categorie":"Catégorie B","filiere":"Filière médico-sociale","cadreEmploi":"Auxiliaires de puériculture territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"douleur en se relevant","grade":"Auxiliaire puér Cl Sup","etat":"En cours","risque":"Activité Physique","siege":"Genoux","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-07-04","dateMois":"2025-07-04","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"PICARD","prenom":"OLIVIER","dateNaissance":"1990-07-15","age":36,"serviceDetail":"ENV_Propreté déchets","service":"Propreté Déchet","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Agents de maîtrise Territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":28,"circonstances":"Douleur au dos en déchargeant un frigo d\u0027une remorque","grade":"Agent maitrise","etat":"Guéri","risque":"Activité Physique","siege":"Dos","nature":"Lombalgie","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-07-22","dateMois":"2025-07-22","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"ROGER","prenom":"CORINNE","dateNaissance":"1990-01-15","age":36,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"L\u0027agent à l\u0027\u0027aché le banc sur son pieds","grade":"Adjt ter anim Pal 2Cl","etat":"En cours","risque":"Activité Physique","siege":"Pieds","nature":"Douleur","elementMateriel":"NON PRECISE, MANIPULATION D\u0027OBJETS, D\u0027OUTIL A MAIN / INSTRUMENTS PORTATIFS"},{"collectivite":"Agglomération","dateAT":"2025-07-29","dateMois":"2025-07-29","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"FONTENOY","prenom":"CHRISTOPHE","dateNaissance":"1984-04-15","age":42,"serviceDetail":"ENV_Propreté déchets","service":"Propreté Déchet","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"L\u0027agent a été piqué à plusieurs reprise par une guêpe, entrainant une réaction allergique","grade":"Adjt tech","etat":"En cours","risque":"Autres","siege":"Oreilles","nature":"Psy","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-08-04","dateMois":"2025-08-04","jour":"lundi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"GILBERT","prenom":"FABRICE","dateNaissance":"1973-01-15","age":53,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Agression verbale","grade":"Adjt ter anim Pal 2Cl","etat":"Sans suite","risque":"RPS","siege":"Rps","nature":"Psy","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-08-05","dateMois":"2025-08-05","jour":"mardi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"GUILLOT","prenom":"BEATRICE","dateNaissance":"2001-06-15","age":25,"serviceDetail":"Bib section jeunesse","service":"Médiathèque","categorie":"Catégorie C","filiere":"Filière culturelle","cadreEmploi":"Adjoints du patrimoine territoriaux","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Chute de hauteur","grade":"Adjt ter patr Pal 1Cl","etat":"En cours","risque":"Chute de hauteur","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-08-19","dateMois":"2025-08-19","jour":"mardi","statut":"CONT - Remplaçant","civilite":"Madame","nom":"BAILLY","prenom":"VERONIQUE","dateNaissance":"1970-04-15","age":56,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"Choc psychologique","grade":"Adjt ter animation","etat":"En cours","risque":"RPS","siege":"Rps","nature":"Psy","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-09-01","dateMois":"2025-09-01","jour":"lundi","statut":"CONT - Remplaçant","civilite":"Monsieur","nom":"HERVE","prenom":"STEPHANE","dateNaissance":"2004-07-15","age":22,"serviceDetail":"ENV_Propreté déchets","service":"Propreté Déchet","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":37,"circonstances":"En collectant les déchets j\u0027ai mis le pied dans un nid de poule et je me suis tordu la cheville","grade":"Adjt tech","etat":"Guéri","risque":"Déplacement","siege":"Cheville","nature":"Entorse","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-09-05","dateMois":"2025-09-05","jour":"vendredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"SCHMITT","prenom":"PATRICIA","dateNaissance":"1972-04-15","age":54,"serviceDetail":"PE_Boule de Gomme","service":"Petite Enfance","categorie":"Catégorie A","filiere":"Filière Sociale","cadreEmploi":"Educateurs terr. de jeunes enfants","typeAtMp":"Accident de travail","arret":true,"joursArret":25,"circonstances":"L\u0027agent a marché dans un trou présent sur le parking, son pied gauche s\u0027est tordu et l\u0027agent a chuté","grade":"Educateur Jeunes Enfants","etat":"En cours","risque":"Chute de plain pied","siege":"Cheville","nature":"Entorse","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-10-01","dateMois":"2025-10-01","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"KLEIN","prenom":"MONIQUE","dateNaissance":"1987-02-15","age":39,"serviceDetail":"RH_Conditions de travail","service":"DRHCT","categorie":"Catégorie B","filiere":"Filière technique","cadreEmploi":"Techniciens territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":10,"circonstances":"Impossibilité de se relever après une démonstration d\u0027un geste de secourisme","grade":"Technicien","etat":"Guéri","risque":"Activité Physique","siege":"Dos","nature":"Lombalgie","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-10-22","dateMois":"2025-10-22","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"WEBER","prenom":"FRANCOISE","dateNaissance":"1990-09-15","age":36,"serviceDetail":"ED_Coordination Jeunesse","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Bénin","arret":false,"joursArret":0,"circonstances":"L\u0027agent assistait à une représentation à CIRCA avec un groupe d\u0027enfants quand elle a tourné la tête et a ressenti une douleur au cou","grade":"Adjt ter anim Pal 2Cl","etat":"Sans suite","risque":"Activité Physique","siege":"Cervical","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-11-13","dateMois":"2025-11-13","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"FISCHER","prenom":"BRIGITTE","dateNaissance":"1969-07-15","age":57,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":true,"joursArret":18,"circonstances":"L\u0027agent a chuté dans les toilettes de l\u0027école","grade":"Adjt ter anim Pal 2Cl","etat":"Guéri","risque":"Chute de plain pied","siege":"Multiple","nature":"Contusion","elementMateriel":"NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED"},{"collectivite":"Agglomération","dateAT":"2025-11-17","dateMois":"2025-11-17","jour":"lundi","statut":"CONT - Remplaçant","civilite":"Monsieur","nom":"MEYER","prenom":"FREDERIC","dateNaissance":"1977-03-15","age":49,"serviceDetail":"ED_Coordination Jeunesse","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de trajet","arret":false,"joursArret":0,"circonstances":"Chute de vélo","grade":"Adjt ter animation","etat":"En cours","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-11-19","dateMois":"2025-11-19","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"LACROIX","prenom":"MARTINE","dateNaissance":"1979-11-15","age":47,"serviceDetail":"PE_Maison Petite Enfance","service":"Petite Enfance","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"Malaise sans perte de connaissance","grade":"Adjt ter anim Pal 1Cl","etat":"En cours","risque":"Autres","siege":"Autres","nature":"Malaise","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-11-20","dateMois":"2025-11-20","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"DENIS","prenom":"CHANTAL","dateNaissance":"1969-03-15","age":57,"serviceDetail":"PE_Pôle Administratif","service":"Petite Enfance","categorie":"Catégorie C","filiere":"Filière administrative","cadreEmploi":"Adjoints administratifs territoriaux","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"Douleur au poignet en attrapant un carton de livre","grade":"Adjt adm","etat":"Sans suite","risque":"Activité Physique","siege":"Poignée","nature":"Entorse","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-11-27","dateMois":"2025-11-27","jour":"jeudi","statut":"CONT - Remplaçant","civilite":"Monsieur","nom":"GUILLAUME","prenom":"BRUNO","dateNaissance":"1971-10-15","age":55,"serviceDetail":"","service":"Propreté Déchet","categorie":"Catégorie C","filiere":"Filière technique","cadreEmploi":"Adjoints techniques territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":8,"circonstances":"l\u0027agent a été secoué alors qu\u0027il était sur le marche pied, ","grade":"Adjt tech","etat":"En cours","risque":"Routier","siege":"Ventre","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-12-01","dateMois":"2025-12-01","jour":"lundi","statut":"Stagiaire","civilite":"Madame","nom":"CHAUVIN","prenom":"DANIELLE","dateNaissance":"1967-03-15","age":59,"serviceDetail":"PE_Maison Petite Enfance","service":"Petite Enfance","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de trajet","arret":true,"joursArret":4,"circonstances":"Agent a percuté 4 sangliers en rentrant du travail avec sa voiture personnel","grade":"Adjt ter animation","etat":"Guéri","risque":"Routier","siege":"Multiple","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-12-05","dateMois":"2025-12-05","jour":"vendredi","statut":"Assistante maternelle-CDI","civilite":"Madame","nom":"MORIN","prenom":"JACQUELINE","dateNaissance":"1998-11-15","age":28,"serviceDetail":"PE_Accueil Familial les Petits loups","service":"Petite Enfance","categorie":"Sans categorie","filiere":"Sans filière","cadreEmploi":"Grade non statutaire - sans cadre emploi","typeAtMp":"Accident de travail","arret":true,"joursArret":3,"circonstances":"Chute suite à un malaise","grade":"Assistante maternelle","etat":"En cours","risque":"Chute de plain pied","siege":"Multiple","nature":"Malaise","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-12-10","dateMois":"2025-12-10","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"KLEIN","prenom":"MONIQUE","dateNaissance":"1987-02-15","age":39,"serviceDetail":"RH_Conditions de travail","service":"DRHCT","categorie":"Catégorie B","filiere":"Filière technique","cadreEmploi":"Techniciens territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":2,"circonstances":"Déplacement de la valise du mannequin adulte","grade":"Technicien","etat":"En cours","risque":"Activité Physique","siege":"Dos","nature":"Lombalgie","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-12-17","dateMois":"2025-12-17","jour":"mercredi","statut":"CONT - Remplaçant","civilite":"Monsieur","nom":"NGUYEN","prenom":"HERVE","dateNaissance":"2001-04-15","age":25,"serviceDetail":"ED_Activités périscolaires / extrascol","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"L\u0027agent tirer la table, le bans dessous lui ai tombé sur le pied","grade":"Adjt ter animation","etat":"Sans suite","risque":"Chute d\u0027objet","siege":"Pieds","nature":"Douleur","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-12-18","dateMois":"2025-12-18","jour":"jeudi","statut":"Titulaire (FPT)","civilite":"Madame","nom":"DUVAL","prenom":"YVONNE","dateNaissance":"1994-10-15","age":32,"serviceDetail":"PEDP_Pol Educatives et de Prévention","service":"EEJ","categorie":"Catégorie A","filiere":"Filière administrative","cadreEmploi":"Attachés Territoriaux","typeAtMp":"Accident de travail","arret":true,"joursArret":95,"circonstances":"l\u0027agent a chuté dans les couloirs","grade":"Attaché","etat":"En cours","risque":"Chute de plain pied","siege":"Cheville","nature":"Entorse","elementMateriel":""},{"collectivite":"Agglomération","dateAT":"2025-12-31","dateMois":"2025-12-31","jour":"mercredi","statut":"Titulaire (FPT)","civilite":"Monsieur","nom":"JOLY","prenom":"PATRICK","dateNaissance":"1994-02-15","age":32,"serviceDetail":"ED_Coordination Jeunesse","service":"EEJ","categorie":"Catégorie C","filiere":"Filière animation","cadreEmploi":"Adjoints territoriaux d\u0027animation","typeAtMp":"Accident de travail","arret":false,"joursArret":0,"circonstances":"Altercation avec un jeune","grade":"Adjt ter anim Pal 1Cl","etat":"Sans suite","risque":"RPS","siege":"Epaule","nature":"Contusion","elementMateriel":""}];
+  const TECH_SERVICES = ["Voirie","Espace Vert","Propreté Déchet","Propreté Urbaine","Mécanique","Batiment"];
+  const TECH_TYPES = ["CACES","Habilitation électrique","AIPR (Autorisation d'Intervention à Proximité des Réseaux)","Habilitation travail en hauteur"];
+  const ORGANISMES_FORMATION = ["AFPA","APAVE Formation","GRETA","Cnfpt","Centre de formation privé agréé"];
+  function hashStr(s){
+    let h = 0;
+    for (let i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) | 0; }
+    return Math.abs(h);
+  }
+  function buildHabilitationSeeds(){
+    const seen = new Map();
+    SEED_ATMP.forEach(r => {
+      if (!r.nom || !r.prenom || !r.service) return;
+      const key = r.nom + "|" + r.prenom + "|" + r.service;
+      if (!seen.has(key)) seen.set(key, r);
+    });
+    const out = [];
+    seen.forEach((r, key) => {
+      const h = hashStr(key);
+      const isTech = TECH_SERVICES.includes(r.service);
+      const types = [];
+      if (isTech){
+        types.push(TECH_TYPES[h % TECH_TYPES.length]);
+        if (h % 3 === 0) types.push("SST (Sauveteur Secouriste du Travail)");
+      } else {
+        if (h % 4 !== 3) types.push("SST (Sauveteur Secouriste du Travail)");
+      }
+      types.forEach(type => {
+        const h2 = hashStr(key + "|" + type);
+        const duree = HAB_DUREE[type];
+        const monthsAgo = 1 + (h2 % 58);
+        const d = new Date();
+        d.setMonth(d.getMonth() - monthsAgo);
+        out.push({
+          id: "hab-" + h2.toString(36),
+          nom: r.nom, prenom: r.prenom, service: r.service, collectivite: r.collectivite || "Ville",
+          typeHabilitation: type,
+          organismeFormateur: ORGANISMES_FORMATION[h2 % ORGANISMES_FORMATION.length],
+          dateObtention: d.toISOString().slice(0,10),
+          dureeValiditeMois: duree,
+          commentaire: "",
+        });
+      });
+    });
+    return out;
+  }
+
+  // ---------- Dataset (always-merge) ----------
+  const STORAGE_KEY = "vigie_hse_habilitations";
+  function genId(){ return "man-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
+  function loadDataset(){
+    let stored = [];
+    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    const seedList = buildHabilitationSeeds();
+    const storedById = new Map(stored.map(r => [r.id, r]));
+    const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
+    const seedIds = new Set(seeded.map(r => r.id));
+    const userExtra = stored.filter(r => !seedIds.has(r.id));
+    const merged = seeded.concat(userExtra);
+    saveDataset(merged);
+    return merged;
+  }
+  let DATASET = loadDataset();
+  if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
+
+  function computeStatus(h){
+    const d = new Date(h.dateObtention);
+    const expiration = new Date(d);
+    expiration.setMonth(expiration.getMonth() + (Number(h.dureeValiditeMois) || 24));
+    const today = new Date();
+    const in60 = new Date(today); in60.setDate(in60.getDate() + 60);
+    let statut = "À jour", cls = "ok";
+    if (expiration < today){ statut = "Expirée"; cls = "late"; }
+    else if (expiration <= in60){ statut = "À renouveler"; cls = "soon"; }
+    return { dateExpiration: expiration.toISOString().slice(0,10), statut, cls };
+  }
+
+  // ---------- Filtres ----------
+  const fCollectivite = $("fCollectivite"), fService = $("fService"), fType = $("fType"), fStatut = $("fStatut");
+  fType.innerHTML = `<option value="all">Tous les types</option>` + HAB_TYPES.map(t => `<option value="${t[0]}">${t[0]}</option>`).join("");
+  function fillServiceOptions(){
+    const col = fCollectivite.value;
+    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const current = fService.value;
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.value = list.includes(current) ? current : "all";
+  }
+  fillServiceOptions();
+  fCollectivite.addEventListener("change", () => { fillServiceOptions(); render(); });
+
+  function render(){
+    const col = fCollectivite.value, svc = fService.value, typ = fType.value, st = fStatut.value;
+    const withStatus = DATASET.map(v => Object.assign({}, v, computeStatus(v)));
+    let rows = withStatus.filter(v =>
+      (col === "all" || v.collectivite === col) &&
+      (svc === "all" || v.service === svc) &&
+      (typ === "all" || v.typeHabilitation === typ) &&
+      (st === "all" || v.statut === st)
+    );
+    rows = rows.slice().sort((a,b) => a.dateExpiration.localeCompare(b.dateExpiration));
+
+    $("kpiTotal").textContent = DATASET.length;
+    $("kpiOk").textContent = withStatus.filter(v => v.statut === "À jour").length;
+    $("kpiSoon").textContent = withStatus.filter(v => v.statut === "À renouveler").length;
+    $("kpiLate").textContent = withStatus.filter(v => v.statut === "Expirée").length;
+    $("resultCount").textContent = rows.length;
+    $("totalCount").textContent = DATASET.length;
+
+    const tbody = $("tbody");
+    const colspan = canEdit ? 9 : 8;
+    if (rows.length === 0){
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">${DATASET.length === 0 ? "Aucune habilitation suivie pour le moment." : "Aucune habilitation ne correspond aux filtres sélectionnés."}</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(v => `
+      <tr class="${v.cls === 'late' ? 'late' : ''}" data-id="${v.id}">
+        <td>${v.nom}</td>
+        <td>${v.prenom}</td>
+        <td>${v.service} <span style="color:var(--text-faint)">· ${v.collectivite}</span></td>
+        <td class="wrap">${v.typeHabilitation}</td>
+        <td>${v.organismeFormateur || '—'}</td>
+        <td>${v.dateObtention}</td>
+        <td class="${v.cls === 'late' ? 'echeance-overdue' : ''}">${v.dateExpiration}</td>
+        <td><span class="status-chip ${v.cls}">${v.statut}</span></td>
+        ${canEdit ? `<td class="actions-float">
+          <button type="button" class="act-edit" data-edit="${v.id}">Modifier</button>
+          <button type="button" class="act-del" data-id="${v.id}">Suppr.</button>
+        </td>` : ''}
+      </tr>`).join("");
+  }
+
+  fService.addEventListener("change", render);
+  fType.addEventListener("change", render);
+  fStatut.addEventListener("change", render);
+  $("btnReset").addEventListener("click", () => {
+    fCollectivite.value = "all"; fillServiceOptions(); fType.value = "all"; fStatut.value = "all"; render();
+  });
+
+  if (canEdit){
+    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle habilitation</button>`;
+
+    const formPanel = $("formPanel"), form = $("habForm");
+    $("fTypeForm").innerHTML = HAB_TYPES.map(t => `<option value="${t[0]}">${t[0]}</option>`).join("");
+    function fillFormServiceOptions(col){
+      const list = servicesForCollectivite(col);
+      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+    }
+    fillFormServiceOptions("Ville");
+    $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
+    $("fTypeForm").addEventListener("change", (e) => {
+      const d = HAB_DUREE[e.target.value];
+      if (d) $("fDuree").value = d;
+    });
+
+    function openForm(rec){
+      form.reset();
+      if (rec){
+        $("formTitle").textContent = "Modifier l'habilitation";
+        $("fId").value = rec.id;
+        $("fNom").value = rec.nom;
+        $("fPrenom").value = rec.prenom;
+        $("fCollectiviteForm").value = rec.collectivite;
+        fillFormServiceOptions(rec.collectivite);
+        $("fServiceForm").value = rec.service;
+        $("fTypeForm").value = rec.typeHabilitation;
+        $("fOrganisme").value = rec.organismeFormateur || "";
+        $("fDateObtention").value = rec.dateObtention || "";
+        $("fDuree").value = rec.dureeValiditeMois;
+        $("fCommentaire").value = rec.commentaire || "";
+      } else {
+        $("formTitle").textContent = "Nouvelle habilitation";
+        $("fId").value = "";
+        fillFormServiceOptions("Ville");
+        $("fTypeForm").value = HAB_TYPES[0][0];
+        $("fDuree").value = HAB_TYPES[0][1];
+        $("fDateObtention").value = new Date().toISOString().slice(0,10);
+      }
+      formPanel.style.display = "";
+      formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+    $("btnNew").addEventListener("click", () => openForm(null));
+    $("btnCancelForm").addEventListener("click", () => { formPanel.style.display = "none"; form.reset(); });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = $("fId").value;
+      const isNew = !id;
+      const rec = {
+        id: id || genId(),
+        nom: $("fNom").value.trim(),
+        prenom: $("fPrenom").value.trim(),
+        collectivite: $("fCollectiviteForm").value,
+        service: $("fServiceForm").value,
+        typeHabilitation: $("fTypeForm").value,
+        organismeFormateur: $("fOrganisme").value.trim(),
+        dateObtention: $("fDateObtention").value,
+        dureeValiditeMois: Number($("fDuree").value) || 24,
+        commentaire: $("fCommentaire").value.trim(),
+      };
+      const idx = DATASET.findIndex(d => d.id === rec.id);
+      if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);
+      saveDataset(DATASET);
+      logAudit("Formation / Habilitation", isNew ? "Création" : "Modification", `${rec.typeHabilitation} — ${rec.nom} ${rec.prenom}`);
+      formPanel.style.display = "none";
+      form.reset();
+      render();
+    });
+
+    $("tbody").addEventListener("click", (e) => {
+      const editBtn = e.target.closest(".act-edit");
+      if (editBtn){ const rec = DATASET.find(d => d.id === editBtn.dataset.edit); if (rec) openForm(rec); return; }
+      const delBtn = e.target.closest(".act-del");
+      if (delBtn){
+        const rec = DATASET.find(d => d.id === delBtn.dataset.id);
+        if (!rec) return;
+        if (confirm(`Supprimer « ${rec.typeHabilitation} » pour ${rec.nom} ${rec.prenom} ?`)){
+          DATASET = DATASET.filter(d => d.id !== rec.id);
+          saveDataset(DATASET);
+          logAudit("Formation / Habilitation", "Suppression", `${rec.typeHabilitation} — ${rec.nom} ${rec.prenom}`);
+          render();
+        }
+      }
+    });
+  }
+
+  render();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

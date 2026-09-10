@@ -1,0 +1,791 @@
+<title>Déclaration AT / MP</title>
+<meta name="description" content="Espace RH — création et modification des cas d'accident du travail ou de maladie professionnelle du Registre AT/MP.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B;
+    --danger-bg:#FFF4F4; --success-bg:#F1FAF6; --warning-bg:#FFF8ED;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px;
+    --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985;
+      --danger-bg:rgba(232,147,143,.12); --success-bg:rgba(134,199,172,.12); --warning-bg:rgba(237,199,134,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985;
+    --danger-bg:rgba(232,147,143,.12); --success-bg:rgba(134,199,172,.12); --warning-bg:rgba(237,199,134,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  ::selection{ background:rgba(var(--accent-rgb),.24); }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; font-variant-numeric:tabular-nums; }
+  .eyebrow{ font-family:"Barlow Condensed",sans-serif; font-weight:600; letter-spacing:.09em; text-transform:uppercase; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item.soon{ opacity:.5; cursor:default; }
+  .nav-item .icon{ width:17px; height:17px; }
+  .nav-item-badge{ margin-left:auto; font-size:9px; padding:2px 6px; border-radius:var(--r-pill); background:var(--bg-2); color:var(--text-faint); font-family:"IBM Plex Mono",monospace; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:var(--danger-bg); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .content{ padding:26px 28px 60px; max-width:1400px; width:100%; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  /* ===== Sidebar auto-collapsible (desktop) ===== */
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name,
+    .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label,
+    .app-shell.sidebar-collapsed .nav-item-badge,
+    .app-shell.sidebar-collapsed .user-meta{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+  .hero{ margin-bottom:22px; } .hero h1{ font-size:25px; } .hero p{ margin:6px 0 0; color:var(--text-muted); font-size:13px; }
+
+  /* ===== Compact sticky page summary (icon + titre + description sur une ligne) ===== */
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } }
+  .edit-flag{ display:inline-flex; align-items:center; gap:6px; margin-top:8px; padding:3px 9px; border-radius:var(--r-sm); background:var(--warning-bg); color:var(--warning); font-size:11px; font-weight:600; }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:10px 17px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+
+  .entry-layout{ display:grid; grid-template-columns:1.8fr 1fr; gap:18px; align-items:start; }
+  @media (max-width:960px){ .entry-layout{ grid-template-columns:1fr; } }
+  .form-panel{ padding:24px clamp(18px,2.4vw,28px) 26px; }
+  fieldset{ border:none; margin:0 0 26px; padding:0; } fieldset:last-of-type{ margin-bottom:0; }
+  .fieldset-head{ display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+  .fieldset-head .flabel{ font-size:11px; color:var(--text-faint); font-family:"Barlow Condensed",sans-serif; font-weight:600; letter-spacing:.09em; text-transform:uppercase; }
+  .fieldset-head .idx{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; color:var(--accent); background:rgba(var(--accent-rgb),.12); flex-shrink:0; }
+  .field-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px 18px; }
+  .field-grid .span2{ grid-column:span 2; } .field-grid .span3{ grid-column:span 3; }
+  @media (max-width:640px){ .field-grid .span2, .field-grid .span3{ grid-column:span 1; } }
+  .f{ display:flex; flex-direction:column; gap:7px; }
+  .f label{ font-size:11.5px; color:var(--text-muted); font-weight:500; }
+
+  select, input[type="text"], input[type="number"], input[type="date"], textarea{
+    appearance:none; -webkit-appearance:none; background:var(--surface); border:1px solid var(--border); color:var(--text);
+    font:500 13px "IBM Plex Sans",sans-serif; padding:10px 12px; border-radius:var(--r-sm); width:100%;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  textarea{ resize:vertical; min-height:66px; font-weight:400; line-height:1.5; }
+  select{
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>');
+    background-repeat:no-repeat; background-position:right 12px center; padding-right:32px; cursor:pointer;
+  }
+  input:disabled{ opacity:.45; cursor:not-allowed; }
+  select:hover, input:hover, textarea:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible, .segmented input:focus-visible + label{
+    outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14);
+  }
+
+  .segmented{ display:inline-flex; border:1px solid var(--border); border-radius:var(--r-sm); overflow:hidden; width:100%; background:var(--surface); }
+  .segmented input{ position:absolute; width:1px; height:1px; opacity:0; }
+  .segmented label{ flex:1; text-align:center; padding:10px 8px; font:500 12px "IBM Plex Sans",sans-serif; color:var(--text-muted); cursor:pointer; border-right:1px solid var(--border); transition:background .15s ease, color .15s ease; }
+  .segmented label:last-child{ border-right:none; }
+  .segmented input:checked + label{ background:linear-gradient(135deg, var(--accent), var(--accent-violet)); color:#fff; font-weight:600; }
+  .segmented.danger input:checked + label{ background:var(--danger); color:#fff; }
+  .segmented.triple label{ font-size:11.5px; }
+
+  .form-actions{ display:flex; align-items:center; gap:12px; margin-top:28px; padding-top:20px; border-top:1px solid var(--border); flex-wrap:wrap; }
+  .confirm-banner{ display:none; align-items:center; gap:8px; margin-top:16px; padding:11px 14px; border-radius:var(--r-sm); background:var(--success-bg); color:var(--success); font-size:12.5px; font-weight:500; }
+  .confirm-banner.show{ display:flex; }
+  .confirm-banner::before{ content:"✓"; font-weight:700; }
+
+  .feed-panel{ padding:20px 20px 22px; position:sticky; top:76px; }
+  .feed-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:4px; }
+  .feed-title{ font-size:16px; }
+  .feed-count{ font-size:11px; color:var(--text-faint); } .feed-count b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+  .feed-sub{ font-size:11.5px; color:var(--text-faint); margin-bottom:14px; }
+  .feed-list{ display:flex; flex-direction:column; gap:10px; max-height:520px; overflow-y:auto; }
+  .feed-empty{ font-size:12.5px; color:var(--text-faint); padding:20px 4px; text-align:center; border:1px dashed var(--border); border-radius:var(--r-sm); }
+  .feed-item{ border:1px solid var(--border); border-left:3px solid var(--border); border-radius:var(--r-sm); padding:11px 13px; background:var(--bg-2); }
+  .feed-item.avec{ border-left-color:var(--danger); } .feed-item.sans{ border-left-color:var(--success); }
+  .feed-item-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .feed-date{ font-size:11.5px; color:var(--text-muted); }
+  .feed-action{ font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); }
+  .feed-service{ font-size:12.5px; font-weight:600; margin-top:6px; }
+  .feed-sub-service{ font-size:11px; color:var(--text-faint); }
+  .feed-nature{ font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .feed-bottom{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; }
+
+  .type-chip{ display:inline-block; padding:3px 9px; border-radius:var(--r-sm); font-size:10px; font-weight:600; font-family:"IBM Plex Mono",monospace; border:1px solid; white-space:nowrap; }
+  .type-chip.at{ color:var(--accent); border-color:rgba(var(--accent-rgb),.35); background:rgba(var(--accent-rgb),.09); }
+  .type-chip.trajet{ color:var(--success); border-color:rgba(var(--success-rgb),.35); background:var(--success-bg); }
+  .type-chip.benin{ color:var(--warning); border-color:rgba(var(--warning-rgb),.4); background:var(--warning-bg); }
+
+  .badge{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:10.5px; font-weight:600; white-space:nowrap; }
+  .badge::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .badge-danger{ background:var(--danger-bg); color:var(--danger); } .badge-danger::before{ background:var(--danger); }
+  .badge-neutral{ background:var(--success-bg); color:var(--success); } .badge-neutral::before{ background:var(--success); }
+
+  .feed-clear{ margin-top:12px; font-size:11px; color:var(--text-faint); background:none; border:none; text-decoration:underline; cursor:pointer; padding:0; }
+  .feed-clear:hover{ color:var(--danger); }
+  .feed-open{ display:block; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); font-size:12px; font-weight:600; color:var(--accent); }
+  .footnote{ margin-top:22px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.6; }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user){ location.href = "login.html"; return; }
+      if (s.role !== "rh" && s.role !== "admin"){ location.href = "registre-at-mp.html"; }
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="index.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="index.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre Santé &amp; Sécurité</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item active" href="saisie-rh.html"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" href="saisie-duerp.html"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section" id="navAdmin" style="display:none;">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item" href="administration.html"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">Compte RH</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Espace RH / <b id="pageTitle">Déclaration AT/MP</b></div>
+      <div class="topbar-right">
+        <span class="role-chip">RH</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-plus"/></svg></div>
+          <div class="page-summary-text">
+            <h1 id="pageH1">Déclaration AT / MP</h1>
+            <p id="pageSub">Saisie d'un accident du travail, d'un accident de trajet ou d'un événement bénin pour le Registre AT/MP.</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="entry-layout">
+        <div class="panel form-panel">
+          <form id="declForm" novalidate>
+
+            <fieldset>
+              <div class="fieldset-head"><span class="idx">1</span><span class="flabel">Agent</span></div>
+              <div class="field-grid">
+                <div class="f"><label for="fStatut">Statut</label><select id="fStatut" name="statut" required></select></div>
+                <div class="f"><label for="fCivilite">Civilité</label><select id="fCivilite" name="civilite" required></select></div>
+                <div class="f"><label for="fNom">Nom</label><input type="text" id="fNom" name="nom" required autocomplete="off" placeholder="ex. DURAND"></div>
+                <div class="f"><label for="fPrenom">Prénom</label><input type="text" id="fPrenom" name="prenom" required autocomplete="off" placeholder="ex. MARIE"></div>
+                <div class="f"><label for="fDateNaissance">Date de naissance</label><input type="date" id="fDateNaissance" name="dateNaissance" required></div>
+                <div class="f"><label for="fAge">Âge</label><input type="number" id="fAge" name="age" min="16" max="75" required placeholder="ex. 42"></div>
+                <div class="f"><label for="fCategorie">Catégorie</label><select id="fCategorie" name="categorie" required></select></div>
+                <div class="f"><label for="fFiliere">Filière</label><select id="fFiliere" name="filiere" required></select></div>
+                <div class="f"><label for="fCadreEmploi">Cadre d'emploi</label><select id="fCadreEmploi" name="cadreEmploi" required></select></div>
+                <div class="f"><label for="fGrade">Grade</label><input type="text" id="fGrade" name="grade" list="dlGrade" required autocomplete="off" placeholder="ex. Adjt tech"><datalist id="dlGrade"></datalist></div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <div class="fieldset-head"><span class="idx">2</span><span class="flabel">Localisation</span></div>
+              <div class="field-grid">
+                <div class="f">
+                  <label>Collectivité</label>
+                  <div class="segmented" id="segCollectivite">
+                    <input type="radio" name="collectivite" id="col-ville" value="Ville" checked required><label for="col-ville">Ville</label>
+                    <input type="radio" name="collectivite" id="col-agglo" value="Agglomération" required><label for="col-agglo">Agglomération</label>
+                  </div>
+                </div>
+                <div class="f"><label for="fService">Service</label><select id="fService" name="service" required></select></div>
+                <div class="f span2"><label for="fServiceDetail">Service (détail)</label><input type="text" id="fServiceDetail" name="serviceDetail" list="dlServiceDetail" required autocomplete="off" placeholder="Sélectionnez d'abord un service" disabled><datalist id="dlServiceDetail"></datalist></div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <div class="fieldset-head"><span class="idx">3</span><span class="flabel">Événement</span></div>
+              <div class="field-grid">
+                <div class="f span3">
+                  <label>Type AT/MP</label>
+                  <div class="segmented triple" id="segType">
+                    <input type="radio" name="typeAtMp" id="type-at" value="Accident de travail" checked required><label for="type-at">Accident de travail</label>
+                    <input type="radio" name="typeAtMp" id="type-trajet" value="Accident de trajet" required><label for="type-trajet">Accident de trajet</label>
+                    <input type="radio" name="typeAtMp" id="type-benin" value="Bénin" required><label for="type-benin">Bénin</label>
+                  </div>
+                </div>
+                <div class="f"><label for="fDateAT">Date</label><input type="date" id="fDateAT" name="dateAT" required></div>
+                <div class="f span2"><label for="fRisque">Risque</label><select id="fRisque" name="risque" required></select></div>
+                <div class="f span3"><label for="fCirconstances">Circonstances</label><textarea id="fCirconstances" name="circonstances" required placeholder="Décrivez précisément le déroulement de l'événement…"></textarea></div>
+                <div class="f"><label for="fSiege">Siège</label><select id="fSiege" name="siege" required></select></div>
+                <div class="f"><label for="fNature">Nature</label><select id="fNature" name="nature" required></select></div>
+                <div class="f"><label for="fElementMateriel">Élément matériel</label><input type="text" id="fElementMateriel" name="elementMateriel" list="dlElementMateriel" autocomplete="off" placeholder="ex. Véhicule routier (facultatif)"><datalist id="dlElementMateriel"></datalist></div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <div class="fieldset-head"><span class="idx">4</span><span class="flabel">Conséquences</span></div>
+              <div class="field-grid">
+                <div class="f">
+                  <label>Avec / sans arrêt</label>
+                  <div class="segmented danger" id="segArret">
+                    <input type="radio" name="arret" id="arret-sans" value="sans" checked required><label for="arret-sans">Sans arrêt</label>
+                    <input type="radio" name="arret" id="arret-avec" value="avec" required><label for="arret-avec">Avec arrêt</label>
+                  </div>
+                </div>
+                <div class="f"><label for="fJours">Nombre de jours d'arrêt</label><input type="number" id="fJours" name="jours" min="1" max="600" placeholder="—" disabled></div>
+              </div>
+            </fieldset>
+
+            <div class="form-actions" id="formActions">
+              <button type="submit" class="btn btn-primary" id="btnSubmit">Enregistrer la déclaration</button>
+              <button type="reset" class="btn btn-ghost" id="btnResetForm">Réinitialiser le formulaire</button>
+            </div>
+            <div class="confirm-banner" id="confirmBanner">Déclaration enregistrée — visible dans le Registre AT/MP.</div>
+          </form>
+        </div>
+
+        <div class="panel feed-panel">
+          <div class="feed-head"><span class="feed-title">Journal de saisie</span><span class="feed-count"><b id="feedCount">0</b></span></div>
+          <div class="feed-sub">Créations et modifications effectuées depuis cet espace, dans ce navigateur.</div>
+          <div class="feed-list" id="feedList"><div class="feed-empty">Aucune déclaration saisie pour le moment.</div></div>
+          <button class="feed-clear" id="btnClearFeed" type="button">Vider le journal (le registre n'est pas modifié)</button>
+          <a class="feed-open" href="registre-at-mp.html">Ouvrir le Registre AT/MP →</a>
+        </div>
+      </div>
+
+      <p class="footnote">Espace RH — les données sont enregistrées localement dans ce navigateur (aucun serveur connecté à ce stade du prototype) et partagées avec le Registre AT/MP. L'import/export Excel se pilote depuis le Registre.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const sessRole = (session && session.role) || "rh";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = sessRole === "admin" ? "Administrateur" : "Compte RH";
+  if (sessRole === "admin"){ $("navAdmin").style.display = ""; }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+
+  // ---------- Sidebar auto-collapse (desktop) ----------
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){
+    clearTimeout(collapseTimer);
+    if (appShell) appShell.classList.remove("sidebar-collapsed");
+  }
+  function sidebarCollapse(delay){
+    clearTimeout(collapseTimer);
+    if (!isDesktopWidth()) return;
+    collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0);
+  }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){
+    mainEl.addEventListener("mouseenter", () => sidebarCollapse(200));
+    mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+  }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(module, type, description){
+    try {
+      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
+      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+
+  // ---------- Référentiels partagés (éditables depuis l'Administration) ----------
+  const REF_KEY = "vigie_hse_referentials";
+  const REF_DEFAULTS = {
+    risquesATMP: ["Activité Physique","Autres","Chute de hauteur","Chute de plain pied","Chute d'objet","Déplacement","Equipement de travail","Routier","RPS"],
+    sieges: ["Autres","Bras","Cervical","Cheville","Cuisse","Dos","Epaule","Genoux","Main","Mollet","Multiple","Oreilles","Pieds","Poignée","Rps","Thorax","Ventre","Visage","Yeux"],
+    natures: ["Autres","Brulure","Contusion","Douleur","Entorse","Inflammation","Lombalgie","Malaise","Multiple","Plaie","Psy"],
+    statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
+    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
+    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+    risqueFamillesDUERP: [],
+  };
+  function loadReferentials(){
+    let stored = {};
+    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    const merged = {};
+    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
+    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  const REF = loadReferentials();
+
+  // ---------- Vocabulaire fusionné Ville (DB.xlsx) + Agglomération (BIlan AT GACG 2025.xlsx) ----------
+  const STATUTS = REF.statutsRH;
+  const CIVILITES = ["Madame","Monsieur"];
+  const CATEGORIES = ["Catégorie A","Catégorie B","Catégorie C","Sans categorie"];
+  const FILIERES = ["Filière administrative","Filière animation","Filière culturelle","Filière médico-sociale","Filière Sécurité (Police Municipale)","Filière Sociale","Filière sportive","Filière technique","Sans filière"];
+  const CADRE_EMPLOI = ["Adjoints administratifs territoriaux","Adjoints du patrimoine territoriaux","Adjoints techniques territoriaux","Adjoints territoriaux d'animation","Agents de maîtrise Territoriaux","Agents de police municipale","Agents ter.spécialis. écoles maternelles","Attachés Territoriaux","Auxiliaires de puériculture territoriaux","Cadre d'emploi animateurs temporaires","Educateurs terr. de jeunes enfants","Educateurs territoriaux des APS","Emplois fonctionnels administratifs","Grade non statutaire - sans cadre emploi","Puéricultrices territoriales","Rédacteurs Territoriaux","Techniciens territoriaux"];
+  const GRADES = ["Adjt adm","Adjt adm Pal 1Cl","Adjt adm Pal 2Cl","Adjt ter anim Pal 1Cl","Adjt ter anim Pal 2Cl","Adjt ter animation","Adjt ter patr Pal 1Cl","Adjt tech","Adjt tech Pal 1Cl","Adjt tech Pal 2Cl","Agent maitrise","Agent maitrise Pal","Animateur","Assistante maternelle","ATSEM Pal 1Cl","Attaché","Attaché Pal","Auxiliaire puér Cl N","Auxiliaire puér Cl Sup","Brigadier-chef Pal","Dir.adj.ets pub.","Educateur APS Pal 2Cl","Educateur Jeunes Enfants","Gardien-brigadier","Puér","Rédacteur Pal 1Cl","Technicien"];
+  const RISQUES = REF.risquesATMP;
+  const SIEGES = REF.sieges;
+  const NATURES = REF.natures;
+  const ELEMENTS_MATERIELS = ["AUTRE OUTIL MECANIQUE GUIDE A LA MAIN","EMPLACEMENTS ET SURFACES POUR ACCIDENT DE PLAIN-PIED NON PRECISES","NON PRECISE EFFORT INTENSE","NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED","NON PRECISE, CHUTE OU GLISSADE EN DENIVELE OU HAUTEUR (DESCENTE DE BUS, ESCALIER, ESCABEAU, MARCHES)","NON PRECISE, MANIPULATION D'OBJETS, D'OUTIL A MAIN / INSTRUMENTS PORTATIFS","NON PRECISE, NE RENTRANT PAS DANS UNE DE CES CATEGORIES. A PRECISER","OUTIL MECANIQUE TENU OU GUIDE A LA MAIN NON PRECISE","VEHICULE ROUTIER"];
+  const VILLE_SERVICES = REF.servicesVille;
+  const AGGLO_SERVICES = REF.servicesAgglo;
+  const SERVICE_DETAIL = {
+    "Admin Générale": ["ADMG_Accueil"],
+    "Batiment": ["BMO_Régie Bâtiments communaux"],
+    "Communication": ["COM_Communication Supports"],
+    "Cuisine Centrale": ["Cuisine Centrale"],
+    "Direction Générale": ["Directeur Général des Services Adjoint"],
+    "DRHCT": ["Ressources Humaines et Cond de travail","RH_Accueil - Gestion Administrative","RH_Conditions de travail","RH_Emploi-formation"],
+    "Ecole de musique": ["Ecole de Musique"],
+    "EEJ": ["ED_Activités périscolaires / extrascol","ED_Coordination Jeunesse","EEJ_Ecoles Elémentaires","EEJ_Ecoles maternelles","EEJ_Entretien Bâtiments communaux","PEDP_Pol Educatives et de Prévention","Pôle Administratif EEJ"],
+    "Espace Vert": ["BMO_Cimetière","Espaces verts - terrain régie"],
+    "Manifestation": ["BMO_Fêtes et cérémonies"],
+    "Mécanique": ["ENV_Achat / Mécanique"],
+    "Médiathèque": ["Bib section jeunesse","BIB_Secrétariat"],
+    "Petite Enfance": ["PE_Accueil Familial les Petits loups","PE_Boule de Gomme","PE_Maison Petite Enfance","PE_Pôle Administratif","PE_Tendres Galipettes"],
+    "Propreté Déchet": ["ENV_Propreté déchets"],
+    "Propreté Urbaine": ["PRU_Nettoiement mécanisé","PUR_Nettoiement manuel","PUR_Travaux spécifiques / remplacements"],
+    "SAF": ["DST_Administratif et financier"],
+    "Sécurité Tranquilité Publique": ["STP_Police Municipale","STP_Stationnement Marchés de plein vent"],
+    "Sport": ["Equipements sportifs","SPORTS"],
+    "Urbanisme": ["DST_Urbanisme"],
+    "Voirie": ["INF_Régie Voirie"],
+  };
+
+  const STORAGE_KEY = "vigie_hse_dataset";
+  const LOG_KEY = "vigie_hse_rh_log";
+
+  function genId(){ return "d-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
+  function loadDataset(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw){
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && (parsed.length === 0 || (parsed[0].dateAT !== undefined && parsed[0].joursArret !== undefined))) return parsed;
+      }
+    } catch(e){}
+    return null;
+  }
+  function loadLog(){
+    try { const v = JSON.parse(localStorage.getItem(LOG_KEY) || "[]"); return Array.isArray(v) ? v : []; }
+    catch(e){ return []; }
+  }
+  function saveLog(v){ try { localStorage.setItem(LOG_KEY, JSON.stringify(v)); } catch(e){} }
+
+  let DATASET = loadDataset();
+  if (DATASET === null){
+    alert("Le Registre AT/MP n'a pas encore été ouvert dans ce navigateur — ouverture pour initialiser les données.");
+    location.href = "registre-at-mp.html";
+  }
+
+  function fillOptions(select, values, placeholder){
+    select.innerHTML = "";
+    const ph = document.createElement("option");
+    ph.value = ""; ph.textContent = placeholder; ph.disabled = true; ph.selected = true;
+    select.appendChild(ph);
+    values.forEach(v => {
+      const o = document.createElement("option");
+      o.value = v; o.textContent = v;
+      select.appendChild(o);
+    });
+  }
+  function fillDatalist(dl, values){
+    dl.innerHTML = values.map(v => `<option value="${v.replace(/"/g,'&quot;')}">`).join("");
+  }
+
+  fillOptions($("fStatut"), STATUTS, "Sélectionner…");
+  fillOptions($("fCivilite"), CIVILITES, "Sélectionner…");
+  fillOptions($("fCategorie"), CATEGORIES, "Sélectionner…");
+  fillOptions($("fFiliere"), FILIERES, "Sélectionner…");
+  fillOptions($("fCadreEmploi"), CADRE_EMPLOI, "Sélectionner…");
+  fillOptions($("fRisque"), RISQUES, "Sélectionner…");
+  fillOptions($("fSiege"), SIEGES, "Sélectionner…");
+  fillOptions($("fNature"), NATURES, "Sélectionner…");
+  fillDatalist($("dlGrade"), GRADES);
+  fillDatalist($("dlElementMateriel"), ELEMENTS_MATERIELS);
+
+  const fServiceEl = $("fService");
+  function populateServiceOptions(col){
+    const list = col === "Agglomération" ? AGGLO_SERVICES : VILLE_SERVICES;
+    fillOptions(fServiceEl, list.slice().sort((a,b)=>a.localeCompare(b,'fr')), "Sélectionner…");
+  }
+  populateServiceOptions("Ville");
+  document.querySelectorAll('input[name="collectivite"]').forEach(r => {
+    r.addEventListener("change", () => {
+      if (!r.checked) return;
+      populateServiceOptions(r.value);
+      fServiceDetail.disabled = true;
+      fServiceDetail.value = "";
+      fServiceDetail.placeholder = "Sélectionnez d'abord un service";
+    });
+  });
+
+  const fServiceDetail = $("fServiceDetail");
+  fServiceEl.addEventListener("change", (e) => {
+    const list = SERVICE_DETAIL[e.target.value] || [];
+    fillDatalist($("dlServiceDetail"), list);
+    fServiceDetail.disabled = false;
+    fServiceDetail.value = "";
+    fServiceDetail.placeholder = list.length ? "ex. " + list[0] : "Préciser le service";
+  });
+
+  const fJours = $("fJours");
+  document.querySelectorAll('input[name="arret"]').forEach(r => {
+    r.addEventListener("change", () => {
+      if (r.value === "avec" && r.checked){
+        fJours.disabled = false; fJours.required = true; fJours.placeholder = "ex. 12";
+      } else if (r.value === "sans" && r.checked){
+        fJours.disabled = true; fJours.required = false; fJours.value = ""; fJours.placeholder = "—";
+      }
+    });
+  });
+
+  function fmtDate(iso){
+    if(!iso) return "—";
+    const [y,m,d] = String(iso).split("-");
+    return (y && m && d) ? `${d}/${m}/${y}` : String(iso);
+  }
+  function weekdayFr(iso){
+    if (!iso) return "";
+    const jours = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+    const d = new Date(iso + "T12:00:00");
+    return isNaN(d) ? "" : jours[d.getDay()];
+  }
+  function typeChipClass(t){
+    if (t === "Accident de travail") return "at";
+    if (t === "Accident de trajet") return "trajet";
+    return "benin";
+  }
+
+  const params = new URLSearchParams(location.search);
+  const editId = params.get("id");
+
+  function prefillForm(rec){
+    $("fStatut").value = rec.statut || "";
+    $("fCivilite").value = rec.civilite || "";
+    $("fNom").value = rec.nom || "";
+    $("fPrenom").value = rec.prenom || "";
+    $("fDateNaissance").value = rec.dateNaissance || "";
+    $("fAge").value = rec.age ?? "";
+    $("fCategorie").value = rec.categorie || "";
+    $("fFiliere").value = rec.filiere || "";
+    $("fCadreEmploi").value = rec.cadreEmploi || "";
+    $("fGrade").value = rec.grade || "";
+
+    const colInput = $(rec.collectivite === "Agglomération" ? "col-agglo" : "col-ville");
+    if (colInput) colInput.checked = true;
+    populateServiceOptions(rec.collectivite || "Ville");
+    $("fService").value = rec.service || "";
+    fillDatalist($("dlServiceDetail"), SERVICE_DETAIL[rec.service] || []);
+    fServiceDetail.disabled = false;
+    fServiceDetail.value = rec.serviceDetail || "";
+
+    const typeInput = rec.typeAtMp === "Accident de trajet" ? $("type-trajet")
+                     : rec.typeAtMp === "Bénin" ? $("type-benin")
+                     : $("type-at");
+    typeInput.checked = true;
+    $("fDateAT").value = rec.dateAT || "";
+    $("fRisque").value = rec.risque || "";
+    $("fCirconstances").value = rec.circonstances || "";
+    $("fSiege").value = rec.siege || "";
+    $("fNature").value = rec.nature || "";
+    $("fElementMateriel").value = rec.elementMateriel || "";
+
+    const arretInput = $(rec.arret ? "arret-avec" : "arret-sans");
+    arretInput.checked = true;
+    arretInput.dispatchEvent(new Event("change"));
+    if (rec.arret) fJours.value = rec.joursArret;
+  }
+
+  let editingRecord = null;
+  if (editId){
+    editingRecord = DATASET.find(d => d.id === editId) || null;
+    if (editingRecord){
+      $("pageTitle").textContent = "Modifier la déclaration";
+      $("pageH1").textContent = "Modifier la déclaration";
+      $("pageSub").innerHTML = `Mise à jour d'un événement existant du Registre AT/MP <span class="edit-flag">ID ${editingRecord.id}</span>`;
+      $("btnSubmit").textContent = "Enregistrer les modifications";
+      const cancel = document.createElement("a");
+      cancel.href = "registre-at-mp.html";
+      cancel.className = "btn btn-ghost";
+      cancel.textContent = "Annuler";
+      $("formActions").appendChild(cancel);
+      prefillForm(editingRecord);
+    } else {
+      alert("Déclaration introuvable dans ce navigateur — ouverture en mode création.");
+    }
+  }
+
+  function feedItemHTML(entry){
+    const r = entry.record;
+    return `
+      <div class="feed-item ${r.arret ? 'avec' : 'sans'}">
+        <div class="feed-item-top">
+          <span class="feed-date mono">${fmtDate(r.dateAT)}</span>
+          <span class="feed-action">${entry.action === 'update' ? 'Modifiée' : 'Créée'}</span>
+          <span class="type-chip ${typeChipClass(r.typeAtMp)}">${r.typeAtMp}</span>
+        </div>
+        <div class="feed-service">${r.nom || ''} ${r.prenom || ''} — ${r.service}</div>
+        <div class="feed-sub-service">${r.serviceDetail}</div>
+        <div class="feed-nature">${r.nature}${r.siege ? ' · ' + r.siege : ''}</div>
+        <div class="feed-bottom">
+          ${r.arret
+            ? `<span class="badge badge-danger">Avec arrêt</span><span class="mono" style="font-size:11px;color:var(--text-muted);">${r.joursArret} j</span>`
+            : `<span class="badge badge-neutral">Sans arrêt</span><span></span>`}
+        </div>
+      </div>`;
+  }
+
+  function renderFeed(){
+    const log = loadLog();
+    $("feedCount").textContent = log.length;
+    const list = $("feedList");
+    if (log.length === 0){
+      list.innerHTML = `<div class="feed-empty">Aucune déclaration saisie pour le moment.</div>`;
+      return;
+    }
+    list.innerHTML = log.slice().reverse().map(feedItemHTML).join("");
+  }
+  renderFeed();
+
+  const form = $("declForm");
+  const confirmBanner = $("confirmBanner");
+  let confirmTimer = null;
+
+  form.addEventListener("reset", () => {
+    setTimeout(() => {
+      populateServiceOptions("Ville");
+      fServiceDetail.disabled = true;
+      fServiceDetail.value = "";
+      fServiceDetail.placeholder = "Sélectionnez d'abord un service";
+    }, 0);
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+
+    const fd = new FormData(form);
+    const arretVal = fd.get("arret") === "avec";
+    const dateAT = fd.get("dateAT");
+    const typeAtMp = fd.get("typeAtMp");
+    const record = {
+      id: (editingRecord && editingRecord.id) || genId(),
+      collectivite: fd.get("collectivite"),
+      dateAT,
+      dateMois: dateAT,
+      jour: weekdayFr(dateAT),
+      statut: fd.get("statut"),
+      civilite: fd.get("civilite"),
+      nom: fd.get("nom"),
+      prenom: fd.get("prenom"),
+      dateNaissance: fd.get("dateNaissance"),
+      age: Number(fd.get("age")),
+      serviceDetail: fd.get("serviceDetail"),
+      service: fd.get("service"),
+      categorie: fd.get("categorie"),
+      filiere: fd.get("filiere"),
+      cadreEmploi: fd.get("cadreEmploi"),
+      typeAtMp,
+      arret: arretVal,
+      joursArret: arretVal ? Number(fd.get("jours") || 0) : 0,
+      circonstances: fd.get("circonstances"),
+      grade: fd.get("grade"),
+      etat: typeAtMp === "Bénin" ? "Bénin" : "AT",
+      risque: fd.get("risque"),
+      siege: fd.get("siege"),
+      nature: fd.get("nature"),
+      elementMateriel: fd.get("elementMateriel") || "",
+    };
+
+    if (editingRecord){
+      const idx = DATASET.findIndex(d => d.id === editingRecord.id);
+      if (idx >= 0) DATASET[idx] = record; else DATASET.push(record);
+    } else {
+      DATASET.push(record);
+    }
+    saveDataset(DATASET);
+
+    const log = loadLog();
+    log.push({ action: editingRecord ? "update" : "create", record });
+    saveLog(log);
+    logAudit("Registre AT/MP", editingRecord ? "Modification" : "Création", `${record.typeAtMp} — ${record.nom || ''} ${record.prenom || ''} (${record.service})`.trim());
+
+    if (editingRecord){
+      window.location.href = "registre-at-mp.html";
+      return;
+    }
+
+    renderFeed();
+    confirmBanner.classList.add("show");
+    clearTimeout(confirmTimer);
+    confirmTimer = setTimeout(() => confirmBanner.classList.remove("show"), 4000);
+
+    form.reset();
+    populateServiceOptions("Ville");
+    fServiceDetail.disabled = true;
+    fServiceDetail.placeholder = "Sélectionnez d'abord un service";
+    fJours.disabled = true; fJours.required = false;
+    $("fStatut").focus();
+  });
+
+  $("btnClearFeed").addEventListener("click", () => {
+    if (loadLog().length === 0) return;
+    if (confirm("Vider le journal de saisie de cette session ? Les données du registre ne seront pas modifiées.")){
+      saveLog([]);
+      renderFeed();
+    }
+  });
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

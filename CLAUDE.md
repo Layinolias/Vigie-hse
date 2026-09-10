@@ -18,7 +18,7 @@ Dashboard HSE prototype (Ville de Verchamps + Agglomération de Verchamps) : Reg
 4. **PowerShell : toujours `[System.IO.File]::ReadAllText/WriteAllText` + `UTF8Encoding($false)`** — `Get-Content`/`Out-File` corrompent les accents.
 5. **Édits ciblés fichier par fichier, jamais un regex global non vérifié.** Vérifier l'équilibre accolades/parenthèses/crochets JS après chaque édition (technique en §13 de `ETAT-DU-PROJET.md`).
 6. **Toute délégation à un agent en arrière-plan est bornée explicitement** ("fais exactement ceci, puis arrête-toi") et son résultat re-vérifié indépendamment avant d'être considéré acquis.
-7. **`git` n'est pas installé sur cette machine** (ni `gh`) — installation bloquée par une invite UAC non interactive. La mise en place de `git`/GitHub est reportée (demande explicite de l'utilisateur) ; ne pas la relancer sans qu'il le redemande.
+7. **`git` est installé** (`C:\Program Files\Git\cmd\git.exe` — utiliser ce chemin complet si `git` n'est pas dans le PATH d'une nouvelle session shell). Dépôt GitHub : `https://github.com/Layinolias/Vigie-hse` (public, GitHub Pages activé sur `main`/`root` → `https://layinolias.github.io/Vigie-hse/`). Le remote `origin` a un PAT embarqué dans son URL pour push direct — pas besoin de redemander un token sauf s'il expire/est révoqué.
 8. **Attention aux limites de session/débit** : un agent en arrière-plan peut être interrompu en cours de tâche (erreur `rate_limit`). Ne jamais supposer un travail perdu sur cette seule base — vérifier l'état réel des fichiers (souvent déjà complets, seul le rapport final manque) avant de relancer quoi que ce soit.
 
 ## Comptes de test

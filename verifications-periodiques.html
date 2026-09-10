@@ -2,6 +2,7 @@
 <meta name="description" content="Suivi des vérifications techniques périodiques des équipements et installations par organismes agréés.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -610,7 +611,20 @@
   });
 
   if (canEdit){
-    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel équipement</button>`;
+    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel équipement</button>`;
+
+    $("btnExport").addEventListener("click", () => {
+      const rows = DATASET.map(v => Object.assign({}, v, computeStatus(v))).map(v => ({
+        "ID": v.id, "Équipement": v.equipement, "Catégorie": v.categorie, "Collectivité": v.collectivite || "Ville",
+        "Site": v.site, "Service": v.service, "Organisme": v.organisme || "", "Dernière vérification": v.dateDerniere,
+        "Prochaine échéance": v.prochaine, "Statut": v.statut, "Conformité": v.conformite, "Commentaire": v.commentaire || "",
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Vérifications");
+      const today = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(wb, `verifications-periodiques_${today}.xlsx`);
+    });
 
     const formPanel = $("formPanel"), form = $("verifForm");
     $("fCategorieForm").innerHTML = CATEGORIES.map(c => `<option value="${c[0]}">${c[0]}</option>`).join("");

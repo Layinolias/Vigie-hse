@@ -239,6 +239,26 @@
   .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
   .footnote button{ background:none; border:none; color:var(--text-faint); text-decoration:underline; cursor:pointer; font-size:11.5px; font-family:"IBM Plex Sans",sans-serif; padding:0; }
   .footnote button:hover{ color:var(--danger); }
+
+  /* ===== Impression / export PDF (window.print) ===== */
+  .print-header{ display:none; }
+  @media print{
+    body{ background:#fff !important; }
+    .sidebar, .sidebar-scrim, .topbar, .page-summary, .ref-panel, .panel.console, .no-print, #btnImport, #btnExport, #btnExportPdf, #importFile, .footnote{ display:none !important; }
+    .main{ margin-left:0 !important; }
+    .content{ padding:0 !important; max-width:none !important; }
+    .print-header{ display:block !important; margin-bottom:14px; color:#000; }
+    .print-header .print-brand{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#555; }
+    .print-header h1{ font-size:18px; margin:2px 0 4px; color:#000; }
+    .print-header .print-date{ font-size:10.5px; color:#555; }
+    .panel{ box-shadow:none !important; border:none !important; background:#fff !important; }
+    .table-panel{ overflow:visible !important; max-height:none !important; }
+    table.reg, table.reg *{ color:#000 !important; }
+    table.reg thead th{ background:#eee !important; position:static !important; box-shadow:none !important; }
+    table.reg td, table.reg th{ font-size:9px !important; padding:4px 6px !important; border-color:#ccc !important; }
+    table.reg tr{ break-inside:avoid; page-break-inside:avoid; }
+    table.reg td.actions-float, table.reg th#thActions{ display:none !important; }
+  }
 </style>
 
 <script>
@@ -331,6 +351,12 @@
     </header>
 
     <div class="content">
+      <div class="print-header">
+        <div class="print-brand">VIGIE HSE</div>
+        <h1>Document Unique d'Évaluation des Risques Professionnels</h1>
+        <div class="print-date">Édité le <span id="printDate"></span></div>
+      </div>
+
       <header class="page-summary">
         <div class="page-summary-id">
           <div class="page-summary-icon"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
@@ -426,6 +452,7 @@
           <div class="panel-actions" id="rhToolbar">
             <button class="btn btn-ghost" id="btnImport" type="button"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button>
             <button class="btn btn-ghost" id="btnExport" type="button"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>
+            <button class="btn btn-ghost no-print" id="btnExportPdf" type="button" title="Utilise l'impression du navigateur — choisissez « Enregistrer au format PDF » comme imprimante."><svg class="icon"><use href="#i-download"/></svg> Exporter en PDF</button>
             <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none">
             <a class="btn btn-primary" href="saisie-duerp.html"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle évaluation</a>
           </div>
@@ -875,7 +902,12 @@
       XLSX.utils.book_append_sheet(wb, ws, "EVR");
       XLSX.writeFile(wb, `document-unique_${new Date().toISOString().slice(0,10)}.xlsx`);
     });
+
+    $("btnExportPdf").addEventListener("click", () => { window.print(); });
   }
+
+  const printDateEl = $("printDate");
+  if (printDateEl) printDateEl.textContent = new Date().toLocaleDateString('fr-FR');
 
   render();
 

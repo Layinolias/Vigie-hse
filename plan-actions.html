@@ -2,6 +2,7 @@
 <meta name="description" content="Suivi des actions correctives issues du Document Unique et du Registre AT/MP.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -671,7 +672,20 @@
   });
 
   if (canEdit){
-    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle action</button>`;
+    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle action</button>`;
+
+    $("btnExport").addEventListener("click", () => {
+      const rows = DATASET.map(r => ({
+        "ID": r.id, "Titre": r.titre, "Description": r.description, "Collectivité": r.collectivite || "Ville", "Service": r.service,
+        "Risque lié": r.risqueLie || "", "Origine": r.origine, "Responsable": r.responsable || "", "Échéance": r.echeance,
+        "Priorité": r.priorite, "Statut": r.statut, "Date de création": r.dateCreation || "",
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Plan d'Actions");
+      const today = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(wb, `plan-actions_${today}.xlsx`);
+    });
 
     const formPanel = $("formPanel"), form = $("actionForm");
     function fillFormServiceOptions(col){

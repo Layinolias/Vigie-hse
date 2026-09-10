@@ -2,6 +2,7 @@
 <meta name="description" content="Catalogue des équipements de protection individuelle et vêtements de travail, stock, dotations par agent et suivi de l'entretien.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -747,7 +748,18 @@
       </tr>`).join("");
   }
   if (canEdit){
-    $("catActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="catNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel article</button>`;
+    $("catActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="catExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="catNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel article</button>`;
+    $("catExport").addEventListener("click", () => {
+      const rows = CATALOGUE.map(c => ({
+        "ID": c.id, "Nom": c.nom, "Catégorie": c.categorie, "Norme": c.norme || "",
+        "Durée de vie (mois)": c.dureeVieMois || "", "Nombre de lavages max": c.nombreLavagesMax || "",
+        "Fiche technique": c.ficheTechnique || "",
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Catalogue");
+      XLSX.writeFile(wb, `epi-catalogue_${new Date().toISOString().slice(0,10)}.xlsx`);
+    });
     const catFormPanel = $("catFormPanel"), catForm = $("catForm");
     function openCatForm(rec){
       catForm.reset();
@@ -827,7 +839,20 @@
     }).join("");
   }
   if (canEdit){
-    $("stockActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="stkNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle ligne de stock</button>`;
+    $("stockActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="stkExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="stkNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle ligne de stock</button>`;
+    $("stkExport").addEventListener("click", () => {
+      const rows = STOCK.map(s => {
+        const c = catalogueById(s.articleId);
+        return {
+          "ID": s.id, "Article": c ? c.nom : "", "Taille": s.taille, "Quantité": s.quantiteStock,
+          "Seuil d'alerte": s.seuilAlerte, "Stock bas": s.quantiteStock <= s.seuilAlerte ? "Oui" : "Non",
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Stock");
+      XLSX.writeFile(wb, `epi-stock_${new Date().toISOString().slice(0,10)}.xlsx`);
+    });
     const stockFormPanel = $("stockFormPanel"), stockForm = $("stockForm");
     function openStockForm(rec){
       stockForm.reset();
@@ -912,7 +937,21 @@
     }).join("");
   }
   if (canEdit){
-    $("dotActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="dotNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle dotation</button>`;
+    $("dotActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="dotExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="dotNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle dotation</button>`;
+    $("dotExport").addEventListener("click", () => {
+      const rows = DOTATIONS.map(d => Object.assign({}, d, computeDotationStatus(d))).map(d => {
+        const c = catalogueById(d.articleId);
+        return {
+          "ID": d.id, "Nom": d.nom, "Prénom": d.prenom, "Collectivité": d.collectivite || "Ville", "Service": d.service,
+          "Article": c ? c.nom : "", "Taille": d.taille, "Date de remise": d.dateRemise,
+          "Date de renouvellement": d.dateRenouvellement || "", "Statut": d.statut,
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Dotations");
+      XLSX.writeFile(wb, `epi-dotations_${new Date().toISOString().slice(0,10)}.xlsx`);
+    });
     const dotFormPanel = $("dotFormPanel"), dotForm = $("dotForm");
     function fillDotFormServices(col){ $("dotService").innerHTML = servicesForCollectivite(col).map(s => `<option value="${s}">${s}</option>`).join(""); }
     fillDotFormServices("Ville");
@@ -995,7 +1034,22 @@
     }).join("");
   }
   if (canEdit){
-    $("lavActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="lavNew"><svg class="icon"><use href="#i-plus"/></svg> Enregistrer un lavage</button>`;
+    $("lavActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="lavExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="lavNew"><svg class="icon"><use href="#i-plus"/></svg> Enregistrer un lavage</button>`;
+    $("lavExport").addEventListener("click", () => {
+      const rows = LAVAGES.map(l => {
+        const dot = DOTATIONS_ALL.find(d => d.id === l.dotationId);
+        const c = dot ? catalogueById(dot.articleId) : null;
+        return {
+          "ID": l.id, "Agent": dot ? dot.nom + " " + dot.prenom : "", "Article": c ? c.nom : "",
+          "Date de lavage": l.dateLavage, "Lavages cumulés": l.nombreLavagesCumules,
+          "Max autorisé": c && c.nombreLavagesMax ? c.nombreLavagesMax : "", "Statut": l.statut,
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Entretien & Lavage");
+      XLSX.writeFile(wb, `epi-lavages_${new Date().toISOString().slice(0,10)}.xlsx`);
+    });
     const lavFormPanel = $("lavFormPanel"), lavForm = $("lavForm");
     $("lavNew").addEventListener("click", () => {
       lavForm.reset(); fillLavageDotationSelect();

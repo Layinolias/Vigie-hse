@@ -2,6 +2,7 @@
 <meta name="description" content="Registre de Santé et de Sécurité au Travail (RSST) — observations et signalements des agents.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -592,7 +593,20 @@
   });
 
   // ---------- Création (ouverte à tous les rôles) ----------
-  $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle observation</button>`;
+  $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle observation</button>`;
+
+  $("btnExport").addEventListener("click", () => {
+    const rows = DATASET.map(a => ({
+      "ID": a.id, "Date": a.date || "", "Collectivité": a.collectivite || "Ville", "Service": a.service, "Nature": a.nature,
+      "Description": a.description, "Gravité": a.gravite, "Statut": a.statut,
+      "Auteur": role === "ag" ? "—" : (a.auteur || ""), "Suite donnée": a.suiteDonnee || "", "Traité par": a.traitePar || "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "RSST");
+    const today = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, `registre-sst_${today}.xlsx`);
+  });
   const formPanel = $("formPanel"), form = $("obsForm");
   function fillFormServiceOptions(col){
     let list = servicesForCollectivite(col);

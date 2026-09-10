@@ -2,6 +2,7 @@
 <meta name="description" content="Planification et réalisation d'inspections HSE à partir de trames de contrôle réutilisables, avec remontée des non-conformités vers le Plan d'Actions.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -678,9 +679,26 @@
 
   if (canEdit){
     $("panelActionsBtns").innerHTML = `
+      <button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>
       <button type="button" class="btn btn-secondary" id="btnToggleTrames">Gérer les trames</button>
       <button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle inspection</button>
     `;
+
+    $("btnExport").addEventListener("click", () => {
+      const rows = DATASET.map(d => {
+        const nc = (d.reponses || []).filter(r => r.statut === "Non conforme").map(r => r.libelle);
+        return {
+          "ID": d.id, "Date": d.dateInspection || "", "Trame": d.trameNom, "Collectivité": d.collectivite || "Ville",
+          "Service": d.service, "Inspecteur": d.inspecteur, "Statut global": d.statutGlobal,
+          "Points non conformes": nc.join(" ; "), "Nb points NC": nc.length, "Créateur": d.createur || "",
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Inspections");
+      const today = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(wb, `inspection-audit_${today}.xlsx`);
+    });
 
     const formPanel = $("formPanel"), form = $("inspForm"), pointsContainer = $("pointsContainer");
     $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");

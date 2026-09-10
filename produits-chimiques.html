@@ -2,6 +2,7 @@
 <meta name="description" content="Inventaire des produits chimiques par service, pictogrammes de danger CLP, et suivi des Fiches de Données de Sécurité (FDS).">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -576,7 +577,21 @@
   });
 
   if (canEdit){
-    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouveau produit</button>`;
+    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouveau produit</button>`;
+
+    $("btnExport").addEventListener("click", () => {
+      const rows = DATASET.map(p => ({
+        "ID": p.id, "Produit": p.nom, "Fournisseur": p.fournisseur || "", "Collectivité": p.collectivite || "Ville",
+        "Service": p.service, "Quantité": p.quantiteStockee != null ? p.quantiteStockee : "", "Unité": p.unite || "",
+        "Pictogrammes": (p.pictogrammes || []).join(", "), "Dernière MAJ FDS": p.dateMajFDS || "",
+        "Lien FDS": p.lienFDS || "", "Mesures de prévention": p.mesuresPrevention || "",
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Produits Chimiques");
+      const today = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(wb, `produits-chimiques_${today}.xlsx`);
+    });
 
     const formPanel = $("formPanel"), form = $("prodForm");
     $("pictosCheck").innerHTML = PICTOGRAMMES.map(p => `

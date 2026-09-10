@@ -2,6 +2,7 @@
 <meta name="description" content="Suivi des habilitations et certifications obligatoires des agents (CACES, habilitation électrique, SST, permis…).">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -588,7 +589,20 @@
   });
 
   if (canEdit){
-    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle habilitation</button>`;
+    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle habilitation</button>`;
+
+    $("btnExport").addEventListener("click", () => {
+      const rows = DATASET.map(v => Object.assign({}, v, computeStatus(v))).map(v => ({
+        "ID": v.id, "Nom": v.nom, "Prénom": v.prenom, "Collectivité": v.collectivite || "Ville", "Service": v.service,
+        "Type d'habilitation": v.typeHabilitation, "Organisme formateur": v.organismeFormateur || "",
+        "Date d'obtention": v.dateObtention, "Date d'expiration": v.dateExpiration, "Statut": v.statut,
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Habilitations");
+      const today = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(wb, `formation-habilitation_${today}.xlsx`);
+    });
 
     const formPanel = $("formPanel"), form = $("habForm");
     $("fTypeForm").innerHTML = HAB_TYPES.map(t => `<option value="${t[0]}">${t[0]}</option>`).join("");

@@ -15,6 +15,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | Jalon | Statut |
 |---|---|
 | **J0 — Généralisation commerciale (collectivités + secteur privé)** | ❌ Non démarré — prérequis à toute commercialisation |
+| **J1 — Accompagnement certification ISO 45001** | ❌ Non démarré — version ultérieure, étude de valeur ajoutée |
 
 **Modules fonctionnels** :
 
@@ -103,6 +104,43 @@ Vendre ce logiciel à des tiers change le statut RGPD du projet : l'éditeur dev
 ### Pourquoi ce jalon est un prérequis, pas un module parmi d'autres
 
 Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-dessous) risque de re-coder en dur les mêmes suppositions "collectivité territoriale" (vocabulaire, Ville/Agglomération, F3SCT...) qu'il faudra ensuite désapprendre. **Recommandation : traiter au minimum la généralisation du vocabulaire et de la structure organisationnelle avant de construire beaucoup plus de modules 1-9**, pour éviter d'avoir à tout reprendre a posteriori. Le passage à un vrai backend multi-tenant, en revanche, peut raisonnablement rester postérieur — il ne bloque pas la conception générique du modèle de données et du vocabulaire, qui peut se préparer dès maintenant dans l'architecture actuelle.
+
+---
+
+## J1 — Jalon complémentaire : accompagnement à la certification ISO 45001 — ❌ Non démarré (version ultérieure)
+
+**Objectif exprimé par l'utilisateur (2026-09-12) :** étudier, pour une version ultérieure (explicitement pas un chantier immédiat), la possibilité d'aider une collectivité/entreprise cliente à obtenir ou conserver une certification de système de management de la santé-sécurité au travail — norme visée : **ISO 45001**. Confronter ce que VIGIE HSE produit déjà aux exigences de la norme, identifier les modules qui manquent, et ne retenir que ceux qui apportent une vraie valeur ajoutée par rapport à une certification "à la main" (audit papier, tableurs).
+
+**Recherche effectuée — structure de la norme ISO 45001:2018 :** la norme suit la structure commune aux normes de management ISO (Annexe SL, partagée avec ISO 9001 qualité et ISO 14001 environnement), en 10 clauses dont 7 portent des exigences (clauses 4 à 10) : Contexte de l'organisme, Leadership et participation des travailleurs, Planification, Support, Réalisation des activités opérationnelles, Évaluation des performances, Amélioration. [ISO 45001 Clauses Explained (Effivity)](https://www.effivity.com/health-and-safety-management-system/iso-45001-clauses) · [ISO 45001:2018 Clause Structure (45001 Store)](https://45001store.com/articles/iso-45001-detail/)
+
+**Recherche effectuée — informations documentées exigées :** contrairement à l'ancien référentiel OHSAS 18001, ISO 45001 ne fixe pas de format imposé (pas de "manuel qualité" obligatoire), mais exige que certaines informations soient *tenues à jour* (politique, procédures) et d'autres *conservées comme preuve* (enregistrements). Documents/enregistrements mandatés cités par les sources : périmètre du système de management, politique HSE, preuves de compétence du personnel, enregistrements d'incidents/investigations, enregistrements de surveillance/mesure (inspections, audits, évaluations). [List of mandatory documents (Advisera)](https://advisera.com/45001academy/blog/2018/03/28/list-of-mandatory-documents-according-to-iso-45001/) · [Mandatory documents (IT Governance)](https://www.itgovernance.co.uk/blog/list-of-mandatory-documents-required-by-iso-45001)
+
+**Confrontation clause par clause — ce qui est déjà couvert, ce qui manque :**
+
+| Exigence ISO 45001 | Déjà couvert par VIGIE HSE | Statut |
+|---|---|---|
+| 6.1 — Identification des dangers, évaluation des risques | Document Unique (DUERP) | ✅ Cœur de métier déjà là |
+| 6.1 — Veille des exigences légales | Module 1, Veille réglementaire | 🔶 Base posée |
+| 7.2/7.3 — Compétence, sensibilisation | Formation/Habilitation | ✅ Fait |
+| 5.4 — Participation et consultation des travailleurs | RSST + futur module 13 (Dialogue social) | 🔶 Base posée / prévu |
+| 8.1 — Maîtrise opérationnelle | Plan d'Actions, Inspection/Audit, Vérifications périodiques, Produits chimiques | ✅ Fait |
+| 9.1 — Surveillance, mesure, analyse | Indicateurs & Reporting KPI | ✅ Fait |
+| 10.2 — Incidents, actions correctives | Registre AT/MP + Plan d'Actions | ✅ Fait |
+| 7.5 — Maîtrise des informations documentées | Module 8, Gestion documentaire | ❌ Non démarré (déjà identifié) |
+| **5.2 — Politique HSE formalisée, publiée, revue** | *Rien aujourd'hui* | ❌ **Écart identifié** |
+| **8.2 — Préparation et réponse aux situations d'urgence** | *Rien aujourd'hui* | ❌ **Écart identifié** |
+| **9.2 — Programme d'audit interne du système de management** | Inspection/Audit couvre le contrôle terrain, pas un audit du système lui-même (le SMS est-il suivi ? est-il efficace ?) | 🔶 **Écart partiel** |
+| **9.3 — Revue de direction** | *Rien aujourd'hui* | ❌ **Écart identifié — exigence dure, quasi systématiquement demandée en audit** |
+
+**Modules/extensions candidats à étudier (par ordre de probable valeur ajoutée) :**
+
+1. **Revue de direction** — le plus gros manque : un enregistrement structuré (ordre du jour normé : actions issues des revues précédentes, évolutions du contexte, performance HSE/incidents/résultats d'audits, retours de consultation des travailleurs, risques et opportunités ; décisions, ressources, actions) tenu périodiquement, daté, archivé. C'est l'un des tout premiers documents qu'un auditeur externe réclame — un vrai gain immédiat pour la crédibilité "prêt à l'audit".
+2. **Préparation aux situations d'urgence** — plans d'urgence par site, exercices d'évacuation planifiés et leurs résultats, contacts d'urgence, retours d'expérience post-exercice.
+3. **Politique HSE** — un document de politique versionné, daté, publié (probablement dans le futur module Gestion documentaire), avec preuve de communication aux agents (pourrait s'appuyer sur le futur module 12, Accueil au poste, pour l'émargement de prise de connaissance).
+4. **Programme d'audit interne formalisé** — étendre Inspection/Audit avec une couche "audit du système" distincte des inspections terrain : calendrier d'audits annuel, périmètre/critères par audit, traçabilité de la qualification de l'auditeur.
+5. **Idée à plus forte valeur ajoutée : une matrice de conformité ISO 45001 intégrée à l'app.** Plutôt que de simplement combler les 4 écarts ci-dessus séparément, une vue dédiée (dans Reporting ou Administration) qui relie chaque clause de la norme aux données déjà présentes dans VIGIE HSE et signale en direct ce qui est prêt/à compléter transformerait l'app en véritable outil d'accompagnement à la certification, pas seulement un tracker HSE qui se trouve aussi couvrir la norme. C'est probablement l'angle qui différencie le plus par rapport à un accompagnement "à la main" — à confirmer avec toi avant d'aller plus loin.
+
+**Cadrage :** explicitement une étude pour une version ultérieure, pas un chantier à démarrer maintenant. **Ceci n'est pas un conseil de certification** — la certification effective reste délivrée par un organisme certificateur accrédité après audit externe ; VIGIE HSE peut outiller la préparation et la collecte de preuves, pas se substituer à l'audit lui-même.
 
 ---
 

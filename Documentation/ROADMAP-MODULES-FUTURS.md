@@ -30,7 +30,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 8 | Gestion documentaire | ❌ Non démarré |
 | 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html` |
 | 10 | EPI, dotation & entretien | ❌ Non démarré (nouveau, voir section dédiée) |
-| 11 | Dashboard mobile simplifié | ❌ Non démarré (décision prise, voir section dédiée) |
+| 11 | Dashboard mobile simplifié | ✅ Fait |
 
 ---
 

@@ -31,6 +31,9 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html` |
 | 10 | EPI, dotation & entretien | ✅ Fait — `epi-dotation.html` |
 | 11 | Dashboard mobile simplifié | ✅ Fait |
+| 12 | Accueil au poste | ❌ Non démarré (nouveau, retour alpha 2026-09-12) |
+| 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — nécessite un nouveau rôle/compte "Représentant du personnel" |
+| 14 | Gestion administrative RH | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — voir aussi extension du module 7 |
 
 ---
 
@@ -56,9 +59,22 @@ Recherche effectuée sur les équivalences terminologiques entre secteur privé 
 
 **Implication pour le code :** tous les textes actuellement codés en dur qui supposent une collectivité ("agent", "Ville"/"Agglomération", "F3SCT" dans la description du RSST, "collectivité" comme libellé de champ) devront devenir des **libellés configurables par organisation cliente**, pas des constantes. Le pattern existe déjà partiellement : `vigie_hse_referentials` permet déjà de reconfigurer des listes (services, risques) sans toucher au code — il faudra l'étendre à la terminologie elle-même (noms des champs, des instances, des statuts RH) et pas seulement aux valeurs des listes déroulantes.
 
+### Réflexion actée — refonte complète du système de comptes/rôles/permissions (2026-09-12)
+
+Point soulevé par l'utilisateur suite à un retour de test alpha mentionnant un rôle "Préventeur" qui n'existe pas dans le système actuel (aujourd'hui : 4 rôles fixes codés en dur, `admin`/`rh`/`manager`/`ag`, définis dans `login.html`). Plutôt que d'ajouter des rôles fixes au coup par coup à chaque nouveau besoin (un "Préventeur" pour l'AT/MP, un "Représentant du personnel" pour le futur module Dialogue social — voir module 13 — et probablement d'autres ensuite), l'utilisateur demande une **réflexion de fond**, pas encore un chantier spécifié :
+
+- **Objectif explicite : éviter les doublons de comptes/profils** pour des permissions quasi identiques.
+- **Direction envisagée : un modèle de permissions granulaire façon Discord** — des cases à cocher par type d'accès, plutôt que des rôles fixes en dur.
+- **Structure envisagée pour une permission unitaire :** création de profil → quel service → quel module → lecture ou écriture (donc un triplet service × module × niveau d'accès, potentiellement répété pour chaque combinaison autorisée).
+- **Profils préréglés ET personnalisables** : des profils génériques standards (probablement les 4 rôles actuels comme point de départ, plus Préventeur/Représentant du personnel), mais renommables et dont les permissions restent modifiables — sans empêcher la création de profils entièrement sur-mesure.
+- **Lien avec le jalon J0** : cette réflexion rejoint directement le chantier de généralisation du vocabulaire ci-dessus et celui des unités organisationnelles ci-dessous — un système de permissions par (service générique × module × lecture/écriture) est probablement plus facile à généraliser pour un client privé qu'un jeu de rôles nommés spécifiques à une collectivité. À concevoir ensemble plutôt que comme deux chantiers séparés.
+- **Non traité pour l'instant** : cette note capture l'intention, pas une spécification. Avant de coder quoi que ce soit, il faudra définir le modèle de données exact (comment représenter un profil et ses permissions dans `vigie_hse_users`/`vigie_hse_referentials`), et si ce chantier doit rester dans l'architecture localStorage actuelle ou attendre le vrai backend multi-tenant (la gestion de permissions fines par tenant est justement le genre de chantier qui bénéficie d'une vraie base de données).
+
 ### Ce qui doit devenir générique — structure organisationnelle
 
 Le distingo actuel "Ville / Agglomération" est une **structure à 2 niveaux spécifique à cette collectivité précise** (commune + intercommunalité). Une entreprise privée n'a pas cette dichotomie — elle a plutôt des sites/filiales/directions/agences. Il faut remplacer ce couple figé par une notion générique d'**unités organisationnelles configurables** (nombre variable, hiérarchie libre : ça peut être 1 seule entité, ou une arborescence à plusieurs niveaux selon le client), dont "Ville"/"Agglomération" ne serait qu'une configuration possible parmi d'autres.
+
+**Point à préciser (soulevé 2026-09-12) : la gestion du cycle de vie des services eux-mêmes.** Au-delà du nombre de niveaux hiérarchiques, il faut réfléchir à comment un service est **ajouté, renommé ou supprimé** en cours d'exploitation, une fois des données déjà rattachées à ce service. Aujourd'hui, `administration.html` → Référentiels permet déjà un CRUD basique sur deux listes fixes ("Services — Ville", "Services — Agglomération"), mais uniquement ces deux catégories figées — pas une hiérarchie d'unités organisationnelles générique. À traiter dans le même chantier : que devient un service supprimé s'il est encore référencé par des déclarations AT/MP, évaluations DUERP, dotations EPI, etc. (renommage propagé partout, ou service "archivé" mais conservé pour l'historique) ?
 
 ### Ce qui doit devenir générique — contenu éditorial et branding
 
@@ -86,7 +102,7 @@ Vendre ce logiciel à des tiers change le statut RGPD du projet : l'éditeur dev
 
 ### Pourquoi ce jalon est un prérequis, pas un module parmi d'autres
 
-Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-9 ci-dessous) risque de re-coder en dur les mêmes suppositions "collectivité territoriale" (vocabulaire, Ville/Agglomération, F3SCT...) qu'il faudra ensuite désapprendre. **Recommandation : traiter au minimum la généralisation du vocabulaire et de la structure organisationnelle avant de construire beaucoup plus de modules 1-9**, pour éviter d'avoir à tout reprendre a posteriori. Le passage à un vrai backend multi-tenant, en revanche, peut raisonnablement rester postérieur — il ne bloque pas la conception générique du modèle de données et du vocabulaire, qui peut se préparer dès maintenant dans l'architecture actuelle.
+Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-dessous) risque de re-coder en dur les mêmes suppositions "collectivité territoriale" (vocabulaire, Ville/Agglomération, F3SCT...) qu'il faudra ensuite désapprendre. **Recommandation : traiter au minimum la généralisation du vocabulaire et de la structure organisationnelle avant de construire beaucoup plus de modules 1-9**, pour éviter d'avoir à tout reprendre a posteriori. Le passage à un vrai backend multi-tenant, en revanche, peut raisonnablement rester postérieur — il ne bloque pas la conception générique du modèle de données et du vocabulaire, qui peut se préparer dès maintenant dans l'architecture actuelle.
 
 ---
 
@@ -142,6 +158,12 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-9 ci-dess
 
 **Annotation pour reprise :** ne pas reconstruire `sante-visites.html`, l'étendre avec un nouveau modèle `vigie_hse_rdv_medicaux` (ou un champ enrichi sur les fiches existantes) : `{id, visiteId (lien vers la fiche santé), dateHeure, lieu, medecin, statutConvocation ("À convoquer"|"Convoqué"|"Confirmé"|"Réalisé"|"Annulé")}`. La génération de convocation pourrait dans un premier temps être un simple texte pré-rempli à copier/coller (imprimable ou copiable dans un email), en attendant un vrai système d'envoi.
 
+**Précisions apportées (retour alpha, 2026-09-12) :**
+- **Indicateurs visuels par habilitation** : icônes d'avertissement dédiées selon le type d'habilitation de l'agent (ex. prise électrique pour l'habilitation électrique, engin pour CACES/conduite) — à afficher sur la fiche santé de l'agent. Suppose de lire les habilitations de l'agent depuis `formation-habilitation.html` — encore un point de couplage entre les deux modules, à traiter avec la factorisation du roster déjà notée en fin de document.
+- **Ajustement automatique de la périodicité de visite selon les habilitations renseignées** (ex. une habilitation à risque particulier peut légalement imposer une surveillance médicale renforcée, donc une périodicité plus courte) — logique métier nouvelle à spécifier précisément avec l'utilisateur avant de coder (quelles habilitations déclenchent quelle périodicité).
+- **Vue agenda intégrée, format calendrier type Outlook** pour planifier les RDV médicaux — confirme et précise le point déjà noté ci-dessus ("pas de vue calendrier, pas de créneaux").
+- **Génération automatique de convocations** à partir de **modèles prédéfinis et modifiables** (pas seulement un texte pré-rempli à copier/coller comme envisagé initialement) — la personnalisation des modèles elle-même devra être gérée quelque part, probablement `administration.html`.
+
 ## 8. Gestion documentaire — ❌ Non démarré
 
 **Note d'origine :** "Gestion documentaire : référentiel de documents officiels, dans tous les domaines concernés."
@@ -154,18 +176,18 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-9 ci-dess
   2. Attendre le passage à un vrai backend (voir §14 de `ETAT-DU-PROJET.md`) avant de construire ce module, car c'est probablement celui qui bénéficierait le plus d'un vrai stockage de fichiers.
 - Discuter avec l'utilisateur avant de démarrer : accepter la limite (1) en V1, ou considérer que ce module doit attendre le backend ?
 
-## 9. Indicateurs & reporting KPI — 🔶 Partiellement couvert
+## 9. Indicateurs & reporting KPI — ✅ Fait, extension demandée
 
-**Note d'origine :** "Indicateurs et reporting KPI:" *(vide, à préciser)*
+**Ce qui existe (`reporting.html`) :** sélection de période (`select` : 3/6/12 mois ou tout), indicateurs et tendance AT/MP sur cette période, export Excel (SheetJS). Limite documentée dans la page elle-même : la période ne s'applique qu'au Registre AT/MP et à sa tendance — les autres modules affichent une photo instantanée de l'état actuel, quelle que soit la période choisie.
 
-**Ce qui existe déjà :** chaque module a son propre bandeau de KPI en haut de page (voir `.page-summary`/`.kpi-row` dans chaque fichier), et `index.html` centralise déjà les indicateurs principaux (AT/MP, jours d'arrêt, Score HSE, DUERP) sur le cockpit.
-
-**Ce qui manque pour un vrai "module de reporting" :**
-- Pas d'export consolidé (PDF/Excel) des indicateurs multi-modules pour, par exemple, un rapport annuel HSE ou une présentation en F3SCT/CHSCT.
-- Pas de vue "historique"/tendance au-delà des 6 derniers mois déjà affichés pour les AT/MP sur le cockpit.
-- Pas de tableau de bord personnalisable (choisir quels indicateurs afficher/comparer).
-
-**Annotation pour reprise :** ce module a probablement le plus à gagner à être construit **après** que plusieurs des modules ci-dessus (2, 4, 5, 6, 8) existent, pour avoir davantage de données à agréger. Une V1 raisonnable : une page `reporting.html` avec une sélection de période + export Excel (réutiliser SheetJS, déjà en place pour l'import/export AT/MP et DUERP) des indicateurs de tous les modules actifs.
+**Extension demandée (retour alpha 2026-09-12) :**
+- Remplacer/compléter le sélecteur de période (menu déroulant à choix prédéfinis) par un vrai sélecteur calendaire (dates de début/fin libres).
+- Faire en sorte que **tous** les graphiques et valeurs affichés réagissent à la période sélectionnée, pas seulement le bloc AT/MP — lever la limitation actuellement documentée dans la page.
+- Nouveaux graphiques demandés :
+  - Évolution du nombre de jours d'arrêt dans le temps (courbe/tendance).
+  - Nombre d'accidents par type de risque.
+  - Nombre de jours d'arrêt par type de risque.
+  - Ces deux derniers sont directement faisables : le champ `risque` existe déjà sur chaque événement AT/MP (`registre-at-mp.html`), simple regroupement à ajouter côté reporting.
 
 ## 10. EPI, dotation & entretien — ✅ Fait
 
@@ -186,6 +208,61 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-9 ci-dess
 **Ce qui existe :** sur petit écran (<640px), `dashboard.html` affiche l'essentiel (accueil, sélecteur de zone, KPI) puis deux boutons pleine largeur "Déclarer un AT/MP" et "Signaler une observation" ; les panneaux denses (actualités, tendances, tableau des dernières déclarations) restent masqués sur mobile uniquement, avec une note explicite — le rendu desktop est strictement inchangé. Les formulaires de création les plus utilisés sur le terrain (`saisie-rh.html`, `saisie-duerp.html`, création dans `registre-sst.html`) ont aussi reçu des ajustements tactiles : police 16px sur les champs (évite le zoom automatique iOS), contrôles segmentés qui passent à la ligne plutôt que de s'écraser, boutons pleine largeur et tactiles (48px).
 
 **Ce qui reste hors scope, assumé :** Administration, Indicateurs & Reporting et les tableaux denses restent explicitement desktop-only sur mobile — pas un chantier resté à faire, un choix de portée pour ce module.
+
+## 12. Accueil au poste — ❌ Non démarré
+
+**Note d'origine (retour alpha, 2026-09-12) :** nouveau module demandé, pas encore détaillé par l'utilisateur.
+
+**Annotation pour reprise :** objectif probable — un parcours d'intégration/accueil sécurité pour un nouvel agent prenant son poste (livret d'accueil, points de vigilance du poste, consignes de sécurité spécifiques, émargement de prise de connaissance). À préciser avec l'utilisateur avant de coder quoi que ce soit : périmètre exact, qui déclenche le parcours (RH à l'embauche ? manager à l'affectation ?), et si un suivi de complétion est attendu (comme pour Formation/Habilitation).
+
+## 13. Dialogue social — ❌ Non démarré
+
+**Note d'origine (retour alpha, 2026-09-12) :** nouveau module demandé, réservé aux représentants du personnel — implique la création d'un nouveau compte/rôle **"Représentant du personnel"**.
+
+**Annotation pour reprise :**
+- Objectif probable : donner aux représentants du personnel (élus CST/F3SCT actuellement, CSE/CSSCT dans la version généralisée — voir tableau de correspondance dans la section J0 ci-dessus) un accès dédié à des informations HSE/RH sans leur donner les droits RH/admin complets — un cas d'usage concret de permissions à grain fin, à construire main dans la main avec la réflexion sur la refonte des rôles (voir section J0 ci-dessus, "Réflexion actée — refonte complète du système de comptes/rôles/permissions").
+- À préciser avec l'utilisateur avant de coder : quel contenu concret ce module doit exposer (ordre du jour/comptes-rendus de F3SCT ? accès en lecture à des indicateurs agrégés et anonymisés du Registre AT/MP et du RSST ? un espace de questions/réponses avec la direction ?).
+- Ne pas construire ce module avant d'avoir au moins esquissé le modèle de permissions générique (section J0) — sinon "Représentant du personnel" devient un 5ᵉ rôle codé en dur de plus, exactement le problème que la réflexion sur les permissions cherche à éviter.
+
+## 14. Gestion administrative RH — ❌ Non démarré
+
+**Note d'origine (retour alpha, 2026-09-12) :** nouveau module, deux volets.
+
+**Volet 1 — Données RH et calculs automatiques :**
+- Base de données complète du personnel (liste des agents, fiches individuelles). **C'est très probablement le bon endroit pour résoudre la dette technique déjà identifiée** des rosters d'agents dupliqués indépendamment (`sante-visites.html`, `formation-habilitation.html`, `epi-dotation.html` — voir Notes générales en fin de document) : ce module deviendrait la source canonique, les trois autres modules la consommant au lieu de re-dériver leur propre copie.
+- Saisie des données d'activité, notamment les heures travaillées.
+- Calcul automatisé du Taux de fréquence (TF) et du Taux de gravité (TG). **Ces indicateurs existent déjà** dans `registre-at-mp.html`, mais avec un effectif et un volume horaire **codés en dur** (`EFFECTIF = 850` agents, 1607 h/an — la durée légale annuelle, pas les heures réellement travaillées). Ce module permettrait de calculer un TF/TG réel à partir des heures effectivement saisies, au lieu d'une approximation — à faire remplacer le calcul actuel plutôt qu'en construire un second en parallèle.
+
+**Volet 2 — Organigramme et rattachements :**
+- Modélisation de l'organigramme / structure hiérarchique de la collectivité ou de l'entreprise.
+- Gestion des rattachements : équipes, managers, périmètres d'encadrement.
+- Interface d'ajustement dynamique (réaffecter un agent, changer un responsable d'équipe).
+
+**Annotation pour reprise :** ce volet 2 recoupe directement deux réflexions déjà en cours dans ce document — la généralisation des "unités organisationnelles" (section J0, aujourd'hui figées sur Ville/Agglomération) et le scoping par service du rôle `manager` déjà existant (`session.services`, voir `ETAT-DU-PROJET.md`). Un vrai organigramme donnerait une structure de données propre à ces deux chantiers plutôt que des règles de scoping éparses par module. À concevoir ensemble, pas comme trois chantiers séparés.
+
+---
+
+## Retours de test Alpha (2026-09-12) — points UX/fonctionnels sur les modules déjà construits
+
+Points remontés par un retour de test alpha (résumé d'une discussion avec Gemini), analysés et confrontés au code existant. Contrairement aux sections numérotées ci-dessus, ce ne sont pas de nouveaux modules mais des corrections/ajustements sur des modules déjà en place. Statut de chaque point à date de rédaction :
+
+- **En-tête du tableau de bord (`dashboard.html`) — 🔶 réflexion à mener.** Le texte de bienvenue ("Bonjour." + sous-titre) est jugé trop verbeux, et le positionnement du nom "VIGIE HSE" doit être repensé dans cette même zone. Pas de direction de design arrêtée — à traiter comme une vraie refonte de cet en-tête, pas une simple coupe de texte. Ne concerne que `dashboard.html` (le tableau de bord post-connexion), pas `index.html` (la page vitrine publique, hors sujet ici).
+- **Tri & filtres dynamiques façon Excel sur toutes les colonnes de tous les tableaux — 🆕 chantier transversal.** Rien de tel n'existe aujourd'hui (seulement des filtres déroulants par page). Recommandation : construire un composant réutilisable (tri par clic sur en-tête de colonne + filtre par colonne) une fois, plutôt que de le dupliquer sur chacune des pages à tableau — cohérent avec la dette déjà notée sur le CSS dupliqué par fichier (`ETAT-DU-PROJET.md` §14). Priorisation entre modules non encore arbitrée.
+- **Sidebar : renommer "Registre Santé & Sécurité" en "Registre SST" — ✅ à faire, simple.**
+- **Registre SST (`registre-sst.html`) :**
+  - Titre de page → "Registre santé sécurité au travail" (le libellé court "Registre SST" reste réservé à la sidebar, ne pas confondre les deux).
+  - Le "…" sous le titre à remplacer par une infobulle n'est pas un texte statique : c'est le CSS de l'en-tête compact (`.page-summary-text p`, `text-overflow:ellipsis`) qui tronque la vraie description déjà présente, sur **toutes les pages du site**, pas seulement RSST. Corriger ce composant partagé (ex. tooltip/popover au survol) réglerait le problème partout d'un coup — bon candidat à traiter avec le point sur l'en-tête du dashboard.
+  - CRUD des observations "vide et verrouillé" — ❓ **à vérifier avant toute correction.** Le code contient déjà une logique de création/réponse/suppression d'observation (réponse restreinte à RH/admin). Reproduire le parcours exact du retour alpha (quel compte utilisé, quelle action bloquée) pour confirmer ou infirmer un vrai bug avant de coder quoi que ce soit.
+- **Registre AT/MP (`registre-at-mp.html` / `saisie-rh.html`) :**
+  - Retirer "— Ville et Agglomération" du sous-titre (`saisie-rh` non concerné, texte situé dans `registre-at-mp.html`) — cohérent avec le travail de dé-identification déjà engagé.
+  - Nouvelle colonne de statut de l'arrêt : "En cours" / "Clôturé".
+  - Remplacer le champ libre "Nombre de jours d'arrêt" (`saisie-rh.html`, actuellement un simple `<input type="number">`) par deux champs date (début/fin d'arrêt), avec jours calculés automatiquement en lecture seule.
+  - Masquer les filtres globaux (Collectivité/Service/Année) pour Agent et Manager (déjà scopés par service à la création du compte), les garder pour RH/Préventeur/Admin.
+  - Rendre paramétrable par l'admin qui a le droit de déclarer un accident (RH seul / Préventeur seul / ouverture aux managers) — dépend du modèle de permissions à définir (voir section J0).
+- **Document Unique (`document-unique.html`) :**
+  - Ajouter un encart/tooltip expliquant le rôle du DUERP sous le titre (même logique transversale que le point RSST ci-dessus).
+  - Icônes à moderniser — subjectif, nécessite soit une direction visuelle de l'utilisateur, soit plusieurs propositions à soumettre.
+  - Masquer les filtres pour le profil Agent (vision restreinte à son propre service), même logique que pour AT/MP.
 
 ---
 

@@ -1,0 +1,583 @@
+<title>Indicateurs &amp; Reporting</title>
+<meta name="description" content="Rapport consolidé des indicateurs HSE de tous les modules — vue de pilotage pour la direction et les instances (F3SCT/CSSCT).">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B; --critical-rgb:201,94,107;
+    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px; --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item .icon{ width:17px; height:17px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .page-summary-kpis{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ps-kpi{ display:flex; align-items:center; gap:7px; padding:5px 11px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); }
+  .ps-kpi-icon{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ps-kpi-icon .icon{ width:12px; height:12px; }
+  .ps-kpi-icon.blue{ background:rgba(var(--accent-rgb),.14); color:var(--accent); }
+  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
+  .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+  .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } .ps-kpi-label{ display:none; } }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn .icon{ width:15px; height:15px; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+
+  .console{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
+  select{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 32px 9px 12px; border-radius:var(--r-sm); min-width:170px; cursor:pointer;
+  }
+  select:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  .console-note{ font-size:11.5px; color:var(--text-faint); flex-basis:100%; }
+  .console-actions{ margin-left:auto; display:flex; gap:9px; flex-wrap:wrap; }
+
+  .module-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:14px; margin-bottom:22px; }
+  .module-card{ padding:16px 18px; display:flex; flex-direction:column; gap:12px; }
+  .module-top{ display:flex; align-items:center; gap:10px; }
+  .module-icon{ width:32px; height:32px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .module-name{ font-size:14px; font-weight:600; }
+  .module-stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px 10px; }
+  .mstat{ display:flex; flex-direction:column; gap:2px; }
+  .mstat-value{ font-size:17px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .mstat-value.success{ color:var(--success); } .mstat-value.warn{ color:var(--warning); } .mstat-value.danger{ color:var(--danger); }
+  .mstat-label{ font-size:10px; color:var(--text-faint); line-height:1.3; }
+  .module-empty{ font-size:11px; color:var(--text-faint); font-style:italic; }
+
+  .trend-card{ padding:20px; margin-bottom:22px; }
+  .trend-top{ display:flex; align-items:baseline; justify-content:space-between; }
+  .trend-value{ font-size:24px; font-weight:600; }
+  .trend-label{ font-size:11.5px; color:var(--text-muted); }
+  .trend-bars{ display:flex; align-items:flex-end; gap:6px; height:64px; margin-top:14px; }
+  .trend-bar{ flex:1; border-radius:4px 4px 0 0; background:linear-gradient(180deg, rgba(var(--accent-rgb),.55), rgba(var(--accent-rgb),.18)); min-height:4px; }
+  .trend-labels{ display:flex; justify-content:space-between; margin-top:6px; font-size:9.5px; color:var(--text-faint); }
+
+  .footnote{ margin-top:6px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+
+  .print-header{ display:none; }
+  @media print{
+    body{ background:#fff !important; }
+    .sidebar, .sidebar-scrim, .topbar, .page-summary, .console, .no-print, .footnote{ display:none !important; }
+    .main{ margin-left:0 !important; }
+    .content{ padding:0 !important; max-width:none !important; }
+    .print-header{ display:block !important; margin-bottom:14px; color:#000; }
+    .print-header .print-brand{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#555; }
+    .print-header h1{ font-size:18px; margin:2px 0 4px; color:#000; }
+    .print-header .print-date{ font-size:10.5px; color:#555; }
+    .panel{ box-shadow:none !important; border:1px solid #ccc !important; background:#fff !important; }
+    .module-card, .trend-card{ break-inside:avoid; page-break-inside:avoid; }
+    .mstat-value, .module-name, .trend-value{ color:#000 !important; }
+    .module-grid{ grid-template-columns:repeat(2,1fr) !important; }
+  }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user){ location.href = "login.html"; return; }
+      if (s.role !== "admin" && s.role !== "rh"){ location.href = "dashboard.html"; }
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+  <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="dashboard.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre Santé &amp; Sécurité</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+      </div>
+      <div class="nav-section" id="navRh">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item" href="saisie-rh.html"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" href="saisie-duerp.html"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section" id="navPilotage" style="display:none;">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item active" id="navReportingLink" href="reporting.html" style="display:none;"><svg class="icon"><use href="#i-bar-chart"/></svg> Indicateurs &amp; Reporting</a>
+        <a class="nav-item" id="navAdminLink" href="administration.html" style="display:none;"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Pilotage / <b>Indicateurs &amp; Reporting</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="print-header">
+        <div class="print-brand">VIGIE HSE</div>
+        <h1>Rapport d'indicateurs HSE</h1>
+        <div class="print-date" id="printDate"></div>
+      </div>
+
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-bar-chart"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Indicateurs &amp; Reporting</h1>
+            <p>Vue consolidée des indicateurs de tous les modules — pour une présentation en instance (F3SCT/CSSCT) ou un rapport annuel HSE.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-activity"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiAtTotal">–</span><span class="ps-kpi-label">AT/MP</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon violet"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiHseScore">–</span><span class="ps-kpi-label">Score HSE</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiPaTaux">–</span><span class="ps-kpi-label">Actions soldées</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="panel console">
+        <div class="field"><span class="flabel">Période (AT/MP &amp; tendance)</span>
+          <select id="fPeriode">
+            <option value="6">6 derniers mois</option>
+            <option value="12" selected>12 derniers mois</option>
+            <option value="all">Depuis le début</option>
+          </select>
+        </div>
+        <div class="console-actions">
+          <button type="button" class="btn btn-ghost no-print" id="btnExportPdf" title="Utilise l'impression du navigateur — choisissez « Enregistrer au format PDF » comme imprimante."><svg class="icon"><use href="#i-download"/></svg> Exporter en PDF</button>
+          <button type="button" class="btn btn-primary no-print" id="btnExportXlsx"><svg class="icon"><use href="#i-download"/></svg> Exporter le rapport (Excel)</button>
+        </div>
+        <div class="console-note">La période ne s'applique qu'au Registre AT/MP et à la tendance ci-dessous — les autres modules affichent l'état actuel (photo instantanée), quelle que soit la période sélectionnée.</div>
+      </div>
+
+      <div class="panel trend-card">
+        <div class="trend-top">
+          <div><div class="trend-label">Événements AT/MP sur la période</div><div class="trend-value mono" id="trendTotal">–</div></div>
+        </div>
+        <div class="trend-bars" id="trendBars"></div>
+        <div class="trend-labels" id="trendLabels"></div>
+      </div>
+
+      <div class="module-grid" id="moduleGrid"></div>
+
+      <p class="footnote">Indicateurs calculés à partir des données actuellement stockées dans ce navigateur (aucune agrégation serveur). Un module jamais ouvert dans ce navigateur affiche 0 — ce n'est pas une anomalie.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const role = (session && session.role) || "ag";
+  const canEdit = role === "rh" || role === "admin";
+  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("roleChip").textContent = role.toUpperCase();
+  if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
+  if (role === "admin"){ $("navAdminLink").style.display = ""; }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
+  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth()) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+
+  // ---------- Lecture défensive des jeux de données de chaque module (aucune génération de seed ici) ----------
+  function readKey(key){
+    try { const raw = localStorage.getItem(key); if (!raw) return []; const p = JSON.parse(raw); return Array.isArray(p) ? p : []; }
+    catch(e){ return []; }
+  }
+  const MOIS = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+
+  function computeStatus(dateStr, periodiciteMois, fallbackMonths){
+    if (!dateStr) return "inconnu";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "inconnu";
+    const prochaine = new Date(d); prochaine.setMonth(prochaine.getMonth() + (Number(periodiciteMois) || fallbackMonths));
+    const today = new Date(); const in60 = new Date(today); in60.setDate(in60.getDate()+60);
+    if (prochaine < today) return "late";
+    if (prochaine <= in60) return "soon";
+    return "ok";
+  }
+
+  function renderReport(){
+    const periode = $("fPeriode").value;
+    const today = new Date();
+    let cutoff = null;
+    if (periode !== "all"){
+      cutoff = new Date(today); cutoff.setMonth(cutoff.getMonth() - Number(periode));
+    }
+
+    // ---- AT/MP ----
+    const ATMP_ALL = readKey("vigie_hse_dataset");
+    const ATMP = cutoff ? ATMP_ALL.filter(r => r.dateAT && new Date(r.dateAT) >= cutoff) : ATMP_ALL;
+    const atTotal = ATMP.length;
+    const atAvec = ATMP.filter(r => r.arret).length;
+    const atJours = ATMP.reduce((s,r) => s + (Number(r.joursArret)||0), 0);
+    const EFFECTIF = 850, HEURES_AN = 1607;
+    const atYears = [...new Set(ATMP.map(r => (r.dateAT||"").slice(0,4)).filter(Boolean))];
+    const heures = EFFECTIF * HEURES_AN * Math.max(atYears.length, 1);
+    const tf = heures ? (atAvec * 1000000 / heures) : 0;
+    $("kpiAtTotal").textContent = atTotal;
+
+    // ---- DUERP ----
+    const DUERP = readKey("vigie_hse_duerp_dataset").map(r => ({ ...r, score:(Number(r.frequence)||0)*(Number(r.gravite)||0) }));
+    const duTotal = DUERP.length;
+    const duPrio = DUERP.filter(r => r.score > 6);
+    const hseScorePct = duTotal ? Math.round(((duTotal - duPrio.length) / duTotal) * 100) : null;
+    $("kpiHseScore").textContent = hseScorePct === null ? "–" : hseScorePct + "%";
+
+    // ---- Plan d'Actions ----
+    const ACTIONS = readKey("vigie_hse_actions");
+    const paTotal = ACTIONS.length;
+    const todayStr = today.toISOString().slice(0,10);
+    const paRetard = ACTIONS.filter(a => a.statut !== "Fait" && a.echeance && a.echeance < todayStr).length;
+    const paEnCours = ACTIONS.filter(a => a.statut === "En cours").length;
+    const paFait = ACTIONS.filter(a => a.statut === "Fait").length;
+    const paTaux = paTotal ? Math.round((paFait/paTotal)*100) : null;
+    $("kpiPaTaux").textContent = paTaux === null ? "–" : paTaux + "%";
+
+    // ---- Santé & Visites ----
+    const VISITES = readKey("vigie_hse_visites");
+    const svTotal = VISITES.length;
+    const svStatus = VISITES.map(v => computeStatus(v.dateDerniere, v.periodiciteMois, 24));
+    const svOk = svStatus.filter(s => s === "ok").length;
+    const svSoon = svStatus.filter(s => s === "soon").length;
+    const svLate = svStatus.filter(s => s === "late").length;
+
+    // ---- Registre Santé & Sécurité ----
+    const RSST = readKey("vigie_hse_rsst");
+    const rsstTotal = RSST.length;
+    const rsstNouvelle = RSST.filter(r => r.statut === "Nouvelle").length;
+    const rsstTraitee = RSST.filter(r => r.statut === "Traitée").length;
+    const rsstTaux = rsstTotal ? Math.round((rsstTraitee/rsstTotal)*100) : null;
+
+    // ---- Vérifications Périodiques ----
+    const VERIF = readKey("vigie_hse_verifications");
+    const vpTotal = VERIF.length;
+    const vpStatus = VERIF.map(v => computeStatus(v.dateDerniere, v.periodiciteMois, 12));
+    const vpOk = vpStatus.filter(s => s === "ok").length;
+    const vpNonConforme = VERIF.filter(v => v.conformite === "Non conforme").length;
+
+    // ---- Inspection / Audit ----
+    const INSPECTIONS = readKey("vigie_hse_inspections");
+    const iaTotal = INSPECTIONS.length;
+    const iaConforme = INSPECTIONS.filter(i => i.statutGlobal === "Conforme").length;
+    const iaTaux = iaTotal ? Math.round((iaConforme/iaTotal)*100) : null;
+    const iaNonConforme = INSPECTIONS.filter(i => i.statutGlobal === "Non conforme").length;
+
+    // ---- Produits Chimiques ----
+    const PRODUITS = readKey("vigie_hse_produits_chimiques");
+    const pcTotal = PRODUITS.length;
+    const pcCmr = PRODUITS.filter(p => Array.isArray(p.pictogrammes) && p.pictogrammes.some(c => c === "GHS06" || c === "GHS08")).length;
+
+    // ---- Formation / Habilitation ----
+    const HABS = readKey("vigie_hse_habilitations");
+    const fhTotal = HABS.length;
+    const fhStatus = HABS.map(h => computeStatus(h.dateObtention, h.dureeValiditeMois, 24));
+    const fhOk = fhStatus.filter(s => s === "ok").length;
+    const fhExpiree = fhStatus.filter(s => s === "late").length;
+
+    // ---- EPI & Dotation ----
+    const EPI_CAT = readKey("vigie_hse_epi_catalogue");
+    const EPI_DOT = readKey("vigie_hse_epi_dotations");
+    const catById = Object.fromEntries(EPI_CAT.map(c => [c.id, c]));
+    const epiTotal = EPI_DOT.length;
+    let epiOk = 0, epiRenew = 0;
+    EPI_DOT.forEach(d => {
+      const cat = catById[d.articleId] || {};
+      if (!cat.dureeVieMois) return;
+      const s = computeStatus(d.dateRemise, cat.dureeVieMois, cat.dureeVieMois);
+      if (s === "ok") epiOk++; else if (s === "soon" || s === "late") epiRenew++;
+    });
+
+    // ---- Grille des modules ----
+    const MODULES = [
+      { icon:"i-activity", name:"Registre AT/MP", stats: atTotal === 0 ? null : [
+        { v:atTotal, l:"Total (période)" }, { v:atJours+"j", l:"Jours d'arrêt" },
+        { v:atAvec, l:"Avec arrêt" }, { v:tf.toFixed(1), l:"Taux fréquence" } ] },
+      { icon:"i-alert-triangle", name:"Document Unique (DUERP)", stats: duTotal === 0 ? null : [
+        { v:duTotal, l:"Évaluations" }, { v:hseScorePct+"%", l:"Score HSE", cls:"success" },
+        { v:duPrio.length, l:"Élevé/Critique", cls:duPrio.length ? "danger" : "" } ] },
+      { icon:"i-clipboard", name:"Plan d'Actions", stats: paTotal === 0 ? null : [
+        { v:paTotal, l:"Total" }, { v:paTaux+"%", l:"Soldées", cls:"success" },
+        { v:paEnCours, l:"En cours", cls:"warn" }, { v:paRetard, l:"En retard", cls:paRetard?"danger":"" } ] },
+      { icon:"i-shield-check", name:"Santé & Visites", stats: svTotal === 0 ? null : [
+        { v:svTotal, l:"Agents suivis" }, { v:svOk, l:"À jour", cls:"success" },
+        { v:svSoon, l:"À programmer", cls:"warn" }, { v:svLate, l:"En retard", cls:svLate?"danger":"" } ] },
+      { icon:"i-message-square", name:"Registre Santé & Sécurité", stats: rsstTotal === 0 ? null : [
+        { v:rsstTotal, l:"Observations" }, { v:rsstTaux+"%", l:"Traitées", cls:"success" },
+        { v:rsstNouvelle, l:"Nouvelles", cls:rsstNouvelle?"warn":"" } ] },
+      { icon:"i-check-circle", name:"Vérifications Périodiques", stats: vpTotal === 0 ? null : [
+        { v:vpTotal, l:"Équipements" }, { v:vpOk, l:"À jour", cls:"success" },
+        { v:vpNonConforme, l:"Non conformes", cls:vpNonConforme?"danger":"" } ] },
+      { icon:"i-search", name:"Inspection / Audit", stats: iaTotal === 0 ? null : [
+        { v:iaTotal, l:"Inspections" }, { v:iaTaux+"%", l:"Conformes", cls:"success" },
+        { v:iaNonConforme, l:"Non conformes", cls:iaNonConforme?"danger":"" } ] },
+      { icon:"i-flask", name:"Produits Chimiques", stats: pcTotal === 0 ? null : [
+        { v:pcTotal, l:"Produits référencés" }, { v:pcCmr, l:"Dont CMR/dangereux", cls:pcCmr?"warn":"" } ] },
+      { icon:"i-award", name:"Formation / Habilitation", stats: fhTotal === 0 ? null : [
+        { v:fhTotal, l:"Habilitations" }, { v:fhOk, l:"À jour", cls:"success" },
+        { v:fhExpiree, l:"Expirées", cls:fhExpiree?"danger":"" } ] },
+      { icon:"i-package", name:"EPI & Dotation", stats: epiTotal === 0 ? null : [
+        { v:epiTotal, l:"Dotations" }, { v:epiOk, l:"À jour", cls:"success" },
+        { v:epiRenew, l:"À renouveler/expirées", cls:epiRenew?"warn":"" } ] },
+    ];
+    $("moduleGrid").innerHTML = MODULES.map(m => `
+      <div class="panel module-card">
+        <div class="module-top"><div class="module-icon"><svg class="icon"><use href="#${m.icon}"/></svg></div><div class="module-name">${m.name}</div></div>
+        ${m.stats ? `<div class="module-stats">${m.stats.map(s => `
+          <div class="mstat"><span class="mstat-value ${s.cls||''}">${s.v}</span><span class="mstat-label">${s.l}</span></div>`).join("")}</div>`
+          : `<div class="module-empty">Aucune donnée dans ce navigateur pour ce module.</div>`}
+      </div>`).join("");
+
+    // ---- Tendance AT/MP ----
+    const monthCounts = {};
+    ATMP.forEach(r => { const m = (r.dateAT||"").slice(0,7); if (m) monthCounts[m] = (monthCounts[m]||0) + 1; });
+    const capMonths = periode === "all" ? 24 : Number(periode);
+    const months = Object.keys(monthCounts).sort().slice(-capMonths);
+    const maxCount = Math.max(1, ...months.map(m => monthCounts[m]));
+    $("trendTotal").textContent = months.reduce((s,m) => s + monthCounts[m], 0);
+    $("trendBars").innerHTML = months.length === 0
+      ? `<div class="module-empty">Aucun événement AT/MP sur la période.</div>`
+      : months.map(m => `<div class="trend-bar" style="height:${Math.max(6,(monthCounts[m]/maxCount)*100)}%" title="${m} — ${monthCounts[m]}"></div>`).join("");
+    $("trendLabels").innerHTML = months.map(m => `<span>${MOIS[parseInt(m.slice(5,7),10)-1]} ${m.slice(2,4)}</span>`).join("");
+
+    // stash for export
+    window.__reportData = { atTotal, atJours, atAvec, tf, duTotal, hseScorePct, duPrioCount:duPrio.length,
+      paTotal, paTaux, paEnCours, paRetard, svTotal, svOk, svSoon, svLate, rsstTotal, rsstTaux, rsstNouvelle,
+      vpTotal, vpOk, vpNonConforme, iaTotal, iaTaux, iaNonConforme, pcTotal, pcCmr, fhTotal, fhOk, fhExpiree,
+      epiTotal, epiOk, epiRenew };
+  }
+
+  $("fPeriode").addEventListener("change", renderReport);
+  renderReport();
+
+  $("btnExportPdf").addEventListener("click", () => { window.print(); });
+
+  $("btnExportXlsx").addEventListener("click", () => {
+    const d = window.__reportData || {};
+    const wb = XLSX.utils.book_new();
+    function addSheet(name, rows){ XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), name); }
+    addSheet("AT-MP", [
+      { Indicateur:"Total événements (période)", Valeur:d.atTotal }, { Indicateur:"Jours d'arrêt cumulés", Valeur:d.atJours },
+      { Indicateur:"Avec arrêt", Valeur:d.atAvec }, { Indicateur:"Taux de fréquence", Valeur:Number(d.tf||0).toFixed(1) } ]);
+    addSheet("DUERP", [
+      { Indicateur:"Évaluations", Valeur:d.duTotal }, { Indicateur:"Score HSE (%)", Valeur:d.hseScorePct },
+      { Indicateur:"Élevé + Critique", Valeur:d.duPrioCount } ]);
+    addSheet("Plan d'Actions", [
+      { Indicateur:"Total", Valeur:d.paTotal }, { Indicateur:"Taux de complétion (%)", Valeur:d.paTaux },
+      { Indicateur:"En cours", Valeur:d.paEnCours }, { Indicateur:"En retard", Valeur:d.paRetard } ]);
+    addSheet("Santé & Visites", [
+      { Indicateur:"Agents suivis", Valeur:d.svTotal }, { Indicateur:"À jour", Valeur:d.svOk },
+      { Indicateur:"À programmer", Valeur:d.svSoon }, { Indicateur:"En retard", Valeur:d.svLate } ]);
+    addSheet("RSST", [
+      { Indicateur:"Observations", Valeur:d.rsstTotal }, { Indicateur:"Taux de traitement (%)", Valeur:d.rsstTaux },
+      { Indicateur:"Nouvelles", Valeur:d.rsstNouvelle } ]);
+    addSheet("Vérifications", [
+      { Indicateur:"Équipements", Valeur:d.vpTotal }, { Indicateur:"À jour", Valeur:d.vpOk },
+      { Indicateur:"Non conformes", Valeur:d.vpNonConforme } ]);
+    addSheet("Inspection-Audit", [
+      { Indicateur:"Inspections", Valeur:d.iaTotal }, { Indicateur:"Taux de conformité (%)", Valeur:d.iaTaux },
+      { Indicateur:"Non conformes", Valeur:d.iaNonConforme } ]);
+    addSheet("Produits Chimiques", [
+      { Indicateur:"Produits référencés", Valeur:d.pcTotal }, { Indicateur:"Dont CMR/dangereux", Valeur:d.pcCmr } ]);
+    addSheet("Formation-Habilitation", [
+      { Indicateur:"Habilitations", Valeur:d.fhTotal }, { Indicateur:"À jour", Valeur:d.fhOk },
+      { Indicateur:"Expirées", Valeur:d.fhExpiree } ]);
+    addSheet("EPI & Dotation", [
+      { Indicateur:"Dotations", Valeur:d.epiTotal }, { Indicateur:"À jour", Valeur:d.epiOk },
+      { Indicateur:"À renouveler/expirées", Valeur:d.epiRenew } ]);
+    const todayIso = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, `rapport-indicateurs-hse_${todayIso}.xlsx`);
+  });
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    $("printDate").textContent = "Édité le " + now.toLocaleDateString('fr-FR');
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

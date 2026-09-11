@@ -213,7 +213,7 @@
     try {
       const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
       if (!s || !s.user){ location.href = "login.html"; return; }
-      if (s.role !== "admin"){ location.href = "index.html"; }
+      if (s.role !== "admin"){ location.href = "dashboard.html"; }
     } catch(e){ location.href = "login.html"; }
   })();
 </script>
@@ -249,11 +249,11 @@
   <div class="sidebar-scrim" id="scrim"></div>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <a class="brand-mark" href="index.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
       <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
     </div>
     <nav>
-      <div class="nav-section"><a class="nav-item" href="index.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section"><a class="nav-item" href="dashboard.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
       <div class="nav-section">
         <div class="nav-label">Santé au travail</div>
         <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
@@ -447,6 +447,14 @@
         </div>
       </section>
 
+      <div class="panel section-block" style="padding:20px; margin-top:18px; border-color:rgba(var(--danger-rgb),.3);">
+        <div class="panel-head">
+          <h3 class="panel-title">Réinitialiser la démonstration</h3>
+        </div>
+        <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px;">Efface toutes les données stockées dans ce navigateur — utilisateurs, référentiels, registres, journal d'audit — et les remet aux valeurs de démonstration d'origine. Utile pour repartir d'un état propre avant une démonstration. Cette action ne peut pas être annulée et vous déconnectera.</p>
+        <button type="button" class="btn btn-danger" id="btnResetAll"><svg class="icon"><use href="#i-trash"/></svg> Réinitialiser toutes les données</button>
+      </div>
+
       <p class="footnote">Panneau d'administration — les données sont stockées localement dans ce navigateur (aucun serveur connecté à ce stade du prototype).</p>
     </div>
   </div>
@@ -459,6 +467,14 @@
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  $("btnResetAll").addEventListener("click", () => {
+    if (confirm("Réinitialiser TOUTES les données de démonstration stockées dans ce navigateur (utilisateurs, référentiels, registres, journal d'audit) ? Cette action est irréversible et vous déconnectera.")) {
+      localStorage.clear();
+      sessionStorage.clear();
+      location.href = "login.html";
+    }
+  });
 
   const sidebar = $("sidebar"), scrim = $("scrim");
   $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });

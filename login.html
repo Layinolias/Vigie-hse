@@ -109,6 +109,7 @@
   </div>
 
   <p class="footnote">Authentification de démonstration côté navigateur — à remplacer par le dispositif d'identification sécurisé de la collectivité lors du raccordement à l'architecture back-end.</p>
+  <p class="footnote">Démonstration à données fictives : tout ce que vous saisissez reste dans ce navigateur (<span class="mono">localStorage</span>), n'est partagé avec personne et peut être réinitialisé à tout moment. <a href="index.html" style="color:var(--accent);">En savoir plus</a>.</p>
 </div>
 
 <script>
@@ -140,7 +141,7 @@
 
   try {
     const existing = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null");
-    if (existing && existing.user) location.href = "index.html";
+    if (existing && existing.user) location.href = "dashboard.html";
   } catch(e){}
 
   const form = document.getElementById("loginForm");
@@ -162,7 +163,7 @@
         email: account.email,
         services: account.services || ["*"],
       }));
-      location.href = "index.html";
+      location.href = "dashboard.html";
     } else if (account && account.active === false){
       errorBox.textContent = "Ce compte a été désactivé. Contactez un administrateur.";
       errorBox.classList.add("show");

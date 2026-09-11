@@ -75,6 +75,8 @@ Chaque version est un dossier autonome et complet (pas de dépendance croisée).
 | `inspection-audit.html` | Trames de contrôle réutilisables + inspections réalisées ; les non-conformités alimentent le Plan d'Actions. |
 | `produits-chimiques.html` | Inventaire des produits chimiques par service, pictogrammes CLP, suivi des FDS. |
 | `formation-habilitation.html` | Suivi des habilitations par agent (CACES, habilitation électrique, SST...) et de leurs échéances de renouvellement. |
+| `epi-dotation.html` | EPI/vêtements de travail — catalogue, stock, dotation par agent, cycles de lavage/entretien. |
+| `reporting.html` | Indicateurs & reporting KPI (accès rh/admin). |
 | `administration.html` | Panneau admin (accès admin uniquement) : Utilisateurs, Référentiels (listes déroulantes éditables), Flash Info, Journal d'audit. |
 
 ## 7. Modèle de rôles
@@ -145,7 +147,10 @@ Les IDs des seeds sont **stables et déterministes** (ex. `pa-<id du risque DUER
 - Modules RSST et Vérifications Périodiques : terminés et vérifiés.
 - Séparation Flash Info interne / Actualités du secteur HSE : terminée.
 - Widgets météo (Open-Meteo, Verchamps) et Score HSE compact intégrés à la topbar de `index.html`, cliquables (météo → portail Météo France, score → ancre vers le détail sur la page).
-- **En cours au moment de la rédaction de ce document** : généralisation de l'en-tête compact/sticky (`.page-summary`, logo+titre+description+KPI sur une ligne) à tous les modules autres que `index.html`. Vérifier l'état réel des 9 fichiers concernés avant de considérer cette tâche comme acquise.
+- Généralisation de l'en-tête compact/sticky (`.page-summary`) à tous les modules : terminée.
+- Modules Indicateurs & Reporting KPI, Mode démonstration, Exports professionnels (PDF/Excel généralisé), EPI/dotation, Dashboard mobile simplifié : tous terminés — voir `ROADMAP-MODULES-FUTURS.md` pour le détail par module.
+- Menu latéral : bouton "épingler" pour empêcher le repli automatique, et zone de navigation rendue défilante indépendamment de l'en-tête/pied de sidebar (corrige un cas où trop d'éléments de menu rendaient le bouton de déconnexion inatteignable sur un écran bas).
+- **État courant** : le projet est en phase de test manuel avant tag `v1.0.0` — voir `CHECKLIST-QA-V1.md`.
 
 ## 13. Comment vérifier qu'un fichier n'est pas cassé après édition
 

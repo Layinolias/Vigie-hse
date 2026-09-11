@@ -27,4 +27,4 @@ Dashboard HSE prototype (Ville de Verchamps + Agglomération de Verchamps) : Reg
 
 ## Fichiers de `V0.1.1.2`
 
-Cockpit : `login.html`, `index.html`. Cœur HSE : `registre-at-mp.html` + `saisie-rh.html`, `document-unique.html` + `saisie-duerp.html`. Modules de suivi : `plan-actions.html`, `sante-visites.html`, `registre-sst.html`, `verifications-periodiques.html`, `inspection-audit.html`, `produits-chimiques.html`, `formation-habilitation.html`. Back-office : `administration.html`. Détail du rôle de chacun dans `ETAT-DU-PROJET.md` §6 (à tenir à jour à chaque nouveau module).
+Cockpit : `login.html`, `index.html`. Cœur HSE : `registre-at-mp.html` + `saisie-rh.html`, `document-unique.html` + `saisie-duerp.html`. Modules de suivi : `plan-actions.html`, `sante-visites.html`, `registre-sst.html`, `verifications-periodiques.html`, `inspection-audit.html`, `produits-chimiques.html`, `formation-habilitation.html`, `epi-dotation.html`, `reporting.html`. Back-office : `administration.html`. Détail du rôle de chacun dans `ETAT-DU-PROJET.md` §6 (à tenir à jour à chaque nouveau module).

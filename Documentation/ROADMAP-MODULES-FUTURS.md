@@ -29,7 +29,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 7 | Santé au travail — planning des visites médicales | 🔶 Base posée — extension prévue |
 | 8 | Gestion documentaire | ❌ Non démarré |
 | 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html` |
-| 10 | EPI, dotation & entretien | ❌ Non démarré (nouveau, voir section dédiée) |
+| 10 | EPI, dotation & entretien | ✅ Fait — `epi-dotation.html` |
 | 11 | Dashboard mobile simplifié | ✅ Fait |
 
 ---
@@ -167,35 +167,25 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-9 ci-dess
 
 **Annotation pour reprise :** ce module a probablement le plus à gagner à être construit **après** que plusieurs des modules ci-dessus (2, 4, 5, 6, 8) existent, pour avoir davantage de données à agréger. Une V1 raisonnable : une page `reporting.html` avec une sélection de période + export Excel (réutiliser SheetJS, déjà en place pour l'import/export AT/MP et DUERP) des indicateurs de tous les modules actifs.
 
-## 10. EPI, dotation & entretien — ❌ Non démarré
+## 10. EPI, dotation & entretien — ✅ Fait
 
 **Note d'origine (demande directe de l'utilisateur) :** un module couvrant tout ce qui concerne l'équipement personnel — EPI (Équipements de Protection Individuelle), vêtements de travail, gestion des stocks, entretien et lavage (avec gestion des cycles de lavage), centralisation des fiches techniques, gestion de la dotation (ce qui a été remis à quel agent).
 
-**Objectif compris :** un registre à plusieurs volets, plus proche d'une gestion de stock/inventaire que des autres modules HSE :
-1. **Catalogue** : les articles disponibles (EPI + vêtements), avec fiche technique (norme EN associée, taille, durée de vie recommandée).
-2. **Stock** : quantités en magasin par article/taille, seuil de réapprovisionnement.
-3. **Dotation** : ce qui a été remis à quel agent, quand, et la date de péremption/renouvellement prévue (chaussures de sécurité, gants, casque, vêtements haute visibilité...).
-4. **Entretien/lavage** : cycles de lavage suivis par article ou par lot (certains EPI ont un nombre de lavages maximal avant perte de leurs propriétés protectrices — pertinent en particulier pour les vêtements haute visibilité et ignifugés).
+**Ce qui existe (`epi-dotation.html`) :** un registre à quatre volets, implémenté selon le modèle pressenti initialement :
+1. **Catalogue** (`vigie_hse_epi_catalogue`) : les articles disponibles (EPI + vêtements), avec fiche technique (norme EN, taille, durée de vie recommandée).
+2. **Stock** (`vigie_hse_epi_stock`) : quantités en magasin par article/taille, seuil de réapprovisionnement.
+3. **Dotation** (`vigie_hse_epi_dotations`) : ce qui a été remis à quel agent, quand, et l'échéance de renouvellement, avec statut calculé (même pattern périodicité/échéance/statut que `verifications-periodiques.html`/`formation-habilitation.html`).
+4. **Entretien/lavage** (`vigie_hse_epi_lavages`) : cycles de lavage suivis par article, statut "OK"/"À réformer" au-delà du nombre de lavages maximal.
 
-**Annotation pour reprise :**
-- Modèle pressenti (4 tables sous forme de clés `localStorage` séparées, comme le reste de l'app) :
-  - `vigie_hse_epi_catalogue` — `{id, nom, categorie ("EPI"|"Vêtement de travail"), norme (ex. "EN 388", "EN ISO 20471"), dureeVieMois ou nombreLavagesMax, ficheTechnique (texte/URL)}`.
-  - `vigie_hse_epi_stock` — `{id, articleId, taille, quantiteStock, seuilAlerte}`.
-  - `vigie_hse_epi_dotations` — `{id, agent (nom/prénom/service — même roster partagé que Santé & Visites/Formation, voir note ci-dessous), articleId, taille, dateRemise, dateRenouvellementPrevue (calculée depuis dureeVieMois), statut}` — même pattern périodicité/échéance/statut que `verifications-periodiques.html`/`formation-habilitation.html`.
-  - `vigie_hse_epi_lavages` — `{id, articleId ou dotationId, dateLavage, nombreLavagesCumules, statut ("OK"|"À réformer" si nombreLavagesCumules ≥ nombreLavagesMax)}`.
-- **C'est le 3ᵉ module à avoir besoin d'un roster d'agents** (après Santé & Visites et Formation/Habilitation) — voir la note générale ci-dessous, c'est maintenant un vrai problème de duplication à traiter, pas juste une hypothèse.
-- Portée volontairement large (4 sous-thèmes en un seul module) — à re-découper en plusieurs pages si la construction s'avère trop dense pour un seul fichier (par ex. séparer "Catalogue + Stock" d'un côté et "Dotation + Lavage" de l'autre), à décider au moment de la construction plutôt que de figer maintenant.
+**Dette technique toujours valable :** c'est le 3ᵉ module à dériver indépendamment un roster d'agents (après Santé & Visites et Formation/Habilitation) — voir la note générale en fin de document, ce n'est plus une hypothèse mais un vrai problème de duplication (3 copies indépendantes du même roster) à factoriser avant un 4ᵉ module qui en aurait besoin.
 
-## 11. Dashboard mobile simplifié — ❌ Non démarré, décision de principe prise
+## 11. Dashboard mobile simplifié — ✅ Fait
 
-**Décision (utilisateur, confirmée) :** l'usage principal restera desktop (RH/HSE au bureau, saisie de données denses). Une vraie application native (React Native/Flutter, nouvelle stack séparée) n'est **pas** retenue — jugée disproportionnée par rapport au besoin réel. La direction retenue est un **dashboard mobile simplifié**, dans la même stack HTML/CSS/JS que le reste du site, pas une appli à part.
+**Décision (utilisateur, confirmée) :** l'usage principal reste desktop (RH/HSE au bureau, saisie de données denses). Une vraie application native (React Native/Flutter, nouvelle stack séparée) n'a **pas** été retenue — jugée disproportionnée par rapport au besoin réel. La direction retenue : un **dashboard mobile simplifié**, dans la même stack HTML/CSS/JS que le reste du site, pas une appli à part.
 
-**Ce que "simplifié" veut dire concrètement (à affiner au moment de la construction) :** pas une tentative de faire tenir les tableaux à 10+ colonnes et les formulaires denses sur petit écran — plutôt une vue mobile dédiée avec un sous-ensemble d'actions à forte fréquence d'usage terrain, par exemple :
-- Consultation rapide des KPI principaux (au lieu du dashboard complet).
-- Déclarer un AT/MP ou déposer une observation RSST (formulaires déjà les plus "rapides" de l'app) en version mobile allégée.
-- Le reste (Administration, Indicateurs & Reporting, tableaux denses) reste explicitement desktop-only, avec un message clair plutôt qu'un rendu dégradé si consulté sur mobile.
+**Ce qui existe :** sur petit écran (<640px), `dashboard.html` affiche l'essentiel (accueil, sélecteur de zone, KPI) puis deux boutons pleine largeur "Déclarer un AT/MP" et "Signaler une observation" ; les panneaux denses (actualités, tendances, tableau des dernières déclarations) restent masqués sur mobile uniquement, avec une note explicite — le rendu desktop est strictement inchangé. Les formulaires de création les plus utilisés sur le terrain (`saisie-rh.html`, `saisie-duerp.html`, création dans `registre-sst.html`) ont aussi reçu des ajustements tactiles : police 16px sur les champs (évite le zoom automatique iOS), contrôles segmentés qui passent à la ligne plutôt que de s'écraser, boutons pleine largeur et tactiles (48px).
 
-**Annotation pour reprise :** ne pas confondre avec le travail responsive déjà fait (sidebar en tiroir, tableaux avec défilement horizontal contenu, `.page-summary` qui s'adapte) — ce travail reste valable et nécessaire, mais insuffisant seul pour une bonne expérience mobile sur les modules denses. Ce module 11 est un vrai chantier de design d'interface (quelles actions exposer, quelle navigation simplifiée), pas juste du CSS — prévoir une phase de réflexion UX avant de coder.
+**Ce qui reste hors scope, assumé :** Administration, Indicateurs & Reporting et les tableaux denses restent explicitement desktop-only sur mobile — pas un chantier resté à faire, un choix de portée pour ce module.
 
 ---
 

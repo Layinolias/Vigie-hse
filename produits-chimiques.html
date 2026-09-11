@@ -48,6 +48,10 @@
   .app-shell{ display:flex; min-height:100vh; }
   .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
   .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; }
+  .sidebar-pin{ margin-left:auto; flex-shrink:0; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:var(--r-sm); background:none; border:none; color:var(--text-faint); cursor:pointer; transition:background .15s ease, color .15s ease; }
+  .sidebar-pin:hover{ background:var(--bg-2); color:var(--text-muted); }
+  .sidebar-pin.active{ color:var(--accent); background:rgba(var(--accent-rgb),.12); }
+  .sidebar-pin .icon{ width:15px; height:15px; }
   .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
   .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
   .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
@@ -84,7 +88,8 @@
     .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
     .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
     .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
-    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta{ display:none; }
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
     .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
     .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
     .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
@@ -236,6 +241,7 @@
   <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
   <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
 </defs>
 </svg>
 
@@ -245,6 +251,7 @@
     <div class="sidebar-brand">
       <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
       <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
     </div>
     <nav>
       <div class="nav-section"><a class="nav-item" href="dashboard.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
@@ -438,9 +445,13 @@
   scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
   const appShell = document.querySelector(".app-shell");
   let collapseTimer = null;
+  const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
+  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  const pinBtn = document.getElementById("sidebarPin");
+  function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function isDesktopWidth(){ return window.innerWidth > 980; }
   function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
-  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth()) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
+  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth() || sidebarLocked) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
   sidebar.addEventListener("mouseenter", sidebarExpand);
   sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
   sidebar.addEventListener("focusin", sidebarExpand);
@@ -448,6 +459,15 @@
   const mainEl = document.querySelector(".main");
   if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
   window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+  if (sidebarLocked) sidebarExpand();
+  applyPinVisual();
+  if (pinBtn) pinBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    sidebarLocked = !sidebarLocked;
+    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    applyPinVisual();
+    if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
+  });
 
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";

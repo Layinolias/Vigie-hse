@@ -28,14 +28,15 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 6 | Formation / Habilitation | ✅ Fait — `formation-habilitation.html` |
 | 7 | Santé au travail — planning des visites médicales | 🔶 Base posée — extension prévue |
 | 8 | Gestion documentaire | ❌ Non démarré |
-| 9 | Indicateurs & reporting KPI | ❌ Non démarré (prochain sur la liste) |
+| 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html` |
 | 10 | EPI, dotation & entretien | ❌ Non démarré (nouveau, voir section dédiée) |
+| 11 | Dashboard mobile simplifié | ❌ Non démarré (décision prise, voir section dédiée) |
 
 ---
 
 ## J0 — Jalon stratégique : généraliser le produit à un usage commercial (collectivités + secteur privé) — ❌ Non démarré
 
-**Objectif exprimé par l'utilisateur :** faire de VIGIE HSE, au-delà du prototype pour une collectivité (Ville de Verchamps + Agglomération), un produit **vendable**, générique, adaptable à "une multitude de projets" — aussi bien des collectivités territoriales que des entreprises privées. C'est un jalon *transverse* : il ne s'agit pas d'un module métier de plus, mais d'une étape de normalisation qui conditionne la commercialisation, à traiter avant (ou en parallèle réfléchi de) l'ajout de nouveaux modules métier.
+**Objectif exprimé par l'utilisateur :** faire de VIGIE HSE, au-delà du prototype pour une collectivité (Ville de Verchamps + Agglomération, collectivité fictive de démonstration), un produit **vendable**, générique, adaptable à "une multitude de projets" — aussi bien des collectivités territoriales que des entreprises privées. C'est un jalon *transverse* : il ne s'agit pas d'un module métier de plus, mais d'une étape de normalisation qui conditionne la commercialisation, à traiter avant (ou en parallèle réfléchi de) l'ajout de nouveaux modules métier.
 
 ### Bonne nouvelle : le socle réglementaire est déjà commun aux deux mondes
 
@@ -61,7 +62,7 @@ Le distingo actuel "Ville / Agglomération" est une **structure à 2 niveaux sp�
 
 ### Ce qui doit devenir générique — contenu éditorial et branding
 
-- Le widget météo de `index.html` est câblé en dur sur les coordonnées de Verchamps et pointe vers le portail Météo France — à rendre configurable par client (ville/site de référence), ou à retirer si non pertinent pour un client sans dimension "terrain extérieur" (ex. un siège social tertiaire).
+- ~~Le widget météo de `index.html` est câblé en dur sur une ville fixe~~ — **fait** : il utilise désormais la géolocalisation du navigateur du visiteur (repli sur la localisation IP si refusé), donc déjà générique par construction, pas besoin de configuration par client sur ce point.
 - Le panneau "Actualités du secteur HSE" est actuellement composé de 7 actus **orientées fonction publique territoriale** (DUERP collectivités, plan santé fonction publique, arrêts maladie agents territoriaux). Un client privé aurait besoin d'un jeu d'actus différent (actualité Code du travail générale, jurisprudence CSE/CSSCT, actualité INRS — déjà pertinente pour les deux mondes). Prévoir soit deux jeux de contenu (profil "collectivité" / profil "entreprise"), soit un contenu recentré sur ce qui est commun (INRS, veille légale générale) complété par un module éditable par client (rejoint le module 1 "Veille réglementaire" du backlog fonctionnel).
 - Nom "VIGIE HSE", palette, logo : à traiter en **marque blanche** — un nom/logo/palette par client, pas un branding figé.
 
@@ -184,6 +185,17 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-9 ci-dess
   - `vigie_hse_epi_lavages` — `{id, articleId ou dotationId, dateLavage, nombreLavagesCumules, statut ("OK"|"À réformer" si nombreLavagesCumules ≥ nombreLavagesMax)}`.
 - **C'est le 3ᵉ module à avoir besoin d'un roster d'agents** (après Santé & Visites et Formation/Habilitation) — voir la note générale ci-dessous, c'est maintenant un vrai problème de duplication à traiter, pas juste une hypothèse.
 - Portée volontairement large (4 sous-thèmes en un seul module) — à re-découper en plusieurs pages si la construction s'avère trop dense pour un seul fichier (par ex. séparer "Catalogue + Stock" d'un côté et "Dotation + Lavage" de l'autre), à décider au moment de la construction plutôt que de figer maintenant.
+
+## 11. Dashboard mobile simplifié — ❌ Non démarré, décision de principe prise
+
+**Décision (utilisateur, confirmée) :** l'usage principal restera desktop (RH/HSE au bureau, saisie de données denses). Une vraie application native (React Native/Flutter, nouvelle stack séparée) n'est **pas** retenue — jugée disproportionnée par rapport au besoin réel. La direction retenue est un **dashboard mobile simplifié**, dans la même stack HTML/CSS/JS que le reste du site, pas une appli à part.
+
+**Ce que "simplifié" veut dire concrètement (à affiner au moment de la construction) :** pas une tentative de faire tenir les tableaux à 10+ colonnes et les formulaires denses sur petit écran — plutôt une vue mobile dédiée avec un sous-ensemble d'actions à forte fréquence d'usage terrain, par exemple :
+- Consultation rapide des KPI principaux (au lieu du dashboard complet).
+- Déclarer un AT/MP ou déposer une observation RSST (formulaires déjà les plus "rapides" de l'app) en version mobile allégée.
+- Le reste (Administration, Indicateurs & Reporting, tableaux denses) reste explicitement desktop-only, avec un message clair plutôt qu'un rendu dégradé si consulté sur mobile.
+
+**Annotation pour reprise :** ne pas confondre avec le travail responsive déjà fait (sidebar en tiroir, tableaux avec défilement horizontal contenu, `.page-summary` qui s'adapte) — ce travail reste valable et nécessaire, mais insuffisant seul pour une bonne expérience mobile sur les modules denses. Ce module 11 est un vrai chantier de design d'interface (quelles actions exposer, quelle navigation simplifiée), pas juste du CSS — prévoir une phase de réflexion UX avant de coder.
 
 ---
 

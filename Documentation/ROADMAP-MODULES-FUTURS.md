@@ -15,7 +15,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | Jalon | Statut |
 |---|---|
 | **J0 — Généralisation commerciale (collectivités + secteur privé)** | ❌ Non démarré — prérequis à toute commercialisation |
-| **J1 — Accompagnement certification ISO 45001** | ❌ Non démarré — version ultérieure, étude de valeur ajoutée |
+| **J1 — Accompagnement certification sécurité (ISO 45001, MASE...)** | ❌ Non démarré — version ultérieure, tour d'horizon des référentiels à faire |
 
 **Modules fonctionnels** :
 
@@ -107,9 +107,11 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 ---
 
-## J1 — Jalon complémentaire : accompagnement à la certification ISO 45001 — ❌ Non démarré (version ultérieure)
+## J1 — Jalon complémentaire : accompagnement à la certification sécurité (ISO 45001 et autres) — ❌ Non démarré (version ultérieure)
 
-**Objectif exprimé par l'utilisateur (2026-09-12) :** étudier, pour une version ultérieure (explicitement pas un chantier immédiat), la possibilité d'aider une collectivité/entreprise cliente à obtenir ou conserver une certification de système de management de la santé-sécurité au travail — norme visée : **ISO 45001**. Confronter ce que VIGIE HSE produit déjà aux exigences de la norme, identifier les modules qui manquent, et ne retenir que ceux qui apportent une vraie valeur ajoutée par rapport à une certification "à la main" (audit papier, tableurs).
+**Objectif exprimé par l'utilisateur (2026-09-12) :** étudier, pour une version ultérieure (explicitement pas un chantier immédiat), la possibilité d'aider une collectivité/entreprise cliente à obtenir ou conserver une certification de système de management de la santé-sécurité au travail. Confronter ce que VIGIE HSE produit déjà aux exigences de ces référentiels, identifier les modules qui manquent, et ne retenir que ceux qui apportent une vraie valeur ajoutée par rapport à une certification "à la main" (audit papier, tableurs).
+
+**Précision importante (2026-09-12) : ne pas se limiter à ISO 45001.** L'utilisateur souligne à raison qu'il existe plusieurs référentiels de certification sécurité pertinents en France, pas un seul — au moins **MASE** (Manuel d'Amélioration Sécurité des Entreprises, très répandu en France notamment dans l'industrie/BTP/collectivités, avec un fonctionnement différent d'ISO 45001 : adhésion via un Comité Régional MASE, référentiel propre, pas un audit ISO classique) doit être étudié à côté d'ISO 45001, et probablement d'autres selon le secteur. **Avant de se lancer dans quoi que ce soit sur ce jalon, faire un tour d'horizon comparatif de ces différents référentiels** (couverture, démarche de certification, public visé, ce qui les distingue d'ISO 45001) plutôt que de concevoir une seule matrice de conformité pensée uniquement pour ISO 45001 — la recherche ISO 45001 ci-dessous reste valable comme premier exemple travaillé, mais ne doit pas être traitée comme la seule cible.
 
 **Recherche effectuée — structure de la norme ISO 45001:2018 :** la norme suit la structure commune aux normes de management ISO (Annexe SL, partagée avec ISO 9001 qualité et ISO 14001 environnement), en 10 clauses dont 7 portent des exigences (clauses 4 à 10) : Contexte de l'organisme, Leadership et participation des travailleurs, Planification, Support, Réalisation des activités opérationnelles, Évaluation des performances, Amélioration. [ISO 45001 Clauses Explained (Effivity)](https://www.effivity.com/health-and-safety-management-system/iso-45001-clauses) · [ISO 45001:2018 Clause Structure (45001 Store)](https://45001store.com/articles/iso-45001-detail/)
 
@@ -138,9 +140,9 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 2. **Préparation aux situations d'urgence** — plans d'urgence par site, exercices d'évacuation planifiés et leurs résultats, contacts d'urgence, retours d'expérience post-exercice.
 3. **Politique HSE** — un document de politique versionné, daté, publié (probablement dans le futur module Gestion documentaire), avec preuve de communication aux agents (pourrait s'appuyer sur le futur module 12, Accueil au poste, pour l'émargement de prise de connaissance).
 4. **Programme d'audit interne formalisé** — étendre Inspection/Audit avec une couche "audit du système" distincte des inspections terrain : calendrier d'audits annuel, périmètre/critères par audit, traçabilité de la qualification de l'auditeur.
-5. **Idée à plus forte valeur ajoutée : une matrice de conformité ISO 45001 intégrée à l'app.** Plutôt que de simplement combler les 4 écarts ci-dessus séparément, une vue dédiée (dans Reporting ou Administration) qui relie chaque clause de la norme aux données déjà présentes dans VIGIE HSE et signale en direct ce qui est prêt/à compléter transformerait l'app en véritable outil d'accompagnement à la certification, pas seulement un tracker HSE qui se trouve aussi couvrir la norme. C'est probablement l'angle qui différencie le plus par rapport à un accompagnement "à la main" — à confirmer avec toi avant d'aller plus loin.
+5. **Idée à plus forte valeur ajoutée : une matrice de conformité multi-référentiels intégrée à l'app** (ISO 45001, MASE, et d'autres selon le tour d'horizon à faire). Plutôt que de combler des écarts pensés pour une seule norme, une vue dédiée (dans Reporting ou Administration) qui relie chaque exigence de chaque référentiel choisi aux données déjà présentes dans VIGIE HSE et signale en direct ce qui est prêt/à compléter transformerait l'app en véritable outil d'accompagnement à la certification, pas seulement un tracker HSE qui se trouve aussi couvrir une norme. C'est probablement l'angle qui différencie le plus par rapport à un accompagnement "à la main" — à confirmer avec toi avant d'aller plus loin.
 
-**Cadrage :** explicitement une étude pour une version ultérieure, pas un chantier à démarrer maintenant. **Ceci n'est pas un conseil de certification** — la certification effective reste délivrée par un organisme certificateur accrédité après audit externe ; VIGIE HSE peut outiller la préparation et la collecte de preuves, pas se substituer à l'audit lui-même.
+**Cadrage :** explicitement une étude pour une version ultérieure, pas un chantier à démarrer maintenant — et explicitement pas limitée à ISO 45001 (voir précision ci-dessus). **Ceci n'est pas un conseil de certification** — la certification effective reste délivrée par un organisme certificateur/comité accrédité après audit externe ; VIGIE HSE peut outiller la préparation et la collecte de preuves, pas se substituer à l'audit lui-même.
 
 ---
 
@@ -206,13 +208,15 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 **Note d'origine :** "Gestion documentaire : référentiel de documents officiels, dans tous les domaines concernés."
 
-**Objectif probable :** un espace centralisé pour les documents officiels de l'app (DUERP imprimable, registre RSST imprimable, procédures HSE, notes de service, arrêtés, consignes de sécurité par site...).
+**Vision élargie (retour utilisateur, 2026-09-12) : pas seulement un registre de documents officiels, un vrai "wiki++" du métier HSE.** Au-delà de stocker des documents (DUERP imprimable, registre RSST imprimable, procédures HSE, notes de service, arrêtés, consignes de sécurité par site...), l'objectif est un système de connaissance consultable et cherchable — retrouver n'importe quelle information utile à la profession — pensé pour **accompagner les agents au quotidien**, pas seulement archiver des fichiers pour un administratif. Change la nature du module : moins "registre de métadonnées passif", plus "base de connaissance active" (recherche, navigation par thème, articles rédigés/structurés en plus des documents déposés).
 
 **Annotation pour reprise :**
-- **Limite structurelle importante à anticiper** : sans backend, ce projet ne peut pas stocker de vrais fichiers de façon fiable/partagée (le `localStorage` est limité en taille — généralement 5-10 Mo par origine — et n'est pas partagé entre utilisateurs). Deux options réalistes pour une V1 dans l'architecture actuelle :
-  1. Un registre de **métadonnées** de documents (nom, catégorie, version, date, lien vers un emplacement externe — ex. un lecteur réseau ou un Drive de la collectivité) sans stockage du fichier lui-même.
-  2. Attendre le passage à un vrai backend (voir §14 de `ETAT-DU-PROJET.md`) avant de construire ce module, car c'est probablement celui qui bénéficierait le plus d'un vrai stockage de fichiers.
-- Discuter avec l'utilisateur avant de démarrer : accepter la limite (1) en V1, ou considérer que ce module doit attendre le backend ?
+- **Limite structurelle importante à anticiper** : sans backend, ce projet ne peut pas stocker de vrais fichiers de façon fiable/partagée (le `localStorage` est limité en taille — généralement 5-10 Mo par origine — et n'est pas partagé entre utilisateurs). Cette limite touche le stockage de fichiers déposés, mais **pas** le contenu de type wiki (articles texte structurés), qui reste réalisable dans l'architecture actuelle comme les autres référentiels (`vigie_hse_referentials`, Flash Info).
+- Deux volets à distinguer, avec des contraintes différentes :
+  1. **Contenu wiki (articles, fiches pratiques, FAQ)** : réalisable dès maintenant, CRUD par l'admin (comme Flash Info/Veille réglementaire), recherche texte côté client, catégorisation par thème/module. Pas de dépendance au backend.
+  2. **Dépôt de vrais fichiers (documents officiels, PDF...)** : registre de **métadonnées** (nom, catégorie, version, date, lien externe) sans stockage du fichier lui-même en V1, ou attendre le vrai backend (§14 de `ETAT-DU-PROJET.md`) pour un stockage natif.
+- Recoupe directement le module 1 (Veille réglementaire, déjà un embryon de contenu éditorial structuré) et le jalon J1 (accompagnement certification) qui aura besoin d'un endroit où loger politique HSE, procédures, comptes-rendus — à concevoir ensemble plutôt que comme des silos séparés.
+- Discuter avec l'utilisateur avant de démarrer : périmètre exact du wiki (arborescence par thème ? moteur de recherche plein texte ? contributions multi-rôles ou admin seul ?), et si le dépôt de fichiers (volet 2) est repoussé au backend ou traité en V1 avec la limite de métadonnées.
 
 ## 9. Indicateurs & reporting KPI — ✅ Fait, extension demandée
 

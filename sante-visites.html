@@ -46,7 +46,8 @@
 
   .app-shell{ display:flex; min-height:100vh; }
   .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
-  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; flex-shrink:0; }
+  .sidebar nav{ flex:1 1 auto; min-height:0; overflow-y:auto; margin-left:-14px; padding-left:14px; scrollbar-width:thin; }
   .sidebar-pin{ margin-left:auto; flex-shrink:0; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:var(--r-sm); background:none; border:none; color:var(--text-faint); cursor:pointer; transition:background .15s ease, color .15s ease; }
   .sidebar-pin:hover{ background:var(--bg-2); color:var(--text-muted); }
   .sidebar-pin.active{ color:var(--accent); background:rgba(var(--accent-rgb),.12); }
@@ -61,7 +62,7 @@
   .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
   .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
   .nav-item .icon{ width:17px; height:17px; }
-  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
   .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
   .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
   .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }

@@ -117,6 +117,11 @@
   .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
   .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
   @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  .mobile-notice{ display:none; }
+  @media (max-width:640px){
+    .mobile-notice.show{ display:flex; align-items:center; gap:8px; padding:8px 12px; margin-bottom:14px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); font-size:11.5px; color:var(--text-muted); }
+    .mobile-notice.show button{ margin-left:auto; background:none; border:none; color:var(--text-faint); font-size:16px; line-height:1; cursor:pointer; padding:0 2px; flex-shrink:0; }
+  }
   @media (max-width:640px){ .page-summary{ padding:9px 16px; } .ps-kpi-label{ display:none; } }
 
   .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
@@ -301,6 +306,11 @@
         </div>
       </header>
 
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord ou la déclaration rapide.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
       <div class="panel console">
         <div class="field"><span class="flabel">Période (AT/MP &amp; tendance)</span>
           <select id="fPeriode">
@@ -333,6 +343,20 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const role = (session && session.role) || "ag";

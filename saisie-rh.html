@@ -135,6 +135,13 @@
   .field-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px 18px; }
   .field-grid .span2{ grid-column:span 2; } .field-grid .span3{ grid-column:span 3; }
   @media (max-width:640px){ .field-grid .span2, .field-grid .span3{ grid-column:span 1; } }
+  @media (max-width:640px){
+    select, input[type="text"], input[type="number"], input[type="date"], textarea{ font-size:16px; }
+    .segmented{ flex-wrap:wrap; }
+    .segmented label{ flex:1 1 33%; min-width:0; padding:9px 4px; font-size:11px; }
+    .form-actions{ flex-direction:column; align-items:stretch; }
+    .form-actions .btn{ width:100%; justify-content:center; min-height:46px; }
+  }
   .f{ display:flex; flex-direction:column; gap:7px; }
   .f label{ font-size:11.5px; color:var(--text-muted); font-weight:500; }
 

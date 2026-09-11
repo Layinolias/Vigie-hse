@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Nouvelle session dans le depot VIGIE HSE (V0.1.1.2). Avant toute autre action, lis ces trois fichiers de suivi du projet : Documentation/ETAT-DU-PROJET.md (etat/suivi), Documentation/ROADMAP-MODULES-FUTURS.md (roadmap), Documentation/CHECKLIST-QA-V1.md (checklist QA).\"}}'"
+          }
+        ]
+      }
+    ]
+  }
+}

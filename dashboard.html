@@ -149,6 +149,26 @@
   .tb-weather-cond{ font-size:9.5px; color:var(--text-faint); font-weight:500; white-space:nowrap; max-width:120px; overflow:hidden; text-overflow:ellipsis; }
   .tb-weather-wind{ display:flex; align-items:center; gap:3px; font-size:10px; color:var(--text-faint); padding-left:8px; margin-left:2px; border-left:1px solid rgba(var(--accent-blue-rgb),.3); white-space:nowrap; }
   .tb-weather-wind .icon{ width:12px; height:12px; color:var(--text-faint); }
+  .tb-weather-wrap{ position:relative; }
+  .weather-popover{
+    position:absolute; top:calc(100% + 8px); left:0; width:260px; z-index:50;
+    background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-md);
+    box-shadow:var(--shadow-md); padding:12px; display:flex; flex-direction:column; gap:8px;
+    cursor:default;
+  }
+  .weather-popover-head{ font:600 11.5px "Barlow Condensed",sans-serif; letter-spacing:.03em; text-transform:uppercase; color:var(--text-muted); }
+  .weather-popover input{
+    width:100%; padding:8px 10px; border-radius:var(--r-sm); border:1px solid var(--border);
+    background:var(--surface); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif; box-sizing:border-box;
+  }
+  .weather-results{ display:flex; flex-direction:column; gap:2px; max-height:180px; overflow-y:auto; }
+  .weather-result-item{ padding:7px 9px; border-radius:var(--r-sm); cursor:pointer; font-size:12.5px; color:var(--text); display:flex; flex-direction:column; gap:1px; }
+  .weather-result-item:hover{ background:var(--bg-2); }
+  .weather-result-item .wr-sub{ font-size:10.5px; color:var(--text-faint); }
+  .weather-result-empty{ font-size:11.5px; color:var(--text-faint); padding:6px 2px; }
+  .weather-popover-link{ font-size:11px; color:var(--accent-blue); text-decoration:none; align-self:flex-start; }
+  .weather-popover-link:hover{ text-decoration:underline; }
+  .weather-current{ font-size:11px; color:var(--text-muted); }
   .tb-score{
     background:linear-gradient(135deg, rgba(var(--accent-rgb),.16), rgba(var(--accent-violet-rgb),.06));
     border-color:rgba(var(--accent-rgb),.28);
@@ -177,7 +197,7 @@
     .zone-btn{ padding:8px 18px; font-size:12.5px; }
   }
 
-  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
 
   @media (max-width:980px){
     .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); }
@@ -494,13 +514,21 @@
       <div class="topbar-left">
         <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
 
-        <div class="tb-widget tb-weather" id="tbWeather" title="Météo en direct">
-          <svg class="icon" id="weatherIcon"><use href="#i-cloud"/></svg>
-          <div class="tb-weather-text">
-            <span class="tb-weather-temp mono" id="weatherTemp">–°C</span>
-            <span class="tb-weather-cond" id="weatherCond">…</span>
+        <div class="tb-weather-wrap">
+          <div class="tb-widget tb-weather" id="tbWeather" title="Choisir une ville pour la météo">
+            <svg class="icon" id="weatherIcon"><use href="#i-cloud"/></svg>
+            <div class="tb-weather-text">
+              <span class="tb-weather-temp mono" id="weatherTemp">–°C</span>
+              <span class="tb-weather-cond" id="weatherCond">…</span>
+            </div>
+            <span class="tb-weather-wind" id="weatherMeta"><svg class="icon"><use href="#i-wind"/></svg><span id="weatherWind">–</span></span>
           </div>
-          <span class="tb-weather-wind" id="weatherMeta"><svg class="icon"><use href="#i-wind"/></svg><span id="weatherWind">–</span></span>
+          <div class="weather-popover" id="weatherPopover" hidden>
+            <div class="weather-popover-head">Choisir une localisation</div>
+            <input type="text" id="weatherSearchInput" placeholder="Ville, région, pays…" autocomplete="off">
+            <div class="weather-results" id="weatherResults"></div>
+            <a href="https://meteofrance.com/" target="_blank" rel="noopener" class="weather-popover-link">Voir sur Météo France ↗</a>
+          </div>
         </div>
 
         <div class="tb-widget tb-score" id="tbScore" title="Score HSE — part des risques évalués au niveau faible ou modéré">
@@ -897,10 +925,13 @@
 
   $("moduleNote").textContent = "4 modules actifs";
 
-  // ---------- Météo en direct (localité du visiteur) ----------
-  // Géolocalisation navigateur -> reverse-geocoding gratuit (BigDataCloud, sans clé, repli IP
-  // automatique si refus/échec GPS) -> météo Open-Meteo pour ces coordonnées. Aucune ville n'est
-  // codée en dur : chaque visiteur voit la météo de l'endroit où il se trouve.
+  // ---------- Météo en direct (localisation choisie manuellement) ----------
+  // Plus de demande de permission de géolocalisation : l'utilisateur choisit lui-même sa ville
+  // via une recherche (API de géocodage Open-Meteo, gratuite, sans clé). Le choix est mémorisé
+  // dans le navigateur (localStorage) et réutilisé aux visites suivantes.
+  const WEATHER_LOC_KEY = "vigie_hse_weather_location";
+  function loadWeatherLocation(){ try { return JSON.parse(localStorage.getItem(WEATHER_LOC_KEY) || "null"); } catch(e){ return null; } }
+  function saveWeatherLocation(loc){ try { localStorage.setItem(WEATHER_LOC_KEY, JSON.stringify(loc)); } catch(e){} }
   function weatherCodeInfo(code){
     if (code === 0) return { label:"Ciel dégagé", icon:"i-sun" };
     if (code === 1 || code === 2) return { label:"Peu nuageux", icon:"i-sun" };
@@ -931,38 +962,68 @@
       });
     $("tbWeather").title = cityName ? `Météo en direct — ${cityName}` : "Météo en direct";
   }
-  function resolveLocalityThenWeather(lat, lon){
-    const geoUrl = (lat != null && lon != null)
-      ? `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=fr`
-      : `https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=fr`; // pas de coordonnées -> repli localisation IP côté API
-    fetch(geoUrl)
-      .then(r => { if (!r.ok) throw new Error("bad response"); return r.json(); })
-      .then(g => {
-        const cityName = (g && (g.city || g.locality || g.localityName)) || "";
-        const finalLat = (lat != null) ? lat : (g && g.latitude);
-        const finalLon = (lon != null) ? lon : (g && g.longitude);
-        if (finalLat != null && finalLon != null) loadWeatherFor(finalLat, finalLon, cityName);
-        else { $("weatherTemp").textContent = "—"; $("weatherCond").textContent = "Météo indisponible"; $("weatherWind").textContent = "—"; }
-      })
-      .catch(() => {
-        // le géocodage a échoué : si on a quand même des coordonnées GPS, on affiche la météo sans nom de ville
-        if (lat != null && lon != null) loadWeatherFor(lat, lon, "");
-        else { $("weatherTemp").textContent = "—"; $("weatherCond").textContent = "Météo indisponible"; $("weatherWind").textContent = "—"; }
-      });
+  function renderWeatherNoLocation(){
+    $("weatherTemp").textContent = "–°C";
+    $("weatherCond").textContent = "Choisir une ville";
+    $("weatherWind").textContent = "–";
+    $("weatherIcon").innerHTML = `<use href="#i-cloud"/>`;
+    $("tbWeather").title = "Cliquer pour choisir une ville";
   }
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolveLocalityThenWeather(pos.coords.latitude, pos.coords.longitude),
-      () => resolveLocalityThenWeather(null, null), // refusé/indisponible -> repli localisation IP
-      { timeout: 6000, maximumAge: 600000 }
-    );
+  const savedWeatherLoc = loadWeatherLocation();
+  if (savedWeatherLoc && savedWeatherLoc.lat != null && savedWeatherLoc.lon != null){
+    loadWeatherFor(savedWeatherLoc.lat, savedWeatherLoc.lon, savedWeatherLoc.name);
   } else {
-    resolveLocalityThenWeather(null, null);
+    renderWeatherNoLocation();
   }
 
-  // Clic météo → portail Météo France (pas de page dédiée pour une ville fictive)
-  $("tbWeather").addEventListener("click", () => {
-    window.open("https://meteofrance.com/", "_blank", "noopener");
+  // ---------- Popover de recherche de ville ----------
+  const weatherPopover = $("weatherPopover");
+  const weatherSearchInput = $("weatherSearchInput");
+  const weatherResults = $("weatherResults");
+  let weatherSearchTimer = null;
+
+  function closeWeatherPopover(){ weatherPopover.hidden = true; }
+  function openWeatherPopover(){
+    weatherPopover.hidden = false;
+    weatherSearchInput.value = "";
+    weatherResults.innerHTML = "";
+    weatherSearchInput.focus();
+  }
+  $("tbWeather").addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (weatherPopover.hidden) openWeatherPopover(); else closeWeatherPopover();
+  });
+  weatherPopover.addEventListener("click", (e) => e.stopPropagation());
+  document.addEventListener("click", () => closeWeatherPopover());
+  weatherPopover.addEventListener("keydown", (e) => { if (e.key === "Escape") closeWeatherPopover(); });
+
+  weatherSearchInput.addEventListener("input", () => {
+    clearTimeout(weatherSearchTimer);
+    const q = weatherSearchInput.value.trim();
+    if (q.length < 2){ weatherResults.innerHTML = ""; return; }
+    weatherSearchTimer = setTimeout(() => {
+      fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=8&language=fr&format=json`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          const results = (data && data.results) || [];
+          if (results.length === 0){ weatherResults.innerHTML = `<div class="weather-result-empty">Aucun résultat.</div>`; return; }
+          weatherResults.innerHTML = results.map((r, i) => `
+            <div class="weather-result-item" data-idx="${i}">
+              <span>${r.name}</span>
+              <span class="wr-sub">${[r.admin1, r.country].filter(Boolean).join(", ")}</span>
+            </div>`).join("");
+          weatherResults.querySelectorAll(".weather-result-item").forEach(el => {
+            el.addEventListener("click", () => {
+              const r = results[Number(el.dataset.idx)];
+              const loc = { name: r.name, admin1: r.admin1 || "", country: r.country || "", lat: r.latitude, lon: r.longitude };
+              saveWeatherLocation(loc);
+              loadWeatherFor(loc.lat, loc.lon, loc.name);
+              closeWeatherPopover();
+            });
+          });
+        })
+        .catch(() => { weatherResults.innerHTML = `<div class="weather-result-empty">Recherche indisponible.</div>`; });
+    }, 350);
   });
 
   // Clic score HSE → défile jusqu'au détail du score sur la page

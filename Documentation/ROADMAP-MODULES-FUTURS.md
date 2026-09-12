@@ -1,16 +1,14 @@
 # VIGIE HSE — Roadmap des modules futurs
 
-## 🔝 Prochaine action prioritaire (à faire en tout premier)
+## 🔝 État courant / dernières évolutions (2026-09-12)
 
-**Importer les 10 fichiers de données de test dans l'application** — générés par Gemini le 2026-09-12 via `Documentation/PROMPT-GENERATION-DONNEES-TEST.md`, vérifiés (en-têtes, valeurs, cohérence croisée) et corrigés, disponibles dans `DATATEST/`. Chaque module dispose maintenant d'un vrai bouton "Importer .xlsx" (ajouté le 2026-09-12).
+- ✅ **Données de test** : les 10 fichiers générés par Gemini (`Documentation/PROMPT-GENERATION-DONNEES-TEST.md`), vérifiés et corrigés, sont dans `DATATEST/`. Chaque module a désormais un vrai bouton "Importer .xlsx", **et** un **auto-chargement automatique** de ces fichiers au chargement de chaque page quand le site est servi en http/https (GitHub Pages) — plus besoin de cliquer un par un. IDs déterministes (`dtst-*`) pour éviter les doublons au rechargement.
+- ✅ **Météo sans géolocalisation** : le widget météo (topbar, cockpit) ne demande plus la permission de localisation au navigateur. L'utilisateur choisit lui-même sa ville via une popover de recherche (API de géocodage Open-Meteo), le choix est mémorisé dans le navigateur.
+- ✅ **Contenu centré** : sur tous les modules, la zone de contenu principale est maintenant centrée horizontalement sur grand écran (`margin:0 auto` ajouté à `.content`) au lieu de rester collée à gauche.
 
-Ordre d'import (via les boutons de chaque page) :
-1. `1-IMPORT-registre-at-mp.xlsx` et `2-IMPORT-document-unique.xlsx`
-2. `3-REF-epi-catalogue.xlsx` **avant** `7-REF-epi-dotation.xlsx`
-3. Onglet **Trames** de `10-REF-inspection-audit.xlsx` **avant** l'onglet **Inspections** du même fichier
-4. Le reste (`4`, `5`, `6`, `8`, `9`) dans l'ordre voulu
+⚠️ **Rappel important** : l'auto-chargement DATATEST tourne pour **tous les visiteurs**, pas seulement en interne — un nouveau testeur verra directement les données de démo au lieu d'une app vraiment vierge. Le jour où une vraie remise à zéro est nécessaire, vider ou renommer `DATATEST/`.
 
-But : obtenir un exemple complet et cohérent du fonctionnement de l'app avant de la transmettre à un utilisateur test. Une fois importé, penser à vérifier avec le bouton "Réinitialiser toutes les données" (Administration) si on veut repartir d'un état vierge pour un nouveau testeur.
+**À vérifier ensuite** : repasser sur `Documentation/CHECKLIST-QA-V1.md` (section météo, import, centrage mises à jour) sur le site déployé.
 
 ---
 

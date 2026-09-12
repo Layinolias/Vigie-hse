@@ -109,6 +109,7 @@ Le scoping `manager` (`session.services`) est vérifié dans chaque page consomm
 | `vigie_hse_visites` | Fiches de suivi santé/visites médicales | `sante-visites.html` |
 | `vigie_hse_rsst` | Observations du Registre Santé & Sécurité | `registre-sst.html` |
 | `vigie_hse_verifications` | Équipements et leur historique de vérification périodique | `verifications-periodiques.html` |
+| `vigie_hse_weather_location` | Ville choisie manuellement pour le widget météo (`{name, admin1, country, lat, lon}`) | `dashboard.html` |
 
 **"Actualités du secteur HSE"** (sur `index.html`) n'est PAS dans le localStorage : c'est une liste éditoriale de 7 actus réelles (INRS, Weka, Préventica, Inforisque, portail Fonction publique), codée en dur dans `index.html`, avec de vrais liens externes. Elle nécessite une mise à jour manuelle périodique (pas de flux RSS live — voir §9).
 

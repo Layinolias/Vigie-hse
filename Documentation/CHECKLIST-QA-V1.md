@@ -56,11 +56,13 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 
 ## 4. Fonctionnalités transverses
 
-- [ ] **Météo** (topbar) : au premier chargement, le navigateur demande l'autorisation de géolocalisation — accepter, vérifier que la météo affichée correspond à peu près à l'endroit réel. Refuser sur un autre test : une météo s'affiche quand même (repli IP), pas de blocage.
+- [ ] **Météo** (topbar) : au premier chargement, aucune demande de géolocalisation — le widget affiche "Choisir une ville". Cliquer dessus ouvre une popover de recherche ; taper un nom de ville affiche des résultats (nom + région + pays) ; en choisir un met à jour la météo et se souvient du choix au rechargement (localStorage). Le lien "Voir sur Météo France" dans la popover fonctionne toujours.
 - [ ] **Score HSE** (topbar) : cliquer dessus fait défiler la page jusqu'au détail, sans que la barre du haut ne le cache.
 - [ ] **Sélecteur Ville/Agglomération/Tous** (topbar, cockpit) : change bien les chiffres affichés sur le tableau de bord.
 - [ ] **Menu latéral** : se réduit/étend correctement au survol sur grand écran ; devient un tiroir accessible via le bouton menu sur petit écran (voir §5).
-- [ ] **Import Excel** (Registre AT/MP ou Document Unique) : importer un fichier volontairement invalide (mauvais format, colonnes manquantes) → message d'erreur clair, pas de plantage silencieux.
+- [ ] **Import Excel** (disponible sur tous les modules désormais, pas seulement AT/MP et Document Unique) : importer un fichier volontairement invalide (mauvais format, colonnes manquantes) → message d'erreur clair, pas de plantage silencieux.
+- [ ] **Auto-chargement DATATEST** : sur le site déployé (pas en local), chaque module se remplit tout seul au chargement avec les données de `DATATEST/` (pas de bouton à cliquer). Vérifier qu'un rechargement ne duplique pas les lignes (IDs stables `dtst-*`).
+- [ ] **Centrage du contenu** : sur un écran large (>1500px), le contenu de chaque page est centré horizontalement dans la zone principale (pas collé à gauche sous le menu latéral).
 
 ## 5. Responsive / mobile
 

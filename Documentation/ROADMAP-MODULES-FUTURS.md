@@ -29,7 +29,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 5 | Pénibilité & fiches individuelles | ❌ Non démarré |
 | 6 | Formation / Habilitation | ✅ Fait — `formation-habilitation.html` |
 | 7 | Santé au travail — planning des visites médicales | 🔶 Base posée — extension prévue |
-| 8 | Gestion documentaire | ❌ Non démarré |
+| 8 | Gestion documentaire (wiki++ HSE) | ❌ Non démarré — vision élargie, contenu fiches de sécurité/familles de risque ajouté 2026-09-12 |
 | 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html` |
 | 10 | EPI, dotation & entretien | ✅ Fait — `epi-dotation.html` |
 | 11 | Dashboard mobile simplifié | ✅ Fait |
@@ -37,6 +37,8 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — nécessite un nouveau rôle/compte "Représentant du personnel" |
 | 14 | Gestion administrative RH | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — voir aussi extension du module 7 |
 | 15 | Analyse d'accident (arbre des causes) | ❌ Non démarré (nouveau, 2026-09-12) — lié au jalon J2 |
+| 16 | Situations d'urgence & exercices d'évacuation | ❌ Non démarré (nouveau, 2026-09-12) — recoupe l'écart clause 8.2 du jalon J1 |
+| 17 | Entreprises extérieures & Plan de Prévention | ❌ Non démarré (nouveau, 2026-09-12) — recoupe le risque "Coactivité" déjà référencé |
 
 ---
 
@@ -139,7 +141,7 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 **Modules/extensions candidats à étudier (par ordre de probable valeur ajoutée) :**
 
 1. **Revue de direction** — le plus gros manque : un enregistrement structuré (ordre du jour normé : actions issues des revues précédentes, évolutions du contexte, performance HSE/incidents/résultats d'audits, retours de consultation des travailleurs, risques et opportunités ; décisions, ressources, actions) tenu périodiquement, daté, archivé. C'est l'un des tout premiers documents qu'un auditeur externe réclame — un vrai gain immédiat pour la crédibilité "prêt à l'audit".
-2. **Préparation aux situations d'urgence** — plans d'urgence par site, exercices d'évacuation planifiés et leurs résultats, contacts d'urgence, retours d'expérience post-exercice.
+2. **Préparation aux situations d'urgence** — plans d'urgence par site, exercices d'évacuation planifiés et leurs résultats, contacts d'urgence, retours d'expérience post-exercice. Promu module à part entière le 2026-09-12 — voir **module 16, Situations d'urgence & exercices d'évacuation**.
 3. **Politique HSE** — un document de politique versionné, daté, publié (probablement dans le futur module Gestion documentaire), avec preuve de communication aux agents (pourrait s'appuyer sur le futur module 12, Accueil au poste, pour l'émargement de prise de connaissance).
 4. **Programme d'audit interne formalisé** — étendre Inspection/Audit avec une couche "audit du système" distincte des inspections terrain : calendrier d'audits annuel, périmètre/critères par audit, traçabilité de la qualification de l'auditeur.
 5. **Idée à plus forte valeur ajoutée : une matrice de conformité multi-référentiels intégrée à l'app** (ISO 45001, MASE, et d'autres selon le tour d'horizon à faire). Plutôt que de combler des écarts pensés pour une seule norme, une vue dédiée (dans Reporting ou Administration) qui relie chaque exigence de chaque référentiel choisi aux données déjà présentes dans VIGIE HSE et signale en direct ce qui est prêt/à compléter transformerait l'app en véritable outil d'accompagnement à la certification, pas seulement un tracker HSE qui se trouve aussi couvrir une norme. C'est probablement l'angle qui différencie le plus par rapport à un accompagnement "à la main" — à confirmer avec toi avant d'aller plus loin.
@@ -228,6 +230,11 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - Recoupe directement le module 1 (Veille réglementaire, déjà un embryon de contenu éditorial structuré) et le jalon J1 (accompagnement certification) qui aura besoin d'un endroit où loger politique HSE, procédures, comptes-rendus — à concevoir ensemble plutôt que comme des silos séparés.
 - Discuter avec l'utilisateur avant de démarrer : périmètre exact du wiki (arborescence par thème ? moteur de recherche plein texte ? contributions multi-rôles ou admin seul ?), et si le dépôt de fichiers (volet 2) est repoussé au backend ou traité en V1 avec la limite de métadonnées.
 
+**Contenu à prévoir pour le wiki++ (demandé le 2026-09-12), non cadré en détail — pistes pour discussion ultérieure :**
+- **Fiches de sécurité.** À ne pas confondre avec le suivi des FDS produits déjà présent dans `produits-chimiques.html` (métadonnée "dernière mise à jour" par produit, pas le contenu de la fiche elle-même) — l'idée ici est plus large : des fiches de sécurité/consignes par poste, tâche ou équipement (ce que l'agent doit savoir/faire avant d'intervenir), qui pourraient elles-mêmes vivre comme articles du wiki++ et être liées aux FDS produits existantes plutôt que dupliquées.
+- **Familles de risque.** La taxonomie `RISK_TAXONOMY_DEFAULT` (`administration.html`, définitions courtes par famille : RPS, Travail isolé, Amiante, Coactivité, etc. — voir jalon J1 ci-dessus) n'est aujourd'hui qu'un référentiel de catégorisation pour noter le DUERP, pas un contenu consultable en soi. L'idée : que chaque famille de risque devienne un vrai article du wiki++ (ce que c'est, comment le reconnaître, mesures de prévention type, cadre réglementaire) plutôt qu'une simple étiquette de menu déroulant.
+- **Comment amener ce type d'information à l'agent, pas seulement l'archiver.** Le point le plus important et le moins tranché : à quoi bon un wiki riche si personne ne va le consulter ? Piste à creuser plus tard plutôt qu'assumée maintenant : des liens contextuels *depuis* les endroits où l'information sert déjà (le risque sélectionné dans une évaluation DUERP renvoie vers l'article de la famille de risque correspondante ; un produit chimique renvoie vers sa FDS et vers une éventuelle fiche de sécurité liée ; un module de suivi peut pointer vers l'article pertinent) plutôt qu'un wiki isolé accessible uniquement par sa propre entrée de menu. Recoupe aussi le futur module 12 (Accueil au poste) comme moment naturel de mise en avant de ces fiches à un nouvel agent.
+
 ## 9. Indicateurs & reporting KPI — ✅ Fait, extension demandée
 
 **Ce qui existe (`reporting.html`) :** sélection de période (`select` : 3/6/12 mois ou tout), indicateurs et tendance AT/MP sur cette période, export Excel (SheetJS). Limite documentée dans la page elle-même : la période ne s'applique qu'au Registre AT/MP et à sa tendance — les autres modules affichent une photo instantanée de l'état actuel, quelle que soit la période choisie.
@@ -305,6 +312,40 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - Qui a le droit de mener/valider une analyse (RH/admin seuls, ou aussi un manager/chef de service sur son périmètre ?) — à trancher avec la réflexion générale sur les rôles/permissions (section J0).
 
 **Cadrage :** comme pour J1/J2, une piste posée pour discussion ultérieure, pas un chantier à démarrer immédiatement.
+
+## 16. Situations d'urgence & exercices d'évacuation — ❌ Non démarré
+
+**Demandé le 2026-09-12.** Recoupe un écart déjà repéré lors de l'étude du jalon **J1** (clause **8.2 — Préparation et réponse aux situations d'urgence** d'ISO 45001, listée comme candidat n°2 dans la confrontation clause par clause ci-dessus) : aujourd'hui rien dans VIGIE HSE ne trace la préparation aux situations d'urgence ni la tenue effective des exercices — un manque quasi systématiquement relevé en audit sécurité, et une brique de prévention à part entière indépendamment de toute certification.
+
+**Objectif probable** (à confirmer avec l'utilisateur avant de coder) : deux volets distincts à ne pas mélanger dans un même écran —
+- **Plans d'urgence par site** : consignes de sécurité, points de rassemblement, contacts d'urgence, moyens de secours disponibles (extincteurs, défibrillateur...) — plutôt de la donnée de référence par site que de l'instance répétée (voir le futur module Gestion documentaire, module 8, pour l'hébergement du document lui-même).
+- **Exercices réalisés** : un registre chronologique par site (date, type — évacuation incendie, confinement, autre —, durée, participants ou taux de participation, anomalies constatées, actions correctives). C'est ce second volet qui a le plus de valeur immédiate : une preuve datée que les exercices ont bien lieu, pas seulement qu'un plan existe sur le papier.
+
+**Pistes fonctionnelles à évaluer, sans engagement de conception :**
+- Rattacher au même modèle site que celui déjà utilisé par `verifications-periodiques.html` (`SITES`, `service`, `collectivite`) plutôt que réinventer une notion de site propre à ce module.
+- Les anomalies/non-conformités constatées lors d'un exercice devraient alimenter le Plan d'Actions existant, sur le même principe que `"DUERP"`, `"Inspection"` et le futur `"Analyse"` (module 15) — pas un circuit de suivi séparé de plus.
+- Un rappel/échéance de "prochain exercice dû" par site, dans l'esprit de ce qui existe déjà pour les échéances de Vérifications Périodiques et de Formation/Habilitation.
+- Vérifier avant de construire si une périodicité réglementaire minimale s'applique (type d'établissement recevant du public, code du travail) — à documenter plutôt qu'à deviner.
+
+**Cadrage :** comme pour J1/J2/module 15, une piste posée pour discussion ultérieure, pas un chantier à démarrer immédiatement.
+
+## 17. Entreprises extérieures & Plan de Prévention — ❌ Non démarré
+
+**Demandé le 2026-09-12.** Recoupe directement le risque **"Coactivité"** déjà présent dans `RISK_TAXONOMY_DEFAULT` (`administration.html` : "Interférence entre activités, équipements et personnel de la structure et d'entreprises extérieures intervenant simultanément. Absence d'inspection commune et de plan de prévention partagé.") — aujourd'hui identifié comme famille de risque mais sans aucun module pour outiller la prévention correspondante. Le Plan de Prévention est une obligation réglementaire précise (Code du travail, art. R4511-1 et suivants) dès qu'une entreprise extérieure intervient dans les locaux d'une entreprise utilisatrice, avec inspection commune préalable obligatoire, et plan de prévention écrit obligatoire au-delà de 400h/an cumulées ou pour une liste de travaux dangereux définie par arrêté — à vérifier/documenter précisément avant de coder plutôt que d'approximer.
+
+**Objectif probable** (à confirmer avec l'utilisateur avant de coder) : un registre des entreprises extérieures intervenant sur les sites de la collectivité, avec pour chaque intervention —
+- Identité de l'entreprise extérieure, nature de la prestation, service/site concerné, période d'intervention (ponctuelle ou récurrente).
+- Trace de l'inspection commune préalable (date, participants des deux parties, risques identifiés).
+- Le plan de prévention lui-même (mesures de prévention retenues, consignes transmises, répartition des responsabilités) — probablement un document (voir futur module 8, Gestion documentaire) plutôt qu'un formulaire entièrement structuré dès la V1.
+- Suivi de la durée cumulée d'intervention par entreprise/année, pour savoir si le seuil des 400h est atteint.
+
+**Pistes fonctionnelles à évaluer, sans engagement de conception :**
+- Réutiliser le modèle service/site déjà en place (`verifications-periodiques.html`) plutôt qu'une notion de site propre à ce module.
+- L'inspection commune préalable ressemble fonctionnellement à une inspection du module Inspection/Audit (module 2) — évaluer si une trame dédiée dans ce module existant suffit plutôt que de dupliquer la mécanique de trames/inspections.
+- Les mesures de prévention non tenues ou incidents en cours d'intervention devraient remonter au Plan d'Actions (`origine: "Prévention EE"`), même logique que DUERP/Inspection/Analyse (module 15).
+- Lien naturel avec la Formation/Habilitation existante côté agents internes — question ouverte : faut-il tracer aussi les habilitations/qualifications exigées côté entreprise extérieure (ex. habilitation électrique d'un sous-traitant), ou est-ce hors périmètre de VIGIE HSE (responsabilité contractuelle de l'entreprise extérieure elle-même) ?
+
+**Cadrage :** comme pour les autres pistes ajoutées cette semaine, une piste posée pour discussion ultérieure, pas un chantier à démarrer immédiatement.
 
 ---
 

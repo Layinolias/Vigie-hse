@@ -1,5 +1,19 @@
 # VIGIE HSE — Roadmap des modules futurs
 
+## 🔝 Prochaine action prioritaire (à faire en tout premier)
+
+**Importer les 10 fichiers de données de test dans l'application** — générés par Gemini le 2026-09-12 via `Documentation/PROMPT-GENERATION-DONNEES-TEST.md`, vérifiés (en-têtes, valeurs, cohérence croisée) et corrigés, disponibles dans `DATATEST/`. Chaque module dispose maintenant d'un vrai bouton "Importer .xlsx" (ajouté le 2026-09-12).
+
+Ordre d'import (via les boutons de chaque page) :
+1. `1-IMPORT-registre-at-mp.xlsx` et `2-IMPORT-document-unique.xlsx`
+2. `3-REF-epi-catalogue.xlsx` **avant** `7-REF-epi-dotation.xlsx`
+3. Onglet **Trames** de `10-REF-inspection-audit.xlsx` **avant** l'onglet **Inspections** du même fichier
+4. Le reste (`4`, `5`, `6`, `8`, `9`) dans l'ordre voulu
+
+But : obtenir un exemple complet et cohérent du fonctionnement de l'app avant de la transmettre à un utilisateur test. Une fois importé, penser à vérifier avec le bouton "Réinitialiser toutes les données" (Administration) si on veut repartir d'un état vierge pour un nouveau testeur.
+
+---
+
 Version organisée et suivie de `future modules.txt` (notes brutes laissées à la racine du dossier `Projet HSE`, conservées telles quelles — ce document-ci en est la réorganisation avec suivi d'avancement et annotations techniques).
 
 **Légende statut :** ❌ Non démarré · 🔶 Base posée / partiellement couvert · ✅ Fait · 💤 En pause

@@ -805,6 +805,58 @@
 
   render();
 
+  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
+  fetch("DATATEST/5-REF-verifications-periodiques.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    const full = loadDataset();
+    function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    function parseDateDtst(v){
+      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
+      const s = String(v || "").trim();
+      if (!s) return "";
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+      const d = new Date(s);
+      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      return "";
+    }
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let changed = false;
+    rawRows.forEach((raw, i) => {
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const equipement = String(pick(["equipement"])).trim();
+      if (!equipement) return;
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const categorie = String(pick(["categorie"])).trim();
+      const conformite = String(pick(["conformite"])).trim();
+      const catNames = CATEGORIES.map(c => c[0]);
+      const rec = {
+        id: "dtst-verif-" + (i + 1), equipement,
+        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        categorie: catNames.includes(categorie) ? categorie : (catNames[0] || categorie),
+        site: String(pick(["site"])).trim(),
+        service: String(pick(["service"])).trim(),
+        organisme: String(pick(["organisme"])).trim(),
+        dateDerniere: parseDateDtst(pick(["derniere verification","date derniere"])),
+        periodiciteMois: PERIODICITE_BY_CAT[categorie] || 12,
+        conformite: ["Conforme","Conforme avec réserves","Non conforme"].includes(conformite) ? conformite : "Conforme",
+        commentaire: String(pick(["commentaire"])).trim(),
+      };
+      if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
+    });
+    if (changed){
+      saveDataset(full);
+      DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
+      render();
+    }
+  }).catch(() => {});
+
   function tickClock(){
     const now = new Date();
     $("clockTime").textContent = now.toLocaleTimeString('fr-FR');

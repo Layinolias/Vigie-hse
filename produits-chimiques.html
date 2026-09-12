@@ -780,6 +780,46 @@
 
   render();
 
+  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
+  fetch("DATATEST/4-REF-produits-chimiques.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    const full = loadDataset();
+    function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let changed = false;
+    rawRows.forEach((raw, i) => {
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const nom = String(pick(["produit","nom"])).trim();
+      if (!nom) return;
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const validCodes = PICTOGRAMMES.map(p => p.code);
+      const pictos = String(pick(["pictogrammes"])).split(/[,;]/).map(s => s.trim().toUpperCase()).filter(s => validCodes.includes(s));
+      const qte = pick(["quantite"]);
+      const rec = {
+        id: "dtst-prod-" + (i + 1), nom,
+        fournisseur: String(pick(["fournisseur"])).trim(),
+        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        service: String(pick(["service"])).trim(),
+        quantiteStockee: qte !== "" ? Number(qte) || 0 : null,
+        unite: String(pick(["unite"])).trim(),
+        pictogrammes: pictos,
+        dateMajFDS: String(pick(["derniere maj fds"])).trim(),
+        lienFDS: String(pick(["lien fds"])).trim(),
+        mesuresPrevention: String(pick(["mesures de prevention"])).trim(),
+      };
+      if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
+    });
+    if (changed){
+      saveDataset(full);
+      DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
+      render();
+    }
+  }).catch(() => {});
+
   function tickClock(){
     const now = new Date();
     $("clockTime").textContent = now.toLocaleTimeString('fr-FR');

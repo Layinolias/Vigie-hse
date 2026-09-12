@@ -815,6 +815,61 @@
 
   render();
 
+  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
+  fetch("DATATEST/6-REF-formation-habilitation.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    const full = loadDataset();
+    function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    function parseDateDtst(v){
+      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
+      const s = String(v || "").trim();
+      if (!s) return "";
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+      const d = new Date(s);
+      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      return "";
+    }
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let changed = false;
+    rawRows.forEach((raw, i) => {
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const nom = String(pick(["nom"])).trim();
+      const typeHabilitation = String(pick(["type d habilitation","type"])).trim();
+      if (!nom && !typeHabilitation) return;
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const dateObtention = parseDateDtst(pick(["date d obtention","date obtention"])) || new Date().toISOString().slice(0,10);
+      const dateExpirationRaw = parseDateDtst(pick(["date d expiration","date expiration"]));
+      let dureeValiditeMois = Number(pick(["duree de validite mois","duree"])) || 0;
+      if (!dureeValiditeMois && dateExpirationRaw){
+        const d1 = new Date(dateObtention), d2 = new Date(dateExpirationRaw);
+        dureeValiditeMois = Math.max(1, Math.round((d2 - d1) / (1000*60*60*24*30.44)));
+      }
+      const rec = {
+        id: "dtst-hab-" + (i + 1), nom, prenom: String(pick(["prenom"])).trim(),
+        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        service: String(pick(["service"])).trim(),
+        typeHabilitation,
+        organismeFormateur: String(pick(["organisme formateur"])).trim(),
+        dateObtention,
+        dureeValiditeMois: dureeValiditeMois || 24,
+        commentaire: String(pick(["commentaire"])).trim(),
+      };
+      if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
+    });
+    if (changed){
+      saveDataset(full);
+      DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
+      render();
+    }
+  }).catch(() => {});
+
   function tickClock(){
     const now = new Date();
     $("clockTime").textContent = now.toLocaleTimeString('fr-FR');

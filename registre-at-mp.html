@@ -916,6 +916,27 @@
 
   render();
 
+  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
+  fetch("DATATEST/1-IMPORT-registre-at-mp.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    const full = loadDataset();
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let changed = false;
+    rawRows.forEach((raw, i) => {
+      const rec = mapImportedRow(raw);
+      if (!rec) return;
+      rec.id = "dtst-atmp-" + (i + 1);
+      if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
+    });
+    if (changed){
+      saveDataset(full);
+      DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
+      refreshFilterOptions(); render();
+    }
+  }).catch(() => {});
+
   function tickClock(){
     const now = new Date();
     $("clockTime").textContent = now.toLocaleTimeString('fr-FR');

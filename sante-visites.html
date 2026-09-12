@@ -755,6 +755,43 @@
 
   render();
 
+  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
+  fetch("DATATEST/9-REF-sante-visites.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    const full = loadDataset();
+    function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    const TYPES_VISITE = ["Embauche","Périodique","Reprise","Occasionnelle","Surveillance renforcée"];
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let changed = false;
+    rawRows.forEach((raw, i) => {
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const nom = String(pick(["nom"])).trim();
+      if (!nom) return;
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const typeVisite = String(pick(["type de visite","type"])).trim();
+      const rec = {
+        id: "dtst-visite-" + (i + 1),
+        nom, prenom: String(pick(["prenom"])).trim(),
+        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        service: String(pick(["service"])).trim(),
+        typeVisite: TYPES_VISITE.includes(typeVisite) ? typeVisite : "Périodique",
+        dateDerniere: String(pick(["date derniere visite","date derniere"])).trim(),
+        periodiciteMois: Number(pick(["periodicite mois","periodicite"])) || 24,
+        commentaire: String(pick(["commentaire"])).trim(),
+      };
+      if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
+    });
+    if (changed){
+      saveDataset(full);
+      DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
+      render();
+    }
+  }).catch(() => {});
+
   function tickClock(){
     const now = new Date();
     $("clockTime").textContent = now.toLocaleTimeString('fr-FR');

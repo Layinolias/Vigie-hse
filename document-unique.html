@@ -900,6 +900,46 @@
 
   render();
 
+  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
+  fetch("DATATEST/2-IMPORT-document-unique.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    const full = loadDataset();
+    function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let changed = false;
+    rawRows.forEach((raw, i) => {
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const risque = String(pick(["risques","risque"])).trim();
+      const taches = String(pick(["taches","tâches"])).trim();
+      if (!risque && !taches) return;
+      const fq = Number(pick(["fq","frequence"])) || 1;
+      const gr = Number(pick(["gravite","gravité"])) || 1;
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const rec = {
+        id: "dtst-duerp-" + (i + 1),
+        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        service: String(pick(["service"])).trim(),
+        risque, taches,
+        danger: String(pick(["danger"])).trim(),
+        frequence: Math.min(4, Math.max(1, fq)),
+        gravite: Math.min(4, Math.max(1, gr)),
+        moyensPrevention: String(pick(["moyens de prevention existants","moyens de prevention"])).trim(),
+        mesuresProposees: String(pick(["proposition des mesures de prevention","mesures proposees"])).trim(),
+        maitrise: String(pick(["maitrise du risque","maitrise"])).trim().toUpperCase(),
+      };
+      if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
+    });
+    if (changed){
+      saveDataset(full);
+      DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
+      render();
+    }
+  }).catch(() => {});
+
   function tickClock(){
     const now = new Date();
     $("clockTime").textContent = now.toLocaleTimeString('fr-FR');

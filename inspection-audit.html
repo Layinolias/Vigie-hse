@@ -1032,6 +1032,80 @@
 
   render();
 
+  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
+  fetch("DATATEST/10-REF-inspection-audit.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+
+    // Onglet 1 : Trames
+    const tramesSheet = wb.Sheets[wb.SheetNames[0]];
+    const trameRows = XLSX.utils.sheet_to_json(tramesSheet, { defval: "" });
+    const byTrame = new Map();
+    trameRows.forEach(raw => {
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const nomTrame = String(pick(["trame"])).trim();
+      const libelle = String(pick(["point de controle","point"])).trim();
+      if (!nomTrame || !libelle) return;
+      if (!byTrame.has(nomTrame)) byTrame.set(nomTrame, []);
+      byTrame.get(nomTrame).push({ id: genPointId(), libelle, categorie: String(pick(["categorie"])).trim() });
+    });
+    let tramesChanged = false;
+    byTrame.forEach((points, nom) => {
+      if (!TRAMES.some(t => normKeyDtst(t.nom) === normKeyDtst(nom))){
+        TRAMES.push({ id: "dtst-trm-" + normKeyDtst(nom).replace(/ /g, "-"), nom, description: "", points });
+        tramesChanged = true;
+      }
+    });
+    if (tramesChanged){
+      saveTrames(TRAMES);
+      if (typeof renderTramesList === "function") renderTramesList();
+      if (typeof fTrame !== "undefined") fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+      if ($("fTrameForm")) $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+    }
+
+    // Onglet 2 : Inspections réalisées
+    if (!wb.SheetNames[1]) return;
+    const inspSheet = wb.Sheets[wb.SheetNames[1]];
+    const inspRows = XLSX.utils.sheet_to_json(inspSheet, { defval: "" });
+    const full = loadDataset();
+    let changed = false;
+    inspRows.forEach((raw, i) => {
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const nomTrame = String(pick(["trame"])).trim();
+      const trame = TRAMES.find(t => normKeyDtst(t.nom) === normKeyDtst(nomTrame));
+      if (!trame) return;
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const ncLibelles = String(pick(["points non conformes"])).split(";").map(s => s.trim()).filter(Boolean);
+      const reponses = (trame.points || []).map(p => ({
+        pointId: p.id, libelle: p.libelle,
+        statut: ncLibelles.some(l => normKeyDtst(l) === normKeyDtst(p.libelle)) ? "Non conforme" : "Conforme",
+        commentaire: "",
+      }));
+      const rec = {
+        id: "dtst-insp-" + (i + 1),
+        trameId: trame.id, trameNom: trame.nom,
+        service: String(pick(["service"])).trim(),
+        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        dateInspection: String(pick(["date"])).trim(),
+        inspecteur: String(pick(["inspecteur"])).trim(),
+        reponses,
+        statutGlobal: computeStatutGlobal(reponses),
+        createur: "DATATEST",
+      };
+      if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
+    });
+    if (changed){
+      saveDataset(full);
+      DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
+      render();
+    }
+  }).catch(() => {});
+
   function tickClock(){
     const now = new Date();
     $("clockTime").textContent = now.toLocaleTimeString('fr-FR');

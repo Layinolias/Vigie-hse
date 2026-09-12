@@ -813,6 +813,47 @@
 
   render();
 
+  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
+  fetch("DATATEST/8-REF-registre-sst.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    const full = loadDataset();
+    function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let changed = false;
+    rawRows.forEach((raw, i) => {
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const description = String(pick(["description"])).trim();
+      const nature = String(pick(["nature"])).trim();
+      if (!description && !nature) return;
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const gravite = String(pick(["gravite"])).trim();
+      const statut = String(pick(["statut"])).trim();
+      const auteur = String(pick(["auteur"])).trim();
+      const rec = {
+        id: "dtst-rsst-" + (i + 1),
+        date: String(pick(["date"])).trim(),
+        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        service: String(pick(["service"])).trim(),
+        nature, description,
+        gravite: ["Faible","Moyenne","Élevée"].includes(gravite) ? gravite : "Moyenne",
+        statut: ["Nouvelle","En cours de traitement","Traitée","Classée sans suite"].includes(statut) ? statut : "Nouvelle",
+        auteur: auteur.toLowerCase() === "anonyme" ? "" : auteur,
+        suiteDonnee: String(pick(["suite donnee"])).trim(),
+        traitePar: String(pick(["traite par"])).trim(),
+      };
+      if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
+    });
+    if (changed){
+      saveDataset(full);
+      DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
+      render();
+    }
+  }).catch(() => {});
+
   function tickClock(){
     const now = new Date();
     $("clockTime").textContent = now.toLocaleTimeString('fr-FR');

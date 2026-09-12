@@ -1232,6 +1232,65 @@
   renderDotations();
   renderLavages();
 
+  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
+  function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+  fetch("DATATEST/3-REF-epi-catalogue.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (buf && typeof XLSX !== "undefined"){
+      const wb = XLSX.read(buf, { type: "array", cellDates: true });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      let changed = false;
+      rawRows.forEach((raw, i) => {
+        const n = {};
+        Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
+        const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+        const nom = String(pick(["nom"])).trim();
+        if (!nom) return;
+        const categorie = String(pick(["categorie"])).trim();
+        const rec = {
+          id: "dtst-cat-" + (i + 1), nom,
+          categorie: categorie === "Vêtement de travail" ? "Vêtement de travail" : "EPI",
+          norme: String(pick(["norme"])).trim(),
+          dureeVieMois: Number(pick(["duree de vie mois"])) || null,
+          nombreLavagesMax: Number(pick(["nombre de lavages max"])) || null,
+          ficheTechnique: String(pick(["fiche technique"])).trim(),
+        };
+        if (!CATALOGUE.some(c => c.id === rec.id)){ CATALOGUE.push(rec); changed = true; }
+      });
+      if (changed){ saveCatalogue(CATALOGUE); renderCatalogue(); renderStock(); renderTopKpis(); if (typeof fillArticleSelects === "function") fillArticleSelects(); }
+    }
+  }).catch(() => {}).then(() => fetch("DATATEST/7-REF-epi-dotation.xlsx")).then(res => res && res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let changed = false;
+    rawRows.forEach((raw, i) => {
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const nom = String(pick(["nom"])).trim();
+      const articleNom = String(pick(["article"])).trim();
+      if (!nom && !articleNom) return;
+      const article = CATALOGUE.find(c => normKeyDtst(c.nom) === normKeyDtst(articleNom));
+      if (!article) return;
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const rec = {
+        id: "dtst-dot-" + (i + 1), nom, prenom: String(pick(["prenom"])).trim(),
+        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        service: String(pick(["service"])).trim(),
+        articleId: article.id, taille: String(pick(["taille"])).trim(),
+        dateRemise: String(pick(["date de remise"])).trim(),
+      };
+      if (!DOTATIONS_ALL.some(d => d.id === rec.id)){ DOTATIONS_ALL.push(rec); changed = true; }
+    });
+    if (changed){
+      saveDotations(DOTATIONS_ALL);
+      DOTATIONS = isScoped ? DOTATIONS_ALL.filter(d => myServices.includes(d.service)) : DOTATIONS_ALL;
+      renderDotations(); renderTopKpis(); if (typeof fillLavageDotationSelect === "function") fillLavageDotationSelect();
+    }
+  }).catch(() => {});
+
   function tickClock(){
     const now = new Date();
     $("clockTime").textContent = now.toLocaleTimeString('fr-FR');

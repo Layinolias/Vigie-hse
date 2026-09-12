@@ -514,8 +514,8 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
-    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
+    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -592,25 +592,7 @@
       return { pointId:p.id, libelle:p.libelle, statut:o.statut || "Conforme", commentaire:o.commentaire || "" };
     });
   }
-  const SEED_INSPECTIONS_RAW = [
-    { id:"insp-1", trameId:"tr-1", offset:25, collectivite:"Ville", service:"Espace Vert", inspecteur:"RH1", createur:"RH1",
-      overrides:{ "tr1-p5":{ statut:"NA" } } },
-    { id:"insp-2", trameId:"tr-2", offset:18, collectivite:"Ville", service:"Mécanique", inspecteur:"RH2", createur:"RH2",
-      overrides:{
-        "tr2-p1":{ statut:"Non conforme", commentaire:"Extincteur périmé, accès partiellement obstrué par du matériel." },
-        "tr2-p2":{ statut:"Non conforme", commentaire:"Outils tranchants laissés hors de leur rangement dédié." },
-        "tr2-p6":{ statut:"Non conforme", commentaire:"Bidons de solvant stockés hors de l'armoire ventilée." },
-      } },
-    { id:"insp-3", trameId:"tr-3", offset:40, collectivite:"Ville", service:"Admin Générale", inspecteur:"RH1", createur:"RH1",
-      overrides:{ "tr3-p3":{ statut:"Non conforme", commentaire:"Plusieurs sièges non réglables signalés par les agents." } } },
-    { id:"insp-4", trameId:"tr-2", offset:12, collectivite:"Agglomération", service:"Propreté Déchet", inspecteur:"RH2", createur:"RH2",
-      overrides:{
-        "tr2-p4":{ statut:"Non conforme", commentaire:"Local mal ventilé lors du stockage des déchets ménagers spéciaux." },
-        "tr2-p3":{ statut:"Non conforme", commentaire:"Câblage apparent détérioré sur une prise." },
-      } },
-    { id:"insp-5", trameId:"tr-3", offset:5, collectivite:"Agglomération", service:"Direction Générale", inspecteur:"RH1", createur:"RH1",
-      overrides:{} },
-  ];
+  const SEED_INSPECTIONS_RAW = [];
   function buildSeedInspections(){
     return SEED_INSPECTIONS_RAW.map(r => {
       const trame = SEED_TRAMES.find(t => t.id === r.trameId);

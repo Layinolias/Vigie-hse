@@ -630,8 +630,8 @@
     sieges: ["Autres","Bras","Cervical","Cheville","Cuisse","Dos","Epaule","Genoux","Main","Mollet","Multiple","Oreilles","Pieds","Poignée","Rps","Thorax","Ventre","Visage","Yeux"],
     natures: ["Autres","Brulure","Contusion","Douleur","Entorse","Inflammation","Lombalgie","Malaise","Multiple","Plaie","Psy"],
     statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
-    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
-    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
+    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
     risqueFamillesDUERP: RISK_TAXONOMY_DEFAULT,
   };
   function loadReferentials(){
@@ -668,7 +668,7 @@
       { id:"u-ag1", nom:"", prenom:"", email:"AG1", username:"AG1", password:"1234", role:"ag", services:["*"], active:true },
       { id:"u-ag2", nom:"", prenom:"", email:"AG2", username:"AG2", password:"1234", role:"ag", services:["*"], active:true },
       { id:"u-admin", nom:"Verchamps", prenom:"Admin", email:"admin@verchamps.fr", username:"admin@verchamps.fr", password:"admin1234", role:"admin", services:["*"], active:true },
-      { id:"u-manager", nom:"Verchamps", prenom:"Manager", email:"manager@verchamps.fr", username:"manager@verchamps.fr", password:"manager1234", role:"manager", services:["Voirie","Espace Vert"], active:true },
+      { id:"u-manager", nom:"Verchamps", prenom:"Manager", email:"manager@verchamps.fr", username:"manager@verchamps.fr", password:"manager1234", role:"manager", services:["Voirie & Réseaux","Espaces Verts & Paysage"], active:true },
     ];
   }
   function loadUsers(){
@@ -967,11 +967,7 @@
   // ===================================================================
   const NEWS_KEY = "vigie_hse_news";
   function defaultNews(){
-    return [
-      { id:"n-1", titre:"Vigilance canicule — rappel EPI", texte:"Avec les fortes chaleurs annoncées, pensez à vous hydrater régulièrement et à porter les EPI adaptés (casquette, protection solaire) pour les équipes en extérieur : espaces verts, voirie, déchetterie.", date: new Date().toISOString().slice(0,10), image:"", auteur:"Administrateur" },
-      { id:"n-2", titre:"Port des chaussures de sécurité obligatoire", texte:"Rappel : le port des chaussures de sécurité est obligatoire sur l'ensemble des interventions de voirie, espaces verts et déchetterie.", date:"2026-08-20", image:"", auteur:"Administrateur" },
-      { id:"n-3", titre:"Exercice incendie — Hôtel de Ville", texte:"Un exercice d'évacuation incendie aura lieu prochainement à l'Hôtel de Ville. Merci de vous familiariser avec les issues de secours de votre bâtiment.", date:"2026-07-02", image:"", auteur:"Administrateur" },
-    ];
+    return [];
   }
   function loadNews(){
     let stored = null;

@@ -488,8 +488,8 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
-    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
+    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -524,53 +524,22 @@
     return Math.abs(h);
   }
   const SITES = [
-    { site:"Hôtel de Ville", service:"Admin Générale", collectivite:"Ville" },
-    { site:"Mairie annexe", service:"SAF", collectivite:"Ville" },
-    { site:"Complexe sportif municipal", service:"Sport", collectivite:"Ville" },
-    { site:"Cuisine Centrale", service:"Cuisine Centrale", collectivite:"Ville" },
-    { site:"Ateliers municipaux", service:"Batiment", collectivite:"Ville" },
-    { site:"Salle polyvalente EEJ", service:"EEJ", collectivite:"Ville" },
-    { site:"Direction Générale — siège agglo", service:"Direction Générale", collectivite:"Agglomération" },
-    { site:"Médiathèque", service:"Médiathèque", collectivite:"Agglomération" },
-    { site:"École de musique", service:"Ecole de musique", collectivite:"Agglomération" },
-    { site:"Déchetterie", service:"Propreté Déchet", collectivite:"Agglomération" },
+    { site:"Hôtel de Ville", service:"Accueil & Affaires Générales", collectivite:"Ville" },
+    { site:"Mairie annexe", service:"Affaires Financières", collectivite:"Ville" },
+    { site:"Complexe sportif municipal", service:"Sports & Vie Associative", collectivite:"Ville" },
+    { site:"Cuisine Centrale", service:"Restauration Collective", collectivite:"Ville" },
+    { site:"Ateliers municipaux", service:"Patrimoine Bâti", collectivite:"Ville" },
+    { site:"Salle polyvalente Enfance", service:"Enfance & Jeunesse", collectivite:"Ville" },
+    { site:"Direction Générale — siège agglo", service:"Direction Générale des Services", collectivite:"Agglomération" },
+    { site:"Médiathèque", service:"Réseau des Médiathèques", collectivite:"Agglomération" },
+    { site:"Conservatoire de musique", service:"Conservatoire de Musique", collectivite:"Agglomération" },
+    { site:"Déchetterie", service:"Collecte & Propreté", collectivite:"Agglomération" },
   ];
-  const ORGANISMES = ["APAVE", "Bureau Veritas", "SOCOTEC", "DEKRA", "Qualiconsult"];
+  const ORGANISMES = ["Contrôle Sud Vérification", "Bureau de Contrôle Occitan", "Sécuritech Diagnostic", "Vérital Contrôle", "Organisme Régional de Contrôle"];
   const CONFORMITE_PLAN = ["Conforme","Conforme","Conforme","Conforme","Conforme","Conforme","Conforme","Conforme avec réserves","Conforme avec réserves","Non conforme"];
 
   function buildEquipmentSeeds(){
-    const out = [];
-    let idx = 0;
-    CATEGORIES.forEach(([cat, periodicite], ci) => {
-      // 1 to 2 sites per category so the fleet spans ~16-20 records total
-      const nbSites = ci % 3 === 0 ? 2 : 1;
-      for (let k = 0; k < nbSites; k++){
-        const site = SITES[(ci + k) % SITES.length];
-        const equipement = cat.split(" (")[0].split(" &")[0] + " — " + site.site;
-        const key = equipement + "|" + site.site;
-        const h = hashStr(key);
-        const organisme = ORGANISMES[h % ORGANISMES.length];
-        const monthsAgo = 1 + (h % 11);
-        const d = new Date();
-        d.setMonth(d.getMonth() - monthsAgo);
-        const conformite = CONFORMITE_PLAN[idx % CONFORMITE_PLAN.length];
-        out.push({
-          id: "vp-" + h.toString(36),
-          equipement,
-          categorie: cat,
-          site: site.site,
-          service: site.service,
-          collectivite: site.collectivite,
-          organisme,
-          periodiciteMois: periodicite,
-          dateDerniere: d.toISOString().slice(0,10),
-          conformite,
-          commentaire: conformite === "Non conforme" ? "Réserve levée en attente ; contre-visite à programmer." : (conformite === "Conforme avec réserves" ? "Réserves mineures notées au rapport, sans caractère bloquant." : ""),
-        });
-        idx++;
-      }
-    });
-    return out;
+    return [];
   }
 
   // ---------- Dataset (always-merge) ----------

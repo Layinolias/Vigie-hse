@@ -16,6 +16,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 |---|---|
 | **J0 — Généralisation commerciale (collectivités + secteur privé)** | ❌ Non démarré — prérequis à toute commercialisation |
 | **J1 — Accompagnement certification sécurité (ISO 45001, MASE...)** | ❌ Non démarré — version ultérieure, tour d'horizon des référentiels à faire |
+| **J2 — Culture sécurité, remontée presque-accident/incident/accident** | ❌ Non démarré — piste posée, à approfondir plus tard ; premier pas fait dans le Registre AT/MP |
 
 **Modules fonctionnels** :
 
@@ -35,6 +36,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 12 | Accueil au poste | ❌ Non démarré (nouveau, retour alpha 2026-09-12) |
 | 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — nécessite un nouveau rôle/compte "Représentant du personnel" |
 | 14 | Gestion administrative RH | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — voir aussi extension du module 7 |
+| 15 | Analyse d'accident (arbre des causes) | ❌ Non démarré (nouveau, 2026-09-12) — lié au jalon J2 |
 
 ---
 
@@ -143,6 +145,14 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 5. **Idée à plus forte valeur ajoutée : une matrice de conformité multi-référentiels intégrée à l'app** (ISO 45001, MASE, et d'autres selon le tour d'horizon à faire). Plutôt que de combler des écarts pensés pour une seule norme, une vue dédiée (dans Reporting ou Administration) qui relie chaque exigence de chaque référentiel choisi aux données déjà présentes dans VIGIE HSE et signale en direct ce qui est prêt/à compléter transformerait l'app en véritable outil d'accompagnement à la certification, pas seulement un tracker HSE qui se trouve aussi couvrir une norme. C'est probablement l'angle qui différencie le plus par rapport à un accompagnement "à la main" — à confirmer avec toi avant d'aller plus loin.
 
 **Cadrage :** explicitement une étude pour une version ultérieure, pas un chantier à démarrer maintenant — et explicitement pas limitée à ISO 45001 (voir précision ci-dessus). **Ceci n'est pas un conseil de certification** — la certification effective reste délivrée par un organisme certificateur/comité accrédité après audit externe ; VIGIE HSE peut outiller la préparation et la collecte de preuves, pas se substituer à l'audit lui-même.
+
+---
+
+## J2 — Jalon complémentaire : culture sécurité en entreprise, via la remontée d'information — ❌ Non démarré (piste à approfondir plus tard)
+
+**Intention exprimée par l'utilisateur (2026-09-12) :** au-delà du strict enregistrement réglementaire des AT/MP, développer un axe produit autour de la **culture de la sécurité** dans une organisation, portée par un vrai processus de remontée d'information à plusieurs étages : **presque-accident** (near-miss, aucune conséquence) → **incident bénin** (conséquence mineure, sans arrêt) → **accident** (avec ou sans arrêt). L'idée directrice — classique en prévention des risques (pyramide de Bird/Heinrich) — est qu'une organisation qui recueille et traite bien les signaux faibles (presque-accidents) réduit mécaniquement sa sinistralité réelle ; encourager et faciliter cette remontée est donc un levier de sécurité à part entière, pas seulement un exercice de conformité. **Premier pas déjà posé (2026-09-12) :** le Registre AT/MP distingue désormais 4 types d'événement — `Accident de travail`, `Accident de trajet`, `Incident bénin` (renommé depuis `Bénin`), et `Presque accident` (nouveau) — saisissables depuis `saisie-rh.html` et affichés avec leur propre code couleur dans `registre-at-mp.html`. Le jeu de données de démonstration reflète volontairement une pyramide où les presque-accidents/incidents bénins sont plus nombreux que les accidents avérés.
+
+**Explicitement non cadré pour l'instant** — l'utilisateur a indiqué que ce sujet sera creusé plus en profondeur dans une session ultérieure. Pistes déjà entrevues à réévaluer à ce moment-là plutôt qu'à développer maintenant : un canal de signalement simplifié/anonymisable pour le presque-accident (à l'image de l'option d'anonymat déjà présente dans le RSST) ; un indicateur dédié au taux de remontée (ratio presque-accidents/incidents/accidents, à comparer aux repères de la littérature prévention) ; une articulation avec le futur module Dialogue social (13), avec le futur module Analyse d'accident (15, ajouté le 2026-09-12 — l'analyse des causes est le prolongement naturel d'une bonne remontée), et avec le jalon J1 (la remontée structurée des incidents est aussi une exigence de certification, clause 10.2).
 
 ---
 
@@ -281,6 +291,20 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - Interface d'ajustement dynamique (réaffecter un agent, changer un responsable d'équipe).
 
 **Annotation pour reprise :** ce volet 2 recoupe directement deux réflexions déjà en cours dans ce document — la généralisation des "unités organisationnelles" (section J0, aujourd'hui figées sur Ville/Agglomération) et le scoping par service du rôle `manager` déjà existant (`session.services`, voir `ETAT-DU-PROJET.md`). Un vrai organigramme donnerait une structure de données propre à ces deux chantiers plutôt que des règles de scoping éparses par module. À concevoir ensemble, pas comme trois chantiers séparés.
+
+## 15. Analyse d'accident (arbre des causes) — ❌ Non démarré
+
+**Demandé le 2026-09-12**, en lien direct avec le jalon **J2** (culture sécurité et remontée d'information — voir section dédiée plus haut) : aujourd'hui le Registre AT/MP enregistre le *fait* (qui, quand, où, quelles conséquences) mais pas l'*analyse* de pourquoi c'est arrivé ni de ce qui a été fait pour que ça ne se reproduise pas — deux choses distinctes.
+
+**Objectif probable** (à confirmer avec l'utilisateur avant de coder) : une fiche d'analyse rattachée à un événement du Registre AT/MP (et potentiellement aux futurs presque-accidents/incidents bénins, voir J2), structurée autour d'une méthode d'analyse des causes reconnue en prévention — la plus répandue et la plus simple à outiller est l'**arbre des causes** (méthode INRS : reconstitution chronologique des faits menant à l'accident, distinction fait/opinion, remontée aux causes profondes plutôt qu'à la seule cause immédiate). Alternatives à évaluer selon la profondeur voulue : les "5 pourquoi" (plus légers, adaptés aux presque-accidents/incidents bénins) ou le diagramme d'Ishikawa (causes/effet par familles : matériel, méthode, main-d'œuvre, milieu, matière).
+
+**Pistes fonctionnelles à évaluer, sans engagement de conception :**
+- Un accès "Analyser" depuis chaque ligne du Registre AT/MP (et, une fois J2 avancé, depuis un presque-accident/incident bénin) plutôt qu'un module totalement séparé — l'analyse n'a de sens que rattachée à un événement.
+- Une structure de données simple pour l'arbre des causes (liste de faits datés/typés, liens de causalité entre eux) plutôt qu'un éditeur graphique complexe dès la V1 de ce module — un export/impression lisible (PDF, à l'image de l'export déjà présent sur le Registre AT/MP) compte probablement plus qu'une belle interface de graphe interactive.
+- Les actions correctives identifiées à l'issue de l'analyse doivent alimenter le Plan d'Actions existant (`origine: "Analyse"`, sur le modèle de ce qui existe déjà pour `"DUERP"` et `"Inspection"`) plutôt que créer un circuit de suivi parallèle.
+- Qui a le droit de mener/valider une analyse (RH/admin seuls, ou aussi un manager/chef de service sur son périmètre ?) — à trancher avec la réflexion générale sur les rôles/permissions (section J0).
+
+**Cadrage :** comme pour J1/J2, une piste posée pour discussion ultérieure, pas un chantier à démarrer immédiatement.
 
 ---
 

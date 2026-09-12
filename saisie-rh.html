@@ -359,7 +359,8 @@
                   <div class="segmented triple" id="segType">
                     <input type="radio" name="typeAtMp" id="type-at" value="Accident de travail" checked required><label for="type-at">Accident de travail</label>
                     <input type="radio" name="typeAtMp" id="type-trajet" value="Accident de trajet" required><label for="type-trajet">Accident de trajet</label>
-                    <input type="radio" name="typeAtMp" id="type-benin" value="Bénin" required><label for="type-benin">Bénin</label>
+                    <input type="radio" name="typeAtMp" id="type-benin" value="Incident bénin" required><label for="type-benin">Incident bénin</label>
+                    <input type="radio" name="typeAtMp" id="type-presque" value="Presque accident" required><label for="type-presque">Presque accident</label>
                   </div>
                 </div>
                 <div class="f"><label for="fDateAT">Date</label><input type="date" id="fDateAT" name="dateAT" required></div>
@@ -477,8 +478,8 @@
     sieges: ["Autres","Bras","Cervical","Cheville","Cuisse","Dos","Epaule","Genoux","Main","Mollet","Multiple","Oreilles","Pieds","Poignée","Rps","Thorax","Ventre","Visage","Yeux"],
     natures: ["Autres","Brulure","Contusion","Douleur","Entorse","Inflammation","Lombalgie","Malaise","Multiple","Plaie","Psy"],
     statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
-    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
-    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
+    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
     risqueFamillesDUERP: [],
   };
   function loadReferentials(){
@@ -505,26 +506,26 @@
   const VILLE_SERVICES = REF.servicesVille;
   const AGGLO_SERVICES = REF.servicesAgglo;
   const SERVICE_DETAIL = {
-    "Admin Générale": ["ADMG_Accueil"],
-    "Batiment": ["BMO_Régie Bâtiments communaux"],
-    "Communication": ["COM_Communication Supports"],
-    "Cuisine Centrale": ["Cuisine Centrale"],
-    "Direction Générale": ["Directeur Général des Services Adjoint"],
-    "DRHCT": ["Ressources Humaines et Cond de travail","RH_Accueil - Gestion Administrative","RH_Conditions de travail","RH_Emploi-formation"],
-    "Ecole de musique": ["Ecole de Musique"],
-    "EEJ": ["ED_Activités périscolaires / extrascol","ED_Coordination Jeunesse","EEJ_Ecoles Elémentaires","EEJ_Ecoles maternelles","EEJ_Entretien Bâtiments communaux","PEDP_Pol Educatives et de Prévention","Pôle Administratif EEJ"],
-    "Espace Vert": ["BMO_Cimetière","Espaces verts - terrain régie"],
-    "Manifestation": ["BMO_Fêtes et cérémonies"],
-    "Mécanique": ["ENV_Achat / Mécanique"],
-    "Médiathèque": ["Bib section jeunesse","BIB_Secrétariat"],
-    "Petite Enfance": ["PE_Accueil Familial les Petits loups","PE_Boule de Gomme","PE_Maison Petite Enfance","PE_Pôle Administratif","PE_Tendres Galipettes"],
-    "Propreté Déchet": ["ENV_Propreté déchets"],
-    "Propreté Urbaine": ["PRU_Nettoiement mécanisé","PUR_Nettoiement manuel","PUR_Travaux spécifiques / remplacements"],
-    "SAF": ["DST_Administratif et financier"],
-    "Sécurité Tranquilité Publique": ["STP_Police Municipale","STP_Stationnement Marchés de plein vent"],
-    "Sport": ["Equipements sportifs","SPORTS"],
-    "Urbanisme": ["DST_Urbanisme"],
-    "Voirie": ["INF_Régie Voirie"],
+    "Accueil & Affaires Générales": ["Accueil du public"],
+    "Patrimoine Bâti": ["Régie Bâtiments"],
+    "Communication Institutionnelle": ["Pôle Communication"],
+    "Restauration Collective": ["Restauration Collective"],
+    "Direction Générale des Services": ["Direction Générale Adjointe"],
+    "Ressources Humaines & Vie au Travail": ["Gestion Administrative du Personnel","Prévention & Conditions de Travail","Emploi & Formation"],
+    "Conservatoire de Musique": ["Conservatoire"],
+    "Enfance & Jeunesse": ["Accueils Périscolaires","Coordination Jeunesse","Écoles Élémentaires","Écoles Maternelles","Entretien des Groupes Scolaires","Politiques Éducatives & Prévention","Pôle Administratif Enfance"],
+    "Espaces Verts & Paysage": ["Cimetières & Espaces Naturels","Équipe Espaces Verts"],
+    "Vie Événementielle": ["Fêtes & Cérémonies"],
+    "Atelier Mécanique": ["Atelier Mécanique & Achats"],
+    "Réseau des Médiathèques": ["Section Jeunesse","Secrétariat Médiathèque"],
+    "Petite Enfance & Familles": ["Accueil Familial","Multi-accueil Les Petits Pas","Maison de la Petite Enfance","Pôle Administratif Petite Enfance","Multi-accueil Les Lucioles"],
+    "Collecte & Propreté": ["Collecte des Déchets"],
+    "Propreté de la Ville": ["Nettoiement Mécanisé","Nettoiement Manuel","Travaux Spécifiques & Remplacements"],
+    "Affaires Financières": ["Gestion Administrative & Financière"],
+    "Police Municipale & Tranquillité": ["Brigade de Voie Publique","Stationnement & Marchés"],
+    "Sports & Vie Associative": ["Équipements Sportifs","Encadrement Sportif"],
+    "Urbanisme & Aménagement": ["Instruction du Droit des Sols"],
+    "Voirie & Réseaux": ["Régie Voirie"],
   };
 
   const STORAGE_KEY = "vigie_hse_dataset";
@@ -657,7 +658,8 @@
     fServiceDetail.value = rec.serviceDetail || "";
 
     const typeInput = rec.typeAtMp === "Accident de trajet" ? $("type-trajet")
-                     : rec.typeAtMp === "Bénin" ? $("type-benin")
+                     : (rec.typeAtMp === "Incident bénin" || rec.typeAtMp === "Bénin") ? $("type-benin")
+                     : rec.typeAtMp === "Presque accident" ? $("type-presque")
                      : $("type-at");
     typeInput.checked = true;
     $("fDateAT").value = rec.dateAT || "";
@@ -767,7 +769,7 @@
       joursArret: arretVal ? Number(fd.get("jours") || 0) : 0,
       circonstances: fd.get("circonstances"),
       grade: fd.get("grade"),
-      etat: typeAtMp === "Bénin" ? "Bénin" : "AT",
+      etat: (typeAtMp === "Incident bénin" || typeAtMp === "Bénin") ? "Incident bénin" : typeAtMp === "Presque accident" ? "Presque accident" : "AT",
       risque: fd.get("risque"),
       siege: fd.get("siege"),
       nature: fd.get("nature"),

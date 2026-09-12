@@ -517,8 +517,8 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
-    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
+    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -533,13 +533,7 @@
 
   // ---------- Seed RSST ----------
   function daysAgoISO(n){ const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); }
-  const SEED_RSST_RAW = [
-    { id:"rsst-1", offset:35, respOffset:28, collectivite:"Ville", service:"Voirie", nature:"Risque constaté", description:"Trottoir affaissé rue de la République, risque de chute pour les piétons et les agents lors des interventions de nettoiement.", gravite:"Moyenne", auteur:"Agent Voirie", statut:"Traitée", suiteDonnee:"Signalement transmis aux services techniques ; réfection programmée.", traitePar:"RH1" },
-    { id:"rsst-2", offset:21, respOffset:12, collectivite:"Ville", service:"Cuisine Centrale", nature:"Dysfonctionnement matériel", description:"Sol glissant récurrent à proximité du lave-vaisselle industriel malgré le tapis antidérapant en place.", gravite:"Élevée", auteur:"Agent Cuisine Centrale", statut:"En cours de traitement", suiteDonnee:"Devis demandé pour un revêtement de sol antidérapant renforcé.", traitePar:"RH1" },
-    { id:"rsst-3", offset:40, respOffset:33, collectivite:"Ville", service:"Espace Vert", nature:"Suggestion d'amélioration", description:"Demande de mise à disposition de gants anti-coupure supplémentaires pour l'entretien des massifs épineux.", gravite:"Faible", auteur:"Agent Espace Vert", statut:"Traitée", suiteDonnee:"Commande passée, distribution effectuée à l'ensemble de l'équipe.", traitePar:"RH2" },
-    { id:"rsst-4", offset:9, respOffset:0, collectivite:"Agglomération", service:"Propreté Déchet", nature:"Risque constaté", description:"Éclairage insuffisant sur le quai de déchargement de la déchetterie en période hivernale, risque pour la manœuvre des engins.", gravite:"Élevée", auteur:"Agent Déchetterie", statut:"Nouvelle", suiteDonnee:"", traitePar:"" },
-    { id:"rsst-5", offset:4, respOffset:0, collectivite:"Ville", service:"EEJ", nature:"Autre", description:"Demande de formation aux gestes et postures pour l'équipe d'animation, sollicitations physiques répétées lors des activités avec les enfants.", gravite:"Faible", auteur:"Animateur EEJ", statut:"Nouvelle", suiteDonnee:"", traitePar:"" },
-  ];
+  const SEED_RSST_RAW = [];
   function buildSeed(){
     return SEED_RSST_RAW.map(r => ({
       id: r.id,

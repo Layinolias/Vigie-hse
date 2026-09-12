@@ -473,8 +473,8 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Admin Générale","Batiment","Communication","Cuisine Centrale","DRHCT","EEJ","Espace Vert","Manifestation","Mécanique","Propreté Urbaine","SAF","Sécurité Tranquilité Publique","Sport","Voirie"],
-    servicesAgglo: ["Direction Générale","DRHCT","Ecole de musique","EEJ","Médiathèque","Petite Enfance","Propreté Déchet","Sport","Urbanisme"],
+    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
+    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -504,20 +504,7 @@
 
   // ---------- Génération de l'inventaire illustratif ----------
   function hashStr(s){ let h = 0; for (let i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) | 0; } return Math.abs(h); }
-  const SEED_PRODUCTS_RAW = [
-    { nom:"Détergent désinfectant surfaces", fournisseur:"Diversey", service:"Cuisine Centrale", collectivite:"Ville", quantite:25, unite:"L", pictos:["GHS05","GHS07"] },
-    { nom:"Détartrant lave-vaisselle industriel", fournisseur:"Diversey", service:"Cuisine Centrale", collectivite:"Ville", quantite:10, unite:"L", pictos:["GHS05"] },
-    { nom:"Désherbant à base de glyphosate", fournisseur:"Phyteurop", service:"Espace Vert", collectivite:"Ville", quantite:15, unite:"L", pictos:["GHS06","GHS09"] },
-    { nom:"Insecticide horticole", fournisseur:"Bayer Agri", service:"Espace Vert", collectivite:"Ville", quantite:8, unite:"L", pictos:["GHS06","GHS09"] },
-    { nom:"Peinture marquage routier", fournisseur:"Signaux Girod", service:"Voirie", collectivite:"Ville", quantite:60, unite:"L", pictos:["GHS02","GHS08"] },
-    { nom:"Dégraissant industriel", fournisseur:"Würth", service:"Voirie", collectivite:"Ville", quantite:20, unite:"L", pictos:["GHS02","GHS07"] },
-    { nom:"Peinture glycéro", fournisseur:"Seigneurie", service:"Batiment", collectivite:"Ville", quantite:40, unite:"L", pictos:["GHS02","GHS08"] },
-    { nom:"Solvant de nettoyage", fournisseur:"Würth", service:"Batiment", collectivite:"Ville", quantite:12, unite:"L", pictos:["GHS02","GHS07"] },
-    { nom:"Huile moteur", fournisseur:"Total Energies", service:"Mécanique", collectivite:"Ville", quantite:100, unite:"L", pictos:["GHS09"] },
-    { nom:"Liquide de refroidissement / antigel", fournisseur:"Total Energies", service:"Mécanique", collectivite:"Ville", quantite:30, unite:"L", pictos:["GHS07","GHS09"] },
-    { nom:"Carburant diesel (cuve engins)", fournisseur:"Avia", service:"Propreté Déchet", collectivite:"Agglomération", quantite:800, unite:"L", pictos:["GHS02","GHS08"] },
-    { nom:"Huiles usagées collectées", fournisseur:"—", service:"Propreté Déchet", collectivite:"Agglomération", quantite:150, unite:"L", pictos:["GHS08","GHS09"] },
-  ];
+  const SEED_PRODUCTS_RAW = [];
   function buildProductSeeds(){
     return SEED_PRODUCTS_RAW.map(p => {
       const h = hashStr(p.nom + "|" + p.service);

@@ -464,6 +464,7 @@
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const role = (session && session.role) || "ag";
   const canRespond = role === "rh" || role === "admin";
+  const canEdit = canRespond;
   const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");

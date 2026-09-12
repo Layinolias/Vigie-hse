@@ -613,20 +613,7 @@
   }
 
   // ---------- Catalogue (seed fixe) ----------
-  const CATALOGUE_SEED = [
-    { id:"cat-1", nom:"Casque de chantier", categorie:"EPI", norme:"EN 397", dureeVieMois:60, nombreLavagesMax:null, ficheTechnique:"Casque de protection contre les chocs et chutes d'objets. Contrôle visuel avant chaque usage, remplacement immédiat après un choc." },
-    { id:"cat-2", nom:"Chaussures de sécurité", categorie:"EPI", norme:"EN ISO 20345", dureeVieMois:12, nombreLavagesMax:null, ficheTechnique:"Chaussures à coque de protection S3, semelle anti-perforation. Remplacement annuel ou dès usure de la semelle." },
-    { id:"cat-3", nom:"Gants anti-coupure", categorie:"EPI", norme:"EN 388", dureeVieMois:6, nombreLavagesMax:null, ficheTechnique:"Gants de protection mécanique contre les coupures et abrasions. Remplacement dès dégradation visible." },
-    { id:"cat-4", nom:"Lunettes de protection", categorie:"EPI", norme:"EN 166", dureeVieMois:24, nombreLavagesMax:null, ficheTechnique:"Protection oculaire contre les projections. Remplacer en cas de rayures gênant la vision." },
-    { id:"cat-5", nom:"Protections auditives", categorie:"EPI", norme:"EN 352", dureeVieMois:12, nombreLavagesMax:null, ficheTechnique:"Bouchons ou casque anti-bruit, atténuation adaptée au poste. Hygiène et remplacement réguliers." },
-    { id:"cat-6", nom:"Harnais anti-chute", categorie:"EPI", norme:"EN 361", dureeVieMois:60, nombreLavagesMax:null, ficheTechnique:"Harnais de protection contre les chutes de hauteur. Vérification périodique obligatoire par une personne compétente." },
-    { id:"cat-7", nom:"Masque de protection respiratoire", categorie:"EPI", norme:"EN 149", dureeVieMois:12, nombreLavagesMax:null, ficheTechnique:"Masque filtrant contre les poussières et particules (FFP2/FFP3 selon exposition)." },
-    { id:"cat-8", nom:"Gants de manutention", categorie:"EPI", norme:"EN 388", dureeVieMois:6, nombreLavagesMax:null, ficheTechnique:"Gants de protection pour la manutention manuelle de charges." },
-    { id:"cat-9", nom:"Veste haute visibilité", categorie:"Vêtement de travail", norme:"EN ISO 20471", dureeVieMois:null, nombreLavagesMax:25, ficheTechnique:"Vêtement de signalisation à haute visibilité, classe 2. Propriétés rétroréfléchissantes garanties jusqu'au nombre de lavages indiqué." },
-    { id:"cat-10", nom:"Pantalon de travail", categorie:"Vêtement de travail", norme:"EN ISO 13688", dureeVieMois:null, nombreLavagesMax:50, ficheTechnique:"Pantalon de travail renforcé — exigences générales des vêtements de protection." },
-    { id:"cat-11", nom:"Veste imperméable", categorie:"Vêtement de travail", norme:"EN 343", dureeVieMois:null, nombreLavagesMax:40, ficheTechnique:"Protection contre les intempéries (pluie). Étanchéité garantie jusqu'au nombre de lavages indiqué." },
-    { id:"cat-12", nom:"Polaire de travail", categorie:"Vêtement de travail", norme:"EN ISO 13688", dureeVieMois:null, nombreLavagesMax:60, ficheTechnique:"Vêtement d'appoint pour le travail par temps froid." },
-  ];
+  const CATALOGUE_SEED = [];
   const CAT_KEY = "vigie_hse_epi_catalogue";
   function loadCatalogue(){
     let stored = [];

@@ -532,34 +532,7 @@
   const TRAMES_KEY = "vigie_hse_inspection_trames";
   function genTrameId(){ return "trm-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
   function genPointId(){ return "pt-" + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
-  const SEED_TRAMES = [
-    { id:"tr-1", nom:"Inspection Espaces Verts", description:"Contrôle des conditions de travail et du matériel pour les équipes d'entretien des espaces verts.",
-      points:[
-        { id:"tr1-p1", libelle:"Rangement et état des outils tranchants", categorie:"Outillage" },
-        { id:"tr1-p2", libelle:"Port des EPI (gants anti-coupure, protections auditives)", categorie:"EPI" },
-        { id:"tr1-p3", libelle:"État des machines (tondeuses, débroussailleuses)", categorie:"Équipement" },
-        { id:"tr1-p4", libelle:"Stockage des produits phytosanitaires", categorie:"Produits chimiques" },
-        { id:"tr1-p5", libelle:"Signalisation de chantier mobile", categorie:"Circulation" },
-        { id:"tr1-p6", libelle:"Trousse de secours à disposition", categorie:"Secours" },
-      ] },
-    { id:"tr-2", nom:"Inspection Atelier / Mécanique", description:"Contrôle des conditions de sécurité dans les ateliers mécaniques et de maintenance.",
-      points:[
-        { id:"tr2-p1", libelle:"État des extincteurs et accès dégagé", categorie:"Incendie" },
-        { id:"tr2-p2", libelle:"Rangement des outils", categorie:"Outillage" },
-        { id:"tr2-p3", libelle:"État électrique des équipements", categorie:"Électrique" },
-        { id:"tr2-p4", libelle:"Ventilation de l'atelier", categorie:"Ambiance" },
-        { id:"tr2-p5", libelle:"Port des EPI (lunettes, gants)", categorie:"EPI" },
-        { id:"tr2-p6", libelle:"Stockage des produits inflammables", categorie:"Produits chimiques" },
-      ] },
-    { id:"tr-3", nom:"Inspection Locaux administratifs", description:"Contrôle des conditions de sécurité et d'ergonomie dans les locaux de bureau.",
-      points:[
-        { id:"tr3-p1", libelle:"Dégagement des issues de secours", categorie:"Incendie" },
-        { id:"tr3-p2", libelle:"État des extincteurs", categorie:"Incendie" },
-        { id:"tr3-p3", libelle:"Ergonomie des postes de travail (écrans, sièges)", categorie:"Ergonomie" },
-        { id:"tr3-p4", libelle:"Rangement et câblage électrique", categorie:"Électrique" },
-        { id:"tr3-p5", libelle:"Affichage des consignes de sécurité", categorie:"Affichage" },
-      ] },
-  ];
+  const SEED_TRAMES = [];
   function saveTrames(ds){ try { localStorage.setItem(TRAMES_KEY, JSON.stringify(ds)); } catch(e){} }
   function loadTrames(){
     let stored = [];

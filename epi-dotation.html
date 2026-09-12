@@ -253,6 +253,7 @@
   <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
   <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/></symbol>
   <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
   <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
@@ -776,7 +777,61 @@
       </tr>`).join("");
   }
   if (canEdit){
-    $("catActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="catExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="catNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel article</button>`;
+    $("catActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="catImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="catImportFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="catExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="catNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel article</button>`;
+    function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    function mapImportedCatRow(raw){
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyImp(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const nom = String(pick(["nom"])).trim();
+      if (!nom) return null;
+      const categorie = String(pick(["categorie"])).trim();
+      const duree = Number(pick(["duree de vie mois"])) || null;
+      const lavages = Number(pick(["nombre de lavages max"])) || null;
+      return {
+        id: String(pick(["id"])).trim() || "",
+        nom,
+        categorie: categorie === "Vêtement de travail" ? "Vêtement de travail" : "EPI",
+        norme: String(pick(["norme"])).trim(),
+        dureeVieMois: duree,
+        nombreLavagesMax: lavages,
+        ficheTechnique: String(pick(["fiche technique"])).trim(),
+      };
+    }
+    $("catImport").addEventListener("click", () => $("catImportFile").click());
+    $("catImportFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+        if (rawRows.length === 0){
+          alert("Le fichier semble vide — aucune ligne n'a été trouvée dans la première feuille.");
+          e.target.value = "";
+          return;
+        }
+        let added = 0, updated = 0, skipped = 0;
+        rawRows.forEach(raw => {
+          const rec = mapImportedCatRow(raw);
+          if (!rec){ skipped++; return; }
+          const idx = rec.id ? CATALOGUE.findIndex(c => c.id === rec.id) : -1;
+          if (idx >= 0){ CATALOGUE[idx] = rec; updated++; }
+          else { rec.id = rec.id || genId("cat"); CATALOGUE.push(rec); added++; }
+        });
+        saveCatalogue(CATALOGUE);
+        renderCatalogue(); renderStock(); renderTopKpis(); fillArticleSelects();
+        if (added === 0 && updated === 0){
+          alert(`Aucune ligne n'a pu être importée (${skipped} ignorée(s)). Vérifiez que le fichier contient bien les colonnes attendues (Nom, Catégorie…).`);
+        } else {
+          alert(`Import terminé — ${added} ligne(s) ajoutée(s), ${updated} mise(s) à jour, ${skipped} ignorée(s).`);
+        }
+      } catch (err){
+        alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
+      }
+      e.target.value = "";
+    });
     $("catExport").addEventListener("click", () => {
       const rows = CATALOGUE.map(c => ({
         "ID": c.id, "Nom": c.nom, "Catégorie": c.categorie, "Norme": c.norme || "",
@@ -965,7 +1020,64 @@
     }).join("");
   }
   if (canEdit){
-    $("dotActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="dotExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="dotNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle dotation</button>`;
+    $("dotActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="dotImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="dotImportFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="dotExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="dotNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle dotation</button>`;
+    function normKeyImpDot(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    function catalogueByName(nom){ return CATALOGUE.find(c => normKeyImpDot(c.nom) === normKeyImpDot(nom)); }
+    function mapImportedDotRow(raw){
+      const n = {};
+      Object.keys(raw).forEach(k => { n[normKeyImpDot(k)] = raw[k]; });
+      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
+      const nom = String(pick(["nom"])).trim();
+      const articleNom = String(pick(["article"])).trim();
+      if (!nom && !articleNom) return null;
+      const article = catalogueByName(articleNom);
+      if (!article) return null;
+      const collectiviteRaw = normKeyImpDot(pick(["collectivite","structure"]));
+      const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
+      return {
+        id: String(pick(["id"])).trim() || "",
+        nom, prenom: String(pick(["prenom"])).trim(), collectivite,
+        service: String(pick(["service"])).trim(),
+        articleId: article.id,
+        taille: String(pick(["taille"])).trim(),
+        dateRemise: String(pick(["date de remise"])).trim() || new Date().toISOString().slice(0,10),
+      };
+    }
+    $("dotImport").addEventListener("click", () => $("dotImportFile").click());
+    $("dotImportFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+        if (rawRows.length === 0){
+          alert("Le fichier semble vide — aucune ligne n'a été trouvée dans la première feuille.");
+          e.target.value = "";
+          return;
+        }
+        let added = 0, updated = 0, skipped = 0;
+        rawRows.forEach(raw => {
+          const rec = mapImportedDotRow(raw);
+          if (!rec){ skipped++; return; }
+          const idx = rec.id ? DOTATIONS_ALL.findIndex(d => d.id === rec.id) : -1;
+          if (idx >= 0){ DOTATIONS_ALL[idx] = rec; updated++; }
+          else { rec.id = rec.id || genId("dot"); DOTATIONS_ALL.push(rec); added++; }
+        });
+        saveDotations(DOTATIONS_ALL);
+        DOTATIONS = isScoped ? DOTATIONS_ALL.filter(d => myServices.includes(d.service)) : DOTATIONS_ALL;
+        renderDotations(); renderTopKpis(); fillLavageDotationSelect();
+        if (added === 0 && updated === 0){
+          alert(`Aucune ligne n'a pu être importée (${skipped} ignorée(s)). Vérifiez que le fichier contient bien les colonnes attendues (Nom, Article — qui doit exister dans le catalogue…).`);
+        } else {
+          alert(`Import terminé — ${added} ligne(s) ajoutée(s), ${updated} mise(s) à jour, ${skipped} ignorée(s).`);
+        }
+      } catch (err){
+        alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
+      }
+      e.target.value = "";
+    });
     $("dotExport").addEventListener("click", () => {
       const rows = DOTATIONS.map(d => Object.assign({}, d, computeDotationStatus(d))).map(d => {
         const c = catalogueById(d.articleId);

@@ -708,6 +708,7 @@
       moyensPrevention: fd.get("moyensPrevention") || "",
       mesuresProposees: fd.get("mesuresProposees") || "",
       maitrise: fd.get("maitrise"),
+      dateEvaluation: (editingRecord && editingRecord.dateEvaluation) || new Date().toISOString().slice(0,10),
     };
 
     if (editingRecord){

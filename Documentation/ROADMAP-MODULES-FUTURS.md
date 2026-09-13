@@ -50,7 +50,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 6 | Formation / Habilitation | ✅ Fait — `formation-habilitation.html` |
 | 7 | Santé au travail — planning des visites médicales | 🔶 Base posée — extension prévue |
 | 8 | Gestion documentaire (wiki++ HSE) | ❌ Non démarré — vision élargie, contenu fiches de sécurité/familles de risque ajouté 2026-09-12 |
-| 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html` |
+| 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html`, sélecteur calendaire + tous modules période-conscients + graphiques par risque (2026-09-14) |
 | 10 | EPI, dotation & entretien | ✅ Fait — `epi-dotation.html` |
 | 11 | Dashboard mobile simplifié | ✅ Fait |
 | 12 | Accueil au poste | ❌ Non démarré (nouveau, retour alpha 2026-09-12) |
@@ -255,18 +255,16 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - **Familles de risque.** La taxonomie `RISK_TAXONOMY_DEFAULT` (`administration.html`, définitions courtes par famille : RPS, Travail isolé, Amiante, Coactivité, etc. — voir jalon J1 ci-dessus) n'est aujourd'hui qu'un référentiel de catégorisation pour noter le DUERP, pas un contenu consultable en soi. L'idée : que chaque famille de risque devienne un vrai article du wiki++ (ce que c'est, comment le reconnaître, mesures de prévention type, cadre réglementaire) plutôt qu'une simple étiquette de menu déroulant.
 - **Comment amener ce type d'information à l'agent, pas seulement l'archiver.** Le point le plus important et le moins tranché : à quoi bon un wiki riche si personne ne va le consulter ? Piste à creuser plus tard plutôt qu'assumée maintenant : des liens contextuels *depuis* les endroits où l'information sert déjà (le risque sélectionné dans une évaluation DUERP renvoie vers l'article de la famille de risque correspondante ; un produit chimique renvoie vers sa FDS et vers une éventuelle fiche de sécurité liée ; un module de suivi peut pointer vers l'article pertinent) plutôt qu'un wiki isolé accessible uniquement par sa propre entrée de menu. Recoupe aussi le futur module 12 (Accueil au poste) comme moment naturel de mise en avant de ces fiches à un nouvel agent.
 
-## 9. Indicateurs & reporting KPI — ✅ Fait, extension demandée
+## 9. Indicateurs & reporting KPI — ✅ Fait, extension livrée (2026-09-14)
 
-**Ce qui existe (`reporting.html`) :** sélection de période (`select` : 3/6/12 mois ou tout), indicateurs et tendance AT/MP sur cette période, export Excel (SheetJS). Limite documentée dans la page elle-même : la période ne s'applique qu'au Registre AT/MP et à sa tendance — les autres modules affichent une photo instantanée de l'état actuel, quelle que soit la période choisie.
+**Ce qui existe (`reporting.html`) :** indicateurs et tendance AT/MP sur une période, export Excel (SheetJS).
 
-**Extension demandée (retour alpha 2026-09-12) :**
-- Remplacer/compléter le sélecteur de période (menu déroulant à choix prédéfinis) par un vrai sélecteur calendaire (dates de début/fin libres).
-- Faire en sorte que **tous** les graphiques et valeurs affichés réagissent à la période sélectionnée, pas seulement le bloc AT/MP — lever la limitation actuellement documentée dans la page.
-- Nouveaux graphiques demandés :
-  - Évolution du nombre de jours d'arrêt dans le temps (courbe/tendance).
-  - Nombre d'accidents par type de risque.
-  - Nombre de jours d'arrêt par type de risque.
-  - Ces deux derniers sont directement faisables : le champ `risque` existe déjà sur chaque événement AT/MP (`registre-at-mp.html`), simple regroupement à ajouter côté reporting.
+**Extension demandée (retour alpha 2026-09-12), livrée le 2026-09-14 :**
+- **Sélecteur calendaire (dates de début/fin libres)** — fait. Le menu déroulant 6/12 mois "Depuis le début" reste comme raccourci rapide (il pré-remplit les deux champs), mais les deux dates `fDateDebut`/`fDateFin` sont directement éditables.
+- **Tous les graphiques et valeurs réagissent maintenant à la période sélectionnée**, pas seulement le bloc AT/MP — fait, via une fonction `inPeriod(dateStr, dDebut, dFin)` unique appliquée à chaque module avant calcul des statistiques. Champ de date utilisé par module : AT/MP → `dateAT`, DUERP → `dateEvaluation` (nouveau champ, voir ci-dessous), Plan d'Actions → `dateCreation`, Santé & Visites → `dateDerniere`, RSST → `date`, Vérifications → `dateDerniere`, Inspection/Audit → `dateInspection`, Produits Chimiques → `dateMajFDS` (date de mise à jour FDS, pas une date de création — seule date disponible sur ce module), Formation/Habilitation → `dateObtention`, EPI & Dotation → `dateRemise`. Un enregistrement sans date connue reste toujours compté (`inPeriod` renvoie `true` si la date est absente) — pas de régression pour les données existantes.
+- **Nouveau champ `dateEvaluation` sur les évaluations DUERP** (`vigie_hse_duerp_dataset`) — nécessaire pour ce module, qui n'avait jusqu'ici aucune date. Fixée automatiquement à la date de création (préservée sur modification, jamais réécrite), sur le même principe que `dateCreation` du Plan d'Actions — pas un champ de formulaire visible. **Limite assumée :** seules les évaluations saisies manuellement via `saisie-duerp.html` depuis le 2026-09-14 portent cette date ; les évaluations importées par Excel (`document-unique.html`) ou chargées depuis `DATATEST/` n'en ont pas (le fichier `2-document-unique.xlsx` n'a pas de colonne date, voir `PROMPT-GENERATION-DONNEES-TEST.md`) et restent donc toujours comptabilisées quelle que soit la période — plutôt que de leur fabriquer une fausse date d'import.
+  - Nouveaux graphiques : **Nombre d'accidents par type de risque** et **Nombre de jours d'arrêt par type de risque** — fait, deux nouveaux panneaux à barres horizontales sous la tendance AT/MP, regroupés sur le champ `risque` déjà présent sur chaque événement AT/MP, recalculés sur la période sélectionnée. Ajoutés aussi à l'export Excel (nouvel onglet "AT-MP par risque").
+- **Non fait (reporté, pas demandé comme prioritaire) :** courbe dédiée "Évolution du nombre de jours d'arrêt dans le temps" — le total de jours d'arrêt sur la période est déjà visible (KPI module AT/MP), mais pas encore une vraie courbe mois par mois comme la tendance en nombre d'événements. Candidat naturel pour une prochaine itération si le besoin est confirmé.
 
 ## 10. EPI, dotation & entretien — ✅ Fait
 
@@ -367,7 +365,7 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 **Cadrage :** comme pour les autres pistes ajoutées cette semaine, une piste posée pour discussion ultérieure, pas un chantier à démarrer immédiatement.
 
-## 18. Gestion administrative des dossiers AT/MP & CITIS — ❌ Non démarré
+## 18. Gestion administrative des dossiers AT/MP & CITIS — ✅ Fait (2026-09-13)
 
 **Retour utilisateur reçu le 2026-09-13, retranscrit intégralement :**
 

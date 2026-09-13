@@ -8,7 +8,15 @@
 
 ⚠️ **Rappel important** : l'auto-chargement DATATEST tourne pour **tous les visiteurs**, pas seulement en interne — un nouveau testeur verra directement les données de démo au lieu d'une app vraiment vierge. Le jour où une vraie remise à zéro est nécessaire, vider ou renommer `DATATEST/`.
 
-**À vérifier ensuite** : repasser sur `Documentation/CHECKLIST-QA-V1.md` (section météo, import, centrage mises à jour) sur le site déployé.
+## ✅ Vérification sur le site déployé (2026-09-13)
+
+Passage QA effectué directement sur `https://layinolias.github.io/Vigie-hse/` (navigateur automatisé) :
+- Auto-chargement DATATEST confirmé fonctionnel sur AT/MP (25), DUERP (30), Inspection/Audit (3 trames + 15 inspections), RSST (15), EPI Dotation (12 catalogue + 20 dotations), Santé & Visites (15), Produits Chimiques (15).
+- **Bug trouvé et corrigé** (commit `a7d34e9`) : dans 6 fichiers (Registre SST, Santé & Visites, Inspection/Audit, Produits Chimiques, EPI Dotation, Plan d'Actions), les cellules de date Excel remontaient comme objets `Date` JS natifs (SheetJS + `cellDates:true`) et un simple `String(...)` produisait un format illisible (`Wed Jun 17 2026 23:59:59 GMT+0200...`) au lieu de `2026-06-17`. Corrigé avec un parseur de date dédié dans chaque import (manuel + auto-chargement). Re-vérifié après correction : toutes les dates s'affichent proprement.
+- Météo : confirmé, aucune demande de géolocalisation ; popover de recherche de ville fonctionnelle.
+- Centrage : confirmé sur grand écran (1920px testé), contenu centré avec marges symétriques.
+
+**Reste à faire** : dérouler le reste de `Documentation/CHECKLIST-QA-V1.md` (rôles manager/RH/AG, responsive mobile, multi-navigateur) — nécessite un humain pour les parties non automatisables (vrai téléphone, Safari, etc.).
 
 ---
 

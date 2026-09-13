@@ -59,7 +59,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 15 | Analyse d'accident (arbre des causes) | ❌ Non démarré (nouveau, 2026-09-12) — lié au jalon J2 |
 | 16 | Situations d'urgence & exercices d'évacuation | ❌ Non démarré (nouveau, 2026-09-12) — recoupe l'écart clause 8.2 du jalon J1 |
 | 17 | Entreprises extérieures & Plan de Prévention | ❌ Non démarré (nouveau, 2026-09-12) — recoupe le risque "Coactivité" déjà référencé |
-| 18 | Gestion administrative des dossiers AT/MP & CITIS | ❌ Non démarré (retour utilisateur, 2026-09-13) — restriction RBAC stricte, lié au rôle "Préventeur" (voir J0) |
+| 18 | Gestion administrative des dossiers AT/MP & CITIS | ✅ Fait (2026-09-13) — `dossiers-atmp-citis.html`, premier cas d'usage du modèle de permissions granulaires (voir J0) |
 
 ---
 
@@ -95,6 +95,7 @@ Point soulevé par l'utilisateur suite à un retour de test alpha mentionnant un
 - **Profils préréglés ET personnalisables** : des profils génériques standards (probablement les 4 rôles actuels comme point de départ, plus Préventeur/Représentant du personnel), mais renommables et dont les permissions restent modifiables — sans empêcher la création de profils entièrement sur-mesure.
 - **Lien avec le jalon J0** : cette réflexion rejoint directement le chantier de généralisation du vocabulaire ci-dessus et celui des unités organisationnelles ci-dessous — un système de permissions par (service générique × module × lecture/écriture) est probablement plus facile à généraliser pour un client privé qu'un jeu de rôles nommés spécifiques à une collectivité. À concevoir ensemble plutôt que comme deux chantiers séparés.
 - **Non traité pour l'instant** : cette note capture l'intention, pas une spécification. Avant de coder quoi que ce soit, il faudra définir le modèle de données exact (comment représenter un profil et ses permissions dans `vigie_hse_users`/`vigie_hse_referentials`), et si ce chantier doit rester dans l'architecture localStorage actuelle ou attendre le vrai backend multi-tenant (la gestion de permissions fines par tenant est justement le genre de chantier qui bénéficie d'une vraie base de données).
+- **✅ Premier cas d'usage réel construit le 2026-09-13** : module 18 (Dossiers AT/MP & CITIS, voir plus bas) utilise `u.modulePermissions = { "atmp-admin": "read"|"write" }` plutôt qu'un rôle "Préventeur" codé en dur — exactement la direction "case à cocher par module" envisagée ci-dessus, mais câblée sur un seul module pour l'instant (pas encore le tableau générique module × service × lecture/écriture avec UI d'administration dédiée). Sert de preuve de concept avant de décider si/quand généraliser.
 
 ### Ce qui doit devenir générique — structure organisationnelle
 
@@ -432,7 +433,17 @@ Le retour demande explicitement du **Tailwind CSS**. **Ça ne correspond pas à 
 3. **Migrer progressivement tout le site vers Tailwind**, en commençant par ce module — répond le mieux à l'esprit de la demande, mais change radicalement la portée : ce n'est plus l'ajout d'un module, c'est une refonte du design system entier, à traiter comme un chantier à part (et à décider si elle vaut le coup avant ou après la généralisation commerciale du jalon J0).
 **Recommandation par défaut en l'absence de précision : option 1**, la plus cohérente avec zéro régression et l'architecture actuelle — mais à confirmer explicitement avec l'utilisateur avant de coder, vu que la demande nommait Tailwind spécifiquement.
 
-**Cadrage :** comme pour les modules 12-17, à préciser avec l'utilisateur avant de coder — en particulier l'arbitrage RBAC (option 1 vs 2 ci-dessus) et l'arbitrage design (Tailwind vs thème existant), qui changent significativement l'ampleur du chantier.
+**✅ Construit le 2026-09-13.** Arbitrages tranchés par l'utilisateur : option 2 pour le RBAC (premier cas d'usage réel du modèle de permissions granulaires, pas un rôle codé en dur) et option 1 pour le design (thème clair/sombre existant, pas de Tailwind).
+
+**Ce qui a été livré :**
+- `dossiers-atmp-citis.html` : liste des dossiers (une ligne par événement du Registre AT/MP), panneau détail avec checklist documentaire (CMI, prolongations multiples, certificat final guérison/consolidation, notification IPP), enquête administrative + coût total/détail, et gestion des arrêtés (type Imputabilité/Placement CITIS/Maintien CITIS/Fin CITIS, workflow Brouillon → Transmis à l'autorité → Signé & Notifié). Export `.xlsx` (deux feuilles). Pas d'import en V1 (portée maîtrisée).
+- **Modèle de permissions granulaires** (nouveau, minimal) : `u.modulePermissions = { "atmp-admin": "read"|"write" }` sur chaque utilisateur (`vigie_hse_users`), copié dans `session.modulePermissions` à la connexion. Géré depuis `administration.html` (formulaire utilisateur). Un `admin`/`rh` a toujours accès ; un `manager`/`ag` seulement si la permission lui est explicitement accordée — exactement le mécanisme "case à cocher par module" envisagé dans la réflexion J0 ci-dessus, mais câblé sur un seul module pour l'instant, pas généralisé (l'UI reste dédiée à ce module précis, pas un tableau générique module × service × niveau — ça reste le chantier complet de J0 si d'autres modules doivent l'adopter).
+- Compte de test dédié : `PREV1` / `1234`, rôle de base `ag` (le moins privilégié) + `atmp-admin:write` — démontre que l'accès vient bien de la permission accordée, pas d'un rôle caché.
+- Lien de sidebar ajouté sur les 15 pages existantes + la nouvelle page elle-même (16 fichiers), masqué par défaut et révélé par `canAtmpAdmin`, sauf sur les 4 pages déjà restreintes rh/admin (`saisie-rh.html`, `saisie-duerp.html`, `reporting.html`, `administration.html`) où il est affiché sans condition puisque ces pages ne sont de toute façon jamais atteintes par un rôle non qualifié.
+
+**Écart connu, non traité :** le Registre AT/MP n'a pas de type "Maladie professionnelle" distinct dans `typeAtMp` (seulement Accident de travail/de trajet, Incident bénin, Presque accident) — ce module liste donc tous les événements AT/MP sans distinction de type plutôt que de filtrer sur une catégorie MP qui n'existe pas encore dans le modèle de données. À revisiter si la distinction AT/MP devient nécessaire.
+
+**Rappel CITIS/J0 (déjà noté plus haut) :** ce module reste spécifique fonction publique territoriale (CITIS n'existe pas dans le privé) — à traiter explicitement lors de la généralisation commerciale.
 
 ---
 

@@ -78,6 +78,7 @@ Chaque version est un dossier autonome et complet (pas de dépendance croisée).
 | `epi-dotation.html` | EPI/vêtements de travail — catalogue, stock, dotation par agent, cycles de lavage/entretien. |
 | `reporting.html` | Indicateurs & reporting KPI (accès rh/admin). |
 | `administration.html` | Panneau admin (accès admin uniquement) : Utilisateurs, Référentiels (listes déroulantes éditables), Flash Info, Journal d'audit. |
+| `dossiers-atmp-citis.html` | Suivi administratif des dossiers AT/MP et maladies professionnelles : checklist documentaire (CMI, prolongations, certificat final, IPP, enquête/coûts), arrêtés d'imputabilité/CITIS avec workflow de signature. Accès via le modèle de permissions granulaires (§7) plutôt que par rôle fixe — voir aussi `ROADMAP-MODULES-FUTURS.md` module 18. |
 
 ## 7. Modèle de rôles
 
@@ -91,6 +92,17 @@ Chaque version est un dossier autonome et complet (pas de dépendance croisée).
 Le **RSST fait exception** : c'est un registre ouvert où n'importe quel rôle peut déposer une observation (avec option d'anonymat) — c'est la nature même de ce registre réglementaire (tout agent peut signaler). Seuls `rh`/`admin` peuvent y répondre et le clôturer.
 
 Le scoping `manager` (`session.services`) est vérifié dans chaque page consommant des données de service — chercher `session.services` dans le code pour voir le pattern exact.
+
+### Permissions granulaires par module (nouveau, 2026-09-13 — premier cas d'usage)
+
+En plus des 4 rôles fixes ci-dessus, un utilisateur peut recevoir des **permissions additionnelles par module**, stockées dans `u.modulePermissions` (`vigie_hse_users`) et copiées dans `session.modulePermissions` à la connexion (`login.html`) :
+```js
+modulePermissions: { "atmp-admin": "read" | "write" }  // absent = aucun accès
+```
+- N'affecte **aucun** module existant — couche strictement additive.
+- Premier (et pour l'instant seul) module câblé sur ce mécanisme : `dossiers-atmp-citis.html` (clé `"atmp-admin"`). Un `admin`/`rh` y a toujours accès (`write`) via son rôle ; un `manager`/`ag` n'y accède que si cette permission lui a été explicitement accordée dans `administration.html` (onglet Utilisateurs).
+- Géré dans `administration.html` (formulaire utilisateur, champ `uAtmpAdminPerm`) — pas encore une UI générique par module (ça reste à faire si d'autres modules adoptent ce mécanisme, voir la réflexion sur la refonte des permissions dans `ROADMAP-MODULES-FUTURS.md`, section J0).
+- Pattern d'accès reproductible dans le code de chaque page : `const canAtmpAdmin = role === "admin" || role === "rh" || !!(session.modulePermissions && session.modulePermissions["atmp-admin"]);` — même principe transposable à un futur module avec une autre clé.
 
 ## 8. Modèle de données — clés `localStorage`
 
@@ -108,6 +120,8 @@ Le scoping `manager` (`session.services`) est vérifié dans chaque page consomm
 | `vigie_hse_actions` | Actions du Plan d'Actions | `plan-actions.html` |
 | `vigie_hse_visites` | Fiches de suivi santé/visites médicales | `sante-visites.html` |
 | `vigie_hse_rsst` | Observations du Registre Santé & Sécurité | `registre-sst.html` |
+| `vigie_hse_atmp_dossiers` | Checklist documentaire par dossier AT/MP (CMI, prolongations, certificat final, IPP, enquête/coûts), une entrée par `atmpId` | `dossiers-atmp-citis.html` |
+| `vigie_hse_atmp_arretes` | Arrêtés d'imputabilité/CITIS (type, statut de signature, dates, autorité), plusieurs par `atmpId` | `dossiers-atmp-citis.html` |
 | `vigie_hse_verifications` | Équipements et leur historique de vérification périodique | `verifications-periodiques.html` |
 | `vigie_hse_weather_location` | Ville choisie manuellement pour le widget météo (`{name, admin1, country, lat, lon}`) | `dashboard.html` |
 

@@ -53,6 +53,14 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Voit toutes les données (tous services), lecture seule uniquement.
 - [ ] Les colonnes personnelles (nom, prénom, date de naissance) sont masquées ou affichées "—" dans le Registre AT/MP.
 - [ ] Peut déposer une observation dans le Registre Santé & Sécurité, en cochant "anonyme" si souhaité.
+- [ ] Ne voit **pas** le lien "Dossiers AT/MP & CITIS" dans la sidebar (module 18, accès par permission granulaire — voir ci-dessous).
+
+### `PREV1` (permission granulaire `atmp-admin:write`, sans être RH/admin)
+- [ ] Voit le lien "Dossiers AT/MP & CITIS" dans la sidebar (section "Administratif") alors que le rôle de base est `ag`.
+- [ ] Peut ouvrir un dossier, cocher/dater les pièces (CMI, prolongations, certificat final, IPP), enregistrer, rouvrir le dossier et retrouver les données.
+- [ ] Peut ajouter un arrêté (type + statut + dates), le voir apparaître dans le tableau des arrêtés du dossier.
+- [ ] Ne voit **aucun** autre module RH (pas de "Déclarer un AT/MP", pas de "Évaluer un risque") — la permission ne donne accès qu'à ce module précis, pas aux droits RH complets.
+- [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : le module doit être invisible, et taper l'URL `dossiers-atmp-citis.html` directement doit rediriger vers le tableau de bord.
 
 ## 4. Fonctionnalités transverses
 

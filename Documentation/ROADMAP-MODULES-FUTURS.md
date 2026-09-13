@@ -453,21 +453,21 @@ Points remontés par un retour de test alpha (résumé d'une discussion avec Gem
 
 - **En-tête du tableau de bord (`dashboard.html`) — 🔶 réflexion à mener.** Le texte de bienvenue ("Bonjour." + sous-titre) est jugé trop verbeux, et le positionnement du nom "VIGIE HSE" doit être repensé dans cette même zone. Pas de direction de design arrêtée — à traiter comme une vraie refonte de cet en-tête, pas une simple coupe de texte. Ne concerne que `dashboard.html` (le tableau de bord post-connexion), pas `index.html` (la page vitrine publique, hors sujet ici).
 - **Tri & filtres dynamiques façon Excel sur toutes les colonnes de tous les tableaux — 🆕 chantier transversal.** Rien de tel n'existe aujourd'hui (seulement des filtres déroulants par page). Recommandation : construire un composant réutilisable (tri par clic sur en-tête de colonne + filtre par colonne) une fois, plutôt que de le dupliquer sur chacune des pages à tableau — cohérent avec la dette déjà notée sur le CSS dupliqué par fichier (`ETAT-DU-PROJET.md` §14). Priorisation entre modules non encore arbitrée.
-- **Sidebar : renommer "Registre Santé & Sécurité" en "Registre SST" — ✅ à faire, simple.**
+- **Sidebar : renommer "Registre Santé & Sécurité" en "Registre SST" — ✅ Fait (2026-09-13).** Appliqué sur les 16 fichiers (lien de sidebar uniquement, pas les autres occurrences comme la carte du dashboard).
 - **Registre SST (`registre-sst.html`) :**
-  - Titre de page → "Registre santé sécurité au travail" (le libellé court "Registre SST" reste réservé à la sidebar, ne pas confondre les deux).
-  - Le "…" sous le titre à remplacer par une infobulle n'est pas un texte statique : c'est le CSS de l'en-tête compact (`.page-summary-text p`, `text-overflow:ellipsis`) qui tronque la vraie description déjà présente, sur **toutes les pages du site**, pas seulement RSST. Corriger ce composant partagé (ex. tooltip/popover au survol) réglerait le problème partout d'un coup — bon candidat à traiter avec le point sur l'en-tête du dashboard.
-  - CRUD des observations "vide et verrouillé" — ❓ **à vérifier avant toute correction.** Le code contient déjà une logique de création/réponse/suppression d'observation (réponse restreinte à RH/admin). Reproduire le parcours exact du retour alpha (quel compte utilisé, quelle action bloquée) pour confirmer ou infirmer un vrai bug avant de coder quoi que ce soit.
+  - Titre de page → "Registre santé sécurité au travail" — ✅ Fait (2026-09-13). Appliqué au `<title>`, au fil d'Ariane et au `<h1>` ; le libellé court "Registre SST" reste réservé à la sidebar.
+  - Le "…" sous le titre (infobulle) — ❌ toujours en attente. Chantier transversal confirmé (`.page-summary-text p`, `text-overflow:ellipsis`, dupliqué dans les 17 pages) — regroupé avec le point sur l'en-tête du dashboard ci-dessous, pas traité isolément pour éviter un correctif à refaire différemment par page.
+  - CRUD des observations "vide et verrouillé" — ✅ **Résolu (2026-09-12), cause confirmée.** Ce n'était pas un problème d'accès RH/admin : une variable `canEdit` était utilisée dans `registre-sst.html` sans jamais avoir été déclarée (`ReferenceError`), ce qui plantait tout le script dès le chargement — aucun bouton n'apparaissait (ni Import/Export/Nouvelle observation, ni horloge). Corrigé en ajoutant `const canEdit = canRespond;`. Le CRUD lui-même fonctionnait déjà correctement une fois ce plantage levé.
 - **Registre AT/MP (`registre-at-mp.html` / `saisie-rh.html`) :**
-  - Retirer "— Ville et Agglomération" du sous-titre (`saisie-rh` non concerné, texte situé dans `registre-at-mp.html`) — cohérent avec le travail de dé-identification déjà engagé.
-  - Nouvelle colonne de statut de l'arrêt : "En cours" / "Clôturé".
-  - Remplacer le champ libre "Nombre de jours d'arrêt" (`saisie-rh.html`, actuellement un simple `<input type="number">`) par deux champs date (début/fin d'arrêt), avec jours calculés automatiquement en lecture seule.
-  - Masquer les filtres globaux (Collectivité/Service/Année) pour Agent et Manager (déjà scopés par service à la création du compte), les garder pour RH/Préventeur/Admin.
-  - Rendre paramétrable par l'admin qui a le droit de déclarer un accident (RH seul / Préventeur seul / ouverture aux managers) — dépend du modèle de permissions à définir (voir section J0).
+  - Retirer "— Ville et Agglomération" du sous-titre — ✅ Fait (2026-09-13).
+  - Nouvelle colonne de statut de l'arrêt : "En cours" / "Clôturé" — ✅ Fait (2026-09-13). Ajouté au badge "Statut" existant (`arretStatut`) plutôt qu'une colonne séparée ; calculé automatiquement (voir point suivant), avec repli "En cours" pour les enregistrements existants qui n'ont que l'ancien champ `joursArret` sans dates détaillées.
+  - Remplacer le champ libre "Nombre de jours d'arrêt" par deux champs date (début/fin) — ✅ Fait (2026-09-13). `saisie-rh.html` calcule désormais `joursArret` et `statutArret` ("Clôturé" si une date de fin est saisie, sinon "En cours", jours comptés jusqu'à aujourd'hui) à partir de `dateDebutArret`/`dateFinArret` ; les enregistrements plus anciens sans ces deux dates restent affichés via leur `joursArret` hérité (zéro régression).
+  - Masquer les filtres globaux (Collectivité/Service/Année) pour Agent et Manager — ✅ Fait (2026-09-13), masqués pour tout rôle hors RH/admin (`!canEdit`). Le volet "Préventeur" de la demande reste en attente : pas de rôle/permission "Préventeur" générique pour l'instant (voir module 18 pour le premier pas concret sur les permissions granulaires, câblé uniquement sur le module Dossiers AT/MP & CITIS) — à revisiter si/quand un vrai statut Préventeur transversal est défini.
+  - Rendre paramétrable qui a le droit de déclarer un accident — ❌ toujours en attente, dépend du modèle de permissions générique (section J0) plutôt que d'un nouveau cas particulier codé en dur.
 - **Document Unique (`document-unique.html`) :**
-  - Ajouter un encart/tooltip expliquant le rôle du DUERP sous le titre (même logique transversale que le point RSST ci-dessus).
-  - Icônes à moderniser — subjectif, nécessite soit une direction visuelle de l'utilisateur, soit plusieurs propositions à soumettre.
-  - Masquer les filtres pour le profil Agent (vision restreinte à son propre service), même logique que pour AT/MP.
+  - Tooltip expliquant le rôle du DUERP — ❌ toujours en attente, même chantier transversal que le point RSST ci-dessus (composant partagé, pas un correctif par page).
+  - Icônes à moderniser — ❌ toujours en attente, sujet à une direction visuelle de l'utilisateur.
+  - Masquer les filtres pour le profil Agent — ✅ Fait (2026-09-13), masqués pour `role === "ag"` (Collectivité/Service), la Famille de risque et le Niveau restent visibles à tous (filtres de contenu, pas de périmètre organisationnel).
 
 ---
 

@@ -110,7 +110,7 @@ modulePermissions: { "atmp-admin": "read" | "write" }  // absent = aucun accès
 |---|---|---|
 | `vigie_hse_session` *(sessionStorage, pas localStorage)* | `{user, role}` de la session en cours | `login.html` |
 | `vigie_hse_users` | Comptes utilisateurs (email/login, rôle, services, actif/inactif, mot de passe en clair) | `administration.html` (onglet Utilisateurs), lu par `login.html` |
-| `vigie_hse_dataset` | Enregistrements AT/MP | `saisie-rh.html`, lu/édité par `registre-at-mp.html` |
+| `vigie_hse_dataset` | Enregistrements AT/MP. Depuis 2026-09-13 : `dateDebutArret`/`dateFinArret` (saisies) + `joursArret`/`statutArret` ("En cours"/"Clôturé", calculés) remplacent l'ancien champ libre "nombre de jours" — les enregistrements plus anciens sans ces deux dates gardent leur `joursArret` hérité, affiché avec un statut "En cours" par défaut. | `saisie-rh.html`, lu/édité par `registre-at-mp.html` |
 | `vigie_hse_rh_log` | Journal de saisie local (feed) côté formulaire AT/MP | `saisie-rh.html` |
 | `vigie_hse_duerp_dataset` | Évaluations DUERP | `saisie-duerp.html`, lu/édité par `document-unique.html`, `plan-actions.html` |
 | `vigie_hse_duerp_log` | Journal de saisie local (feed) côté formulaire DUERP | `saisie-duerp.html` |

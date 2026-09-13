@@ -259,7 +259,7 @@
       <div class="nav-section">
         <div class="nav-label">Santé au travail</div>
         <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
-        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre Santé &amp; Sécurité</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre SST</a>
       </div>
       <div class="nav-section">
         <div class="nav-label">Sécurité &amp; Risques</div>
@@ -386,7 +386,9 @@
                     <input type="radio" name="arret" id="arret-avec" value="avec" required><label for="arret-avec">Avec arrêt</label>
                   </div>
                 </div>
-                <div class="f"><label for="fJours">Nombre de jours d'arrêt</label><input type="number" id="fJours" name="jours" min="1" max="600" placeholder="—" disabled></div>
+                <div class="f"><label for="fDateDebutArret">Début de l'arrêt</label><input type="date" id="fDateDebutArret" name="dateDebutArret" disabled></div>
+                <div class="f"><label for="fDateFinArret">Fin de l'arrêt (laisser vide si en cours)</label><input type="date" id="fDateFinArret" name="dateFinArret" disabled></div>
+                <div class="f"><label for="fJoursCalc">Jours d'arrêt (calculé)</label><input type="text" id="fJoursCalc" disabled placeholder="—"></div>
               </div>
             </fieldset>
 
@@ -610,13 +612,25 @@
     fServiceDetail.placeholder = list.length ? "ex. " + list[0] : "Préciser le service";
   });
 
-  const fJours = $("fJours");
+  const fDateDebutArret = $("fDateDebutArret"), fDateFinArret = $("fDateFinArret"), fJoursCalc = $("fJoursCalc");
+  function computeJoursArret(){
+    if (!fDateDebutArret.value){ fJoursCalc.value = ""; return; }
+    const debut = new Date(fDateDebutArret.value);
+    const fin = fDateFinArret.value ? new Date(fDateFinArret.value) : new Date();
+    const jours = Math.max(0, Math.round((fin - debut) / 86400000) + 1);
+    fJoursCalc.value = fDateFinArret.value ? `${jours} j (clôturé)` : `${jours} j (en cours, calculé à ce jour)`;
+  }
+  fDateDebutArret.addEventListener("change", computeJoursArret);
+  fDateFinArret.addEventListener("change", computeJoursArret);
   document.querySelectorAll('input[name="arret"]').forEach(r => {
     r.addEventListener("change", () => {
       if (r.value === "avec" && r.checked){
-        fJours.disabled = false; fJours.required = true; fJours.placeholder = "ex. 12";
+        fDateDebutArret.disabled = false; fDateDebutArret.required = true;
+        fDateFinArret.disabled = false;
       } else if (r.value === "sans" && r.checked){
-        fJours.disabled = true; fJours.required = false; fJours.value = ""; fJours.placeholder = "—";
+        fDateDebutArret.disabled = true; fDateDebutArret.required = false; fDateDebutArret.value = "";
+        fDateFinArret.disabled = true; fDateFinArret.value = "";
+        fJoursCalc.value = "";
       }
     });
   });
@@ -676,7 +690,12 @@
     const arretInput = $(rec.arret ? "arret-avec" : "arret-sans");
     arretInput.checked = true;
     arretInput.dispatchEvent(new Event("change"));
-    if (rec.arret) fJours.value = rec.joursArret;
+    if (rec.arret){
+      fDateDebutArret.value = rec.dateDebutArret || "";
+      fDateFinArret.value = rec.dateFinArret || "";
+      computeJoursArret();
+      if (!rec.dateDebutArret && rec.joursArret) fJoursCalc.value = `${rec.joursArret} j (valeur héritée, pas de dates détaillées)`;
+    }
   }
 
   let editingRecord = null;
@@ -770,7 +789,15 @@
       cadreEmploi: fd.get("cadreEmploi"),
       typeAtMp,
       arret: arretVal,
-      joursArret: arretVal ? Number(fd.get("jours") || 0) : 0,
+      dateDebutArret: arretVal ? (fd.get("dateDebutArret") || "") : "",
+      dateFinArret: arretVal ? (fd.get("dateFinArret") || "") : "",
+      joursArret: (() => {
+        if (!arretVal || !fd.get("dateDebutArret")) return 0;
+        const debut = new Date(fd.get("dateDebutArret"));
+        const fin = fd.get("dateFinArret") ? new Date(fd.get("dateFinArret")) : new Date();
+        return Math.max(0, Math.round((fin - debut) / 86400000) + 1);
+      })(),
+      statutArret: arretVal ? (fd.get("dateFinArret") ? "Clôturé" : "En cours") : "",
       circonstances: fd.get("circonstances"),
       grade: fd.get("grade"),
       etat: (typeAtMp === "Incident bénin" || typeAtMp === "Bénin") ? "Incident bénin" : typeAtMp === "Presque accident" ? "Presque accident" : "AT",
@@ -807,7 +834,9 @@
     populateServiceOptions("Ville");
     fServiceDetail.disabled = true;
     fServiceDetail.placeholder = "Sélectionnez d'abord un service";
-    fJours.disabled = true; fJours.required = false;
+    fDateDebutArret.disabled = true; fDateDebutArret.required = false;
+    fDateFinArret.disabled = true;
+    fJoursCalc.value = "";
     $("fStatut").focus();
   });
 

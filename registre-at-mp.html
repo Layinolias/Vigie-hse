@@ -224,6 +224,7 @@
   .badge::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
   .badge-danger{ background:var(--danger-bg); color:var(--danger); } .badge-danger::before{ background:var(--danger); }
   .badge-neutral{ background:var(--success-bg); color:var(--success); } .badge-neutral::before{ background:var(--success); }
+  .badge-warning{ background:var(--warning-bg); color:var(--warning); } .badge-warning::before{ background:var(--warning); }
 
   .type-chip{ display:inline-block; padding:3px 9px; border-radius:var(--r-sm); font-size:10.5px; font-weight:600; font-family:"IBM Plex Mono",monospace; border:1px solid; white-space:nowrap; }
   .type-chip.at{ color:var(--accent); border-color:rgba(var(--accent-rgb),.35); background:rgba(var(--accent-rgb),.09); }
@@ -309,7 +310,7 @@
       <div class="nav-section">
         <div class="nav-label">Santé au travail</div>
         <a class="nav-item active" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
-        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre Santé &amp; Sécurité</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre SST</a>
       </div>
       <div class="nav-section">
         <div class="nav-label">Sécurité &amp; Risques</div>
@@ -371,7 +372,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-activity"/></svg></div>
           <div class="page-summary-text">
             <h1>Registre AT / MP</h1>
-            <p>Suivi des accidents du travail et maladies professionnelles — Ville et Agglomération.</p>
+            <p>Suivi des accidents du travail et maladies professionnelles.</p>
           </div>
         </div>
         <div class="page-summary-kpis" id="kpiRow">
@@ -402,6 +403,7 @@
       </div>
 
       <section class="panel console">
+        <div class="field-group" id="globalFiltersWrap" style="display:contents;">
         <div class="field">
           <label class="flabel" for="fCollectivite">Collectivité</label>
           <select id="fCollectivite">
@@ -412,6 +414,7 @@
         </div>
         <div class="field"><label class="flabel" for="fService">Service</label><select id="fService"></select></div>
         <div class="field"><label class="flabel" for="fYear">Année</label><select id="fYear"></select></div>
+        </div>
         <div class="field">
           <label class="flabel" for="fArret">Avec / sans arrêt</label>
           <select id="fArret">
@@ -481,6 +484,7 @@
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const role = (session && session.role) || "ag";
   const canEdit = role === "rh" || role === "admin";
+  if (!canEdit){ $("globalFiltersWrap").style.display = "none"; }
   const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
@@ -626,7 +630,7 @@
     { key:"nature",         label:"Nature",           group:"Événement",    render:r => r.nature || "" },
     { key:"elementMateriel",label:"Élément matériel", group:"Événement",    cls:"wrap", render:r => r.elementMateriel || "" },
     { key:"arretStatut",    label:"Statut",           group:"Conséquences", render:r => r.arret
-        ? `<span class="badge badge-danger">Avec arrêt</span>`
+        ? `<span class="badge badge-danger">Avec arrêt</span> <span class="badge ${(r.statutArret || 'En cours') === 'Clôturé' ? 'badge-neutral' : 'badge-warning'}">${r.statutArret || 'En cours'}</span>`
         : `<span class="badge badge-neutral">Sans arrêt</span>` },
     { key:"joursArret",     label:"Jours d'arrêt",    group:"Conséquences", cls:"num", render:r => r.arret ? (r.joursArret ?? 0) : "—" },
     { key:"actions",        label:"Actions",          group:"",             cls:"actions", render:r =>

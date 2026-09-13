@@ -319,7 +319,7 @@
       <div class="nav-section">
         <div class="nav-label">Santé au travail</div>
         <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
-        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre Santé &amp; Sécurité</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre SST</a>
       </div>
       <div class="nav-section">
         <div class="nav-label">Sécurité &amp; Risques</div>
@@ -446,6 +446,7 @@
       </section>
 
       <section class="panel console">
+        <div class="field-group" id="globalFiltersWrap" style="display:contents;">
         <div class="field">
           <label class="flabel" for="fCollectivite">Collectivité</label>
           <select id="fCollectivite">
@@ -455,6 +456,7 @@
           </select>
         </div>
         <div class="field"><label class="flabel" for="fService">Service</label><select id="fService"></select></div>
+        </div>
         <div class="field"><label class="flabel" for="fRisque">Famille de risque</label><select id="fRisque"></select></div>
         <div class="field">
           <label class="flabel" for="fNiveau">Niveau</label>
@@ -528,6 +530,7 @@
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const role = (session && session.role) || "ag";
   const canEdit = role === "rh" || role === "admin";
+  if (role === "ag"){ $("globalFiltersWrap").style.display = "none"; }
   const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");

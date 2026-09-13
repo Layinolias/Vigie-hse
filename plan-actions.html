@@ -666,6 +666,18 @@
     $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle action</button>`;
 
     function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    function parseDateImp(v){
+      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
+      const s = String(v || "").trim();
+      if (!s) return "";
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+      const d = new Date(s);
+      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      return "";
+    }
     function mapImportedRow(raw){
       const n = {};
       Object.keys(raw).forEach(k => { n[normKeyImp(k)] = raw[k]; });
@@ -684,10 +696,10 @@
         risqueLie: String(pick(["risque lie","risque"])).trim(),
         origine: String(pick(["origine"])).trim() || "Manuel",
         responsable: String(pick(["responsable"])).trim(),
-        echeance: String(pick(["echeance"])).trim(),
+        echeance: parseDateImp(pick(["echeance"])),
         priorite: ["Critique","Haute","Moyenne","Basse"].includes(priorite) ? priorite : "Moyenne",
         statut: ["À faire","En cours","Fait"].includes(statut) ? statut : "À faire",
-        dateCreation: String(pick(["date de creation"])).trim() || new Date().toISOString().slice(0,10),
+        dateCreation: parseDateImp(pick(["date de creation"])) || new Date().toISOString().slice(0,10),
       };
     }
     $("btnImport").addEventListener("click", () => $("importFile").click());

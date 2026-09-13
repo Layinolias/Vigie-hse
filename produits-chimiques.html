@@ -617,6 +617,18 @@
     $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouveau produit</button>`;
 
     function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    function parseDateImp(v){
+      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
+      const s = String(v || "").trim();
+      if (!s) return "";
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+      const d = new Date(s);
+      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      return "";
+    }
     function mapImportedRow(raw){
       const n = {};
       Object.keys(raw).forEach(k => { n[normKeyImp(k)] = raw[k]; });
@@ -637,7 +649,7 @@
         quantiteStockee: qte !== "" ? Number(qte) || 0 : null,
         unite: String(pick(["unite"])).trim(),
         pictogrammes: pictos,
-        dateMajFDS: String(pick(["derniere maj fds"])).trim(),
+        dateMajFDS: parseDateImp(pick(["derniere maj fds"])),
         lienFDS: String(pick(["lien fds"])).trim(),
         mesuresPrevention: String(pick(["mesures de prevention"])).trim(),
       };
@@ -785,6 +797,18 @@
     if (!buf || typeof XLSX === "undefined") return;
     const full = loadDataset();
     function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    function parseDateDtst(v){
+      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
+      const s = String(v || "").trim();
+      if (!s) return "";
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+      const d = new Date(s);
+      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      return "";
+    }
     const wb = XLSX.read(buf, { type: "array", cellDates: true });
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
@@ -807,7 +831,7 @@
         quantiteStockee: qte !== "" ? Number(qte) || 0 : null,
         unite: String(pick(["unite"])).trim(),
         pictogrammes: pictos,
-        dateMajFDS: String(pick(["derniere maj fds"])).trim(),
+        dateMajFDS: parseDateDtst(pick(["derniere maj fds"])),
         lienFDS: String(pick(["lien fds"])).trim(),
         mesuresPrevention: String(pick(["mesures de prevention"])).trim(),
       };

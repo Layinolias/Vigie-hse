@@ -739,6 +739,18 @@
     });
 
     // ---------- Import des inspections réalisées ----------
+    function parseDateImp(v){
+      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
+      const s = String(v || "").trim();
+      if (!s) return "";
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+      const d = new Date(s);
+      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      return "";
+    }
     function mapImportedInspection(raw){
       const n = {};
       Object.keys(raw).forEach(k => { n[normKeyImp(k)] = raw[k]; });
@@ -759,7 +771,7 @@
         trameId: trame.id, trameNom: trame.nom,
         service: String(pick(["service"])).trim(),
         collectivite,
-        dateInspection: String(pick(["date"])).trim() || new Date().toISOString().slice(0,10),
+        dateInspection: parseDateImp(pick(["date"])) || new Date().toISOString().slice(0,10),
         inspecteur: String(pick(["inspecteur"])).trim(),
         reponses,
         statutGlobal: computeStatutGlobal(reponses),
@@ -1036,6 +1048,18 @@
   fetch("DATATEST/10-REF-inspection-audit.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
     if (!buf || typeof XLSX === "undefined") return;
     function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    function parseDateDtst(v){
+      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
+      const s = String(v || "").trim();
+      if (!s) return "";
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+      const d = new Date(s);
+      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      return "";
+    }
     const wb = XLSX.read(buf, { type: "array", cellDates: true });
 
     // Onglet 1 : Trames
@@ -1091,7 +1115,7 @@
         trameId: trame.id, trameNom: trame.nom,
         service: String(pick(["service"])).trim(),
         collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
-        dateInspection: String(pick(["date"])).trim(),
+        dateInspection: parseDateDtst(pick(["date"])),
         inspecteur: String(pick(["inspecteur"])).trim(),
         reponses,
         statutGlobal: computeStatutGlobal(reponses),

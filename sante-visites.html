@@ -622,6 +622,18 @@
       XLSX.writeFile(wb, `sante-visites_${new Date().toISOString().slice(0,10)}.xlsx`);
     });
     function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    function parseDateImp(v){
+      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
+      const s = String(v || "").trim();
+      if (!s) return "";
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+      const d = new Date(s);
+      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      return "";
+    }
     const TYPES_VISITE = ["Embauche","Périodique","Reprise","Occasionnelle","Surveillance renforcée"];
     function mapImportedRow(raw){
       const n = {};
@@ -637,7 +649,7 @@
         nom, prenom: String(pick(["prenom"])).trim(), collectivite,
         service: String(pick(["service"])).trim(),
         typeVisite: TYPES_VISITE.includes(typeVisite) ? typeVisite : "Périodique",
-        dateDerniere: String(pick(["date derniere visite","date derniere"])).trim() || new Date().toISOString().slice(0,10),
+        dateDerniere: parseDateImp(pick(["date derniere visite","date derniere"])) || new Date().toISOString().slice(0,10),
         periodiciteMois: Number(pick(["periodicite mois","periodicite"])) || 24,
         commentaire: String(pick(["commentaire"])).trim(),
       };
@@ -760,6 +772,18 @@
     if (!buf || typeof XLSX === "undefined") return;
     const full = loadDataset();
     function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    function parseDateDtst(v){
+      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
+      const s = String(v || "").trim();
+      if (!s) return "";
+      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+      const d = new Date(s);
+      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      return "";
+    }
     const TYPES_VISITE = ["Embauche","Périodique","Reprise","Occasionnelle","Surveillance renforcée"];
     const wb = XLSX.read(buf, { type: "array", cellDates: true });
     const sheet = wb.Sheets[wb.SheetNames[0]];
@@ -779,7 +803,7 @@
         collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
         service: String(pick(["service"])).trim(),
         typeVisite: TYPES_VISITE.includes(typeVisite) ? typeVisite : "Périodique",
-        dateDerniere: String(pick(["date derniere visite","date derniere"])).trim(),
+        dateDerniere: parseDateDtst(pick(["date derniere visite","date derniere"])),
         periodiciteMois: Number(pick(["periodicite mois","periodicite"])) || 24,
         commentaire: String(pick(["commentaire"])).trim(),
       };

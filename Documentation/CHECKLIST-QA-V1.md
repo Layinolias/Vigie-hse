@@ -34,6 +34,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Dans **Administration** : créer un utilisateur test, modifier son rôle, le désactiver, le supprimer — sans erreur.
 - [ ] Dans **Administration** → Référentiels : ajouter un élément à une liste (ex. un service), vérifier qu'il apparaît dans un formulaire d'un autre module (ex. Déclarer un AT/MP).
 - [ ] Dans **Administration** : publier une actualité Flash Info, vérifier qu'elle apparaît sur le cockpit.
+- [ ] Dans **Administration** → Veille réglementaire : ajouter une actualité, vérifier qu'elle apparaît sur le cockpit ; passer son statut à "Archivé", vérifier qu'elle disparaît du cockpit (mais reste visible/éditable dans Administration).
 - [ ] Tester le bouton "Réinitialiser la démonstration" dans Administration (⚠️ à faire en dernier, ça remet tout à zéro).
 
 ### `rh` (RH1)

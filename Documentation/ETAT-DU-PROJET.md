@@ -77,7 +77,7 @@ Chaque version est un dossier autonome et complet (pas de dépendance croisée).
 | `formation-habilitation.html` | Suivi des habilitations par agent (CACES, habilitation électrique, SST...) et de leurs échéances de renouvellement. |
 | `epi-dotation.html` | EPI/vêtements de travail — catalogue, stock, dotation par agent, cycles de lavage/entretien. |
 | `reporting.html` | Indicateurs & reporting KPI (accès rh/admin). |
-| `administration.html` | Panneau admin (accès admin uniquement) : Utilisateurs, Référentiels (listes déroulantes éditables), Flash Info, Journal d'audit. |
+| `administration.html` | Panneau admin (accès admin uniquement) : Utilisateurs, Référentiels (listes déroulantes éditables), Flash Info, Veille réglementaire, Journal d'audit. |
 | `dossiers-atmp-citis.html` | Suivi administratif des dossiers AT/MP et maladies professionnelles : checklist documentaire (CMI, prolongations, certificat final, IPP, enquête/coûts), arrêtés d'imputabilité/CITIS avec workflow de signature. Accès via le modèle de permissions granulaires (§7) plutôt que par rôle fixe — voir aussi `ROADMAP-MODULES-FUTURS.md` module 18. |
 
 ## 7. Modèle de rôles
@@ -116,6 +116,7 @@ modulePermissions: { "atmp-admin": "read" | "write" }  // absent = aucun accès
 | `vigie_hse_duerp_log` | Journal de saisie local (feed) côté formulaire DUERP | `saisie-duerp.html` |
 | `vigie_hse_referentials` | Listes déroulantes éditables (risques, sièges, natures, statuts RH, services Ville/Agglo, familles DUERP) | `administration.html` (onglet Référentiels), lu par tous les formulaires/filtres |
 | `vigie_hse_news` | Flash Info interne (actus rédigées par l'admin) | `administration.html` (onglet Flash Info), affiché sur `index.html` |
+| `vigie_hse_veille` | Veille réglementaire / actualités du secteur HSE (titre, source, date ISO, catégorie, résumé, url, statut "À lire"/"Lu"/"Archivé") — remplace depuis 2026-09-13 l'ancien tableau codé en dur `SECTOR_NEWS` | `administration.html` (onglet Veille réglementaire, CRUD complet), affiché sur `dashboard.html` (statut "Archivé" masqué côté cockpit) |
 | `vigie_hse_audit_log` | Journal d'audit global (création/modification/suppression, tous modules) | Toute page qui modifie des données, lu par `administration.html` (onglet Journal) |
 | `vigie_hse_actions` | Actions du Plan d'Actions | `plan-actions.html` |
 | `vigie_hse_visites` | Fiches de suivi santé/visites médicales | `sante-visites.html` |
@@ -125,7 +126,7 @@ modulePermissions: { "atmp-admin": "read" | "write" }  // absent = aucun accès
 | `vigie_hse_verifications` | Équipements et leur historique de vérification périodique | `verifications-periodiques.html` |
 | `vigie_hse_weather_location` | Ville choisie manuellement pour le widget météo (`{name, admin1, country, lat, lon}`) | `dashboard.html` |
 
-**"Actualités du secteur HSE"** (sur `index.html`) n'est PAS dans le localStorage : c'est une liste éditoriale de 7 actus réelles (INRS, Weka, Préventica, Inforisque, portail Fonction publique), codée en dur dans `index.html`, avec de vrais liens externes. Elle nécessite une mise à jour manuelle périodique (pas de flux RSS live — voir §9).
+**"Actualités du secteur HSE"** (sur `dashboard.html`) est éditable depuis `administration.html` (onglet Veille réglementaire, clé `vigie_hse_veille`) depuis 2026-09-13 — avant cette date c'était une liste codée en dur dans le fichier du cockpit. Le seed initial reprend les 7 mêmes actus réelles (INRS, Weka, Préventica, Inforisque, portail Fonction publique) avec de vrais liens externes ; comme pour Flash Info, le seed ne se recharge jamais si l'admin vide la liste volontairement (pattern "seed une seule fois", pas "always-merge" — voir §9, ce module fait partie des exceptions volontaires).
 
 ## 9. Pattern architectural clé : fusion seed + stockage ("always-merge")
 

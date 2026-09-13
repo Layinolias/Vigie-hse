@@ -1079,20 +1079,32 @@
         </div>
       </div>`).join("");
 
-  // ---------- Actualités du secteur HSE (veille éditoriale, statique) ----------
-  const SECTOR_NEWS = [
-    { titre:"DUERP en collectivité territoriale : ce qui change vraiment en 2026", source:"Inforisque", date:"04/05/2026", resume:"Sanctions renforcées depuis le 27 juin 2026 (loi de lutte contre les fraudes sociales et fiscales) ; le DUERP doit désormais intégrer plus explicitement les risques psychosociaux, le télétravail et les conditions de travail extrêmes.", url:"https://inforisque.fr/actualite-du-risque/article-13007-2026-05-04-DUERP-collectivite-territoriale-change-vraiment-2026.html" },
-    { titre:"Nouveau plan santé au travail dans la fonction publique : cap sur 2026", source:"Weka", date:"2026", resume:"Élaboration d'ici l'été 2026 d'un nouveau plan santé au travail, qui succède au plan 2022-2025 et se recentre sur les TMS, les RPS, l'usure professionnelle et le maintien en emploi.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/nouveau-plan-sante-au-travail-dans-la-fonction-publique-cap-sur-2026-210605/" },
-    { titre:"Arrêts maladie : la réforme s'applique-t-elle aux agents territoriaux ?", source:"Weka", date:"Depuis le 01/09/2026", resume:"Le décret n° 2026-498 du 12 juin 2026 plafonne la durée des arrêts de travail : 31 jours maximum en première prescription, 62 jours en prolongation.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/arrets-maladie-la-reforme-des-arrets-de-travail-au-1er-septembre-2026-s-applique-t-elle-aux-agents-territoriaux-215658/" },
-    { titre:"La DGAFP prépare le Plan Santé au Travail dans la fonction publique 2026-2030", source:"Préventica", date:"13/02/2026", resume:"Prise de parole institutionnelle sur les priorités du futur plan pluriannuel de santé au travail pour l'ensemble des agents publics.", url:"https://www.preventica.com/magazine/actualites/la-dgafp-prepare-le-plan-sante-au-travail-dans-la-fonction-publique-2026-2030-13022026" },
-    { titre:"Bulletin d'actualité juridique — janvier 2026", source:"INRS", date:"Janvier 2026", resume:"Sélection mensuelle des textes officiels parus en prévention des risques professionnels, en France et en Europe.", url:"https://www.inrs.fr/actualites/bulletin-juridique-janvier-2026.html" },
-    { titre:"Travail & Sécurité n°879 — mars 2026", source:"INRS", date:"Mars 2026", resume:"Nouveau numéro de la revue technique de référence de l'INRS sur la santé et la sécurité au travail.", url:"https://www.inrs.fr/actualites/TS-879-mars-2026.html" },
-    { titre:"Santé et sécurité au travail — ressources officielles", source:"Portail de la Fonction publique", date:"Ressource permanente", resume:"Page de référence du portail officiel de la fonction publique sur les obligations et ressources en santé-sécurité au travail des agents publics.", url:"https://www.fonction-publique.gouv.fr/etre-agent-public/mon-quotidien-au-travail/sante-et-securite-au-travail" },
-  ];
-  $("sectorNewsGrid").innerHTML = SECTOR_NEWS.map(n => `
+  // ---------- Actualités du secteur HSE (veille réglementaire, éditée dans Administration) ----------
+  const VEILLE_KEY = "vigie_hse_veille";
+  function defaultVeille(){
+    return [
+      { id:"v-1", titre:"DUERP en collectivité territoriale : ce qui change vraiment en 2026", source:"Inforisque", date:"2026-05-04", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sanctions renforcées depuis le 27 juin 2026 (loi de lutte contre les fraudes sociales et fiscales) ; le DUERP doit désormais intégrer plus explicitement les risques psychosociaux, le télétravail et les conditions de travail extrêmes.", url:"https://inforisque.fr/actualite-du-risque/article-13007-2026-05-04-DUERP-collectivite-territoriale-change-vraiment-2026.html" },
+      { id:"v-2", titre:"Nouveau plan santé au travail dans la fonction publique : cap sur 2026", source:"Weka", date:"2026-06-01", categorie:"Actu métier", statut:"À lire", resume:"Élaboration d'ici l'été 2026 d'un nouveau plan santé au travail, qui succède au plan 2022-2025 et se recentre sur les TMS, les RPS, l'usure professionnelle et le maintien en emploi.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/nouveau-plan-sante-au-travail-dans-la-fonction-publique-cap-sur-2026-210605/" },
+      { id:"v-3", titre:"Arrêts maladie : la réforme s'applique-t-elle aux agents territoriaux ?", source:"Weka", date:"2026-09-01", categorie:"Loi / Réglementation", statut:"À lire", resume:"Le décret n° 2026-498 du 12 juin 2026 plafonne la durée des arrêts de travail : 31 jours maximum en première prescription, 62 jours en prolongation.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/arrets-maladie-la-reforme-des-arrets-de-travail-au-1er-septembre-2026-s-applique-t-elle-aux-agents-territoriaux-215658/" },
+      { id:"v-4", titre:"La DGAFP prépare le Plan Santé au Travail dans la fonction publique 2026-2030", source:"Préventica", date:"2026-02-13", categorie:"Actu métier", statut:"À lire", resume:"Prise de parole institutionnelle sur les priorités du futur plan pluriannuel de santé au travail pour l'ensemble des agents publics.", url:"https://www.preventica.com/magazine/actualites/la-dgafp-prepare-le-plan-sante-au-travail-dans-la-fonction-publique-2026-2030-13022026" },
+      { id:"v-5", titre:"Bulletin d'actualité juridique — janvier 2026", source:"INRS", date:"2026-01-15", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sélection mensuelle des textes officiels parus en prévention des risques professionnels, en France et en Europe.", url:"https://www.inrs.fr/actualites/bulletin-juridique-janvier-2026.html" },
+      { id:"v-6", titre:"Travail & Sécurité n°879 — mars 2026", source:"INRS", date:"2026-03-01", categorie:"Actu métier", statut:"À lire", resume:"Nouveau numéro de la revue technique de référence de l'INRS sur la santé et la sécurité au travail.", url:"https://www.inrs.fr/actualites/TS-879-mars-2026.html" },
+      { id:"v-7", titre:"Santé et sécurité au travail — ressources officielles", source:"Portail de la Fonction publique", date:"2026-01-01", categorie:"Norme / Référentiel", statut:"À lire", resume:"Page de référence du portail officiel de la fonction publique sur les obligations et ressources en santé-sécurité au travail des agents publics.", url:"https://www.fonction-publique.gouv.fr/etre-agent-public/mon-quotidien-au-travail/sante-et-securite-au-travail" },
+    ];
+  }
+  function loadVeille(){
+    let stored = null;
+    try { const raw = localStorage.getItem(VEILLE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    if (stored === null){ stored = defaultVeille(); try { localStorage.setItem(VEILLE_KEY, JSON.stringify(stored)); } catch(e){} }
+    return stored;
+  }
+  const SECTOR_NEWS = loadVeille().filter(n => n.statut !== "Archivé").sort((a,b) => (b.date||"").localeCompare(a.date||""));
+  $("sectorNewsGrid").innerHTML = SECTOR_NEWS.length === 0
+    ? `<p style="color:var(--text-faint); padding:8px 0;">Aucune actualité pour le moment.</p>`
+    : SECTOR_NEWS.map(n => `
     <div class="news-card external">
       <div class="news-card-head" style="${newsHeadBg(n.titre + n.source)}">
-        <div class="news-source">${n.source} · ${n.date}</div>
+        <div class="news-source">${n.source} · ${fmtDateFr(n.date)}</div>
         <div class="news-title">${n.titre}</div>
       </div>
       <div class="news-body">

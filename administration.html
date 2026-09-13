@@ -340,6 +340,7 @@
         <button class="admin-tab active" data-tab="users"><svg class="icon"><use href="#i-users"/></svg> Utilisateurs</button>
         <button class="admin-tab" data-tab="ref"><svg class="icon"><use href="#i-list"/></svg> Référentiels</button>
         <button class="admin-tab" data-tab="news"><svg class="icon"><use href="#i-megaphone"/></svg> Flash Info</button>
+        <button class="admin-tab" data-tab="veille"><svg class="icon"><use href="#i-search"/></svg> Veille réglementaire</button>
         <button class="admin-tab" data-tab="audit"><svg class="icon"><use href="#i-history"/></svg> Journal des modifications</button>
       </div>
 
@@ -446,6 +447,52 @@
             <div style="display:flex; gap:10px; margin-top:16px;">
               <button type="submit" class="btn btn-primary" id="newsSubmitBtn">Publier</button>
               <button type="button" class="btn btn-ghost" id="newsCancelBtn" style="display:none;">Annuler la modification</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ===================== C-bis. VEILLE RÉGLEMENTAIRE ===================== -->
+      <section class="tab-panel" id="tab-veille">
+        <div class="banner" id="veilleBanner"></div>
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head"><h3 class="panel-title">Actualités du secteur HSE</h3><span class="panel-note">Visibles sur le Cockpit (statut "Archivé" masqué)</span></div>
+          <div class="table-wrap">
+            <table class="admin">
+              <thead><tr><th>Titre</th><th>Source</th><th>Date</th><th>Catégorie</th><th>Statut</th><th></th></tr></thead>
+              <tbody id="veilleBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head"><h3 class="panel-title" id="veilleFormTitle">Ajouter une actualité</h3></div>
+          <form id="veilleForm">
+            <input type="hidden" id="vId" value="">
+            <div class="field-grid">
+              <div class="f span2"><label for="vTitre">Titre</label><input type="text" id="vTitre" required autocomplete="off" placeholder="ex. DUERP en collectivité territoriale : ce qui change en 2026"></div>
+              <div class="f"><label for="vSource">Source</label><input type="text" id="vSource" required autocomplete="off" placeholder="ex. INRS, Weka, Inforisque…"></div>
+              <div class="f"><label for="vDate">Date</label><input type="date" id="vDate" required></div>
+              <div class="f"><label for="vCategorie">Catégorie</label>
+                <select id="vCategorie">
+                  <option value="Loi / Réglementation">Loi / Réglementation</option>
+                  <option value="Jurisprudence">Jurisprudence</option>
+                  <option value="Norme / Référentiel">Norme / Référentiel</option>
+                  <option value="Actu métier">Actu métier</option>
+                </select>
+              </div>
+              <div class="f"><label for="vStatut">Statut</label>
+                <select id="vStatut">
+                  <option value="À lire">À lire</option>
+                  <option value="Lu">Lu</option>
+                  <option value="Archivé">Archivé</option>
+                </select>
+              </div>
+              <div class="f span3"><label for="vResume">Résumé</label><textarea id="vResume" required placeholder="Résumé court de l'actualité…"></textarea></div>
+              <div class="f span3"><label for="vUrl">Lien vers l'article</label><input type="text" id="vUrl" placeholder="https://…"></div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:16px;">
+              <button type="submit" class="btn btn-primary" id="veilleSubmitBtn">Ajouter</button>
+              <button type="button" class="btn btn-ghost" id="veilleCancelBtn" style="display:none;">Annuler la modification</button>
             </div>
           </form>
         </div>
@@ -1101,6 +1148,130 @@
     renderNewsAdmin();
     e.target.reset();
     $("nDate").value = new Date().toISOString().slice(0,10);
+  });
+
+  // ===================================================================
+  // C-bis. VEILLE RÉGLEMENTAIRE
+  // ===================================================================
+  const VEILLE_KEY = "vigie_hse_veille";
+  function defaultVeille(){
+    return [
+      { id:"v-1", titre:"DUERP en collectivité territoriale : ce qui change vraiment en 2026", source:"Inforisque", date:"2026-05-04", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sanctions renforcées depuis le 27 juin 2026 (loi de lutte contre les fraudes sociales et fiscales) ; le DUERP doit désormais intégrer plus explicitement les risques psychosociaux, le télétravail et les conditions de travail extrêmes.", url:"https://inforisque.fr/actualite-du-risque/article-13007-2026-05-04-DUERP-collectivite-territoriale-change-vraiment-2026.html" },
+      { id:"v-2", titre:"Nouveau plan santé au travail dans la fonction publique : cap sur 2026", source:"Weka", date:"2026-06-01", categorie:"Actu métier", statut:"À lire", resume:"Élaboration d'ici l'été 2026 d'un nouveau plan santé au travail, qui succède au plan 2022-2025 et se recentre sur les TMS, les RPS, l'usure professionnelle et le maintien en emploi.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/nouveau-plan-sante-au-travail-dans-la-fonction-publique-cap-sur-2026-210605/" },
+      { id:"v-3", titre:"Arrêts maladie : la réforme s'applique-t-elle aux agents territoriaux ?", source:"Weka", date:"2026-09-01", categorie:"Loi / Réglementation", statut:"À lire", resume:"Le décret n° 2026-498 du 12 juin 2026 plafonne la durée des arrêts de travail : 31 jours maximum en première prescription, 62 jours en prolongation.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/arrets-maladie-la-reforme-des-arrets-de-travail-au-1er-septembre-2026-s-applique-t-elle-aux-agents-territoriaux-215658/" },
+      { id:"v-4", titre:"La DGAFP prépare le Plan Santé au Travail dans la fonction publique 2026-2030", source:"Préventica", date:"2026-02-13", categorie:"Actu métier", statut:"À lire", resume:"Prise de parole institutionnelle sur les priorités du futur plan pluriannuel de santé au travail pour l'ensemble des agents publics.", url:"https://www.preventica.com/magazine/actualites/la-dgafp-prepare-le-plan-sante-au-travail-dans-la-fonction-publique-2026-2030-13022026" },
+      { id:"v-5", titre:"Bulletin d'actualité juridique — janvier 2026", source:"INRS", date:"2026-01-15", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sélection mensuelle des textes officiels parus en prévention des risques professionnels, en France et en Europe.", url:"https://www.inrs.fr/actualites/bulletin-juridique-janvier-2026.html" },
+      { id:"v-6", titre:"Travail & Sécurité n°879 — mars 2026", source:"INRS", date:"2026-03-01", categorie:"Actu métier", statut:"À lire", resume:"Nouveau numéro de la revue technique de référence de l'INRS sur la santé et la sécurité au travail.", url:"https://www.inrs.fr/actualites/TS-879-mars-2026.html" },
+      { id:"v-7", titre:"Santé et sécurité au travail — ressources officielles", source:"Portail de la Fonction publique", date:"2026-01-01", categorie:"Norme / Référentiel", statut:"À lire", resume:"Page de référence du portail officiel de la fonction publique sur les obligations et ressources en santé-sécurité au travail des agents publics.", url:"https://www.fonction-publique.gouv.fr/etre-agent-public/mon-quotidien-au-travail/sante-et-securite-au-travail" },
+    ];
+  }
+  function loadVeille(){
+    let stored = null;
+    try { const raw = localStorage.getItem(VEILLE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    if (stored === null){ stored = defaultVeille(); saveVeille(stored); }
+    return stored;
+  }
+  function saveVeille(v){ try { localStorage.setItem(VEILLE_KEY, JSON.stringify(v)); } catch(e){} }
+  let VEILLE = loadVeille();
+  const veilleStatutCls = { "À lire":"ag", "Lu":"active-yes", "Archivé":"active-no" };
+
+  function renderVeille(){
+    const tbody = $("veilleBody");
+    const sorted = VEILLE.slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
+    tbody.innerHTML = sorted.length === 0
+      ? `<tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:20px;">Aucune actualité.</td></tr>`
+      : sorted.map(v => `
+        <tr data-id="${v.id}">
+          <td class="wrap">${v.titre}</td>
+          <td>${v.source}</td>
+          <td class="mono">${fmtDateFr(v.date)}</td>
+          <td>${v.categorie}</td>
+          <td><span class="chip ${veilleStatutCls[v.statut] || ''}">${v.statut}</span></td>
+          <td>
+            <button type="button" class="btn btn-ghost btn-sm act-edit-veille" data-id="${v.id}">Modifier</button>
+            <button type="button" class="btn btn-danger btn-sm act-del-veille" data-id="${v.id}">Supprimer</button>
+          </td>
+        </tr>`).join("");
+  }
+  renderVeille();
+  $("vDate").value = new Date().toISOString().slice(0,10);
+
+  let editingVeilleId = null;
+  $("veilleBody").addEventListener("click", (e) => {
+    const editBtn = e.target.closest(".act-edit-veille");
+    const delBtn = e.target.closest(".act-del-veille");
+    if (editBtn){
+      const v = VEILLE.find(x => x.id === editBtn.dataset.id);
+      if (!v) return;
+      editingVeilleId = v.id;
+      $("vId").value = v.id;
+      $("vTitre").value = v.titre;
+      $("vSource").value = v.source;
+      $("vDate").value = v.date;
+      $("vCategorie").value = v.categorie;
+      $("vStatut").value = v.statut;
+      $("vResume").value = v.resume;
+      $("vUrl").value = v.url || "";
+      $("veilleFormTitle").textContent = "Modifier l'actualité";
+      $("veilleSubmitBtn").textContent = "Enregistrer les modifications";
+      $("veilleCancelBtn").style.display = "";
+      window.scrollTo({ top: document.body.scrollHeight, behavior:"smooth" });
+    }
+    if (delBtn){
+      const v = VEILLE.find(x => x.id === delBtn.dataset.id);
+      if (!v) return;
+      if (confirm(`Supprimer l'actualité « ${v.titre} » ?`)){
+        VEILLE = VEILLE.filter(x => x.id !== v.id);
+        saveVeille(VEILLE);
+        logAudit("Veille réglementaire", "Suppression", `Actualité supprimée : ${v.titre}`);
+        renderVeille();
+        flashBanner($("veilleBanner"), "Actualité supprimée.");
+      }
+    }
+  });
+  $("veilleCancelBtn").addEventListener("click", () => {
+    editingVeilleId = null;
+    $("veilleForm").reset();
+    $("vId").value = "";
+    $("vDate").value = new Date().toISOString().slice(0,10);
+    $("veilleFormTitle").textContent = "Ajouter une actualité";
+    $("veilleSubmitBtn").textContent = "Ajouter";
+    $("veilleCancelBtn").style.display = "none";
+  });
+  $("veilleForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const titre = $("vTitre").value.trim();
+    const source = $("vSource").value.trim();
+    const date = $("vDate").value;
+    const categorie = $("vCategorie").value;
+    const statut = $("vStatut").value;
+    const resume = $("vResume").value.trim();
+    const url = $("vUrl").value.trim();
+
+    if (editingVeilleId){
+      const v = VEILLE.find(x => x.id === editingVeilleId);
+      if (v){
+        v.titre = titre; v.source = source; v.date = date; v.categorie = categorie;
+        v.statut = statut; v.resume = resume; v.url = url;
+        saveVeille(VEILLE);
+        logAudit("Veille réglementaire", "Modification", `Actualité modifiée : ${titre}`);
+        flashBanner($("veilleBanner"), "Actualité mise à jour.");
+      }
+      editingVeilleId = null;
+      $("vId").value = "";
+      $("veilleFormTitle").textContent = "Ajouter une actualité";
+      $("veilleSubmitBtn").textContent = "Ajouter";
+      $("veilleCancelBtn").style.display = "none";
+    } else {
+      const item = { id: genId("v"), titre, source, date, categorie, statut, resume, url };
+      VEILLE.push(item);
+      saveVeille(VEILLE);
+      logAudit("Veille réglementaire", "Création", `Actualité ajoutée : ${titre}`);
+      flashBanner($("veilleBanner"), "Actualité ajoutée.");
+    }
+    renderVeille();
+    e.target.reset();
+    $("vDate").value = new Date().toISOString().slice(0,10);
   });
 
   // ===================================================================

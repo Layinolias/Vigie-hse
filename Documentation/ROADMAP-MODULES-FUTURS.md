@@ -42,7 +42,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 
 | # | Module | Statut |
 |---|---|---|
-| 1 | Veille réglementaire | 🔶 Base posée |
+| 1 | Veille réglementaire | ✅ Fait — `administration.html` (onglet Veille réglementaire), affiché sur `dashboard.html` |
 | 2 | Inspection / Audit | ✅ Fait — `inspection-audit.html`, alimente le Plan d'Actions |
 | 3 | Plan d'Actions (hub transverse) | ✅ Fait — agrège désormais DUERP + Inspection/Audit |
 | 4 | Gestion des produits chimiques | ✅ Fait — `produits-chimiques.html` |
@@ -148,7 +148,7 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 | Exigence ISO 45001 | Déjà couvert par VIGIE HSE | Statut |
 |---|---|---|
 | 6.1 — Identification des dangers, évaluation des risques | Document Unique (DUERP) | ✅ Cœur de métier déjà là |
-| 6.1 — Veille des exigences légales | Module 1, Veille réglementaire | 🔶 Base posée |
+| 6.1 — Veille des exigences légales | Module 1, Veille réglementaire | ✅ Fait |
 | 7.2/7.3 — Compétence, sensibilisation | Formation/Habilitation | ✅ Fait |
 | 5.4 — Participation et consultation des travailleurs | RSST + futur module 13 (Dialogue social) | 🔶 Base posée / prévu |
 | 8.1 — Maîtrise opérationnelle | Plan d'Actions, Inspection/Audit, Vérifications périodiques, Produits chimiques | ✅ Fait |
@@ -180,18 +180,16 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 ---
 
-## 1. Veille réglementaire — 🔶 Base posée
+## 1. Veille réglementaire — ✅ Fait (version légère)
 
 **Note d'origine :** "veille réglementaire :" *(note laissée vide par l'utilisateur — objectif à préciser)*
 
-**Ce qui existe déjà (V0.1.1.2) :** le panneau "Actualités du secteur HSE" sur `index.html` — une liste éditoriale de 7 actualités réelles et sourcées (INRS, Weka, Préventica, Inforisque, portail de la Fonction publique), avec liens externes vers les articles. C'est un embryon de veille réglementaire, mais :
-- Codé en dur dans `index.html` (pas de CRUD, pas de mise à jour depuis Administration).
-- Pas de flux live (impossible sans backend — la plupart des sites d'actu HSE/juridiques n'autorisent pas le fetch cross-origin depuis un navigateur, et ce projet n'a pas de serveur proxy).
-- Pas d'archivage, pas de catégorisation (loi / jurisprudence / norme / actu métier), pas de lien vers les modules impactés (ex. "ce changement de loi DUERP impacte le module Document Unique").
+**Livré le 2026-09-13 (version légère, option 1 du plan ci-dessous) :** le panneau "Actualités du secteur HSE" (`dashboard.html`) est maintenant piloté depuis un vrai CRUD dans `administration.html` (nouvel onglet "Veille réglementaire", clé `vigie_hse_veille`), avec exactement les champs prévus : titre, source, date, résumé, url, + catégorie (Loi / Réglementation, Jurisprudence, Norme / Référentiel, Actu métier) et statut (À lire / Lu / Archivé). Le statut "Archivé" masque l'actu du cockpit public sans la supprimer. Seed initial = les 7 mêmes actus réelles qu'avant (dates converties au format ISO), avec le même pattern "seed une seule fois" que Flash Info (`stored === null`, pas `always-merge`) — l'admin peut vider la liste sans qu'elle se re-remplisse toute seule.
 
-**Annotation pour reprise :** deux pistes possibles selon l'ambition voulue :
-1. *Version légère* : donner à l'admin un CRUD dans `administration.html` pour éditer cette liste (comme pour Flash Info), avec les mêmes champs (titre/source/date/résumé/url) + une catégorie et un statut "à lire"/"lu"/"archivé".
-2. *Version connectée* : nécessite un vrai backend capable de faire des requêtes serveur→serveur vers des flux RSS/API (Légifrance a une API officielle — `piste.gouv.fr` — INRS et Weka n'en ont pas publiquement). Hors de portée de l'architecture actuelle sans backend.
+**Ce qui reste hors périmètre (repoussé, cohérent avec l'analyse d'origine) :**
+- Pas de flux live (impossible sans backend — la plupart des sites d'actu HSE/juridiques n'autorisent pas le fetch cross-origin depuis un navigateur, et ce projet n'a pas de serveur proxy).
+- Pas de lien structuré vers les modules impactés (ex. "ce changement de loi DUERP impacte le module Document Unique") — la catégorisation reste libre-texte, pas un vrai rattachement.
+- *Version connectée* (option 2, non retenue) : nécessiterait un vrai backend capable de faire des requêtes serveur→serveur vers des flux RSS/API (Légifrance a une API officielle — `piste.gouv.fr` — INRS et Weka n'en ont pas publiquement). Hors de portée de l'architecture actuelle sans backend.
 
 ## 2. Inspection / Audit — ✅ Fait
 

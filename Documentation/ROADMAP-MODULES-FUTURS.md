@@ -59,6 +59,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 15 | Analyse d'accident (arbre des causes) | ❌ Non démarré (nouveau, 2026-09-12) — lié au jalon J2 |
 | 16 | Situations d'urgence & exercices d'évacuation | ❌ Non démarré (nouveau, 2026-09-12) — recoupe l'écart clause 8.2 du jalon J1 |
 | 17 | Entreprises extérieures & Plan de Prévention | ❌ Non démarré (nouveau, 2026-09-12) — recoupe le risque "Coactivité" déjà référencé |
+| 18 | Gestion administrative des dossiers AT/MP & CITIS | ❌ Non démarré (retour utilisateur, 2026-09-13) — restriction RBAC stricte, lié au rôle "Préventeur" (voir J0) |
 
 ---
 
@@ -366,6 +367,72 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - Lien naturel avec la Formation/Habilitation existante côté agents internes — question ouverte : faut-il tracer aussi les habilitations/qualifications exigées côté entreprise extérieure (ex. habilitation électrique d'un sous-traitant), ou est-ce hors périmètre de VIGIE HSE (responsabilité contractuelle de l'entreprise extérieure elle-même) ?
 
 **Cadrage :** comme pour les autres pistes ajoutées cette semaine, une piste posée pour discussion ultérieure, pas un chantier à démarrer immédiatement.
+
+## 18. Gestion administrative des dossiers AT/MP & CITIS — ❌ Non démarré
+
+**Retour utilisateur reçu le 2026-09-13, retranscrit intégralement :**
+
+> Intègre le module "Gestion Administrative des Dossiers AT / MP & CITIS" en y appliquant un filtrage de sécurité strict par profil (RBAC). Utilise un design "Dark Mode" (Tailwind CSS) soigné.
+> 1. Restriction d'Accès (Sécurité & Confidentialité) : Ce module ne doit être visible et accessible dans la barre latérale (Sidebar) que pour les utilisateurs connectés avec le profil Administrateur Préventeur ou Profil RH. Si un utilisateur "Manager" ou simple agent se connecte, ce module doit être totalement masqué ou verrouillé.
+> 2. Tableau de Suivi Documentaire (Checklist RH) : Pour chaque dossier d'AT ou de Maladie Professionnelle, une vue détaillée permet de suivre l'exhaustivité des pièces : Certificat médical initial (CMI) / Constatation. Certificats de prolongation multiple. Certificat final, de guérison ou de consolidation. Notification du taux d'IPP éventuel. Enquête administrative et suivi des coûts.
+> 3. Gestion des Arrêtés (Imputabilité & CITIS) & Workflow de Signature : Suivi des arrêtés juridiques (Imputabilité, placement/maintien en CITIS, fin de CITIS). Traçabilité des signatures : Statuts de validation (Brouillon, Transmis à l'autorité, Signé & Notifié). Alertes visuelles pour les arrêtés en attente de signature ou les pièces manquantes.
+
+**Ce que c'est, en une phrase :** un dossier administratif détaillé qui se greffe sur chaque événement déjà enregistré dans le Registre AT/MP — aujourd'hui `registre-at-mp.html` capture le *fait* (qui, quand, quelles circonstances), ce module ajoute le *suivi administratif et juridique* qui accompagne légalement un accident du travail ou une maladie professionnelle dans la fonction publique territoriale (pièces médicales, arrêtés d'imputabilité, CITIS). C'est un complément direct au module 15 (Analyse d'accident) : 15 répond à "pourquoi c'est arrivé", ce module répond à "où en est le dossier administratif".
+
+**CITIS, pour contexte :** le Congé pour Invalidité Temporaire Imputable au Service a remplacé l'ancien régime du "congé pour accident de service"/maladie professionnelle des fonctionnaires territoriaux (ordonnance n° 2017-53 du 19 janvier 2017, décret n° 2019-122 du 21 février 2019) — procédure spécifique à la fonction publique (reconnaissance de l'imputabilité au service, placement en CITIS, suivi des prolongations, sortie de CITIS). **Point de vigilance direct pour le jalon J0** (généralisation collectivité/privé, voir plus haut) : CITIS n'existe pas dans le privé, où l'équivalent est la procédure accident du travail/maladie professionnelle gérée par la Sécurité sociale (déclaration, indemnités journalières, rente). Ce module est donc, par nature, **encore plus spécifique "collectivité territoriale"** que le reste de l'app — à garder en tête si/quand le vocabulaire est généralisé (section J0) : il faudra soit une variante "privé" de ce module (workflow IJ/Sécu au lieu d'arrêtés CITIS), soit le documenter explicitement comme un module optionnel activable seulement pour les clients collectivité.
+
+### 1. Restriction d'accès (RBAC)
+
+**Rejoint directement la réflexion déjà actée en section J0** ("Réflexion actée — refonte complète du système de comptes/rôles/permissions", 2026-09-12) : ce retour utilise justement le rôle **"Administrateur Préventeur"** dont l'absence avait été identifiée comme le déclencheur de cette réflexion. Deux options, à trancher avant de coder :
+1. **Solution rapide (dette assumée) :** mapper "Administrateur Préventeur" sur le rôle `admin` existant et "Profil RH" sur `rh` — reproduit le problème que la réflexion J0 cherche justement à éviter (un rôle nommé de plus, codé en dur), mais débloque ce module immédiatement.
+2. **Solution alignée avec J0 :** ce module est un bon premier cas d'usage concret pour prototyper le modèle de permissions générique évoqué en J0 (triplet service × module × lecture/écriture) — "Préventeur" y serait un profil préréglé avec accès complet à ce module précis, RH pareil, Manager/Agent sans aucun accès. Recommandation : ne pas construire ce module avant d'avoir au moins esquissé ce modèle, sinon on ajoute un rôle en dur de plus au moment même où on avait décidé d'arrêter de le faire (voir aussi le même arbitrage déjà posé pour le module 13, Dialogue social).
+- **Masquage vs verrouillage :** le retour dit "totalement masqué **ou** verrouillé" — à trancher avec l'utilisateur. Le pattern déjà en place ailleurs dans l'app est le masquage pur du lien de sidebar selon le rôle (`if (role !== "rh" && role !== "admin"){ $("navRh").style.display = "none"; }`, présent dans chaque fichier) — cohérent à reproduire ici plutôt qu'un état "verrouillé" (lien visible mais inaccessible), qui n'existe nulle part ailleurs dans le code actuel.
+
+### 2. Tableau de suivi documentaire (checklist RH)
+
+Pour chaque dossier, une checklist de complétude des pièces. Modèle de données proposé, rattaché à un événement existant du Registre AT/MP par `atmpId` :
+```
+{
+  id, atmpId,                      // lien vers l'enregistrement AT/MP existant (vigie_hse_dataset)
+  pieces: {
+    cmiConstatation:  { recu:bool, date, fichierRef },
+    prolongations:    [ { recu:bool, date, fichierRef }, ... ],  // multiple, d'où le tableau
+    certificatFinal:  { type:"Guerison"|"Consolidation", recu:bool, date, fichierRef },
+    notificationIPP:  { applicable:bool, taux, date, fichierRef },
+  },
+  enquete: { realisee:bool, date, conclusions },
+  coûts:   { montantTotal, detail: [ { poste, montant, date }, ... ] },
+}
+```
+- Même limite déjà documentée pour le module 8 (Gestion documentaire) et pour les FDS de `produits-chimiques.html` : pas de vrai stockage de fichier en localStorage — `fichierRef` reste un lien/nom de fichier, pas le binaire lui-même, en attendant un vrai backend.
+- Le statut "dossier complet" par ligne du Registre AT/MP est un candidat naturel pour une nouvelle colonne/badge dans `registre-at-mp.html` (visible uniquement pour RH/Préventeur, cohérent avec la restriction RBAC ci-dessus).
+
+### 3. Gestion des arrêtés (imputabilité & CITIS) & workflow de signature
+
+Modèle de données proposé :
+```
+{
+  id, atmpId,
+  type: "Imputabilité" | "Placement CITIS" | "Maintien CITIS" | "Fin CITIS",
+  statut: "Brouillon" | "Transmis à l'autorité" | "Signé & Notifié",
+  dateCreation, dateTransmission, dateSignature,
+  autoriteSignataire,
+  fichierRef,
+}
+```
+- Workflow à 3 états explicitement demandé — modèle proche de ce qui existe déjà pour le statut RSST (`Nouvelle`/`En cours de traitement`/`Traitée`), même logique de progression linéaire à réutiliser plutôt qu'à réinventer.
+- **Alertes visuelles** (arrêtés en attente de signature, pièces manquantes) : rejoint le pattern déjà en place pour les échéances (Vérifications Périodiques, Formation/Habilitation, EPI/Dotation — statut "À jour"/"À renouveler"/"Expiré" calculé) — même logique de badges/couleurs à reproduire ici pour "en attente" vs "en retard".
+- Un arrêté en attente/pièce manquante est aussi un candidat naturel pour alimenter le Plan d'Actions existant (`origine: "AT/MP Admin"`), même principe que DUERP/Inspection/Analyse — à confirmer avec l'utilisateur si ce niveau de détail administratif doit vraiment remonter au Plan d'Actions global ou rester cantonné à ce module.
+
+### Design : Dark Mode / Tailwind CSS — point de friction à trancher avant de coder
+
+Le retour demande explicitement du **Tailwind CSS**. **Ça ne correspond pas à l'architecture actuelle du projet**, qui est explicitement "HTML/CSS/JS vanilla, aucun framework, aucune étape de build, aucun bundler" (voir `ETAT-DU-PROJET.md` §3) — chaque page a son propre design system en custom properties CSS, avec un thème clair/sombre **déjà fonctionnel** partout (`@media (prefers-color-scheme: dark)` + attribut `data-theme`, répété par fichier). Trois options, à trancher avec l'utilisateur avant de commencer :
+1. **Construire ce module avec le système de thème déjà en place** (custom properties existantes, juste vérifier/renforcer le rendu en mode sombre sur ce module précis) — cohérent avec le reste de l'app, zéro nouvelle dépendance, mais ne répond pas littéralement à "Tailwind CSS".
+2. **Introduire Tailwind uniquement sur ce module** (ex. via le CDN `cdn.tailwindcss.com`, sans étape de build) — répond à la demande mais crée une incohérence stylistique avec les 17 autres pages, et un système de design dupliqué (custom properties partout + Tailwind ici) plutôt qu'un seul système partagé.
+3. **Migrer progressivement tout le site vers Tailwind**, en commençant par ce module — répond le mieux à l'esprit de la demande, mais change radicalement la portée : ce n'est plus l'ajout d'un module, c'est une refonte du design system entier, à traiter comme un chantier à part (et à décider si elle vaut le coup avant ou après la généralisation commerciale du jalon J0).
+**Recommandation par défaut en l'absence de précision : option 1**, la plus cohérente avec zéro régression et l'architecture actuelle — mais à confirmer explicitement avec l'utilisateur avant de coder, vu que la demande nommait Tailwind spécifiquement.
+
+**Cadrage :** comme pour les modules 12-17, à préciser avec l'utilisateur avant de coder — en particulier l'arbitrage RBAC (option 1 vs 2 ci-dessus) et l'arbitrage design (Tailwind vs thème existant), qui changent significativement l'ampleur du chantier.
 
 ---
 

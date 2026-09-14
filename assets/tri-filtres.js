@@ -344,7 +344,14 @@
         var col = byKey[state.sortKey];
         var dir = state.sortDir;
         out = out.slice().sort(function (a, b) {
-          return dir * compare(col.value(a), col.value(b));
+          // Les valeurs vides restent toujours en fin de liste, y compris en tri
+          // décroissant : le sens ne s'applique qu'aux valeurs renseignées (comme
+          // le fait un tableur avec les cellules vides).
+          var va = txt(col.value(a)), vb = txt(col.value(b));
+          if (va === "" && vb === "") return 0;
+          if (va === "") return 1;
+          if (vb === "") return -1;
+          return dir * compare(va, vb);
         });
       }
       return out;

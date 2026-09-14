@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/tri-filtres.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -491,7 +492,7 @@
         <div class="table-panel">
           <table class="reg">
             <thead>
-              <tr>
+              <tr id="theadFields">
                 <th>Collectivité</th><th>Service</th><th>Risque</th><th>Tâches</th><th>Danger</th>
                 <th>Fq</th><th>Grav.</th><th>Score</th><th>Niveau</th>
                 <th>Moyens de prévention</th><th>Priorité</th><th>Mesures proposées</th><th>Maîtrise</th>
@@ -739,6 +740,30 @@
   fillSelect(fService, servicesForCollectivite(fCollectivite.value), "Tous les services");
   fillSelect(fRisque, RISK_TAXONOMY.map(r => r[0]), "Toutes les familles");
 
+  // Tri & filtres par colonne (composant partagé assets/tri-filtres.js).
+  // L'ordre des colonnes suit celui des <th> de #theadFields. Les colonnes
+  // calculées (score, niveau, priorité) trient sur leur valeur métier.
+  const tri = VigieTri.create({
+    columns: [
+      { key:"collectivite",     label:"Collectivité", value:r => r.collectivite || "Ville" },
+      { key:"service",          label:"Service" },
+      { key:"risque",           label:"Risque" },
+      { key:"taches",           label:"Tâches" },
+      { key:"danger",           label:"Danger" },
+      { key:"frequence",        label:"Fq" },
+      { key:"gravite",          label:"Grav." },
+      { key:"score",            label:"Score",    value:r => r.frequence * r.gravite },
+      { key:"niveau",           label:"Niveau",   value:r => riskLevel(r.frequence * r.gravite).label },
+      { key:"moyensPrevention", label:"Moyens de prévention" },
+      { key:"priorite",         label:"Priorité", value:r => priorityFor(riskLevel(r.frequence * r.gravite).cls) },
+      { key:"mesuresProposees", label:"Mesures proposées" },
+      { key:"maitrise",         label:"Maîtrise" },
+      { key:"actions",          label:"Actions",  noFilter:true },
+    ],
+    onChange: () => render(),
+  });
+  tri.decorate($("theadFields"));
+
   function render(){
     const col = fCollectivite.value, svc = fService.value, rq = fRisque.value, nv = fNiveau.value;
     let rows = DATASET.filter(d => {
@@ -749,6 +774,8 @@
              (nv === "all" || lvl.cls === nv);
     });
     rows = rows.slice().sort((a,b) => (b.frequence*b.gravite) - (a.frequence*a.gravite));
+    // Sans tri de colonne actif, l'ordre par défaut (score décroissant) est conservé.
+    rows = tri.apply(rows);
 
     const total = rows.length;
     const prioritaires = rows.filter(r => { const l = riskLevel(r.frequence*r.gravite); return l.cls === "eleve" || l.cls === "critique"; }).length;
@@ -808,6 +835,7 @@
   $("btnReset").addEventListener("click", () => {
     fCollectivite.value = "all"; fService.value = "all"; fRisque.value = "all"; fNiveau.value = "all";
     fillSelect(fService, servicesForCollectivite(fCollectivite.value), "Tous les services");
+    tri.reset();
     render();
   });
 

@@ -8,6 +8,8 @@
 
 ⚠️ **Rappel important** : l'auto-chargement DATATEST tourne pour **tous les visiteurs**, pas seulement en interne — un nouveau testeur verra directement les données de démo au lieu d'une app vraiment vierge. Le jour où une vraie remise à zéro est nécessaire, vider ou renommer `DATATEST/`.
 
+📋 **Registre des questions métier (créé le 2026-09-14)** : `Documentation/QUESTIONS-METIER-EN-ATTENTE.md` centralise toutes les questions relevant du **métier de la prévention** (réglementation, seuils, façon de lire un indicateur) auxquelles la technique ne peut pas répondre seule — elles sont destinées à un collègue expert HSE. Y sont déjà consignées 2 questions bloquantes (calculs du module Reporting) et 5 questions à anticiper, extraites des sections 5, 7, 16, 17 et 18 de cette roadmap. **Toute nouvelle question de profession rencontrée pendant le développement doit y être ajoutée** plutôt que tranchée à l'aveugle ; la roadmap ne garde que les décisions produit/technique.
+
 ## ✅ Vérification sur le site déployé (2026-09-13)
 
 Passage QA effectué directement sur `https://layinolias.github.io/Vigie-hse/` (navigateur automatisé) :

@@ -20,6 +20,7 @@ Dashboard HSE prototype (Ville de Verchamps + Agglomération de Verchamps) : Reg
 6. **Toute délégation à un agent en arrière-plan est bornée explicitement** ("fais exactement ceci, puis arrête-toi") et son résultat re-vérifié indépendamment avant d'être considéré acquis.
 7. **`git` est installé** (`C:\Program Files\Git\cmd\git.exe` — utiliser ce chemin complet si `git` n'est pas dans le PATH d'une nouvelle session shell). Dépôt GitHub : `https://github.com/Layinolias/Vigie-hse` (public, GitHub Pages activé sur `main`/`root` → `https://layinolias.github.io/Vigie-hse/`). Le remote `origin` a un PAT embarqué dans son URL pour push direct — pas besoin de redemander un token sauf s'il expire/est révoqué.
 8. **Attention aux limites de session/débit** : un agent en arrière-plan peut être interrompu en cours de tâche (erreur `rate_limit`). Ne jamais supposer un travail perdu sur cette seule base — vérifier l'état réel des fichiers (souvent déjà complets, seul le rapport final manque) avant de relancer quoi que ce soit.
+9. **Ne jamais trancher une question de métier HSE à l'aveugle** (seuil réglementaire, périodicité légale, façon dont un indicateur doit être lu). L'utilisateur n'est pas préventeur : ces questions vont dans `Documentation/QUESTIONS-METIER-EN-ATTENTE.md`, rédigées pour être comprises sans connaître le code (contexte, ce que fait le logiciel aujourd'hui avec des chiffres mesurés, la question, les options), puis sont traitées avec un collègue expert. Continuer le reste du chantier pendant ce temps plutôt que de bloquer.
 
 ## Comptes de test
 

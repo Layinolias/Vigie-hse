@@ -1,6 +1,18 @@
 # VIGIE HSE — Roadmap des modules futurs
 
-## 🔝 État courant / dernières évolutions (2026-09-12)
+## 🔝 Point de reprise (fin de journée du 2026-09-14)
+
+**Livré ce jour** (16 commits, tout poussé sur `main`) : module 9 (Reporting — période libre, tous les modules réactifs, graphiques par risque), module 15 (Analyse d'accident, 3 méthodes au choix), deux nouvelles permissions granulaires (`atmp-declare`, `accident-analyse`), les 3 derniers points du retour alpha (en-tête du cockpit, icônes DUERP, tri & filtres), et le **déploiement complet du tri/filtres façon tableur sur les 10 pages à tableau**.
+
+**Le backlog des retours alpha est vide.** Modules restants : 5, 7 (extension), 8, 12, 13, 14, 16, 17 — **tous en attente d'un avis métier**, pas d'un arbitrage technique.
+
+**➡️ À faire en reprenant :** lire les réponses du préventeur sur le *Cahier du préventeur* (outil Artifact, `read_db` sur les collections `reponses` et `idees` — lien et procédure en tête de `QUESTIONS-METIER-EN-ATTENTE.md`). Ses premières réponses étaient attendues dans la soirée du 14. Reporter ses décisions dans le registre, ses idées ici, puis mettre en œuvre. Rien d'autre n'est débloqué sans lui.
+
+**Chantiers techniques possibles sans lui, si besoin d'avancer :** factoriser les 3 rosters d'agents dupliqués (voir Notes générales en fin de document) ; dérouler la checklist QA (63 points, nécessite un humain dans un vrai navigateur).
+
+---
+
+## État courant / évolutions du 2026-09-12
 
 - ✅ **Données de test** : les 10 fichiers générés par Gemini (`Documentation/PROMPT-GENERATION-DONNEES-TEST.md`), vérifiés et corrigés, sont dans `DATATEST/`. Chaque module a désormais un vrai bouton "Importer .xlsx", **et** un **auto-chargement automatique** de ces fichiers au chargement de chaque page quand le site est servi en http/https (GitHub Pages) — plus besoin de cliquer un par un. IDs déterministes (`dtst-*`) pour éviter les doublons au rechargement.
 - ✅ **Météo sans géolocalisation** : le widget météo (topbar, cockpit) ne demande plus la permission de localisation au navigateur. L'utilisateur choisit lui-même sa ville via une popover de recherche (API de géocodage Open-Meteo), le choix est mémorisé dans le navigateur.

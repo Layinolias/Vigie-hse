@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/tri-filtres.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -395,7 +396,7 @@
           <div class="panel-head"><h3 class="panel-title">Catalogue</h3><div class="panel-actions" id="catActionsBtns"></div></div>
           <div class="table-panel">
             <table class="reg">
-              <thead><tr><th>Nom</th><th>Catégorie</th><th>Norme</th><th>Péremption</th><th class="wrap">Fiche technique</th><th id="thActionsCat"></th></tr></thead>
+              <thead><tr id="theadCat"><th>Nom</th><th>Catégorie</th><th>Norme</th><th>Péremption</th><th class="wrap">Fiche technique</th><th id="thActionsCat"></th></tr></thead>
               <tbody id="catBody"></tbody>
             </table>
           </div>
@@ -428,7 +429,7 @@
           <div class="panel-head"><h3 class="panel-title">Stock</h3><div class="panel-actions" id="stockActionsBtns"></div></div>
           <div class="table-panel">
             <table class="reg">
-              <thead><tr><th>Article</th><th>Taille</th><th>Quantité</th><th>Seuil alerte</th><th>Statut</th><th id="thActionsStock"></th></tr></thead>
+              <thead><tr id="theadStock"><th>Article</th><th>Taille</th><th>Quantité</th><th>Seuil alerte</th><th>Statut</th><th id="thActionsStock"></th></tr></thead>
               <tbody id="stockBody"></tbody>
             </table>
           </div>
@@ -473,7 +474,7 @@
           <div class="panel-head"><h3 class="panel-title">Dotations</h3><div class="panel-actions" id="dotActionsBtns"></div></div>
           <div class="table-panel">
             <table class="reg">
-              <thead><tr><th>Nom</th><th>Prénom</th><th>Service</th><th>Article</th><th>Taille</th><th>Remise</th><th>Renouvellement</th><th>Statut</th><th id="thActionsDot"></th></tr></thead>
+              <thead><tr id="theadDot"><th>Nom</th><th>Prénom</th><th>Service</th><th>Article</th><th>Taille</th><th>Remise</th><th>Renouvellement</th><th>Statut</th><th id="thActionsDot"></th></tr></thead>
               <tbody id="dotBody"></tbody>
             </table>
           </div>
@@ -504,7 +505,7 @@
           <div class="panel-head"><h3 class="panel-title">Journal d'entretien</h3><div class="panel-actions" id="lavActionsBtns"></div></div>
           <div class="table-panel">
             <table class="reg">
-              <thead><tr><th>Agent</th><th>Article</th><th>Date lavage</th><th>Lavages cumulés</th><th>Statut</th><th id="thActionsLav"></th></tr></thead>
+              <thead><tr id="theadLav"><th>Agent</th><th>Article</th><th>Date lavage</th><th>Lavages cumulés</th><th>Statut</th><th id="thActionsLav"></th></tr></thead>
               <tbody id="lavBody"></tbody>
             </table>
           </div>
@@ -643,6 +644,57 @@
   let CATALOGUE = loadCatalogue();
   function catalogueById(id){ return CATALOGUE.find(c => c.id === id); }
 
+  // ---------- Tri & filtres par colonne (composant partagé assets/tri-filtres.js) ----------
+  // Un jeu de tri/filtres par tableau de la page. Les colonnes qui affichent une
+  // valeur d'un autre tableau (article, agent) trient sur le libellé résolu.
+  const triCat = VigieTri.create({
+    columns: [
+      { key:"nom",            label:"Nom" },
+      { key:"categorie",      label:"Catégorie" },
+      { key:"norme",          label:"Norme" },
+      { key:"peremption",     label:"Péremption", value:c => c.dureeVieMois || "" },
+      { key:"ficheTechnique", label:"Fiche technique" },
+      { key:"actionsCat",     label:"", noFilter:true },
+    ],
+    onChange: () => renderCatalogue(),
+  });
+  const triStock = VigieTri.create({
+    columns: [
+      { key:"article",       label:"Article", value:s => { const c = catalogueById(s.articleId); return c ? c.nom : ""; } },
+      { key:"taille",        label:"Taille" },
+      { key:"quantiteStock", label:"Quantité" },
+      { key:"seuilAlerte",   label:"Seuil alerte" },
+      { key:"statutStock",   label:"Statut", value:s => s.quantiteStock <= s.seuilAlerte ? "À réapprovisionner" : "Suffisant" },
+      { key:"actionsStock",  label:"", noFilter:true },
+    ],
+    onChange: () => renderStock(),
+  });
+  const triDot = VigieTri.create({
+    columns: [
+      { key:"nom",                label:"Nom" },
+      { key:"prenom",             label:"Prénom" },
+      { key:"service",            label:"Service" },
+      { key:"article",            label:"Article", value:d => { const c = catalogueById(d.articleId); return c ? c.nom : ""; } },
+      { key:"taille",             label:"Taille" },
+      { key:"dateRemise",         label:"Remise" },
+      { key:"dateRenouvellement", label:"Renouvellement" },
+      { key:"statut",             label:"Statut" },
+      { key:"actionsDot",         label:"", noFilter:true },
+    ],
+    onChange: () => renderDotations(),
+  });
+  const triLav = VigieTri.create({
+    columns: [
+      { key:"agent",                label:"Agent", value:l => { const d = DOTATIONS_ALL.find(x => x.id === l.dotationId); return d ? (d.nom + " " + d.prenom) : ""; } },
+      { key:"article",              label:"Article", value:l => { const d = DOTATIONS_ALL.find(x => x.id === l.dotationId); const c = d ? catalogueById(d.articleId) : null; return c ? c.nom : ""; } },
+      { key:"dateLavage",           label:"Date lavage" },
+      { key:"nombreLavagesCumules", label:"Lavages cumulés" },
+      { key:"statut",               label:"Statut" },
+      { key:"actionsLav",           label:"", noFilter:true },
+    ],
+    onChange: () => renderLavages(),
+  });
+
   // ---------- Stock (seed fixe) ----------
   const STOCK_SEED_DEF = [];
   const STOCK_SEED = STOCK_SEED_DEF.map(([articleId,taille,quantiteStock,seuilAlerte], i) => ({ id:"stk-"+(i+1), articleId, taille, quantiteStock, seuilAlerte }));
@@ -776,9 +828,11 @@
   function renderCatalogue(){
     $("catTotal").textContent = CATALOGUE.length;
     $("catSplit").textContent = CATALOGUE.filter(c=>c.categorie==="EPI").length + " / " + CATALOGUE.filter(c=>c.categorie==="Vêtement de travail").length;
+    triCat.decorate($("theadCat"));
+    const lignesCat = triCat.apply(CATALOGUE);
     const body = $("catBody");
-    if (CATALOGUE.length === 0){ body.innerHTML = `<tr class="empty-row"><td colspan="${canEdit?6:5}">Aucun article au catalogue.</td></tr>`; return; }
-    body.innerHTML = CATALOGUE.map(c => `
+    if (lignesCat.length === 0){ body.innerHTML = `<tr class="empty-row"><td colspan="${canEdit?6:5}">Aucun article au catalogue.</td></tr>`; return; }
+    body.innerHTML = lignesCat.map(c => `
       <tr data-id="${c.id}">
         <td>${c.nom}</td>
         <td><span class="cat-chip ${c.categorie==='EPI'?'epi':'vetement'}">${c.categorie}</span></td>
@@ -917,9 +971,11 @@
     $("stockTotal").textContent = STOCK.length;
     const bas = STOCK.filter(s => s.quantiteStock <= s.seuilAlerte);
     $("stockBas").textContent = bas.length;
+    triStock.decorate($("theadStock"));
+    const lignesStock = triStock.apply(STOCK);
     const body = $("stockBody");
-    if (STOCK.length === 0){ body.innerHTML = `<tr class="empty-row"><td colspan="${canEdit?6:5}">Aucune ligne de stock.</td></tr>`; return; }
-    body.innerHTML = STOCK.map(s => {
+    if (lignesStock.length === 0){ body.innerHTML = `<tr class="empty-row"><td colspan="${canEdit?6:5}">Aucune ligne de stock.</td></tr>`; return; }
+    body.innerHTML = lignesStock.map(s => {
       const c = catalogueById(s.articleId);
       const low = s.quantiteStock <= s.seuilAlerte;
       return `
@@ -1002,7 +1058,7 @@
   dfCollectivite.addEventListener("change", () => { fillDotServiceOptions(); renderDotations(); });
   dfService.addEventListener("change", renderDotations);
   dfStatut.addEventListener("change", renderDotations);
-  $("dfReset").addEventListener("click", () => { dfCollectivite.value = "all"; fillDotServiceOptions(); dfStatut.value = "all"; renderDotations(); });
+  $("dfReset").addEventListener("click", () => { dfCollectivite.value = "all"; fillDotServiceOptions(); dfStatut.value = "all"; triDot.reset(); renderDotations(); });
 
   function renderDotations(){
     const withStatus = DOTATIONS.map(d => Object.assign({}, d, computeDotationStatus(d)));
@@ -1013,6 +1069,8 @@
 
     const col = dfCollectivite.value, svc = dfService.value, st = dfStatut.value;
     let rows = withStatus.filter(d => (col==="all"||d.collectivite===col) && (svc==="all"||d.service===svc) && (st==="all"||d.statut===st));
+    triDot.decorate($("theadDot"));
+    rows = triDot.apply(rows);
     $("dotResultCount").textContent = rows.length;
     $("dotTotalCount").textContent = DOTATIONS.length;
     const body = $("dotBody");
@@ -1182,7 +1240,8 @@
     $("lavReforme").textContent = LAVAGES.filter(l => l.statut === "À réformer").length;
     const body = $("lavBody");
     if (LAVAGES.length === 0){ body.innerHTML = `<tr class="empty-row"><td colspan="${canEdit?5:4}">Aucun lavage enregistré.</td></tr>`; return; }
-    const rows = LAVAGES.slice().sort((a,b) => b.dateLavage.localeCompare(a.dateLavage));
+    triLav.decorate($("theadLav"));
+    const rows = triLav.apply(LAVAGES.slice().sort((a,b) => b.dateLavage.localeCompare(a.dateLavage)));
     body.innerHTML = rows.map(l => {
       const dot = DOTATIONS_ALL.find(d => d.id === l.dotationId);
       const c = dot ? catalogueById(dot.articleId) : null;

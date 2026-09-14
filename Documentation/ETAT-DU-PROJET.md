@@ -80,6 +80,33 @@ Chaque version est un dossier autonome et complet (pas de dépendance croisée).
 | `administration.html` | Panneau admin (accès admin uniquement) : Utilisateurs, Référentiels (listes déroulantes éditables), Flash Info, Veille réglementaire, Journal d'audit. |
 | `dossiers-atmp-citis.html` | Suivi administratif des dossiers AT/MP et maladies professionnelles : checklist documentaire (CMI, prolongations, certificat final, IPP, enquête/coûts), arrêtés d'imputabilité/CITIS avec workflow de signature. Accès via le modèle de permissions granulaires (§7) plutôt que par rôle fixe — voir aussi `ROADMAP-MODULES-FUTURS.md` module 18. |
 | `accident-analyse.html` | Analyse des causes d'un accident (arbre des causes INRS, 5 Pourquoi ou Ishikawa au choix par analyse), rattachée à chaque événement du Registre AT/MP ; actions correctives remontant au Plan d'Actions (`origine:"Analyse"`). Accès via permission granulaire `accident-analyse` — voir `ROADMAP-MODULES-FUTURS.md` module 15. |
+| `assets/tri-filtres.js` | **Premier fichier JS partagé du projet** (2026-09-14) — composant de tri et de filtres de colonne façon tableur, réutilisable sur n'importe quelle page à tableau. Voir §6 bis ci-dessous. |
+
+### 6 bis. Composant partagé `assets/tri-filtres.js` (tri & filtres de colonne)
+
+Jusqu'ici chaque page était strictement autonome (CSS et JS en ligne, dupliqués). Ce composant est la **première exception assumée** : le chantier « tri & filtres façon Excel » devait être construit une seule fois plutôt que dupliqué sur chaque page à tableau.
+
+Il reste compatible avec les contraintes du projet : script classique (pas de module ES), donc il fonctionne aussi bien en `file://` qu'en HTTP, sans étape de build ni dépendance. **Il injecte lui-même sa feuille de style**, construite sur les variables CSS déjà définies par chaque page (`--surface-el`, `--border`, `--accent`…) — il suit donc automatiquement le thème clair/sombre sans fichier CSS partagé à maintenir.
+
+**Pour l'ajouter à une page :**
+```html
+<script src="assets/tri-filtres.js"></script>
+```
+```js
+const tri = VigieTri.create({
+  columns: VISIBLE_COLUMNS.map(c => ({ key:c.key, label:c.label, noFilter:!!c.noFilter, value:COLUMN_VALUES[c.key] })),
+  onChange: () => render(),
+});
+tri.decorate($("theadFields"));   // après chaque (re)construction de l'en-tête
+rows = tri.apply(rows);           // dans render(), après les filtres globaux de la page
+tri.reset();                      // à câbler sur le bouton "Réinitialiser" de la page
+```
+
+- `value(row)` est **optionnel** : par défaut le composant lit `row[key]`. Il faut le fournir pour toute colonne dont la valeur affichée est calculée (badge, champ dérivé) — on trie et on filtre toujours sur la **valeur métier, jamais sur le HTML rendu**. Exemple dans `registre-at-mp.html` : la constante `COLUMN_VALUES` couvre `arretStatut` et `joursArret`.
+- `noFilter:true` neutralise une colonne (utilisé pour la colonne Actions).
+- Comportements repris du tableur : tri à 3 états (croissant → décroissant → annulé), tri numérique ou texte français détecté automatiquement, **valeurs vides toujours en fin quel que soit le sens**, filtres cumulés en ET, et options d'une colonne calculées sur les lignes filtrées par les *autres* colonnes (une colonne filtrée conserve toutes ses propres options).
+- **Déployé à ce jour sur :** `registre-at-mp.html` uniquement (premier cas d'usage). Les autres pages à tableau peuvent l'adopter avec les 4 lignes ci-dessus.
+- ⚠️ **Cache navigateur** : GitHub Pages sert ce fichier avec `max-age=600`. Après une modification, un visiteur peut donc garder l'ancienne version jusqu'à 10 minutes (les pages HTML ont la même politique). En test, forcer un rechargement dur pour ne pas déboguer une version périmée.
 
 ## 7. Modèle de rôles
 

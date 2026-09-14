@@ -67,6 +67,18 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Depuis le Registre AT/MP, cliquer "Analyser" sur une ligne ouvre directement le bon événement dans Analyse d'accident.
 - [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : les trois modules/liens doivent être invisibles, et taper les URLs `dossiers-atmp-citis.html` / `accident-analyse.html` / `saisie-rh.html` directement doit rediriger (dashboard ou registre AT/MP selon la page).
 
+### Tri & filtres de colonne (Registre AT/MP)
+- [ ] Cliquer sur l'intitulé d'une colonne trie la table ; un 2ᵉ clic inverse le sens, un 3ᵉ revient à l'ordre d'origine (date décroissante). Une flèche indique le sens.
+- [ ] Trier « Jours d'arrêt » : les nombres se classent bien numériquement (4, 5, 7, 8… et pas 10 avant 4), et les lignes sans arrêt (« — ») restent **en bas dans les deux sens**.
+- [ ] Cliquer sur l'entonnoir d'une colonne ouvre un panneau avec les valeurs distinctes et leur nombre ; décocher des valeurs filtre la table immédiatement et l'entonnoir devient coloré.
+- [ ] Filtrer sur deux colonnes en même temps : les deux filtres se cumulent.
+- [ ] En ouvrant l'entonnoir d'une **autre** colonne, les valeurs proposées tiennent compte du filtre déjà actif ; en rouvrant celui de la colonne **déjà filtrée**, toutes ses valeurs restent proposées.
+- [ ] Le compteur « X affichés sur Y » et les KPI du haut de page suivent bien les filtres de colonne.
+- [ ] Le bouton « Réinitialiser » efface aussi le tri et les filtres de colonne.
+- [ ] Le panneau se ferme en cliquant ailleurs, avec Échap, ou en faisant défiler la page — et reste toujours entièrement visible à l'écran, y compris sur une fenêtre étroite.
+- [ ] En thème sombre, le panneau est bien lisible (fond sombre, texte clair).
+- [ ] Se connecter en `AG2` (moins de colonnes visibles) : le tri d'une colonne trie bien **cette** colonne (pas de décalage).
+
 ## 4. Fonctionnalités transverses
 
 - [ ] **Météo** (topbar) : au premier chargement, aucune demande de géolocalisation — le widget affiche "Choisir une ville". Cliquer dessus ouvre une popover de recherche ; taper un nom de ville affiche des résultats (nom + région + pays) ; en choisir un met à jour la météo et se souvient du choix au rechargement (localStorage). Le lien "Voir sur Météo France" dans la popover fonctionne toujours.

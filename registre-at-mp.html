@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/tri-filtres.js"></script>
 <style>
   /* ===== HSE Soft Tech — Design tokens (identiques au Dashboard) ===== */
   :root{
@@ -640,11 +641,18 @@
         ? `<span class="badge badge-danger">Avec arrêt</span> <span class="badge ${(r.statutArret || 'En cours') === 'Clôturé' ? 'badge-neutral' : 'badge-warning'}">${r.statutArret || 'En cours'}</span>`
         : `<span class="badge badge-neutral">Sans arrêt</span>` },
     { key:"joursArret",     label:"Jours d'arrêt",    group:"Conséquences", cls:"num", render:r => r.arret ? (r.joursArret ?? 0) : "—" },
-    { key:"actions",        label:"Actions",          group:"",             cls:"actions", render:r =>
+    { key:"actions",        label:"Actions",          group:"",             cls:"actions", noFilter:true, render:r =>
         `${canEdit ? `<a href="saisie-rh.html?id=${encodeURIComponent(r.id)}" class="act-edit">Modifier</a>` : ""}
          ${canAccidentAnalyse ? `<a href="accident-analyse.html?atmpId=${encodeURIComponent(r.id)}" class="act-edit">Analyser</a>` : ""}
          ${canEdit ? `<button type="button" class="act-del" data-id="${r.id}">Suppr.</button>` : ""}` },
   ];
+
+  // Valeurs métier utilisées pour le tri et les filtres de colonne (jamais le HTML rendu).
+  // Non renseigné = on lit directement row[key].
+  const COLUMN_VALUES = {
+    arretStatut: r => r.arret ? (r.statutArret || "En cours") : "Sans arrêt",
+    joursArret:  r => r.arret ? (r.joursArret ?? 0) : "",
+  };
 
   const COLUMN_VISIBILITY = {
     statut: ["rh"], civilite: ["rh"], nom: ["rh"], prenom: ["rh"], dateNaissance: ["rh"], age: ["rh"],
@@ -671,8 +679,15 @@
     }
     $("theadGroups").innerHTML = groupsRow.join("");
     $("theadFields").innerHTML = VISIBLE_COLUMNS.map(c => `<th>${c.label}</th>`).join("");
-    document.querySelector(".table-panel table").style.minWidth = Math.max(760, VISIBLE_COLUMNS.length * 110) + "px";
+    document.querySelector(".table-panel table").style.minWidth = Math.max(760, VISIBLE_COLUMNS.length * 130) + "px";
+    tri.decorate($("theadFields"));
   }
+
+  // Tri & filtres par colonne (composant partagé assets/tri-filtres.js)
+  const tri = VigieTri.create({
+    columns: VISIBLE_COLUMNS.map(c => ({ key:c.key, label:c.label, noFilter:!!c.noFilter, value:COLUMN_VALUES[c.key] })),
+    onChange: () => render(),
+  });
   buildHead();
 
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fYear = $("fYear"), fArret = $("fArret");
@@ -711,6 +726,9 @@
       (ar === "all" || (ar === "avec" ? d.arret : !d.arret))
     );
     rows = rows.slice().sort((a,b) => (b.dateAT||"").localeCompare(a.dateAT||""));
+    // Tri & filtres par colonne : s'appliquent après les filtres globaux de la page.
+    // Sans tri de colonne actif, l'ordre par défaut (date décroissante) est conservé.
+    rows = tri.apply(rows);
 
     const total = rows.length;
     const avecCount = rows.filter(r => r.arret).length;
@@ -751,6 +769,7 @@
   fArret.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
     fCollectivite.value = "all"; fService.value = "all"; fYear.value = "all"; fArret.value = "all";
+    tri.reset();
     refreshFilterOptions();
     render();
   });

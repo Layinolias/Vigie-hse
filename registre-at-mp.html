@@ -641,9 +641,9 @@
         : `<span class="badge badge-neutral">Sans arrêt</span>` },
     { key:"joursArret",     label:"Jours d'arrêt",    group:"Conséquences", cls:"num", render:r => r.arret ? (r.joursArret ?? 0) : "—" },
     { key:"actions",        label:"Actions",          group:"",             cls:"actions", render:r =>
-        `<a href="saisie-rh.html?id=${encodeURIComponent(r.id)}" class="act-edit">Modifier</a>
+        `${canEdit ? `<a href="saisie-rh.html?id=${encodeURIComponent(r.id)}" class="act-edit">Modifier</a>` : ""}
          ${canAccidentAnalyse ? `<a href="accident-analyse.html?atmpId=${encodeURIComponent(r.id)}" class="act-edit">Analyser</a>` : ""}
-         <button type="button" class="act-del" data-id="${r.id}">Suppr.</button>` },
+         ${canEdit ? `<button type="button" class="act-del" data-id="${r.id}">Suppr.</button>` : ""}` },
   ];
 
   const COLUMN_VISIBILITY = {
@@ -653,7 +653,7 @@
     dateAT: ["rh","ag"], dateMois: ["rh"], jour: ["rh"], typeAtMp: ["rh","ag"],
     circonstances: ["rh","ag"], etat: ["rh","ag"], risque: ["rh","ag"], siege: ["rh","ag"],
     nature: ["rh","ag"], elementMateriel: ["rh","ag"], arretStatut: ["rh","ag"], joursArret: ["rh","ag"],
-    actions: ["rh"],
+    actions: canAccidentAnalyse ? ["rh","ag"] : ["rh"],
   };
 
   const visRole = canEdit ? "rh" : "ag";

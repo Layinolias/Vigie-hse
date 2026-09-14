@@ -725,7 +725,8 @@
 
     [ "anMethode","ishMateriel","ishMethode","ishMainOeuvre","ishMilieu","ishMatiere","anConclusion" ]
       .forEach(id => { $(id).disabled = !canAnalyseWrite; });
-    $("btnSaveAnalyse").style.display = canAnalyseWrite ? "" : "none";
+    [ "btnSaveAnalyse","btnAddFait","btnAddPourquoi","btnAddAction" ]
+      .forEach(id => { $(id).style.display = canAnalyseWrite ? "" : "none"; });
 
     $("detailPanel").style.display = "";
     $("detailPanel").scrollIntoView({ behavior:"smooth", block:"start" });

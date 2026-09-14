@@ -266,12 +266,23 @@
 
       document.body.appendChild(pop);
 
-      // positionnement sous l'en-tête, recadré dans la fenêtre
+      // Positionnement sous l'en-tête, aligné à droite du bouton, recadré dans la
+      // fenêtre. La borne basse (8px) est appliquée EN DERNIER : sinon, sur une
+      // fenêtre très étroite — ou quand le navigateur renvoie une largeur nulle
+      // (aperçu intégré, onglet non encore mis en page) — le recadrage à droite
+      // produisait une position négative et le panneau sortait de l'écran.
       var r = anchor.getBoundingClientRect();
-      var w = pop.offsetWidth, h = pop.offsetHeight;
-      var left = Math.min(Math.max(8, r.left - w + r.width), window.innerWidth - w - 8);
+      var w = pop.offsetWidth || 252, h = pop.offsetHeight || 300;
+      var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+      var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+
+      var left = r.left - w + r.width;
+      if (vw > 0) left = Math.min(left, vw - w - 8);
+      left = Math.max(8, left);
+
       var top = r.bottom + 6;
-      if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+      if (vh > 0 && top + h > vh - 8) top = Math.max(8, r.top - h - 6);
+
       pop.style.left = left + "px";
       pop.style.top = top + "px";
       search.focus();

@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/tri-filtres.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -406,7 +407,7 @@
         <div class="table-panel">
           <table class="reg">
             <thead>
-              <tr>
+              <tr id="theadFields">
                 <th>Équipement</th><th>Catégorie</th><th>Site / Service</th><th>Organisme</th><th>Dernière vérif.</th><th>Prochaine échéance</th><th>Statut</th><th>Conformité</th>
                 <th id="thActions"></th>
               </tr>
@@ -591,6 +592,24 @@
   const fCollectivite = $("fCollectivite"), fCategorie = $("fCategorie"), fStatut = $("fStatut"), fConformite = $("fConformite");
   fCategorie.innerHTML = `<option value="all">Toutes</option>` + CATEGORIES.map(c => `<option value="${c[0]}">${c[0]}</option>`).join("");
 
+  // Tri & filtres par colonne (composant partagé assets/tri-filtres.js).
+  // L'ordre des colonnes suit celui des <th> de #theadFields.
+  const tri = VigieTri.create({
+    columns: [
+      { key:"equipement",   label:"Équipement" },
+      { key:"categorie",    label:"Catégorie" },
+      { key:"site",         label:"Site / Service" },
+      { key:"organisme",    label:"Organisme" },
+      { key:"dateDerniere", label:"Dernière vérif." },
+      { key:"prochaine",    label:"Prochaine échéance" },
+      { key:"statut",       label:"Statut" },
+      { key:"conformite",   label:"Conformité" },
+      { key:"actions",      label:"", noFilter:true },
+    ],
+    onChange: () => render(),
+  });
+  tri.decorate($("theadFields"));
+
   function render(){
     const col = fCollectivite.value, cat = fCategorie.value, st = fStatut.value, cf = fConformite.value;
     const withStatus = DATASET.map(v => Object.assign({}, v, computeStatus(v)));
@@ -601,6 +620,8 @@
       (cf === "all" || v.conformite === cf)
     );
     rows = rows.slice().sort((a,b) => a.prochaine.localeCompare(b.prochaine));
+    // Sans tri de colonne actif, l'ordre par défaut de la page est conservé.
+    rows = tri.apply(rows);
 
     $("kpiTotal").textContent = DATASET.length;
     $("kpiOk").textContent = withStatus.filter(v => v.statut === "À jour").length;
@@ -638,7 +659,7 @@
   fStatut.addEventListener("change", render);
   fConformite.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fCategorie.value = "all"; fStatut.value = "all"; fConformite.value = "all"; render();
+    fCollectivite.value = "all"; fCategorie.value = "all"; fStatut.value = "all"; fConformite.value = "all"; tri.reset(); render();
   });
 
   if (canEdit){

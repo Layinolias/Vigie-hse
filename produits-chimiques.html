@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/tri-filtres.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -392,7 +393,7 @@
         <div class="table-panel">
           <table class="reg">
             <thead>
-              <tr>
+              <tr id="theadFields">
                 <th>Produit</th><th>Fournisseur</th><th>Service</th><th>Quantité</th><th>Pictogrammes</th><th>Dernière MAJ FDS</th>
                 <th id="thActions"></th>
               </tr>
@@ -582,6 +583,22 @@
   fillServiceOptions();
   fPicto.innerHTML = `<option value="all">Tous</option>` + PICTOGRAMMES.map(p => `<option value="${p.code}">${p.code} — ${p.label}</option>`).join("");
 
+  // Tri & filtres par colonne (composant partagé assets/tri-filtres.js).
+  // L'ordre des colonnes suit celui des <th> de #theadFields.
+  const tri = VigieTri.create({
+    columns: [
+      { key:"nom",          label:"Produit" },
+      { key:"fournisseur",  label:"Fournisseur" },
+      { key:"service",      label:"Service" },
+      { key:"quantite",     label:"Quantité", value:p => p.quantiteStockee != null ? p.quantiteStockee : "" },
+      { key:"pictogrammes", label:"Pictogrammes", value:p => (p.pictogrammes || []).join(", ") },
+      { key:"dateMajFDS",   label:"Dernière MAJ FDS" },
+      { key:"actions",      label:"", noFilter:true },
+    ],
+    onChange: () => render(),
+  });
+  tri.decorate($("theadFields"));
+
   function render(){
     const col = fCollectivite.value, svc = fService.value, pic = fPicto.value;
     let rows = DATASET.filter(p =>
@@ -590,6 +607,8 @@
       (pic === "all" || (p.pictogrammes || []).includes(pic))
     );
     rows = rows.slice().sort((a,b) => a.nom.localeCompare(b.nom, 'fr'));
+    // Sans tri de colonne actif, l'ordre par défaut de la page est conservé.
+    rows = tri.apply(rows);
 
     $("kpiTotal").textContent = DATASET.length;
     $("kpiCmr").textContent = DATASET.filter(isDangereux).length;
@@ -623,7 +642,7 @@
   fService.addEventListener("change", render);
   fPicto.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fillServiceOptions(); fPicto.value = "all"; render();
+    fCollectivite.value = "all"; fillServiceOptions(); fPicto.value = "all"; tri.reset(); render();
   });
 
   if (canEdit){

@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/tri-filtres.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -390,7 +391,7 @@
         <div class="table-panel">
           <table class="reg">
             <thead>
-              <tr>
+              <tr id="theadFields">
                 <th>Nom</th><th>Prénom</th><th>Service</th><th>Type</th><th>Organisme</th><th>Obtention</th><th>Expiration</th><th>Statut</th>
                 <th id="thActions"></th>
               </tr>
@@ -602,6 +603,24 @@
   fillServiceOptions();
   fCollectivite.addEventListener("change", () => { fillServiceOptions(); render(); });
 
+  // Tri & filtres par colonne (composant partagé assets/tri-filtres.js).
+  // L'ordre des colonnes suit celui des <th> de #theadFields.
+  const tri = VigieTri.create({
+    columns: [
+      { key:"nom",                label:"Nom" },
+      { key:"prenom",             label:"Prénom" },
+      { key:"service",            label:"Service" },
+      { key:"typeHabilitation",   label:"Type" },
+      { key:"organismeFormateur", label:"Organisme" },
+      { key:"dateObtention",      label:"Obtention" },
+      { key:"dateExpiration",     label:"Expiration" },
+      { key:"statut",             label:"Statut" },
+      { key:"actions",            label:"", noFilter:true },
+    ],
+    onChange: () => render(),
+  });
+  tri.decorate($("theadFields"));
+
   function render(){
     const col = fCollectivite.value, svc = fService.value, typ = fType.value, st = fStatut.value;
     const withStatus = DATASET.map(v => Object.assign({}, v, computeStatus(v)));
@@ -612,6 +631,8 @@
       (st === "all" || v.statut === st)
     );
     rows = rows.slice().sort((a,b) => a.dateExpiration.localeCompare(b.dateExpiration));
+    // Sans tri de colonne actif, l'ordre par défaut de la page est conservé.
+    rows = tri.apply(rows);
 
     $("kpiTotal").textContent = DATASET.length;
     $("kpiOk").textContent = withStatus.filter(v => v.statut === "À jour").length;
@@ -647,7 +668,7 @@
   fType.addEventListener("change", render);
   fStatut.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fillServiceOptions(); fType.value = "all"; fStatut.value = "all"; render();
+    fCollectivite.value = "all"; fillServiceOptions(); fType.value = "all"; fStatut.value = "all"; tri.reset(); render();
   });
 
   if (canEdit){

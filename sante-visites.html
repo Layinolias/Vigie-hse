@@ -1,6 +1,7 @@
 <title>Santé &amp; Visites</title>
 <meta name="description" content="Suivi des visites médicales et de la surveillance santé au travail des agents.">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/tri-filtres.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -389,7 +390,7 @@
         <div class="table-panel">
           <table class="reg">
             <thead>
-              <tr>
+              <tr id="theadFields">
                 <th>Nom</th><th>Prénom</th><th>Service</th><th>Type de visite</th><th>Dernière visite</th><th>Prochaine échéance</th><th>Statut</th>
                 <th id="thActions"></th>
               </tr>
@@ -574,6 +575,23 @@
   }
   fillServiceOptions();
 
+  // Tri & filtres par colonne (composant partagé assets/tri-filtres.js).
+  // L'ordre des colonnes suit celui des <th> de #theadFields.
+  const tri = VigieTri.create({
+    columns: [
+      { key:"nom",          label:"Nom" },
+      { key:"prenom",       label:"Prénom" },
+      { key:"service",      label:"Service" },
+      { key:"typeVisite",   label:"Type de visite" },
+      { key:"dateDerniere", label:"Dernière visite" },
+      { key:"prochaine",    label:"Prochaine échéance" },
+      { key:"statut",       label:"Statut" },
+      { key:"actions",      label:"", noFilter:true },
+    ],
+    onChange: () => render(),
+  });
+  tri.decorate($("theadFields"));
+
   function render(){
     const col = fCollectivite.value, svc = fService.value, st = fStatut.value;
     const withStatus = DATASET.map(v => Object.assign({}, v, computeStatus(v)));
@@ -583,6 +601,8 @@
       (st === "all" || v.statut === st)
     );
     rows = rows.slice().sort((a,b) => a.prochaine.localeCompare(b.prochaine));
+    // Sans tri de colonne actif, l'ordre par défaut de la page est conservé.
+    rows = tri.apply(rows);
 
     $("kpiTotal").textContent = DATASET.length;
     $("kpiOk").textContent = withStatus.filter(v => v.statut === "À jour").length;
@@ -617,7 +637,7 @@
   fService.addEventListener("change", render);
   fStatut.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fillServiceOptions(); fStatut.value = "all"; render();
+    fCollectivite.value = "all"; fillServiceOptions(); fStatut.value = "all"; tri.reset(); render();
   });
 
   if (canEdit){

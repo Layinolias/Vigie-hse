@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/tri-filtres.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -435,7 +436,7 @@
         <div class="table-panel">
           <table class="reg">
             <thead>
-              <tr>
+              <tr id="theadFields">
                 <th>Date</th><th>Service</th><th>Nature</th><th style="min-width:240px;">Description</th><th>Gravité</th><th>Statut</th><th>Auteur</th>
                 <th id="thActions"></th>
               </tr>
@@ -598,6 +599,23 @@
   const statutCls = { "Nouvelle":"s-nouvelle", "En cours de traitement":"s-encours", "Traitée":"s-traitee", "Classée sans suite":"s-classee" };
   const graviteCls = { "Faible":"g-faible", "Moyenne":"g-moyenne", "Élevée":"g-elevee" };
 
+  // Tri & filtres par colonne (composant partagé assets/tri-filtres.js).
+  // L'ordre des colonnes suit celui des <th> de #theadFields.
+  const tri = VigieTri.create({
+    columns: [
+      { key:"date",        label:"Date" },
+      { key:"service",     label:"Service" },
+      { key:"nature",      label:"Nature" },
+      { key:"description", label:"Description" },
+      { key:"gravite",     label:"Gravité" },
+      { key:"statut",      label:"Statut" },
+      { key:"auteur",      label:"Auteur", value:a => role === "ag" ? "" : (a.auteur || "") },
+      { key:"actions",     label:"", noFilter:true },
+    ],
+    onChange: () => render(),
+  });
+  tri.decorate($("theadFields"));
+
   function render(){
     const col = fCollectivite.value, svc = fService.value, st = fStatut.value, gr = fGravite.value;
     let rows = DATASET.filter(a =>
@@ -607,6 +625,8 @@
       (gr === "all" || a.gravite === gr)
     );
     rows = rows.slice().sort((a,b) => (b.date || "").localeCompare(a.date || ""));
+    // Sans tri de colonne actif, l'ordre par défaut de la page est conservé.
+    rows = tri.apply(rows);
 
     $("kpiTotal").textContent = DATASET.length;
     $("kpiNouvelle").textContent = DATASET.filter(a => a.statut === "Nouvelle").length;
@@ -646,7 +666,7 @@
   fStatut.addEventListener("change", render);
   fGravite.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fillServiceOptions(); fStatut.value = "all"; fGravite.value = "all"; render();
+    fCollectivite.value = "all"; fillServiceOptions(); fStatut.value = "all"; fGravite.value = "all"; tri.reset(); render();
   });
 
   $("tbody").addEventListener("click", (e) => {

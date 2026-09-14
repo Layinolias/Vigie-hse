@@ -255,6 +255,7 @@
   <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
   <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
+  <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
 </defs>
 </svg>
 
@@ -295,6 +296,7 @@
       <div class="nav-section">
         <div class="nav-label">Administratif</div>
         <a class="nav-item" href="dossiers-atmp-citis.html"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
+        <a class="nav-item" href="accident-analyse.html"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
       </div>
       <div class="nav-section">
         <div class="nav-label">Pilotage</div>
@@ -389,6 +391,18 @@
               <div class="f span3">
                 <label for="uAtmpAdminPerm">Modules avancés — Dossiers AT/MP &amp; CITIS</label>
                 <select id="uAtmpAdminPerm">
+                  <option value="none">Aucun accès</option>
+                  <option value="read">Lecture seule</option>
+                  <option value="write">Lecture / écriture</option>
+                </select>
+              </div>
+              <div class="f">
+                <label>Déclaration AT/MP</label>
+                <label class="checkbox-row"><input type="checkbox" id="uAtmpDeclarePerm"> Peut déclarer un AT/MP (même sans être RH/admin)</label>
+              </div>
+              <div class="f span2">
+                <label for="uAccidentAnalysePerm">Modules avancés — Analyse d'accident</label>
+                <select id="uAccidentAnalysePerm">
                   <option value="none">Aucun accès</option>
                   <option value="read">Lecture seule</option>
                   <option value="write">Lecture / écriture</option>
@@ -726,7 +740,7 @@
       { id:"u-rh2", nom:"", prenom:"", email:"RH2", username:"RH2", password:"1234", role:"rh", services:["*"], active:true },
       { id:"u-ag1", nom:"", prenom:"", email:"AG1", username:"AG1", password:"1234", role:"ag", services:["*"], active:true },
       { id:"u-ag2", nom:"", prenom:"", email:"AG2", username:"AG2", password:"1234", role:"ag", services:["*"], active:true },
-      { id:"u-prev1", nom:"", prenom:"", email:"PREV1", username:"PREV1", password:"1234", role:"ag", services:["*"], modulePermissions:{"atmp-admin":"write"}, active:true },
+      { id:"u-prev1", nom:"", prenom:"", email:"PREV1", username:"PREV1", password:"1234", role:"ag", services:["*"], modulePermissions:{"atmp-admin":"write","atmp-declare":"write","accident-analyse":"write"}, active:true },
       { id:"u-admin", nom:"Verchamps", prenom:"Admin", email:"admin@verchamps.fr", username:"admin@verchamps.fr", password:"admin1234", role:"admin", services:["*"], active:true },
       { id:"u-manager", nom:"Verchamps", prenom:"Manager", email:"manager@verchamps.fr", username:"manager@verchamps.fr", password:"manager1234", role:"manager", services:["Voirie & Réseaux","Espaces Verts & Paysage"], active:true },
     ];
@@ -762,11 +776,15 @@
         : `<div class="svc-tags">${(u.services||[]).map(s => `<span class="svc-tag">${s}</span>`).join("") || '<span class="svc-tag">Aucun</span>'}</div>`;
       const atmpPerm = u.modulePermissions && u.modulePermissions["atmp-admin"];
       const atmpBadge = (atmpPerm && atmpPerm !== "none") ? ` <span class="svc-tag" title="Dossiers AT/MP &amp; CITIS">AT/MP-CITIS · ${atmpPerm === "write" ? "écriture" : "lecture"}</span>` : "";
+      const declarePerm = u.modulePermissions && u.modulePermissions["atmp-declare"];
+      const declareBadge = declarePerm === "write" ? ` <span class="svc-tag" title="Peut déclarer un AT/MP">Déclaration AT/MP</span>` : "";
+      const analysePerm = u.modulePermissions && u.modulePermissions["accident-analyse"];
+      const analyseBadge = (analysePerm && analysePerm !== "none") ? ` <span class="svc-tag" title="Analyse d'accident">Analyse · ${analysePerm === "write" ? "écriture" : "lecture"}</span>` : "";
       return `
       <tr data-id="${u.id}">
         <td class="mono">${u.username || u.email}</td>
         <td>${(u.nom || u.prenom) ? `${u.prenom} ${u.nom}` : "—"}</td>
-        <td><span class="chip ${u.role}">${ROLE_CHIP_LABEL[u.role] || u.role}</span>${atmpBadge}</td>
+        <td><span class="chip ${u.role}">${ROLE_CHIP_LABEL[u.role] || u.role}</span>${atmpBadge}${declareBadge}${analyseBadge}</td>
         <td>${svcHtml}</td>
         <td><span class="chip ${u.active !== false ? 'active-yes' : 'active-no'}">${u.active !== false ? "Actif" : "Désactivé"}</span></td>
         <td>
@@ -794,6 +812,8 @@
     $("uServicesWrap").style.display = "none";
     renderServicesCheckboxes();
     $("uAtmpAdminPerm").value = "none";
+    $("uAtmpDeclarePerm").checked = false;
+    $("uAccidentAnalysePerm").value = "none";
   }
   resetUserForm();
 
@@ -819,6 +839,8 @@
         $("uServicesGrid").querySelectorAll("input").forEach(cb => { cb.checked = u.services.includes(cb.value); });
       }
       $("uAtmpAdminPerm").value = (u.modulePermissions && u.modulePermissions["atmp-admin"]) || "none";
+      $("uAtmpDeclarePerm").checked = !!(u.modulePermissions && u.modulePermissions["atmp-declare"] === "write");
+      $("uAccidentAnalysePerm").value = (u.modulePermissions && u.modulePermissions["accident-analyse"]) || "none";
       $("uPassword").value = "";
       $("uPassword").placeholder = "Laisser vide pour conserver le mot de passe actuel";
       $("uPassword").required = false;
@@ -882,7 +904,11 @@
       u.services = role === "manager"
         ? Array.from($("uServicesGrid").querySelectorAll("input:checked")).map(i => i.value)
         : ["*"];
-      u.modulePermissions = Object.assign({}, u.modulePermissions, { "atmp-admin": $("uAtmpAdminPerm").value });
+      u.modulePermissions = Object.assign({}, u.modulePermissions, {
+        "atmp-admin": $("uAtmpAdminPerm").value,
+        "atmp-declare": $("uAtmpDeclarePerm").checked ? "write" : "none",
+        "accident-analyse": $("uAccidentAnalysePerm").value,
+      });
       if (passwordInput) u.password = passwordInput;
       saveUsers(USERS);
       logAudit("Utilisateurs", "Modification", `Compte modifié : ${email} (rôle ${ROLE_CHIP_LABEL[role]})`);
@@ -903,7 +929,11 @@
     const services = role === "manager"
       ? Array.from($("uServicesGrid").querySelectorAll("input:checked")).map(i => i.value)
       : ["*"];
-    const modulePermissions = { "atmp-admin": $("uAtmpAdminPerm").value };
+    const modulePermissions = {
+      "atmp-admin": $("uAtmpAdminPerm").value,
+      "atmp-declare": $("uAtmpDeclarePerm").checked ? "write" : "none",
+      "accident-analyse": $("uAccidentAnalysePerm").value,
+    };
     const user = { id: genId("u"), nom, prenom, email, username: email, password: passwordInput, role, services, modulePermissions, active: true };
     USERS.push(user);
     saveUsers(USERS);

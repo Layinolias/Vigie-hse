@@ -23,8 +23,8 @@ Dashboard HSE prototype (Ville de Verchamps + Agglomération de Verchamps) : Reg
 
 ## Comptes de test
 
-`admin@verchamps.fr` / `admin1234` · `manager@verchamps.fr` / `manager1234` · `RH1`/`RH2` / `1234` · `AG1`/`AG2` / `1234` · `PREV1` / `1234` (rôle de base `ag` + permission granulaire `atmp-admin:write` — démontre le modèle de permissions par module, voir `ETAT-DU-PROJET.md` §7)
+`admin@verchamps.fr` / `admin1234` · `manager@verchamps.fr` / `manager1234` · `RH1`/`RH2` / `1234` · `AG1`/`AG2` / `1234` · `PREV1` / `1234` (rôle de base `ag` + permissions granulaires `atmp-admin:write`, `atmp-declare:write`, `accident-analyse:write` — démontre le modèle de permissions par module, voir `ETAT-DU-PROJET.md` §7)
 
 ## Fichiers de `V0.1.1.2`
 
-Cockpit : `login.html`, `index.html`. Cœur HSE : `registre-at-mp.html` + `saisie-rh.html`, `document-unique.html` + `saisie-duerp.html`. Modules de suivi : `plan-actions.html`, `sante-visites.html`, `registre-sst.html`, `verifications-periodiques.html`, `inspection-audit.html`, `produits-chimiques.html`, `formation-habilitation.html`, `epi-dotation.html`, `reporting.html`, `dossiers-atmp-citis.html`. Back-office : `administration.html`. Détail du rôle de chacun dans `ETAT-DU-PROJET.md` §6 (à tenir à jour à chaque nouveau module).
+Cockpit : `login.html`, `index.html`. Cœur HSE : `registre-at-mp.html` + `saisie-rh.html`, `document-unique.html` + `saisie-duerp.html`. Modules de suivi : `plan-actions.html`, `sante-visites.html`, `registre-sst.html`, `verifications-periodiques.html`, `inspection-audit.html`, `produits-chimiques.html`, `formation-habilitation.html`, `epi-dotation.html`, `reporting.html`, `dossiers-atmp-citis.html`, `accident-analyse.html`. Back-office : `administration.html`. Détail du rôle de chacun dans `ETAT-DU-PROJET.md` §6 (à tenir à jour à chaque nouveau module).

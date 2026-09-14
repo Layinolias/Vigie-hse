@@ -1,5 +1,5 @@
-<title>Vérifications Périodiques</title>
-<meta name="description" content="Suivi des vérifications techniques périodiques des équipements et installations par organismes agréés.">
+<title>Analyse d'accident</title>
+<meta name="description" content="Analyse des causes d'un accident du travail (arbre des causes, 5 Pourquoi ou Ishikawa) rattachée à chaque événement du Registre AT/MP, avec suivi des actions correctives.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -79,7 +79,7 @@
   .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
   .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
   .role-chip.ag{ background:rgba(var(--accent-blue-rgb),.16); color:var(--accent-blue); }
-  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  .content{ padding:26px 28px 60px; max-width:1400px; width:100%; margin:0 auto; }
   @media (max-width:980px){
     .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
     .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
@@ -98,9 +98,7 @@
   }
 
   .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
-  .hero{ margin-bottom:22px; } .hero h1{ font-size:25px; } .hero p{ margin:6px 0 0; color:var(--text-muted); font-size:13px; max-width:76ch; line-height:1.55; }
 
-  /* ===== Compact sticky page summary (icon + titre + description + KPI sur une ligne) ===== */
   .page-summary{
     position: sticky; top: 60px; z-index: 15;
     display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
@@ -118,14 +116,10 @@
   .ps-kpi-icon{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .ps-kpi-icon .icon{ width:12px; height:12px; }
   .ps-kpi-icon.blue{ background:rgba(var(--accent-rgb),.14); color:var(--accent); }
-  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
   .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
   .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
-  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
-  .ps-kpi-icon.critical{ background:rgba(var(--critical-rgb),.14); color:var(--critical); }
   .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
   .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
-  .ps-kpi-value .unit{ font-size:10px; color:var(--text-muted); font-weight:500; margin-left:1px; }
   .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
   @media (max-width:1100px){ .page-summary-text p{ display:none; } }
   .mobile-notice{ display:none; }
@@ -141,22 +135,9 @@
   .btn-primary:hover{ transform:translateY(-1px); }
   .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
   .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
-
-  .kpi-row{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:18px; }
-  @media (max-width:1280px){ .kpi-row{ grid-template-columns:repeat(3,1fr); } }
-  @media (max-width:720px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:460px){ .kpi-row{ grid-template-columns:1fr; } }
-  .kpi{ padding:14px 16px; display:flex; flex-direction:column; gap:7px; }
-  .kpi-top{ display:flex; align-items:center; justify-content:space-between; }
-  .kpi-icon{ width:28px; height:28px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; }
-  .kpi-icon .icon{ width:15px; height:15px; }
-  .kpi-icon.blue{ background:rgba(var(--accent-rgb),.12); color:var(--accent); }
-  .kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
-  .kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
-  .kpi-icon.success{ background:var(--success-bg); color:var(--success); }
-  .kpi-icon.critical{ background:rgba(var(--critical-rgb),.12); color:var(--critical); }
-  .kpi-label{ font-size:11px; color:var(--text-muted); font-weight:500; }
-  .kpi-value{ font-size:23px; font-weight:600; letter-spacing:-.01em; }
+  .btn-sm{ padding:6px 11px; font-size:11.5px; }
+  .btn-danger{ background:transparent; border-color:rgba(var(--danger-rgb),.4); color:var(--danger); }
+  .btn-danger:hover{ background:var(--danger-bg); }
 
   .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
   .field{ display:flex; flex-direction:column; gap:5px; }
@@ -182,41 +163,48 @@
 
   .form-panel{ padding:20px 22px 22px; margin-bottom:18px; }
   .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px 16px; }
-  .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; }
+  .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; } .form-grid .span4{ grid-column:1/-1; }
   @media (max-width:680px){ .form-grid .span2, .form-grid .span3{ grid-column:span 1; } }
+  @media (max-width:640px){
+    select, input[type="text"], input[type="date"], input[type="number"], textarea{ font-size:16px; }
+    .form-actions{ flex-direction:column; align-items:stretch; }
+    .form-actions .btn{ width:100%; justify-content:center; min-height:46px; }
+  }
   .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
-  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  .checkline{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:500; margin-bottom:6px; }
+  .checkline input{ width:16px; height:16px; accent-color:var(--accent); cursor:pointer; }
 
   .table-panel{ overflow:auto; max-height:70vh; }
-  table.reg{ border-collapse:collapse; width:100%; min-width:1240px; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
   table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
   table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
-  table.reg tbody tr{ border-left:3px solid transparent; transition:background .12s ease; }
+  table.reg tbody tr{ transition:background .12s ease; }
   table.reg tbody tr:hover{ background:var(--bg-2); }
-  table.reg tbody tr.late{ border-left-color:var(--danger); background:rgba(var(--danger-rgb),.04); }
-  table.reg tbody tr.nonconforme{ border-left-color:var(--critical); }
-  table.reg tbody td.wrap{ white-space:normal; min-width:180px; }
   table.reg thead th#thActions{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
   table.reg tbody td.actions-float{ position:sticky; right:0; z-index:1; background:var(--surface-el); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); white-space:nowrap; }
   table.reg tbody tr:hover td.actions-float{ background:var(--bg-2); }
 
-  .status-chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
-  .status-chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .status-chip.ok{ color:var(--success); background:var(--success-bg); } .status-chip.ok::before{ background:var(--success); }
-  .status-chip.soon{ color:var(--warning); background:var(--warning-bg); } .status-chip.soon::before{ background:var(--warning); }
-  .status-chip.late{ color:var(--danger); background:var(--danger-bg); } .status-chip.late::before{ background:var(--danger); }
-  .conf-chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
-  .conf-chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .conf-chip.c-conforme{ color:var(--success); background:var(--success-bg); } .conf-chip.c-conforme::before{ background:var(--success); }
-  .conf-chip.c-reserves{ color:var(--warning); background:var(--warning-bg); } .conf-chip.c-reserves::before{ background:var(--warning); }
-  .conf-chip.c-non{ color:var(--danger); background:var(--danger-bg); } .conf-chip.c-non::before{ background:var(--danger); }
-  .echeance-overdue{ color:var(--danger); font-weight:600; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.complet{ color:var(--success); background:var(--success-bg); } .chip.complet::before{ background:var(--success); }
+  .chip.incomplet{ color:var(--danger); background:var(--danger-bg); } .chip.incomplet::before{ background:var(--danger); }
   .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
   .act-edit:hover{ text-decoration:underline; }
   .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
   .act-del:hover{ text-decoration:underline; }
   .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
   .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+  .readonly-banner{ display:flex; align-items:center; gap:8px; padding:9px 14px; margin-bottom:14px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); font-size:12px; color:var(--text-muted); }
+
+  .dossier-header{ display:flex; flex-wrap:wrap; gap:18px; padding:14px 16px; background:var(--bg-2); border-radius:var(--r-sm); margin-bottom:18px; font-size:12.5px; }
+  .dossier-header b{ color:var(--text); }
+  .section-title{ font-size:13.5px; font-weight:600; margin:18px 0 10px; padding-top:14px; border-top:1px solid var(--border); }
+  .section-title:first-child{ margin-top:0; padding-top:0; border-top:none; }
+  .dyn-list{ display:flex; flex-direction:column; gap:8px; margin:6px 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 10px; background:var(--bg-2); border-radius:var(--r-sm); }
+  .dyn-row input, .dyn-row select{ min-width:130px; flex:1 1 130px; }
+  .method-note{ font-size:11.5px; color:var(--text-faint); margin:-2px 0 10px; }
 </style>
 
 <script>
@@ -248,7 +236,6 @@
   <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
   <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
-  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
   <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
 </defs>
@@ -278,7 +265,7 @@
         <div class="nav-label">Suivi</div>
         <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
         <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
-        <a class="nav-item active" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
         <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
         <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
         <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
@@ -288,10 +275,10 @@
         <a class="nav-item" id="navDeclarerAtmp" href="saisie-rh.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
         <a class="nav-item" id="navEvaluerDuerp" href="saisie-duerp.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
       </div>
-      <div class="nav-section" id="navAdministratif" style="display:none;">
+      <div class="nav-section">
         <div class="nav-label">Administratif</div>
         <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
-        <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
+        <a class="nav-item active" href="accident-analyse.html"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
       </div>
       <div class="nav-section" id="navPilotage" style="display:none;">
         <div class="nav-label">Pilotage</div>
@@ -311,7 +298,7 @@
   <div class="main">
     <header class="topbar">
       <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
-      <div class="breadcrumb">Suivi / <b>Vérifications Périodiques</b></div>
+      <div class="breadcrumb">Administratif / <b>Analyse d'accident</b></div>
       <div class="topbar-right">
         <span class="role-chip" id="roleChip">—</span>
         <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
@@ -321,93 +308,115 @@
     <div class="content">
       <header class="page-summary">
         <div class="page-summary-id">
-          <div class="page-summary-icon"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-git-branch"/></svg></div>
           <div class="page-summary-text">
-            <h1>Vérifications Périodiques</h1>
-            <p title="Suivi des contrôles techniques réglementaires réalisés par des organismes agréés (APAVE, Bureau Veritas, SOCOTEC, DEKRA, Qualiconsult…) sur les équipements et installations. Cet inventaire est un point de départ illustratif à compléter et corriger par les équipes RH/HSE avec le patrimoine réel de la collectivité.">Suivi des contrôles techniques réglementaires réalisés par des organismes agréés (APAVE, Bureau Veritas, SOCOTEC, DEKRA, Qualiconsult…) sur les équipements et installations. Cet inventaire est un point de départ illustratif à compléter et corriger par les équipes RH/HSE avec le patrimoine réel de la collectivité.</p>
+            <h1>Analyse d'accident</h1>
+            <p title="Analyse des causes d'un accident (arbre des causes, 5 Pourquoi ou Ishikawa) rattachée à chaque événement du Registre AT/MP — les actions correctives alimentent le Plan d'Actions.">Analyse des causes d'un accident (arbre des causes, 5 Pourquoi ou Ishikawa) rattachée à chaque événement du Registre AT/MP — les actions correctives alimentent le Plan d'Actions.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
           <div class="ps-kpi">
-            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-check-circle"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Équipements</span></div>
-          </div>
-          <div class="ps-kpi">
-            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-shield-check"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiOk">–</span><span class="ps-kpi-label">À jour</span></div>
-          </div>
-          <div class="ps-kpi">
-            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-activity"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiSoon">–</span><span class="ps-kpi-label">À programmer</span></div>
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-git-branch"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiAnalyses">–</span><span class="ps-kpi-label">Analyses réalisées</span></div>
           </div>
           <div class="ps-kpi">
             <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiLate">–</span><span class="ps-kpi-label">En retard</span></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEnAttente">–</span><span class="ps-kpi-label">Sans analyse</span></div>
           </div>
           <div class="ps-kpi">
-            <div class="ps-kpi-icon critical"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiNonConforme">–</span><span class="ps-kpi-label">Non conformes</span></div>
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiActionsEnCours">–</span><span class="ps-kpi-label">Actions en cours</span></div>
           </div>
         </div>
       </header>
 
       <div class="mobile-notice" id="mobileNotice">
-        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord ou la déclaration rapide.</span>
+        <span>Cette page est optimisée pour un usage sur ordinateur.</span>
         <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="readonly-banner" id="readonlyBanner" style="display:none;">
+        <svg class="icon" style="width:15px;height:15px"><use href="#i-shield"/></svg>
+        Accès en lecture seule — vous pouvez consulter les analyses mais pas les modifier.
       </div>
 
       <div class="panel console">
         <div class="field"><span class="flabel">Collectivité</span>
           <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
         </div>
-        <div class="field"><span class="flabel">Catégorie</span><select id="fCategorie"></select></div>
-        <div class="field"><span class="flabel">Statut planning</span>
-          <select id="fStatut"><option value="all">Tous</option><option value="À jour">À jour</option><option value="À programmer">À programmer</option><option value="En retard">En retard</option></select>
-        </div>
-        <div class="field"><span class="flabel">Conformité</span>
-          <select id="fConformite"><option value="all">Toutes</option><option value="Conforme">Conforme</option><option value="Conforme avec réserves">Conforme avec réserves</option><option value="Non conforme">Non conforme</option></select>
+        <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
+        <div class="field"><span class="flabel">Statut analyse</span>
+          <select id="fStatutAnalyse"><option value="all">Tous</option><option value="faite">Faite</option><option value="attente">En attente</option></select>
         </div>
         <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
-        <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> équipements</span>
+        <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> événements</span>
       </div>
 
-      <div class="panel form-panel" id="formPanel" style="display:none;">
-        <div class="panel-head"><h3 class="panel-title" id="formTitle">Nouvel équipement</h3></div>
-        <form id="verifForm">
-          <input type="hidden" id="fId">
+      <div class="panel form-panel" id="detailPanel" style="display:none;">
+        <div class="panel-head"><h3 class="panel-title" id="detailTitle">Analyse</h3></div>
+        <div class="dossier-header" id="analyseHeader"></div>
+
+        <div class="form-grid">
+          <div class="span2">
+            <label for="anMethode">Méthode d'analyse</label>
+            <select id="anMethode">
+              <option value="">Choisir une méthode…</option>
+              <option value="Arbre des causes">Arbre des causes (INRS)</option>
+              <option value="5 Pourquoi">5 Pourquoi</option>
+              <option value="Ishikawa">Ishikawa (causes/effet)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="secArbre" style="display:none;">
+          <div class="section-title">Arbre des causes — faits chronologiques</div>
+          <div class="method-note">Reconstituez les faits dans l'ordre, en distinguant fait constaté / opinion, et indiquez de quel fait chacun découle.</div>
+          <div class="dyn-list" id="faitsList"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="btnAddFait"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un fait</button>
+        </div>
+
+        <div id="sec5P" style="display:none;">
+          <div class="section-title">5 Pourquoi</div>
+          <div class="dyn-list" id="pourquoiList"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="btnAddPourquoi"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un « Pourquoi »</button>
+        </div>
+
+        <div id="secIshikawa" style="display:none;">
+          <div class="section-title">Ishikawa — causes par famille</div>
+          <div class="method-note">Une cause par ligne dans chaque catégorie.</div>
           <div class="form-grid">
-            <div class="span2"><label for="fEquipement">Équipement</label><input type="text" id="fEquipement" required placeholder="ex. Extincteurs — Hôtel de Ville"></div>
-            <div><label for="fCategorieForm">Catégorie</label><select id="fCategorieForm" required></select></div>
-            <div><label for="fSite">Site</label><input type="text" id="fSite" required placeholder="ex. Hôtel de Ville"></div>
-            <div><label for="fCollectiviteForm">Collectivité</label>
-              <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
-            </div>
-            <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
-            <div><label for="fOrganisme">Organisme agréé</label><input type="text" id="fOrganisme" placeholder="ex. APAVE"></div>
-            <div><label for="fPeriodicite">Périodicité (mois)</label><input type="number" id="fPeriodicite" min="1" required></div>
-            <div><label for="fDateDerniere">Dernière vérification</label><input type="date" id="fDateDerniere" required></div>
-            <div><label for="fConformiteForm">Conformité</label>
-              <select id="fConformiteForm"><option value="Conforme">Conforme</option><option value="Conforme avec réserves">Conforme avec réserves</option><option value="Non conforme">Non conforme</option></select>
-            </div>
-            <div class="span3"><label for="fCommentaire">Commentaire</label><textarea id="fCommentaire" placeholder="Observations, réserves, actions à mener…"></textarea></div>
+            <div><label for="ishMateriel">Matériel</label><textarea id="ishMateriel" placeholder="ex. équipement défectueux…"></textarea></div>
+            <div><label for="ishMethode">Méthode</label><textarea id="ishMethode" placeholder="ex. procédure absente ou non suivie…"></textarea></div>
+            <div><label for="ishMainOeuvre">Main-d'œuvre</label><textarea id="ishMainOeuvre" placeholder="ex. formation insuffisante…"></textarea></div>
+            <div><label for="ishMilieu">Milieu</label><textarea id="ishMilieu" placeholder="ex. éclairage, bruit, encombrement…"></textarea></div>
+            <div><label for="ishMatiere">Matière</label><textarea id="ishMatiere" placeholder="ex. produit inadapté…"></textarea></div>
           </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
-            <button type="button" class="btn btn-ghost" id="btnCancelForm">Annuler</button>
-          </div>
-        </form>
+        </div>
+
+        <div class="section-title">Conclusion</div>
+        <textarea id="anConclusion" placeholder="Synthèse de l'analyse, causes profondes retenues…"></textarea>
+
+        <div class="section-title">Actions correctives</div>
+        <div class="method-note">Ces actions alimentent automatiquement le Plan d'Actions (origine « Analyse »).</div>
+        <div class="dyn-list" id="actionsList"></div>
+        <button type="button" class="btn btn-ghost btn-sm" id="btnAddAction"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une action corrective</button>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="btnSaveAnalyse">Enregistrer l'analyse</button>
+          <button type="button" class="btn btn-ghost" id="btnCloseAnalyse">Fermer</button>
+        </div>
       </div>
 
       <div class="panel" style="padding:20px 22px 22px;">
         <div class="panel-head">
-          <h3 class="panel-title">Équipements &amp; installations</h3>
+          <h3 class="panel-title">Événements AT/MP</h3>
           <div class="panel-actions" id="panelActionsBtns"></div>
         </div>
         <div class="table-panel">
           <table class="reg">
             <thead>
               <tr>
-                <th>Équipement</th><th>Catégorie</th><th>Site / Service</th><th>Organisme</th><th>Dernière vérif.</th><th>Prochaine échéance</th><th>Statut</th><th>Conformité</th>
+                <th>Nom</th><th>Prénom</th><th>Date AT</th><th>Type</th><th>Service</th><th>Méthode</th><th>Statut analyse</th>
                 <th id="thActions"></th>
               </tr>
             </thead>
@@ -416,7 +425,7 @@
         </div>
       </div>
 
-      <p class="footnote">Périodicités réglementaires standard appliquées par catégorie ; à ajuster selon les prescriptions spécifiques de chaque organisme de contrôle.</p>
+      <p class="footnote">Les événements listés proviennent du Registre AT/MP déjà consulté dans ce navigateur. Version V1 : structure en liste simple (pas d'éditeur graphique) — une visualisation interactive de l'arbre des causes pourra être envisagée dans une itération future.</p>
     </div>
   </div>
 </div>
@@ -440,24 +449,30 @@
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const role = (session && session.role) || "ag";
-  const canEdit = role === "rh" || role === "admin";
   const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
+
+  // ---------- Contrôle d'accès (permissions granulaires par module) ----------
+  const analysePermLevel = (role === "admin" || role === "rh") ? "write" : ((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none");
+  const canAnalyse = analysePermLevel !== "none";
+  const canAnalyseWrite = analysePermLevel === "write";
+  if (!canAnalyse){ location.href = "dashboard.html"; }
+
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
   $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
   $("roleChip").textContent = role.toUpperCase();
-  if (!canEdit){ $("roleChip").classList.add("ag"); }
+  if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
+  const canEdit = role === "rh" || role === "admin";
   const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
   if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
   if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
   const canAtmpAdmin = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["atmp-admin"]);
-  const canAccidentAnalyse = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["accident-analyse"]);
-  if (canAtmpAdmin){ $("navAdministratif").style.display = ""; $("navAtmpAdmin").style.display = ""; }
-  if (canAccidentAnalyse){ $("navAdministratif").style.display = ""; $("navAccidentAnalyse").style.display = ""; }
+  if (canAtmpAdmin){ $("navAtmpAdmin").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
+  if (!canAnalyseWrite){ $("readonlyBanner").style.display = "flex"; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   const AUDIT_KEY = "vigie_hse_audit_log";
@@ -513,361 +528,300 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
 
-  // ---------- Catégories & périodicités standard ----------
-  const CATEGORIES = [
-    ["Installations électriques", 12],
-    ["Extincteurs & moyens de secours incendie", 12],
-    ["Systèmes de désenfumage / SSI", 12],
-    ["Ascenseurs & monte-charges", 12],
-    ["Aires de jeux", 12],
-    ["Équipements de levage (nacelles, grues)", 6],
-    ["Échafaudages", 3],
-    ["Portes & portails automatiques", 6],
-    ["Chaudières & installations de chauffage", 12],
-    ["Structures gonflables", 12],
-  ];
-  const PERIODICITE_BY_CAT = Object.fromEntries(CATEGORIES);
-
-  // ---------- Génération du parc d'équipements illustratif ----------
-  function hashStr(s){
-    let h = 0;
-    for (let i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) | 0; }
-    return Math.abs(h);
-  }
-  const SITES = [
-    { site:"Hôtel de Ville", service:"Accueil & Affaires Générales", collectivite:"Ville" },
-    { site:"Mairie annexe", service:"Affaires Financières", collectivite:"Ville" },
-    { site:"Complexe sportif municipal", service:"Sports & Vie Associative", collectivite:"Ville" },
-    { site:"Cuisine Centrale", service:"Restauration Collective", collectivite:"Ville" },
-    { site:"Ateliers municipaux", service:"Patrimoine Bâti", collectivite:"Ville" },
-    { site:"Salle polyvalente Enfance", service:"Enfance & Jeunesse", collectivite:"Ville" },
-    { site:"Direction Générale — siège agglo", service:"Direction Générale des Services", collectivite:"Agglomération" },
-    { site:"Médiathèque", service:"Réseau des Médiathèques", collectivite:"Agglomération" },
-    { site:"Conservatoire de musique", service:"Conservatoire de Musique", collectivite:"Agglomération" },
-    { site:"Déchetterie", service:"Collecte & Propreté", collectivite:"Agglomération" },
-  ];
-  const ORGANISMES = ["Contrôle Sud Vérification", "Bureau de Contrôle Occitan", "Sécuritech Diagnostic", "Vérital Contrôle", "Organisme Régional de Contrôle"];
-  const CONFORMITE_PLAN = ["Conforme","Conforme","Conforme","Conforme","Conforme","Conforme","Conforme","Conforme avec réserves","Conforme avec réserves","Non conforme"];
-
-  function buildEquipmentSeeds(){
+  // ---------- Événements AT/MP (lecture seule, source = Registre AT/MP) ----------
+  function loadAtmpEvents(){
+    try { const raw = localStorage.getItem("vigie_hse_dataset"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
     return [];
   }
+  let ATMP_EVENTS = loadAtmpEvents();
+  if (isScoped){ ATMP_EVENTS = ATMP_EVENTS.filter(d => myServices.includes(d.service)); }
 
-  // ---------- Dataset (always-merge) ----------
-  const STORAGE_KEY = "vigie_hse_verifications";
-  function genId(){ return "man-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-  function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
-  function loadDataset(){
-    let stored = [];
-    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    const seedList = buildEquipmentSeeds();
-    const storedById = new Map(stored.map(r => [r.id, r]));
-    const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
-    const seedIds = new Set(seeded.map(r => r.id));
-    const userExtra = stored.filter(r => !seedIds.has(r.id));
-    const merged = seeded.concat(userExtra);
-    saveDataset(merged);
-    return merged;
+  // ---------- Analyses d'accident ----------
+  const ANALYSES_KEY = "vigie_hse_analyses_accident";
+  function loadAnalyses(){
+    try { const raw = localStorage.getItem(ANALYSES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
+    return [];
   }
-  let DATASET = loadDataset();
-  if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
-
-  function computeStatus(v){
-    const d = new Date(v.dateDerniere);
-    const prochaine = new Date(d);
-    prochaine.setMonth(prochaine.getMonth() + (Number(v.periodiciteMois) || 12));
-    const today = new Date();
-    const in60 = new Date(today); in60.setDate(in60.getDate() + 60);
-    let statut = "À jour", cls = "ok";
-    if (prochaine < today){ statut = "En retard"; cls = "late"; }
-    else if (prochaine <= in60){ statut = "À programmer"; cls = "soon"; }
-    return { prochaine: prochaine.toISOString().slice(0,10), statut, cls };
+  function saveAnalyses(a){ try { localStorage.setItem(ANALYSES_KEY, JSON.stringify(a)); } catch(e){} }
+  let ANALYSES = loadAnalyses();
+  function analyseFor(atmpId){ return ANALYSES.find(a => a.atmpId === atmpId) || null; }
+  function emptyAnalyse(atmpId){
+    return {
+      id: "ana-" + atmpId, atmpId,
+      methode: "",
+      faits: [],
+      pourquoi: [],
+      ishikawa: { materiel:[], methode:[], mainOeuvre:[], milieu:[], matiere:[] },
+      conclusion: "",
+      actions: [],
+      dateAnalyse: "", auteur: "",
+    };
   }
-  const confCls = { "Conforme":"c-conforme", "Conforme avec réserves":"c-reserves", "Non conforme":"c-non" };
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
   // ---------- Filtres ----------
-  const fCollectivite = $("fCollectivite"), fCategorie = $("fCategorie"), fStatut = $("fStatut"), fConformite = $("fConformite");
-  fCategorie.innerHTML = `<option value="all">Toutes</option>` + CATEGORIES.map(c => `<option value="${c[0]}">${c[0]}</option>`).join("");
+  const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatutAnalyse = $("fStatutAnalyse");
+  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function fillServiceOptions(){
+    const col = fCollectivite.value;
+    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const current = fService.value;
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.value = list.includes(current) ? current : "all";
+  }
+  fillServiceOptions();
 
   function render(){
-    const col = fCollectivite.value, cat = fCategorie.value, st = fStatut.value, cf = fConformite.value;
-    const withStatus = DATASET.map(v => Object.assign({}, v, computeStatus(v)));
-    let rows = withStatus.filter(v =>
-      (col === "all" || v.collectivite === col) &&
-      (cat === "all" || v.categorie === cat) &&
-      (st === "all" || v.statut === st) &&
-      (cf === "all" || v.conformite === cf)
-    );
-    rows = rows.slice().sort((a,b) => a.prochaine.localeCompare(b.prochaine));
+    const col = fCollectivite.value, svc = fService.value, statutF = fStatutAnalyse.value;
+    let rows = ATMP_EVENTS.filter(a =>
+      (col === "all" || a.collectivite === col) &&
+      (svc === "all" || a.service === svc)
+    ).map(a => {
+      const an = analyseFor(a.id);
+      const faite = !!(an && an.methode);
+      return { evt:a, analyse:an, faite };
+    });
+    if (statutF !== "all"){ rows = rows.filter(r => (statutF === "faite") === r.faite); }
+    rows = rows.slice().sort((a,b) => (b.evt.dateAT || "").localeCompare(a.evt.dateAT || ""));
 
-    $("kpiTotal").textContent = DATASET.length;
-    $("kpiOk").textContent = withStatus.filter(v => v.statut === "À jour").length;
-    $("kpiSoon").textContent = withStatus.filter(v => v.statut === "À programmer").length;
-    $("kpiLate").textContent = withStatus.filter(v => v.statut === "En retard").length;
-    $("kpiNonConforme").textContent = DATASET.filter(v => v.conformite === "Non conforme").length;
+    $("kpiAnalyses").textContent = ATMP_EVENTS.filter(a => { const an = analyseFor(a.id); return !!(an && an.methode); }).length;
+    $("kpiEnAttente").textContent = ATMP_EVENTS.filter(a => { const an = analyseFor(a.id); return !(an && an.methode); }).length;
+    $("kpiActionsEnCours").textContent = ANALYSES.reduce((s,a) => s + (a.actions||[]).filter(x => x.statut !== "Fait").length, 0);
     $("resultCount").textContent = rows.length;
-    $("totalCount").textContent = DATASET.length;
+    $("totalCount").textContent = ATMP_EVENTS.length;
 
     const tbody = $("tbody");
-    const colspan = canEdit ? 9 : 8;
     if (rows.length === 0){
-      tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">${DATASET.length === 0 ? "Aucun équipement suivi pour le moment." : "Aucun équipement ne correspond aux filtres sélectionnés."}</td></tr>`;
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="8">${ATMP_EVENTS.length === 0 ? "Aucun événement AT/MP trouvé — consultez d'abord le Registre AT/MP dans ce navigateur." : "Aucun événement ne correspond aux filtres sélectionnés."}</td></tr>`;
       return;
     }
-    tbody.innerHTML = rows.map(v => `
-      <tr class="${v.cls === 'late' ? 'late' : ''} ${v.conformite === 'Non conforme' ? 'nonconforme' : ''}" data-id="${v.id}">
-        <td class="wrap">${v.equipement}</td>
-        <td>${v.categorie}</td>
-        <td>${v.site} <span style="color:var(--text-faint)">· ${v.service}</span></td>
-        <td>${v.organisme || '—'}</td>
-        <td>${v.dateDerniere}</td>
-        <td class="${v.cls === 'late' ? 'echeance-overdue' : ''}">${v.prochaine}</td>
-        <td><span class="status-chip ${v.cls}">${v.statut}</span></td>
-        <td><span class="conf-chip ${confCls[v.conformite] || 'c-conforme'}">${v.conformite}</span></td>
-        ${canEdit ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${v.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${v.id}">Suppr.</button>
-        </td>` : ''}
+    tbody.innerHTML = rows.map(r => `
+      <tr data-id="${r.evt.id}">
+        <td>${r.evt.nom || '—'}</td>
+        <td>${r.evt.prenom || '—'}</td>
+        <td>${r.evt.dateAT || '—'}</td>
+        <td>${r.evt.typeAtMp || '—'}</td>
+        <td>${r.evt.service || '—'}</td>
+        <td>${(r.analyse && r.analyse.methode) || '—'}</td>
+        <td><span class="chip ${r.faite ? 'complet' : 'incomplet'}">${r.faite ? 'Faite' : 'En attente'}</span></td>
+        <td class="actions-float"><button type="button" class="act-edit" data-open="${r.evt.id}">${canAnalyseWrite ? 'Ouvrir' : 'Consulter'}</button></td>
       </tr>`).join("");
   }
 
-  fCollectivite.addEventListener("change", render);
-  fCategorie.addEventListener("change", render);
-  fStatut.addEventListener("change", render);
-  fConformite.addEventListener("change", render);
-  $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fCategorie.value = "all"; fStatut.value = "all"; fConformite.value = "all"; render();
+  fCollectivite.addEventListener("change", () => { fillServiceOptions(); render(); });
+  fService.addEventListener("change", render);
+  fStatutAnalyse.addEventListener("change", render);
+  $("btnReset").addEventListener("click", () => { fCollectivite.value = "all"; fillServiceOptions(); fStatutAnalyse.value = "all"; render(); });
+
+  // ---------- Panneau détail ----------
+  let currentAtmpId = null;
+  let currentFaits = [];
+  let currentPourquoi = [];
+  let currentActions = [];
+
+  function renderFaitsList(){
+    $("faitsList").innerHTML = currentFaits.map((f, i) => `
+      <div class="dyn-row" data-idx="${i}">
+        <input type="date" class="fait-date" value="${f.date || ''}" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="text" class="fait-texte" placeholder="Fait constaté…" value="${(f.texte||'').replace(/"/g,'&quot;')}" style="flex:2 1 220px;" ${canAnalyseWrite ? '' : 'disabled'}>
+        <select class="fait-type" ${canAnalyseWrite ? '' : 'disabled'}>
+          <option value="Fait" ${f.type !== "Opinion" ? "selected" : ""}>Fait</option>
+          <option value="Opinion" ${f.type === "Opinion" ? "selected" : ""}>Opinion</option>
+        </select>
+        <input type="text" class="fait-causede" placeholder="Cause de (réf. fait)" value="${(f.causeDe||'').replace(/"/g,'&quot;')}" ${canAnalyseWrite ? '' : 'disabled'}>
+        ${canAnalyseWrite ? `<button type="button" class="act-del" data-remove-fait="${i}">Suppr.</button>` : ''}
+      </div>`).join("") || `<div style="font-size:12px;color:var(--text-faint)">Aucun fait enregistré.</div>`;
+  }
+  $("btnAddFait").addEventListener("click", () => {
+    if (!canAnalyseWrite) return;
+    currentFaits.push({ id: genId("f"), date:"", texte:"", type:"Fait", causeDe:"" });
+    renderFaitsList();
+  });
+  $("faitsList").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-remove-fait]");
+    if (btn){ currentFaits.splice(Number(btn.dataset.removeFait), 1); renderFaitsList(); }
   });
 
-  if (canEdit){
-    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel équipement</button>`;
+  function renderPourquoiList(){
+    $("pourquoiList").innerHTML = currentPourquoi.map((p, i) => `
+      <div class="dyn-row" data-idx="${i}">
+        <input type="text" class="pq-question" placeholder="Pourquoi… ?" value="${(p.question||'').replace(/"/g,'&quot;')}" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="text" class="pq-reponse" placeholder="Parce que…" value="${(p.reponse||'').replace(/"/g,'&quot;')}" ${canAnalyseWrite ? '' : 'disabled'}>
+        ${canAnalyseWrite ? `<button type="button" class="act-del" data-remove-pq="${i}">Suppr.</button>` : ''}
+      </div>`).join("") || `<div style="font-size:12px;color:var(--text-faint)">Aucun « Pourquoi » enregistré.</div>`;
+  }
+  $("btnAddPourquoi").addEventListener("click", () => {
+    if (!canAnalyseWrite) return;
+    currentPourquoi.push({ question:"", reponse:"" });
+    renderPourquoiList();
+  });
+  $("pourquoiList").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-remove-pq]");
+    if (btn){ currentPourquoi.splice(Number(btn.dataset.removePq), 1); renderPourquoiList(); }
+  });
 
-    function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
-    function mapImportedRow(raw){
-      const n = {};
-      Object.keys(raw).forEach(k => { n[normKeyImp(k)] = raw[k]; });
-      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
-      const equipement = String(pick(["equipement"])).trim();
-      if (!equipement) return null;
-      const collectiviteRaw = normKeyImp(pick(["collectivite","structure"]));
-      const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
-      const categorie = String(pick(["categorie"])).trim();
-      const conformite = String(pick(["conformite"])).trim();
-      const catNames = CATEGORIES.map(c => c[0]);
-      return {
-        id: String(pick(["id"])).trim() || "",
-        equipement, collectivite,
-        categorie: catNames.includes(categorie) ? categorie : (catNames[0] || categorie),
-        site: String(pick(["site"])).trim(),
-        service: String(pick(["service"])).trim(),
-        organisme: String(pick(["organisme"])).trim(),
-        dateDerniere: parseDateValueImp(pick(["derniere verification","date derniere","dateDerniere"])),
-        periodiciteMois: PERIODICITE_BY_CAT[categorie] || 12,
-        conformite: ["Conforme","Conforme avec réserves","Non conforme"].includes(conformite) ? conformite : "Conforme",
-        commentaire: String(pick(["commentaire"])).trim(),
-      };
-    }
-    function parseDateValueImp(v){
-      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
-      const s = String(v || "").trim();
-      if (!s) return "";
-      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
-      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
-      const d = new Date(s);
-      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-      return "";
-    }
-    $("btnImport").addEventListener("click", () => $("importFile").click());
-    $("importFile").addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      try {
-        const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
-        const sheet = wb.Sheets[wb.SheetNames[0]];
-        const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-        if (rawRows.length === 0){
-          alert("Le fichier semble vide — aucune ligne n'a été trouvée dans la première feuille.");
-          e.target.value = "";
-          return;
-        }
-        let added = 0, updated = 0, skipped = 0;
-        rawRows.forEach(raw => {
-          const rec = mapImportedRow(raw);
-          if (!rec){ skipped++; return; }
-          const idx = rec.id ? DATASET.findIndex(d => d.id === rec.id) : -1;
-          if (idx >= 0){ DATASET[idx] = rec; updated++; }
-          else { rec.id = rec.id || genId(); DATASET.push(rec); added++; }
-        });
-        saveDataset(DATASET);
-        render();
-        if (added === 0 && updated === 0){
-          alert(`Aucune ligne n'a pu être importée (${skipped} ignorée(s)). Vérifiez que le fichier contient bien les colonnes attendues (Équipement…).`);
-        } else {
-          alert(`Import terminé — ${added} ligne(s) ajoutée(s), ${updated} mise(s) à jour, ${skipped} ignorée(s).`);
-        }
-      } catch (err){
-        alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
-      }
-      e.target.value = "";
-    });
+  function renderActionsList(){
+    $("actionsList").innerHTML = currentActions.map((a, i) => `
+      <div class="dyn-row" data-idx="${i}">
+        <input type="text" class="act-description" placeholder="Action corrective…" value="${(a.description||'').replace(/"/g,'&quot;')}" style="flex:2 1 220px;" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="text" class="act-responsable" placeholder="Responsable" value="${(a.responsable||'').replace(/"/g,'&quot;')}" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="date" class="act-echeance" value="${a.echeance || ''}" ${canAnalyseWrite ? '' : 'disabled'}>
+        <select class="act-statut" ${canAnalyseWrite ? '' : 'disabled'}>
+          <option value="À faire" ${(a.statut||"À faire") === "À faire" ? "selected" : ""}>À faire</option>
+          <option value="En cours" ${a.statut === "En cours" ? "selected" : ""}>En cours</option>
+          <option value="Fait" ${a.statut === "Fait" ? "selected" : ""}>Fait</option>
+        </select>
+        ${canAnalyseWrite ? `<button type="button" class="act-del" data-remove-action="${i}">Suppr.</button>` : ''}
+      </div>`).join("") || `<div style="font-size:12px;color:var(--text-faint)">Aucune action corrective enregistrée.</div>`;
+  }
+  $("btnAddAction").addEventListener("click", () => {
+    if (!canAnalyseWrite) return;
+    currentActions.push({ id: genId("act"), description:"", responsable:"", echeance:"", statut:"À faire" });
+    renderActionsList();
+  });
+  $("actionsList").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-remove-action]");
+    if (btn){ currentActions.splice(Number(btn.dataset.removeAction), 1); renderActionsList(); }
+  });
 
-    $("btnExport").addEventListener("click", () => {
-      const rows = DATASET.map(v => Object.assign({}, v, computeStatus(v))).map(v => ({
-        "ID": v.id, "Équipement": v.equipement, "Catégorie": v.categorie, "Collectivité": v.collectivite || "Ville",
-        "Site": v.site, "Service": v.service, "Organisme": v.organisme || "", "Dernière vérification": v.dateDerniere,
-        "Prochaine échéance": v.prochaine, "Statut": v.statut, "Conformité": v.conformite, "Commentaire": v.commentaire || "",
-      }));
-      const ws = XLSX.utils.json_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Vérifications");
-      const today = new Date().toISOString().slice(0,10);
-      XLSX.writeFile(wb, `verifications-periodiques_${today}.xlsx`);
-    });
+  function updateMethodSections(){
+    const m = $("anMethode").value;
+    $("secArbre").style.display = m === "Arbre des causes" ? "" : "none";
+    $("sec5P").style.display = m === "5 Pourquoi" ? "" : "none";
+    $("secIshikawa").style.display = m === "Ishikawa" ? "" : "none";
+  }
+  $("anMethode").addEventListener("change", updateMethodSections);
 
-    const formPanel = $("formPanel"), form = $("verifForm");
-    $("fCategorieForm").innerHTML = CATEGORIES.map(c => `<option value="${c[0]}">${c[0]}</option>`).join("");
-    function fillFormServiceOptions(col){
-      const list = servicesForCollectivite(col);
-      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
-    }
-    fillFormServiceOptions("Ville");
-    $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
-    $("fCategorieForm").addEventListener("change", (e) => {
-      const p = PERIODICITE_BY_CAT[e.target.value];
-      if (p) $("fPeriodicite").value = p;
-    });
+  function openAnalyse(atmpId){
+    const evt = ATMP_EVENTS.find(e => e.id === atmpId);
+    if (!evt) return;
+    currentAtmpId = atmpId;
+    const a = analyseFor(atmpId) || emptyAnalyse(atmpId);
+    currentFaits = (a.faits || []).map(f => Object.assign({}, f));
+    currentPourquoi = (a.pourquoi || []).map(p => Object.assign({}, p));
+    currentActions = (a.actions || []).map(x => Object.assign({}, x));
 
-    function openForm(rec){
-      form.reset();
-      if (rec){
-        $("formTitle").textContent = "Modifier l'équipement";
-        $("fId").value = rec.id;
-        $("fEquipement").value = rec.equipement;
-        $("fCategorieForm").value = rec.categorie;
-        $("fSite").value = rec.site;
-        $("fCollectiviteForm").value = rec.collectivite;
-        fillFormServiceOptions(rec.collectivite);
-        $("fServiceForm").value = rec.service;
-        $("fOrganisme").value = rec.organisme || "";
-        $("fPeriodicite").value = rec.periodiciteMois;
-        $("fDateDerniere").value = rec.dateDerniere || "";
-        $("fConformiteForm").value = rec.conformite || "Conforme";
-        $("fCommentaire").value = rec.commentaire || "";
-      } else {
-        $("formTitle").textContent = "Nouvel équipement";
-        $("fId").value = "";
-        fillFormServiceOptions("Ville");
-        $("fCategorieForm").value = CATEGORIES[0][0];
-        $("fPeriodicite").value = CATEGORIES[0][1];
-        $("fDateDerniere").value = new Date().toISOString().slice(0,10);
-      }
-      formPanel.style.display = "";
-      formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
-    }
-    $("btnNew").addEventListener("click", () => openForm(null));
-    $("btnCancelForm").addEventListener("click", () => { formPanel.style.display = "none"; form.reset(); });
+    $("detailTitle").textContent = `Analyse — ${evt.nom || ''} ${evt.prenom || ''}`;
+    $("analyseHeader").innerHTML = `
+      <div><b>Agent</b><br>${evt.nom || '—'} ${evt.prenom || ''}</div>
+      <div><b>Date AT</b><br>${evt.dateAT || '—'}</div>
+      <div><b>Type</b><br>${evt.typeAtMp || '—'}</div>
+      <div><b>Service</b><br>${evt.service || '—'}</div>
+      <div><b>Collectivité</b><br>${evt.collectivite || 'Ville'}</div>`;
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const id = $("fId").value;
-      const isNew = !id;
+    $("anMethode").value = a.methode || "";
+    updateMethodSections();
+    renderFaitsList();
+    renderPourquoiList();
+    renderActionsList();
+    const ish = a.ishikawa || {};
+    $("ishMateriel").value = (ish.materiel || []).join("\n");
+    $("ishMethode").value = (ish.methode || []).join("\n");
+    $("ishMainOeuvre").value = (ish.mainOeuvre || []).join("\n");
+    $("ishMilieu").value = (ish.milieu || []).join("\n");
+    $("ishMatiere").value = (ish.matiere || []).join("\n");
+    $("anConclusion").value = a.conclusion || "";
+
+    [ "anMethode","ishMateriel","ishMethode","ishMainOeuvre","ishMilieu","ishMatiere","anConclusion" ]
+      .forEach(id => { $(id).disabled = !canAnalyseWrite; });
+    $("btnSaveAnalyse").style.display = canAnalyseWrite ? "" : "none";
+
+    $("detailPanel").style.display = "";
+    $("detailPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  $("tbody").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-open]");
+    if (btn) openAnalyse(btn.dataset.open);
+  });
+  $("btnCloseAnalyse").addEventListener("click", () => { $("detailPanel").style.display = "none"; currentAtmpId = null; });
+
+  if (canAnalyseWrite){
+    $("btnSaveAnalyse").addEventListener("click", () => {
+      if (!currentAtmpId) return;
+      if (!$("anMethode").value){ alert("Choisissez une méthode d'analyse avant d'enregistrer."); return; }
+      $("faitsList").querySelectorAll(".dyn-row").forEach((row, i) => {
+        currentFaits[i] = {
+          id: currentFaits[i] ? currentFaits[i].id : genId("f"),
+          date: row.querySelector(".fait-date").value,
+          texte: row.querySelector(".fait-texte").value.trim(),
+          type: row.querySelector(".fait-type").value,
+          causeDe: row.querySelector(".fait-causede").value.trim(),
+        };
+      });
+      $("pourquoiList").querySelectorAll(".dyn-row").forEach((row, i) => {
+        currentPourquoi[i] = { question: row.querySelector(".pq-question").value.trim(), reponse: row.querySelector(".pq-reponse").value.trim() };
+      });
+      $("actionsList").querySelectorAll(".dyn-row").forEach((row, i) => {
+        currentActions[i] = {
+          id: currentActions[i] ? currentActions[i].id : genId("act"),
+          description: row.querySelector(".act-description").value.trim(),
+          responsable: row.querySelector(".act-responsable").value.trim(),
+          echeance: row.querySelector(".act-echeance").value,
+          statut: row.querySelector(".act-statut").value,
+        };
+      });
+      const existing = analyseFor(currentAtmpId);
+      const splitLines = (v) => v.split("\n").map(s => s.trim()).filter(Boolean);
       const rec = {
-        id: id || genId(),
-        equipement: $("fEquipement").value.trim(),
-        categorie: $("fCategorieForm").value,
-        site: $("fSite").value.trim(),
-        collectivite: $("fCollectiviteForm").value,
-        service: $("fServiceForm").value,
-        organisme: $("fOrganisme").value.trim(),
-        periodiciteMois: Number($("fPeriodicite").value) || 12,
-        dateDerniere: $("fDateDerniere").value,
-        conformite: $("fConformiteForm").value,
-        commentaire: $("fCommentaire").value.trim(),
+        id: "ana-" + currentAtmpId, atmpId: currentAtmpId,
+        methode: $("anMethode").value,
+        faits: currentFaits,
+        pourquoi: currentPourquoi,
+        ishikawa: {
+          materiel: splitLines($("ishMateriel").value),
+          methode: splitLines($("ishMethode").value),
+          mainOeuvre: splitLines($("ishMainOeuvre").value),
+          milieu: splitLines($("ishMilieu").value),
+          matiere: splitLines($("ishMatiere").value),
+        },
+        conclusion: $("anConclusion").value.trim(),
+        actions: currentActions,
+        dateAnalyse: (existing && existing.dateAnalyse) || new Date().toISOString().slice(0,10),
+        auteur: session.user,
       };
-      const idx = DATASET.findIndex(d => d.id === rec.id);
-      if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);
-      saveDataset(DATASET);
-      logAudit("Vérifications Périodiques", isNew ? "Création" : "Modification", `${rec.equipement} — ${rec.site}`);
-      formPanel.style.display = "none";
-      form.reset();
+      const idx = ANALYSES.findIndex(x => x.atmpId === currentAtmpId);
+      if (idx >= 0) ANALYSES[idx] = rec; else ANALYSES.push(rec);
+      saveAnalyses(ANALYSES);
+      logAudit("Analyse d'accident", existing ? "Modification" : "Création", `Analyse (${rec.methode}) enregistrée — ${$("detailTitle").textContent}`);
       render();
-    });
-
-    $("tbody").addEventListener("click", (e) => {
-      const editBtn = e.target.closest(".act-edit");
-      if (editBtn){ const rec = DATASET.find(d => d.id === editBtn.dataset.edit); if (rec) openForm(rec); return; }
-      const delBtn = e.target.closest(".act-del");
-      if (delBtn){
-        const rec = DATASET.find(d => d.id === delBtn.dataset.id);
-        if (!rec) return;
-        if (confirm(`Supprimer « ${rec.equipement} » (${rec.site}) ?`)){
-          DATASET = DATASET.filter(d => d.id !== rec.id);
-          saveDataset(DATASET);
-          logAudit("Vérifications Périodiques", "Suppression", `${rec.equipement} — ${rec.site}`);
-          render();
-        }
-      }
+      openAnalyse(currentAtmpId);
     });
   }
 
+  // ---------- Export .xlsx (analyses + actions) ----------
+  $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+  $("btnExport").addEventListener("click", () => {
+    const analyseRows = ATMP_EVENTS.map(evt => {
+      const a = analyseFor(evt.id);
+      return {
+        "Nom": evt.nom, "Prénom": evt.prenom, "Date AT": evt.dateAT, "Service": evt.service,
+        "Méthode": (a && a.methode) || "", "Statut": (a && a.methode) ? "Faite" : "En attente",
+        "Conclusion": (a && a.conclusion) || "", "Date analyse": (a && a.dateAnalyse) || "", "Auteur": (a && a.auteur) || "",
+      };
+    });
+    const actionRows = [];
+    ANALYSES.forEach(a => {
+      const evt = ATMP_EVENTS.find(e => e.id === a.atmpId) || {};
+      (a.actions || []).forEach(act => {
+        if (!act.description) return;
+        actionRows.push({ "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Action": act.description, "Responsable": act.responsable, "Échéance": act.echeance, "Statut": act.statut });
+      });
+    });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(analyseRows), "Analyses");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(actionRows), "Actions");
+    XLSX.writeFile(wb, `analyses-accident_${new Date().toISOString().slice(0,10)}.xlsx`);
+  });
+
   render();
 
-  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
-  fetch("DATATEST/5-REF-verifications-periodiques.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
-    if (!buf || typeof XLSX === "undefined") return;
-    const full = loadDataset();
-    function normKeyDtst(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
-    function parseDateDtst(v){
-      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
-      const s = String(v || "").trim();
-      if (!s) return "";
-      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
-      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
-      const d = new Date(s);
-      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-      return "";
-    }
-    const wb = XLSX.read(buf, { type: "array", cellDates: true });
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-    let changed = false;
-    rawRows.forEach((raw, i) => {
-      const n = {};
-      Object.keys(raw).forEach(k => { n[normKeyDtst(k)] = raw[k]; });
-      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
-      const equipement = String(pick(["equipement"])).trim();
-      if (!equipement) return;
-      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
-      const categorie = String(pick(["categorie"])).trim();
-      const conformite = String(pick(["conformite"])).trim();
-      const catNames = CATEGORIES.map(c => c[0]);
-      const rec = {
-        id: "dtst-verif-" + (i + 1), equipement,
-        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
-        categorie: catNames.includes(categorie) ? categorie : (catNames[0] || categorie),
-        site: String(pick(["site"])).trim(),
-        service: String(pick(["service"])).trim(),
-        organisme: String(pick(["organisme"])).trim(),
-        dateDerniere: parseDateDtst(pick(["derniere verification","date derniere"])),
-        periodiciteMois: PERIODICITE_BY_CAT[categorie] || 12,
-        conformite: ["Conforme","Conforme avec réserves","Non conforme"].includes(conformite) ? conformite : "Conforme",
-        commentaire: String(pick(["commentaire"])).trim(),
-      };
-      if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
-    });
-    if (changed){
-      saveDataset(full);
-      DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
-      render();
-    }
-  }).catch(() => {});
+  // ---------- Ouverture directe depuis le Registre AT/MP (?atmpId=...) ----------
+  (function(){
+    const atmpId = new URLSearchParams(location.search).get("atmpId");
+    if (atmpId && ATMP_EVENTS.some(e => e.id === atmpId)) openAnalyse(atmpId);
+  })();
 
   function tickClock(){
     const now = new Date();

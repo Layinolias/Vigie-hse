@@ -56,7 +56,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 12 | Accueil au poste | ❌ Non démarré (nouveau, retour alpha 2026-09-12) |
 | 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — nécessite un nouveau rôle/compte "Représentant du personnel" |
 | 14 | Gestion administrative RH | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — voir aussi extension du module 7 |
-| 15 | Analyse d'accident (arbre des causes) | ❌ Non démarré (nouveau, 2026-09-12) — lié au jalon J2 |
+| 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
 | 16 | Situations d'urgence & exercices d'évacuation | ❌ Non démarré (nouveau, 2026-09-12) — recoupe l'écart clause 8.2 du jalon J1 |
 | 17 | Entreprises extérieures & Plan de Prévention | ❌ Non démarré (nouveau, 2026-09-12) — recoupe le risque "Coactivité" déjà référencé |
 | 18 | Gestion administrative des dossiers AT/MP & CITIS | ✅ Fait (2026-09-13) — `dossiers-atmp-citis.html`, premier cas d'usage du modèle de permissions granulaires (voir J0) |
@@ -95,7 +95,7 @@ Point soulevé par l'utilisateur suite à un retour de test alpha mentionnant un
 - **Profils préréglés ET personnalisables** : des profils génériques standards (probablement les 4 rôles actuels comme point de départ, plus Préventeur/Représentant du personnel), mais renommables et dont les permissions restent modifiables — sans empêcher la création de profils entièrement sur-mesure.
 - **Lien avec le jalon J0** : cette réflexion rejoint directement le chantier de généralisation du vocabulaire ci-dessus et celui des unités organisationnelles ci-dessous — un système de permissions par (service générique × module × lecture/écriture) est probablement plus facile à généraliser pour un client privé qu'un jeu de rôles nommés spécifiques à une collectivité. À concevoir ensemble plutôt que comme deux chantiers séparés.
 - **Non traité pour l'instant** : cette note capture l'intention, pas une spécification. Avant de coder quoi que ce soit, il faudra définir le modèle de données exact (comment représenter un profil et ses permissions dans `vigie_hse_users`/`vigie_hse_referentials`), et si ce chantier doit rester dans l'architecture localStorage actuelle ou attendre le vrai backend multi-tenant (la gestion de permissions fines par tenant est justement le genre de chantier qui bénéficie d'une vraie base de données).
-- **✅ Premier cas d'usage réel construit le 2026-09-13** : module 18 (Dossiers AT/MP & CITIS, voir plus bas) utilise `u.modulePermissions = { "atmp-admin": "read"|"write" }` plutôt qu'un rôle "Préventeur" codé en dur — exactement la direction "case à cocher par module" envisagée ci-dessus, mais câblée sur un seul module pour l'instant (pas encore le tableau générique module × service × lecture/écriture avec UI d'administration dédiée). Sert de preuve de concept avant de décider si/quand généraliser.
+- **✅ Premier cas d'usage réel construit le 2026-09-13, étendu à deux modules de plus le 2026-09-14** : module 18 (Dossiers AT/MP & CITIS) a ouvert la voie avec `u.modulePermissions = { "atmp-admin": "read"|"write" }` ; la session du 2026-09-14 a ajouté `"atmp-declare"` (déclarer un AT/MP, booléen) et `"accident-analyse"` (module 15, read/write) sur le même principe — trois clés indépendantes plutôt qu'un rôle "Préventeur" codé en dur. Toujours câblé module par module (pas encore le tableau générique module × service × lecture/écriture avec UI d'administration dédiée), mais le mécanisme a maintenant fait ses preuves sur plusieurs cas d'usage réels avant de décider si/quand généraliser.
 
 ### Ce qui doit devenir générique — structure organisationnelle
 
@@ -317,19 +317,21 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 **Annotation pour reprise :** ce volet 2 recoupe directement deux réflexions déjà en cours dans ce document — la généralisation des "unités organisationnelles" (section J0, aujourd'hui figées sur Ville/Agglomération) et le scoping par service du rôle `manager` déjà existant (`session.services`, voir `ETAT-DU-PROJET.md`). Un vrai organigramme donnerait une structure de données propre à ces deux chantiers plutôt que des règles de scoping éparses par module. À concevoir ensemble, pas comme trois chantiers séparés.
 
-## 15. Analyse d'accident (arbre des causes) — ❌ Non démarré
+## 15. Analyse d'accident (arbre des causes) — ✅ Fait (2026-09-14)
 
 **Demandé le 2026-09-12**, en lien direct avec le jalon **J2** (culture sécurité et remontée d'information — voir section dédiée plus haut) : aujourd'hui le Registre AT/MP enregistre le *fait* (qui, quand, où, quelles conséquences) mais pas l'*analyse* de pourquoi c'est arrivé ni de ce qui a été fait pour que ça ne se reproduise pas — deux choses distinctes.
 
-**Objectif probable** (à confirmer avec l'utilisateur avant de coder) : une fiche d'analyse rattachée à un événement du Registre AT/MP (et potentiellement aux futurs presque-accidents/incidents bénins, voir J2), structurée autour d'une méthode d'analyse des causes reconnue en prévention — la plus répandue et la plus simple à outiller est l'**arbre des causes** (méthode INRS : reconstitution chronologique des faits menant à l'accident, distinction fait/opinion, remontée aux causes profondes plutôt qu'à la seule cause immédiate). Alternatives à évaluer selon la profondeur voulue : les "5 pourquoi" (plus légers, adaptés aux presque-accidents/incidents bénins) ou le diagramme d'Ishikawa (causes/effet par familles : matériel, méthode, main-d'œuvre, milieu, matière).
+**Arbitrages tranchés par l'utilisateur (session dédiée du 2026-09-14) :**
+- **Méthode** : les 3 méthodes disponibles au choix par analyse — Arbre des causes (INRS), 5 Pourquoi, Ishikawa — pas une seule imposée. Le préventeur choisit celle adaptée à l'événement au moment de créer l'analyse.
+- **Accès** : étendu via le modèle de permissions granulaires (`session.modulePermissions["accident-analyse"]`, read/write), même mécanisme que le module 18 — pas RH/admin seuls, pas un rôle "Préventeur" codé en dur.
+- **Profondeur V1** : liste structurée simple (faits datés/typés pour l'arbre des causes, chaîne question/réponse pour les 5 Pourquoi, causes par famille en texte libre pour Ishikawa) — **pas d'éditeur graphique interactif**. Note conservée pour une itération future : un vrai schéma visuel (nœuds/liens glisser-déposer) reste envisageable si le besoin est confirmé, mais n'était pas la priorité de cette V1.
+- **Plan d'Actions** : les actions correctives d'une analyse remontent au Plan d'Actions existant (`origine: "Analyse"`), même pattern que `"DUERP"` et `"Inspection"`.
 
-**Pistes fonctionnelles à évaluer, sans engagement de conception :**
-- Un accès "Analyser" depuis chaque ligne du Registre AT/MP (et, une fois J2 avancé, depuis un presque-accident/incident bénin) plutôt qu'un module totalement séparé — l'analyse n'a de sens que rattachée à un événement.
-- Une structure de données simple pour l'arbre des causes (liste de faits datés/typés, liens de causalité entre eux) plutôt qu'un éditeur graphique complexe dès la V1 de ce module — un export/impression lisible (PDF, à l'image de l'export déjà présent sur le Registre AT/MP) compte probablement plus qu'une belle interface de graphe interactive.
-- Les actions correctives identifiées à l'issue de l'analyse doivent alimenter le Plan d'Actions existant (`origine: "Analyse"`, sur le modèle de ce qui existe déjà pour `"DUERP"` et `"Inspection"`) plutôt que créer un circuit de suivi parallèle.
-- Qui a le droit de mener/valider une analyse (RH/admin seuls, ou aussi un manager/chef de service sur son périmètre ?) — à trancher avec la réflexion générale sur les rôles/permissions (section J0).
-
-**Cadrage :** comme pour J1/J2, une piste posée pour discussion ultérieure, pas un chantier à démarrer immédiatement.
+**Ce qui a été livré :**
+- `accident-analyse.html` : liste des événements AT/MP (lecture seule, source = Registre AT/MP), statut d'analyse "Faite"/"En attente" par ligne, panneau détail avec sélection de méthode + formulaire dédié à la méthode choisie, conclusion, liste d'actions correctives. Accès direct depuis `registre-at-mp.html` via un lien "Analyser" par ligne (`?atmpId=...`, ouverture automatique du panneau). Export `.xlsx` (feuilles Analyses + Actions).
+- **Permission `atmp-declare`** ajoutée dans la même session (répond au point alpha "rendre paramétrable qui a le droit de déclarer un accident" — voir plus bas) : même mécanisme `modulePermissions`, booléen plutôt que read/write puisque déclarer n'a pas de sens en lecture seule.
+- Sidebar à deux niveaux : les sections partagées entre plusieurs permissions (ex. "Espace RH") toggle maintenant chaque lien individuellement plutôt que la section entière, pour ne jamais afficher un lien qu'un utilisateur ne pourrait pas utiliser — voir `ETAT-DU-PROJET.md` §7.
+- Compte de test `PREV1` étendu avec les 3 permissions (`atmp-admin`, `atmp-declare`, `accident-analyse`) plutôt qu'un 4ᵉ compte dédié.
 
 ## 16. Situations d'urgence & exercices d'évacuation — ❌ Non démarré
 
@@ -459,7 +461,7 @@ Points remontés par un retour de test alpha (résumé d'une discussion avec Gem
   - Nouvelle colonne de statut de l'arrêt : "En cours" / "Clôturé" — ✅ Fait (2026-09-13). Ajouté au badge "Statut" existant (`arretStatut`) plutôt qu'une colonne séparée ; calculé automatiquement (voir point suivant), avec repli "En cours" pour les enregistrements existants qui n'ont que l'ancien champ `joursArret` sans dates détaillées.
   - Remplacer le champ libre "Nombre de jours d'arrêt" par deux champs date (début/fin) — ✅ Fait (2026-09-13). `saisie-rh.html` calcule désormais `joursArret` et `statutArret` ("Clôturé" si une date de fin est saisie, sinon "En cours", jours comptés jusqu'à aujourd'hui) à partir de `dateDebutArret`/`dateFinArret` ; les enregistrements plus anciens sans ces deux dates restent affichés via leur `joursArret` hérité (zéro régression).
   - Masquer les filtres globaux (Collectivité/Service/Année) pour Agent et Manager — ✅ Fait (2026-09-13), masqués pour tout rôle hors RH/admin (`!canEdit`). Le volet "Préventeur" de la demande reste en attente : pas de rôle/permission "Préventeur" générique pour l'instant (voir module 18 pour le premier pas concret sur les permissions granulaires, câblé uniquement sur le module Dossiers AT/MP & CITIS) — à revisiter si/quand un vrai statut Préventeur transversal est défini.
-  - Rendre paramétrable qui a le droit de déclarer un accident — ❌ toujours en attente, dépend du modèle de permissions générique (section J0) plutôt que d'un nouveau cas particulier codé en dur.
+  - Rendre paramétrable qui a le droit de déclarer un accident — ✅ Fait (2026-09-14). Nouvelle permission granulaire `atmp-declare` (`session.modulePermissions`, booléen) : un manager/agent avec cette permission accordée dans `administration.html` peut désormais accéder à `saisie-rh.html` et déclarer un AT/MP sans avoir le rôle rh/admin — même mécanisme que le module 18, pas un rôle "Préventeur" codé en dur.
 - **Document Unique (`document-unique.html`) :**
   - Tooltip expliquant le rôle du DUERP — ✅ Fait (2026-09-14), voir le point RSST ci-dessus (même chantier transversal, traité en une passe).
   - Icônes à moderniser — ❌ toujours en attente, sujet à une direction visuelle de l'utilisateur.

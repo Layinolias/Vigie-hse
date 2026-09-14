@@ -79,6 +79,7 @@ Chaque version est un dossier autonome et complet (pas de dépendance croisée).
 | `reporting.html` | Indicateurs & reporting KPI (accès rh/admin). |
 | `administration.html` | Panneau admin (accès admin uniquement) : Utilisateurs, Référentiels (listes déroulantes éditables), Flash Info, Veille réglementaire, Journal d'audit. |
 | `dossiers-atmp-citis.html` | Suivi administratif des dossiers AT/MP et maladies professionnelles : checklist documentaire (CMI, prolongations, certificat final, IPP, enquête/coûts), arrêtés d'imputabilité/CITIS avec workflow de signature. Accès via le modèle de permissions granulaires (§7) plutôt que par rôle fixe — voir aussi `ROADMAP-MODULES-FUTURS.md` module 18. |
+| `accident-analyse.html` | Analyse des causes d'un accident (arbre des causes INRS, 5 Pourquoi ou Ishikawa au choix par analyse), rattachée à chaque événement du Registre AT/MP ; actions correctives remontant au Plan d'Actions (`origine:"Analyse"`). Accès via permission granulaire `accident-analyse` — voir `ROADMAP-MODULES-FUTURS.md` module 15. |
 
 ## 7. Modèle de rôles
 
@@ -93,16 +94,25 @@ Le **RSST fait exception** : c'est un registre ouvert où n'importe quel rôle p
 
 Le scoping `manager` (`session.services`) est vérifié dans chaque page consommant des données de service — chercher `session.services` dans le code pour voir le pattern exact.
 
-### Permissions granulaires par module (nouveau, 2026-09-13 — premier cas d'usage)
+### Permissions granulaires par module (nouveau, 2026-09-13, étendu 2026-09-14)
 
 En plus des 4 rôles fixes ci-dessus, un utilisateur peut recevoir des **permissions additionnelles par module**, stockées dans `u.modulePermissions` (`vigie_hse_users`) et copiées dans `session.modulePermissions` à la connexion (`login.html`) :
 ```js
-modulePermissions: { "atmp-admin": "read" | "write" }  // absent = aucun accès
+modulePermissions: {
+  "atmp-admin": "read" | "write",        // Dossiers AT/MP & CITIS
+  "atmp-declare": "write",               // Déclarer un AT/MP (saisie-rh.html) — booléen, pas de niveau lecture
+  "accident-analyse": "read" | "write",  // Analyse d'accident
+}  // clé absente ou "none" = aucun accès sur ce module
 ```
 - N'affecte **aucun** module existant — couche strictement additive.
-- Premier (et pour l'instant seul) module câblé sur ce mécanisme : `dossiers-atmp-citis.html` (clé `"atmp-admin"`). Un `admin`/`rh` y a toujours accès (`write`) via son rôle ; un `manager`/`ag` n'y accède que si cette permission lui a été explicitement accordée dans `administration.html` (onglet Utilisateurs).
-- Géré dans `administration.html` (formulaire utilisateur, champ `uAtmpAdminPerm`) — pas encore une UI générique par module (ça reste à faire si d'autres modules adoptent ce mécanisme, voir la réflexion sur la refonte des permissions dans `ROADMAP-MODULES-FUTURS.md`, section J0).
+- Trois modules câblés sur ce mécanisme à ce jour :
+  - `dossiers-atmp-citis.html` (clé `"atmp-admin"`, read/write) — premier cas d'usage, 2026-09-13.
+  - `saisie-rh.html` (clé `"atmp-declare"`, booléen `"write"`/absent) — permet à un manager/agent de déclarer un AT/MP sans avoir le rôle rh/admin. Répond au retour alpha "rendre paramétrable qui a le droit de déclarer un accident".
+  - `accident-analyse.html` (clé `"accident-analyse"`, read/write) — module 15, voir `ROADMAP-MODULES-FUTURS.md`.
+- Un `admin`/`rh` a toujours accès complet (`write`) à ces trois modules via son rôle ; un `manager`/`ag` n'y accède que si la permission lui a été explicitement accordée dans `administration.html` (onglet Utilisateurs).
+- Géré dans `administration.html` (formulaire utilisateur, champs `uAtmpAdminPerm`/`uAtmpDeclarePerm`/`uAccidentAnalysePerm`) — pas encore une UI générique par module (ça reste à faire si d'autres modules adoptent ce mécanisme, voir la réflexion sur la refonte des permissions dans `ROADMAP-MODULES-FUTURS.md`, section J0).
 - Pattern d'accès reproductible dans le code de chaque page : `const canAtmpAdmin = role === "admin" || role === "rh" || !!(session.modulePermissions && session.modulePermissions["atmp-admin"]);` — même principe transposable à un futur module avec une autre clé.
+- **Sidebar à deux niveaux** : les liens dont la visibilité dépend d'une permission granulaire (pas seulement du rôle) ont chacun leur propre `id` et sont masqués/affichés individuellement (`display:none` par défaut, révélé par JS), plutôt que la section entière — évite d'afficher un lien qu'un détenteur d'une seule des permissions ne pourrait pas utiliser (ex. "Déclarer un AT/MP" et "Évaluer un risque" dans la section "Espace RH" sont maintenant deux toggles indépendants, pas un seul pour toute la section).
 
 ## 8. Modèle de données — clés `localStorage`
 
@@ -123,6 +133,7 @@ modulePermissions: { "atmp-admin": "read" | "write" }  // absent = aucun accès
 | `vigie_hse_rsst` | Observations du Registre Santé & Sécurité | `registre-sst.html` |
 | `vigie_hse_atmp_dossiers` | Checklist documentaire par dossier AT/MP (CMI, prolongations, certificat final, IPP, enquête/coûts), une entrée par `atmpId` | `dossiers-atmp-citis.html` |
 | `vigie_hse_atmp_arretes` | Arrêtés d'imputabilité/CITIS (type, statut de signature, dates, autorité), plusieurs par `atmpId` | `dossiers-atmp-citis.html` |
+| `vigie_hse_analyses_accident` | Analyse des causes d'un accident (méthode Arbre des causes/5 Pourquoi/Ishikawa au choix, conclusion, actions correctives), une entrée par `atmpId` | `accident-analyse.html`, actions correctives lues par `plan-actions.html` (`origine:"Analyse"`) |
 | `vigie_hse_verifications` | Équipements et leur historique de vérification périodique | `verifications-periodiques.html` |
 | `vigie_hse_weather_location` | Ville choisie manuellement pour le widget météo (`{name, admin1, country, lat, lon}`) | `dashboard.html` |
 

@@ -56,12 +56,16 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Peut déposer une observation dans le Registre Santé & Sécurité, en cochant "anonyme" si souhaité.
 - [ ] Ne voit **pas** le lien "Dossiers AT/MP & CITIS" dans la sidebar (module 18, accès par permission granulaire — voir ci-dessous).
 
-### `PREV1` (permission granulaire `atmp-admin:write`, sans être RH/admin)
-- [ ] Voit le lien "Dossiers AT/MP & CITIS" dans la sidebar (section "Administratif") alors que le rôle de base est `ag`.
-- [ ] Peut ouvrir un dossier, cocher/dater les pièces (CMI, prolongations, certificat final, IPP), enregistrer, rouvrir le dossier et retrouver les données.
+### `PREV1` (permissions granulaires `atmp-admin:write`, `atmp-declare:write`, `accident-analyse:write` — rôle de base `ag`, pas RH/admin)
+- [ ] Voit "Dossiers AT/MP & CITIS" et "Analyse d'accident" dans la sidebar (section "Administratif"), et "Déclarer un AT/MP" (section "Espace RH") — alors que le rôle de base est `ag`.
+- [ ] Ne voit **pas** "Évaluer un risque" (section "Espace RH") — cette permission n'a pas été accordée, seule la déclaration AT/MP l'a été (vérifie que les deux liens de la section se togglent bien indépendamment).
+- [ ] Peut ouvrir un dossier AT/MP & CITIS, cocher/dater les pièces (CMI, prolongations, certificat final, IPP), enregistrer, rouvrir le dossier et retrouver les données.
 - [ ] Peut ajouter un arrêté (type + statut + dates), le voir apparaître dans le tableau des arrêtés du dossier.
-- [ ] Ne voit **aucun** autre module RH (pas de "Déclarer un AT/MP", pas de "Évaluer un risque") — la permission ne donne accès qu'à ce module précis, pas aux droits RH complets.
-- [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : le module doit être invisible, et taper l'URL `dossiers-atmp-citis.html` directement doit rediriger vers le tableau de bord.
+- [ ] Peut déclarer un AT/MP complet depuis `saisie-rh.html`, le retrouver dans le Registre AT/MP.
+- [ ] Peut ouvrir "Analyse d'accident" sur un événement existant, choisir une méthode (tester les 3 : Arbre des causes, 5 Pourquoi, Ishikawa sur des événements différents), ajouter une action corrective, enregistrer, rouvrir et retrouver les données.
+- [ ] L'action corrective créée apparaît bien dans **Plan d'Actions** avec l'origine "Analyse".
+- [ ] Depuis le Registre AT/MP, cliquer "Analyser" sur une ligne ouvre directement le bon événement dans Analyse d'accident.
+- [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : les trois modules/liens doivent être invisibles, et taper les URLs `dossiers-atmp-citis.html` / `accident-analyse.html` / `saisie-rh.html` directement doit rediriger (dashboard ou registre AT/MP selon la page).
 
 ## 4. Fonctionnalités transverses
 

@@ -233,7 +233,7 @@ Ce n'est pas un défaut : le choix a été de ne pas inventer une fausse date d'
 # Repères techniques (après décision, pour la mise en œuvre)
 
 - **Q1** : `reporting.html`, fonction `renderReport()` — filtrage via `inPeriod(...)` appliqué module par module.
-- **Q2** : `reporting.html`, bloc `// ---- AT/MP ----`, variables `EFFECTIF`, `HEURES_AN`, `atYears`, `heures`, `tf`. Le même calcul existe aussi dans `registre-at-mp.html` (avec son propre filtre par année) — à aligner.
+- **Q2** : `reporting.html`, bloc `// ---- AT/MP ----`, variables `EFFECTIF`, `HEURES_AN`, `dureeAtJours`, `heures`, `tf`. Le même calcul, aligné, existe dans `registre-at-mp.html` (variable `dureeAtJours`, adaptée à son filtre par année plutôt qu'à une plage de dates).
 - **Q3** : champ `typeAtMp`, défini dans `saisie-rh.html` et affiché par `typeChip()` dans `registre-at-mp.html` ; impacte `dossiers-atmp-citis.html`.
 - **Q4** : `sante-visites.html` (périodicité) + lecture des habilitations dans `formation-habilitation.html`.
 - **Q5, Q6, Q7** : modules non créés — voir `ROADMAP-MODULES-FUTURS.md` sections 5, 16 et 17.

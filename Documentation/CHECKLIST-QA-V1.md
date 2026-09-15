@@ -2,6 +2,14 @@
 
 À exécuter par un humain dans un vrai navigateur (je ne peux pas cliquer moi-même dans une interface). Coche au fur et à mesure ; note tout ce qui coince avec le format en bas de page, je m'en occupe ensuite.
 
+## 🔗 Version cliquable en ligne
+
+Depuis le 2026-09-15, ces 63 points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné :
+
+**https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
+
+Ce fichier-ci reste la version de référence (diff dans l'historique du dépôt) ; c'est la page en ligne qu'il faut utiliser pour dérouler le passage de recette.
+
 **URL à tester :** `https://layinolias.github.io/Vigie-hse/`
 
 ---

@@ -749,8 +749,25 @@
     const joursSum = rows.reduce((s,r) => s + (Number(r.joursArret)||0), 0);
     const moyJours = avecCount ? (joursSum / avecCount).toFixed(1) : "0.0";
 
-    const nbAnnees = yr === "all" ? Math.max(years.length, 1) : 1;
-    const heuresTravaillees = EFFECTIF * HEURES_AN * nbAnnees;
+    // Question 2 du Cahier du préventeur, répondue le 2026-09-15 (option B) : le taux de
+    // fréquence se calcule au prorata de la durée réelle de la période plutôt qu'en comptant
+    // les années civiles distinctes présentes dans les données (même correctif que reporting.html).
+    const dureeAtJours = (() => {
+      const todayStr = new Date().toISOString().slice(0,10);
+      let debut, fin;
+      if (yr === "all"){
+        const dates = rows.map(r => r.dateAT).filter(Boolean).sort();
+        debut = dates.length ? dates[0] : todayStr;
+        fin = todayStr;
+      } else {
+        debut = yr + "-01-01";
+        const finAnnee = yr + "-12-31";
+        fin = finAnnee < todayStr ? finAnnee : todayStr;
+      }
+      const ms = new Date(fin) - new Date(debut);
+      return Math.max(1, Math.round(ms / 86400000) + 1);
+    })();
+    const heuresTravaillees = EFFECTIF * HEURES_AN * (dureeAtJours / 365);
     const tf = heuresTravaillees ? (avecCount * 1000000 / heuresTravaillees) : 0;
     const tg = heuresTravaillees ? (joursSum * 1000 / heuresTravaillees) : 0;
 

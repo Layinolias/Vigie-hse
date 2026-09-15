@@ -32,6 +32,19 @@ Passage QA effectué directement sur `https://layinolias.github.io/Vigie-hse/` (
 
 **Reste à faire** : dérouler le reste de `Documentation/CHECKLIST-QA-V1.md` (rôles manager/RH/AG, responsive mobile, multi-navigateur) — nécessite un humain pour les parties non automatisables (vrai téléphone, Safari, etc.).
 
+## ✅ Checklist QA V1 déroulée intégralement (2026-09-15)
+
+Les 63 points de `Documentation/CHECKLIST-QA-V1.md` ont été cochés un par un dans un vrai navigateur par le porteur du projet, via la version cliquable en ligne (`https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf`) : parcours complet par rôle (admin, rh, manager, ag, `PREV1`), tri & filtres de colonne, fonctionnalités transverses, responsive mobile, multi-navigateur (Chrome, Firefox, Safari).
+
+**Constats remontés en cours de passage, corrigés le jour même** (détail dans `Documentation/BUGS-CONNUS.md`) :
+- Le popover météo (choix de ville) ne se fermait jamais — CSS uniquement, `dashboard.html`.
+- Sur une largeur de page réduite (~650-900px, pas encore mobile), le widget météo et le sélecteur Ville/Agglomération/Tous chevauchaient le Score HSE dans la topbar — le seuil d'empilement mobile a été avancé pour couvrir cette zone.
+- Import Excel absent sur 2 modules (`dossiers-atmp-citis.html`, `accident-analyse.html`) alors que l'export y était déjà présent — ajouté sur le même modèle que le Registre AT/MP (pour `accident-analyse.html`, seuls les champs plats de l'analyse sont ré-importables, pas l'arbre causal — voir `BUGS-CONNUS.md` pour le détail de ce choix de périmètre).
+
+**Ajout à la checklist elle-même**, demandé pendant le passage (le porteur n'avait vérifié en détail la visibilité des données par rôle que sur le Registre AT/MP) : nouvelle sous-section "Visibilité des données par tableau (tous rôles)" dans `## 3. Parcours complet par rôle`, un point par module à tableau (12 points) — total checklist désormais 75 points.
+
+**Pas encore fait** : présentation à un professionnel HSE externe pour un retour à froid — toujours en recherche, dernier point du gel `v1.0.0` dans `PLAN-VERSIONS-V1.md`.
+
 ---
 
 Version organisée et suivie de `future modules.txt` (notes brutes laissées à la racine du dossier `Projet HSE`, conservées telles quelles — ce document-ci en est la réorganisation avec suivi d'avancement et annotations techniques).

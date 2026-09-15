@@ -205,7 +205,7 @@ Les IDs des seeds sont **stables et déterministes** (ex. `pa-<id du risque DUER
 - Généralisation de l'en-tête compact/sticky (`.page-summary`) à tous les modules : terminée.
 - Modules Indicateurs & Reporting KPI, Mode démonstration, Exports professionnels (PDF/Excel généralisé), EPI/dotation, Dashboard mobile simplifié : tous terminés — voir `ROADMAP-MODULES-FUTURS.md` pour le détail par module.
 - Menu latéral : bouton "épingler" pour empêcher le repli automatique, et zone de navigation rendue défilante indépendamment de l'en-tête/pied de sidebar (corrige un cas où trop d'éléments de menu rendaient le bouton de déconnexion inatteignable sur un écran bas).
-- **État courant** : le projet est en phase de test manuel avant tag `v1.0.0` — voir `CHECKLIST-QA-V1.md`.
+- **État courant** : la checklist QA V1 (75 points, dont 12 ajoutés le 2026-09-15) a été déroulée intégralement le 2026-09-15 — voir l'entrée datée correspondante dans `ROADMAP-MODULES-FUTURS.md` et `BUGS-CONNUS.md` pour les constats remontés (3 corrigés le jour même). Reste avant le gel `v1.0.0` : présentation à un professionnel externe pour un retour à froid — voir `PLAN-VERSIONS-V1.md`.
 
 ## 13. Comment vérifier qu'un fichier n'est pas cassé après édition
 

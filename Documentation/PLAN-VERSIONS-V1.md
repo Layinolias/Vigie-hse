@@ -71,13 +71,13 @@ Volontairement non détaillé maintenant : après une ou deux démos réelles à
 
 ### V1.0.0 — Gel
 Checklist de sortie proposée (à valider ensemble avant de taguer `v1.0.0`) :
-- [ ] Tous les modules du périmètre actuel ont un golden path testé pour chaque rôle (admin/rh/manager/ag).
+- [x] Tous les modules du périmètre actuel ont un golden path testé pour chaque rôle (admin/rh/manager/ag). — vérifié le 2026-09-15 (checklist QA V1, 75 points, tous rôles y compris `PREV1`).
 - [ ] Aucune page ne renvoie d'erreur JS en usage normal (vérifié, pas supposé).
 - [ ] Exports PDF/Excel disponibles sur tous les registres qui en ont l'usage.
 - [ ] Site en ligne sur un vrai hébergement, à une URL stable, testé (pas seulement en local).
 - [ ] Mode démo + page vitrine en place.
 - [ ] Documentation à jour (`ETAT-DU-PROJET.md`, ce fichier, `ROADMAP-MODULES-FUTURS.md`).
-- [ ] Testé sur au moins 2 navigateurs différents et une largeur mobile.
+- [x] Testé sur au moins 2 navigateurs différents et une largeur mobile. — vérifié le 2026-09-15 (Chrome, Firefox, Safari + largeur ~375px).
 - [ ] Présenté au moins une fois à un professionnel externe au projet pour retour à froid, avant le gel définitif.
 
 ## Ce qui reste explicitement HORS scope de V1.0

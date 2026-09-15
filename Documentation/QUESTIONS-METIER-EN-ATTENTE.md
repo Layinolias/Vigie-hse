@@ -30,10 +30,10 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 
 | # | Question | Concerne | Statut |
 |---|---|---|---|
-| 1 | Un retard doit-il disparaître quand on regarde une période courte ? | Indicateurs & Reporting (existant) | 🔴 |
-| 2 | Sur quelle base calculer le taux de fréquence sur une période libre ? | Indicateurs & Reporting (existant) | 🔴 |
-| 3 | Faut-il un type « Maladie professionnelle » distinct dans le registre ? | Registre AT/MP (existant) | 🟠 |
-| 4 | Quelles habilitations imposent une surveillance médicale renforcée ? | Module Santé & Visites (extension) | 🟠 |
+| 1 | Un retard doit-il disparaître quand on regarde une période courte ? | Indicateurs & Reporting (existant) | ✅ |
+| 2 | Sur quelle base calculer le taux de fréquence sur une période libre ? | Indicateurs & Reporting (existant) | ✅ |
+| 3 | Faut-il un type « Maladie professionnelle » distinct dans le registre ? | Registre AT/MP (existant) | ✅ |
+| 4 | Quelles habilitations imposent une surveillance médicale renforcée ? | Module Santé & Visites (extension) | 🟠 réponse incomplète, à redemander |
 | 5 | Quel niveau de fidélité réglementaire pour la pénibilité / C2P ? | Module Pénibilité (à construire) | 🟠 |
 | 6 | Quelle périodicité réglementaire pour les exercices d'évacuation ? | Module Situations d'urgence (à construire) | 🟠 |
 | 7 | Plan de prévention : seuil des 400 h et qualifications des sous-traitants | Module Entreprises extérieures (à construire) | 🟠 |
@@ -46,7 +46,7 @@ Ces deux questions portent sur des chiffres **déjà affichés** dans l'applicat
 
 ---
 
-## 🔴 Question 1 — Un retard doit-il disparaître quand on regarde une période courte ?
+## ✅ Question 1 — Un retard doit-il disparaître quand on regarde une période courte ?
 
 ### Le contexte
 
@@ -81,13 +81,13 @@ Le même raisonnement vaut pour : Vérifications Périodiques (extincteurs, éle
 
 ### Décision
 
-> Option retenue :
->
-> Remarques :
+> **Option B retenue** (répondu le 2026-09-15 sur le Cahier du préventeur) — ajouter un repère du type « + N éléments en retard hors période » à côté du chiffre filtré, sur tous les modules concernés (Santé & Visites, Vérifications Périodiques, Formation/Habilitation, EPI & Dotation).
+
+**Mis en œuvre le 2026-09-15** dans `reporting.html` — voir le commit correspondant.
 
 ---
 
-## 🔴 Question 2 — Sur quelle base calculer le taux de fréquence sur une période libre ?
+## ✅ Question 2 — Sur quelle base calculer le taux de fréquence sur une période libre ?
 
 ### Le contexte
 
@@ -127,11 +127,12 @@ L'effectif de référence (**850 agents**) et la base horaire (**1 607 h/an**) s
 
 ### Décision
 
-> Option retenue :
+> **Option B retenue** (répondu le 2026-09-15) — calcul au prorata de la durée réelle de la période, plutôt que par années civiles entières.
 >
-> Effectif / base horaire à utiliser :
->
-> Remarques :
+> **Remarque du préventeur, à retenir pour la suite** : *« l'effectif des agents doit être saisie dans un tableau pour les rh (ou importer). cela permettra d'avoir l'effectif reelle par collectivité. pour les taux de fréquence, on pourrait avoir celui estime au reell en saisissant les nbres d'heure, cela permettra aussi d'avoir un TF par service ou direction. »*
+> → Confirme l'option D en vision cible (heures réelles saisies), au-delà du prorata immédiat. Rejoint le module 14 (Gestion administrative RH) déjà noté dans la roadmap comme le bon endroit pour remplacer l'effectif figé (850 agents) par un effectif réel saisi/importé, avec un TF calculable par service/direction — noté dans `ROADMAP-MODULES-FUTURS.md`, à cadrer avec lui quand ce module sera abordé.
+
+**Mis en œuvre le 2026-09-15** (option B, prorata) dans `reporting.html` et `registre-at-mp.html` — voir le commit correspondant. La vision cible (effectif réel, TF par service) reste un chantier futur, module 14.
 
 ---
 
@@ -141,17 +142,18 @@ Ces questions concernent des modules **pas encore construits** (ou une extension
 
 ---
 
-## 🟠 Question 3 — Faut-il un type « Maladie professionnelle » distinct dans le registre ?
+## ✅ Question 3 — Faut-il un type « Maladie professionnelle » distinct dans le registre ?
 
-**Contexte.** Le Registre AT/MP s'appelle « AT/MP » mais ne propose aujourd'hui que quatre types d'événement : *Accident de travail*, *Accident de trajet*, *Incident bénin*, *Presque accident*. Il n'y a **pas de type « Maladie professionnelle »** à proprement parler.
+**Contexte.** Le Registre AT/MP s'appelait « AT/MP » mais ne proposait que quatre types d'événement : *Accident de travail*, *Accident de trajet*, *Incident bénin*, *Presque accident*. Il n'y avait **pas de type « Maladie professionnelle »** à proprement parler.
 
-**Conséquence.** Le module « Dossiers AT/MP & CITIS » liste tous les événements sans pouvoir distinguer un AT d'une MP, alors que la procédure administrative n'est pas la même (déclaration, délais, reconnaissance, tableaux de MP).
-
-**La question.** Faut-il ajouter « Maladie professionnelle » comme type à part entière ? Si oui, quels champs spécifiques faut-il prévoir (n° de tableau MP, date de première constatation médicale, date de déclaration, avis du comité…) ?
+**Conséquence.** Le module « Dossiers AT/MP & CITIS » listait tous les événements sans pouvoir distinguer un AT d'une MP, alors que la procédure administrative n'est pas la même (déclaration, délais, reconnaissance, tableaux de MP).
 
 ### Décision
 
-> 
+> **OUI** (répondu le 2026-09-15) — ajouter le type, avec les champs suivants :
+> *« n° de tableau MP, date de première constatation médicale, date de déclaration, avis médecin du travail, avis conseil médical, décision de la collectivité, nbre de jour d'arrêt etc… »*
+
+**Mis en œuvre le 2026-09-15** — `saisie-rh.html` (nouveau type + champs spécifiques conditionnels), `registre-at-mp.html` (badge, colonnes, export), `dossiers-atmp-citis.html` (l'écart connu de non-distinction AT/MP est levé). Voir le commit correspondant.
 
 ---
 
@@ -165,7 +167,7 @@ Ces questions concernent des modules **pas encore construits** (ou une extension
 
 ### Décision
 
-> 
+> ⚠️ **Réponse commencée le 2026-09-15 mais interrompue** : *« La saisie d'une »* — la phrase s'arrête là, rien d'autre n'a été enregistré (le second champ de remarques est resté vide aussi). Probablement une frappe interrompue plutôt qu'une vraie réponse. **À redemander** — ne rien mettre en œuvre sur cette base.
 
 ---
 

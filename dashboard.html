@@ -156,6 +156,7 @@
     box-shadow:var(--shadow-md); padding:12px; display:flex; flex-direction:column; gap:8px;
     cursor:default;
   }
+  .weather-popover[hidden]{ display:none; }
   .weather-popover-head{ font:600 11.5px "Barlow Condensed",sans-serif; letter-spacing:.03em; text-transform:uppercase; color:var(--text-muted); }
   .weather-popover input{
     width:100%; padding:8px 10px; border-radius:var(--r-sm); border:1px solid var(--border);
@@ -177,11 +178,11 @@
   .tb-gauge svg{ transform:rotate(-90deg); }
   .tb-gauge-num{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:var(--text); }
   .tb-score-label{ font-size:10.5px; color:var(--text-muted); font-weight:600; white-space:nowrap; }
-  @media (max-width:900px){ .tb-weather-cond, .tb-weather-wind, .tb-score-label{ display:none; } .tb-widget{ padding:5px 8px; } }
 
-  /* ===== Topbar mobile (<=640px) : le sélecteur de zone passe sur sa propre ligne,
-     plus de superposition avec météo/score, qui redeviennent lisibles vu la place gagnée ===== */
-  @media (max-width:640px){
+  /* ===== Topbar resserrée (<=900px) : le sélecteur de zone passe sur sa propre ligne,
+     plus de superposition avec météo/score — avant ce seuil, .tb-score et .zone-switch
+     se chevauchaient déjà bien avant le point de bascule mobile (constaté vers 680-648px) ===== */
+  @media (max-width:900px){
     .topbar{
       height:auto; min-height:60px; padding:9px 16px;
       grid-template-columns:1fr 1fr; grid-template-areas:"left right" "center center"; row-gap:8px;

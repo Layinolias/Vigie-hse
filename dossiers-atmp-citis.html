@@ -257,6 +257,7 @@
   <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
   <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
   <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
 </defs>
@@ -818,12 +819,101 @@
     });
   }
 
-  // ---------- Export .xlsx (dossiers + arrêtés) ----------
-  $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+  // ---------- Import / Export .xlsx (dossiers + arrêtés) ----------
+  $("panelActionsBtns").innerHTML = (canAtmpWrite ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none">` : "") +
+    `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+
+  function normKey(s){
+    return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  }
+  function rawPick(raw, aliases){
+    const n = {};
+    Object.keys(raw).forEach(k => { n[normKey(k)] = raw[k]; });
+    for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; }
+    return "";
+  }
+  function resolveAtmpId(raw, agentAliases){
+    const idRaw = String(rawPick(raw, ["id at mp","atmpid"])).trim();
+    if (idRaw && ATMP_EVENTS.some(e => e.id === idRaw)) return idRaw;
+    const nom = normKey(rawPick(raw, ["nom"]) || (rawPick(raw, agentAliases).split(" ")[0] || ""));
+    const dateAT = String(rawPick(raw, ["date at"])).trim();
+    const evt = ATMP_EVENTS.find(e => normKey(e.nom) === nom && (!dateAT || e.dateAT === dateAT))
+      || ATMP_EVENTS.find(e => normKey(`${e.nom} ${e.prenom}`) === normKey(rawPick(raw, agentAliases)));
+    return evt ? evt.id : null;
+  }
+
+  if (canAtmpWrite){
+    $("btnImport").addEventListener("click", () => $("importFile").click());
+    $("importFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        let dAdded = 0, dUpdated = 0, dSkipped = 0, aAdded = 0, aSkipped = 0;
+
+        const dSheet = wb.Sheets["Dossiers"] || wb.Sheets[wb.SheetNames[0]];
+        if (dSheet){
+          XLSX.utils.sheet_to_json(dSheet, { defval: "" }).forEach(raw => {
+            const atmpId = resolveAtmpId(raw, ["nom"]);
+            if (!atmpId){ dSkipped++; return; }
+            const rec = {
+              id: "dos-" + atmpId, atmpId,
+              cmi: { recu: normKey(rawPick(raw,["cmi recu"])).includes("oui"), date: String(rawPick(raw,["cmi date"])).trim(), ref: "" },
+              prolongations: [],
+              certificatFinal: { type: String(rawPick(raw,["certificat final"])).trim() || "Guérison", recu: normKey(rawPick(raw,["certificat final recu"])).includes("oui"), date: "", ref: "" },
+              ipp: { applicable: normKey(rawPick(raw,["ipp applicable"])).includes("oui"), taux: String(rawPick(raw,["taux ipp"])).trim(), date: "", ref: "" },
+              enquete: { realisee: normKey(rawPick(raw,["enquete realisee"])).includes("oui"), date: "", conclusions: "" },
+              coutTotal: Number(rawPick(raw,["cout total"])) || 0,
+              coutDetail: "",
+            };
+            const idx = DOSSIERS.findIndex(x => x.atmpId === atmpId);
+            if (idx >= 0){ DOSSIERS[idx] = Object.assign({}, DOSSIERS[idx], rec, { prolongations: DOSSIERS[idx].prolongations || [] }); dUpdated++; }
+            else { DOSSIERS.push(rec); dAdded++; }
+          });
+          saveDossiers(DOSSIERS);
+        }
+
+        const aSheet = wb.Sheets["Arretes"];
+        if (aSheet){
+          XLSX.utils.sheet_to_json(aSheet, { defval: "" }).forEach(raw => {
+            const atmpId = resolveAtmpId(raw, ["agent"]);
+            const type = String(rawPick(raw,["type"])).trim();
+            if (!atmpId || !type){ aSkipped++; return; }
+            ARRETES.push({
+              id: genId("arr"), atmpId, type,
+              statut: String(rawPick(raw,["statut"])).trim() || "Brouillon",
+              dateCreation: String(rawPick(raw,["cree le","date creation"])).trim() || new Date().toISOString().slice(0,10),
+              dateTransmission: String(rawPick(raw,["transmis le","date transmission"])).trim(),
+              dateSignature: String(rawPick(raw,["signe le","date signature"])).trim(),
+              autorite: String(rawPick(raw,["autorite"])).trim(),
+            });
+            aAdded++;
+          });
+          saveArretes(ARRETES);
+        }
+
+        render();
+        if (currentAtmpId) openDossier(currentAtmpId);
+        const total = dAdded + dUpdated + aAdded;
+        if (total === 0){
+          alert(`Aucune ligne n'a pu être importée (${dSkipped + aSkipped} ignorée(s)). Vérifiez que le fichier contient bien des feuilles "Dossiers"/"Arretes" avec des lignes rattachées à un événement AT/MP existant.`);
+        } else {
+          alert(`Import terminé — dossiers : ${dAdded} ajouté(s), ${dUpdated} mis à jour, ${dSkipped} ignoré(s). Arrêtés : ${aAdded} ajouté(s), ${aSkipped} ignoré(s).`);
+        }
+        logAudit("Dossiers AT/MP & CITIS", "Import", `Import .xlsx — ${dAdded + dUpdated} dossier(s), ${aAdded} arrêté(s)`);
+      } catch (err){
+        alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
+      }
+      e.target.value = "";
+    });
+  }
+
   $("btnExport").addEventListener("click", () => {
     const dossierRows = ATMP_EVENTS.map(evt => {
       const d = dossierFor(evt.id) || emptyDossier(evt.id);
       return {
+        "ID AT/MP": evt.id,
         "Nom": evt.nom, "Prénom": evt.prenom, "Date AT": evt.dateAT, "Service": evt.service,
         "CMI reçu": d.cmi.recu ? "Oui" : "Non", "CMI date": d.cmi.date || "",
         "Nb prolongations": (d.prolongations || []).length,
@@ -835,7 +925,7 @@
     });
     const arreteRows = ARRETES.map(a => {
       const evt = ATMP_EVENTS.find(e => e.id === a.atmpId) || {};
-      return { "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Type": a.type, "Statut": a.statut, "Créé le": a.dateCreation, "Transmis le": a.dateTransmission, "Signé le": a.dateSignature, "Autorité": a.autorite };
+      return { "ID AT/MP": a.atmpId, "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Type": a.type, "Statut": a.statut, "Créé le": a.dateCreation, "Transmis le": a.dateTransmission, "Signé le": a.dateSignature, "Autorité": a.autorite };
     });
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossierRows), "Dossiers");

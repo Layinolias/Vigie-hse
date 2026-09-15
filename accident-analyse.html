@@ -791,12 +791,102 @@
     });
   }
 
-  // ---------- Export .xlsx (analyses + actions) ----------
-  $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+  // ---------- Import / Export .xlsx (analyses + actions) ----------
+  // Import volontairement limité aux champs plats déjà présents dans l'export (méthode, conclusion,
+  // date, auteur, actions) : l'arbre causal (faits / pourquoi / ishikawa) est structurellement mal
+  // adapté à un aller-retour tableur et n'est pas ré-importé — seul un aller simple (export) existe pour lui.
+  $("panelActionsBtns").innerHTML = (canAnalyseWrite ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none">` : "") +
+    `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+
+  function normKey(s){
+    return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  }
+  function rawPick(raw, aliases){
+    const n = {};
+    Object.keys(raw).forEach(k => { n[normKey(k)] = raw[k]; });
+    for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; }
+    return "";
+  }
+  function resolveAtmpId(raw, agentAliases){
+    const idRaw = String(rawPick(raw, ["id at mp","atmpid"])).trim();
+    if (idRaw && ATMP_EVENTS.some(e => e.id === idRaw)) return idRaw;
+    const nom = normKey(rawPick(raw, ["nom"]));
+    const dateAT = String(rawPick(raw, ["date at"])).trim();
+    const evt = (nom ? ATMP_EVENTS.find(e => normKey(e.nom) === nom && (!dateAT || e.dateAT === dateAT)) : null)
+      || ATMP_EVENTS.find(e => normKey(`${e.nom} ${e.prenom}`) === normKey(rawPick(raw, agentAliases)));
+    return evt ? evt.id : null;
+  }
+
+  if (canAnalyseWrite){
+    $("btnImport").addEventListener("click", () => $("importFile").click());
+    $("importFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        let anAdded = 0, anUpdated = 0, anSkipped = 0, actAdded = 0, actSkipped = 0;
+
+        const anSheet = wb.Sheets["Analyses"] || wb.Sheets[wb.SheetNames[0]];
+        if (anSheet){
+          XLSX.utils.sheet_to_json(anSheet, { defval: "" }).forEach(raw => {
+            const atmpId = resolveAtmpId(raw, ["nom"]);
+            const methode = String(rawPick(raw, ["methode"])).trim();
+            if (!atmpId || !methode){ anSkipped++; return; }
+            const flat = {
+              methode,
+              conclusion: String(rawPick(raw, ["conclusion"])).trim(),
+              dateAnalyse: String(rawPick(raw, ["date analyse"])).trim(),
+              auteur: String(rawPick(raw, ["auteur"])).trim(),
+            };
+            const idx = ANALYSES.findIndex(a => a.atmpId === atmpId);
+            if (idx >= 0){ Object.assign(ANALYSES[idx], flat); anUpdated++; }
+            else { ANALYSES.push(Object.assign(emptyAnalyse(atmpId), flat)); anAdded++; }
+          });
+          saveAnalyses(ANALYSES);
+        }
+
+        const actSheet = wb.Sheets["Actions"];
+        if (actSheet){
+          XLSX.utils.sheet_to_json(actSheet, { defval: "" }).forEach(raw => {
+            const atmpId = resolveAtmpId(raw, ["agent"]);
+            const description = String(rawPick(raw, ["action","description"])).trim();
+            if (!atmpId || !description){ actSkipped++; return; }
+            let a = ANALYSES.find(x => x.atmpId === atmpId);
+            if (!a){ a = emptyAnalyse(atmpId); ANALYSES.push(a); }
+            a.actions = a.actions || [];
+            a.actions.push({
+              id: genId("act"), description,
+              responsable: String(rawPick(raw, ["responsable"])).trim(),
+              echeance: String(rawPick(raw, ["echeance"])).trim(),
+              statut: String(rawPick(raw, ["statut"])).trim() || "À faire",
+            });
+            actAdded++;
+          });
+          saveAnalyses(ANALYSES);
+        }
+
+        render();
+        if (currentAtmpId) openAnalyse(currentAtmpId);
+        const total = anAdded + anUpdated + actAdded;
+        if (total === 0){
+          alert(`Aucune ligne n'a pu être importée (${anSkipped + actSkipped} ignorée(s)). Vérifiez que le fichier contient bien des feuilles "Analyses"/"Actions" avec des lignes rattachées à un événement AT/MP existant.`);
+        } else {
+          alert(`Import terminé — analyses : ${anAdded} ajoutée(s), ${anUpdated} mise(s) à jour, ${anSkipped} ignorée(s). Actions : ${actAdded} ajoutée(s), ${actSkipped} ignorée(s). (L'arbre causal — faits, pourquoi, Ishikawa — n'est pas importé, seuls les champs plats le sont.)`);
+        }
+        logAudit("Analyse d'accident", "Import", `Import .xlsx — ${anAdded + anUpdated} analyse(s), ${actAdded} action(s)`);
+      } catch (err){
+        alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
+      }
+      e.target.value = "";
+    });
+  }
+
   $("btnExport").addEventListener("click", () => {
     const analyseRows = ATMP_EVENTS.map(evt => {
       const a = analyseFor(evt.id);
       return {
+        "ID AT/MP": evt.id,
         "Nom": evt.nom, "Prénom": evt.prenom, "Date AT": evt.dateAT, "Service": evt.service,
         "Méthode": (a && a.methode) || "", "Statut": (a && a.methode) ? "Faite" : "En attente",
         "Conclusion": (a && a.conclusion) || "", "Date analyse": (a && a.dateAnalyse) || "", "Auteur": (a && a.auteur) || "",
@@ -807,7 +897,7 @@
       const evt = ATMP_EVENTS.find(e => e.id === a.atmpId) || {};
       (a.actions || []).forEach(act => {
         if (!act.description) return;
-        actionRows.push({ "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Action": act.description, "Responsable": act.responsable, "Échéance": act.echeance, "Statut": act.statut });
+        actionRows.push({ "ID AT/MP": a.atmpId, "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Action": act.description, "Responsable": act.responsable, "Échéance": act.echeance, "Statut": act.statut });
       });
     });
     const wb = XLSX.utils.book_new();

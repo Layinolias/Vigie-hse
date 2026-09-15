@@ -75,6 +75,21 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Depuis le Registre AT/MP, cliquer "Analyser" sur une ligne ouvre directement le bon événement dans Analyse d'accident.
 - [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : les trois modules/liens doivent être invisibles, et taper les URLs `dossiers-atmp-citis.html` / `accident-analyse.html` / `saisie-rh.html` directement doit rediriger (dashboard ou registre AT/MP selon la page).
 
+### Visibilité des données par tableau (tous rôles)
+Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le rôle" (§2) n'avait été vérifié en détail que sur le Registre AT/MP. Un point par module à tableau pour couvrir le reste — même geste à chaque fois : se connecter avec au moins deux comptes de rôles différents (ex. `RH1` puis `AG1`, ou `manager`) et vérifier que les lignes/colonnes affichées sont cohérentes avec le périmètre du rôle (scope service pour `manager`, colonnes personnelles masquées pour `ag`, etc. — voir §3 ci-dessus pour le détail attendu par rôle).
+- [ ] Registre AT/MP (`registre-at-mp.html`) — déjà vérifié en détail le 2026-09-15.
+- [ ] Document Unique (`document-unique.html`)
+- [ ] Plan d'Actions (`plan-actions.html`)
+- [ ] Santé & Visites (`sante-visites.html`)
+- [ ] Registre Santé & Sécurité (`registre-sst.html`)
+- [ ] Vérifications Périodiques (`verifications-periodiques.html`)
+- [ ] Inspection / Audit (`inspection-audit.html`)
+- [ ] Produits Chimiques (`produits-chimiques.html`)
+- [ ] Formation / Habilitation (`formation-habilitation.html`)
+- [ ] EPI & Dotation (`epi-dotation.html`)
+- [ ] Dossiers AT/MP & CITIS (`dossiers-atmp-citis.html`)
+- [ ] Analyse d'accident (`accident-analyse.html`)
+
 ### Tri & filtres de colonne (Registre AT/MP)
 - [ ] Cliquer sur l'intitulé d'une colonne trie la table ; un 2ᵉ clic inverse le sens, un 3ᵉ revient à l'ordre d'origine (date décroissante). Une flèche indique le sens.
 - [ ] Trier « Jours d'arrêt » : les nombres se classent bien numériquement (4, 5, 7, 8… et pas 10 avant 4), et les lignes sans arrêt (« — ») restent **en bas dans les deux sens**.

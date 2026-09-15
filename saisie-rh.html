@@ -201,6 +201,8 @@
   .type-chip.at{ color:var(--accent); border-color:rgba(var(--accent-rgb),.35); background:rgba(var(--accent-rgb),.09); }
   .type-chip.trajet{ color:var(--success); border-color:rgba(var(--success-rgb),.35); background:var(--success-bg); }
   .type-chip.benin{ color:var(--warning); border-color:rgba(var(--warning-rgb),.4); background:var(--warning-bg); }
+  .type-chip.presque{ color:var(--accent-blue); border-color:rgba(var(--accent-blue-rgb),.4); background:rgba(var(--accent-blue-rgb),.1); }
+  .type-chip.mp{ color:var(--accent-violet); border-color:rgba(var(--accent-violet-rgb),.4); background:rgba(var(--accent-violet-rgb),.1); }
 
   .badge{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:10.5px; font-weight:600; white-space:nowrap; }
   .badge::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
@@ -367,6 +369,7 @@
                     <input type="radio" name="typeAtMp" id="type-trajet" value="Accident de trajet" required><label for="type-trajet">Accident de trajet</label>
                     <input type="radio" name="typeAtMp" id="type-benin" value="Incident bénin" required><label for="type-benin">Incident bénin</label>
                     <input type="radio" name="typeAtMp" id="type-presque" value="Presque accident" required><label for="type-presque">Presque accident</label>
+                    <input type="radio" name="typeAtMp" id="type-mp" value="Maladie professionnelle" required><label for="type-mp">Maladie professionnelle</label>
                   </div>
                 </div>
                 <div class="f"><label for="fDateAT">Date</label><input type="date" id="fDateAT" name="dateAT" required></div>
@@ -391,6 +394,18 @@
                 <div class="f"><label for="fDateDebutArret">Début de l'arrêt</label><input type="date" id="fDateDebutArret" name="dateDebutArret" disabled></div>
                 <div class="f"><label for="fDateFinArret">Fin de l'arrêt (laisser vide si en cours)</label><input type="date" id="fDateFinArret" name="dateFinArret" disabled></div>
                 <div class="f"><label for="fJoursCalc">Jours d'arrêt (calculé)</label><input type="text" id="fJoursCalc" disabled placeholder="—"></div>
+              </div>
+            </fieldset>
+
+            <fieldset id="fieldsetMP" style="display:none;">
+              <div class="fieldset-head"><span class="idx">5</span><span class="flabel">Maladie professionnelle</span></div>
+              <div class="field-grid">
+                <div class="f"><label for="fMpTableau">N° de tableau MP</label><input type="text" id="fMpTableau" name="mpTableau" autocomplete="off" placeholder="ex. 57, 98…"></div>
+                <div class="f"><label for="fMpDateConstatation">Date de première constatation médicale</label><input type="date" id="fMpDateConstatation" name="mpDateConstatation"></div>
+                <div class="f"><label for="fMpDateDeclaration">Date de déclaration</label><input type="date" id="fMpDateDeclaration" name="mpDateDeclaration"></div>
+                <div class="f span2"><label for="fMpAvisMedecinTravail">Avis médecin du travail</label><input type="text" id="fMpAvisMedecinTravail" name="mpAvisMedecinTravail" autocomplete="off" placeholder="ex. Favorable, réserves émises…"></div>
+                <div class="f"><label for="fMpAvisConseilMedical">Avis conseil médical</label><input type="text" id="fMpAvisConseilMedical" name="mpAvisConseilMedical" autocomplete="off" placeholder="ex. En attente, favorable…"></div>
+                <div class="f span3"><label for="fMpDecisionCollectivite">Décision de la collectivité</label><input type="text" id="fMpDecisionCollectivite" name="mpDecisionCollectivite" autocomplete="off" placeholder="ex. Reconnaissance d'imputabilité au service…"></div>
               </div>
             </fieldset>
 
@@ -641,6 +656,22 @@
     });
   });
 
+  // Question 3 du Cahier du préventeur, répondue le 2026-09-15 : nouveau type "Maladie
+  // professionnelle" avec ses champs propres, affichés seulement pour ce type. Un seul
+  // radio du groupe déclenche "change" à la fois (celui qui vient d'être coché).
+  const fieldsetMP = $("fieldsetMP");
+  const champsMP = ["fMpTableau","fMpDateConstatation","fMpDateDeclaration","fMpAvisMedecinTravail","fMpAvisConseilMedical","fMpDecisionCollectivite"];
+  document.querySelectorAll('input[name="typeAtMp"]').forEach(r => {
+    r.addEventListener("change", () => {
+      const estMP = r.value === "Maladie professionnelle";
+      fieldsetMP.style.display = estMP ? "" : "none";
+      champsMP.forEach(id => {
+        $(id).disabled = !estMP;
+        if (!estMP) $(id).value = "";
+      });
+    });
+  });
+
   function fmtDate(iso){
     if(!iso) return "—";
     const [y,m,d] = String(iso).split("-");
@@ -655,6 +686,8 @@
   function typeChipClass(t){
     if (t === "Accident de travail") return "at";
     if (t === "Accident de trajet") return "trajet";
+    if (t === "Presque accident") return "presque";
+    if (t === "Maladie professionnelle") return "mp";
     return "benin";
   }
 
@@ -684,14 +717,22 @@
     const typeInput = rec.typeAtMp === "Accident de trajet" ? $("type-trajet")
                      : (rec.typeAtMp === "Incident bénin" || rec.typeAtMp === "Bénin") ? $("type-benin")
                      : rec.typeAtMp === "Presque accident" ? $("type-presque")
+                     : rec.typeAtMp === "Maladie professionnelle" ? $("type-mp")
                      : $("type-at");
     typeInput.checked = true;
+    typeInput.dispatchEvent(new Event("change"));
     $("fDateAT").value = rec.dateAT || "";
     $("fRisque").value = rec.risque || "";
     $("fCirconstances").value = rec.circonstances || "";
     $("fSiege").value = rec.siege || "";
     $("fNature").value = rec.nature || "";
     $("fElementMateriel").value = rec.elementMateriel || "";
+    $("fMpTableau").value = rec.mpTableau || "";
+    $("fMpDateConstatation").value = rec.mpDateConstatation || "";
+    $("fMpDateDeclaration").value = rec.mpDateDeclaration || "";
+    $("fMpAvisMedecinTravail").value = rec.mpAvisMedecinTravail || "";
+    $("fMpAvisConseilMedical").value = rec.mpAvisConseilMedical || "";
+    $("fMpDecisionCollectivite").value = rec.mpDecisionCollectivite || "";
 
     const arretInput = $(rec.arret ? "arret-avec" : "arret-sans");
     arretInput.checked = true;
@@ -766,6 +807,8 @@
       fServiceDetail.disabled = true;
       fServiceDetail.value = "";
       fServiceDetail.placeholder = "Sélectionnez d'abord un service";
+      fieldsetMP.style.display = "none";
+      champsMP.forEach(id => { $(id).disabled = true; $(id).value = ""; });
     }, 0);
   });
 
@@ -807,11 +850,20 @@
       statutArret: arretVal ? (fd.get("dateFinArret") ? "Clôturé" : "En cours") : "",
       circonstances: fd.get("circonstances"),
       grade: fd.get("grade"),
-      etat: (typeAtMp === "Incident bénin" || typeAtMp === "Bénin") ? "Incident bénin" : typeAtMp === "Presque accident" ? "Presque accident" : "AT",
+      etat: (typeAtMp === "Incident bénin" || typeAtMp === "Bénin") ? "Incident bénin" : typeAtMp === "Presque accident" ? "Presque accident" : typeAtMp === "Maladie professionnelle" ? "Maladie professionnelle" : "AT",
       risque: fd.get("risque"),
       siege: fd.get("siege"),
       nature: fd.get("nature"),
       elementMateriel: fd.get("elementMateriel") || "",
+      // Question 3 du Cahier du préventeur (2026-09-15) : champs propres au type
+      // "Maladie professionnelle", vides pour les autres types (champs désactivés
+      // donc absents de FormData — repli sur "" par cohérence).
+      mpTableau: fd.get("mpTableau") || "",
+      mpDateConstatation: fd.get("mpDateConstatation") || "",
+      mpDateDeclaration: fd.get("mpDateDeclaration") || "",
+      mpAvisMedecinTravail: fd.get("mpAvisMedecinTravail") || "",
+      mpAvisConseilMedical: fd.get("mpAvisConseilMedical") || "",
+      mpDecisionCollectivite: fd.get("mpDecisionCollectivite") || "",
     };
 
     if (editingRecord){
@@ -844,6 +896,8 @@
     fDateDebutArret.disabled = true; fDateDebutArret.required = false;
     fDateFinArret.disabled = true;
     fJoursCalc.value = "";
+    fieldsetMP.style.display = "none";
+    champsMP.forEach(id => { $(id).disabled = true; $(id).value = ""; });
     $("fStatut").focus();
   });
 

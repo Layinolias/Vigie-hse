@@ -480,8 +480,23 @@
     const atAvec = ATMP.filter(r => r.arret).length;
     const atJours = ATMP.reduce((s,r) => s + (Number(r.joursArret)||0), 0);
     const EFFECTIF = 850, HEURES_AN = 1607;
-    const atYears = [...new Set(ATMP.map(r => (r.dateAT||"").slice(0,4)).filter(Boolean))];
-    const heures = EFFECTIF * HEURES_AN * Math.max(atYears.length, 1);
+    // Question 2 du Cahier du préventeur, répondue le 2026-09-15 (option B) : le taux de
+    // fréquence se calcule désormais au prorata de la durée réelle de la période plutôt
+    // qu'en comptant les années civiles distinctes présentes dans les données — l'ancien
+    // calcul divisait le TF par deux selon qu'une période à cheval sur le 1er janvier
+    // comptait pour 1 ou 2 années pleines. Sans borne de début (« Depuis le début »), on
+    // part de l'événement le plus ancien affiché jusqu'à la borne de fin.
+    const dureeAtJours = (() => {
+      const fin = dFin || today.toISOString().slice(0,10);
+      let debut = dDebut;
+      if (!debut){
+        const dates = ATMP.map(r => r.dateAT).filter(Boolean).sort();
+        debut = dates.length ? dates[0] : fin;
+      }
+      const ms = new Date(fin) - new Date(debut);
+      return Math.max(1, Math.round(ms / 86400000) + 1);
+    })();
+    const heures = EFFECTIF * HEURES_AN * (dureeAtJours / 365);
     const tf = heures ? (atAvec * 1000000 / heures) : 0;
     $("kpiAtTotal").textContent = atTotal;
 
@@ -505,12 +520,18 @@
     $("kpiPaTaux").textContent = paTaux === null ? "–" : paTaux + "%";
 
     // ---- Santé & Visites ----
-    const VISITES = readKey("vigie_hse_visites").filter(v => inPeriod(v.dateDerniere, dDebut, dFin));
+    // Question 1 du Cahier du préventeur, répondue le 2026-09-15 (option B) : un retard ne
+    // doit pas disparaître silencieusement quand la période filtre l'élément hors champ —
+    // on calcule aussi le retard sur l'ensemble des données pour afficher un repère.
+    const VISITES_ALL = readKey("vigie_hse_visites");
+    const VISITES = VISITES_ALL.filter(v => inPeriod(v.dateDerniere, dDebut, dFin));
     const svTotal = VISITES.length;
     const svStatus = VISITES.map(v => computeStatus(v.dateDerniere, v.periodiciteMois, 24));
     const svOk = svStatus.filter(s => s === "ok").length;
     const svSoon = svStatus.filter(s => s === "soon").length;
     const svLate = svStatus.filter(s => s === "late").length;
+    const svLateTous = VISITES_ALL.map(v => computeStatus(v.dateDerniere, v.periodiciteMois, 24)).filter(s => s === "late").length;
+    const svLateHorsPeriode = Math.max(0, svLateTous - svLate);
 
     // ---- Registre Santé & Sécurité ----
     const RSST = readKey("vigie_hse_rsst").filter(r => inPeriod(r.date, dDebut, dFin));
@@ -520,11 +541,15 @@
     const rsstTaux = rsstTotal ? Math.round((rsstTraitee/rsstTotal)*100) : null;
 
     // ---- Vérifications Périodiques ----
-    const VERIF = readKey("vigie_hse_verifications").filter(v => inPeriod(v.dateDerniere, dDebut, dFin));
+    const VERIF_ALL = readKey("vigie_hse_verifications");
+    const VERIF = VERIF_ALL.filter(v => inPeriod(v.dateDerniere, dDebut, dFin));
     const vpTotal = VERIF.length;
     const vpStatus = VERIF.map(v => computeStatus(v.dateDerniere, v.periodiciteMois, 12));
     const vpOk = vpStatus.filter(s => s === "ok").length;
     const vpNonConforme = VERIF.filter(v => v.conformite === "Non conforme").length;
+    const vpLate = vpStatus.filter(s => s === "late").length;
+    const vpLateTous = VERIF_ALL.map(v => computeStatus(v.dateDerniere, v.periodiciteMois, 12)).filter(s => s === "late").length;
+    const vpLateHorsPeriode = Math.max(0, vpLateTous - vpLate);
 
     // ---- Inspection / Audit ----
     const INSPECTIONS = readKey("vigie_hse_inspections").filter(i => inPeriod(i.dateInspection, dDebut, dFin));
@@ -539,24 +564,36 @@
     const pcCmr = PRODUITS.filter(p => Array.isArray(p.pictogrammes) && p.pictogrammes.some(c => c === "GHS06" || c === "GHS08")).length;
 
     // ---- Formation / Habilitation ----
-    const HABS = readKey("vigie_hse_habilitations").filter(h => inPeriod(h.dateObtention, dDebut, dFin));
+    const HABS_ALL = readKey("vigie_hse_habilitations");
+    const HABS = HABS_ALL.filter(h => inPeriod(h.dateObtention, dDebut, dFin));
     const fhTotal = HABS.length;
     const fhStatus = HABS.map(h => computeStatus(h.dateObtention, h.dureeValiditeMois, 24));
     const fhOk = fhStatus.filter(s => s === "ok").length;
     const fhExpiree = fhStatus.filter(s => s === "late").length;
+    const fhExpireeTous = HABS_ALL.map(h => computeStatus(h.dateObtention, h.dureeValiditeMois, 24)).filter(s => s === "late").length;
+    const fhExpireeHorsPeriode = Math.max(0, fhExpireeTous - fhExpiree);
 
     // ---- EPI & Dotation ----
     const EPI_CAT = readKey("vigie_hse_epi_catalogue");
-    const EPI_DOT = readKey("vigie_hse_epi_dotations").filter(d => inPeriod(d.dateRemise, dDebut, dFin));
+    const EPI_DOT_ALL = readKey("vigie_hse_epi_dotations");
+    const EPI_DOT = EPI_DOT_ALL.filter(d => inPeriod(d.dateRemise, dDebut, dFin));
     const catById = Object.fromEntries(EPI_CAT.map(c => [c.id, c]));
     const epiTotal = EPI_DOT.length;
-    let epiOk = 0, epiRenew = 0;
+    let epiOk = 0, epiRenew = 0, epiLate = 0;
     EPI_DOT.forEach(d => {
       const cat = catById[d.articleId] || {};
       if (!cat.dureeVieMois) return;
       const s = computeStatus(d.dateRemise, cat.dureeVieMois, cat.dureeVieMois);
       if (s === "ok") epiOk++; else if (s === "soon" || s === "late") epiRenew++;
+      if (s === "late") epiLate++;
     });
+    let epiLateTous = 0;
+    EPI_DOT_ALL.forEach(d => {
+      const cat = catById[d.articleId] || {};
+      if (!cat.dureeVieMois) return;
+      if (computeStatus(d.dateRemise, cat.dureeVieMois, cat.dureeVieMois) === "late") epiLateTous++;
+    });
+    const epiLateHorsPeriode = Math.max(0, epiLateTous - epiLate);
 
     // ---- Grille des modules ----
     const MODULES = [
@@ -569,26 +606,30 @@
       { icon:"i-clipboard", name:"Plan d'Actions", stats: paTotal === 0 ? null : [
         { v:paTotal, l:"Total (période)" }, { v:paTaux+"%", l:"Soldées", cls:"success" },
         { v:paEnCours, l:"En cours", cls:"warn" }, { v:paRetard, l:"En retard", cls:paRetard?"danger":"" } ] },
-      { icon:"i-shield-check", name:"Santé & Visites", stats: svTotal === 0 ? null : [
+      { icon:"i-shield-check", name:"Santé & Visites", stats: VISITES_ALL.length === 0 ? null : [
         { v:svTotal, l:"Visites (période)" }, { v:svOk, l:"À jour", cls:"success" },
-        { v:svSoon, l:"À programmer", cls:"warn" }, { v:svLate, l:"En retard", cls:svLate?"danger":"" } ] },
+        { v:svSoon, l:"À programmer", cls:"warn" }, { v:svLate, l:"En retard", cls:svLate?"danger":"" },
+      ].concat(svLateHorsPeriode ? [{ v:"+"+svLateHorsPeriode, l:"En retard hors période", cls:"danger" }] : []) },
       { icon:"i-message-square", name:"Registre Santé & Sécurité", stats: rsstTotal === 0 ? null : [
         { v:rsstTotal, l:"Observations (période)" }, { v:rsstTaux+"%", l:"Traitées", cls:"success" },
         { v:rsstNouvelle, l:"Nouvelles", cls:rsstNouvelle?"warn":"" } ] },
-      { icon:"i-check-circle", name:"Vérifications Périodiques", stats: vpTotal === 0 ? null : [
+      { icon:"i-check-circle", name:"Vérifications Périodiques", stats: VERIF_ALL.length === 0 ? null : [
         { v:vpTotal, l:"Contrôles (période)" }, { v:vpOk, l:"À jour", cls:"success" },
-        { v:vpNonConforme, l:"Non conformes", cls:vpNonConforme?"danger":"" } ] },
+        { v:vpNonConforme, l:"Non conformes", cls:vpNonConforme?"danger":"" },
+      ].concat(vpLateHorsPeriode ? [{ v:"+"+vpLateHorsPeriode, l:"En retard hors période", cls:"danger" }] : []) },
       { icon:"i-search", name:"Inspection / Audit", stats: iaTotal === 0 ? null : [
         { v:iaTotal, l:"Inspections (période)" }, { v:iaTaux+"%", l:"Conformes", cls:"success" },
         { v:iaNonConforme, l:"Non conformes", cls:iaNonConforme?"danger":"" } ] },
       { icon:"i-flask", name:"Produits Chimiques", stats: pcTotal === 0 ? null : [
         { v:pcTotal, l:"FDS mises à jour (période)" }, { v:pcCmr, l:"Dont CMR/dangereux", cls:pcCmr?"warn":"" } ] },
-      { icon:"i-award", name:"Formation / Habilitation", stats: fhTotal === 0 ? null : [
+      { icon:"i-award", name:"Formation / Habilitation", stats: HABS_ALL.length === 0 ? null : [
         { v:fhTotal, l:"Obtenues (période)" }, { v:fhOk, l:"À jour", cls:"success" },
-        { v:fhExpiree, l:"Expirées", cls:fhExpiree?"danger":"" } ] },
-      { icon:"i-package", name:"EPI & Dotation", stats: epiTotal === 0 ? null : [
+        { v:fhExpiree, l:"Expirées", cls:fhExpiree?"danger":"" },
+      ].concat(fhExpireeHorsPeriode ? [{ v:"+"+fhExpireeHorsPeriode, l:"En retard hors période", cls:"danger" }] : []) },
+      { icon:"i-package", name:"EPI & Dotation", stats: EPI_DOT_ALL.length === 0 ? null : [
         { v:epiTotal, l:"Dotations (période)" }, { v:epiOk, l:"À jour", cls:"success" },
-        { v:epiRenew, l:"À renouveler/expirées", cls:epiRenew?"warn":"" } ] },
+        { v:epiRenew, l:"À renouveler/expirées", cls:epiRenew?"warn":"" },
+      ].concat(epiLateHorsPeriode ? [{ v:"+"+epiLateHorsPeriode, l:"En retard hors période", cls:"danger" }] : []) },
     ];
     $("moduleGrid").innerHTML = MODULES.map(m => `
       <div class="panel module-card">
@@ -638,9 +679,11 @@
 
     // stash for export
     window.__reportData = { atTotal, atJours, atAvec, tf, duTotal, hseScorePct, duPrioCount:duPrio.length,
-      paTotal, paTaux, paEnCours, paRetard, svTotal, svOk, svSoon, svLate, rsstTotal, rsstTaux, rsstNouvelle,
-      vpTotal, vpOk, vpNonConforme, iaTotal, iaTaux, iaNonConforme, pcTotal, pcCmr, fhTotal, fhOk, fhExpiree,
-      epiTotal, epiOk, epiRenew, riskCounts, riskJours };
+      paTotal, paTaux, paEnCours, paRetard, svTotal, svOk, svSoon, svLate, svLateHorsPeriode,
+      rsstTotal, rsstTaux, rsstNouvelle,
+      vpTotal, vpOk, vpNonConforme, vpLateHorsPeriode, iaTotal, iaTaux, iaNonConforme, pcTotal, pcCmr,
+      fhTotal, fhOk, fhExpiree, fhExpireeHorsPeriode,
+      epiTotal, epiOk, epiRenew, epiLateHorsPeriode, riskCounts, riskJours };
   }
 
   $("fPeriodePreset").addEventListener("change", () => { applyPreset(); renderReport(); });
@@ -666,13 +709,15 @@
       { Indicateur:"En cours", Valeur:d.paEnCours }, { Indicateur:"En retard", Valeur:d.paRetard } ]);
     addSheet("Santé & Visites", [
       { Indicateur:"Agents suivis", Valeur:d.svTotal }, { Indicateur:"À jour", Valeur:d.svOk },
-      { Indicateur:"À programmer", Valeur:d.svSoon }, { Indicateur:"En retard", Valeur:d.svLate } ]);
+      { Indicateur:"À programmer", Valeur:d.svSoon }, { Indicateur:"En retard", Valeur:d.svLate },
+      { Indicateur:"En retard hors période", Valeur:d.svLateHorsPeriode||0 } ]);
     addSheet("RSST", [
       { Indicateur:"Observations", Valeur:d.rsstTotal }, { Indicateur:"Taux de traitement (%)", Valeur:d.rsstTaux },
       { Indicateur:"Nouvelles", Valeur:d.rsstNouvelle } ]);
     addSheet("Vérifications", [
       { Indicateur:"Équipements", Valeur:d.vpTotal }, { Indicateur:"À jour", Valeur:d.vpOk },
-      { Indicateur:"Non conformes", Valeur:d.vpNonConforme } ]);
+      { Indicateur:"Non conformes", Valeur:d.vpNonConforme },
+      { Indicateur:"En retard hors période", Valeur:d.vpLateHorsPeriode||0 } ]);
     addSheet("Inspection-Audit", [
       { Indicateur:"Inspections", Valeur:d.iaTotal }, { Indicateur:"Taux de conformité (%)", Valeur:d.iaTaux },
       { Indicateur:"Non conformes", Valeur:d.iaNonConforme } ]);
@@ -680,10 +725,12 @@
       { Indicateur:"Produits référencés", Valeur:d.pcTotal }, { Indicateur:"Dont CMR/dangereux", Valeur:d.pcCmr } ]);
     addSheet("Formation-Habilitation", [
       { Indicateur:"Habilitations", Valeur:d.fhTotal }, { Indicateur:"À jour", Valeur:d.fhOk },
-      { Indicateur:"Expirées", Valeur:d.fhExpiree } ]);
+      { Indicateur:"Expirées", Valeur:d.fhExpiree },
+      { Indicateur:"En retard hors période", Valeur:d.fhExpireeHorsPeriode||0 } ]);
     addSheet("EPI & Dotation", [
       { Indicateur:"Dotations", Valeur:d.epiTotal }, { Indicateur:"À jour", Valeur:d.epiOk },
-      { Indicateur:"À renouveler/expirées", Valeur:d.epiRenew } ]);
+      { Indicateur:"À renouveler/expirées", Valeur:d.epiRenew },
+      { Indicateur:"En retard hors période", Valeur:d.epiLateHorsPeriode||0 } ]);
     const riskRows = Object.keys(d.riskCounts || {}).sort((a,b) => (d.riskCounts[b]||0)-(d.riskCounts[a]||0))
       .map(r => ({ "Type de risque":r, "Accidents":d.riskCounts[r]||0, "Jours d'arrêt":d.riskJours[r]||0 }));
     if (riskRows.length) addSheet("AT-MP par risque", riskRows);

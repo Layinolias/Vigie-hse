@@ -232,6 +232,7 @@
   .type-chip.trajet{ color:var(--success); border-color:rgba(var(--success-rgb),.35); background:var(--success-bg); }
   .type-chip.benin{ color:var(--warning); border-color:rgba(var(--warning-rgb),.4); background:var(--warning-bg); }
   .type-chip.presque{ color:var(--info); border-color:rgba(var(--info-rgb),.4); background:var(--info-bg); }
+  .type-chip.mp{ color:var(--accent-violet); border-color:rgba(var(--accent-violet-rgb),.4); background:rgba(var(--accent-violet-rgb),.1); }
 
   .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; }
   .act-edit:hover{ text-decoration:underline; }
@@ -610,6 +611,7 @@
     else if (t === "Accident de trajet"){ cls = "trajet"; label = "Trajet"; }
     else if (t === "Incident bénin" || t === "Bénin"){ cls = "benin"; label = "Incident bénin"; }
     else if (t === "Presque accident"){ cls = "presque"; label = "Presque accident"; }
+    else if (t === "Maladie professionnelle"){ cls = "mp"; label = "MP"; }
     return `<span class="type-chip ${cls}">${label}</span>`;
   }
 
@@ -641,6 +643,12 @@
         ? `<span class="badge badge-danger">Avec arrêt</span> <span class="badge ${(r.statutArret || 'En cours') === 'Clôturé' ? 'badge-neutral' : 'badge-warning'}">${r.statutArret || 'En cours'}</span>`
         : `<span class="badge badge-neutral">Sans arrêt</span>` },
     { key:"joursArret",     label:"Jours d'arrêt",    group:"Conséquences", cls:"num", render:r => r.arret ? (r.joursArret ?? 0) : "—" },
+    { key:"mpTableau",              label:"N° tableau MP",         group:"Maladie professionnelle", render:r => r.mpTableau || "—" },
+    { key:"mpDateConstatation",     label:"1ère constatation",     group:"Maladie professionnelle", cls:"mono", render:r => r.mpDateConstatation ? fmtDate(r.mpDateConstatation) : "—" },
+    { key:"mpDateDeclaration",      label:"Date déclaration",      group:"Maladie professionnelle", cls:"mono", render:r => r.mpDateDeclaration ? fmtDate(r.mpDateDeclaration) : "—" },
+    { key:"mpAvisMedecinTravail",   label:"Avis médecin travail",  group:"Maladie professionnelle", cls:"wrap", render:r => r.mpAvisMedecinTravail || "—" },
+    { key:"mpAvisConseilMedical",   label:"Avis conseil médical",  group:"Maladie professionnelle", cls:"wrap", render:r => r.mpAvisConseilMedical || "—" },
+    { key:"mpDecisionCollectivite", label:"Décision collectivité", group:"Maladie professionnelle", cls:"wrap", render:r => r.mpDecisionCollectivite || "—" },
     { key:"actions",        label:"Actions",          group:"",             cls:"actions", noFilter:true, render:r =>
         `${canEdit ? `<a href="saisie-rh.html?id=${encodeURIComponent(r.id)}" class="act-edit">Modifier</a>` : ""}
          ${canAccidentAnalyse ? `<a href="accident-analyse.html?atmpId=${encodeURIComponent(r.id)}" class="act-edit">Analyser</a>` : ""}
@@ -661,6 +669,11 @@
     dateAT: ["rh","ag"], dateMois: ["rh"], jour: ["rh"], typeAtMp: ["rh","ag"],
     circonstances: ["rh","ag"], etat: ["rh","ag"], risque: ["rh","ag"], siege: ["rh","ag"],
     nature: ["rh","ag"], elementMateriel: ["rh","ag"], arretStatut: ["rh","ag"], joursArret: ["rh","ag"],
+    // Question 3 du Cahier du préventeur (2026-09-15) : champs Maladie professionnelle —
+    // données médicales/administratives sensibles, réservées RH comme le reste des
+    // informations personnelles (nom, prénom, cadre d'emploi…).
+    mpTableau: ["rh"], mpDateConstatation: ["rh"], mpDateDeclaration: ["rh"],
+    mpAvisMedecinTravail: ["rh"], mpAvisConseilMedical: ["rh"], mpDecisionCollectivite: ["rh"],
     actions: canAccidentAnalyse ? ["rh","ag"] : ["rh"],
   };
 
@@ -868,6 +881,12 @@
       siege: String(pick(["siege"])).trim(),
       nature: String(pick(["nature"])).trim(),
       elementMateriel: String(pick(["element materiel"])).trim(),
+      mpTableau: String(pick(["n tableau mp","numero tableau mp","tableau mp"])).trim(),
+      mpDateConstatation: parseDateValue(pick(["date premiere constatation medicale","1ere constatation","date constatation"])),
+      mpDateDeclaration: parseDateValue(pick(["date declaration","date de declaration"])),
+      mpAvisMedecinTravail: String(pick(["avis medecin du travail","avis medecin travail"])).trim(),
+      mpAvisConseilMedical: String(pick(["avis conseil medical"])).trim(),
+      mpDecisionCollectivite: String(pick(["decision de la collectivite","decision collectivite"])).trim(),
     };
   }
 
@@ -937,6 +956,12 @@
         "Siege": r.siege,
         "Nature": r.nature,
         "Elément matériel": r.elementMateriel,
+        "N° tableau MP": r.mpTableau || "",
+        "Date première constatation médicale": r.mpDateConstatation || "",
+        "Date déclaration": r.mpDateDeclaration || "",
+        "Avis médecin du travail": r.mpAvisMedecinTravail || "",
+        "Avis conseil médical": r.mpAvisConseilMedical || "",
+        "Décision de la collectivité": r.mpDecisionCollectivite || "",
       }));
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();

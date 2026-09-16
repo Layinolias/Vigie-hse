@@ -8,7 +8,7 @@
 
 **➡️ À faire en reprenant :** lire les réponses du préventeur sur le *Cahier du préventeur* (outil Artifact, `read_db` sur les collections `reponses` et `idees` — lien et procédure en tête de `QUESTIONS-METIER-EN-ATTENTE.md`). Ses premières réponses étaient attendues dans la soirée du 14. Reporter ses décisions dans le registre, ses idées ici, puis mettre en œuvre. Rien d'autre n'est débloqué sans lui.
 
-**Chantiers techniques possibles sans lui, si besoin d'avancer :** factoriser les 3 rosters d'agents dupliqués (voir Notes générales en fin de document) ; dérouler la checklist QA (63 points, nécessite un humain dans un vrai navigateur).
+**Chantiers techniques possibles sans lui, si besoin d'avancer :** dérouler la checklist QA (nécessite un humain dans un vrai navigateur). ~~Factoriser les 3 rosters d'agents dupliqués~~ — fait le 2026-09-16, voir Notes générales en fin de document.
 
 ---
 
@@ -305,7 +305,7 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 3. **Dotation** (`vigie_hse_epi_dotations`) : ce qui a été remis à quel agent, quand, et l'échéance de renouvellement, avec statut calculé (même pattern périodicité/échéance/statut que `verifications-periodiques.html`/`formation-habilitation.html`).
 4. **Entretien/lavage** (`vigie_hse_epi_lavages`) : cycles de lavage suivis par article, statut "OK"/"À réformer" au-delà du nombre de lavages maximal.
 
-**Dette technique toujours valable :** c'est le 3ᵉ module à dériver indépendamment un roster d'agents (après Santé & Visites et Formation/Habilitation) — voir la note générale en fin de document, ce n'est plus une hypothèse mais un vrai problème de duplication (3 copies indépendantes du même roster) à factoriser avant un 4ᵉ module qui en aurait besoin.
+**Dette technique :** ce module a été le 3ᵉ à dériver indépendamment un roster d'agents (après Santé & Visites et Formation/Habilitation) — la brique commune (hash + dédoublonnage) est factorisée dans `assets/roster.js` depuis le 2026-09-16, voir la note générale en fin de document.
 
 ## 11. Dashboard mobile simplifié — ✅ Fait
 
@@ -509,6 +509,6 @@ Points remontés par un retour de test alpha (résumé d'une discussion avec Gem
 ## Notes générales pour reprendre ce backlog
 
 - **Un module à la fois.** Chaque module ci-dessus a été délégué comme une tâche isolée et bornée, avec vérification indépendante du résultat avant de le considérer acquis (voir §11 de `ETAT-DU-PROJET.md`, incident de l'agent en roue libre). Reproduire cette discipline plutôt que de tout lancer en une seule passe.
-- **Dette technique confirmée, pas seulement anticipée : trois rosters d'agents dérivés indépendamment du Registre AT/MP** (`sante-visites.html`, `formation-habilitation.html`, et bientôt le module EPI). Ils utilisent la même technique (dédoublonnage par nom/prénom/service, hash déterministe) mais sont trois copies indépendantes. **Avant de construire un 4ᵉ module qui en a besoin, factoriser ce roster** dans un référentiel partagé (ex. étendre `vigie_hse_referentials` ou créer `vigie_hse_agents`) plutôt que de continuer à dupliquer.
+- **Dette technique partiellement traitée le 2026-09-16 : trois rosters d'agents dérivés indépendamment du Registre AT/MP** (`sante-visites.html`, `formation-habilitation.html`, `epi-dotation.html`). Le geste identique dans les trois (hash déterministe `hashStr`, dédoublonnage par `nom|prénom|service` dans une `Map`) est désormais factorisé dans `assets/roster.js` (`VigieRoster.hashStr`, `VigieRoster.dedupeByAgent`) — chaque module garde sa propre logique de ce qu'il seede pour un agent (combien d'enregistrements, quels champs), seule la brique commune est partagée. **Ce que ça ne règle PAS** : les trois modules dérivent toujours chacun leur propre copie de données (pas de source canonique unique) — `SEED_ATMP` est d'ailleurs vide dans les trois aujourd'hui (donnée de départ réelle chargée via DATATEST, pas via ce mécanisme). Si un 4ᵉ module a besoin d'un roster d'agents, ou si le futur module RH (ligne ~338, `vigie_hse_agents`) voit le jour, réévaluer alors si `VigieRoster` doit devenir une vraie source de données partagée plutôt qu'un simple utilitaire de hash/dédoublonnage.
 - **Chaque nouveau module = un nouveau fichier `.html` + une entrée de sidebar à ajouter sur TOUTES les pages existantes.** C'est le point le plus sujet aux oublis/erreurs (voir l'incident de corruption par regex non ancrée, §11 de `ETAT-DU-PROJET.md`) — procéder fichier par fichier, jamais par un remplacement global non vérifié.
 - **Attention aux limites de session/débit** lors de la délégation à des agents en arrière-plan : une tâche peut être interrompue par une erreur `rate_limit` en toute fin de tâche, souvent après que le travail réel soit déjà terminé. Toujours vérifier l'état réel des fichiers avant de considérer le travail perdu ou de relancer une tâche déjà accomplie.

@@ -240,6 +240,8 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - Lien naturel avec `sante-visites.html` (déjà un roster d'agents dérivé du Registre AT/MP) — envisager de partager le même roster de base plutôt que d'en re-dériver un troisième.
 - Sujet réglementairement sensible (Compte professionnel de prévention / C2P) — bien vérifier avec l'utilisateur le niveau de fidélité réglementaire attendu avant de coder une logique de seuils d'exposition, qui est précise et évolue par décret.
 
+**Réponse du préventeur (Q5, Cahier du préventeur, 2026-09-16) :** niveau retenu = **avec calcul des seuils** (pas un simple déclaratif). Facteurs et seuils exacts : *« voir réglementation en vigueur, conforme au texte »* — à vérifier précisément au moment de construire ce module (les seuils C2P évoluent par décret, ne pas les figer aujourd'hui). Voir `QUESTIONS-METIER-EN-ATTENTE.md` Q5 pour le détail.
+
 ## 6. Formation / Habilitation — ✅ Fait
 
 `formation-habilitation.html` : CACES, habilitation électrique, SST, AIPR, permis PL, travail en hauteur — durées de validité standards par type, roster dérivé du Registre AT/MP (même technique que Santé & Visites), statut À jour/À renouveler/Expirée calculé. **Remarque toujours valable pour un futur module Pénibilité** : envisager un roster d'agents partagé plutôt qu'une troisième dérivation indépendante du Registre AT/MP — il y en a maintenant deux (Santé & Visites, Formation/Habilitation) construites indépendamment l'une de l'autre.
@@ -248,7 +250,7 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 **Note d'origine :** "Santé au travail, Gestion des visites médicales : gestion de planning, rdv, convocation,"
 
-**Ce qui existe (V0.1.1.2) :** `sante-visites.html` — suit le type de visite, la date de dernière visite, la périodicité, calcule l'échéance et le statut (À jour/À programmer/En retard). Roster de départ dérivé (illustratif) du Registre AT/MP.
+**Ce qui existe (V0.1.1.2) :** `sante-visites.html` — suit le type de visite, la date de dernière visite, la périodicité, calcule l'échéance et le statut (À jour/À programmer/En retard). Roster de départ dérivé (illustratif) du Registre AT/MP. **Depuis le 2026-09-16 (réponse Q4 du préventeur)** : la périodicité est automatiquement resserrée quand l'agent détient une habilitation dont la durée de validité (`formation-habilitation.html`) est plus stricte que la périodicité saisie — badge « Renforcée » dans le tableau, colonnes dédiées à l'export.
 
 **Ce qui manque pour correspondre à la note d'origine :**
 - **Gestion de planning/agenda** : pas de vue calendrier, pas de créneaux.
@@ -375,6 +377,8 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - Un rappel/échéance de "prochain exercice dû" par site, dans l'esprit de ce qui existe déjà pour les échéances de Vérifications Périodiques et de Formation/Habilitation.
 - Vérifier avant de construire si une périodicité réglementaire minimale s'applique (type d'établissement recevant du public, code du travail) — à documenter plutôt qu'à deviner.
 
+**Réponse du préventeur (Q6, Cahier du préventeur, 2026-09-16) :** la périodicité varie selon le type d'établissement — **pas de valeur figée dans le code**, une périodicité **saisie manuellement à chaque exercice enregistré**. Types d'exercices à tracer : évacuation incendie, intrusion, risque environnemental (inondation, accident chimique…). Voir `QUESTIONS-METIER-EN-ATTENTE.md` Q6 pour le détail.
+
 **Cadrage :** comme pour J1/J2/module 15, une piste posée pour discussion ultérieure, pas un chantier à démarrer immédiatement.
 
 ## 17. Entreprises extérieures & Plan de Prévention — ❌ Non démarré
@@ -391,6 +395,11 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - Réutiliser le modèle service/site déjà en place (`verifications-periodiques.html`) plutôt qu'une notion de site propre à ce module.
 - L'inspection commune préalable ressemble fonctionnellement à une inspection du module Inspection/Audit (module 2) — évaluer si une trame dédiée dans ce module existant suffit plutôt que de dupliquer la mécanique de trames/inspections.
 - Les mesures de prévention non tenues ou incidents en cours d'intervention devraient remonter au Plan d'Actions (`origine: "Prévention EE"`), même logique que DUERP/Inspection/Analyse (module 15).
+
+**Réponse du préventeur (Q7, Cahier du préventeur, 2026-09-16) :**
+- Seuil/comptage des heures : par intervention/opération, comme le prévoit la réglementation.
+- Habilitations des intervenants extérieurs : **hors périmètre** — sous la responsabilité contractuelle de l'entreprise extérieure, pas à tracer dans VIGIE HSE.
+- Inspection commune préalable : *« il existe une trame »* — reste à clarifier au moment de construire ce module s'il parle de réutiliser la trame du module Inspection/Audit existant (piste déjà évoquée ci-dessus) ou d'une trame externe à reproduire. Voir `QUESTIONS-METIER-EN-ATTENTE.md` Q7 pour le détail.
 - Lien naturel avec la Formation/Habilitation existante côté agents internes — question ouverte : faut-il tracer aussi les habilitations/qualifications exigées côté entreprise extérieure (ex. habilitation électrique d'un sous-traitant), ou est-ce hors périmètre de VIGIE HSE (responsabilité contractuelle de l'entreprise extérieure elle-même) ?
 
 **Cadrage :** comme pour les autres pistes ajoutées cette semaine, une piste posée pour discussion ultérieure, pas un chantier à démarrer immédiatement.

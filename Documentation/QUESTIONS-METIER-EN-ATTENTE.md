@@ -33,10 +33,10 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 1 | Un retard doit-il disparaître quand on regarde une période courte ? | Indicateurs & Reporting (existant) | ✅ |
 | 2 | Sur quelle base calculer le taux de fréquence sur une période libre ? | Indicateurs & Reporting (existant) | ✅ |
 | 3 | Faut-il un type « Maladie professionnelle » distinct dans le registre ? | Registre AT/MP (existant) | ✅ |
-| 4 | Quelles habilitations imposent une surveillance médicale renforcée ? | Module Santé & Visites (extension) | 🟠 réponse incomplète, à redemander |
-| 5 | Quel niveau de fidélité réglementaire pour la pénibilité / C2P ? | Module Pénibilité (à construire) | 🟠 |
-| 6 | Quelle périodicité réglementaire pour les exercices d'évacuation ? | Module Situations d'urgence (à construire) | 🟠 |
-| 7 | Plan de prévention : seuil des 400 h et qualifications des sous-traitants | Module Entreprises extérieures (à construire) | 🟠 |
+| 4 | Quelles habilitations imposent une surveillance médicale renforcée ? | Module Santé & Visites (extension) | ✅ |
+| 5 | Quel niveau de fidélité réglementaire pour la pénibilité / C2P ? | Module Pénibilité (à construire) | ✅ réponse consignée, module pas encore construit |
+| 6 | Quelle périodicité réglementaire pour les exercices d'évacuation ? | Module Situations d'urgence (à construire) | ✅ réponse consignée, module pas encore construit |
+| 7 | Plan de prévention : seuil des 400 h et qualifications des sous-traitants | Module Entreprises extérieures (à construire) | ✅ réponse consignée, module pas encore construit |
 
 ---
 
@@ -157,7 +157,7 @@ Ces questions concernent des modules **pas encore construits** (ou une extension
 
 ---
 
-## 🟠 Question 4 — Quelles habilitations imposent une surveillance médicale renforcée ?
+## ✅ Question 4 — Quelles habilitations imposent une surveillance médicale renforcée ?
 
 **Contexte.** Un retour de test demandait que la **périodicité des visites médicales s'ajuste automatiquement** selon les habilitations détenues par l'agent : certaines expositions imposent légalement un suivi individuel renforcé, donc une visite plus fréquente.
 
@@ -167,11 +167,15 @@ Ces questions concernent des modules **pas encore construits** (ou une extension
 
 ### Décision
 
-> ⚠️ **Réponse commencée le 2026-09-15 mais interrompue** : *« La saisie d'une »* — la phrase s'arrête là, rien d'autre n'a été enregistré (le second champ de remarques est resté vide aussi). Probablement une frappe interrompue plutôt qu'une vraie réponse. **À redemander** — ne rien mettre en œuvre sur cette base.
+> **Répondu le 2026-09-16** : *« La saisie d'un type d'habilitation doit permettre de déterminer une périodicité/validité. »* Pas d'autre critère (âge, poste, exposition CMR, travail de nuit) : *« non »* — seul le type d'habilitation détenu compte.
+
+**Sens retenu pour la mise en œuvre** : pas de liste figée « CACES → tous les X mois » codée en dur, mais une **périodicité/validité portée par le type d'habilitation lui-même** dans le référentiel — c'est la présence de ce type sur la fiche de l'agent qui doit ajuster automatiquement l'échéance de la prochaine visite.
+
+**Mis en œuvre le 2026-09-16** dans `sante-visites.html` : réutilise les durées déjà définies par type dans `formation-habilitation.html` (`HAB_TYPES` — CACES 60 mois, habilitation électrique 36, SST 24, permis PL 60, AIPR 60, travail en hauteur 12). Pour chaque agent, si une habilitation détenue a une durée **plus stricte** que la périodicité saisie manuellement sur sa fiche de visite, celle-ci devient la périodicité effective (jamais l'inverse — une habilitation ne peut qu'accélérer le suivi, pas le relâcher). Un badge « ⚠ Renforcée » l'indique dans le tableau, avec le type d'habilitation en cause ; l'export `.xlsx` porte les colonnes « Périodicité effective » et « Surveillance renforcée par ».
 
 ---
 
-## 🟠 Question 5 — Quel niveau de fidélité réglementaire pour la pénibilité / C2P ?
+## ✅ Question 5 — Quel niveau de fidélité réglementaire pour la pénibilité / C2P ?
 
 **Contexte.** Le module « Pénibilité & fiches individuelles » (module 5 de la roadmap) suivrait l'exposition des agents aux facteurs de pénibilité et générerait des fiches individuelles d'exposition.
 
@@ -185,11 +189,13 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ### Décision
 
-> 
+> **Avec seuils** (répondu le 2026-09-16) — *« Voir réglementation en vigueur, conforme au texte. »* Le collègue ne donne pas lui-même la liste des facteurs/seuils : il renvoie à la réglementation en vigueur au moment de la construction du module, à vérifier précisément à ce moment-là plutôt qu'à figer aujourd'hui (les seuils C2P évoluent par décret).
+
+**Reporté dans `ROADMAP-MODULES-FUTURS.md`, module 5** — ce module n'est pas encore construit ; rien à coder maintenant.
 
 ---
 
-## 🟠 Question 6 — Quelle périodicité réglementaire pour les exercices d'évacuation ?
+## ✅ Question 6 — Quelle périodicité réglementaire pour les exercices d'évacuation ?
 
 **Contexte.** Le module « Situations d'urgence & exercices » (module 16) tiendrait un registre daté des exercices réalisés par site, avec une alerte « prochain exercice dû ».
 
@@ -199,11 +205,13 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ### Décision
 
-> 
+> **Répondu le 2026-09-16.** Périodicité : *« Oui certaines périodicités varient en fonction du type d'établissement, la saisie manuelle d'une périodicité est nécessaire lors de la saisie »* — donc pas de valeur figée par type de site dans le code, une périodicité **saisie à la main** à chaque exercice enregistré (même logique que la réponse Q4 : la donnée porte sa propre règle plutôt qu'une table codée en dur). Types d'exercices à tracer : *« Évacuation incendie, intrusion, risque environnemental (inondation, accident chimique…) »*.
+
+**Reporté dans `ROADMAP-MODULES-FUTURS.md`, module 16** — ce module n'est pas encore construit ; rien à coder maintenant.
 
 ---
 
-## 🟠 Question 7 — Plan de prévention : seuil des 400 h et qualifications des sous-traitants
+## ✅ Question 7 — Plan de prévention : seuil des 400 h et qualifications des sous-traitants
 
 **Contexte.** Le module « Entreprises extérieures & Plan de Prévention » (module 17) suivrait les interventions d'entreprises extérieures sur les sites de la collectivité. Le plan de prévention écrit est obligatoire au-delà d'un seuil d'heures cumulées, ou pour certains travaux dangereux.
 
@@ -216,7 +224,12 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ### Décision
 
-> 
+> **Répondu le 2026-09-16.**
+> - Seuil et comptage des heures : *« Par intervention / opération, comme la réglementation le prévoit. »*
+> - Tracer les habilitations des intervenants extérieurs : **non** — hors périmètre, sous la responsabilité contractuelle de l'entreprise extérieure.
+> - Inspection commune préalable : *« Oui, il existe une trame »* — à clarifier au moment de construire le module s'il s'agit de réutiliser la trame du module Inspection/Audit existant, ou d'une trame externe (papier) que le collègue utilise déjà et qu'il faudrait reproduire.
+
+**Reporté dans `ROADMAP-MODULES-FUTURS.md`, module 17** — ce module n'est pas encore construit ; rien à coder maintenant. Le point sur la trame de l'inspection commune reste à clarifier avec lui au moment de construire ce module.
 
 ---
 
@@ -235,6 +248,6 @@ Ce n'est pas un défaut : le choix a été de ne pas inventer une fausse date d'
 - **Q1** : `reporting.html`, fonction `renderReport()` — filtrage via `inPeriod(...)` appliqué module par module.
 - **Q2** : `reporting.html`, bloc `// ---- AT/MP ----`, variables `EFFECTIF`, `HEURES_AN`, `dureeAtJours`, `heures`, `tf`. Le même calcul, aligné, existe dans `registre-at-mp.html` (variable `dureeAtJours`, adaptée à son filtre par année plutôt qu'à une plage de dates).
 - **Q3** : champ `typeAtMp`, défini dans `saisie-rh.html` et affiché par `typeChip()` dans `registre-at-mp.html` ; impacte `dossiers-atmp-citis.html`.
-- **Q4** : `sante-visites.html` (périodicité) + lecture des habilitations dans `formation-habilitation.html`.
+- **Q4** : `sante-visites.html`, fonctions `loadHabilitationsRef()`, `buildSurveillanceRenforceeMap()`, `computeStatus()` (constante `HAB_DUREE_SURVEILLANCE`, dupliquée depuis `HAB_TYPES`/`HAB_DUREE` de `formation-habilitation.html`).
 - **Q5, Q6, Q7** : modules non créés — voir `ROADMAP-MODULES-FUTURS.md` sections 5, 16 et 17.
 - **Point DUERP** : champ `dateEvaluation` écrit par `saisie-duerp.html` ; import sans date dans `document-unique.html`.

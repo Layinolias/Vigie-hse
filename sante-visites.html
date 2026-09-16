@@ -2,6 +2,7 @@
 <meta name="description" content="Suivi des visites médicales et de la surveillance santé au travail des agents.">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
+<script src="assets/roster.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -501,23 +502,16 @@
   function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
 
   // ---------- Roster de départ (dérivé du Registre AT/MP) ----------
+  // Hash + dédoublonnage factorisés dans assets/roster.js (VigieRoster) : partagés
+  // avec formation-habilitation.html et epi-dotation.html, seule la logique
+  // ci-dessous (que seeder pour un agent donné) reste propre à cette page.
   const SEED_ATMP = [];
   const HIGH_EXPOSURE = ["Voirie & Réseaux","Espaces Verts & Paysage","Collecte & Propreté","Propreté de la Ville","Atelier Mécanique","Police Municipale & Tranquillité"];
-  function hashStr(s){
-    let h = 0;
-    for (let i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) | 0; }
-    return Math.abs(h);
-  }
   function buildRosterSeeds(){
-    const seen = new Map();
-    SEED_ATMP.forEach(r => {
-      if (!r.nom || !r.prenom || !r.service) return;
-      const key = r.nom + "|" + r.prenom + "|" + r.service;
-      if (!seen.has(key)) seen.set(key, r);
-    });
+    const seen = VigieRoster.dedupeByAgent(SEED_ATMP);
     const out = [];
     seen.forEach((r, key) => {
-      const h = hashStr(key);
+      const h = VigieRoster.hashStr(key);
       const periodiciteMois = HIGH_EXPOSURE.includes(r.service) ? 12 : 24;
       const monthsAgo = 1 + (h % 30);
       const d = new Date();

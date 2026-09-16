@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
+<script src="assets/roster.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -620,12 +621,6 @@
   const REF = loadReferentials();
   function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
 
-  function hashStr(s){
-    let h = 0;
-    for (let i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) | 0; }
-    return Math.abs(h);
-  }
-
   // ---------- Catalogue (seed fixe) ----------
   const CATALOGUE_SEED = [];
   const CAT_KEY = "vigie_hse_epi_catalogue";
@@ -714,19 +709,17 @@
   let STOCK = loadStock();
 
   // ---------- Roster (dérivé du Registre AT/MP) ----------
+  // Hash + dédoublonnage factorisés dans assets/roster.js (VigieRoster) : partagés
+  // avec sante-visites.html et formation-habilitation.html, seule la logique
+  // ci-dessous (que seeder pour un agent donné) reste propre à cette page.
   const SEED_ATMP = [];
   const TECH_SERVICES = ["Voirie & Réseaux","Espaces Verts & Paysage","Collecte & Propreté","Propreté de la Ville","Atelier Mécanique","Patrimoine Bâti"];
 
   function buildDotationSeeds(){
-    const seen = new Map();
-    SEED_ATMP.forEach(r => {
-      if (!r.nom || !r.prenom || !r.service) return;
-      const key = r.nom + "|" + r.prenom + "|" + r.service;
-      if (!seen.has(key)) seen.set(key, r);
-    });
+    const seen = VigieRoster.dedupeByAgent(SEED_ATMP);
     const out = [];
     seen.forEach((r, key) => {
-      const h = hashStr(key);
+      const h = VigieRoster.hashStr(key);
       const isTech = TECH_SERVICES.includes(r.service);
       let items = [];
       if (isTech){
@@ -738,7 +731,7 @@
         if (h % 4 === 0) items.push("cat-9");
       }
       items.forEach(articleId => {
-        const h2 = hashStr(key + "|" + articleId);
+        const h2 = VigieRoster.hashStr(key + "|" + articleId);
         const monthsAgo = 1 + (h2 % 48);
         const d = new Date(); d.setMonth(d.getMonth() - monthsAgo);
         const tailleOptions = STOCK_SEED_DEF.filter(s => s[0] === articleId).map(s => s[1]);
@@ -787,7 +780,7 @@
     const washCandidates = DOTATIONS_ALL.filter(d => { const c = catalogueById(d.articleId); return c && c.nombreLavagesMax; });
     return washCandidates.slice(0, 8).map(d => {
       const c = catalogueById(d.articleId);
-      const h = hashStr(d.id);
+      const h = VigieRoster.hashStr(d.id);
       const cumul = Math.max(1, Math.round((h % 100) / 100 * c.nombreLavagesMax * 1.3));
       const monthsAgo = 1 + (h % 6);
       const dd = new Date(); dd.setMonth(dd.getMonth() - monthsAgo);

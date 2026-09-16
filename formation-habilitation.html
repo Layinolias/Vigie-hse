@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
+<script src="assets/roster.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -512,25 +513,18 @@
   const HAB_DUREE = Object.fromEntries(HAB_TYPES);
 
   // ---------- Roster de départ (dérivé du Registre AT/MP) ----------
+  // Hash + dédoublonnage factorisés dans assets/roster.js (VigieRoster) : partagés
+  // avec sante-visites.html et epi-dotation.html, seule la logique ci-dessous
+  // (que seeder pour un agent donné) reste propre à cette page.
   const SEED_ATMP = [];
   const TECH_SERVICES = ["Voirie & Réseaux","Espaces Verts & Paysage","Collecte & Propreté","Propreté de la Ville","Atelier Mécanique","Patrimoine Bâti"];
   const TECH_TYPES = ["CACES","Habilitation électrique","AIPR (Autorisation d'Intervention à Proximité des Réseaux)","Habilitation travail en hauteur"];
   const ORGANISMES_FORMATION = ["Institut régional de formation professionnelle","Cap Prévention Formation","Centre de formation des collectivités territoriales","Institut national du service public territorial","Organisme de formation agréé partenaire"];
-  function hashStr(s){
-    let h = 0;
-    for (let i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) | 0; }
-    return Math.abs(h);
-  }
   function buildHabilitationSeeds(){
-    const seen = new Map();
-    SEED_ATMP.forEach(r => {
-      if (!r.nom || !r.prenom || !r.service) return;
-      const key = r.nom + "|" + r.prenom + "|" + r.service;
-      if (!seen.has(key)) seen.set(key, r);
-    });
+    const seen = VigieRoster.dedupeByAgent(SEED_ATMP);
     const out = [];
     seen.forEach((r, key) => {
-      const h = hashStr(key);
+      const h = VigieRoster.hashStr(key);
       const isTech = TECH_SERVICES.includes(r.service);
       const types = [];
       if (isTech){
@@ -540,7 +534,7 @@
         if (h % 4 !== 3) types.push("SST (Sauveteur Secouriste du Travail)");
       }
       types.forEach(type => {
-        const h2 = hashStr(key + "|" + type);
+        const h2 = VigieRoster.hashStr(key + "|" + type);
         const duree = HAB_DUREE[type];
         const monthsAgo = 1 + (h2 % 58);
         const d = new Date();

@@ -532,26 +532,8 @@
   const PERIODICITE_BY_CAT = Object.fromEntries(CATEGORIES);
 
   // ---------- Génération du parc d'équipements illustratif ----------
-  function hashStr(s){
-    let h = 0;
-    for (let i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) | 0; }
-    return Math.abs(h);
-  }
-  const SITES = [
-    { site:"Hôtel de Ville", service:"Accueil & Affaires Générales", collectivite:"Ville" },
-    { site:"Mairie annexe", service:"Affaires Financières", collectivite:"Ville" },
-    { site:"Complexe sportif municipal", service:"Sports & Vie Associative", collectivite:"Ville" },
-    { site:"Cuisine Centrale", service:"Restauration Collective", collectivite:"Ville" },
-    { site:"Ateliers municipaux", service:"Patrimoine Bâti", collectivite:"Ville" },
-    { site:"Salle polyvalente Enfance", service:"Enfance & Jeunesse", collectivite:"Ville" },
-    { site:"Direction Générale — siège agglo", service:"Direction Générale des Services", collectivite:"Agglomération" },
-    { site:"Médiathèque", service:"Réseau des Médiathèques", collectivite:"Agglomération" },
-    { site:"Conservatoire de musique", service:"Conservatoire de Musique", collectivite:"Agglomération" },
-    { site:"Déchetterie", service:"Collecte & Propreté", collectivite:"Agglomération" },
-  ];
-  const ORGANISMES = ["Contrôle Sud Vérification", "Bureau de Contrôle Occitan", "Sécuritech Diagnostic", "Vérital Contrôle", "Organisme Régional de Contrôle"];
-  const CONFORMITE_PLAN = ["Conforme","Conforme","Conforme","Conforme","Conforme","Conforme","Conforme","Conforme avec réserves","Conforme avec réserves","Non conforme"];
-
+  // Donnée de départ réelle chargée via DATATEST (voir plus bas) plutôt que par ce
+  // générateur — laissé en place pour respecter le pattern always-merge (règle #2).
   function buildEquipmentSeeds(){
     return [];
   }

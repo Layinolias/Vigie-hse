@@ -203,6 +203,7 @@
   .status-chip.ok{ color:var(--success); background:var(--success-bg); } .status-chip.ok::before{ background:var(--success); }
   .status-chip.soon{ color:var(--warning); background:var(--warning-bg); } .status-chip.soon::before{ background:var(--warning); }
   .status-chip.late{ color:var(--danger); background:var(--danger-bg); } .status-chip.late::before{ background:var(--danger); }
+  .badge-renforcee{ display:inline-block; margin-top:3px; font-size:10px; font-weight:600; color:var(--warning); white-space:nowrap; }
   .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
   .act-edit:hover{ text-decoration:underline; }
   .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
@@ -552,16 +553,53 @@
   let DATASET = loadDataset();
   if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
 
+  // ---------- Surveillance renforcée par habilitation (Q4 du Cahier du préventeur, répondue le
+  // 2026-09-16) : « la saisie d'un type d'habilitation doit permettre de déterminer une
+  // périodicité/validité » (pas d'autre critère — âge, exposition, etc. — écartés par le préventeur).
+  // Même table de durées que formation-habilitation.html (dupliquée volontairement, comme les
+  // rosters d'agents indépendants déjà notés dans ETAT-DU-PROJET.md) : la durée de validité d'une
+  // habilitation détenue par l'agent devient un plafond sur la périodicité de sa visite si elle est
+  // plus stricte que la périodicité saisie manuellement — jamais plus large.
+  const HAB_DUREE_SURVEILLANCE = {
+    "CACES": 60,
+    "Habilitation électrique": 36,
+    "SST (Sauveteur Secouriste du Travail)": 24,
+    "Permis de conduire poids lourd / remorque": 60,
+    "AIPR (Autorisation d'Intervention à Proximité des Réseaux)": 60,
+    "Habilitation travail en hauteur": 12,
+  };
+  function loadHabilitationsRef(){
+    try { const raw = localStorage.getItem("vigie_hse_habilitations"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
+    return [];
+  }
+  function buildSurveillanceRenforceeMap(){
+    const map = new Map();
+    loadHabilitationsRef().forEach(h => {
+      if (!h.nom || !h.prenom || !h.service) return;
+      const duree = HAB_DUREE_SURVEILLANCE[h.typeHabilitation];
+      if (!duree) return;
+      const key = h.nom + "|" + h.prenom + "|" + h.service;
+      const cur = map.get(key);
+      if (!cur || duree < cur.duree){ map.set(key, { duree, type: h.typeHabilitation }); }
+    });
+    return map;
+  }
+  const SURVEILLANCE_RENFORCEE = buildSurveillanceRenforceeMap();
+
   function computeStatus(v){
+    const renfort = SURVEILLANCE_RENFORCEE.get(v.nom + "|" + v.prenom + "|" + v.service);
+    const basePeriodicite = Number(v.periodiciteMois) || 24;
+    const renforcee = !!(renfort && renfort.duree < basePeriodicite);
+    const periodiciteEffective = renforcee ? renfort.duree : basePeriodicite;
     const d = new Date(v.dateDerniere);
     const prochaine = new Date(d);
-    prochaine.setMonth(prochaine.getMonth() + (Number(v.periodiciteMois) || 24));
+    prochaine.setMonth(prochaine.getMonth() + periodiciteEffective);
     const today = new Date();
     const in60 = new Date(today); in60.setDate(in60.getDate() + 60);
     let statut = "À jour", cls = "ok";
     if (prochaine < today){ statut = "En retard"; cls = "late"; }
     else if (prochaine <= in60){ statut = "À programmer"; cls = "soon"; }
-    return { prochaine: prochaine.toISOString().slice(0,10), statut, cls };
+    return { prochaine: prochaine.toISOString().slice(0,10), statut, cls, periodiciteEffective, renforcee, renforceePar: renforcee ? renfort.type : "" };
   }
 
   // ---------- Filtres ----------
@@ -622,7 +660,7 @@
         <td>${v.nom}</td>
         <td>${v.prenom}</td>
         <td>${v.service}</td>
-        <td>${v.typeVisite}</td>
+        <td>${v.typeVisite}${v.renforcee ? `<br><span class="badge-renforcee" title="Périodicité ramenée à ${v.periodiciteEffective} mois du fait de l'habilitation « ${v.renforceePar} » détenue par l'agent">⚠ Renforcée — ${v.renforceePar} (${v.periodiciteEffective} mois)</span>` : ''}</td>
         <td>${v.dateDerniere}</td>
         <td>${v.prochaine}</td>
         <td><span class="status-chip ${v.cls}">${v.statut}</span></td>
@@ -644,11 +682,15 @@
     $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle fiche</button>`;
 
     $("btnExport").addEventListener("click", () => {
-      const rows = DATASET.map(v => ({
-        "ID": v.id, "Nom": v.nom, "Prénom": v.prenom, "Collectivité": v.collectivite || "Ville", "Service": v.service,
-        "Type de visite": v.typeVisite, "Date dernière visite": v.dateDerniere, "Périodicité (mois)": v.periodiciteMois,
-        "Commentaire": v.commentaire || "",
-      }));
+      const rows = DATASET.map(v => {
+        const s = computeStatus(v);
+        return {
+          "ID": v.id, "Nom": v.nom, "Prénom": v.prenom, "Collectivité": v.collectivite || "Ville", "Service": v.service,
+          "Type de visite": v.typeVisite, "Date dernière visite": v.dateDerniere, "Périodicité (mois)": v.periodiciteMois,
+          "Périodicité effective (mois)": s.periodiciteEffective, "Surveillance renforcée par": s.renforceePar || "",
+          "Commentaire": v.commentaire || "",
+        };
+      });
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Santé & Visites");

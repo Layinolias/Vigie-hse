@@ -1,5 +1,5 @@
-<title>Plan d'Actions</title>
-<meta name="description" content="Suivi des actions correctives issues du Document Unique et du Registre AT/MP.">
+<title>Situations d'urgence & exercices</title>
+<meta name="description" content="Registre des exercices d'évacuation, d'intrusion et de risque environnemental — preuve datée que les exercices ont bien lieu.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -99,9 +99,7 @@
   }
 
   .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
-  .hero{ margin-bottom:22px; } .hero h1{ font-size:25px; } .hero p{ margin:6px 0 0; color:var(--text-muted); font-size:13px; max-width:70ch; line-height:1.55; }
 
-  /* ===== Compact sticky page summary (icon + titre + description + KPI sur une ligne) ===== */
   .page-summary{
     position: sticky; top: 60px; z-index: 15;
     display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
@@ -123,10 +121,8 @@
   .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
   .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
   .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
-  .ps-kpi-icon.critical{ background:rgba(var(--critical-rgb),.14); color:var(--critical); }
   .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
   .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
-  .ps-kpi-value .unit{ font-size:10px; color:var(--text-muted); font-weight:500; margin-left:1px; }
   .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
   @media (max-width:1100px){ .page-summary-text p{ display:none; } }
   .mobile-notice{ display:none; }
@@ -143,24 +139,10 @@
   .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
   .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
 
-  .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:18px; }
-  @media (max-width:1180px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:560px){ .kpi-row{ grid-template-columns:1fr; } }
-  .kpi{ padding:16px 18px; display:flex; flex-direction:column; gap:8px; }
-  .kpi-top{ display:flex; align-items:center; justify-content:space-between; }
-  .kpi-icon{ width:30px; height:30px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; }
-  .kpi-icon.blue{ background:rgba(var(--accent-rgb),.12); color:var(--accent); }
-  .kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
-  .kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
-  .kpi-icon.success{ background:var(--success-bg); color:var(--success); }
-  .kpi-label{ font-size:11.5px; color:var(--text-muted); font-weight:500; }
-  .kpi-value{ font-size:26px; font-weight:600; letter-spacing:-.01em; }
-  .kpi-sub{ font-size:11.5px; color:var(--text-faint); } .kpi-sub b{ color:var(--text); font-weight:600; }
-
   .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
   .field{ display:flex; flex-direction:column; gap:5px; }
   .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
-  select, input[type="text"], input[type="date"], textarea{
+  select, input[type="text"], input[type="date"], input[type="number"], textarea{
     appearance:none; -webkit-appearance:none;
     background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
     padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease;
@@ -183,41 +165,49 @@
   .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px 16px; }
   .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; }
   @media (max-width:680px){ .form-grid .span2, .form-grid .span3{ grid-column:span 1; } }
+  @media (max-width:640px){
+    select, input[type="text"], input[type="date"], input[type="number"], textarea{ font-size:16px; }
+    .form-actions{ flex-direction:column; align-items:stretch; }
+    .form-actions .btn{ width:100%; justify-content:center; min-height:46px; }
+  }
   .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
-  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  .form-sub{ font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin:20px 0 10px; }
+
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input[type="text"]{ flex:1 1 160px; }
+  .dyn-row input[type="date"]{ flex:0 0 150px; }
+  .dyn-row select{ flex:0 0 120px; min-width:0; }
 
   .table-panel{ overflow:auto; max-height:70vh; }
-  table.reg{ border-collapse:collapse; width:100%; min-width:1180px; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:1100px; }
   table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
   table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
   table.reg tbody tr{ border-left:3px solid transparent; transition:background .12s ease; }
   table.reg tbody tr:hover{ background:var(--bg-2); }
-  table.reg tbody tr.overdue{ border-left-color:var(--danger); background:rgba(var(--danger-rgb),.04); }
-  table.reg tbody td.wrap{ white-space:normal; min-width:200px; }
+  table.reg tbody td.wrap{ white-space:normal; min-width:200px; max-width:320px; }
   table.reg thead th#thActions{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
   table.reg tbody td.actions-float{ position:sticky; right:0; z-index:1; background:var(--surface-el); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); white-space:nowrap; }
   table.reg tbody tr:hover td.actions-float{ background:var(--bg-2); }
 
   .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
   .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .chip.p-critique{ color:var(--danger); background:var(--danger-bg); } .chip.p-critique::before{ background:var(--danger); }
-  .chip.p-haute{ color:var(--critical); background:rgba(var(--critical-rgb),.12); } .chip.p-haute::before{ background:var(--critical); }
-  .chip.p-moyenne{ color:var(--warning); background:var(--warning-bg); } .chip.p-moyenne::before{ background:var(--warning); }
-  .chip.p-basse{ color:var(--text-muted); background:var(--bg-2); } .chip.p-basse::before{ background:var(--text-faint); }
-  .origine-chip{ display:inline-block; padding:3px 9px; border-radius:var(--r-sm); font-size:10.5px; font-weight:600; font-family:"IBM Plex Mono",monospace; border:1px solid; white-space:nowrap; }
-  .origine-chip.duerp{ color:var(--accent); border-color:rgba(var(--accent-rgb),.35); background:rgba(var(--accent-rgb),.09); }
-  .origine-chip.manuel{ color:var(--accent-blue); border-color:rgba(var(--accent-blue-rgb),.4); background:rgba(var(--accent-blue-rgb),.1); }
-  .origine-chip.inspection{ color:var(--warning); border-color:rgba(var(--warning-rgb),.4); background:rgba(var(--warning-rgb),.1); }
-  .origine-chip.analyse{ color:var(--accent-violet); border-color:rgba(var(--accent-violet-rgb),.4); background:rgba(var(--accent-violet-rgb),.1); }
-  .origine-chip.urgence{ color:var(--danger); border-color:rgba(var(--danger-rgb),.4); background:rgba(var(--danger-rgb),.1); }
-  .statut-select{ min-width:118px; padding:6px 28px 6px 10px; font-size:12px; }
-  .echeance-overdue{ color:var(--danger); font-weight:600; }
+  .chip.ok{ color:var(--success); background:var(--success-bg); } .chip.ok::before{ background:var(--success); }
+  .chip.soon{ color:var(--warning); background:var(--warning-bg); } .chip.soon::before{ background:var(--warning); }
+  .chip.late{ color:var(--danger); background:var(--danger-bg); } .chip.late::before{ background:var(--danger); }
+  .type-tag{ display:inline-block; padding:2px 8px; border-radius:var(--r-sm); font-size:11px; font-weight:600; background:rgba(var(--accent-violet-rgb),.12); color:var(--accent-violet); white-space:nowrap; }
+
   .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
   .act-edit:hover{ text-decoration:underline; }
   .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
   .act-del:hover{ text-decoration:underline; }
   .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
   .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+
+  .echeance-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .echeance-table th{ text-align:left; color:var(--text-muted); font-weight:600; font-size:11px; padding:6px 10px; border-bottom:1px solid var(--border); }
+  .echeance-table td{ padding:7px 10px; border-bottom:1px solid var(--border); }
+  .echeance-table tr:last-child td{ border-bottom:none; }
 </style>
 
 <script>
@@ -278,7 +268,7 @@
       </div>
       <div class="nav-section">
         <div class="nav-label">Suivi</div>
-        <a class="nav-item active" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
         <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
         <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
         <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
@@ -294,7 +284,7 @@
         <div class="nav-label">Administratif</div>
         <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
         <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
-        <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
+        <a class="nav-item active" id="navUrgences" href="urgences-exercices.html"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
       </div>
       <div class="nav-section" id="navPilotage" style="display:none;">
         <div class="nav-label">Pilotage</div>
@@ -314,7 +304,7 @@
   <div class="main">
     <header class="topbar">
       <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
-      <div class="breadcrumb">Suivi / <b>Plan d'Actions</b></div>
+      <div class="breadcrumb">Administratif / <b>Situations d'urgence</b></div>
       <div class="topbar-right">
         <span class="role-chip" id="roleChip">—</span>
         <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
@@ -324,36 +314,43 @@
     <div class="content">
       <header class="page-summary">
         <div class="page-summary-id">
-          <div class="page-summary-icon"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-life-buoy"/></svg></div>
           <div class="page-summary-text">
-            <h1>Plan d'Actions</h1>
-            <p title="Suivi des actions correctives — générées automatiquement depuis les évaluations Élevé/Critique du Document Unique, et complétées manuellement par les équipes RH.">Suivi des actions correctives — générées automatiquement depuis les évaluations Élevé/Critique du Document Unique, et complétées manuellement par les équipes RH.</p>
+            <h1>Situations d'urgence — exercices</h1>
+            <p title="Registre chronologique des exercices d'évacuation, d'intrusion et de risque environnemental réalisés par site : preuve datée que les exercices ont bien lieu, pas seulement qu'un plan existe sur le papier.">Registre chronologique des exercices réalisés par site : preuve datée que les exercices ont bien lieu. Les anomalies constatées alimentent le Plan d'Actions.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
           <div class="ps-kpi">
-            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-clipboard"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Total actions</span></div>
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-life-buoy"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Exercices enregistrés</span></div>
           </div>
-          <span id="kpiTotalSub" style="display:none">—</span>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon violet"><svg class="icon"><use href="#i-shield"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiSites">–</span><span class="ps-kpi-label">Sites suivis</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiSoon">–</span><span class="ps-kpi-label">À programmer</span></div>
+          </div>
           <div class="ps-kpi">
             <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiRetard">–</span><span class="ps-kpi-label">En retard</span></div>
-          </div>
-          <div class="ps-kpi">
-            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-activity"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEnCours">–</span><span class="ps-kpi-label">En cours</span></div>
-          </div>
-          <div class="ps-kpi">
-            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-shield-check"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiFait">–</span><span class="ps-kpi-label">Terminées</span></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiLate">–</span><span class="ps-kpi-label">En retard</span></div>
           </div>
         </div>
       </header>
 
       <div class="mobile-notice" id="mobileNotice">
-        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord ou la déclaration rapide.</span>
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
         <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel" style="padding:16px 20px; margin-bottom:18px;">
+        <div class="panel-head" style="margin-bottom:8px;"><h3 class="panel-title" style="font-size:14px;">Prochaine échéance par site &amp; type d'exercice</h3></div>
+        <p style="margin:0 0 10px; font-size:11.5px; color:var(--text-faint);">Calculée sur le dernier exercice de chaque site/type, avec la périodicité saisie ce jour-là (aucune valeur réglementaire n'est imposée par l'application — voir la note en bas de page).</p>
+        <div style="overflow-x:auto;">
+          <table class="echeance-table" id="echeanceTable"></table>
+        </div>
       </div>
 
       <div class="panel console">
@@ -361,39 +358,43 @@
           <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
         </div>
         <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
-        <div class="field"><span class="flabel">Statut</span>
-          <select id="fStatut"><option value="all">Tous</option><option value="À faire">À faire</option><option value="En cours">En cours</option><option value="Fait">Fait</option></select>
-        </div>
-        <div class="field"><span class="flabel">Priorité</span>
-          <select id="fPriorite"><option value="all">Toutes</option><option value="Critique">Critique</option><option value="Haute">Haute</option><option value="Moyenne">Moyenne</option><option value="Basse">Basse</option></select>
+        <div class="field"><span class="flabel">Type d'exercice</span>
+          <select id="fType"><option value="all">Tous</option><option value="Évacuation incendie">Évacuation incendie</option><option value="Intrusion">Intrusion</option><option value="Risque environnemental">Risque environnemental</option></select>
         </div>
         <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
-        <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> actions</span>
+        <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> exercices</span>
       </div>
 
       <div class="panel form-panel" id="formPanel" style="display:none;">
-        <div class="panel-head"><h3 class="panel-title" id="formTitle">Nouvelle action</h3></div>
-        <form id="actionForm">
+        <div class="panel-head"><h3 class="panel-title" id="formTitle">Nouvel exercice</h3></div>
+        <form id="exerciceForm">
           <input type="hidden" id="fId">
           <div class="form-grid">
-            <div class="span2"><label for="fTitre">Titre</label><input type="text" id="fTitre" required></div>
+            <div><label for="fSite">Site</label><input type="text" id="fSite" required placeholder="ex. Hôtel de Ville"></div>
             <div><label for="fCollectiviteForm">Collectivité</label>
               <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
             </div>
             <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
-            <div><label for="fRisqueLie">Risque lié</label><input type="text" id="fRisqueLie" placeholder="ex. Chute de plain-pied"></div>
-            <div><label for="fResponsable">Responsable</label><input type="text" id="fResponsable" placeholder="Nom du responsable"></div>
-            <div><label for="fEcheance">Échéance</label><input type="date" id="fEcheance" required></div>
-            <div><label for="fPrioriteForm">Priorité</label>
-              <select id="fPrioriteForm"><option value="Critique">Critique</option><option value="Haute">Haute</option><option value="Moyenne" selected>Moyenne</option><option value="Basse">Basse</option></select>
+            <div><label for="fType">Type d'exercice</label>
+              <select id="fTypeForm" required>
+                <option value="Évacuation incendie">Évacuation incendie</option>
+                <option value="Intrusion">Intrusion</option>
+                <option value="Risque environnemental">Risque environnemental</option>
+              </select>
             </div>
-            <div><label for="fStatutForm">Statut</label>
-              <select id="fStatutForm"><option value="À faire">À faire</option><option value="En cours">En cours</option><option value="Fait">Fait</option></select>
-            </div>
-            <div class="span3"><label for="fDescription">Description / mesures</label><textarea id="fDescription" placeholder="Détail de l'action corrective à mener…"></textarea></div>
+            <div><label for="fDateExercice">Date de l'exercice</label><input type="date" id="fDateExercice" required></div>
+            <div><label for="fDuree">Durée (minutes)</label><input type="number" id="fDuree" min="1"></div>
+            <div><label for="fParticipation">Participation</label><input type="text" id="fParticipation" placeholder="ex. 42 agents ou 85%"></div>
+            <div><label for="fPeriodicite">Périodicité retenue (mois)</label><input type="number" id="fPeriodicite" min="1" required placeholder="saisie au cas par cas"></div>
+            <div class="span3"><label for="fConstatations">Constatations / anomalies</label><textarea id="fConstatations" placeholder="Ce qui a été observé pendant l'exercice…"></textarea></div>
           </div>
+
+          <div class="form-sub">Actions correctives (alimentent le Plan d'Actions)</div>
+          <div id="actionsList"></div>
+          <button type="button" class="btn btn-ghost" id="btnAddAction"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une action</button>
+
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="submit" class="btn btn-primary">Enregistrer l'exercice</button>
             <button type="button" class="btn btn-ghost" id="btnCancelForm">Annuler</button>
           </div>
         </form>
@@ -401,14 +402,14 @@
 
       <div class="panel" style="padding:20px 22px 22px;">
         <div class="panel-head">
-          <h3 class="panel-title">Actions correctives</h3>
+          <h3 class="panel-title">Registre des exercices</h3>
           <div class="panel-actions" id="panelActionsBtns"></div>
         </div>
         <div class="table-panel">
           <table class="reg">
             <thead>
               <tr id="theadFields">
-                <th>Titre</th><th>Service</th><th>Origine</th><th>Responsable</th><th>Échéance</th><th>Priorité</th><th>Statut</th>
+                <th>Date</th><th>Site</th><th>Type</th><th>Service</th><th>Durée</th><th>Participation</th><th>Périodicité</th><th style="min-width:200px;">Constatations</th>
                 <th id="thActions"></th>
               </tr>
             </thead>
@@ -417,7 +418,7 @@
         </div>
       </div>
 
-      <p class="footnote">Les actions issues du Document Unique sont générées automatiquement pour les risques Élevé/Critique disposant de mesures proposées ; les autres actions sont créées manuellement par les équipes RH/Administration.</p>
+      <p class="footnote">La périodicité entre deux exercices n'est pas imposée par l'application — elle varie selon le type d'établissement et se saisit à chaque exercice (réponse du préventeur, Cahier de liaison, 2026-09-16). Les anomalies avec une action corrective apparaissent automatiquement dans le Plan d'Actions.</p>
     </div>
   </div>
 </div>
@@ -441,7 +442,6 @@
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const role = (session && session.role) || "ag";
-  const canEdit = role === "rh" || role === "admin";
   const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
@@ -449,7 +449,15 @@
   $("userName").textContent = session.user;
   $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
   $("roleChip").textContent = role.toUpperCase();
-  if (!canEdit){ $("roleChip").classList.add("ag"); }
+  if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
+
+  // ---------- Contrôle d'accès (permissions granulaires par module) ----------
+  const urgencesPermLevel = (role === "admin" || role === "rh") ? "write" : ((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none");
+  const canUrgences = urgencesPermLevel !== "none";
+  const canUrgencesWrite = urgencesPermLevel === "write";
+  if (!canUrgences){ location.href = "dashboard.html"; }
+
+  const canEdit = role === "rh" || role === "admin";
   const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
   if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
   if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
@@ -457,10 +465,10 @@
   const canAccidentAnalyse = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["accident-analyse"]);
   if (canAtmpAdmin){ $("navAdministratif").style.display = ""; $("navAtmpAdmin").style.display = ""; }
   if (canAccidentAnalyse){ $("navAdministratif").style.display = ""; $("navAccidentAnalyse").style.display = ""; }
-  const canUrgences = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["urgences"]);
-  if (canUrgences){ $("navAdministratif").style.display = ""; $("navUrgences").style.display = ""; }
+  $("navAdministratif").style.display = "";
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
+  if (!canUrgencesWrite){ $("btnAddAction").style.display = "none"; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   const AUDIT_KEY = "vigie_hse_audit_log";
@@ -518,157 +526,16 @@
   const REF = loadReferentials();
   function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
 
-  // ---------- Dataset DUERP (lecture pour générer les actions) ----------
-  const SEED_DUERP = [];
-  const DUERP_STORAGE_KEY = "vigie_hse_duerp_dataset";
-  function loadDuerpDataset(){
-    let stored = [];
-    try { const raw = localStorage.getItem(DUERP_STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    stored.forEach(r => {
-      if (r.service === "Propreté de la Ville" && r.taches && r.taches.startsWith("Déchetterie")){ r.service = "Collecte & Propreté"; r.collectivite = "Agglomération"; }
-    });
-    const storedById = new Map(stored.map(r => [r.id, r]));
-    const seeded = SEED_DUERP.map((r,i) => { const id = "du-" + (i+1); return storedById.has(id) ? storedById.get(id) : { id, ...r }; });
-    const seedIds = new Set(seeded.map(r => r.id));
-    const userExtra = stored.filter(r => !seedIds.has(r.id));
-    const merged = seeded.concat(userExtra);
-    try { localStorage.setItem(DUERP_STORAGE_KEY, JSON.stringify(merged)); } catch(e){}
-    return merged;
-  }
-  function riskCls(score){ if (score <= 3) return "faible"; if (score <= 6) return "modere"; if (score <= 12) return "eleve"; return "critique"; }
-
-  function generateActionSeeds(){
-    const duerp = loadDuerpDataset();
-    const out = [];
-    duerp.forEach(r => {
-      const score = (r.frequence||1) * (r.gravite||1);
-      const cls = riskCls(score);
-      if ((cls === "eleve" || cls === "critique") && r.mesuresProposees && String(r.mesuresProposees).trim()){
-        const isCritique = cls === "critique";
-        const today = new Date();
-        const echeance = new Date(today);
-        echeance.setDate(echeance.getDate() + (isCritique ? 15 : 45));
-        out.push({
-          id: "pa-" + r.id,
-          titre: r.risque + " — " + r.service,
-          description: r.mesuresProposees,
-          service: r.service,
-          collectivite: r.collectivite || "Ville",
-          risqueLie: r.risque,
-          origine: "DUERP",
-          responsable: "",
-          echeance: echeance.toISOString().slice(0,10),
-          priorite: isCritique ? "Critique" : "Haute",
-          statut: "À faire",
-          dateCreation: today.toISOString().slice(0,10),
-        });
-      }
-    });
-    return out;
-  }
-
-  // ---------- Actions issues des inspections (Inspection / Audit) ----------
-  const INSPECTIONS_KEY = "vigie_hse_inspections";
-  function generateInspectionActionSeeds(){
-    let inspections = [];
-    try { const raw = localStorage.getItem(INSPECTIONS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) inspections = p; } } catch(e){}
-    const out = [];
-    const today = new Date();
-    inspections.forEach(insp => {
-      (insp.reponses || []).forEach(rep => {
-        if (rep.statut === "Non conforme"){
-          const echeance = new Date(today);
-          echeance.setDate(echeance.getDate() + 30);
-          out.push({
-            id: "pa-insp-" + insp.id + "-" + rep.pointId,
-            titre: (insp.trameNom || "Inspection") + " — " + rep.libelle,
-            description: rep.commentaire && rep.commentaire.trim() ? rep.commentaire : "Non-conformité relevée lors de l'inspection.",
-            service: insp.service,
-            collectivite: insp.collectivite || "Ville",
-            risqueLie: rep.libelle,
-            origine: "Inspection",
-            responsable: "",
-            echeance: echeance.toISOString().slice(0,10),
-            priorite: "Haute",
-            statut: "À faire",
-            dateCreation: today.toISOString().slice(0,10),
-          });
-        }
-      });
-    });
-    return out;
-  }
-
-  // ---------- Actions issues des analyses d'accident (Analyse d'accident) ----------
-  const ANALYSES_KEY = "vigie_hse_analyses_accident";
-  function generateAnalyseActionSeeds(){
-    let analyses = [];
-    try { const raw = localStorage.getItem(ANALYSES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) analyses = p; } } catch(e){}
-    let atmpEvents = [];
-    try { const raw = localStorage.getItem("vigie_hse_dataset"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) atmpEvents = p; } } catch(e){}
-    const atmpById = Object.fromEntries(atmpEvents.map(r => [r.id, r]));
-    const out = [];
-    const today = new Date();
-    analyses.forEach(an => {
-      const evt = atmpById[an.atmpId] || {};
-      (an.actions || []).forEach(act => {
-        if (!act.description || !String(act.description).trim()) return;
-        out.push({
-          id: "pa-analyse-" + an.id + "-" + act.id,
-          titre: "Analyse d'accident — " + (evt.risque || an.atmpId),
-          description: act.description,
-          service: evt.service || "",
-          collectivite: evt.collectivite || "Ville",
-          risqueLie: evt.risque || "",
-          origine: "Analyse",
-          responsable: act.responsable || "",
-          echeance: act.echeance || today.toISOString().slice(0,10),
-          priorite: "Haute",
-          statut: act.statut || "À faire",
-          dateCreation: an.dateAnalyse || today.toISOString().slice(0,10),
-        });
-      });
-    });
-    return out;
-  }
-
-  // ---------- Actions issues des exercices d'urgence (Situations d'urgence) ----------
-  const URGENCES_KEY = "vigie_hse_exercices_urgence";
-  function generateUrgenceActionSeeds(){
-    let exercices = [];
-    try { const raw = localStorage.getItem(URGENCES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) exercices = p; } } catch(e){}
-    const out = [];
-    const today = new Date();
-    exercices.forEach(ex => {
-      (ex.actions || []).forEach(act => {
-        if (!act.description || !String(act.description).trim()) return;
-        out.push({
-          id: "pa-urgence-" + ex.id + "-" + act.id,
-          titre: "Exercice " + (ex.type || "d'urgence") + " — " + (ex.site || ""),
-          description: act.description,
-          service: ex.service || "",
-          collectivite: ex.collectivite || "Ville",
-          risqueLie: ex.type || "",
-          origine: "Urgence",
-          responsable: act.responsable || "",
-          echeance: act.echeance || today.toISOString().slice(0,10),
-          priorite: "Haute",
-          statut: act.statut || "À faire",
-          dateCreation: ex.dateExercice || today.toISOString().slice(0,10),
-        });
-      });
-    });
-    return out;
-  }
-
-  // ---------- Dataset Plan d'Actions (always-merge) ----------
-  const STORAGE_KEY = "vigie_hse_actions";
-  function genId(){ return "man-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  // ---------- Dataset (always-merge) — registre chronologique, jamais réécrit en place ----------
+  const STORAGE_KEY = "vigie_hse_exercices_urgence";
+  function genId(prefix){ return (prefix || "exu") + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
   function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
+  const SEED_RAW = [];
+  function buildSeed(){ return SEED_RAW; }
   function loadDataset(){
     let stored = [];
     try { const raw = localStorage.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds());
+    const seedList = buildSeed();
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
@@ -680,10 +547,35 @@
   let DATASET = loadDataset();
   if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
 
-  function isOverdue(a){ return a.statut !== "Fait" && a.echeance && a.echeance < new Date().toISOString().slice(0,10); }
+  // ---------- Échéance "prochain exercice dû" par site + type ----------
+  // Calculée à l'affichage, jamais stockée. On ne regarde que le dernier exercice de chaque
+  // groupe site+type : un exercice plus ancien déjà remplacé par un plus récent n'est pas
+  // recompté comme "en retard" pour son propre compte (réponse Q4/Q6 du préventeur : la
+  // périodicité est propre à chaque exercice saisi, pas une valeur globale figée).
+  function computeStatus(dateStr, periodiciteMois){
+    const d = new Date(dateStr);
+    const prochaine = new Date(d);
+    prochaine.setMonth(prochaine.getMonth() + (Number(periodiciteMois) || 12));
+    const today = new Date();
+    const in60 = new Date(today); in60.setDate(in60.getDate() + 60);
+    let statut = "À jour", cls = "ok";
+    if (prochaine < today){ statut = "En retard"; cls = "late"; }
+    else if (prochaine <= in60){ statut = "À programmer"; cls = "soon"; }
+    return { prochaine: prochaine.toISOString().slice(0,10), statut, cls };
+  }
+  function computeEcheances(){
+    const groups = new Map();
+    DATASET.forEach(r => {
+      if (!r.site || !r.type || !r.dateExercice) return;
+      const key = r.site + "|" + r.type;
+      const cur = groups.get(key);
+      if (!cur || r.dateExercice > cur.dateExercice) groups.set(key, r);
+    });
+    return [...groups.values()].map(r => Object.assign({}, r, computeStatus(r.dateExercice, r.periodiciteMois)));
+  }
 
   // ---------- Filtres ----------
-  const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatut = $("fStatut"), fPriorite = $("fPriorite");
+  const fCollectivite = $("fCollectivite"), fService = $("fService"), fType = $("fType");
   function fillServiceOptions(){
     const col = fCollectivite.value;
     const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
@@ -694,116 +586,248 @@
   fillServiceOptions();
 
   // Tri & filtres par colonne (composant partagé assets/tri-filtres.js).
-  // L'ordre des colonnes suit celui des <th> de #theadFields.
   const tri = VigieTri.create({
     columns: [
-      { key:"titre",       label:"Titre" },
-      { key:"service",     label:"Service" },
-      { key:"origine",     label:"Origine" },
-      { key:"responsable", label:"Responsable" },
-      { key:"echeance",    label:"Échéance" },
-      { key:"priorite",    label:"Priorité" },
-      { key:"statut",      label:"Statut" },
-      { key:"actions",     label:"",        noFilter:true },
+      { key:"dateExercice",  label:"Date" },
+      { key:"site",          label:"Site" },
+      { key:"type",          label:"Type" },
+      { key:"service",       label:"Service" },
+      { key:"dureeMinutes",  label:"Durée" },
+      { key:"participation", label:"Participation" },
+      { key:"periodiciteMois", label:"Périodicité" },
+      { key:"constatations", label:"Constatations" },
+      { key:"actions",       label:"", noFilter:true },
     ],
     onChange: () => render(),
   });
   tri.decorate($("theadFields"));
 
-  function render(){
-    const col = fCollectivite.value, svc = fService.value, st = fStatut.value, pr = fPriorite.value;
-    let rows = DATASET.filter(a =>
-      (col === "all" || a.collectivite === col) &&
-      (svc === "all" || a.service === svc) &&
-      (st === "all" || a.statut === st) &&
-      (pr === "all" || a.priorite === pr)
-    );
-    rows = rows.slice().sort((a,b) => (a.echeance || "").localeCompare(b.echeance || ""));
-    // Sans tri de colonne actif, l'ordre par défaut (échéance croissante) est conservé.
-    rows = tri.apply(rows);
-
-    $("kpiTotal").textContent = DATASET.length;
-    $("kpiTotalSub").innerHTML = `<b>${DATASET.filter(a=>a.origine==='DUERP').length}</b> issues du DUERP`;
-    $("kpiRetard").textContent = DATASET.filter(isOverdue).length;
-    $("kpiEnCours").textContent = DATASET.filter(a => a.statut === "En cours").length;
-    $("kpiFait").textContent = DATASET.filter(a => a.statut === "Fait").length;
-    $("resultCount").textContent = rows.length;
-    $("totalCount").textContent = DATASET.length;
-
-    const tbody = $("tbody");
-    const colspan = canEdit ? 8 : 7;
+  function renderEcheanceTable(){
+    const rows = computeEcheances().sort((a,b) => a.prochaine.localeCompare(b.prochaine));
     if (rows.length === 0){
-      tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">${DATASET.length === 0 ? "Aucune action pour le moment." : "Aucune action ne correspond aux filtres sélectionnés."}</td></tr>`;
+      $("echeanceTable").innerHTML = `<tr><td style="padding:10px;color:var(--text-faint);">Aucun exercice enregistré pour le moment.</td></tr>`;
       return;
     }
-    const prioCls = { "Critique":"p-critique", "Haute":"p-haute", "Moyenne":"p-moyenne", "Basse":"p-basse" };
-    tbody.innerHTML = rows.map(a => `
-      <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${a.id}">
-        <td class="wrap">${a.titre}</td>
-        <td>${a.service}</td>
-        <td><span class="origine-chip ${a.origine === 'DUERP' ? 'duerp' : (a.origine === 'Inspection' ? 'inspection' : (a.origine === 'Analyse' ? 'analyse' : (a.origine === 'Urgence' ? 'urgence' : 'manuel')))}">${a.origine}</span></td>
-        <td>${a.responsable || '<span style="color:var(--text-faint)">—</span>'}</td>
-        <td class="${isOverdue(a) ? 'echeance-overdue' : ''}">${a.echeance || '—'}</td>
-        <td><span class="chip ${prioCls[a.priorite] || 'p-basse'}">${a.priorite}</span></td>
-        <td>${canEdit
-          ? `<select class="statut-select" data-id="${a.id}"><option ${a.statut==='À faire'?'selected':''}>À faire</option><option ${a.statut==='En cours'?'selected':''}>En cours</option><option ${a.statut==='Fait'?'selected':''}>Fait</option></select>`
-          : a.statut}</td>
-        ${canEdit ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${a.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${a.id}">Suppr.</button>
+    $("echeanceTable").innerHTML =
+      `<thead><tr><th>Site</th><th>Type</th><th>Dernier exercice</th><th>Prochaine échéance</th><th>Statut</th></tr></thead><tbody>` +
+      rows.map(r => `<tr><td>${r.site}</td><td><span class="type-tag">${r.type}</span></td><td>${r.dateExercice}</td><td>${r.prochaine}</td><td><span class="chip ${r.cls}">${r.statut}</span></td></tr>`).join("") +
+      `</tbody>`;
+  }
+
+  function render(){
+    const col = fCollectivite.value, svc = fService.value, ty = fType.value;
+    let rows = DATASET.filter(r =>
+      (col === "all" || r.collectivite === col) &&
+      (svc === "all" || r.service === svc) &&
+      (ty === "all" || r.type === ty)
+    );
+    rows = rows.slice().sort((a,b) => (b.dateExercice || "").localeCompare(a.dateExercice || ""));
+    rows = tri.apply(rows);
+
+    const echeances = computeEcheances();
+    $("kpiTotal").textContent = DATASET.length;
+    $("kpiSites").textContent = new Set(DATASET.map(r => r.site).filter(Boolean)).size;
+    $("kpiSoon").textContent = echeances.filter(e => e.cls === "soon").length;
+    $("kpiLate").textContent = echeances.filter(e => e.cls === "late").length;
+    $("resultCount").textContent = rows.length;
+    $("totalCount").textContent = DATASET.length;
+    renderEcheanceTable();
+
+    const tbody = $("tbody");
+    const colspan = canUrgencesWrite ? 9 : 8;
+    if (rows.length === 0){
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">${DATASET.length === 0 ? "Aucun exercice enregistré pour le moment." : "Aucun exercice ne correspond aux filtres sélectionnés."}</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr data-id="${r.id}">
+        <td>${r.dateExercice || '—'}</td>
+        <td>${r.site}</td>
+        <td><span class="type-tag">${r.type}</span></td>
+        <td>${r.service}</td>
+        <td>${r.dureeMinutes ? r.dureeMinutes + ' min' : '—'}</td>
+        <td>${r.participation || '—'}</td>
+        <td>${r.periodiciteMois} mois</td>
+        <td class="wrap">${r.constatations || '—'}${(r.actions && r.actions.length) ? `<br><span style="color:var(--text-faint);font-size:11px;">${r.actions.length} action(s) corrective(s)</span>` : ''}</td>
+        ${canUrgencesWrite ? `<td class="actions-float">
+          <button type="button" class="act-edit" data-edit="${r.id}">Modifier</button>
+          <button type="button" class="act-del" data-id="${r.id}">Suppr.</button>
         </td>` : ''}
       </tr>`).join("");
   }
 
   fCollectivite.addEventListener("change", () => { fillServiceOptions(); render(); });
   fService.addEventListener("change", render);
-  fStatut.addEventListener("change", render);
-  fPriorite.addEventListener("change", render);
+  fType.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fillServiceOptions(); fStatut.value = "all"; fPriorite.value = "all";
-    tri.reset(); render();
+    fCollectivite.value = "all"; fillServiceOptions(); fType.value = "all"; tri.reset(); render();
   });
 
-  if (canEdit){
-    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle action</button>`;
+  // ---------- Actions correctives (sous-formulaire dynamique) ----------
+  let currentActions = [];
+  function renderActionsList(){
+    $("actionsList").innerHTML = currentActions.map((a, i) => `
+      <div class="dyn-row" data-idx="${i}">
+        <input type="text" class="act-description" placeholder="Action corrective…" value="${(a.description||'').replace(/"/g,'&quot;')}" style="flex:2 1 220px;" ${canUrgencesWrite ? '' : 'disabled'}>
+        <input type="text" class="act-responsable" placeholder="Responsable" value="${(a.responsable||'').replace(/"/g,'&quot;')}" ${canUrgencesWrite ? '' : 'disabled'}>
+        <input type="date" class="act-echeance" value="${a.echeance || ''}" ${canUrgencesWrite ? '' : 'disabled'}>
+        <select class="act-statut" ${canUrgencesWrite ? '' : 'disabled'}>
+          <option value="À faire" ${(a.statut||"À faire") === "À faire" ? "selected" : ""}>À faire</option>
+          <option value="En cours" ${a.statut === "En cours" ? "selected" : ""}>En cours</option>
+          <option value="Fait" ${a.statut === "Fait" ? "selected" : ""}>Fait</option>
+        </select>
+        ${canUrgencesWrite ? `<button type="button" class="act-del" data-remove-action="${i}">Suppr.</button>` : ''}
+      </div>`).join("") || `<div style="font-size:12px;color:var(--text-faint)">Aucune action corrective enregistrée.</div>`;
+  }
+  $("btnAddAction").addEventListener("click", () => {
+    if (!canUrgencesWrite) return;
+    currentActions.push({ id: genId("act"), description:"", responsable:"", echeance:"", statut:"À faire" });
+    renderActionsList();
+  });
+  $("actionsList").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-remove-action]");
+    if (btn){ currentActions.splice(Number(btn.dataset.removeAction), 1); renderActionsList(); }
+  });
 
-    function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
-    function parseDateImp(v){
-      if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
-      const s = String(v || "").trim();
-      if (!s) return "";
-      let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-      if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
-      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
-      const d = new Date(s);
-      if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-      return "";
+  // ---------- Création / édition ----------
+  const formPanel = $("formPanel"), form = $("exerciceForm");
+  function fillFormServiceOptions(col){
+    let list = servicesForCollectivite(col);
+    if (isScoped) list = list.filter(s => myServices.includes(s));
+    $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+  }
+  fillFormServiceOptions("Ville");
+  $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
+
+  function openForm(rec){
+    form.reset();
+    currentActions = rec ? (rec.actions || []).map(x => Object.assign({}, x)) : [];
+    if (rec){
+      $("formTitle").textContent = "Modifier l'exercice";
+      $("fId").value = rec.id;
+      $("fSite").value = rec.site || "";
+      $("fCollectiviteForm").value = rec.collectivite || "Ville";
+      fillFormServiceOptions(rec.collectivite || "Ville");
+      $("fServiceForm").value = rec.service || "";
+      $("fTypeForm").value = rec.type || "Évacuation incendie";
+      $("fDateExercice").value = rec.dateExercice || "";
+      $("fDuree").value = rec.dureeMinutes || "";
+      $("fParticipation").value = rec.participation || "";
+      $("fPeriodicite").value = rec.periodiciteMois || "";
+      $("fConstatations").value = rec.constatations || "";
+    } else {
+      $("formTitle").textContent = "Nouvel exercice";
+      $("fId").value = "";
+      $("fDateExercice").value = new Date().toISOString().slice(0,10);
+      fillFormServiceOptions("Ville");
     }
-    function mapImportedRow(raw){
-      const n = {};
-      Object.keys(raw).forEach(k => { n[normKeyImp(k)] = raw[k]; });
-      const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
-      const titre = String(pick(["titre"])).trim();
-      const description = String(pick(["description"])).trim();
-      if (!titre && !description) return null;
-      const collectiviteRaw = normKeyImp(pick(["collectivite","structure"]));
-      const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
-      const priorite = String(pick(["priorite"])).trim() || "Moyenne";
-      const statut = String(pick(["statut"])).trim() || "À faire";
-      return {
-        id: String(pick(["id"])).trim() || "",
-        titre, description, collectivite,
-        service: String(pick(["service"])).trim(),
-        risqueLie: String(pick(["risque lie","risque"])).trim(),
-        origine: String(pick(["origine"])).trim() || "Manuel",
-        responsable: String(pick(["responsable"])).trim(),
-        echeance: parseDateImp(pick(["echeance"])),
-        priorite: ["Critique","Haute","Moyenne","Basse"].includes(priorite) ? priorite : "Moyenne",
-        statut: ["À faire","En cours","Fait"].includes(statut) ? statut : "À faire",
-        dateCreation: parseDateImp(pick(["date de creation"])) || new Date().toISOString().slice(0,10),
+    renderActionsList();
+    formPanel.style.display = "";
+    formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  $("btnCancelForm").addEventListener("click", () => { formPanel.style.display = "none"; form.reset(); });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    $("actionsList").querySelectorAll(".dyn-row").forEach((row, i) => {
+      currentActions[i] = {
+        id: currentActions[i] ? currentActions[i].id : genId("act"),
+        description: row.querySelector(".act-description").value.trim(),
+        responsable: row.querySelector(".act-responsable").value.trim(),
+        echeance: row.querySelector(".act-echeance").value,
+        statut: row.querySelector(".act-statut").value,
       };
+    });
+    const id = $("fId").value;
+    const rec = {
+      id: id || genId(),
+      site: $("fSite").value.trim(),
+      collectivite: $("fCollectiviteForm").value,
+      service: $("fServiceForm").value,
+      type: $("fTypeForm").value,
+      dateExercice: $("fDateExercice").value,
+      dureeMinutes: Number($("fDuree").value) || 0,
+      participation: $("fParticipation").value.trim(),
+      periodiciteMois: Number($("fPeriodicite").value) || 12,
+      constatations: $("fConstatations").value.trim(),
+      actions: currentActions.filter(a => a.description),
+      auteur: (session && session.user) || "—",
+      dateCreation: id ? (DATASET.find(d => d.id === id) || {}).dateCreation || new Date().toISOString().slice(0,10) : new Date().toISOString().slice(0,10),
+    };
+    const idx = DATASET.findIndex(d => d.id === rec.id);
+    if (idx >= 0){ DATASET[idx] = rec; logAudit("Situations d'urgence", "Modification", `Exercice ${rec.type} — ${rec.site} (${rec.dateExercice})`); }
+    else { DATASET.push(rec); logAudit("Situations d'urgence", "Création", `Exercice ${rec.type} — ${rec.site} (${rec.dateExercice})`); }
+    saveDataset(DATASET);
+    formPanel.style.display = "none";
+    form.reset();
+    render();
+  });
+
+  $("tbody").addEventListener("click", (e) => {
+    const editBtn = e.target.closest("[data-edit]");
+    if (editBtn){ const rec = DATASET.find(d => d.id === editBtn.dataset.edit); if (rec) openForm(rec); return; }
+    const delBtn = e.target.closest(".act-del[data-id]");
+    if (delBtn){
+      const rec = DATASET.find(d => d.id === delBtn.dataset.id);
+      if (!rec) return;
+      if (confirm(`Supprimer l'exercice « ${rec.type} » (${rec.site}, ${rec.dateExercice}) ?`)){
+        DATASET = DATASET.filter(d => d.id !== rec.id);
+        saveDataset(DATASET);
+        logAudit("Situations d'urgence", "Suppression", `Exercice ${rec.type} — ${rec.site}`);
+        render();
+      }
     }
+  });
+
+  // ---------- Import / Export .xlsx ----------
+  $("panelActionsBtns").innerHTML = (canUrgencesWrite ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none">` : "") +
+    `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>` +
+    (canUrgencesWrite ? `<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel exercice</button>` : "");
+  if (canUrgencesWrite){ $("btnNew").addEventListener("click", () => openForm(null)); }
+
+  function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+  function parseDateImp(v){
+    if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
+    const s = String(v || "").trim();
+    if (!s) return "";
+    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+    const d = new Date(s);
+    if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    return "";
+  }
+  function rawPick(raw, aliases){
+    const n = {};
+    Object.keys(raw).forEach(k => { n[normKeyImp(k)] = raw[k]; });
+    for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; }
+    return "";
+  }
+  const TYPES_VALIDES = ["Évacuation incendie","Intrusion","Risque environnemental"];
+  function mapImportedExercice(raw){
+    const site = String(rawPick(raw, ["site"])).trim();
+    const dateExercice = parseDateImp(rawPick(raw, ["date exercice","date"]));
+    if (!site && !dateExercice) return null;
+    const typeRaw = String(rawPick(raw, ["type"])).trim();
+    const collectiviteRaw = normKeyImp(rawPick(raw, ["collectivite"]));
+    return {
+      id: String(rawPick(raw, ["id"])).trim() || "",
+      site, dateExercice,
+      collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+      service: String(rawPick(raw, ["service"])).trim(),
+      type: TYPES_VALIDES.includes(typeRaw) ? typeRaw : "Évacuation incendie",
+      dureeMinutes: Number(rawPick(raw, ["duree minutes","duree"])) || 0,
+      participation: String(rawPick(raw, ["participation"])).trim(),
+      periodiciteMois: Number(rawPick(raw, ["periodicite mois","periodicite"])) || 12,
+      constatations: String(rawPick(raw, ["constatations"])).trim(),
+      actions: [],
+      auteur: String(rawPick(raw, ["auteur"])).trim() || "—",
+      dateCreation: new Date().toISOString().slice(0,10),
+    };
+  }
+
+  if (canUrgencesWrite){
     $("btnImport").addEventListener("click", () => $("importFile").click());
     $("importFile").addEventListener("change", async (e) => {
       const file = e.target.files[0];
@@ -811,138 +835,94 @@
       try {
         const buf = await file.arrayBuffer();
         const wb = XLSX.read(buf, { type: "array", cellDates: true });
-        const sheet = wb.Sheets[wb.SheetNames[0]];
-        const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-        if (rawRows.length === 0){
-          alert("Le fichier semble vide — aucune ligne n'a été trouvée dans la première feuille.");
-          e.target.value = "";
-          return;
+        let exAdded = 0, exUpdated = 0, exSkipped = 0, actAdded = 0, actSkipped = 0;
+
+        const exSheet = wb.Sheets["Exercices"] || wb.Sheets[wb.SheetNames[0]];
+        if (exSheet){
+          XLSX.utils.sheet_to_json(exSheet, { defval: "" }).forEach(raw => {
+            const rec = mapImportedExercice(raw);
+            if (!rec){ exSkipped++; return; }
+            const idx = rec.id ? DATASET.findIndex(d => d.id === rec.id) : -1;
+            if (idx >= 0){ rec.actions = DATASET[idx].actions || []; DATASET[idx] = rec; exUpdated++; }
+            else { rec.id = rec.id || genId(); DATASET.push(rec); exAdded++; }
+          });
         }
-        let added = 0, updated = 0, skipped = 0;
-        rawRows.forEach(raw => {
-          const rec = mapImportedRow(raw);
-          if (!rec){ skipped++; return; }
-          const idx = rec.id ? DATASET.findIndex(d => d.id === rec.id) : -1;
-          if (idx >= 0){ DATASET[idx] = rec; updated++; }
-          else { rec.id = rec.id || genId(); DATASET.push(rec); added++; }
-        });
+
+        const actSheet = wb.Sheets["Actions"];
+        if (actSheet){
+          XLSX.utils.sheet_to_json(actSheet, { defval: "" }).forEach(raw => {
+            const exId = String(rawPick(raw, ["id exercice"])).trim();
+            const description = String(rawPick(raw, ["action","description"])).trim();
+            const rec = exId ? DATASET.find(d => d.id === exId) : null;
+            if (!rec || !description){ actSkipped++; return; }
+            rec.actions = rec.actions || [];
+            rec.actions.push({
+              id: genId("act"), description,
+              responsable: String(rawPick(raw, ["responsable"])).trim(),
+              echeance: String(rawPick(raw, ["echeance"])).trim(),
+              statut: String(rawPick(raw, ["statut"])).trim() || "À faire",
+            });
+            actAdded++;
+          });
+        }
+
         saveDataset(DATASET);
         render();
-        if (added === 0 && updated === 0){
-          alert(`Aucune ligne n'a pu être importée (${skipped} ignorée(s)). Vérifiez que le fichier contient bien les colonnes attendues (Titre, Description…).`);
+        const total = exAdded + exUpdated + actAdded;
+        if (total === 0){
+          alert(`Aucune ligne n'a pu être importée (${exSkipped + actSkipped} ignorée(s)). Vérifiez que le fichier contient bien une feuille "Exercices" (Site, Date exercice…) et éventuellement "Actions" (ID Exercice, Action…).`);
         } else {
-          alert(`Import terminé — ${added} ligne(s) ajoutée(s), ${updated} mise(s) à jour, ${skipped} ignorée(s).`);
+          alert(`Import terminé — exercices : ${exAdded} ajouté(s), ${exUpdated} mis à jour, ${exSkipped} ignoré(s). Actions : ${actAdded} ajoutée(s), ${actSkipped} ignorée(s).`);
         }
+        logAudit("Situations d'urgence", "Import", `Import .xlsx — ${exAdded + exUpdated} exercice(s), ${actAdded} action(s)`);
       } catch (err){
         alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
       }
       e.target.value = "";
     });
-
-    $("btnExport").addEventListener("click", () => {
-      const rows = DATASET.map(r => ({
-        "ID": r.id, "Titre": r.titre, "Description": r.description, "Collectivité": r.collectivite || "Ville", "Service": r.service,
-        "Risque lié": r.risqueLie || "", "Origine": r.origine, "Responsable": r.responsable || "", "Échéance": r.echeance,
-        "Priorité": r.priorite, "Statut": r.statut, "Date de création": r.dateCreation || "",
-      }));
-      const ws = XLSX.utils.json_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Plan d'Actions");
-      const today = new Date().toISOString().slice(0,10);
-      XLSX.writeFile(wb, `plan-actions_${today}.xlsx`);
-    });
-
-    const formPanel = $("formPanel"), form = $("actionForm");
-    function fillFormServiceOptions(col){
-      const list = servicesForCollectivite(col);
-      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
-    }
-    fillFormServiceOptions("Ville");
-    $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
-
-    function openForm(rec){
-      form.reset();
-      if (rec){
-        $("formTitle").textContent = "Modifier l'action";
-        $("fId").value = rec.id;
-        $("fTitre").value = rec.titre;
-        $("fCollectiviteForm").value = rec.collectivite;
-        fillFormServiceOptions(rec.collectivite);
-        $("fServiceForm").value = rec.service;
-        $("fRisqueLie").value = rec.risqueLie || "";
-        $("fResponsable").value = rec.responsable || "";
-        $("fEcheance").value = rec.echeance || "";
-        $("fPrioriteForm").value = rec.priorite || "Moyenne";
-        $("fStatutForm").value = rec.statut || "À faire";
-        $("fDescription").value = rec.description || "";
-      } else {
-        $("formTitle").textContent = "Nouvelle action";
-        $("fId").value = "";
-        fillFormServiceOptions("Ville");
-        $("fEcheance").value = new Date().toISOString().slice(0,10);
-      }
-      formPanel.style.display = "";
-      formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
-    }
-    $("btnNew").addEventListener("click", () => openForm(null));
-    $("btnCancelForm").addEventListener("click", () => { formPanel.style.display = "none"; form.reset(); });
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const id = $("fId").value;
-      const isNew = !id;
-      const rec = {
-        id: id || genId(),
-        titre: $("fTitre").value.trim(),
-        description: $("fDescription").value.trim(),
-        service: $("fServiceForm").value,
-        collectivite: $("fCollectiviteForm").value,
-        risqueLie: $("fRisqueLie").value.trim(),
-        origine: isNew ? "Manuel" : (DATASET.find(d => d.id === id) || {}).origine || "Manuel",
-        responsable: $("fResponsable").value.trim(),
-        echeance: $("fEcheance").value,
-        priorite: $("fPrioriteForm").value,
-        statut: $("fStatutForm").value,
-        dateCreation: isNew ? new Date().toISOString().slice(0,10) : (DATASET.find(d => d.id === id) || {}).dateCreation || new Date().toISOString().slice(0,10),
-      };
-      const idx = DATASET.findIndex(d => d.id === rec.id);
-      if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);
-      saveDataset(DATASET);
-      logAudit("Plan d'Actions", isNew ? "Création" : "Modification", `Action « ${rec.titre} » — ${rec.service}`);
-      formPanel.style.display = "none";
-      form.reset();
-      render();
-    });
-
-    $("tbody").addEventListener("click", (e) => {
-      const editBtn = e.target.closest(".act-edit");
-      if (editBtn){ const rec = DATASET.find(d => d.id === editBtn.dataset.edit); if (rec) openForm(rec); return; }
-      const delBtn = e.target.closest(".act-del");
-      if (delBtn){
-        const rec = DATASET.find(d => d.id === delBtn.dataset.id);
-        if (!rec) return;
-        if (confirm(`Supprimer l'action « ${rec.titre} » ?`)){
-          DATASET = DATASET.filter(d => d.id !== rec.id);
-          saveDataset(DATASET);
-          logAudit("Plan d'Actions", "Suppression", `Action « ${rec.titre} » — ${rec.service}`);
-          render();
-        }
-      }
-    });
-
-    $("tbody").addEventListener("change", (e) => {
-      const sel = e.target.closest(".statut-select");
-      if (!sel) return;
-      const rec = DATASET.find(d => d.id === sel.dataset.id);
-      if (!rec) return;
-      rec.statut = sel.value;
-      saveDataset(DATASET);
-      logAudit("Plan d'Actions", "Modification", `Statut de « ${rec.titre} » → ${rec.statut}`);
-      render();
-    });
   }
 
+  $("btnExport").addEventListener("click", () => {
+    const exRows = DATASET.map(r => ({
+      "ID": r.id, "Site": r.site, "Date exercice": r.dateExercice, "Collectivité": r.collectivite || "Ville", "Service": r.service,
+      "Type": r.type, "Durée minutes": r.dureeMinutes || 0, "Participation": r.participation || "",
+      "Périodicité mois": r.periodiciteMois, "Constatations": r.constatations || "", "Auteur": r.auteur || "",
+    }));
+    const actRows = [];
+    DATASET.forEach(r => {
+      (r.actions || []).forEach(a => {
+        if (!a.description) return;
+        actRows.push({ "ID Exercice": r.id, "Site": r.site, "Action": a.description, "Responsable": a.responsable, "Échéance": a.echeance, "Statut": a.statut });
+      });
+    });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exRows), "Exercices");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(actRows), "Actions");
+    XLSX.writeFile(wb, `urgences-exercices_${new Date().toISOString().slice(0,10)}.xlsx`);
+  });
+
   render();
+
+  // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
+  fetch("DATATEST/11-REF-urgences-exercices.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    const full = loadDataset();
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const sheet = wb.Sheets["Exercices"] || wb.Sheets[wb.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let changed = false;
+    rawRows.forEach((raw, i) => {
+      const rec = mapImportedExercice(raw);
+      if (!rec) return;
+      rec.id = "dtst-urgence-" + (i + 1);
+      if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
+    });
+    if (changed){
+      saveDataset(full);
+      DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
+      render();
+    }
+  }).catch(() => {});
 
   function tickClock(){
     const now = new Date();

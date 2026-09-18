@@ -64,8 +64,8 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Peut déposer une observation dans le Registre Santé & Sécurité, en cochant "anonyme" si souhaité.
 - [ ] Ne voit **pas** le lien "Dossiers AT/MP & CITIS" dans la sidebar (module 18, accès par permission granulaire — voir ci-dessous).
 
-### `PREV1` (permissions granulaires `atmp-admin:write`, `atmp-declare:write`, `accident-analyse:write` — rôle de base `ag`, pas RH/admin)
-- [ ] Voit "Dossiers AT/MP & CITIS" et "Analyse d'accident" dans la sidebar (section "Administratif"), et "Déclarer un AT/MP" (section "Espace RH") — alors que le rôle de base est `ag`.
+### `PREV1` (permissions granulaires `atmp-admin:write`, `atmp-declare:write`, `accident-analyse:write`, `urgences:write` — rôle de base `ag`, pas RH/admin)
+- [ ] Voit "Dossiers AT/MP & CITIS", "Analyse d'accident" et "Situations d'urgence" dans la sidebar (section "Administratif"), et "Déclarer un AT/MP" (section "Espace RH") — alors que le rôle de base est `ag`.
 - [ ] Ne voit **pas** "Évaluer un risque" (section "Espace RH") — cette permission n'a pas été accordée, seule la déclaration AT/MP l'a été (vérifie que les deux liens de la section se togglent bien indépendamment).
 - [ ] Peut ouvrir un dossier AT/MP & CITIS, cocher/dater les pièces (CMI, prolongations, certificat final, IPP), enregistrer, rouvrir le dossier et retrouver les données.
 - [ ] Peut ajouter un arrêté (type + statut + dates), le voir apparaître dans le tableau des arrêtés du dossier.
@@ -73,7 +73,10 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Peut ouvrir "Analyse d'accident" sur un événement existant, choisir une méthode (tester les 3 : Arbre des causes, 5 Pourquoi, Ishikawa sur des événements différents), ajouter une action corrective, enregistrer, rouvrir et retrouver les données.
 - [ ] L'action corrective créée apparaît bien dans **Plan d'Actions** avec l'origine "Analyse".
 - [ ] Depuis le Registre AT/MP, cliquer "Analyser" sur une ligne ouvre directement le bon événement dans Analyse d'accident.
-- [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : les trois modules/liens doivent être invisibles, et taper les URLs `dossiers-atmp-citis.html` / `accident-analyse.html` / `saisie-rh.html` directement doit rediriger (dashboard ou registre AT/MP selon la page).
+- [ ] Peut créer un exercice d'urgence (site, type, date, périodicité) dans "Situations d'urgence", ajouter une action corrective, enregistrer, modifier l'exercice et retrouver les données.
+- [ ] L'action corrective créée apparaît bien dans **Plan d'Actions** avec l'origine "Urgence".
+- [ ] Le panneau "Prochaine échéance par site & type" affiche correctement le statut (À jour/À programmer/En retard) calculé sur le dernier exercice de chaque site+type — créer un second exercice plus récent pour le même site/type et vérifier que l'échéance se recalcule sur ce dernier, pas sur le premier.
+- [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : les quatre modules/liens doivent être invisibles, et taper les URLs `dossiers-atmp-citis.html` / `accident-analyse.html` / `saisie-rh.html` / `urgences-exercices.html` directement doit rediriger (dashboard ou registre AT/MP selon la page).
 
 ### Visibilité des données par tableau (tous rôles)
 Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le rôle" (§2) n'avait été vérifié en détail que sur le Registre AT/MP. Un point par module à tableau pour couvrir le reste — même geste à chaque fois : se connecter avec au moins deux comptes de rôles différents (ex. `RH1` puis `AG1`, ou `manager`) et vérifier que les lignes/colonnes affichées sont cohérentes avec le périmètre du rôle (scope service pour `manager`, colonnes personnelles masquées pour `ag`, etc. — voir §3 ci-dessus pour le détail attendu par rôle).
@@ -89,6 +92,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] EPI & Dotation (`epi-dotation.html`)
 - [ ] Dossiers AT/MP & CITIS (`dossiers-atmp-citis.html`)
 - [ ] Analyse d'accident (`accident-analyse.html`)
+- [ ] Situations d'urgence (`urgences-exercices.html`)
 
 ### Tri & filtres de colonne (Registre AT/MP)
 - [ ] Cliquer sur l'intitulé d'une colonne trie la table ; un 2ᵉ clic inverse le sens, un 3ᵉ revient à l'ordre d'origine (date décroissante). Une flèche indique le sens.

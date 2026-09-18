@@ -80,7 +80,9 @@ Chaque version est un dossier autonome et complet (pas de dépendance croisée).
 | `administration.html` | Panneau admin (accès admin uniquement) : Utilisateurs, Référentiels (listes déroulantes éditables), Flash Info, Veille réglementaire, Journal d'audit. |
 | `dossiers-atmp-citis.html` | Suivi administratif des dossiers AT/MP et maladies professionnelles : checklist documentaire (CMI, prolongations, certificat final, IPP, enquête/coûts), arrêtés d'imputabilité/CITIS avec workflow de signature. Accès via le modèle de permissions granulaires (§7) plutôt que par rôle fixe — voir aussi `ROADMAP-MODULES-FUTURS.md` module 18. |
 | `accident-analyse.html` | Analyse des causes d'un accident (arbre des causes INRS, 5 Pourquoi ou Ishikawa au choix par analyse), rattachée à chaque événement du Registre AT/MP ; actions correctives remontant au Plan d'Actions (`origine:"Analyse"`). Accès via permission granulaire `accident-analyse` — voir `ROADMAP-MODULES-FUTURS.md` module 15. |
-| `assets/tri-filtres.js` | **Premier fichier JS partagé du projet** (2026-09-14) — composant de tri et de filtres de colonne façon tableur, réutilisable sur n'importe quelle page à tableau. Voir §6 bis ci-dessous. |
+| `urgences-exercices.html` | Registre chronologique des exercices d'urgence (évacuation incendie, intrusion, risque environnemental) — periodicité saisie au cas par cas (pas de valeur réglementaire figée), échéance "prochain exercice dû" calculée par site+type sur le dernier exercice de chaque groupe. Actions correctives remontant au Plan d'Actions (`origine:"Urgence"`). Accès via permission granulaire `urgences` — voir `ROADMAP-MODULES-FUTURS.md` module 16. |
+| `assets/tri-filtres.js` | Composant partagé (2026-09-14) — tri et filtres de colonne façon tableur, réutilisable sur n'importe quelle page à tableau. Voir §6 bis ci-dessous. |
+| `assets/roster.js` | Composant partagé (2026-09-16) — `VigieRoster.hashStr`/`VigieRoster.dedupeByAgent`, hash déterministe et dédoublonnage d'un roster d'agents, factorisés depuis 3 modules qui le dupliquaient indépendamment (`sante-visites.html`, `formation-habilitation.html`, `epi-dotation.html`). |
 
 ### 6 bis. Composant partagé `assets/tri-filtres.js` (tri & filtres de colonne)
 
@@ -130,15 +132,17 @@ modulePermissions: {
   "atmp-admin": "read" | "write",        // Dossiers AT/MP & CITIS
   "atmp-declare": "write",               // Déclarer un AT/MP (saisie-rh.html) — booléen, pas de niveau lecture
   "accident-analyse": "read" | "write",  // Analyse d'accident
+  "urgences": "read" | "write",          // Situations d'urgence & exercices
 }  // clé absente ou "none" = aucun accès sur ce module
 ```
 - N'affecte **aucun** module existant — couche strictement additive.
-- Trois modules câblés sur ce mécanisme à ce jour :
+- Quatre modules câblés sur ce mécanisme à ce jour :
   - `dossiers-atmp-citis.html` (clé `"atmp-admin"`, read/write) — premier cas d'usage, 2026-09-13.
   - `saisie-rh.html` (clé `"atmp-declare"`, booléen `"write"`/absent) — permet à un manager/agent de déclarer un AT/MP sans avoir le rôle rh/admin. Répond au retour alpha "rendre paramétrable qui a le droit de déclarer un accident".
   - `accident-analyse.html` (clé `"accident-analyse"`, read/write) — module 15, voir `ROADMAP-MODULES-FUTURS.md`.
-- Un `admin`/`rh` a toujours accès complet (`write`) à ces trois modules via son rôle ; un `manager`/`ag` n'y accède que si la permission lui a été explicitement accordée dans `administration.html` (onglet Utilisateurs).
-- Géré dans `administration.html` (formulaire utilisateur, champs `uAtmpAdminPerm`/`uAtmpDeclarePerm`/`uAccidentAnalysePerm`) — pas encore une UI générique par module (ça reste à faire si d'autres modules adoptent ce mécanisme, voir la réflexion sur la refonte des permissions dans `ROADMAP-MODULES-FUTURS.md`, section J0).
+  - `urgences-exercices.html` (clé `"urgences"`, read/write) — module 16, voir `ROADMAP-MODULES-FUTURS.md`.
+- Un `admin`/`rh` a toujours accès complet (`write`) à ces quatre modules via son rôle ; un `manager`/`ag` n'y accède que si la permission lui a été explicitement accordée dans `administration.html` (onglet Utilisateurs).
+- Géré dans `administration.html` (formulaire utilisateur, champs `uAtmpAdminPerm`/`uAtmpDeclarePerm`/`uAccidentAnalysePerm`/`uUrgencesPerm`) — pas encore une UI générique par module (ça reste à faire si d'autres modules adoptent ce mécanisme, voir la réflexion sur la refonte des permissions dans `ROADMAP-MODULES-FUTURS.md`, section J0).
 - Pattern d'accès reproductible dans le code de chaque page : `const canAtmpAdmin = role === "admin" || role === "rh" || !!(session.modulePermissions && session.modulePermissions["atmp-admin"]);` — même principe transposable à un futur module avec une autre clé.
 - **Sidebar à deux niveaux** : les liens dont la visibilité dépend d'une permission granulaire (pas seulement du rôle) ont chacun leur propre `id` et sont masqués/affichés individuellement (`display:none` par défaut, révélé par JS), plutôt que la section entière — évite d'afficher un lien qu'un détenteur d'une seule des permissions ne pourrait pas utiliser (ex. "Déclarer un AT/MP" et "Évaluer un risque" dans la section "Espace RH" sont maintenant deux toggles indépendants, pas un seul pour toute la section).
 
@@ -162,6 +166,7 @@ modulePermissions: {
 | `vigie_hse_atmp_dossiers` | Checklist documentaire par dossier AT/MP (CMI, prolongations, certificat final, IPP, enquête/coûts), une entrée par `atmpId` | `dossiers-atmp-citis.html` |
 | `vigie_hse_atmp_arretes` | Arrêtés d'imputabilité/CITIS (type, statut de signature, dates, autorité), plusieurs par `atmpId` | `dossiers-atmp-citis.html` |
 | `vigie_hse_analyses_accident` | Analyse des causes d'un accident (méthode Arbre des causes/5 Pourquoi/Ishikawa au choix, conclusion, actions correctives), une entrée par `atmpId` | `accident-analyse.html`, actions correctives lues par `plan-actions.html` (`origine:"Analyse"`) |
+| `vigie_hse_exercices_urgence` | Registre chronologique des exercices d'urgence (site, type, date, périodicité saisie au cas par cas, constatations, actions correctives) — **append-only**, jamais réécrit en place (un exercice = une nouvelle entrée, contrairement à `vigie_hse_verifications`/`vigie_hse_habilitations` qui gardent un état courant par équipement/habilitation) | `urgences-exercices.html`, actions correctives lues par `plan-actions.html` (`origine:"Urgence"`) |
 | `vigie_hse_verifications` | Équipements et leur historique de vérification périodique | `verifications-periodiques.html` |
 | `vigie_hse_weather_location` | Ville choisie manuellement pour le widget météo (`{name, admin1, country, lat, lon}`) | `dashboard.html` |
 

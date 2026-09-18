@@ -84,7 +84,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — nécessite un nouveau rôle/compte "Représentant du personnel" |
 | 14 | Gestion administrative RH | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — voir aussi extension du module 7 |
 | 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
-| 16 | Situations d'urgence & exercices d'évacuation | ❌ Non démarré (nouveau, 2026-09-12) — recoupe l'écart clause 8.2 du jalon J1 |
+| 16 | Situations d'urgence & exercices d'évacuation | ✅ Fait (2026-09-18) — volet "exercices réalisés" ; plans d'urgence par site reportés |
 | 17 | Entreprises extérieures & Plan de Prévention | ❌ Non démarré (nouveau, 2026-09-12) — recoupe le risque "Coactivité" déjà référencé |
 | 18 | Gestion administrative des dossiers AT/MP & CITIS | ✅ Fait (2026-09-13) — `dossiers-atmp-citis.html`, premier cas d'usage du modèle de permissions granulaires (voir J0) |
 
@@ -363,7 +363,7 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - Sidebar à deux niveaux : les sections partagées entre plusieurs permissions (ex. "Espace RH") toggle maintenant chaque lien individuellement plutôt que la section entière, pour ne jamais afficher un lien qu'un utilisateur ne pourrait pas utiliser — voir `ETAT-DU-PROJET.md` §7.
 - Compte de test `PREV1` étendu avec les 3 permissions (`atmp-admin`, `atmp-declare`, `accident-analyse`) plutôt qu'un 4ᵉ compte dédié.
 
-## 16. Situations d'urgence & exercices d'évacuation — ❌ Non démarré
+## 16. Situations d'urgence & exercices d'évacuation — ✅ Fait (volet "exercices réalisés")
 
 **Demandé le 2026-09-12.** Recoupe un écart déjà repéré lors de l'étude du jalon **J1** (clause **8.2 — Préparation et réponse aux situations d'urgence** d'ISO 45001, listée comme candidat n°2 dans la confrontation clause par clause ci-dessus) : aujourd'hui rien dans VIGIE HSE ne trace la préparation aux situations d'urgence ni la tenue effective des exercices — un manque quasi systématiquement relevé en audit sécurité, et une brique de prévention à part entière indépendamment de toute certification.
 
@@ -379,7 +379,14 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 **Réponse du préventeur (Q6, Cahier du préventeur, 2026-09-16) :** la périodicité varie selon le type d'établissement — **pas de valeur figée dans le code**, une périodicité **saisie manuellement à chaque exercice enregistré**. Types d'exercices à tracer : évacuation incendie, intrusion, risque environnemental (inondation, accident chimique…). Voir `QUESTIONS-METIER-EN-ATTENTE.md` Q6 pour le détail.
 
-**Cadrage :** comme pour J1/J2/module 15, une piste posée pour discussion ultérieure, pas un chantier à démarrer immédiatement.
+**Livré le 2026-09-18 — `urgences-exercices.html`.** Périmètre décidé avec l'utilisateur : **volet "exercices réalisés" seul** — les plans d'urgence par site (consignes, contacts, moyens de secours) restent une itération future, éventuellement avec le futur module Gestion documentaire (module 8).
+- Registre chronologique **append-only** (un exercice = une nouvelle entrée, jamais réécrite en place) — c'est la preuve datée que la roadmap identifiait comme la vraie valeur du module.
+- Périodicité saisie librement à chaque exercice (aucun défaut suggéré, conformément à la réponse Q6) ; échéance "prochain exercice dû" calculée à l'affichage par groupe site+type, sur le dernier exercice du groupe seulement (un exercice ancien déjà remplacé par un plus récent n'est plus compté "en retard" pour son propre compte).
+- Anomalies avec action corrective → Plan d'Actions (`origine:"Urgence"`), même mécanisme que DUERP/Inspection/Analyse.
+- Accès par permission granulaire `urgences` (même modèle que `accident-analyse`), compte `PREV1` étendu.
+- Import/export `.xlsx` dès la V1 (2 feuilles, avec colonne "ID Exercice" dans la feuille Actions pour un ré-import fidèle).
+
+**Cadrage :** le volet "plans d'urgence par site" reste posé pour une itération future — pas de conception engagée dessus.
 
 ## 17. Entreprises extérieures & Plan de Prévention — ❌ Non démarré
 

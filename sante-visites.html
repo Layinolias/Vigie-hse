@@ -349,6 +349,11 @@
         <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
       </div>
 
+      <div id="habilitationsMissingNotice" style="display:none; align-items:center; gap:8px; padding:9px 14px; margin-bottom:14px; border-radius:var(--r-sm); background:var(--warning-bg); border:1px solid var(--warning); font-size:12px; color:var(--text-muted);">
+        <svg class="icon" style="width:15px;height:15px;color:var(--warning);flex-shrink:0;"><use href="#i-alert-triangle"/></svg>
+        <span>Données d'habilitations pas encore chargées dans ce navigateur : la surveillance renforcée (§Q4) ne peut rien détecter pour l'instant. Ouvrez <a href="formation-habilitation.html" style="color:var(--accent);">Formation / Habilitation</a> une fois, puis revenez ici.</span>
+      </div>
+
       <div class="panel console">
         <div class="field"><span class="flabel">Collectivité</span>
           <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
@@ -566,8 +571,14 @@
     "AIPR (Autorisation d'Intervention à Proximité des Réseaux)": 60,
     "Habilitation travail en hauteur": 12,
   };
+  let habilitationsKeyMissing = false;
   function loadHabilitationsRef(){
-    try { const raw = localStorage.getItem("vigie_hse_habilitations"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
+    try {
+      const raw = localStorage.getItem("vigie_hse_habilitations");
+      if (raw === null){ habilitationsKeyMissing = true; return []; }
+      const p = JSON.parse(raw);
+      if (Array.isArray(p)) return p;
+    } catch(e){}
     return [];
   }
   function buildSurveillanceRenforceeMap(){
@@ -583,6 +594,10 @@
     return map;
   }
   const SURVEILLANCE_RENFORCEE = buildSurveillanceRenforceeMap();
+  if (habilitationsKeyMissing){
+    const notice = document.getElementById("habilitationsMissingNotice");
+    if (notice) notice.style.display = "flex";
+  }
 
   function computeStatus(v){
     const renfort = SURVEILLANCE_RENFORCEE.get(v.nom + "|" + v.prenom + "|" + v.service);

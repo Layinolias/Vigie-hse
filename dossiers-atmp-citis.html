@@ -841,8 +841,12 @@
     if (idRaw && ATMP_EVENTS.some(e => e.id === idRaw)) return idRaw;
     const nom = normKey(rawPick(raw, ["nom"]) || (rawPick(raw, agentAliases).split(" ")[0] || ""));
     const dateAT = String(rawPick(raw, ["date at"])).trim();
-    const evt = ATMP_EVENTS.find(e => normKey(e.nom) === nom && (!dateAT || e.dateAT === dateAT))
-      || ATMP_EVENTS.find(e => normKey(`${e.nom} ${e.prenom}`) === normKey(rawPick(raw, agentAliases)));
+    // nom vide : ne jamais matcher un événement dont le nom serait lui aussi vide/mal formé
+    // (les deux tentatives ci-dessous doivent être gardées, pas seulement la première —
+    // trouvé en testant le correctif du 2026-09-18 : la seconde matchait "" === "").
+    const agentKey = normKey(rawPick(raw, agentAliases));
+    const evt = (nom ? ATMP_EVENTS.find(e => normKey(e.nom) === nom && (!dateAT || e.dateAT === dateAT)) : null)
+      || (agentKey ? ATMP_EVENTS.find(e => normKey(`${e.nom} ${e.prenom}`) === agentKey) : null);
     return evt ? evt.id : null;
   }
 

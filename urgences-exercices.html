@@ -553,9 +553,16 @@
   // recompté comme "en retard" pour son propre compte (réponse Q4/Q6 du préventeur : la
   // périodicité est propre à chaque exercice saisi, pas une valeur globale figée).
   function computeStatus(dateStr, periodiciteMois){
+    const mois = Number(periodiciteMois);
+    // Pas de périodicité exploitable (donnée ancienne/mal formée) : on ne lui invente pas
+    // 12 mois (réponse Q6 du préventeur) — on affiche que l'information manque, plutôt que
+    // de calculer une échéance qui aurait l'air fiable sans l'être.
+    if (!mois || mois <= 0){
+      return { prochaine: "—", statut: "Périodicité manquante", cls: "soon" };
+    }
     const d = new Date(dateStr);
     const prochaine = new Date(d);
-    prochaine.setMonth(prochaine.getMonth() + (Number(periodiciteMois) || 12));
+    prochaine.setMonth(prochaine.getMonth() + mois);
     const today = new Date();
     const in60 = new Date(today); in60.setDate(in60.getDate() + 60);
     let statut = "À jour", cls = "ok";
@@ -602,8 +609,8 @@
   });
   tri.decorate($("theadFields"));
 
-  function renderEcheanceTable(){
-    const rows = computeEcheances().sort((a,b) => a.prochaine.localeCompare(b.prochaine));
+  function renderEcheanceTable(echeances){
+    const rows = echeances.slice().sort((a,b) => a.prochaine.localeCompare(b.prochaine));
     if (rows.length === 0){
       $("echeanceTable").innerHTML = `<tr><td style="padding:10px;color:var(--text-faint);">Aucun exercice enregistré pour le moment.</td></tr>`;
       return;
@@ -631,7 +638,7 @@
     $("kpiLate").textContent = echeances.filter(e => e.cls === "late").length;
     $("resultCount").textContent = rows.length;
     $("totalCount").textContent = DATASET.length;
-    renderEcheanceTable();
+    renderEcheanceTable(echeances);
 
     const tbody = $("tbody");
     const colspan = canUrgencesWrite ? 9 : 8;
@@ -809,6 +816,11 @@
     const site = String(rawPick(raw, ["site"])).trim();
     const dateExercice = parseDateImp(rawPick(raw, ["date exercice","date"]));
     if (!site && !dateExercice) return null;
+    // Réponse Q6 du préventeur : la périodicité n'est jamais une valeur par défaut du code,
+    // elle se saisit au cas par cas. Une ligne importée sans périodicité exploitable est donc
+    // ignorée (comme les lignes sans site/date) plutôt que de lui inventer une valeur.
+    const periodiciteMois = Number(rawPick(raw, ["periodicite mois","periodicite"]));
+    if (!periodiciteMois || periodiciteMois <= 0) return null;
     const typeRaw = String(rawPick(raw, ["type"])).trim();
     const collectiviteRaw = normKeyImp(rawPick(raw, ["collectivite"]));
     return {
@@ -819,7 +831,7 @@
       type: TYPES_VALIDES.includes(typeRaw) ? typeRaw : "Évacuation incendie",
       dureeMinutes: Number(rawPick(raw, ["duree minutes","duree"])) || 0,
       participation: String(rawPick(raw, ["participation"])).trim(),
-      periodiciteMois: Number(rawPick(raw, ["periodicite mois","periodicite"])) || 12,
+      periodiciteMois,
       constatations: String(rawPick(raw, ["constatations"])).trim(),
       actions: [],
       auteur: String(rawPick(raw, ["auteur"])).trim() || "—",
@@ -870,7 +882,7 @@
         render();
         const total = exAdded + exUpdated + actAdded;
         if (total === 0){
-          alert(`Aucune ligne n'a pu être importée (${exSkipped + actSkipped} ignorée(s)). Vérifiez que le fichier contient bien une feuille "Exercices" (Site, Date exercice…) et éventuellement "Actions" (ID Exercice, Action…).`);
+          alert(`Aucune ligne n'a pu être importée (${exSkipped + actSkipped} ignorée(s)). Vérifiez que le fichier contient bien une feuille "Exercices" (Site, Date exercice, Périodicité mois…) et éventuellement "Actions" (ID Exercice, Action…). Une ligne sans périodicité est ignorée — elle ne s'invente pas, voir la note en bas de page.`);
         } else {
           alert(`Import terminé — exercices : ${exAdded} ajouté(s), ${exUpdated} mis à jour, ${exSkipped} ignoré(s). Actions : ${actAdded} ajoutée(s), ${actSkipped} ignorée(s).`);
         }

@@ -816,8 +816,12 @@
     if (idRaw && ATMP_EVENTS.some(e => e.id === idRaw)) return idRaw;
     const nom = normKey(rawPick(raw, ["nom"]));
     const dateAT = String(rawPick(raw, ["date at"])).trim();
+    // Les deux tentatives doivent être gardées contre une clé vide, pas seulement la première
+    // (trouvé en testant le correctif du 2026-09-18 sur dossiers-atmp-citis.html : "" === ""
+    // matchait silencieusement le premier événement à nom/prénom vides).
+    const agentKey = normKey(rawPick(raw, agentAliases));
     const evt = (nom ? ATMP_EVENTS.find(e => normKey(e.nom) === nom && (!dateAT || e.dateAT === dateAT)) : null)
-      || ATMP_EVENTS.find(e => normKey(`${e.nom} ${e.prenom}`) === normKey(rawPick(raw, agentAliases)));
+      || (agentKey ? ATMP_EVENTS.find(e => normKey(`${e.nom} ${e.prenom}`) === agentKey) : null);
     return evt ? evt.id : null;
   }
 

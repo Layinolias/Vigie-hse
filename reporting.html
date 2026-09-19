@@ -487,12 +487,16 @@
     // comptait pour 1 ou 2 années pleines. Sans borne de début (« Depuis le début »), on
     // part de l'événement le plus ancien affiché jusqu'à la borne de fin.
     const dureeAtJours = (() => {
-      const fin = dFin || today.toISOString().slice(0,10);
+      let fin = dFin || today.toISOString().slice(0,10);
       let debut = dDebut;
       if (!debut){
         const dates = ATMP.map(r => r.dateAT).filter(Boolean).sort();
         debut = dates.length ? dates[0] : fin;
       }
+      // Garde-fou : une période inversée (bornes croisées via l'UI ou l'URL) ne doit jamais
+      // produire une durée négative ramenée à 1 jour — on rétablit l'ordre plutôt que de
+      // laisser le TF/TG exploser silencieusement.
+      if (debut > fin){ const tmp = debut; debut = fin; fin = tmp; }
       const ms = new Date(fin) - new Date(debut);
       return Math.max(1, Math.round(ms / 86400000) + 1);
     })();
@@ -687,8 +691,15 @@
   }
 
   $("fPeriodePreset").addEventListener("change", () => { applyPreset(); renderReport(); });
-  $("fDateDebut").addEventListener("change", renderReport);
-  $("fDateFin").addEventListener("change", renderReport);
+  // Empêche de choisir une période inversée (début après fin), qui faussait silencieusement
+  // le TF/TG (durée négative ramenée à 1 jour) — trouvé en revue de code le 2026-09-18.
+  function syncDateBounds(){
+    $("fDateFin").min = $("fDateDebut").value || "";
+    $("fDateDebut").max = $("fDateFin").value || "";
+  }
+  syncDateBounds();
+  $("fDateDebut").addEventListener("change", () => { syncDateBounds(); renderReport(); });
+  $("fDateFin").addEventListener("change", () => { syncDateBounds(); renderReport(); });
   applyPreset();
   renderReport();
 

@@ -434,6 +434,14 @@
                   <option value="write">Lecture / écriture</option>
                 </select>
               </div>
+              <div class="f span2">
+                <label for="uAccueilPostePerm">Modules avancés — Accueil au poste</label>
+                <select id="uAccueilPostePerm">
+                  <option value="none">Aucun accès</option>
+                  <option value="read">Lecture seule</option>
+                  <option value="write">Lecture / écriture</option>
+                </select>
+              </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:16px;">
               <button type="submit" class="btn btn-primary" id="userSubmitBtn">Créer l'utilisateur</button>
@@ -812,11 +820,13 @@
       const gestionRhBadge = (gestionRhPerm && gestionRhPerm !== "none") ? ` <span class="svc-tag" title="Gestion RH">RH · ${gestionRhPerm === "write" ? "écriture" : "lecture"}</span>` : "";
       const eePerm = u.modulePermissions && u.modulePermissions["entreprises-ext"];
       const eeBadge = (eePerm && eePerm !== "none") ? ` <span class="svc-tag" title="Entreprises extérieures">EE · ${eePerm === "write" ? "écriture" : "lecture"}</span>` : "";
+      const accueilPerm = u.modulePermissions && u.modulePermissions["accueil-poste"];
+      const accueilBadge = (accueilPerm && accueilPerm !== "none") ? ` <span class="svc-tag" title="Accueil au poste">Accueil · ${accueilPerm === "write" ? "écriture" : "lecture"}</span>` : "";
       return `
       <tr data-id="${u.id}">
         <td class="mono">${u.username || u.email}</td>
         <td>${(u.nom || u.prenom) ? `${u.prenom} ${u.nom}` : "—"}</td>
-        <td><span class="chip ${u.role}">${ROLE_CHIP_LABEL[u.role] || u.role}</span>${atmpBadge}${declareBadge}${analyseBadge}${urgencesBadge}${gestionRhBadge}${eeBadge}</td>
+        <td><span class="chip ${u.role}">${ROLE_CHIP_LABEL[u.role] || u.role}</span>${atmpBadge}${declareBadge}${analyseBadge}${urgencesBadge}${gestionRhBadge}${eeBadge}${accueilBadge}</td>
         <td>${svcHtml}</td>
         <td><span class="chip ${u.active !== false ? 'active-yes' : 'active-no'}">${u.active !== false ? "Actif" : "Désactivé"}</span></td>
         <td>
@@ -849,6 +859,7 @@
     $("uUrgencesPerm").value = "none";
     $("uGestionRhPerm").value = "none";
     $("uEntreprisesExtPerm").value = "none";
+    $("uAccueilPostePerm").value = "none";
   }
   resetUserForm();
 
@@ -879,6 +890,7 @@
       $("uUrgencesPerm").value = (u.modulePermissions && u.modulePermissions["urgences"]) || "none";
       $("uGestionRhPerm").value = (u.modulePermissions && u.modulePermissions["gestion-rh"]) || "none";
       $("uEntreprisesExtPerm").value = (u.modulePermissions && u.modulePermissions["entreprises-ext"]) || "none";
+      $("uAccueilPostePerm").value = (u.modulePermissions && u.modulePermissions["accueil-poste"]) || "none";
       $("uPassword").value = "";
       $("uPassword").placeholder = "Laisser vide pour conserver le mot de passe actuel";
       $("uPassword").required = false;
@@ -949,6 +961,7 @@
         "urgences": $("uUrgencesPerm").value,
         "gestion-rh": $("uGestionRhPerm").value,
         "entreprises-ext": $("uEntreprisesExtPerm").value,
+        "accueil-poste": $("uAccueilPostePerm").value,
       });
       if (passwordInput) u.password = passwordInput;
       saveUsers(USERS);
@@ -977,6 +990,7 @@
       "urgences": $("uUrgencesPerm").value,
       "gestion-rh": $("uGestionRhPerm").value,
       "entreprises-ext": $("uEntreprisesExtPerm").value,
+      "accueil-poste": $("uAccueilPostePerm").value,
     };
     const user = { id: genId("u"), nom, prenom, email, username: email, password: passwordInput, role, services, modulePermissions, active: true };
     USERS.push(user);

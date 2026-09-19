@@ -69,7 +69,7 @@ Chaque version est un dossier autonome et complet (pas de dépendance croisée).
 | `document-unique.html` | Registre DUERP — évaluations de risques par service, cotation, table filtrable, CRUD, import/export Excel. |
 | `saisie-duerp.html` | Formulaire d'évaluation/édition d'un risque DUERP (accès rh/admin). |
 | `plan-actions.html` | Plan d'Actions — agrège les actions issues du DUERP (Élevé/Critique) et d'Inspection/Audit (non-conformités), + création manuelle. |
-| `sante-visites.html` | Santé & Visites — suivi de la surveillance médicale (roster dérivé du Registre AT/MP, à compléter). |
+| `sante-visites.html` | Santé & Visites — 3 onglets : **Suivi** de la surveillance médicale (périodicité, échéance, surveillance renforcée par habilitation), **Agenda & RDV** (2026-09-19 : grille mensuelle, RDV médicaux `vigie_hse_rdv_medicaux`, convocation générée/copiée/imprimée, statut « Réalisé » → proposition de mise à jour de la dernière visite, KPI RDV à venir), **Modèles de convocation** (`vigie_hse_modeles_convocation`, RH/admin). Les RDV s'écrivent par fusion de leur part (RH limité à des services : jamais d'écrasement des autres) ; la forme de `vigie_hse_visites` n'a pas changé. Voir `ROADMAP-MODULES-FUTURS.md` module 7. |
 | `registre-sst.html` | Registre Santé & Sécurité (RSST réglementaire) — observations remontées par les agents, traitées par RH/admin. |
 | `verifications-periodiques.html` | Suivi des contrôles techniques réglementaires (électricité, extincteurs, ascenseurs, etc.). |
 | `inspection-audit.html` | Trames de contrôle réutilisables + inspections réalisées ; les non-conformités alimentent le Plan d'Actions. |
@@ -171,6 +171,8 @@ modulePermissions: {
 | `vigie_hse_audit_log` | Journal d'audit global (création/modification/suppression, tous modules) | Toute page qui modifie des données, lu par `administration.html` (onglet Journal) |
 | `vigie_hse_actions` | Actions du Plan d'Actions | `plan-actions.html` |
 | `vigie_hse_visites` | Fiches de suivi santé/visites médicales | `sante-visites.html` |
+| `vigie_hse_rdv_medicaux` | Rendez-vous médicaux `{id, visiteId, nom, prenom, service, collectivite, date "YYYY-MM-DD", heure "HH:MM", lieu, medecin, statutConvocation ("À convoquer"\|"Convoqué"\|"Confirmé"\|"Réalisé"\|"Annulé"), notes, auteur, dateCreation}` — identité copiée depuis la fiche de suivi (affichage + périmètre par service) ; écriture par fusion de sa part | `sante-visites.html` (onglet Agenda & RDV) |
+| `vigie_hse_modeles_convocation` | Modèles de convocation `{id, nom, objet, corps}` avec champs `{{prenom}} {{nom}} {{service}} {{collectivite}} {{typeVisite}} {{date}} {{heure}} {{lieu}} {{medecin}}` — always-merge, modèle par défaut d'id `tpl-defaut` non supprimable (modifiable) | `sante-visites.html` (onglet Modèles de convocation) |
 | `vigie_hse_rsst` | Observations du Registre Santé & Sécurité | `registre-sst.html` |
 | `vigie_hse_atmp_dossiers` | Checklist documentaire par dossier AT/MP (CMI, prolongations, certificat final, IPP, enquête/coûts), une entrée par `atmpId` | `dossiers-atmp-citis.html` |
 | `vigie_hse_atmp_arretes` | Arrêtés d'imputabilité/CITIS (type, statut de signature, dates, autorité), plusieurs par `atmpId` | `dossiers-atmp-citis.html` |

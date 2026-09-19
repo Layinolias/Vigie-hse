@@ -75,7 +75,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 4 | Gestion des produits chimiques | ✅ Fait — `produits-chimiques.html` |
 | 5 | Pénibilité & fiches individuelles | ❌ Non démarré |
 | 6 | Formation / Habilitation | ✅ Fait — `formation-habilitation.html` |
-| 7 | Santé au travail — planning des visites médicales | 🔶 Base posée — extension prévue |
+| 7 | Santé au travail — planning des visites médicales | ✅ Fait (2026-09-19) — `sante-visites.html` : agenda mensuel, RDV, convocations à partir de modèles modifiables (envoi automatique hors périmètre) |
 | 8 | Gestion documentaire (wiki++ HSE) | ❌ Non démarré — vision élargie, contenu fiches de sécurité/familles de risque ajouté 2026-09-12 |
 | 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html`, sélecteur calendaire + tous modules période-conscients + graphiques par risque (2026-09-14) |
 | 10 | EPI, dotation & entretien | ✅ Fait — `epi-dotation.html` |
@@ -246,7 +246,18 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 `formation-habilitation.html` : CACES, habilitation électrique, SST, AIPR, permis PL, travail en hauteur — durées de validité standards par type, roster dérivé du Registre AT/MP (même technique que Santé & Visites), statut À jour/À renouveler/Expirée calculé. **Remarque toujours valable pour un futur module Pénibilité** : envisager un roster d'agents partagé plutôt qu'une troisième dérivation indépendante du Registre AT/MP — il y en a maintenant deux (Santé & Visites, Formation/Habilitation) construites indépendamment l'une de l'autre.
 
-## 7. Santé au travail — planning des visites médicales — 🔶 Base posée, extension prévue
+## 7. Santé au travail — planning des visites médicales — ✅ Fait (2026-09-19)
+
+**Livré — extension de `sante-visites.html`** (décisions prises avec l'utilisateur le 2026-09-19) :
+- **3 onglets** : « Suivi » (inchangé), « Agenda & RDV », « Modèles de convocation » (RH/admin uniquement).
+- **Agenda mensuel** (lundi en premier, navigation mois précédent/suivant/aujourd'hui), pastilles `heure · prénom nom` colorées par statut, clic sur un jour → liste du jour + « Nouveau RDV ce jour », clic sur une pastille → édition. Sous la grille : « Prochains rendez-vous » (à venir + passés non clôturés, tri/filtres, filtre par statut).
+- **RDV** (`vigie_hse_rdv_medicaux`) : fiche de suivi liée, date, heure, lieu, médecin, statut (À convoquer → Convoqué → Confirmé → Réalisé / Annulé), notes. Bouton « Planifier » sur chaque ligne du suivi. Supprimer une fiche de suivi supprime ses RDV ; renommer un agent met à jour ses RDV.
+- **Convocations** : générées depuis un **modèle modifiable** (`vigie_hse_modeles_convocation`, géré dans un onglet de la page — pas dans Administration, réservée aux admins alors que c'est le RH qui convoque), champs automatiques (`{{prenom}}`, `{{nom}}`, `{{date}}`, `{{heure}}`, `{{lieu}}`, `{{medecin}}`…), texte **éditable avant usage**, boutons « Copier » et « Imprimer / PDF ». Un RDV « À convoquer » passe à « Convoqué » après copie/impression (dit à l'écran). Le modèle par défaut a un texte **neutre** (aucune formule réglementaire inventée) et n'est pas supprimable.
+- **« Réalisé »** : une confirmation propose de mettre à jour la « date de dernière visite » de la fiche (donc de recalculer l'échéance) — jamais fait sans clic, et jamais proposé si la date du RDV n'est pas postérieure à la dernière visite déjà saisie.
+- KPI « RDV à venir (30 j) », export `.xlsx` des RDV. Lecture seule pour manager/ag (agenda limité à leurs services ; les notes ne leur sont pas affichées). Pas d'import ni de DATATEST en V1.
+- **Hors périmètre (assumé)** : envoi d'e-mail (aucun backend), export iCal, RDV récurrents, détection de chevauchement de créneaux, génération PDF native (l'impression navigateur « Enregistrer au format PDF » suffit).
+
+*Historique de la demande, conservé ci-dessous :*
 
 **Note d'origine :** "Santé au travail, Gestion des visites médicales : gestion de planning, rdv, convocation,"
 

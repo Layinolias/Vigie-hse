@@ -417,6 +417,7 @@
   <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
   <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
   <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
   <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
@@ -499,6 +500,7 @@
         <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
         <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
         <a class="nav-item" id="navGestionRh" href="gestion-rh.html" style="display:none;"><svg class="icon"><use href="#i-users"/></svg> Gestion RH</a>
+        <a class="nav-item" id="navEntreprisesExt" href="entreprises-exterieures.html" style="display:none;"><svg class="icon"><use href="#i-briefcase"/></svg> Entreprises extérieures</a>
       </div>
       <div class="nav-section" id="navPilotage" style="display:none;">
         <div class="nav-label">Pilotage</div>
@@ -743,6 +745,8 @@
   if (canUrgences){ $("navAdministratif").style.display = ""; $("navUrgences").style.display = ""; }
   const canGestionRh = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["gestion-rh"]);
   if (canGestionRh){ $("navAdministratif").style.display = ""; $("navGestionRh").style.display = ""; }
+  const canEntreprisesExt = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["entreprises-ext"]);
+  if (canEntreprisesExt){ $("navAdministratif").style.display = ""; $("navEntreprisesExt").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });

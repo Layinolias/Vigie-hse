@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 99 points au 2026-09-19 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 104 points au 2026-09-19 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -101,6 +101,13 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Cocher "Travaux dangereux" sur une intervention de quelques heures la fait passer à "Obligatoire" (le logiciel ne devine jamais cette liste réglementaire — c'est une case à cocher à la main).
 - [ ] Une action corrective ajoutée à une intervention apparaît dans **Plan d'Actions** avec l'origine "Prévention EE" (badge distinct des autres origines).
 - [ ] Se déconnecter, se reconnecter en `AG2` (sans permission `entreprises-ext`) : le lien "Entreprises extérieures" est invisible, et taper l'URL `entreprises-exterieures.html` directement redirige vers `dashboard.html`.
+
+### Accueil au poste (`RH1`/`RH2` ou `admin` — accès write d'office ; permission granulaire `accueil-poste` pour les autres)
+- [ ] `RH1` voit « Accueil au poste » dans la sidebar (section « Administratif ») ; créer un accueil (agent du sélecteur ou saisie libre, poste, date d'arrivée, référent) : il apparaît dans le tableau en « À faire » avec 0/8, et l'ouvrir montre les 8 points du modèle par défaut.
+- [ ] Cocher des points : la date du jour et « par RH1 » s'affichent, la jauge et « n/8 » avancent, le statut passe « En cours » puis « Terminé » quand tout est coché ; décocher un point rouvre l'accueil. Ajouter un commentaire sur un point ; ajouter un point « spécifique au poste » (il porte un badge et un bouton « Retirer »).
+- [ ] « Imprimer la fiche » : l'aperçu contient uniquement la fiche (identité, points avec ☑/☐, date et auteur, deux zones de signature), pas le menu ; « Enregistrer au format PDF » fonctionne.
+- [ ] Onglet « Modèles de parcours » : modifier un point du modèle par défaut, créer un second modèle (ajouter, réordonner ↑↓, retirer des points), l'utiliser pour un nouvel accueil ; vérifier que **modifier le modèle ensuite ne change pas un accueil déjà créé**. Le modèle par défaut n'est pas supprimable mais peut être rétabli à son texte d'origine.
+- [ ] Se connecter en `manager` avec la permission « Accueil au poste : lecture seule » (à donner depuis Administration) : les accueils de son périmètre sont visibles et ouvrables, les cases sont grisées, aucun bouton de création/modification/suppression, pas d'onglet « Modèles de parcours » ; sans permission, le lien est absent et taper l'URL `accueil-poste.html` redirige vers `dashboard.html`.
 
 ### Visibilité des données par tableau (tous rôles)
 Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le rôle" (§2) n'avait été vérifié en détail que sur le Registre AT/MP. Un point par module à tableau pour couvrir le reste — même geste à chaque fois : se connecter avec au moins deux comptes de rôles différents (ex. `RH1` puis `AG1`, ou `manager`) et vérifier que les lignes/colonnes affichées sont cohérentes avec le périmètre du rôle (scope service pour `manager`, colonnes personnelles masquées pour `ag`, etc. — voir §3 ci-dessus pour le détail attendu par rôle).

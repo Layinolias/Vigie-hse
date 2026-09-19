@@ -80,7 +80,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html`, sélecteur calendaire + tous modules période-conscients + graphiques par risque (2026-09-14) |
 | 10 | EPI, dotation & entretien | ✅ Fait — `epi-dotation.html` |
 | 11 | Dashboard mobile simplifié | ✅ Fait |
-| 12 | Accueil au poste | ❌ Non démarré (nouveau, retour alpha 2026-09-12) |
+| 12 | Accueil au poste | ✅ Fait (2026-09-19) — `accueil-poste.html` : parcours d'accueil sécurité d'un nouvel agent à partir de modèles modifiables, suivi de complétion, fiche imprimable à signer |
 | 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — nécessite un nouveau rôle/compte "Représentant du personnel" |
 | 14 | Gestion administrative RH | ✅ Fait (2026-09-19) — `gestion-rh.html`, les deux volets (données RH + organigramme) |
 | 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
@@ -326,7 +326,17 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 **Ce qui reste hors scope, assumé :** Administration, Indicateurs & Reporting et les tableaux denses restent explicitement desktop-only sur mobile — pas un chantier resté à faire, un choix de portée pour ce module.
 
-## 12. Accueil au poste — ❌ Non démarré
+## 12. Accueil au poste — ✅ Fait (2026-09-19)
+
+**Livré — `accueil-poste.html`** (décisions prises avec l'utilisateur le 2026-09-19) :
+- **Registre des accueils** (`vigie_hse_accueils`) : un accueil = un agent (sélecteur du roster Gestion RH ou saisie libre) + poste + date d'arrivée + référent/tuteur. Statut calculé **À faire / En cours / Terminé** d'après les points cochés ; date de clôture posée quand le dernier point est coché, retirée si on rouvre l'accueil (ex. ajout d'un point).
+- **Points du parcours copiés depuis un modèle à la création** (instantané) : modifier ou supprimer un modèle ne réécrit jamais un accueil en cours. Chaque point se coche avec la date (locale) et l'auteur, accepte un commentaire ; le RH peut ajouter des **points spécifiques au poste** à un accueil donné.
+- **Modèles de parcours modifiables par le RH** (`vigie_hse_modeles_accueil`, onglet de la page, always-merge, modèle par défaut d'id `tpl-accueil-defaut` **neutre** — aucune obligation réglementaire ni délai inventés —, non supprimable mais rétablissable ; points réordonnables).
+- **Émargement : coché par le RH/manager + fiche imprimable** avec zones de signature (agent + référent) — « Enregistrer au format PDF » depuis l'impression ; **pas de signature électronique**.
+- Permission granulaire `accueil-poste` (read/write ; RH/admin en écriture d'office), lien « Accueil au poste » dans la section « Administratif » de la sidebar. Un compte limité à certains services ne voit et ne modifie que ses services (fusion de sa part). Export `.xlsx` (feuilles Accueils + Points, colonne « ID accueil »). Pas d'import ni de DATATEST en V1.
+- **Hors périmètre (assumé)** : rappels/relances automatiques, délai réglementaire d'accueil (aucune règle métier codée — voir règle 9), lien avec le Plan d'Actions, signature électronique, pièces jointes (livret d'accueil en PDF : le navigateur seul ne stocke pas de vrais fichiers).
+
+*Note d'origine et annotation de cadrage, conservées ci-dessous :*
 
 **Note d'origine (retour alpha, 2026-09-12) :** nouveau module demandé, pas encore détaillé par l'utilisateur.
 

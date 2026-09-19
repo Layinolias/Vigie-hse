@@ -1,0 +1,902 @@
+<title>Base documentaire</title>
+<meta name="description" content="Base documentaire HSE : articles et fiches pratiques cherchables, familles de risque, registre des documents officiels.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/tri-filtres.js"></script>
+<script src="assets/risques-ref.js"></script>
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B; --critical-rgb:201,94,107;
+    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px; --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; flex-shrink:0; }
+  .sidebar nav{ flex:1 1 auto; min-height:0; overflow-y:auto; margin-left:-14px; padding-left:14px; scrollbar-width:thin; }
+  .sidebar-pin{ margin-left:auto; flex-shrink:0; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:var(--r-sm); background:none; border:none; color:var(--text-faint); cursor:pointer; transition:background .15s ease, color .15s ease; }
+  .sidebar-pin:hover{ background:var(--bg-2); color:var(--text-muted); }
+  .sidebar-pin.active{ color:var(--accent); background:rgba(var(--accent-rgb),.12); }
+  .sidebar-pin .icon{ width:15px; height:15px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item .icon{ width:17px; height:17px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .role-chip.ag{ background:rgba(var(--accent-blue-rgb),.16); color:var(--accent-blue); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .page-summary-kpis{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ps-kpi{ display:flex; align-items:center; gap:7px; padding:5px 11px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); }
+  .ps-kpi-icon{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ps-kpi-icon .icon{ width:12px; height:12px; }
+  .ps-kpi-icon.blue{ background:rgba(var(--accent-rgb),.14); color:var(--accent); }
+  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
+  .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  .mobile-notice{ display:none; }
+  @media (max-width:640px){
+    .mobile-notice.show{ display:flex; align-items:center; gap:8px; padding:8px 12px; margin-bottom:14px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); font-size:11.5px; color:var(--text-muted); }
+    .mobile-notice.show button{ margin-left:auto; background:none; border:none; color:var(--text-faint); font-size:16px; line-height:1; cursor:pointer; padding:0 2px; flex-shrink:0; }
+  }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } .ps-kpi-label{ display:none; } }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn .icon{ width:15px; height:15px; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+
+  .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
+  select, input[type="text"], input[type="date"], input[type="number"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:170px; cursor:pointer;
+  }
+  select:hover, input:hover, textarea:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:64px; width:100%; font-weight:400; line-height:1.5; }
+  .result-count{ align-self:center; margin-left:auto; font-size:12px; color:var(--text-faint); }
+  .result-count b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-title{ font-size:16.5px; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+
+  .form-panel{ padding:20px 22px 22px; margin-bottom:18px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px 16px; }
+  .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; }
+  @media (max-width:680px){ .form-grid .span2, .form-grid .span3{ grid-column:span 1; } }
+  @media (max-width:640px){
+    select, input[type="text"], input[type="date"], input[type="number"], textarea{ font-size:16px; }
+    .form-actions{ flex-direction:column; align-items:stretch; }
+    .form-actions .btn{ width:100%; justify-content:center; min-height:46px; }
+  }
+  .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  .form-sub{ font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin:20px 0 10px; }
+  .form-sub-intro{ font-size:11.5px; color:var(--text-faint); margin:-4px 0 10px; }
+  .checkline{ display:flex; align-items:center; gap:8px; }
+  .checkline input[type="checkbox"]{ width:16px; height:16px; }
+
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input[type="text"]{ flex:1 1 160px; }
+  .dyn-row input[type="date"]{ flex:0 0 150px; }
+  .dyn-row select{ flex:0 0 120px; min-width:0; }
+
+  .table-panel{ overflow:auto; max-height:70vh; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:1150px; }
+  table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr{ transition:background .12s ease; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg tbody td.wrap{ white-space:normal; min-width:200px; max-width:320px; }
+  table.reg thead th#thActions{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
+  table.reg tbody td.actions-float{ position:sticky; right:0; z-index:1; background:var(--surface-el); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); white-space:nowrap; }
+  table.reg tbody tr:hover td.actions-float{ background:var(--bg-2); }
+
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.ok{ color:var(--success); background:var(--success-bg); } .chip.ok::before{ background:var(--success); }
+  .chip.late{ color:var(--danger); background:var(--danger-bg); } .chip.late::before{ background:var(--danger); }
+
+  .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
+  .act-del:hover{ text-decoration:underline; }
+  .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+
+  .chip.soon{ color:var(--warning); background:var(--warning-bg); } .chip.soon::before{ background:var(--warning); }
+  .chip.info{ color:var(--accent); background:rgba(var(--accent-rgb),.10); } .chip.info::before{ background:var(--accent); }
+  .chip.muted{ color:var(--text-muted); background:var(--bg-2); } .chip.muted::before{ background:var(--text-faint); }
+
+  /* ---------- Onglets (même pattern que sante-visites / accueil-poste) ---------- */
+  .bd-tabs{ display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .bd-tab{ display:flex; align-items:center; gap:7px; padding:10px 15px; font:600 13px "IBM Plex Sans",sans-serif; color:var(--text-muted); background:none; border:none; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  .bd-tab:hover{ color:var(--text); }
+  .bd-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .bd-tab .icon{ width:15px; height:15px; }
+  .tab-panel{ display:none; }
+  .tab-panel.show{ display:block; }
+  #articleForm, #articlePanel, #docFormPanel{ scroll-margin-top:150px; } /* le bandeau récapitulatif est collant : sans marge, il masque le haut du panneau ouvert */
+
+  /* ---------- Recherche + cartes d'articles ---------- */
+  .wiki-search{ flex:1 1 320px; min-width:220px; }
+  .wiki-search input[type="text"]{ width:100%; }
+  .wiki-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:14px; }
+  .wiki-card{ display:flex; flex-direction:column; gap:7px; text-align:left; padding:14px 16px; background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-md); cursor:pointer; font-family:inherit; color:var(--text); box-shadow:var(--shadow-sm); transition:border-color .15s ease, transform .12s ease; }
+  .wiki-card:hover{ border-color:rgba(var(--accent-rgb),.55); transform:translateY(-1px); }
+  .wiki-card h4{ margin:0; font:600 15.5px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .wiki-card .snip{ font-size:12.3px; line-height:1.5; color:var(--text-muted); }
+  .wiki-card .meta{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:11px; color:var(--text-faint); margin-top:auto; }
+  .article-body{ white-space:pre-wrap; line-height:1.7; font-size:14px; max-width:78ch; margin:14px 0 0; }
+  .article-meta{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:12px; color:var(--text-muted); }
+  .kw{ display:inline-block; padding:2px 9px; border-radius:var(--r-pill); background:var(--bg-2); border:1px solid var(--border); font-size:11px; color:var(--text-muted); }
+  .doc-link{ color:var(--accent); font-weight:600; font-size:12px; text-decoration:none; }
+  .doc-link:hover{ text-decoration:underline; }
+  .empty-block{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+  <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
+  <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-life-buoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+  <symbol id="i-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></symbol>
+  <symbol id="i-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="dashboard.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre SST</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+      </div>
+      <div class="nav-section" id="navRh" style="display:none;">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item" id="navDeclarerAtmp" href="saisie-rh.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" id="navEvaluerDuerp" href="saisie-duerp.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section" id="navAdministratif" style="display:none;">
+        <div class="nav-label">Administratif</div>
+        <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
+        <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
+        <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
+        <a class="nav-item" id="navGestionRh" href="gestion-rh.html" style="display:none;"><svg class="icon"><use href="#i-users"/></svg> Gestion RH</a>
+        <a class="nav-item" id="navEntreprisesExt" href="entreprises-exterieures.html" style="display:none;"><svg class="icon"><use href="#i-briefcase"/></svg> Entreprises extérieures</a>
+        <a class="nav-item" id="navAccueilPoste" href="accueil-poste.html" style="display:none;"><svg class="icon"><use href="#i-user-plus"/></svg> Accueil au poste</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Ressources</div>
+        <a class="nav-item active" id="navBaseDoc" href="base-documentaire.html"><svg class="icon"><use href="#i-book"/></svg> Base documentaire</a>
+      </div>
+      <div class="nav-section" id="navPilotage" style="display:none;">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item" id="navReportingLink" href="reporting.html" style="display:none;"><svg class="icon"><use href="#i-bar-chart"/></svg> Indicateurs &amp; Reporting</a>
+        <a class="nav-item" id="navAdminLink" href="administration.html" style="display:none;"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Ressources / <b>Base documentaire</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-book"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Base documentaire</h1>
+            <p title="Fiches pratiques, consignes et familles de risque consultables et cherchables, plus le registre des documents officiels.">Fiches pratiques, consignes et familles de risque consultables et cherchables, plus le registre des documents officiels.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-book"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiArticles">–</span><span class="ps-kpi-label">Articles</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon violet"><svg class="icon"><use href="#i-list"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiThemes">–</span><span class="ps-kpi-label">Thèmes</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiDocs">–</span><span class="ps-kpi-label">Documents en vigueur</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page se lit aussi sur mobile ; la rédaction est plus confortable sur ordinateur.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="bd-tabs">
+        <button type="button" class="bd-tab active" data-tab="articles"><svg class="icon"><use href="#i-book"/></svg> Articles</button>
+        <button type="button" class="bd-tab" data-tab="documents"><svg class="icon"><use href="#i-clipboard"/></svg> Documents officiels</button>
+      </div>
+
+      <section class="tab-panel show" id="tab-articles">
+        <div class="panel console">
+          <div class="field wiki-search"><span class="flabel">Rechercher</span>
+            <input type="text" id="wikiSearch" placeholder="Titre, thème, mot-clé ou texte…" autocomplete="off">
+          </div>
+          <div class="field"><span class="flabel">Thème</span><select id="wikiTheme"></select></div>
+          <div class="field" id="wikiStatutWrap" style="display:none;"><span class="flabel">Statut</span>
+            <select id="wikiStatut"><option value="all">Tous</option><option value="Publié">Publié</option><option value="Brouillon">Brouillon</option></select>
+          </div>
+          <button type="button" class="btn btn-ghost" id="wikiReset">Réinitialiser</button>
+          <span class="result-count"><b id="wikiCount">–</b> / <span id="wikiTotal">–</span> articles</span>
+          <div class="panel-actions" id="wikiActions"></div>
+        </div>
+
+        <div class="panel form-panel" id="articleForm" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title" id="articleFormTitle">Nouvel article</h3></div>
+          <form id="articleFormEl">
+            <input type="hidden" id="aId">
+            <div class="form-grid">
+              <div class="span2"><label for="aTitre">Titre</label><input type="text" id="aTitre" required style="width:100%"></div>
+              <div><label for="aTheme">Thème</label><input type="text" id="aTheme" list="themesList" required placeholder="ex. Consignes de sécurité"><datalist id="themesList"></datalist></div>
+              <div class="span2"><label for="aMotsCles">Mots-clés (séparés par des virgules)</label><input type="text" id="aMotsCles" style="width:100%" placeholder="ex. échelle, travaux en hauteur"></div>
+              <div><label for="aStatut">Statut</label><select id="aStatut"><option value="Publié">Publié (visible de tous)</option><option value="Brouillon">Brouillon (rédacteurs seulement)</option></select></div>
+              <div class="span3"><label for="aContenu">Contenu</label><textarea id="aContenu" required style="min-height:260px" placeholder="Texte de l'article. Les retours à la ligne sont conservés à l'affichage."></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <button type="button" class="btn btn-ghost" id="aCancel">Annuler</button>
+              <button type="button" class="btn btn-ghost" id="aRestore" style="display:none;">Rétablir le texte d'origine</button>
+              <span id="aHint" style="align-self:center; font-size:12px; color:var(--text-faint);"></span>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel form-panel" id="articlePanel" style="display:none;">
+          <div class="panel-head">
+            <h3 class="panel-title" id="articleTitle">—</h3>
+            <div class="panel-actions">
+              <button type="button" class="btn btn-ghost" id="articleEdit" style="display:none;">Modifier</button>
+              <button type="button" class="btn btn-ghost" id="articleDelete" style="display:none; color:var(--danger);">Supprimer</button>
+              <button type="button" class="btn btn-ghost" id="articleClose">Fermer</button>
+            </div>
+          </div>
+          <div class="article-meta" id="articleMeta"></div>
+          <div class="article-body" id="articleBody"></div>
+        </div>
+
+        <div id="wikiList" class="wiki-grid"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-documents">
+        <div class="panel console">
+          <div class="field"><span class="flabel">Catégorie</span><select id="dCategorieFiltre"></select></div>
+          <div class="field"><span class="flabel">Statut</span>
+            <select id="dStatutFiltre"><option value="all">Tous</option><option value="En vigueur">En vigueur</option><option value="Obsolète">Obsolète</option></select>
+          </div>
+          <button type="button" class="btn btn-ghost" id="dReset">Réinitialiser</button>
+          <span class="result-count"><b id="dCount">–</b> / <span id="dTotal">–</span> documents</span>
+        </div>
+
+        <div class="panel form-panel" id="docFormPanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title" id="docFormTitle">Nouveau document</h3></div>
+          <form id="docForm">
+            <input type="hidden" id="dId">
+            <div class="form-grid">
+              <div class="span2"><label for="dTitre">Titre</label><input type="text" id="dTitre" required style="width:100%"></div>
+              <div><label for="dCategorie">Catégorie</label><select id="dCategorie" required></select></div>
+              <div><label for="dReference">Référence</label><input type="text" id="dReference" placeholder="N° d'arrêté, code interne…"></div>
+              <div><label for="dVersion">Version</label><input type="text" id="dVersion" placeholder="ex. v2"></div>
+              <div><label for="dDate">Date du document</label><input type="date" id="dDate"></div>
+              <div><label for="dStatut">Statut</label><select id="dStatut"><option>En vigueur</option><option>Obsolète</option></select></div>
+              <div class="span3"><label for="dLien">Lien vers le document (http:// ou https://, facultatif)</label><input type="text" id="dLien" style="width:100%" placeholder="https://…"></div>
+              <div class="span3"><label for="dDescription">Description</label><textarea id="dDescription" placeholder="À quoi sert ce document, à qui il s'adresse…"></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <button type="button" class="btn btn-ghost" id="dCancel">Annuler</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Registre des documents officiels</h3>
+            <div class="panel-actions" id="docActions"></div>
+          </div>
+          <div class="table-panel">
+            <table class="reg" style="min-width:980px;">
+              <thead>
+                <tr id="theadDocs">
+                  <th>Titre</th><th>Catégorie</th><th>Référence</th><th>Version</th><th>Date</th><th>Statut</th><th>Lien</th>
+                  <th id="thActions"></th>
+                </tr>
+              </thead>
+              <tbody id="docTbody"></tbody>
+            </table>
+          </div>
+          <p class="footnote" style="text-align:left; margin-top:12px;">Ce registre référence les documents (titre, version, date, lien) ; <b>il ne stocke pas les fichiers eux-mêmes</b> — le navigateur seul ne permet pas de les conserver de façon fiable et partagée. Le lien pointe vers l'endroit où le document est réellement hébergé.</p>
+        </div>
+      </section>
+
+      <p class="footnote">Les fiches « Familles de risque » sont initialisées avec les définitions courtes déjà utilisées par le Document Unique : elles sont à compléter et à valider par le préventeur avant d'être présentées comme référence. Cette page n'ajoute aucun contenu réglementaire de sa propre initiative.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const role = (session && session.role) || "ag";
+  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const myServices = (session && session.services) || ["*"];
+  const isScoped = !myServices.includes("*");
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("roleChip").textContent = role.toUpperCase();
+  if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
+
+  // ---------- Droits : lecture pour tout compte connecté ; rédaction = RH/admin ou permission granulaire "documentation" ----------
+  const docPermLevel = (role === "admin" || role === "rh") ? "write" : ((session && session.modulePermissions && session.modulePermissions["documentation"]) || "none");
+  const canDocWrite = docPermLevel === "write";
+
+  const canEdit = role === "rh" || role === "admin";
+  const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
+  if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
+  if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
+  const canAtmpAdmin = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
+  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
+  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
+  const canGestionRh = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
+  const canEntreprisesExt = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
+  if (canAtmpAdmin){ $("navAtmpAdmin").style.display = ""; }
+  if (canAccidentAnalyse){ $("navAccidentAnalyse").style.display = ""; }
+  if (canUrgences){ $("navUrgences").style.display = ""; }
+  if (canGestionRh){ $("navGestionRh").style.display = ""; }
+  const canAccueilPoste = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accueil-poste"]) || "none") !== "none");
+  if (canEntreprisesExt){ $("navEntreprisesExt").style.display = ""; }
+  if (canAccueilPoste){ $("navAccueilPoste").style.display = ""; }
+  if (canAtmpAdmin || canAccidentAnalyse || canUrgences || canGestionRh || canEntreprisesExt || canAccueilPoste){ $("navAdministratif").style.display = ""; }
+  if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
+  if (role === "admin"){ $("navAdminLink").style.display = ""; }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(module, type, description){
+    try {
+      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
+      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
+  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  const pinBtn = document.getElementById("sidebarPin");
+  function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
+  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth() || sidebarLocked) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+  if (sidebarLocked) sidebarExpand();
+  applyPinVisual();
+  if (pinBtn) pinBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    sidebarLocked = !sidebarLocked;
+    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    applyPinVisual();
+    if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
+  });
+
+  // ---------- Référentiels partagés (services) ----------
+  const REF_KEY = "vigie_hse_referentials";
+  const REF_DEFAULTS = {
+    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
+    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
+  };
+  function loadReferentials(){
+    let stored = {};
+    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    const merged = Object.assign({}, stored);
+    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
+    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  const REF = loadReferentials();
+  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+
+  // ---------- Base documentaire : articles (wiki) + registre de documents officiels ----------
+  // Lecture pour tout compte connecté ; rédaction pour RH/admin ou permission granulaire "documentation".
+  // Le contenu est global (pas de périmètre par service) : on réécrit donc le tableau entier.
+  const ARTICLES_KEY = "vigie_hse_wiki";
+  const DOCS_KEY = "vigie_hse_documents";
+  const THEME_RISQUES = "Familles de risque";
+  const SEED_DATE = "2026-09-19";
+  const DOC_CATEGORIES = ["Politique HSE","Procédure","Consigne de sécurité","Note de service","Texte officiel (loi, décret, arrêté)","Compte-rendu","Autre"];
+  function genId(prefix){ return (prefix || "bd") + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const pad2 = (n) => String(n).padStart(2, "0");
+  // Dates formatées en LOCAL (toISOString() est en UTC : décalage d'un jour possible le soir).
+  const todayLocal = () => { const d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); };
+  function fmtFr(s){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ""); return m ? m[3] + "/" + m[2] + "/" + m[1] : (s || ""); }
+  // Comparaison insensible à la casse et aux accents.
+  const norm = (s) => String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const slug = (s) => norm(s).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  // Seule une adresse http(s) est cliquable : refuse javascript:, data:, etc. (à l'enregistrement ET à l'affichage).
+  const safeUrl = (u) => { const t = String(u == null ? "" : u).trim(); return /^https?:\/\/[^\s]+$/i.test(t) ? t : ""; };
+
+  // ----- Articles (always-merge : une fiche par famille de risque, le stockage prime) -----
+  function buildSeeds(){
+    return VigieRisques.FAMILLES.map(f => ({
+      id: "wiki-risque-" + slug(f[0]), titre: f[0], theme: THEME_RISQUES, motsCles: "famille de risque, document unique",
+      contenu: f[1], statut: "Publié", source: "famille-risque", auteur: "Initialisation", dateCreation: SEED_DATE, dateMaj: SEED_DATE,
+    }));
+  }
+  function readList(key){
+    try { const raw = localStorage.getItem(key); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p.filter(r => r && r.id); } } catch(e){}
+    return [];
+  }
+  function saveArticles(){ try { localStorage.setItem(ARTICLES_KEY, JSON.stringify(ARTICLES)); } catch(e){} }
+  function saveDocs(){ try { localStorage.setItem(DOCS_KEY, JSON.stringify(DOCS)); } catch(e){} }
+  function loadArticles(){
+    const stored = readList(ARTICLES_KEY);
+    const seeds = buildSeeds();
+    const storedById = new Map(stored.map(a => [a.id, a]));
+    const seeded = seeds.map(s => storedById.has(s.id) ? storedById.get(s.id) : s);
+    const seedIds = new Set(seeds.map(s => s.id));
+    const merged = seeded.concat(stored.filter(a => !seedIds.has(a.id)));
+    try { localStorage.setItem(ARTICLES_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  let ARTICLES = loadArticles();
+  let DOCS = readList(DOCS_KEY);
+  const isSeed = (a) => a.source === "famille-risque";
+  const visibleArticles = () => canDocWrite ? ARTICLES : ARTICLES.filter(a => a.statut !== "Brouillon");
+
+  // ----- Onglets -----
+  function showTab(name){
+    document.querySelectorAll(".bd-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("show", p.id === "tab-" + name));
+  }
+  document.querySelectorAll(".bd-tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+
+  // ----- Recherche plein texte (tous les mots doivent être trouvés ; titre > thème/mots-clés > texte) -----
+  function scoreArticle(a, terms){
+    const t = norm(a.titre), th = norm(a.theme), k = norm(a.motsCles), c = norm(a.contenu);
+    let total = 0;
+    for (const term of terms){
+      let s = 0;
+      if (t.includes(term)) s += 5;
+      if (th.includes(term) || k.includes(term)) s += 3;
+      if (c.includes(term)) s += 1;
+      if (!s) return 0;
+      total += s;
+    }
+    return total;
+  }
+  function snippetOf(a, terms){
+    const txt = String(a.contenu || "");
+    const flat = txt.replace(/\s+/g, " ").trim();
+    if (terms.length){
+      const n = norm(flat);
+      const i = n.indexOf(terms.find(t => n.includes(t)) || " ");
+      if (i > 60) return "… " + flat.slice(i - 50, i + 110).trim() + (flat.length > i + 110 ? " …" : "");
+    }
+    return flat.length > 160 ? flat.slice(0, 160).trim() + " …" : flat;
+  }
+  function themesOf(list){ return [...new Set(list.map(a => a.theme).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr")); }
+  function fillThemeFilter(){
+    const cur = $("wikiTheme").value;
+    const themes = themesOf(visibleArticles());
+    $("wikiTheme").innerHTML = `<option value="all">Tous les thèmes</option>` + themes.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join("");
+    $("wikiTheme").value = themes.includes(cur) ? cur : "all";
+    $("themesList").innerHTML = themesOf(ARTICLES).map(t => `<option value="${esc(t)}"></option>`).join("");
+  }
+  function renderWiki(){
+    const terms = norm($("wikiSearch").value).split(/\s+/).filter(Boolean);
+    const theme = $("wikiTheme").value, st = $("wikiStatut").value;
+    const vis = visibleArticles();
+    let rows = vis.filter(a => (theme === "all" || a.theme === theme) && (!canDocWrite || st === "all" || a.statut === st)).map(a => ({ a, score: terms.length ? scoreArticle(a, terms) : 1 }));
+    if (terms.length) rows = rows.filter(r => r.score > 0);
+    rows.sort((x, y) => terms.length ? (y.score - x.score || x.a.titre.localeCompare(y.a.titre, "fr")) : (String(x.a.theme).localeCompare(String(y.a.theme), "fr") || x.a.titre.localeCompare(y.a.titre, "fr")));
+    $("wikiCount").textContent = rows.length;
+    $("wikiTotal").textContent = vis.length;
+    $("kpiArticles").textContent = vis.length;
+    $("kpiThemes").textContent = themesOf(vis).length;
+    $("wikiList").innerHTML = rows.length ? rows.map(({ a }) => `
+      <button type="button" class="wiki-card" data-article="${esc(a.id)}">
+        <h4>${esc(a.titre)}</h4>
+        <div class="snip">${esc(snippetOf(a, terms))}</div>
+        <div class="meta"><span class="chip info">${esc(a.theme)}</span>${a.statut === "Brouillon" ? `<span class="chip soon">Brouillon</span>` : ""}<span>Mis à jour le ${esc(fmtFr(a.dateMaj))}</span></div>
+      </button>`).join("") : `<div class="empty-block" style="grid-column:1/-1;">${vis.length === 0 ? "Aucun article pour le moment." : "Aucun article ne correspond à la recherche."}</div>`;
+  }
+  $("wikiSearch").addEventListener("input", renderWiki);
+  $("wikiTheme").addEventListener("change", renderWiki);
+  $("wikiStatut").addEventListener("change", renderWiki);
+  $("wikiReset").addEventListener("click", () => { $("wikiSearch").value = ""; $("wikiTheme").value = "all"; $("wikiStatut").value = "all"; renderWiki(); });
+  if (canDocWrite) $("wikiStatutWrap").style.display = "";
+
+  // ----- Lecture d'un article -----
+  let openArticleId = "";
+  function renderArticle(){
+    const a = ARTICLES.find(x => x.id === openArticleId);
+    const panel = $("articlePanel");
+    if (!a || (!canDocWrite && a.statut === "Brouillon")){ panel.style.display = "none"; return; }
+    $("articleTitle").textContent = a.titre;
+    const kws = String(a.motsCles || "").split(",").map(s => s.trim()).filter(Boolean);
+    $("articleMeta").innerHTML = `<span class="chip info">${esc(a.theme)}</span>${a.statut === "Brouillon" ? `<span class="chip soon">Brouillon</span>` : ""}<span>Mis à jour le ${esc(fmtFr(a.dateMaj))}</span>${kws.map(k => `<span class="kw">${esc(k)}</span>`).join("")}`;
+    $("articleBody").textContent = a.contenu || "";
+    $("articleEdit").style.display = canDocWrite ? "" : "none";
+    $("articleDelete").style.display = (canDocWrite && !isSeed(a)) ? "" : "none";
+    panel.style.display = "";
+  }
+  function openArticle(id){ openArticleId = id; renderArticle(); $("articlePanel").scrollIntoView({ behavior:"smooth", block:"start" }); }
+  $("wikiList").addEventListener("click", (e) => { const c = e.target.closest("[data-article]"); if (c) openArticle(c.dataset.article); });
+  $("articleClose").addEventListener("click", () => { openArticleId = ""; renderArticle(); });
+
+  // ----- Rédaction d'un article (rédacteurs) -----
+  const formPanel = $("articleForm"), aForm = $("articleFormEl");
+  function openArticleForm(a){
+    aForm.reset();
+    $("aId").value = a ? a.id : "";
+    $("articleFormTitle").textContent = a ? "Modifier l'article" : "Nouvel article";
+    if (a){
+      $("aTitre").value = a.titre; $("aTheme").value = a.theme || ""; $("aMotsCles").value = a.motsCles || "";
+      $("aStatut").value = a.statut || "Publié"; $("aContenu").value = a.contenu || "";
+    } else {
+      $("aStatut").value = "Publié";
+    }
+    $("aRestore").style.display = (a && isSeed(a)) ? "" : "none";
+    $("aHint").textContent = (a && isSeed(a)) ? "Fiche de famille de risque : non supprimable — passez-la en brouillon pour la masquer aux lecteurs." : "";
+    formPanel.style.display = "";
+    formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function closeArticleForm(){ formPanel.style.display = "none"; aForm.reset(); $("aId").value = ""; }
+  aForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!canDocWrite) return;
+    const id = $("aId").value;
+    const prev = id ? ARTICLES.find(a => a.id === id) : null;
+    const titre = $("aTitre").value.trim(), theme = $("aTheme").value.trim(), contenu = $("aContenu").value;
+    if (!titre || !theme || !contenu.trim()) return;
+    const rec = Object.assign({}, prev || { id: genId("wiki"), source: "", auteur: (session && session.user) || "—", dateCreation: todayLocal() }, {
+      titre, theme, contenu, motsCles: $("aMotsCles").value.trim(), statut: $("aStatut").value,
+      dateMaj: todayLocal(), modifiePar: (session && session.user) || "—",
+    });
+    if (prev) ARTICLES[ARTICLES.findIndex(a => a.id === id)] = rec; else ARTICLES.push(rec);
+    saveArticles();
+    logAudit("Base documentaire", prev ? "Modification" : "Création", `Article « ${rec.titre} » (${rec.theme}, ${rec.statut})`);
+    closeArticleForm();
+    fillThemeFilter(); renderWiki();
+    if (openArticleId === rec.id || !prev){ openArticleId = rec.id; renderArticle(); }
+  });
+  $("aCancel").addEventListener("click", closeArticleForm);
+  $("aRestore").addEventListener("click", () => {
+    const a = ARTICLES.find(x => x.id === $("aId").value);
+    const seed = a && buildSeeds().find(s => s.id === a.id);
+    if (!seed || !confirm("Rétablir le texte d'origine de cette fiche ? Votre texte actuel sera remplacé dans le formulaire (rien n'est enregistré avant « Enregistrer »).")) return;
+    $("aContenu").value = seed.contenu;
+  });
+  $("articleEdit").addEventListener("click", () => { const a = ARTICLES.find(x => x.id === openArticleId); if (a && canDocWrite) openArticleForm(a); });
+  $("articleDelete").addEventListener("click", () => {
+    const a = ARTICLES.find(x => x.id === openArticleId);
+    if (!a || !canDocWrite || isSeed(a) || !confirm(`Supprimer l'article « ${a.titre} » ?`)) return;
+    ARTICLES = ARTICLES.filter(x => x.id !== a.id);
+    saveArticles();
+    logAudit("Base documentaire", "Suppression", `Article « ${a.titre} » (${a.theme})`);
+    openArticleId = ""; renderArticle(); fillThemeFilter(); renderWiki();
+  });
+
+  // ----- Registre de documents officiels -----
+  const dCategorieFiltre = $("dCategorieFiltre"), dStatutFiltre = $("dStatutFiltre");
+  dCategorieFiltre.innerHTML = `<option value="all">Toutes</option>` + DOC_CATEGORIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  $("dCategorie").innerHTML = DOC_CATEGORIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  const triDocs = VigieTri.create({
+    columns: [
+      { key:"titre",        label:"Titre" },
+      { key:"categorie",    label:"Catégorie" },
+      { key:"reference",    label:"Référence" },
+      { key:"version",      label:"Version" },
+      { key:"dateDocument", label:"Date" },
+      { key:"statut",       label:"Statut" },
+      { key:"lien",         label:"Lien", noFilter:true },
+      { key:"actions",      label:"", noFilter:true },
+    ],
+    onChange: () => renderDocs(),
+  });
+  triDocs.decorate($("theadDocs"));
+  function renderDocs(){
+    const cat = dCategorieFiltre.value, st = dStatutFiltre.value;
+    let rows = DOCS.filter(d => (cat === "all" || d.categorie === cat) && (st === "all" || d.statut === st));
+    rows = rows.slice().sort((a, b) => (b.dateDocument || "").localeCompare(a.dateDocument || "") || String(a.titre).localeCompare(String(b.titre), "fr"));
+    rows = triDocs.apply(rows);
+    $("dCount").textContent = rows.length;
+    $("dTotal").textContent = DOCS.length;
+    $("kpiDocs").textContent = DOCS.filter(d => d.statut === "En vigueur").length;
+    const colspan = canDocWrite ? 8 : 7;
+    $("docTbody").innerHTML = rows.length ? rows.map(d => {
+      const url = safeUrl(d.lien);
+      return `<tr data-id="${esc(d.id)}">
+        <td class="wrap"><b>${esc(d.titre)}</b>${d.description ? `<div style="font-size:11.5px;color:var(--text-faint);white-space:normal;">${esc(d.description)}</div>` : ""}</td>
+        <td>${esc(d.categorie)}</td><td>${esc(d.reference || "—")}</td><td>${esc(d.version || "—")}</td><td>${esc(d.dateDocument || "—")}</td>
+        <td><span class="chip ${d.statut === "En vigueur" ? "ok" : "muted"}">${esc(d.statut)}</span></td>
+        <td>${url ? `<a class="doc-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Ouvrir</a>` : "—"}</td>
+        ${canDocWrite ? `<td class="actions-float"><button type="button" class="act-edit" data-edit="${esc(d.id)}">Modifier</button><button type="button" class="act-del" data-del="${esc(d.id)}">Suppr.</button></td>` : ""}
+      </tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="${colspan}">${DOCS.length === 0 ? "Aucun document référencé pour le moment." : "Aucun document ne correspond aux filtres sélectionnés."}</td></tr>`;
+  }
+  dCategorieFiltre.addEventListener("change", renderDocs);
+  dStatutFiltre.addEventListener("change", renderDocs);
+  $("dReset").addEventListener("click", () => { dCategorieFiltre.value = "all"; dStatutFiltre.value = "all"; triDocs.reset(); renderDocs(); });
+
+  const docPanel = $("docFormPanel"), docForm = $("docForm");
+  function openDocForm(d){
+    docForm.reset();
+    $("dId").value = d ? d.id : "";
+    $("docFormTitle").textContent = d ? "Modifier le document" : "Nouveau document";
+    if (d){
+      $("dTitre").value = d.titre; $("dCategorie").value = DOC_CATEGORIES.includes(d.categorie) ? d.categorie : "Autre";
+      $("dReference").value = d.reference || ""; $("dVersion").value = d.version || ""; $("dDate").value = d.dateDocument || "";
+      $("dStatut").value = d.statut || "En vigueur"; $("dLien").value = d.lien || ""; $("dDescription").value = d.description || "";
+    } else {
+      $("dCategorie").value = DOC_CATEGORIES[0]; $("dDate").value = todayLocal(); $("dStatut").value = "En vigueur";
+    }
+    docPanel.style.display = "";
+    docPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function closeDocForm(){ docPanel.style.display = "none"; docForm.reset(); $("dId").value = ""; }
+  docForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!canDocWrite) return;
+    const lienRaw = $("dLien").value.trim();
+    if (lienRaw && !safeUrl(lienRaw)){ alert("Le lien doit commencer par http:// ou https:// (les autres types d'adresse sont refusés)."); return; }
+    const id = $("dId").value;
+    const prev = id ? DOCS.find(d => d.id === id) : null;
+    const titre = $("dTitre").value.trim();
+    if (!titre) return;
+    const rec = Object.assign({}, prev || { id: genId("doc"), auteur: (session && session.user) || "—", dateCreation: todayLocal() }, {
+      titre, categorie: $("dCategorie").value, reference: $("dReference").value.trim(), version: $("dVersion").value.trim(),
+      dateDocument: $("dDate").value, statut: $("dStatut").value, lien: lienRaw, description: $("dDescription").value.trim(),
+    });
+    if (prev) DOCS[DOCS.findIndex(d => d.id === id)] = rec; else DOCS.push(rec);
+    saveDocs();
+    logAudit("Base documentaire", prev ? "Modification" : "Création", `Document « ${rec.titre} » (${rec.categorie}, ${rec.statut})`);
+    closeDocForm(); renderDocs();
+  });
+  $("dCancel").addEventListener("click", closeDocForm);
+  $("docTbody").addEventListener("click", (e) => {
+    if (!canDocWrite) return;
+    const ed = e.target.closest("[data-edit]");
+    if (ed){ const d = DOCS.find(x => x.id === ed.dataset.edit); if (d) openDocForm(d); return; }
+    const del = e.target.closest("[data-del]");
+    if (del){
+      const d = DOCS.find(x => x.id === del.dataset.del);
+      if (!d || !confirm(`Supprimer le document « ${d.titre} » du registre ? (Le fichier lui-même n'est pas concerné.)`)) return;
+      DOCS = DOCS.filter(x => x.id !== d.id);
+      saveDocs();
+      logAudit("Base documentaire", "Suppression", `Document « ${d.titre} » (${d.categorie})`);
+      renderDocs();
+    }
+  });
+
+  // ----- Actions de rédaction + export (rédacteurs) -----
+  if (canDocWrite){
+    $("wikiActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNewArticle"><svg class="icon"><use href="#i-plus"/></svg> Nouvel article</button>`;
+    $("docActions").innerHTML = `<button type="button" class="btn btn-primary" id="btnNewDoc"><svg class="icon"><use href="#i-plus"/></svg> Nouveau document</button>`;
+    $("btnNewArticle").addEventListener("click", () => openArticleForm(null));
+    $("btnNewDoc").addEventListener("click", () => openDocForm(null));
+    $("btnExport").addEventListener("click", () => {
+      const articles = ARTICLES.map(a => ({ "ID": a.id, "Titre": a.titre, "Thème": a.theme, "Mots-clés": a.motsCles || "", "Statut": a.statut, "Contenu": a.contenu || "", "Créé le": a.dateCreation || "", "Mis à jour le": a.dateMaj || "", "Auteur": a.auteur || "" }));
+      const documents = DOCS.map(d => ({ "ID": d.id, "Titre": d.titre, "Catégorie": d.categorie, "Référence": d.reference || "", "Version": d.version || "", "Date du document": d.dateDocument || "", "Statut": d.statut, "Lien": d.lien || "", "Description": d.description || "" }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(articles), "Articles");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(documents), "Documents");
+      XLSX.writeFile(wb, `base-documentaire_${todayLocal()}.xlsx`);
+    });
+  }
+
+  fillThemeFilter();
+  renderWiki();
+  renderDocs();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

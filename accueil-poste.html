@@ -1,0 +1,1023 @@
+<title>Accueil au poste</title>
+<meta name="description" content="Parcours d'accueil sécurité des nouveaux agents : points à voir à l'arrivée, suivi de complétion, fiche imprimable à signer.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/tri-filtres.js"></script>
+<script src="assets/roster.js"></script>
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B; --critical-rgb:201,94,107;
+    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px; --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; flex-shrink:0; }
+  .sidebar nav{ flex:1 1 auto; min-height:0; overflow-y:auto; margin-left:-14px; padding-left:14px; scrollbar-width:thin; }
+  .sidebar-pin{ margin-left:auto; flex-shrink:0; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:var(--r-sm); background:none; border:none; color:var(--text-faint); cursor:pointer; transition:background .15s ease, color .15s ease; }
+  .sidebar-pin:hover{ background:var(--bg-2); color:var(--text-muted); }
+  .sidebar-pin.active{ color:var(--accent); background:rgba(var(--accent-rgb),.12); }
+  .sidebar-pin .icon{ width:15px; height:15px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item .icon{ width:17px; height:17px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .role-chip.ag{ background:rgba(var(--accent-blue-rgb),.16); color:var(--accent-blue); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .page-summary-kpis{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ps-kpi{ display:flex; align-items:center; gap:7px; padding:5px 11px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); }
+  .ps-kpi-icon{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ps-kpi-icon .icon{ width:12px; height:12px; }
+  .ps-kpi-icon.blue{ background:rgba(var(--accent-rgb),.14); color:var(--accent); }
+  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
+  .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  .mobile-notice{ display:none; }
+  @media (max-width:640px){
+    .mobile-notice.show{ display:flex; align-items:center; gap:8px; padding:8px 12px; margin-bottom:14px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); font-size:11.5px; color:var(--text-muted); }
+    .mobile-notice.show button{ margin-left:auto; background:none; border:none; color:var(--text-faint); font-size:16px; line-height:1; cursor:pointer; padding:0 2px; flex-shrink:0; }
+  }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } .ps-kpi-label{ display:none; } }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn .icon{ width:15px; height:15px; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+
+  .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
+  select, input[type="text"], input[type="date"], input[type="number"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:170px; cursor:pointer;
+  }
+  select:hover, input:hover, textarea:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:64px; width:100%; font-weight:400; line-height:1.5; }
+  .result-count{ align-self:center; margin-left:auto; font-size:12px; color:var(--text-faint); }
+  .result-count b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-title{ font-size:16.5px; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+
+  .form-panel{ padding:20px 22px 22px; margin-bottom:18px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px 16px; }
+  .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; }
+  @media (max-width:680px){ .form-grid .span2, .form-grid .span3{ grid-column:span 1; } }
+  @media (max-width:640px){
+    select, input[type="text"], input[type="date"], input[type="number"], textarea{ font-size:16px; }
+    .form-actions{ flex-direction:column; align-items:stretch; }
+    .form-actions .btn{ width:100%; justify-content:center; min-height:46px; }
+  }
+  .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  .form-sub{ font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin:20px 0 10px; }
+  .form-sub-intro{ font-size:11.5px; color:var(--text-faint); margin:-4px 0 10px; }
+  .checkline{ display:flex; align-items:center; gap:8px; }
+  .checkline input[type="checkbox"]{ width:16px; height:16px; }
+
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input[type="text"]{ flex:1 1 160px; }
+  .dyn-row input[type="date"]{ flex:0 0 150px; }
+  .dyn-row select{ flex:0 0 120px; min-width:0; }
+
+  .table-panel{ overflow:auto; max-height:70vh; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:1150px; }
+  table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr{ transition:background .12s ease; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg tbody td.wrap{ white-space:normal; min-width:200px; max-width:320px; }
+  table.reg thead th#thActions{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
+  table.reg tbody td.actions-float{ position:sticky; right:0; z-index:1; background:var(--surface-el); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); white-space:nowrap; }
+  table.reg tbody tr:hover td.actions-float{ background:var(--bg-2); }
+
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.ok{ color:var(--success); background:var(--success-bg); } .chip.ok::before{ background:var(--success); }
+  .chip.late{ color:var(--danger); background:var(--danger-bg); } .chip.late::before{ background:var(--danger); }
+
+  .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
+  .act-del:hover{ text-decoration:underline; }
+  .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+
+  .chip.soon{ color:var(--warning); background:var(--warning-bg); } .chip.soon::before{ background:var(--warning); }
+  .chip.info{ color:var(--accent); background:rgba(var(--accent-rgb),.10); } .chip.info::before{ background:var(--accent); }
+
+  /* ---------- Onglets (même pattern que sante-visites / epi-dotation) ---------- */
+  .ap-tabs{ display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .ap-tab{ display:flex; align-items:center; gap:7px; padding:10px 15px; font:600 13px "IBM Plex Sans",sans-serif; color:var(--text-muted); background:none; border:none; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  .ap-tab:hover{ color:var(--text); }
+  .ap-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .ap-tab .icon{ width:15px; height:15px; }
+  .tab-panel{ display:none; }
+  .tab-panel.show{ display:block; }
+  #formPanel, #detailPanel{ scroll-margin-top:150px; } /* le bandeau récapitulatif est collant : sans marge, il masque le haut du panneau ouvert */
+
+  /* ---------- Avancement + points du parcours ---------- */
+  .progress{ height:8px; background:var(--bg-2); border-radius:var(--r-pill); overflow:hidden; }
+  .progress.mini{ display:inline-block; width:90px; height:6px; vertical-align:middle; margin-right:8px; }
+  .progress-bar{ display:block; height:100%; width:0; background:linear-gradient(90deg, var(--accent), var(--accent-violet)); transition:width .2s ease; }
+  .detail-meta{ margin:0 0 10px; font-size:12.5px; color:var(--text-muted); line-height:1.55; }
+  .detail-count{ font-size:11.5px; color:var(--text-faint); margin:6px 0 14px; }
+  .ap-items{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .ap-items li{ display:flex; align-items:flex-start; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface); flex-wrap:wrap; }
+  .ap-items li.done{ background:var(--success-bg); }
+  .ap-items input[type="checkbox"]{ width:18px; height:18px; margin-top:2px; flex-shrink:0; }
+  .ap-items .ap-lib{ flex:1 1 260px; font-size:13px; line-height:1.45; }
+  .ap-items .ap-when{ display:block; margin-top:3px; font-size:11px; color:var(--text-faint); }
+  .ap-items input[type="text"]{ flex:1 1 200px; font-size:12px; padding:6px 10px; }
+  .ap-items .ap-com{ flex:1 1 200px; font-size:12px; color:var(--text-muted); }
+  .ap-add{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .ap-add input[type="text"]{ flex:1 1 260px; }
+  .tpl-row{ display:flex; gap:6px; align-items:center; margin-bottom:8px; }
+  .tpl-row input[type="text"]{ flex:1 1 auto; }
+  .tpl-row .btn{ padding:7px 10px; }
+
+  /* ---------- Fiche imprimable (hors .app-shell : sinon masquée à l'impression) ---------- */
+  #accueilPrint{ display:none; }
+  @media print{
+    .app-shell{ display:none !important; }
+    body{ background:#fff !important; }
+    #accueilPrint{ display:block; padding:26px 32px; font:13px/1.55 "IBM Plex Sans",Arial,sans-serif; color:#000; }
+    #accueilPrint h1{ font-size:22px; margin:0 0 4px; }
+    #accueilPrint p{ margin:2px 0; }
+    #accueilPrint table{ width:100%; border-collapse:collapse; margin-top:14px; }
+    #accueilPrint th, #accueilPrint td{ border:1px solid #444; padding:6px 8px; text-align:left; vertical-align:top; }
+    #accueilPrint td.c{ width:28px; text-align:center; font-size:16px; }
+    #accueilPrint .pc{ font-size:11px; color:#333; margin-top:2px; }
+    #accueilPrint .sign{ display:flex; gap:30px; margin-top:36px; }
+    #accueilPrint .sign > div{ flex:1; border:1px solid #444; height:96px; padding:6px 8px; font-size:12px; }
+  }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+  <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
+  <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-life-buoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+  <symbol id="i-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></symbol>
+  <symbol id="i-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="dashboard.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre SST</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+      </div>
+      <div class="nav-section" id="navRh" style="display:none;">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item" id="navDeclarerAtmp" href="saisie-rh.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" id="navEvaluerDuerp" href="saisie-duerp.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section" id="navAdministratif">
+        <div class="nav-label">Administratif</div>
+        <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
+        <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
+        <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
+        <a class="nav-item" id="navGestionRh" href="gestion-rh.html" style="display:none;"><svg class="icon"><use href="#i-users"/></svg> Gestion RH</a>
+        <a class="nav-item" id="navEntreprisesExt" href="entreprises-exterieures.html" style="display:none;"><svg class="icon"><use href="#i-briefcase"/></svg> Entreprises extérieures</a>
+        <a class="nav-item active" id="navAccueilPoste" href="accueil-poste.html"><svg class="icon"><use href="#i-user-plus"/></svg> Accueil au poste</a>
+      </div>
+      <div class="nav-section" id="navPilotage" style="display:none;">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item" id="navReportingLink" href="reporting.html" style="display:none;"><svg class="icon"><use href="#i-bar-chart"/></svg> Indicateurs &amp; Reporting</a>
+        <a class="nav-item" id="navAdminLink" href="administration.html" style="display:none;"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Administratif / <b>Accueil au poste</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-user-plus"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Accueil au poste</h1>
+            <p title="Parcours d'accueil sécurité d'un nouvel agent : points à voir avec lui à son arrivée, suivi de complétion et fiche imprimable à signer.">Parcours d'accueil sécurité des nouveaux agents : points à voir à l'arrivée, suivi de complétion, fiche imprimable à signer.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-user-plus"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Accueils</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEnCours">–</span><span class="ps-kpi-label">À faire / en cours</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTermines">–</span><span class="ps-kpi-label">Terminés</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="ap-tabs">
+        <button type="button" class="ap-tab active" data-tab="accueils"><svg class="icon"><use href="#i-user-plus"/></svg> Accueils</button>
+        <button type="button" class="ap-tab" data-tab="modeles" id="tabBtnModeles"><svg class="icon"><use href="#i-list"/></svg> Modèles de parcours</button>
+      </div>
+
+      <section class="tab-panel show" id="tab-accueils">
+        <div class="panel console">
+          <div class="field"><span class="flabel">Collectivité</span>
+            <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+          </div>
+          <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
+          <div class="field"><span class="flabel">Statut</span>
+            <select id="fStatut"><option value="all">Tous</option><option value="À faire">À faire</option><option value="En cours">En cours</option><option value="Terminé">Terminé</option></select>
+          </div>
+          <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
+          <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> accueils</span>
+        </div>
+
+        <div class="panel form-panel" id="formPanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title" id="formTitle">Nouvel accueil</h3></div>
+          <form id="accueilForm">
+            <input type="hidden" id="fId">
+            <div class="form-grid">
+              <div id="fAgentPickerWrap"><label for="fAgentPicker">Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
+              <div><label for="fNom">Nom</label><input type="text" id="fNom" required></div>
+              <div><label for="fPrenom">Prénom</label><input type="text" id="fPrenom" required></div>
+              <div><label for="fCollectiviteForm">Collectivité</label>
+                <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+              </div>
+              <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
+              <div><label for="fPoste">Poste</label><input type="text" id="fPoste" placeholder="ex. Agent d'entretien des espaces verts"></div>
+              <div><label for="fDateArrivee">Date d'arrivée</label><input type="date" id="fDateArrivee" required></div>
+              <div><label for="fReferent">Référent / tuteur</label><input type="text" id="fReferent" placeholder="Personne chargée d'accompagner l'agent"></div>
+              <div id="fModeleWrap"><label for="fModele">Modèle de parcours</label><select id="fModele"></select></div>
+            </div>
+            <p class="form-sub-intro" id="fModeleHint" style="margin-top:10px;">Les points du modèle choisi sont copiés dans l'accueil : modifier le modèle plus tard ne change pas les accueils déjà créés.</p>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <button type="button" class="btn btn-ghost" id="btnCancelForm">Annuler</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel form-panel" id="detailPanel" style="display:none;">
+          <div class="panel-head">
+            <h3 class="panel-title" id="detailTitle">Parcours d'accueil</h3>
+            <div class="panel-actions">
+              <button type="button" class="btn btn-ghost" id="btnPrint"><svg class="icon"><use href="#i-printer"/></svg> Imprimer la fiche</button>
+              <button type="button" class="btn btn-ghost" id="btnCloseDetail">Fermer</button>
+            </div>
+          </div>
+          <p class="detail-meta" id="detailMeta"></p>
+          <div class="progress" aria-hidden="true"><div class="progress-bar" id="detailBar"></div></div>
+          <p class="detail-count" id="detailCount"></p>
+          <ul class="ap-items" id="detailItems"></ul>
+          <div class="ap-add" id="detailAdd">
+            <input type="text" id="newPointText" placeholder="Point spécifique au poste à ajouter à cet accueil…">
+            <button type="button" class="btn btn-ghost" id="btnAddPoint"><svg class="icon"><use href="#i-plus"/></svg> Ajouter</button>
+          </div>
+        </div>
+
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Accueils des nouveaux agents</h3>
+            <div class="panel-actions" id="panelActionsBtns"></div>
+          </div>
+          <div class="table-panel">
+            <table class="reg">
+              <thead>
+                <tr id="theadFields">
+                  <th>Agent</th><th>Service</th><th>Poste</th><th>Arrivée</th><th>Avancement</th><th>Statut</th>
+                  <th id="thActions"></th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-modeles">
+        <div class="panel form-panel">
+          <div class="panel-head"><h3 class="panel-title">Modèles de parcours d'accueil</h3>
+            <div class="panel-actions"><button type="button" class="btn btn-ghost" id="tplNew"><svg class="icon"><use href="#i-plus"/></svg> Nouveau modèle</button></div>
+          </div>
+          <form id="tplForm">
+            <div class="form-grid">
+              <div><label for="tplSelect">Modèle</label><select id="tplSelect" style="width:100%"></select></div>
+              <div class="span2"><label for="tplNom">Nom du modèle</label><input type="text" id="tplNom" required style="width:100%"></div>
+              <div class="span3"><label for="tplDescription">Description</label><input type="text" id="tplDescription" style="width:100%" placeholder="À quels postes / services ce parcours s'applique"></div>
+            </div>
+            <div class="form-sub">Points du parcours</div>
+            <div id="tplPoints"></div>
+            <button type="button" class="btn btn-ghost" id="tplAddPoint"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un point</button>
+            <p class="footnote" style="text-align:left; margin:12px 0 0;">Chaque point est une chose à voir avec le nouvel agent. Le texte est libre : rien n'est imposé par l'application. Modifier un modèle ne change pas les accueils déjà créés (leurs points sont copiés à la création).</p>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer le modèle</button>
+              <button type="button" class="btn btn-ghost" id="tplReset" style="display:none;">Rétablir le texte d'origine</button>
+              <button type="button" class="btn btn-ghost" id="tplDelete" style="margin-left:auto; color:var(--danger);">Supprimer</button>
+              <span id="tplMsg" style="align-self:center; font-size:12px; color:var(--text-muted);"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <p class="footnote">Cette page trace un accueil <b>organisé</b> (points vus avec l'agent, qui et quand) — elle ne remplace pas la formation ni la remise de documents officiels. Aucun contenu réglementaire n'est imposé : les modèles de parcours sont entièrement modifiables. La signature de l'agent se fait sur la fiche imprimée (« Enregistrer au format PDF » possible depuis la fenêtre d'impression).</p>
+    </div>
+  </div>
+</div>
+<div id="accueilPrint" aria-hidden="true"></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const role = (session && session.role) || "ag";
+  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const myServices = (session && session.services) || ["*"];
+  const isScoped = !myServices.includes("*");
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("roleChip").textContent = role.toUpperCase();
+  if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
+
+  // ---------- Contrôle d'accès (permission granulaire "accueil-poste") ----------
+  const accueilPermLevel = (role === "admin" || role === "rh") ? "write" : ((session && session.modulePermissions && session.modulePermissions["accueil-poste"]) || "none");
+  const canAccueil = accueilPermLevel !== "none";
+  const canAccueilWrite = accueilPermLevel === "write";
+  if (!canAccueil){ location.href = "dashboard.html"; }
+
+  const canEdit = role === "rh" || role === "admin";
+  const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
+  if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
+  if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
+  const canAtmpAdmin = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
+  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
+  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
+  const canGestionRh = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
+  const canEntreprisesExt = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
+  if (canAtmpAdmin){ $("navAtmpAdmin").style.display = ""; }
+  if (canAccidentAnalyse){ $("navAccidentAnalyse").style.display = ""; }
+  if (canUrgences){ $("navUrgences").style.display = ""; }
+  if (canGestionRh){ $("navGestionRh").style.display = ""; }
+  if (canEntreprisesExt){ $("navEntreprisesExt").style.display = ""; }
+  if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
+  if (role === "admin"){ $("navAdminLink").style.display = ""; }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(module, type, description){
+    try {
+      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
+      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
+  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  const pinBtn = document.getElementById("sidebarPin");
+  function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
+  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth() || sidebarLocked) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+  if (sidebarLocked) sidebarExpand();
+  applyPinVisual();
+  if (pinBtn) pinBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    sidebarLocked = !sidebarLocked;
+    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    applyPinVisual();
+    if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
+  });
+
+  // ---------- Référentiels partagés (services) ----------
+  const REF_KEY = "vigie_hse_referentials";
+  const REF_DEFAULTS = {
+    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
+    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
+  };
+  function loadReferentials(){
+    let stored = {};
+    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    const merged = Object.assign({}, stored);
+    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
+    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  const REF = loadReferentials();
+  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+
+  // ---------- Accueils (always-merge, CRUD classique) ----------
+  // Un accueil = un agent + un poste + la liste des points vus avec lui. Les points sont COPIÉS depuis le
+  // modèle à la création (instantané) : modifier le modèle ensuite ne réécrit jamais un accueil en cours.
+  const STORAGE_KEY = "vigie_hse_accueils";
+  const TPL_KEY = "vigie_hse_modeles_accueil";
+  function genId(prefix){ return (prefix || "ap") + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
+  function readStored(){
+    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p.filter(r => r && r.id); } } catch(e){}
+    return [];
+  }
+  function loadDataset(){
+    const merged = readStored();   // aucun jeu de départ : le stockage fait foi
+    saveDataset(merged);
+    return merged;
+  }
+  let DATASET = loadDataset();
+  if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
+  // Un compte limité à certains services ne voit (et ne modifie) que ses services : on réécrit SA part et
+  // on conserve telles quelles les fiches des autres services (sinon elles seraient effacées).
+  function persistDataset(){
+    saveDataset(isScoped ? readStored().filter(r => !myServices.includes(r.service)).concat(DATASET) : DATASET);
+  }
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+  // Dates formatées en LOCAL (toISOString() est en UTC : décalage d'un jour possible le soir).
+  const todayLocal = () => { const d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); };
+  function fmtFr(s){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ""); return m ? m[3] + "/" + m[2] + "/" + m[1] : (s || ""); }
+
+  function progress(a){ const items = a.items || []; return { done: items.filter(i => i.fait).length, total: items.length }; }
+  function statutOf(a){
+    const p = progress(a);
+    if (!p.total || p.done === 0) return "À faire";
+    return p.done === p.total ? "Terminé" : "En cours";
+  }
+  const STATUT_CLS = { "À faire":"soon", "En cours":"info", "Terminé":"ok" };
+  // La date de clôture suit l'état : posée quand le dernier point est coché, retirée si on rouvre.
+  function refreshClosure(a){
+    const wasClosed = !!a.dateCloture;
+    const closed = statutOf(a) === "Terminé";
+    a.dateCloture = closed ? (a.dateCloture || todayLocal()) : "";
+    if (closed && !wasClosed) logAudit("Accueil au poste", "Modification", `Accueil terminé — « ${a.nom} ${a.prenom} » (${a.service})`);
+  }
+
+  // ---------- Filtres ----------
+  const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatut = $("fStatut");
+  function fillServiceOptions(){
+    const col = fCollectivite.value;
+    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const current = fService.value;
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+    fService.value = list.includes(current) ? current : "all";
+  }
+  fillServiceOptions();
+
+  // Tri & filtres par colonne (composant partagé assets/tri-filtres.js).
+  const tri = VigieTri.create({
+    columns: [
+      { key:"agent",       label:"Agent" },
+      { key:"service",     label:"Service" },
+      { key:"poste",       label:"Poste" },
+      { key:"dateArrivee", label:"Arrivée" },
+      { key:"avancement",  label:"Avancement", noFilter:true },
+      { key:"statut",      label:"Statut" },
+      { key:"actions",     label:"", noFilter:true },
+    ],
+    onChange: () => render(),
+  });
+  tri.decorate($("theadFields"));
+
+  function render(){
+    const col = fCollectivite.value, svc = fService.value, st = fStatut.value;
+    const all = DATASET.map(a => Object.assign({}, a, { agent: a.nom + " " + a.prenom, statut: statutOf(a), prog: progress(a) }));
+    let rows = all.filter(a => (col === "all" || a.collectivite === col) && (svc === "all" || a.service === svc) && (st === "all" || a.statut === st));
+    rows.sort((a,b) => (b.dateArrivee || "").localeCompare(a.dateArrivee || ""));
+    rows = tri.apply(rows);
+    $("kpiTotal").textContent = all.length;
+    $("kpiEnCours").textContent = all.filter(a => a.statut !== "Terminé").length;
+    $("kpiTermines").textContent = all.filter(a => a.statut === "Terminé").length;
+    $("resultCount").textContent = rows.length;
+    $("totalCount").textContent = all.length;
+    $("tbody").innerHTML = rows.length ? rows.map(a => {
+      const pct = a.prog.total ? Math.round(100 * a.prog.done / a.prog.total) : 0;
+      return `<tr data-id="${esc(a.id)}">
+        <td>${esc(a.agent)}</td><td>${esc(a.service)}</td><td>${esc(a.poste || "—")}</td><td>${esc(a.dateArrivee || "—")}</td>
+        <td><span class="progress mini"><span class="progress-bar" style="width:${pct}%"></span></span><span class="mono">${a.prog.done}/${a.prog.total}</span></td>
+        <td><span class="chip ${STATUT_CLS[a.statut]}">${esc(a.statut)}</span></td>
+        <td class="actions-float"><button type="button" class="act-edit" data-open="${esc(a.id)}">Ouvrir</button>${canAccueilWrite ? `
+          <button type="button" class="act-edit" data-edit="${esc(a.id)}" style="margin-left:10px;">Modifier</button>
+          <button type="button" class="act-del" data-del="${esc(a.id)}">Suppr.</button>` : ""}</td>
+      </tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="7">${DATASET.length === 0 ? "Aucun accueil enregistré pour le moment." : "Aucun accueil ne correspond aux filtres sélectionnés."}</td></tr>`;
+  }
+  fCollectivite.addEventListener("change", () => { fillServiceOptions(); render(); });
+  fService.addEventListener("change", render);
+  fStatut.addEventListener("change", render);
+  $("btnReset").addEventListener("click", () => { fCollectivite.value = "all"; fillServiceOptions(); fService.value = "all"; fStatut.value = "all"; tri.reset(); render(); });
+
+  // ---------- Onglets ----------
+  function showTab(name){
+    document.querySelectorAll(".ap-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("show", p.id === "tab-" + name));
+  }
+  document.querySelectorAll(".ap-tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+  if (!canAccueilWrite){ $("tabBtnModeles").remove(); $("tab-modeles").remove(); }
+
+  // ---------- Détail d'un accueil : points à cocher ----------
+  let openId = "";
+  function renderDetail(){
+    const a = DATASET.find(x => x.id === openId);
+    if (!a){ $("detailPanel").style.display = "none"; return; }
+    const p = progress(a);
+    const pct = p.total ? Math.round(100 * p.done / p.total) : 0;
+    $("detailTitle").textContent = "Parcours d'accueil — " + a.prenom + " " + a.nom;
+    $("detailMeta").textContent = [a.service, a.poste, a.dateArrivee ? "arrivée le " + fmtFr(a.dateArrivee) : "", a.referent ? "référent : " + a.referent : "", a.modeleNom ? "modèle « " + a.modeleNom + " »" : ""].filter(Boolean).join(" · ");
+    $("detailBar").style.width = pct + "%";
+    $("detailCount").textContent = p.done + " / " + p.total + " points faits" + (a.dateCloture ? " — accueil terminé le " + fmtFr(a.dateCloture) : "");
+    $("detailItems").innerHTML = (a.items || []).length ? a.items.map(i => `
+      <li class="${i.fait ? "done" : ""}" data-item="${esc(i.id)}">
+        <input type="checkbox" data-toggle="${esc(i.id)}" ${i.fait ? "checked" : ""} ${canAccueilWrite ? "" : "disabled"} aria-label="${esc(i.libelle)}">
+        <div class="ap-lib">${esc(i.libelle)}${i.specifique ? ` <span class="chip info">Spécifique au poste</span>` : ""}<span class="ap-when">${i.fait ? "Fait le " + esc(fmtFr(i.dateFait)) + (i.faitPar ? " par " + esc(i.faitPar) : "") : "À faire"}</span></div>
+        ${canAccueilWrite ? `<input type="text" data-comment="${esc(i.id)}" value="${esc(i.commentaire)}" placeholder="Commentaire (facultatif)">` : (i.commentaire ? `<span class="ap-com">${esc(i.commentaire)}</span>` : "")}
+        ${canAccueilWrite && i.specifique ? `<button type="button" class="act-del" data-remove-point="${esc(i.id)}" style="margin-left:0;">Retirer</button>` : ""}
+      </li>`).join("") : `<li style="color:var(--text-faint);">Aucun point dans ce parcours.</li>`;
+    $("detailAdd").style.display = canAccueilWrite ? "" : "none";
+    $("detailPanel").style.display = "";
+  }
+  function openDetail(id){ openId = id; renderDetail(); $("detailPanel").scrollIntoView({ behavior:"smooth", block:"start" }); }
+  $("btnCloseDetail").addEventListener("click", () => { openId = ""; renderDetail(); });
+  $("tbody").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-open]");
+    if (b) openDetail(b.dataset.open);
+  });
+  $("detailItems").addEventListener("change", (e) => {
+    if (!canAccueilWrite) return;
+    const a = DATASET.find(x => x.id === openId);
+    if (!a) return;
+    const cb = e.target.closest("[data-toggle]");
+    if (cb){
+      const it = a.items.find(x => x.id === cb.dataset.toggle);
+      if (!it) return;
+      it.fait = cb.checked;
+      it.dateFait = it.fait ? todayLocal() : "";
+      it.faitPar = it.fait ? ((session && session.user) || "—") : "";
+      refreshClosure(a);
+      persistDataset(); renderDetail(); render();
+      return;
+    }
+    const cm = e.target.closest("[data-comment]");
+    if (cm){
+      const it = a.items.find(x => x.id === cm.dataset.comment);
+      if (it){ it.commentaire = cm.value.trim(); persistDataset(); }
+    }
+  });
+  $("detailItems").addEventListener("click", (e) => {
+    const rm = e.target.closest("[data-remove-point]");
+    if (!rm || !canAccueilWrite) return;
+    const a = DATASET.find(x => x.id === openId);
+    if (!a) return;
+    const it = a.items.find(x => x.id === rm.dataset.removePoint);
+    if (!it || !confirm(`Retirer le point « ${it.libelle} » de cet accueil ?`)) return;
+    a.items = a.items.filter(x => x.id !== it.id);
+    refreshClosure(a);
+    persistDataset(); renderDetail(); render();
+  });
+  function addSpecificPoint(){
+    if (!canAccueilWrite) return;
+    const a = DATASET.find(x => x.id === openId);
+    const txt = $("newPointText").value.trim();
+    if (!a || !txt) return;
+    a.items.push({ id: genId("pt"), libelle: txt, fait: false, dateFait: "", faitPar: "", commentaire: "", specifique: true });
+    $("newPointText").value = "";
+    refreshClosure(a);   // un point ajouté à un accueil terminé le rouvre
+    persistDataset(); renderDetail(); render();
+  }
+  $("btnAddPoint").addEventListener("click", addSpecificPoint);
+  $("newPointText").addEventListener("keydown", (e) => { if (e.key === "Enter"){ e.preventDefault(); addSpecificPoint(); } });
+
+  // ---------- Fiche imprimable ----------
+  function printAccueil(a){
+    const lines = (a.items || []).map(i => `<tr><td class="c">${i.fait ? "&#9745;" : "&#9744;"}</td><td>${esc(i.libelle)}${i.commentaire ? `<div class="pc">${esc(i.commentaire)}</div>` : ""}</td><td>${i.fait ? esc(fmtFr(i.dateFait)) + (i.faitPar ? " — " + esc(i.faitPar) : "") : ""}</td></tr>`).join("");
+    $("accueilPrint").innerHTML = `
+      <h1>Fiche d'accueil au poste</h1>
+      <p><b>Agent :</b> ${esc(a.prenom)} ${esc(a.nom)} — ${esc(a.service)} (${esc(a.collectivite || "")})</p>
+      <p><b>Poste :</b> ${esc(a.poste || "—")} &nbsp; <b>Arrivée le :</b> ${esc(fmtFr(a.dateArrivee) || "—")} &nbsp; <b>Référent :</b> ${esc(a.referent || "—")}</p>
+      <table><thead><tr><th></th><th>Point vu avec l'agent</th><th>Fait le / par</th></tr></thead><tbody>${lines}</tbody></table>
+      <div class="sign"><div>Lu et pris connaissance — signature de l'agent<br>Date :</div><div>Signature du référent / de l'encadrant<br>Date :</div></div>`;
+    window.print();
+  }
+  $("btnPrint").addEventListener("click", () => { const a = DATASET.find(x => x.id === openId); if (a) printAccueil(a); });
+
+  // ---------- Export ----------
+  const panelBtns = [`<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`];
+  if (canAccueilWrite) panelBtns.push(`<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel accueil</button>`);
+  $("panelActionsBtns").innerHTML = panelBtns.join("");
+  $("btnExport").addEventListener("click", () => {
+    const accueils = DATASET.map(a => { const p = progress(a); return {
+      "ID": a.id, "Nom": a.nom, "Prénom": a.prenom, "Collectivité": a.collectivite || "", "Service": a.service, "Poste": a.poste || "",
+      "Date d'arrivée": a.dateArrivee || "", "Référent": a.referent || "", "Modèle": a.modeleNom || "",
+      "Points faits": p.done, "Points au total": p.total, "Statut": statutOf(a), "Date de clôture": a.dateCloture || "",
+    }; });
+    const points = [];
+    DATASET.forEach(a => (a.items || []).forEach(i => points.push({
+      "ID accueil": a.id, "Agent": a.nom + " " + a.prenom, "Point": i.libelle, "Spécifique au poste": i.specifique ? "oui" : "non",
+      "Fait": i.fait ? "oui" : "non", "Date": i.dateFait || "", "Par": i.faitPar || "", "Commentaire": i.commentaire || "",
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(accueils), "Accueils");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(points), "Points");
+    XLSX.writeFile(wb, `accueil-poste_${todayLocal()}.xlsx`);
+  });
+
+  if (canAccueilWrite){
+    // ---------- Modèles de parcours (always-merge, modèle par défaut non supprimable) ----------
+    const TPL_DEFAULT = {
+      id: "tpl-accueil-defaut",
+      nom: "Parcours d'accueil — modèle par défaut",
+      description: "Points généraux à voir avec tout nouvel agent — à adapter selon le poste et le service.",
+      points: [
+        "Présentation du service, de l'équipe et du référent",
+        "Remise et explication du livret d'accueil et des consignes générales de sécurité",
+        "Visite des locaux et du poste de travail",
+        "Présentation des issues de secours, des consignes d'évacuation et du point de rassemblement",
+        "Présentation des risques du poste (Document Unique) et des mesures de prévention associées",
+        "Remise, explication et essai des équipements de protection individuelle (EPI) du poste",
+        "Présentation des personnes ressources en santé-sécurité (conseiller ou assistant de prévention, secouristes, médecine de prévention)",
+        "Explication de la façon de signaler un accident, un incident ou une situation dangereuse",
+      ].map((t, i) => ({ id: "pt-d" + (i + 1), libelle: t })),
+    };
+    function loadTemplates(){
+      let stored = [];
+      try { const raw = localStorage.getItem(TPL_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p.filter(t => t && t.id && Array.isArray(t.points)); } } catch(e){}
+      const stockedDefault = stored.find(t => t.id === TPL_DEFAULT.id);
+      const merged = [stockedDefault || TPL_DEFAULT].concat(stored.filter(t => t.id !== TPL_DEFAULT.id));
+      try { localStorage.setItem(TPL_KEY, JSON.stringify(merged)); } catch(e){}
+      return merged;
+    }
+    let TPL = loadTemplates();
+    function saveTemplates(){ try { localStorage.setItem(TPL_KEY, JSON.stringify(TPL)); } catch(e){} }
+
+    let tplEditingId = TPL[0].id;
+    let tplDraft = [];   // points en cours d'édition (copie de travail)
+    function renderTplPoints(){
+      $("tplPoints").innerHTML = tplDraft.map((p, i) => `<div class="tpl-row">
+        <input type="text" data-tpl-point="${i}" value="${esc(p.libelle)}" placeholder="Point à voir avec l'agent…" aria-label="Point ${i + 1}">
+        <button type="button" class="btn btn-ghost" data-up="${i}" title="Monter" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button type="button" class="btn btn-ghost" data-down="${i}" title="Descendre" ${i === tplDraft.length - 1 ? "disabled" : ""}>↓</button>
+        <button type="button" class="btn btn-ghost" data-rm="${i}" title="Retirer ce point" style="color:var(--danger);">✕</button>
+      </div>`).join("");
+    }
+    function renderTplEditor(){
+      let opts = TPL.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
+      if (tplEditingId === "") opts += `<option value="">(nouveau modèle)</option>`;
+      $("tplSelect").innerHTML = opts;
+      $("tplSelect").value = tplEditingId;
+      const t = TPL.find(x => x.id === tplEditingId);
+      $("tplNom").value = t ? t.nom : "";
+      $("tplDescription").value = t ? (t.description || "") : "";
+      tplDraft = t ? t.points.map(p => ({ id: p.id, libelle: p.libelle })) : [{ id: genId("pt"), libelle: "" }];
+      renderTplPoints();
+      $("tplDelete").style.display = (t && t.id !== TPL_DEFAULT.id) ? "" : "none";
+      $("tplReset").style.display = (t && t.id === TPL_DEFAULT.id) ? "" : "none";
+    }
+    renderTplEditor();
+    $("tplSelect").addEventListener("change", () => { tplEditingId = $("tplSelect").value; $("tplMsg").textContent = ""; renderTplEditor(); });
+    $("tplNew").addEventListener("click", () => { tplEditingId = ""; $("tplMsg").textContent = ""; renderTplEditor(); $("tplNom").focus(); });
+    $("tplPoints").addEventListener("input", (e) => {
+      const inp = e.target.closest("[data-tpl-point]");
+      if (inp) tplDraft[Number(inp.dataset.tplPoint)].libelle = inp.value;
+    });
+    $("tplPoints").addEventListener("click", (e) => {
+      const up = e.target.closest("[data-up]"), down = e.target.closest("[data-down]"), rm = e.target.closest("[data-rm]");
+      if (up){ const i = Number(up.dataset.up); if (i > 0){ [tplDraft[i - 1], tplDraft[i]] = [tplDraft[i], tplDraft[i - 1]]; renderTplPoints(); } }
+      else if (down){ const i = Number(down.dataset.down); if (i < tplDraft.length - 1){ [tplDraft[i + 1], tplDraft[i]] = [tplDraft[i], tplDraft[i + 1]]; renderTplPoints(); } }
+      else if (rm){ tplDraft.splice(Number(rm.dataset.rm), 1); renderTplPoints(); }
+    });
+    $("tplAddPoint").addEventListener("click", () => {
+      tplDraft.push({ id: genId("pt"), libelle: "" });
+      renderTplPoints();
+      const inputs = $("tplPoints").querySelectorAll("input[data-tpl-point]");
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    });
+    $("tplForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nom = $("tplNom").value.trim();
+      const points = tplDraft.map(p => ({ id: p.id, libelle: p.libelle.trim() })).filter(p => p.libelle);
+      if (!nom) return;
+      if (!points.length){ $("tplMsg").textContent = "Ajoutez au moins un point au parcours."; return; }
+      const rec = { id: tplEditingId || ("tpl-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)), nom, description: $("tplDescription").value.trim(), points };
+      const idx = TPL.findIndex(t => t.id === rec.id);
+      if (idx >= 0) TPL[idx] = rec; else TPL.push(rec);
+      saveTemplates();
+      logAudit("Accueil au poste", idx >= 0 ? "Modification" : "Création", `Modèle de parcours « ${rec.nom} » (${points.length} points)`);
+      tplEditingId = rec.id;
+      renderTplEditor();
+      $("tplMsg").textContent = "Modèle enregistré.";
+    });
+    $("tplDelete").addEventListener("click", () => {
+      const t = TPL.find(x => x.id === tplEditingId);
+      if (!t || t.id === TPL_DEFAULT.id) return;
+      if (!confirm(`Supprimer le modèle « ${t.nom} » ? Les accueils déjà créés avec ce modèle ne sont pas modifiés.`)) return;
+      TPL = TPL.filter(x => x.id !== t.id);
+      saveTemplates();
+      logAudit("Accueil au poste", "Suppression", `Modèle de parcours « ${t.nom} »`);
+      tplEditingId = TPL[0].id;
+      renderTplEditor();
+      $("tplMsg").textContent = "";
+    });
+    $("tplReset").addEventListener("click", () => {
+      if (!confirm("Rétablir le texte d'origine du modèle par défaut ? Vos modifications seront perdues.")) return;
+      const idx = TPL.findIndex(x => x.id === TPL_DEFAULT.id);
+      if (idx >= 0) TPL[idx] = JSON.parse(JSON.stringify(TPL_DEFAULT));
+      saveTemplates();
+      renderTplEditor();
+      $("tplMsg").textContent = "Texte d'origine rétabli.";
+    });
+
+    // ---------- Formulaire d'accueil ----------
+    const formPanel = $("formPanel"), form = $("accueilForm");
+    function fillFormServiceOptions(col){
+      $("fServiceForm").innerHTML = servicesForCollectivite(col).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+    }
+    fillFormServiceOptions("Ville");
+    $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
+    // Sélecteur d'agent (roster canonique, module Gestion RH) : pré-remplit l'identité, saisie libre possible.
+    VigieRoster.bindAgentPicker($("fAgentPicker"), myServices, (a) => {
+      $("fNom").value = a.nom;
+      $("fPrenom").value = a.prenom;
+      $("fCollectiviteForm").value = a.collectivite || "Ville";
+      fillFormServiceOptions(a.collectivite || "Ville");
+      $("fServiceForm").value = a.service || "";
+    });
+    function openForm(rec){
+      form.reset();
+      $("fId").value = rec ? rec.id : "";
+      $("formTitle").textContent = rec ? "Modifier l'accueil" : "Nouvel accueil";
+      // Le modèle ne se choisit qu'à la création : à l'édition, les points de l'accueil sont déjà copiés.
+      $("fModeleWrap").style.display = rec ? "none" : "";
+      $("fModeleHint").style.display = rec ? "none" : "";
+      $("fAgentPickerWrap").style.display = rec ? "none" : "";
+      $("fModele").innerHTML = TPL.map(t => `<option value="${esc(t.id)}">${esc(t.nom)} (${t.points.length} points)</option>`).join("");
+      if (rec){
+        $("fNom").value = rec.nom; $("fPrenom").value = rec.prenom;
+        $("fCollectiviteForm").value = rec.collectivite || "Ville";
+        fillFormServiceOptions(rec.collectivite || "Ville");
+        $("fServiceForm").value = rec.service;
+        $("fPoste").value = rec.poste || ""; $("fDateArrivee").value = rec.dateArrivee || ""; $("fReferent").value = rec.referent || "";
+      } else {
+        fillFormServiceOptions("Ville");
+        $("fDateArrivee").value = todayLocal();
+      }
+      formPanel.style.display = "";
+      formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+    $("btnNew").addEventListener("click", () => openForm(null));
+    $("btnCancelForm").addEventListener("click", () => { formPanel.style.display = "none"; form.reset(); });
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = $("fId").value;
+      const prev = id ? DATASET.find(d => d.id === id) : null;
+      const base = {
+        nom: $("fNom").value.trim(), prenom: $("fPrenom").value.trim(),
+        collectivite: $("fCollectiviteForm").value, service: $("fServiceForm").value,
+        poste: $("fPoste").value.trim(), dateArrivee: $("fDateArrivee").value, referent: $("fReferent").value.trim(),
+      };
+      let rec;
+      if (prev){
+        rec = Object.assign({}, prev, base);
+        DATASET[DATASET.findIndex(d => d.id === id)] = rec;
+      } else {
+        const t = TPL.find(x => x.id === $("fModele").value) || TPL[0];
+        rec = Object.assign({ id: genId("acc"), modeleId: t.id, modeleNom: t.nom,
+          items: t.points.map(p => ({ id: genId("pt"), libelle: p.libelle, fait: false, dateFait: "", faitPar: "", commentaire: "", specifique: false })),
+          dateCloture: "", auteur: (session && session.user) || "—", dateCreation: new Date().toISOString() }, base);
+        DATASET.push(rec);
+      }
+      persistDataset();
+      logAudit("Accueil au poste", prev ? "Modification" : "Création", `Accueil « ${rec.nom} ${rec.prenom} » — ${rec.service}`);
+      formPanel.style.display = "none";
+      form.reset();
+      render();
+      if (openId === rec.id) renderDetail();
+    });
+    $("tbody").addEventListener("click", (e) => {
+      const ed = e.target.closest("[data-edit]");
+      if (ed){ const r = DATASET.find(d => d.id === ed.dataset.edit); if (r) openForm(r); return; }
+      const del = e.target.closest("[data-del]");
+      if (del){
+        const r = DATASET.find(d => d.id === del.dataset.del);
+        if (!r || !confirm(`Supprimer l'accueil de « ${r.nom} ${r.prenom} » ?`)) return;
+        DATASET = DATASET.filter(d => d.id !== r.id);
+        persistDataset();
+        logAudit("Accueil au poste", "Suppression", `Accueil « ${r.nom} ${r.prenom} » — ${r.service}`);
+        if (openId === r.id){ openId = ""; renderDetail(); }
+        render();
+      }
+    });
+  }
+
+  render();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

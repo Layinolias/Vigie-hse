@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/hse-formulas.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -484,13 +485,13 @@
     const atTotal = ATMP.length;
     const atAvec = ATMP.filter(r => r.arret).length;
     const atJours = ATMP.reduce((s,r) => s + (Number(r.joursArret)||0), 0);
-    const EFFECTIF = 850, HEURES_AN = 1607;
     // Question 2 du Cahier du préventeur, répondue le 2026-09-15 (option B) : le taux de
     // fréquence se calcule désormais au prorata de la durée réelle de la période plutôt
     // qu'en comptant les années civiles distinctes présentes dans les données — l'ancien
     // calcul divisait le TF par deux selon qu'une période à cheval sur le 1er janvier
     // comptait pour 1 ou 2 années pleines. Sans borne de début (« Depuis le début »), on
-    // part de l'événement le plus ancien affiché jusqu'à la borne de fin.
+    // part de l'événement le plus ancien affiché jusqu'à la borne de fin. Formule (EFFECTIF/
+    // HEURES_AN) partagée avec registre-at-mp.html via assets/hse-formulas.js.
     const dureeAtJours = (() => {
       let fin = dFin || today.toISOString().slice(0,10);
       let debut = dDebut;
@@ -502,8 +503,7 @@
       const ms = new Date(fin) - new Date(debut);
       return Math.max(1, Math.round(ms / 86400000) + 1);
     })();
-    const heures = EFFECTIF * HEURES_AN * (dureeAtJours / 365);
-    const tf = heures ? (atAvec * 1000000 / heures) : 0;
+    const tf = VigieFormules.tauxFrequence(atAvec, dureeAtJours);
     $("kpiAtTotal").textContent = atTotal;
 
     // ---- DUERP ----

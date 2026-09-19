@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
+<script src="assets/hse-formulas.js"></script>
 <style>
   /* ===== HSE Soft Tech — Design tokens (identiques au Dashboard) ===== */
   :root{
@@ -600,9 +601,6 @@
   let DATASET = loadDataset();
   if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
 
-  const EFFECTIF = 850;
-  const HEURES_AN = 1607;
-
   function fmtDate(iso){
     if (!iso) return "—";
     const [y,m,d] = String(iso).split("-");
@@ -755,7 +753,8 @@
 
     // Question 2 du Cahier du préventeur, répondue le 2026-09-15 (option B) : le taux de
     // fréquence se calcule au prorata de la durée réelle de la période plutôt qu'en comptant
-    // les années civiles distinctes présentes dans les données (même correctif que reporting.html).
+    // les années civiles distinctes présentes dans les données. Formule (EFFECTIF/HEURES_AN)
+    // partagée avec reporting.html via assets/hse-formulas.js.
     const dureeAtJours = (() => {
       const todayStr = new Date().toISOString().slice(0,10);
       let debut, fin;
@@ -771,9 +770,8 @@
       const ms = new Date(fin) - new Date(debut);
       return Math.max(1, Math.round(ms / 86400000) + 1);
     })();
-    const heuresTravaillees = EFFECTIF * HEURES_AN * (dureeAtJours / 365);
-    const tf = heuresTravaillees ? (avecCount * 1000000 / heuresTravaillees) : 0;
-    const tg = heuresTravaillees ? (joursSum * 1000 / heuresTravaillees) : 0;
+    const tf = VigieFormules.tauxFrequence(avecCount, dureeAtJours);
+    const tg = VigieFormules.tauxGravite(joursSum, dureeAtJours);
 
     $("kpiTotal").textContent = total;
     $("kpiTotalSub").innerHTML = `<b>${avecCount}</b> avec arrêt · <b>${sansCount}</b> sans arrêt`;

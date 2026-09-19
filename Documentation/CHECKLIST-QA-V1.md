@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 104 points au 2026-09-19 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 109 points au 2026-09-19 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -101,6 +101,13 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Cocher "Travaux dangereux" sur une intervention de quelques heures la fait passer à "Obligatoire" (le logiciel ne devine jamais cette liste réglementaire — c'est une case à cocher à la main).
 - [ ] Une action corrective ajoutée à une intervention apparaît dans **Plan d'Actions** avec l'origine "Prévention EE" (badge distinct des autres origines).
 - [ ] Se déconnecter, se reconnecter en `AG2` (sans permission `entreprises-ext`) : le lien "Entreprises extérieures" est invisible, et taper l'URL `entreprises-exterieures.html` directement redirige vers `dashboard.html`.
+
+### Base documentaire (lecture : tout compte ; rédaction : `RH1`/`RH2`, `admin` ou permission « Peut rédiger »)
+- [ ] Depuis n'importe quelle page, le lien « Base documentaire » (section « Ressources » de la sidebar) est visible pour **tous** les comptes (essayer `AG2`) et ouvre la page ; l'onglet « Articles » contient 33 fiches « Familles de risque ».
+- [ ] Recherche : taper « amiante », puis « electrique » (sans accent), puis « chute hauteur » (deux mots) — les bonnes fiches ressortent, le titre passe avant le texte ; filtrer par thème ; « Réinitialiser » remet tout.
+- [ ] En `RH1` : créer un article (titre, thème, mots-clés, texte sur plusieurs lignes) — il s'affiche avec ses retours à la ligne ; le modifier, puis le supprimer. Créer un article en **Brouillon** : `AG2` ne le voit ni dans la liste ni via la recherche. Une fiche « Famille de risque » n'a pas de bouton « Supprimer » (on peut la passer en brouillon ou rétablir son texte d'origine).
+- [ ] Onglet « Documents officiels » : ajouter un document (catégorie, référence, version, lien `https://…`) — le lien s'ouvre dans un nouvel onglet ; un lien `javascript:…` ou sans `http(s)://` est refusé avec un message ; filtrer par catégorie/statut ; modifier et supprimer.
+- [ ] `AG2` (sans permission) : aucun bouton de création, de modification ni d'export, mais lecture complète ; donner la case « Peut rédiger » à un compte depuis Administration (badge « Doc · rédacteur ») : ses boutons de rédaction apparaissent à la reconnexion.
 
 ### Accueil au poste (`RH1`/`RH2` ou `admin` — accès write d'office ; permission granulaire `accueil-poste` pour les autres)
 - [ ] `RH1` voit « Accueil au poste » dans la sidebar (section « Administratif ») ; créer un accueil (agent du sélecteur ou saisie libre, poste, date d'arrivée, référent) : il apparaît dans le tableau en « À faire » avec 0/8, et l'ouvrir montre les 8 points du modèle par défaut.

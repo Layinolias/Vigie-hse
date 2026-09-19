@@ -76,7 +76,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 5 | Pénibilité & fiches individuelles | ❌ Non démarré |
 | 6 | Formation / Habilitation | ✅ Fait — `formation-habilitation.html` |
 | 7 | Santé au travail — planning des visites médicales | ✅ Fait (2026-09-19) — `sante-visites.html` : agenda mensuel, RDV, convocations à partir de modèles modifiables (envoi automatique hors périmètre) |
-| 8 | Gestion documentaire (wiki++ HSE) | ❌ Non démarré — vision élargie, contenu fiches de sécurité/familles de risque ajouté 2026-09-12 |
+| 8 | Gestion documentaire (wiki++ HSE) | ✅ Fait (2026-09-19) — `base-documentaire.html` : wiki d'articles cherchable + fiches « familles de risque » + registre de documents officiels (métadonnées et lien, pas de stockage de fichiers) |
 | 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html`, sélecteur calendaire + tous modules période-conscients + graphiques par risque (2026-09-14) |
 | 10 | EPI, dotation & entretien | ✅ Fait — `epi-dotation.html` |
 | 11 | Dashboard mobile simplifié | ✅ Fait |
@@ -276,7 +276,16 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - **Vue agenda intégrée, format calendrier type Outlook** pour planifier les RDV médicaux — confirme et précise le point déjà noté ci-dessus ("pas de vue calendrier, pas de créneaux").
 - **Génération automatique de convocations** à partir de **modèles prédéfinis et modifiables** (pas seulement un texte pré-rempli à copier/coller comme envisagé initialement) — la personnalisation des modèles elle-même devra être gérée quelque part, probablement `administration.html`.
 
-## 8. Gestion documentaire — ❌ Non démarré
+## 8. Gestion documentaire — ✅ Fait (2026-09-19)
+
+**Livré — `base-documentaire.html`** (décisions prises avec l'utilisateur le 2026-09-19 : les deux volets en V1, lecture ouverte à tous, contenu de départ = familles de risque déjà dans l'appli) :
+- **Articles (wiki)** — `vigie_hse_wiki` : titre, thème libre (liste de suggestions), mots-clés, statut **Publié / Brouillon**, contenu texte (retours à la ligne conservés, jamais interprété comme du HTML). **Recherche plein texte côté client**, insensible à la casse et aux accents : tous les mots doivent être trouvés, classement titre > thème/mots-clés > texte, extrait autour du mot trouvé ; filtre par thème.
+- **33 fiches « Familles de risque »** amorcées (always-merge) avec les **définitions courtes déjà présentes** dans la taxonomie du Document Unique (`assets/risques-ref.js`, copie partagée) — **aucun contenu réglementaire inventé** : elles sont à compléter et à valider par le préventeur. Non supprimables (le stockage prime et les ressusciterait) mais masquables en brouillon ; « Rétablir le texte d'origine » disponible.
+- **Registre de documents officiels** — `vigie_hse_documents` : catégorie (liste fixe neutre), référence, version, date, statut En vigueur/Obsolète, description, **lien externe**. **Le fichier n'est pas stocké** (limite du navigateur seul, cf. annotation ci-dessous) ; seuls les liens `http(s)://` sont acceptés — `javascript:`, `data:` etc. sont refusés à l'enregistrement **et** à l'affichage (protège aussi contre un stockage falsifié).
+- **Droits** : **lecture ouverte à tout compte connecté** (le wiki doit accompagner les agents au quotidien ; les brouillons restent invisibles aux lecteurs) ; **rédaction réservée à RH/admin et aux comptes ayant la permission `documentation`** (case « Peut rédiger » dans Administration). Lien « Base documentaire » (section « Ressources » de la sidebar) visible de tous. Export `.xlsx` (Articles + Documents) pour les rédacteurs. Pas d'import ni de DATATEST en V1.
+- **Hors périmètre (assumé)** : dépôt de vrais fichiers (attendre le backend, §14 de `ETAT-DU-PROJET.md`), liens contextuels depuis les autres modules (ex. un risque du DUERP qui renvoie à sa fiche — **piste principale pour la suite**, non faite), mise en forme riche des articles, versionnement de l'historique d'un article, commentaires. Les 3 copies inline de `RISK_TAXONOMY_DEFAULT` (`administration.html`, `document-unique.html`, `saisie-duerp.html`) n'ont pas encore été repointées sur `assets/risques-ref.js`.
+
+*Note d'origine et annotations de cadrage, conservées ci-dessous :*
 
 **Note d'origine :** "Gestion documentaire : référentiel de documents officiels, dans tous les domaines concernés."
 

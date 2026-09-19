@@ -247,6 +247,7 @@
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
   <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
   <symbol id="i-life-buoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
 </defs>
 </svg>
 
@@ -289,6 +290,7 @@
         <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
         <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
         <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
+        <a class="nav-item" id="navGestionRh" href="gestion-rh.html" style="display:none;"><svg class="icon"><use href="#i-users"/></svg> Gestion RH</a>
       </div>
       <div class="nav-section" id="navPilotage" style="display:none;">
         <div class="nav-label">Pilotage</div>
@@ -333,6 +335,7 @@
             <fieldset>
               <div class="fieldset-head"><span class="idx">1</span><span class="flabel">Agent</span></div>
               <div class="field-grid">
+                <div class="f"><label for="fAgentPicker">Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
                 <div class="f"><label for="fStatut">Statut</label><select id="fStatut" name="statut" required></select></div>
                 <div class="f"><label for="fCivilite">Civilité</label><select id="fCivilite" name="civilite" required></select></div>
                 <div class="f"><label for="fNom">Nom</label><input type="text" id="fNom" name="nom" required autocomplete="off" placeholder="ex. DURAND"></div>
@@ -450,6 +453,8 @@
   if (canAccidentAnalyse){ $("navAdministratif").style.display = ""; $("navAccidentAnalyse").style.display = ""; }
   const canUrgences = isRhAdmin || !!(session && session.modulePermissions && session.modulePermissions["urgences"]);
   if (canUrgences){ $("navAdministratif").style.display = ""; $("navUrgences").style.display = ""; }
+  const canGestionRh = isRhAdmin || !!(session && session.modulePermissions && session.modulePermissions["gestion-rh"]);
+  if (canGestionRh){ $("navAdministratif").style.display = ""; $("navGestionRh").style.display = ""; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   const sidebar = $("sidebar"), scrim = $("scrim");
@@ -636,6 +641,27 @@
     fServiceDetail.value = "";
     fServiceDetail.placeholder = list.length ? "ex. " + list[0] : "Préciser le service";
   });
+
+  // ---------- Sélecteur d'agent (roster canonique, module Gestion RH) ----------
+  // Additif : pré-remplit nom/prénom/collectivité/service à partir de vigie_hse_agents,
+  // mais la saisie libre reste toujours possible (agent pas encore répertorié).
+  (function(){
+    let agents = [];
+    try { const raw = localStorage.getItem("vigie_hse_agents"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) agents = p; } } catch(e){}
+    agents = agents.filter(a => a.actif !== false).sort((a,b) => (a.nom||"").localeCompare(b.nom||"", 'fr'));
+    const picker = $("fAgentPicker");
+    if (!picker || !agents.length) return;
+    picker.innerHTML = `<option value="">— Saisie libre —</option>` + agents.map(a => `<option value="${a.id}">${a.nom} ${a.prenom} — ${a.service}</option>`).join("");
+    picker.addEventListener("change", () => {
+      const a = agents.find(x => x.id === picker.value);
+      if (!a) return;
+      $("fNom").value = a.nom;
+      $("fPrenom").value = a.prenom;
+      const colInput = $(a.collectivite === "Agglomération" ? "col-agglo" : "col-ville");
+      if (colInput){ colInput.checked = true; populateServiceOptions(a.collectivite || "Ville"); }
+      fServiceEl.value = a.service || "";
+    });
+  })();
 
   const fDateDebutArret = $("fDateDebutArret"), fDateFinArret = $("fDateFinArret"), fJoursCalc = $("fJoursCalc");
   function computeJoursArret(){

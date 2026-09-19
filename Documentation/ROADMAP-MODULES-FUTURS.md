@@ -82,7 +82,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 11 | Dashboard mobile simplifié | ✅ Fait |
 | 12 | Accueil au poste | ❌ Non démarré (nouveau, retour alpha 2026-09-12) |
 | 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — nécessite un nouveau rôle/compte "Représentant du personnel" |
-| 14 | Gestion administrative RH | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — voir aussi extension du module 7 |
+| 14 | Gestion administrative RH | ✅ Fait (2026-09-19) — `gestion-rh.html`, les deux volets (données RH + organigramme) |
 | 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
 | 16 | Situations d'urgence & exercices d'évacuation | ✅ Fait (2026-09-18) — volet "exercices réalisés" ; plans d'urgence par site reportés |
 | 17 | Entreprises extérieures & Plan de Prévention | ❌ Non démarré (nouveau, 2026-09-12) — recoupe le risque "Coactivité" déjà référencé |
@@ -330,22 +330,18 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - À préciser avec l'utilisateur avant de coder : quel contenu concret ce module doit exposer (ordre du jour/comptes-rendus de F3SCT ? accès en lecture à des indicateurs agrégés et anonymisés du Registre AT/MP et du RSST ? un espace de questions/réponses avec la direction ?).
 - Ne pas construire ce module avant d'avoir au moins esquissé le modèle de permissions générique (section J0) — sinon "Représentant du personnel" devient un 5ᵉ rôle codé en dur de plus, exactement le problème que la réflexion sur les permissions cherche à éviter.
 
-## 14. Gestion administrative RH — ❌ Non démarré
+## 14. Gestion administrative RH — ✅ Fait (2026-09-19)
 
 **Note d'origine (retour alpha, 2026-09-12) :** nouveau module, deux volets.
 
-**Volet 1 — Données RH et calculs automatiques :**
-- Base de données complète du personnel (liste des agents, fiches individuelles). **C'est très probablement le bon endroit pour résoudre la dette technique déjà identifiée** des rosters d'agents dupliqués indépendamment (`sante-visites.html`, `formation-habilitation.html`, `epi-dotation.html` — voir Notes générales en fin de document) : ce module deviendrait la source canonique, les trois autres modules la consommant au lieu de re-dériver leur propre copie.
-- Saisie des données d'activité, notamment les heures travaillées.
-- Calcul automatisé du Taux de fréquence (TF) et du Taux de gravité (TG). **Ces indicateurs existent déjà** dans `registre-at-mp.html`, mais avec un effectif et un volume horaire **codés en dur** (`EFFECTIF = 850` agents, 1607 h/an — la durée légale annuelle, pas les heures réellement travaillées). Ce module permettrait de calculer un TF/TG réel à partir des heures effectivement saisies, au lieu d'une approximation — à faire remplacer le calcul actuel plutôt qu'en construire un second en parallèle.
-- **Confirmé par le préventeur (2026-09-15, en réponse à la question 2 du reporting) :** « l'effectif des agents doit être saisi dans un tableau pour les RH (ou importé), pour avoir l'effectif réel par collectivité ; pour le taux de fréquence, on pourrait avoir celui estimé **et** le réel en saisissant le nombre d'heures, ce qui permettrait aussi d'avoir un TF par service ou direction. » Confirme le volet 1 tel que déjà noté, avec une précision utile pour le cadrage futur : le TF doit pouvoir se décliner par service/direction, pas seulement au global.
+**Décidé avec l'utilisateur le 2026-09-19 : les deux volets en V1**, avec le roster comme source canonique (remplace les dérivations indépendantes de `sante-visites.html`/`formation-habilitation.html`/`epi-dotation.html`) et le TF/TG "réel" en **coexistence** avec l'estimé existant (ne le remplace pas — conforme à la réponse du préventeur "estimé ET réel" ci-dessous).
 
-**Volet 2 — Organigramme et rattachements :**
-- Modélisation de l'organigramme / structure hiérarchique de la collectivité ou de l'entreprise.
-- Gestion des rattachements : équipes, managers, périmètres d'encadrement.
-- Interface d'ajustement dynamique (réaffecter un agent, changer un responsable d'équipe).
-
-**Annotation pour reprise :** ce volet 2 recoupe directement deux réflexions déjà en cours dans ce document — la généralisation des "unités organisationnelles" (section J0, aujourd'hui figées sur Ville/Agglomération) et le scoping par service du rôle `manager` déjà existant (`session.services`, voir `ETAT-DU-PROJET.md`). Un vrai organigramme donnerait une structure de données propre à ces deux chantiers plutôt que des règles de scoping éparses par module. À concevoir ensemble, pas comme trois chantiers séparés.
+**Livré — `gestion-rh.html` :**
+- **Volet 1 (données RH)** : roster canonique (`vigie_hse_agents` — nom, prénom, service, collectivité, actif), saisie d'heures travaillées agrégées par service/mois (`vigie_hse_heures_travaillees`, pas un pointage individuel — le préventeur demande un TF par service/direction, pas par agent), TF/TG "réel" calculé dessus via `VigieFormules.tauxFrequenceReel`/`tauxGraviteReel` (`assets/hse-formulas.js`), affiché en coexistence avec le TF/TG estimé dans `registre-at-mp.html` et `reporting.html` ("—" si aucune heure saisie, jamais un faux 0).
+- **Volet 2 (organigramme)** : rattachement `managerId` entre agents (pas une nouvelle notion d'"unité organisationnelle" — délibérément pour ne pas anticiper le chantier de généralisation J0, non cadré), vue arborescente, réaffectation avec garde-fou anti-cycle appliqué **au niveau du sélecteur lui-même** (les options qui créeraient une boucle ne sont pas proposées, pas seulement rejetées après coup).
+- **Roster canonique** : un sélecteur "Choisir un agent" (additif, saisie libre toujours possible) a été ajouté aux formulaires de `saisie-rh.html`, `sante-visites.html`, `formation-habilitation.html`, `epi-dotation.html` — pré-remplit nom/prénom/service/collectivité. La forme des enregistrements existants de ces 3 derniers modules n'a pas changé (toujours `nom`/`prenom`/`service` inline, pas de FK) pour éviter une réécriture risquée de gros fichiers déjà en production ; le mécanisme `SEED_ATMP`/`VigieRoster.dedupeByAgent` qu'ils contenaient s'est avéré être du code mort depuis l'anonymisation du 2026-09-12 (seed vide) et n'a pas été réactivé.
+- **Confirmé par le préventeur (2026-09-15, réponse à la question 2 du reporting) :** « l'effectif des agents doit être saisi dans un tableau pour les RH (ou importé), pour avoir l'effectif réel par collectivité ; pour le taux de fréquence, on pourrait avoir celui estimé **et** le réel en saisissant le nombre d'heures, ce qui permettrait aussi d'avoir un TF par service ou direction. »
+- Permission granulaire `gestion-rh` (read/write), même mécanisme que les modules 15/16/18.
 
 ## 15. Analyse d'accident (arbre des causes) — ✅ Fait (2026-09-14)
 

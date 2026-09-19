@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces 63 points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 87 points au 2026-09-19 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -78,6 +78,15 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Le panneau "Prochaine échéance par site & type" affiche correctement le statut (À jour/À programmer/En retard) calculé sur le dernier exercice de chaque site+type — créer un second exercice plus récent pour le même site/type et vérifier que l'échéance se recalcule sur ce dernier, pas sur le premier.
 - [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : les quatre modules/liens doivent être invisibles, et taper les URLs `dossiers-atmp-citis.html` / `accident-analyse.html` / `saisie-rh.html` / `urgences-exercices.html` directement doit rediriger (dashboard ou registre AT/MP selon la page).
 
+### Gestion RH (`RH1`/`RH2` ou `admin` — accès write d'office, pas une permission granulaire pour ces deux rôles)
+- [ ] `RH1` voit "Gestion RH" dans la sidebar (section "Administratif") ; onglet "Agents" : créer un agent (nom, prénom, collectivité, service), le retrouver dans le tableau, le modifier, le désactiver (statut passe à "Inactif", disparaît du filtre "Actifs" par défaut).
+- [ ] Onglet "Organigramme" : créer un second agent, le réaffecter sous le premier via le sélecteur "Réaffecter" — le rattachement apparaît dans l'arborescence. Vérifier que le sélecteur du premier agent ne propose **pas** le second agent comme responsable (empêcherait une boucle) — pas seulement une alerte après coup, l'option est absente du menu.
+- [ ] Onglet "Heures travaillées" : saisir des heures pour un mois/service, les retrouver dans l'historique, les supprimer.
+- [ ] Onglet "Indicateurs" : après la saisie d'heures ci-dessus et un AT/MP avec arrêt sur le même mois/service (Registre AT/MP), le TF/TG réel se calcule et s'affiche (pas "—") ; sur une période sans heure saisie, affiche "—" (pas un faux 0).
+- [ ] Le sélecteur "Choisir un agent" (roster) apparaît et pré-remplit nom/prénom/service dans les formulaires de `saisie-rh.html`, `sante-visites.html`, `formation-habilitation.html` et `epi-dotation.html` — la saisie libre reste possible si on ne choisit personne.
+- [ ] Dans le Registre AT/MP, une ligne "réel : X" apparaît sous le TF/TG estimé une fois des heures saisies pour la période/le service affiché — sans heures saisies, cette ligne reste vide et le TF/TG estimé est inchangé (pas de régression visuelle).
+- [ ] Se déconnecter, se reconnecter en `AG2` (sans permission `gestion-rh`) : le lien "Gestion RH" est invisible, et taper l'URL `gestion-rh.html` directement redirige vers `dashboard.html`.
+
 ### Visibilité des données par tableau (tous rôles)
 Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le rôle" (§2) n'avait été vérifié en détail que sur le Registre AT/MP. Un point par module à tableau pour couvrir le reste — même geste à chaque fois : se connecter avec au moins deux comptes de rôles différents (ex. `RH1` puis `AG1`, ou `manager`) et vérifier que les lignes/colonnes affichées sont cohérentes avec le périmètre du rôle (scope service pour `manager`, colonnes personnelles masquées pour `ag`, etc. — voir §3 ci-dessus pour le détail attendu par rôle).
 - [ ] Registre AT/MP (`registre-at-mp.html`) — déjà vérifié en détail le 2026-09-15.
@@ -93,6 +102,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] Dossiers AT/MP & CITIS (`dossiers-atmp-citis.html`)
 - [ ] Analyse d'accident (`accident-analyse.html`)
 - [ ] Situations d'urgence (`urgences-exercices.html`)
+- [ ] Gestion RH (`gestion-rh.html`)
 
 ### Tri & filtres de colonne (Registre AT/MP)
 - [ ] Cliquer sur l'intitulé d'une colonne trie la table ; un 2ᵉ clic inverse le sens, un 3ᵉ revient à l'ordre d'origine (date décroissante). Une flèche indique le sens.

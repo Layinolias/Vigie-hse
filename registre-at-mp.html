@@ -146,6 +146,7 @@
   .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
   .ps-kpi-value .unit{ font-size:10px; color:var(--text-muted); font-weight:500; margin-left:1px; }
   .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
+  .ps-kpi-sub{ font-size:9px; color:var(--text-faint); white-space:nowrap; margin-top:1px; }
   @media (max-width:1100px){ .page-summary-text p{ display:none; } }
   .mobile-notice{ display:none; }
   @media (max-width:640px){
@@ -299,6 +300,7 @@
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
   <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
   <symbol id="i-life-buoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
 </defs>
 </svg>
 
@@ -341,6 +343,7 @@
         <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
         <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
         <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
+        <a class="nav-item" id="navGestionRh" href="gestion-rh.html" style="display:none;"><svg class="icon"><use href="#i-users"/></svg> Gestion RH</a>
       </div>
       <div class="nav-section" id="navPilotage" style="display:none;">
         <div class="nav-label">Pilotage</div>
@@ -395,11 +398,11 @@
           <span id="kpiJoursSub" style="display:none">—</span>
           <div class="ps-kpi">
             <div class="ps-kpi-icon violet"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTf">–</span><span class="ps-kpi-label">Taux fréquence (Tf)</span></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTf">–</span><span class="ps-kpi-label">Taux fréquence (Tf)</span><span class="ps-kpi-sub mono" id="kpiTfReel"></span></div>
           </div>
           <div class="ps-kpi">
             <div class="ps-kpi-icon violet"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTg">–</span><span class="ps-kpi-label">Taux gravité (Tg)</span></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTg">–</span><span class="ps-kpi-label">Taux gravité (Tg)</span><span class="ps-kpi-sub mono" id="kpiTgReel"></span></div>
           </div>
         </div>
       </header>
@@ -509,6 +512,8 @@
   if (canAccidentAnalyse){ $("navAdministratif").style.display = ""; $("navAccidentAnalyse").style.display = ""; }
   const canUrgences = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["urgences"]);
   if (canUrgences){ $("navAdministratif").style.display = ""; $("navUrgences").style.display = ""; }
+  const canGestionRh = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["gestion-rh"]);
+  if (canGestionRh){ $("navAdministratif").style.display = ""; $("navGestionRh").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
@@ -779,6 +784,18 @@
     $("kpiJoursSub").innerHTML = `moyenne <b>${moyJours} j</b> / événement avec arrêt`;
     $("kpiTf").textContent = tf.toFixed(1);
     $("kpiTg").textContent = tg.toFixed(2);
+    // TF/TG "réel" (module Gestion RH) : coexiste avec l'estimé ci-dessus, ne le remplace pas
+    // (réponse Q2 du préventeur). Basé sur les heures effectivement saisies pour le même
+    // périmètre service/année que le filtre courant — "—" si aucune heure n'a été saisie.
+    let heuresReellesLet = [];
+    try { const raw = localStorage.getItem("vigie_hse_heures_travaillees"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) heuresReellesLet = p; } } catch(e){}
+    const heuresReelles = heuresReellesLet
+      .filter(h => (svc === "all" || h.service === svc) && (yr === "all" || h.periode.slice(0,4) === yr))
+      .reduce((s,h) => s + (Number(h.heures)||0), 0);
+    const tfReel = VigieFormules.tauxFrequenceReel(avecCount, heuresReelles);
+    const tgReel = VigieFormules.tauxGraviteReel(joursSum, heuresReelles);
+    $("kpiTfReel").textContent = tfReel === null ? "" : `réel : ${tfReel.toFixed(1)}`;
+    $("kpiTgReel").textContent = tgReel === null ? "" : `réel : ${tgReel.toFixed(2)}`;
     $("resultCount").textContent = total;
     $("totalCount").textContent = DATASET.length;
 

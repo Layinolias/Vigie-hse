@@ -322,6 +322,10 @@
           </div>
           <div class="ps-kpi">
             <div class="ps-kpi-icon violet"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTfReel">–</span><span class="ps-kpi-label">TF réel</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon violet"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
             <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiHseScore">–</span><span class="ps-kpi-label">Score HSE</span></div>
           </div>
           <div class="ps-kpi">
@@ -505,6 +509,17 @@
     })();
     const tf = VigieFormules.tauxFrequence(atAvec, dureeAtJours);
     $("kpiAtTotal").textContent = atTotal;
+    // TF "réel" (module Gestion RH) : coexiste avec le TF estimé ci-dessus, ne le remplace pas
+    // (réponse Q2 du préventeur). Basé sur les heures effectivement saisies sur la période
+    // affichée (tous services confondus) — "—" si aucune heure n'a été saisie.
+    const heuresReellesRaw = readKey("vigie_hse_heures_travaillees");
+    const periodeDebut = dDebut ? dDebut.slice(0,7) : "";
+    const periodeFin = dFin ? dFin.slice(0,7) : "";
+    const heuresReelles = heuresReellesRaw
+      .filter(h => (!periodeDebut || h.periode >= periodeDebut) && (!periodeFin || h.periode <= periodeFin))
+      .reduce((s,h) => s + (Number(h.heures)||0), 0);
+    const tfReel = VigieFormules.tauxFrequenceReel(atAvec, heuresReelles);
+    $("kpiTfReel").textContent = tfReel === null ? "—" : tfReel.toFixed(1);
 
     // ---- DUERP ----
     const DUERP = readKey("vigie_hse_duerp_dataset")

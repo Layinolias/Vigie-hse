@@ -469,8 +469,13 @@
   }
 
   function renderReport(){
-    const dDebut = $("fDateDebut").value || "";
-    const dFin = $("fDateFin").value || "";
+    let dDebut = $("fDateDebut").value || "";
+    let dFin = $("fDateFin").value || "";
+    // Garde-fou : une période inversée (bornes croisées via l'UI ou l'URL) doit être
+    // traitée comme la même période remise dans l'ordre, pas comme une plage vide —
+    // sinon le filtrage ci-dessous ne trouve silencieusement aucune ligne (0 événement,
+    // TF à 0) alors que des données existent bel et bien sur la période réelle.
+    if (dDebut && dFin && dDebut > dFin){ const tmp = dDebut; dDebut = dFin; dFin = tmp; }
     const today = new Date();
 
     // ---- AT/MP ----
@@ -493,10 +498,7 @@
         const dates = ATMP.map(r => r.dateAT).filter(Boolean).sort();
         debut = dates.length ? dates[0] : fin;
       }
-      // Garde-fou : une période inversée (bornes croisées via l'UI ou l'URL) ne doit jamais
-      // produire une durée négative ramenée à 1 jour — on rétablit l'ordre plutôt que de
-      // laisser le TF/TG exploser silencieusement.
-      if (debut > fin){ const tmp = debut; debut = fin; fin = tmp; }
+      // dDebut/dFin sont déjà remis dans l'ordre en tête de renderReport() : debut <= fin ici.
       const ms = new Date(fin) - new Date(debut);
       return Math.max(1, Math.round(ms / 86400000) + 1);
     })();

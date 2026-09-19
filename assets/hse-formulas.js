@@ -17,4 +17,15 @@ window.VigieFormules = {
     const heures = this.heuresTravaillees(dureeAtJours);
     return heures ? (joursArretSum * 1000 / heures) : 0;
   },
+  // TF/TG "réel" (module 14, Gestion RH) : basé sur des heures effectivement saisies
+  // (vigie_hse_heures_travaillees), pas sur l'estimation EFFECTIF×HEURES_AN ci-dessus.
+  // Coexiste avec tauxFrequence/tauxGravite (réponse Q2 du préventeur : "estimé ET réel"),
+  // ne les remplace pas. Renvoie null (pas 0) quand aucune heure n'a été saisie, pour
+  // distinguer "pas de donnée" de "0 accident".
+  tauxFrequenceReel(atAvecArret, heuresReelles){
+    return heuresReelles ? (atAvecArret * 1000000 / heuresReelles) : null;
+  },
+  tauxGraviteReel(joursArretSum, heuresReelles){
+    return heuresReelles ? (joursArretSum * 1000 / heuresReelles) : null;
+  },
 };

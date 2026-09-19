@@ -85,7 +85,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 14 | Gestion administrative RH | ✅ Fait (2026-09-19) — `gestion-rh.html`, les deux volets (données RH + organigramme) |
 | 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
 | 16 | Situations d'urgence & exercices d'évacuation | ✅ Fait (2026-09-18) — volet "exercices réalisés" ; plans d'urgence par site reportés |
-| 17 | Entreprises extérieures & Plan de Prévention | ❌ Non démarré (nouveau, 2026-09-12) — recoupe le risque "Coactivité" déjà référencé |
+| 17 | Entreprises extérieures & Plan de Prévention | ✅ Fait (2026-09-19) — `entreprises-exterieures.html` ; frontière exacte du seuil 400 h en attente (Q8) |
 | 18 | Gestion administrative des dossiers AT/MP & CITIS | ✅ Fait (2026-09-13) — `dossiers-atmp-citis.html`, premier cas d'usage du modèle de permissions granulaires (voir J0) |
 
 ---
@@ -384,7 +384,19 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 **Cadrage :** le volet "plans d'urgence par site" reste posé pour une itération future — pas de conception engagée dessus.
 
-## 17. Entreprises extérieures & Plan de Prévention — ❌ Non démarré
+## 17. Entreprises extérieures & Plan de Prévention — ✅ Fait (2026-09-19)
+
+**Livré — `entreprises-exterieures.html`** (décisions prises avec l'utilisateur le 2026-09-19) :
+- Registre CRUD des interventions (`vigie_hse_interventions_ee`), entreprise en **texte libre** (pas de second CRUD « entreprise »), `site` en texte libre, `service`/`collectivité` sur les référentiels partagés.
+- **Inspection commune préalable : champs intégrés simples** (réalisée, date, participants, risques identifiés) plutôt que réutilisation d'une trame d'Inspection/Audit — cette dernière n'expose aucune API (tout lecteur externe devrait parser `vigie_hse_inspections` et deviner un `trameId`), et le préventeur n'a pas précisé de quelle « trame » il parle.
+- **Plan de prévention : texte libre** (mesures, consignes, répartition des responsabilités), pas d'éditeur de document structuré en V1.
+- **Verdict « plan obligatoire » par intervention** (réponse Q7 : « par intervention / opération ») : heures estimées > 400, ou case « Travaux dangereux » cochée à la main — **la liste réglementaire des travaux dangereux n'est jamais devinée**. Le cumul par entreprise/année est affiché à titre indicatif seulement. *(Le plan initial cumulait par entreprise/année ; corrigé en cours de route pour respecter la réponse du préventeur.)*
+- Habilitations des intervenants extérieurs : **non tracées** (hors périmètre, réponse Q7).
+- Actions correctives → Plan d'Actions (`origine:"Prévention EE"`). Export `.xlsx` (feuilles Interventions + Actions, colonne « ID Intervention »). Pas d'import ni de DATATEST en V1.
+- Permission granulaire `entreprises-ext` (read/write).
+- **Question ouverte (Q8, `QUESTIONS-METIER-EN-ATTENTE.md`)** : le seuil est appliqué « strictement > 400 h » ; à confirmer avec le préventeur (« plus de » ou « au moins » 400 h, et fenêtre de temps éventuelle).
+
+*Texte d'origine de la demande, conservé ci-dessous :*
 
 **Demandé le 2026-09-12.** Recoupe directement le risque **"Coactivité"** déjà présent dans `RISK_TAXONOMY_DEFAULT` (`administration.html` : "Interférence entre activités, équipements et personnel de la structure et d'entreprises extérieures intervenant simultanément. Absence d'inspection commune et de plan de prévention partagé.") — aujourd'hui identifié comme famille de risque mais sans aucun module pour outiller la prévention correspondante. Le Plan de Prévention est une obligation réglementaire précise (Code du travail, art. R4511-1 et suivants) dès qu'une entreprise extérieure intervient dans les locaux d'une entreprise utilisatrice, avec inspection commune préalable obligatoire, et plan de prévention écrit obligatoire au-delà de 400h/an cumulées ou pour une liste de travaux dangereux définie par arrêté — à vérifier/documenter précisément avant de coder plutôt que d'approximer.
 

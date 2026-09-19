@@ -36,7 +36,8 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 4 | Quelles habilitations imposent une surveillance médicale renforcée ? | Module Santé & Visites (extension) | ✅ |
 | 5 | Quel niveau de fidélité réglementaire pour la pénibilité / C2P ? | Module Pénibilité (à construire) | ✅ réponse consignée, module pas encore construit |
 | 6 | Quelle périodicité réglementaire pour les exercices d'évacuation ? | Module Situations d'urgence (à construire) | ✅ réponse consignée, module pas encore construit |
-| 7 | Plan de prévention : seuil des 400 h et qualifications des sous-traitants | Module Entreprises extérieures (à construire) | ✅ réponse consignée, module pas encore construit |
+| 7 | Plan de prévention : seuil des 400 h et qualifications des sous-traitants | Module Entreprises extérieures | ✅ répondue, mise en œuvre le 2026-09-19 |
+| 8 | Seuil des 400 h : « plus de » ou « au moins » ? Quelle période ? | Module Entreprises extérieures (existant) | 🟠 à poser au préventeur |
 
 ---
 
@@ -229,7 +230,23 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 > - Tracer les habilitations des intervenants extérieurs : **non** — hors périmètre, sous la responsabilité contractuelle de l'entreprise extérieure.
 > - Inspection commune préalable : *« Oui, il existe une trame »* — à clarifier au moment de construire le module s'il s'agit de réutiliser la trame du module Inspection/Audit existant, ou d'une trame externe (papier) que le collègue utilise déjà et qu'il faudrait reproduire.
 
-**Reporté dans `ROADMAP-MODULES-FUTURS.md`, module 17** — ce module n'est pas encore construit ; rien à coder maintenant. Le point sur la trame de l'inspection commune reste à clarifier avec lui au moment de construire ce module.
+**Mis en œuvre le 2026-09-19 (module 17, `entreprises-exterieures.html`)** : le verdict « plan de prévention obligatoire » s'apprécie **par intervention/opération** (pas en cumul par entreprise) ; les habilitations extérieures ne sont pas tracées ; l'inspection commune est saisie par des champs intégrés simples (date, participants, risques identifiés) plutôt que via une trame d'Inspection/Audit — choix technique décidé avec l'utilisateur, en attendant de savoir de quelle « trame » parle le préventeur.
+
+---
+
+## 🟠 Question 8 — Seuil des 400 h : « plus de » ou « au moins » ? Et quelle période ?
+
+**Contexte.** Le module « Entreprises extérieures » signale « plan de prévention obligatoire » pour une intervention dont la durée estimée dépasse 400 heures (ou qui est cochée « travaux dangereux »). Le collègue a répondu que les heures se comptent *par intervention/opération, comme la réglementation le prévoit*.
+
+**Ce que fait le logiciel aujourd'hui.** Il applique « **strictement plus de** 400 h » (donc une intervention de 400 h pile n'est **pas** signalée), sur la durée estimée saisie pour l'intervention, sans fenêtre de temps. C'est la formulation de la roadmap (« au-delà de 400 h ») ; elle n'a pas été confrontée au texte réglementaire.
+
+**La question.** Confirmer :
+- une intervention de **exactement 400 h** doit-elle être signalée (« au moins 400 h ») ou non (« plus de 400 h ») ?
+- le seuil s'apprécie-t-il sur une période bornée (ex. « sur 12 mois ») pour une opération qui s'étale, ou uniquement sur la durée totale saisie de l'intervention ?
+
+### Décision
+
+> *(en attente de réponse du préventeur — non encore posée sur le Cahier en ligne)*
 
 ---
 
@@ -249,5 +266,5 @@ Ce n'est pas un défaut : le choix a été de ne pas inventer une fausse date d'
 - **Q2** : `reporting.html`, bloc `// ---- AT/MP ----`, variables `EFFECTIF`, `HEURES_AN`, `dureeAtJours`, `heures`, `tf`. Le même calcul, aligné, existe dans `registre-at-mp.html` (variable `dureeAtJours`, adaptée à son filtre par année plutôt qu'à une plage de dates).
 - **Q3** : champ `typeAtMp`, défini dans `saisie-rh.html` et affiché par `typeChip()` dans `registre-at-mp.html` ; impacte `dossiers-atmp-citis.html`.
 - **Q4** : `sante-visites.html`, fonctions `loadHabilitationsRef()`, `buildSurveillanceRenforceeMap()`, `computeStatus()` (constante `HAB_DUREE_SURVEILLANCE`, dupliquée depuis `HAB_TYPES`/`HAB_DUREE` de `formation-habilitation.html`).
-- **Q5, Q6, Q7** : modules non créés — voir `ROADMAP-MODULES-FUTURS.md` sections 5, 16 et 17.
+- **Q5** : module non créé — voir `ROADMAP-MODULES-FUTURS.md` section 5. **Q6** : `urgences-exercices.html`. **Q7/Q8** : `entreprises-exterieures.html`, constante `SEUIL_HEURES` et fonction `isPlanObligatoire()`.
 - **Point DUERP** : champ `dateEvaluation` écrit par `saisie-duerp.html` ; import sans date dans `document-unique.html`.

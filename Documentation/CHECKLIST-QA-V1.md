@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 87 points au 2026-09-19 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 93 points au 2026-09-19 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -87,6 +87,13 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Dans le Registre AT/MP, une ligne "réel : X" apparaît sous le TF/TG estimé une fois des heures saisies pour la période/le service affiché — sans heures saisies, cette ligne reste vide et le TF/TG estimé est inchangé (pas de régression visuelle).
 - [ ] Se déconnecter, se reconnecter en `AG2` (sans permission `gestion-rh`) : le lien "Gestion RH" est invisible, et taper l'URL `gestion-rh.html` directement redirige vers `dashboard.html`.
 
+### Entreprises extérieures (`RH1`/`RH2` ou `admin` — accès write d'office ; permission granulaire `entreprises-ext` pour les autres)
+- [ ] `RH1` voit "Entreprises extérieures" dans la sidebar (section "Administratif") ; créer une intervention complète (entreprise, nature, site, dates, heures estimées, inspection commune préalable avec date/participants/risques, plan de prévention en texte libre), la retrouver dans le registre, la modifier.
+- [ ] Une intervention de **plus de 400 h** affiche "Obligatoire" dans la colonne "Plan requis" ; une de 100 h affiche "Non requis". Deux interventions de la même entreprise (250 h + 200 h) restent chacune "Non requis" — le cumul de 450 h n'apparaît que comme repère indicatif dans le panneau du haut (le seuil s'apprécie par intervention, réponse du préventeur).
+- [ ] Cocher "Travaux dangereux" sur une intervention de quelques heures la fait passer à "Obligatoire" (le logiciel ne devine jamais cette liste réglementaire — c'est une case à cocher à la main).
+- [ ] Une action corrective ajoutée à une intervention apparaît dans **Plan d'Actions** avec l'origine "Prévention EE" (badge distinct des autres origines).
+- [ ] Se déconnecter, se reconnecter en `AG2` (sans permission `entreprises-ext`) : le lien "Entreprises extérieures" est invisible, et taper l'URL `entreprises-exterieures.html` directement redirige vers `dashboard.html`.
+
 ### Visibilité des données par tableau (tous rôles)
 Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le rôle" (§2) n'avait été vérifié en détail que sur le Registre AT/MP. Un point par module à tableau pour couvrir le reste — même geste à chaque fois : se connecter avec au moins deux comptes de rôles différents (ex. `RH1` puis `AG1`, ou `manager`) et vérifier que les lignes/colonnes affichées sont cohérentes avec le périmètre du rôle (scope service pour `manager`, colonnes personnelles masquées pour `ag`, etc. — voir §3 ci-dessus pour le détail attendu par rôle).
 - [ ] Registre AT/MP (`registre-at-mp.html`) — déjà vérifié en détail le 2026-09-15.
@@ -103,6 +110,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] Analyse d'accident (`accident-analyse.html`)
 - [ ] Situations d'urgence (`urgences-exercices.html`)
 - [ ] Gestion RH (`gestion-rh.html`)
+- [ ] Entreprises extérieures (`entreprises-exterieures.html`)
 
 ### Tri & filtres de colonne (Registre AT/MP)
 - [ ] Cliquer sur l'intitulé d'une colonne trie la table ; un 2ᵉ clic inverse le sens, un 3ᵉ revient à l'ordre d'origine (date décroissante). Une flèche indique le sens.

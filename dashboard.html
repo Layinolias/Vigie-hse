@@ -498,6 +498,7 @@
         <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
         <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
         <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
+        <a class="nav-item" id="navGestionRh" href="gestion-rh.html" style="display:none;"><svg class="icon"><use href="#i-users"/></svg> Gestion RH</a>
       </div>
       <div class="nav-section" id="navPilotage" style="display:none;">
         <div class="nav-label">Pilotage</div>
@@ -740,6 +741,8 @@
   if (canAccidentAnalyse){ $("navAdministratif").style.display = ""; $("navAccidentAnalyse").style.display = ""; }
   const canUrgences = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["urgences"]);
   if (canUrgences){ $("navAdministratif").style.display = ""; $("navUrgences").style.display = ""; }
+  const canGestionRh = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["gestion-rh"]);
+  if (canGestionRh){ $("navAdministratif").style.display = ""; $("navGestionRh").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });

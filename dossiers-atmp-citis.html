@@ -527,13 +527,13 @@
   if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
   if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
   $("navAdministratif").style.display = "";
-  const canAccidentAnalyse = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["accident-analyse"]);
+  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
   if (canAccidentAnalyse){ $("navAccidentAnalyse").style.display = ""; }
-  const canUrgences = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["urgences"]);
+  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
   if (canUrgences){ $("navUrgences").style.display = ""; }
-  const canGestionRh = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["gestion-rh"]);
+  const canGestionRh = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
   if (canGestionRh){ $("navGestionRh").style.display = ""; }
-  const canEntreprisesExt = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["entreprises-ext"]);
+  const canEntreprisesExt = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
   if (canEntreprisesExt){ $("navEntreprisesExt").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
   if (role === "admin"){ $("navAdminLink").style.display = ""; }

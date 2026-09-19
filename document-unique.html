@@ -554,15 +554,15 @@
   const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
   if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
   if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
-  const canAtmpAdmin = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["atmp-admin"]);
-  const canAccidentAnalyse = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["accident-analyse"]);
+  const canAtmpAdmin = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
+  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
   if (canAtmpAdmin){ $("navAdministratif").style.display = ""; $("navAtmpAdmin").style.display = ""; }
   if (canAccidentAnalyse){ $("navAdministratif").style.display = ""; $("navAccidentAnalyse").style.display = ""; }
-  const canUrgences = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["urgences"]);
+  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
   if (canUrgences){ $("navAdministratif").style.display = ""; $("navUrgences").style.display = ""; }
-  const canGestionRh = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["gestion-rh"]);
+  const canGestionRh = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
   if (canGestionRh){ $("navAdministratif").style.display = ""; $("navGestionRh").style.display = ""; }
-  const canEntreprisesExt = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["entreprises-ext"]);
+  const canEntreprisesExt = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
   if (canEntreprisesExt){ $("navAdministratif").style.display = ""; $("navEntreprisesExt").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
   if (role === "admin"){ $("navAdminLink").style.display = ""; }

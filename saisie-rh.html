@@ -449,15 +449,15 @@
   $("userRoleLabel").textContent = sessRole === "admin" ? "Administrateur" : (isRhAdmin ? "Compte RH" : "Accès déclaration AT/MP");
   if (isRhAdmin){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; $("navEvaluerDuerp").style.display = ""; }
   if (sessRole === "admin"){ $("navAdminLink").style.display = ""; }
-  const canAtmpAdmin = isRhAdmin || !!(session && session.modulePermissions && session.modulePermissions["atmp-admin"]);
-  const canAccidentAnalyse = isRhAdmin || !!(session && session.modulePermissions && session.modulePermissions["accident-analyse"]);
+  const canAtmpAdmin = isRhAdmin || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
+  const canAccidentAnalyse = isRhAdmin || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
   if (canAtmpAdmin){ $("navAdministratif").style.display = ""; $("navAtmpAdmin").style.display = ""; }
   if (canAccidentAnalyse){ $("navAdministratif").style.display = ""; $("navAccidentAnalyse").style.display = ""; }
-  const canUrgences = isRhAdmin || !!(session && session.modulePermissions && session.modulePermissions["urgences"]);
+  const canUrgences = isRhAdmin || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
   if (canUrgences){ $("navAdministratif").style.display = ""; $("navUrgences").style.display = ""; }
-  const canGestionRh = isRhAdmin || !!(session && session.modulePermissions && session.modulePermissions["gestion-rh"]);
+  const canGestionRh = isRhAdmin || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
   if (canGestionRh){ $("navAdministratif").style.display = ""; $("navGestionRh").style.display = ""; }
-  const canEntreprisesExt = isRhAdmin || !!(session && session.modulePermissions && session.modulePermissions["entreprises-ext"]);
+  const canEntreprisesExt = isRhAdmin || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
   if (canEntreprisesExt){ $("navAdministratif").style.display = ""; $("navEntreprisesExt").style.display = ""; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
@@ -664,6 +664,9 @@
       const colInput = $(a.collectivite === "Agglomération" ? "col-agglo" : "col-ville");
       if (colInput){ colInput.checked = true; populateServiceOptions(a.collectivite || "Ville"); }
       fServiceEl.value = a.service || "";
+      // Le handler 'change' active « Service (détail) » (champ required, désactivé au départ) :
+      // sans lui, ce champ reste désactivé, échappe à la validation et part en null dans le registre.
+      fServiceEl.dispatchEvent(new Event("change"));
     });
   })();
 

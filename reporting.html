@@ -512,13 +512,14 @@
     // TF "réel" (module Gestion RH) : coexiste avec le TF estimé ci-dessus, ne le remplace pas
     // (réponse Q2 du préventeur). Basé sur les heures effectivement saisies sur la période
     // affichée (tous services confondus) — "—" si aucune heure n'a été saisie.
-    const heuresReellesRaw = readKey("vigie_hse_heures_travaillees");
+    // Les heures sont saisies au mois : numérateur et dénominateur sont donc bornés au MÊME
+    // mois entiers (un AT sans date est écarté ici, comme dans l'onglet Indicateurs de Gestion RH).
     const periodeDebut = dDebut ? dDebut.slice(0,7) : "";
     const periodeFin = dFin ? dFin.slice(0,7) : "";
-    const heuresReelles = heuresReellesRaw
-      .filter(h => (!periodeDebut || h.periode >= periodeDebut) && (!periodeFin || h.periode <= periodeFin))
-      .reduce((s,h) => s + (Number(h.heures)||0), 0);
-    const tfReel = VigieFormules.tauxFrequenceReel(atAvec, heuresReelles);
+    const atAvecReel = ATMP_ALL.filter(r => r.arret && r.dateAT &&
+      (!periodeDebut || r.dateAT.slice(0,7) >= periodeDebut) && (!periodeFin || r.dateAT.slice(0,7) <= periodeFin)).length;
+    const heuresReelles = VigieFormules.sommeHeures(readKey("vigie_hse_heures_travaillees"), { debut: periodeDebut, fin: periodeFin });
+    const tfReel = VigieFormules.tauxFrequenceReel(atAvecReel, heuresReelles);
     $("kpiTfReel").textContent = tfReel === null ? "—" : tfReel.toFixed(1);
 
     // ---- DUERP ----

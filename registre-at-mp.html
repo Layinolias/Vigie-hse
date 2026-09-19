@@ -508,15 +508,15 @@
   const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
   if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
   if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
-  const canAtmpAdmin = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["atmp-admin"]);
-  const canAccidentAnalyse = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["accident-analyse"]);
+  const canAtmpAdmin = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
+  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
   if (canAtmpAdmin){ $("navAdministratif").style.display = ""; $("navAtmpAdmin").style.display = ""; }
   if (canAccidentAnalyse){ $("navAdministratif").style.display = ""; $("navAccidentAnalyse").style.display = ""; }
-  const canUrgences = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["urgences"]);
+  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
   if (canUrgences){ $("navAdministratif").style.display = ""; $("navUrgences").style.display = ""; }
-  const canGestionRh = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["gestion-rh"]);
+  const canGestionRh = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
   if (canGestionRh){ $("navAdministratif").style.display = ""; $("navGestionRh").style.display = ""; }
-  const canEntreprisesExt = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["entreprises-ext"]);
+  const canEntreprisesExt = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
   if (canEntreprisesExt){ $("navAdministratif").style.display = ""; $("navEntreprisesExt").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
@@ -789,15 +789,23 @@
     $("kpiTf").textContent = tf.toFixed(1);
     $("kpiTg").textContent = tg.toFixed(2);
     // TF/TG "réel" (module Gestion RH) : coexiste avec l'estimé ci-dessus, ne le remplace pas
-    // (réponse Q2 du préventeur). Basé sur les heures effectivement saisies pour le même
-    // périmètre service/année que le filtre courant — "—" si aucune heure n'a été saisie.
-    let heuresReellesLet = [];
-    try { const raw = localStorage.getItem("vigie_hse_heures_travaillees"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) heuresReellesLet = p; } } catch(e){}
-    const heuresReelles = heuresReellesLet
-      .filter(h => (svc === "all" || h.service === svc) && (yr === "all" || h.periode.slice(0,4) === yr))
-      .reduce((s,h) => s + (Number(h.heures)||0), 0);
-    const tfReel = VigieFormules.tauxFrequenceReel(avecCount, heuresReelles);
-    const tgReel = VigieFormules.tauxGraviteReel(joursSum, heuresReelles);
+    // (réponse Q2 du préventeur). Numérateur ET dénominateur sur le même périmètre
+    // (collectivité, service, année, services du manager scopé) : les filtres "arrêt" et de
+    // colonne n'entrent pas ici, ils ne concernent pas les heures. "—" si aucune heure saisie.
+    let heuresSaisies = [];
+    try { const raw = localStorage.getItem("vigie_hse_heures_travaillees"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) heuresSaisies = p; } } catch(e){}
+    const atPerimetre = DATASET.filter(d =>
+      (col === "all" || (d.collectivite || "Ville") === col) &&
+      (svc === "all" || d.service === svc) &&
+      (yr === "all" || (d.dateAT || "").slice(0,4) === yr)
+    );
+    const avecReel = atPerimetre.filter(r => r.arret).length;
+    const joursReel = atPerimetre.reduce((s,r) => s + (Number(r.joursArret)||0), 0);
+    const heuresReelles = VigieFormules.sommeHeures(heuresSaisies, {
+      annee: yr === "all" ? "" : yr, service: svc, collectivite: col, services: myServices,
+    });
+    const tfReel = VigieFormules.tauxFrequenceReel(avecReel, heuresReelles);
+    const tgReel = VigieFormules.tauxGraviteReel(joursReel, heuresReelles);
     $("kpiTfReel").textContent = tfReel === null ? "" : `réel : ${tfReel.toFixed(1)}`;
     $("kpiTgReel").textContent = tgReel === null ? "" : `réel : ${tgReel.toFixed(2)}`;
     $("resultCount").textContent = total;

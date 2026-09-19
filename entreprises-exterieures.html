@@ -474,10 +474,10 @@
   const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
   if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
   if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
-  const canAtmpAdmin = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["atmp-admin"]);
-  const canAccidentAnalyse = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["accident-analyse"]);
-  const canUrgences = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["urgences"]);
-  const canGestionRh = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["gestion-rh"]);
+  const canAtmpAdmin = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
+  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
+  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
+  const canGestionRh = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
   if (canAtmpAdmin){ $("navAtmpAdmin").style.display = ""; }
   if (canAccidentAnalyse){ $("navAccidentAnalyse").style.display = ""; }
   if (canUrgences){ $("navUrgences").style.display = ""; }
@@ -562,6 +562,13 @@
   }
   let DATASET = loadDataset();
   if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
+  // Un manager scopé ne voit (et ne modifie) que ses services : on réécrit donc SA part et on
+  // conserve telles quelles les interventions des autres services (sinon elles seraient effacées).
+  function persistDataset(){
+    let stored = [];
+    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    saveDataset(isScoped ? stored.filter(r => !myServices.includes(r.service)).concat(DATASET) : DATASET);
+  }
 
   // ---------- Seuil des 400h — apprécié PAR INTERVENTION (réponse Q7 du préventeur) ----------
   // Le verdict "plan de prévention obligatoire" se lit sur chaque intervention/opération
@@ -701,14 +708,29 @@
         ${canEeWrite ? `<button type="button" class="act-del" data-remove-action="${i}">Suppr.</button>` : ''}
       </div>`).join("") || `<div style="font-size:12px;color:var(--text-faint)">Aucune action corrective enregistrée.</div>`;
   }
+  // Relit les champs saisis avant de reconstruire la liste : sinon un ajout/une suppression de
+  // ligne re-rend depuis currentActions, encore vide, et efface le texte déjà tapé.
+  function syncActionsFromDom(){
+    $("actionsList").querySelectorAll(".dyn-row").forEach((row, i) => {
+      if (!currentActions[i]) return;
+      currentActions[i] = {
+        id: currentActions[i].id,
+        description: row.querySelector(".act-description").value.trim(),
+        responsable: row.querySelector(".act-responsable").value.trim(),
+        echeance: row.querySelector(".act-echeance").value,
+        statut: row.querySelector(".act-statut").value,
+      };
+    });
+  }
   $("btnAddAction").addEventListener("click", () => {
     if (!canEeWrite) return;
+    syncActionsFromDom();
     currentActions.push({ id: genId("act"), description:"", responsable:"", echeance:"", statut:"À faire" });
     renderActionsList();
   });
   $("actionsList").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-remove-action]");
-    if (btn){ currentActions.splice(Number(btn.dataset.removeAction), 1); renderActionsList(); }
+    if (btn){ syncActionsFromDom(); currentActions.splice(Number(btn.dataset.removeAction), 1); renderActionsList(); }
   });
 
   // ---------- Création / édition ----------
@@ -803,7 +825,7 @@
     const idx = DATASET.findIndex(d => d.id === rec.id);
     if (idx >= 0){ DATASET[idx] = rec; logAudit("Entreprises extérieures", "Modification", `Intervention ${rec.entrepriseNom} — ${rec.site}`); }
     else { DATASET.push(rec); logAudit("Entreprises extérieures", "Création", `Intervention ${rec.entrepriseNom} — ${rec.site}`); }
-    saveDataset(DATASET);
+    persistDataset();
     formPanel.style.display = "none";
     form.reset();
     fillEntrepriseOptions();
@@ -819,7 +841,7 @@
       if (!rec) return;
       if (confirm(`Supprimer l'intervention « ${rec.entrepriseNom} » (${rec.site}) ?`)){
         DATASET = DATASET.filter(d => d.id !== rec.id);
-        saveDataset(DATASET);
+        persistDataset();
         logAudit("Entreprises extérieures", "Suppression", `Intervention ${rec.entrepriseNom} — ${rec.site}`);
         fillEntrepriseOptions();
         render();

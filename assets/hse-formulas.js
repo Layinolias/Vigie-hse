@@ -28,4 +28,20 @@ window.VigieFormules = {
   tauxGraviteReel(joursArretSum, heuresReelles){
     return heuresReelles ? (joursArretSum * 1000 / heuresReelles) : null;
   },
+  // Somme des heures saisies (vigie_hse_heures_travaillees) pour un périmètre. Un seul jeu de
+  // filtres partagé par registre-at-mp, reporting et gestion-rh : le dénominateur du TF réel
+  // doit toujours couvrir le même périmètre que son numérateur.
+  // f = { debut, fin ("YYYY-MM"), annee ("YYYY"), service, collectivite ("all" = tous),
+  //       services (liste d'un manager scopé ; ["*"] ou absente = tous) }
+  sommeHeures(heures, f){
+    f = f || {};
+    return (heures || []).filter(h => {
+      const p = String(h.periode || "");
+      return (!f.debut || p >= f.debut) && (!f.fin || p <= f.fin) &&
+        (!f.annee || p.slice(0,4) === f.annee) &&
+        (!f.service || f.service === "all" || h.service === f.service) &&
+        (!f.collectivite || f.collectivite === "all" || h.collectivite === f.collectivite) &&
+        (!f.services || f.services.includes("*") || f.services.includes(h.service));
+    }).reduce((s, h) => s + (Number(h.heures) || 0), 0);
+  },
 };

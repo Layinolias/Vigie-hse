@@ -527,13 +527,13 @@
   const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
   if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
   if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
-  const canAtmpAdmin = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["atmp-admin"]);
-  const canAccidentAnalyse = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["accident-analyse"]);
-  const canUrgences = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["urgences"]);
+  const canAtmpAdmin = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
+  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
+  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
   if (canAtmpAdmin){ $("navAtmpAdmin").style.display = ""; }
   if (canAccidentAnalyse){ $("navAccidentAnalyse").style.display = ""; }
   if (canUrgences){ $("navUrgences").style.display = ""; }
-  const canEntreprisesExt = role === "admin" || role === "rh" || !!(session && session.modulePermissions && session.modulePermissions["entreprises-ext"]);
+  const canEntreprisesExt = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
   if (canEntreprisesExt){ $("navEntreprisesExt").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
@@ -609,7 +609,13 @@
   // ---------- Dataset Agents (always-merge, CRUD classique) ----------
   const AGENTS_KEY = "vigie_hse_agents";
   function genId(prefix){ return (prefix || "ag") + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-  function saveAgents(ds){ try { localStorage.setItem(AGENTS_KEY, JSON.stringify(ds)); } catch(e){} }
+  // Un manager scopé ne voit (et ne modifie) que ses services : on réécrit donc SA part et on
+  // conserve telles quelles les données des autres services (sinon elles seraient effacées).
+  function persistScoped(key, stored, visible){
+    const out = isScoped ? stored.filter(r => !myServices.includes(r.service)).concat(visible) : visible;
+    try { localStorage.setItem(key, JSON.stringify(out)); } catch(e){}
+  }
+  function saveAgents(ds){ persistScoped(AGENTS_KEY, loadAgents(), ds); }
   function loadAgents(){
     try { const raw = localStorage.getItem(AGENTS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
     return [];
@@ -619,7 +625,7 @@
 
   // ---------- Dataset Heures travaillées (append-only, saisie agrégée) ----------
   const HEURES_KEY = "vigie_hse_heures_travaillees";
-  function saveHeures(ds){ try { localStorage.setItem(HEURES_KEY, JSON.stringify(ds)); } catch(e){} }
+  function saveHeures(ds){ persistScoped(HEURES_KEY, loadHeures(), ds); }
   function loadHeures(){
     try { const raw = localStorage.getItem(HEURES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
     return [];
@@ -767,7 +773,6 @@
     agentFormPanel.style.display = "none";
     agentForm.reset();
     renderAgents();
-    renderOrgTree();
   });
 
   $("agentTbody").addEventListener("click", (e) => {
@@ -783,7 +788,6 @@
         saveAgents(AGENTS);
         logAudit("Gestion RH", "Suppression", `Agent ${rec.nom} ${rec.prenom}`);
         renderAgents();
-        renderOrgTree();
       }
     }
   });
@@ -800,9 +804,11 @@
   // ==================== ONGLET ORGANIGRAMME ====================
   function renderOrgTree(){
     const active = AGENTS.filter(a => a.actif !== false);
+    const activeIds = new Set(active.map(a => a.id));
+    const nameById = new Map(AGENTS.map(a => [a.id, a.nom + " " + a.prenom]));
     const byManager = new Map();
     active.forEach(a => {
-      const key = a.managerId && active.some(x => x.id === a.managerId) ? a.managerId : "";
+      const key = a.managerId && activeIds.has(a.managerId) ? a.managerId : "";
       if (!byManager.has(key)) byManager.set(key, []);
       byManager.get(key).push(a);
     });
@@ -812,7 +818,7 @@
         <div class="org-node">
           <span class="org-node-name">${a.nom} ${a.prenom}</span>
           <span class="org-node-svc">${a.service}</span>
-          ${canGestionRhWrite ? `<select data-reassign="${a.id}">${fillManagerOptions(a.id, a.managerId || "")}</select>` : ''}
+          ${canGestionRhWrite ? `<select data-reassign="${a.id}" data-current="${a.managerId || ''}"><option value="${a.managerId || ''}" selected>${a.managerId ? (nameById.get(a.managerId) || '—') : '— Aucun (sommet)'}</option></select>` : ''}
         </div>
         ${children.length ? `<ul>${children.map(renderNode).join("")}</ul>` : ''}
       </li>`;
@@ -820,6 +826,15 @@
     const roots = (byManager.get("") || []).sort((x,y) => (x.nom||"").localeCompare(y.nom||"", 'fr'));
     $("orgTree").innerHTML = roots.length ? roots.map(renderNode).join("") : `<li style="color:var(--text-faint);font-size:13px;padding:12px 0;">Aucun agent actif enregistré pour le moment.</li>`;
   }
+  // La liste complète des responsables possibles n'est construite qu'à l'ouverture d'un select
+  // (un <select> plein par agent coûterait n² <option> à chaque rendu de l'arbre).
+  function fillOrgSelect(sel){
+    if (!sel || sel.dataset.filled) return;
+    sel.innerHTML = fillManagerOptions(sel.dataset.reassign, sel.dataset.current || "");
+    sel.dataset.filled = "1";
+  }
+  $("orgTree").addEventListener("mousedown", (e) => fillOrgSelect(e.target.closest("[data-reassign]")));
+  $("orgTree").addEventListener("focusin", (e) => fillOrgSelect(e.target.closest("[data-reassign]")));
   $("orgTree").addEventListener("change", (e) => {
     const sel = e.target.closest("[data-reassign]");
     if (!sel) return;
@@ -900,10 +915,11 @@
   // ==================== ONGLET INDICATEURS ====================
   $("iFService").innerHTML += allServicesSorted().map(s => `<option value="${s}">${s}</option>`).join("");
   function periodeInRange(periode, debut, fin){ return (!debut || periode >= debut) && (!fin || periode <= fin); }
-  function sommeReel(debut, fin, service){
-    const heuresReelles = HEURES.filter(h => periodeInRange(h.periode, debut, fin) && (service === "all" || h.service === service))
-      .reduce((s,h) => s + (Number(h.heures)||0), 0);
-    const atmp = loadAtmpDataset().filter(r => {
+  // `atmpAll` est lu et scopé UNE fois par rendu (renderIndicateurs) : HEURES est déjà limité aux
+  // services du manager, les AT doivent donc l'être aussi pour rester sur le même périmètre.
+  function sommeReel(debut, fin, service, atmpAll){
+    const heuresReelles = VigieFormules.sommeHeures(HEURES, { debut, fin, service });
+    const atmp = atmpAll.filter(r => {
       if (!r.dateAT) return false;
       const p = r.dateAT.slice(0,7);
       return periodeInRange(p, debut, fin) && (service === "all" || r.service === service);
@@ -919,18 +935,20 @@
   function fmtTaux(v){ return v === null ? "—" : v.toFixed(2); }
   function renderIndicateurs(){
     const debut = $("iFDebut").value, fin = $("iFFin").value, svc = $("iFService").value;
-    const r = sommeReel(debut, fin, svc);
+    let atmpAll = loadAtmpDataset();
+    if (isScoped){ atmpAll = atmpAll.filter(r => myServices.includes(r.service)); }
+    const r = sommeReel(debut, fin, svc, atmpAll);
     $("indHeures").textContent = r.heuresReelles ? r.heuresReelles.toLocaleString('fr-FR') : "—";
     $("indAtAvec").textContent = r.heuresReelles ? r.atAvec : "—";
     $("indTf").textContent = fmtTaux(r.tf);
     $("indTg").textContent = fmtTaux(r.tg);
 
-    const rowsByService = allServicesSorted().map(s => Object.assign({ service:s }, sommeReel(debut, fin, s))).filter(x => x.heuresReelles > 0);
+    const rowsByService = allServicesSorted().map(s => Object.assign({ service:s }, sommeReel(debut, fin, s, atmpAll))).filter(x => x.heuresReelles > 0);
     $("indTbody").innerHTML = rowsByService.length ? rowsByService.map(x => `
       <tr><td>${x.service}</td><td>${x.heuresReelles.toLocaleString('fr-FR')}</td><td>${x.atAvec}</td><td>${fmtTaux(x.tf)}</td><td>${fmtTaux(x.tg)}</td></tr>
     `).join("") : `<tr class="empty-row"><td colspan="5">Aucune heure saisie pour la période sélectionnée.</td></tr>`;
 
-    const globalReel = sommeReel("", "", "all");
+    const globalReel = sommeReel("", "", "all", atmpAll);
     $("kpiTfReel").textContent = fmtTaux(globalReel.tf);
   }
   $("iFDebut").addEventListener("change", renderIndicateurs);

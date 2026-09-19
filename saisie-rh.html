@@ -2,6 +2,7 @@
 <meta name="description" content="Espace RH — création et modification des cas d'accident du travail ou de maladie professionnelle du Registre AT/MP.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="assets/roster.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -647,28 +648,18 @@
   });
 
   // ---------- Sélecteur d'agent (roster canonique, module Gestion RH) ----------
-  // Additif : pré-remplit nom/prénom/collectivité/service à partir de vigie_hse_agents,
-  // mais la saisie libre reste toujours possible (agent pas encore répertorié).
-  (function(){
-    let agents = [];
-    try { const raw = localStorage.getItem("vigie_hse_agents"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) agents = p; } } catch(e){}
-    agents = agents.filter(a => a.actif !== false).sort((a,b) => (a.nom||"").localeCompare(b.nom||"", 'fr'));
-    const picker = $("fAgentPicker");
-    if (!picker || !agents.length) return;
-    picker.innerHTML = `<option value="">— Saisie libre —</option>` + agents.map(a => `<option value="${a.id}">${a.nom} ${a.prenom} — ${a.service}</option>`).join("");
-    picker.addEventListener("change", () => {
-      const a = agents.find(x => x.id === picker.value);
-      if (!a) return;
-      $("fNom").value = a.nom;
-      $("fPrenom").value = a.prenom;
-      const colInput = $(a.collectivite === "Agglomération" ? "col-agglo" : "col-ville");
-      if (colInput){ colInput.checked = true; populateServiceOptions(a.collectivite || "Ville"); }
-      fServiceEl.value = a.service || "";
-      // Le handler 'change' active « Service (détail) » (champ required, désactivé au départ) :
-      // sans lui, ce champ reste désactivé, échappe à la validation et part en null dans le registre.
-      fServiceEl.dispatchEvent(new Event("change"));
-    });
-  })();
+  // Additif : pré-remplit nom/prénom/collectivité/service (agents du périmètre du compte),
+  // la saisie libre reste toujours possible (agent pas encore répertorié). Logique partagée : assets/roster.js.
+  VigieRoster.bindAgentPicker($("fAgentPicker"), (session && session.services) || ["*"], (a) => {
+    $("fNom").value = a.nom;
+    $("fPrenom").value = a.prenom;
+    const colInput = $(a.collectivite === "Agglomération" ? "col-agglo" : "col-ville");
+    if (colInput){ colInput.checked = true; populateServiceOptions(a.collectivite || "Ville"); }
+    fServiceEl.value = a.service || "";
+    // Le handler 'change' active « Service (détail) » (champ required, désactivé au départ) :
+    // sans lui, ce champ reste désactivé, échappe à la validation et part en null dans le registre.
+    fServiceEl.dispatchEvent(new Event("change"));
+  });
 
   const fDateDebutArret = $("fDateDebutArret"), fDateFinArret = $("fDateFinArret"), fJoursCalc = $("fJoursCalc");
   function computeJoursArret(){

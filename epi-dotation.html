@@ -1185,24 +1185,14 @@
     $("dotCollectivite").addEventListener("change", (e) => fillDotFormServices(e.target.value));
 
     // ---------- Sélecteur d'agent (roster canonique, module Gestion RH) ----------
-    // Additif : pré-remplit nom/prénom/collectivité/service, la saisie libre reste possible.
-    (function(){
-      let agentsRoster = [];
-      try { const raw = localStorage.getItem("vigie_hse_agents"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) agentsRoster = p; } } catch(e){}
-      agentsRoster = agentsRoster.filter(a => a.actif !== false).sort((a,b) => (a.nom||"").localeCompare(b.nom||"", 'fr'));
-      const picker = $("dotAgentPicker");
-      if (!picker || !agentsRoster.length) return;
-      picker.innerHTML = `<option value="">— Saisie libre —</option>` + agentsRoster.map(a => `<option value="${a.id}">${a.nom} ${a.prenom} — ${a.service}</option>`).join("");
-      picker.addEventListener("change", () => {
-        const a = agentsRoster.find(x => x.id === picker.value);
-        if (!a) return;
-        $("dotNom").value = a.nom;
-        $("dotPrenom").value = a.prenom;
-        $("dotCollectivite").value = a.collectivite || "Ville";
-        fillDotFormServices(a.collectivite || "Ville");
-        $("dotService").value = a.service || "";
-      });
-    })();
+    // Additif : pré-remplit nom/prénom/collectivité/service (agents de vos services), saisie libre possible.
+    VigieRoster.bindAgentPicker($("dotAgentPicker"), myServices, (a) => {
+      $("dotNom").value = a.nom;
+      $("dotPrenom").value = a.prenom;
+      $("dotCollectivite").value = a.collectivite || "Ville";
+      fillDotFormServices(a.collectivite || "Ville");
+      $("dotService").value = a.service || "";
+    });
 
     function openDotForm(rec){
       dotForm.reset();

@@ -429,6 +429,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -777,7 +778,7 @@
     const prioCls = { "Critique":"p-critique", "Haute":"p-haute", "Moyenne":"p-moyenne", "Basse":"p-basse" };
     tbody.innerHTML = rows.map(a => `
       <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${a.id}">
-        <td class="wrap">${a.titre}</td>
+        <td class="wrap">${esc(a.titre)}</td>
         <td>${a.service}</td>
         <td><span class="origine-chip ${a.origine === 'DUERP' ? 'duerp' : (a.origine === 'Inspection' ? 'inspection' : (a.origine === 'Analyse' ? 'analyse' : (a.origine === 'Urgence' ? 'urgence' : (a.origine === 'Prévention EE' ? 'ee' : 'manuel'))))}">${a.origine}</span></td>
         <td>${a.responsable || '<span style="color:var(--text-faint)">—</span>'}</td>

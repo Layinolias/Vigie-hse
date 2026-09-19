@@ -438,6 +438,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -599,14 +600,14 @@
     const col = fCollectivite.value;
     const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
     const current = fService.value;
-    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
   }
   fillServiceOptions();
   function fillEntrepriseOptions(){
     const list = [...new Set(DATASET.map(r => r.entrepriseNom).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
     const current = fEntreprise.value;
-    fEntreprise.innerHTML = `<option value="all">Toutes</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fEntreprise.innerHTML = `<option value="all">Toutes</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     fEntreprise.value = list.includes(current) ? current : "all";
   }
   fillEntrepriseOptions();
@@ -637,7 +638,7 @@
     }
     $("seuilTable").innerHTML =
       `<thead><tr><th>Entreprise</th><th>Année</th><th>Interventions</th><th>Heures cumulées (indicatif)</th><th>Plans obligatoires</th></tr></thead><tbody>` +
-      cumuls.map(g => `<tr><td>${g.entrepriseNom}</td><td>${g.annee}</td><td>${g.interventions}</td><td>${g.heures.toFixed(1)} h</td><td><span class="chip ${g.obligatoires ? 'late' : 'ok'}">${g.obligatoires ? g.obligatoires + ' obligatoire(s)' : 'Aucun'}</span></td></tr>`).join("") +
+      cumuls.map(g => `<tr><td>${esc(g.entrepriseNom)}</td><td>${g.annee}</td><td>${g.interventions}</td><td>${g.heures.toFixed(1)} h</td><td><span class="chip ${g.obligatoires ? 'late' : 'ok'}">${g.obligatoires ? g.obligatoires + ' obligatoire(s)' : 'Aucun'}</span></td></tr>`).join("") +
       `</tbody>`;
   }
 
@@ -668,10 +669,10 @@
       const obligatoire = isPlanObligatoire(r);
       return `
       <tr data-id="${r.id}">
-        <td>${r.entrepriseNom}</td>
-        <td>${r.natureIntervention}</td>
-        <td>${r.site}</td>
-        <td>${r.service}</td>
+        <td>${esc(r.entrepriseNom)}</td>
+        <td>${esc(r.natureIntervention)}</td>
+        <td>${esc(r.site)}</td>
+        <td>${esc(r.service)}</td>
         <td>${r.dateDebut || '—'}</td>
         <td>${r.dateFin || '—'}</td>
         <td>${Number(r.heuresEstimees).toFixed(1)} h</td>
@@ -697,8 +698,8 @@
   function renderActionsList(){
     $("actionsList").innerHTML = currentActions.map((a, i) => `
       <div class="dyn-row" data-idx="${i}">
-        <input type="text" class="act-description" placeholder="Action corrective…" value="${(a.description||'').replace(/"/g,'&quot;')}" style="flex:2 1 220px;" ${canEeWrite ? '' : 'disabled'}>
-        <input type="text" class="act-responsable" placeholder="Responsable" value="${(a.responsable||'').replace(/"/g,'&quot;')}" ${canEeWrite ? '' : 'disabled'}>
+        <input type="text" class="act-description" placeholder="Action corrective…" value="${esc(a.description)}" style="flex:2 1 220px;" ${canEeWrite ? '' : 'disabled'}>
+        <input type="text" class="act-responsable" placeholder="Responsable" value="${esc(a.responsable)}" ${canEeWrite ? '' : 'disabled'}>
         <input type="date" class="act-echeance" value="${a.echeance || ''}" ${canEeWrite ? '' : 'disabled'}>
         <select class="act-statut" ${canEeWrite ? '' : 'disabled'}>
           <option value="À faire" ${(a.statut||"À faire") === "À faire" ? "selected" : ""}>À faire</option>
@@ -738,7 +739,7 @@
   function fillFormServiceOptions(col){
     let list = servicesForCollectivite(col);
     if (isScoped) list = list.filter(s => myServices.includes(s));
-    $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+    $("fServiceForm").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
   }
   fillFormServiceOptions("Ville");
   $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));

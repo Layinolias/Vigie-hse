@@ -687,14 +687,29 @@
         ${canAnalyseWrite ? `<button type="button" class="act-del" data-remove-action="${i}">Suppr.</button>` : ''}
       </div>`).join("") || `<div style="font-size:12px;color:var(--text-faint)">Aucune action corrective enregistrée.</div>`;
   }
+  // Relit les champs saisis avant de reconstruire la liste : sinon un ajout/une suppression de
+  // ligne re-rend depuis currentActions, encore vide, et efface le texte déjà tapé.
+  function syncActionsFromDom(){
+    $("actionsList").querySelectorAll(".dyn-row").forEach((row, i) => {
+      if (!currentActions[i]) return;
+      currentActions[i] = {
+        id: currentActions[i].id,
+        description: row.querySelector(".act-description").value.trim(),
+        responsable: row.querySelector(".act-responsable").value.trim(),
+        echeance: row.querySelector(".act-echeance").value,
+        statut: row.querySelector(".act-statut").value,
+      };
+    });
+  }
   $("btnAddAction").addEventListener("click", () => {
     if (!canAnalyseWrite) return;
+    syncActionsFromDom();
     currentActions.push({ id: genId("act"), description:"", responsable:"", echeance:"", statut:"À faire" });
     renderActionsList();
   });
   $("actionsList").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-remove-action]");
-    if (btn){ currentActions.splice(Number(btn.dataset.removeAction), 1); renderActionsList(); }
+    if (btn){ syncActionsFromDom(); currentActions.splice(Number(btn.dataset.removeAction), 1); renderActionsList(); }
   });
 
   function updateMethodSections(){

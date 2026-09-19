@@ -491,6 +491,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -656,7 +657,7 @@
     const col = aFCollectivite.value;
     const list = col === "all" ? allServicesSorted() : servicesForCollectivite(col);
     const current = aFService.value;
-    aFService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    aFService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     aFService.value = list.includes(current) ? current : "all";
   }
   fillAgentFilterServices();
@@ -694,8 +695,8 @@
     }
     tbody.innerHTML = rows.map(a => `
       <tr data-id="${a.id}">
-        <td>${a.nom}</td><td>${a.prenom}</td><td>${a.service}</td><td>${a.collectivite}</td>
-        <td>${a.managerId ? agentName(a.managerId) : '—'}</td>
+        <td>${esc(a.nom)}</td><td>${esc(a.prenom)}</td><td>${esc(a.service)}</td><td>${esc(a.collectivite)}</td>
+        <td>${a.managerId ? esc(agentName(a.managerId)) : '—'}</td>
         <td><span class="chip ${a.actif !== false ? 'ok' : 'off'}">${a.actif !== false ? 'Actif' : 'Inactif'}</span></td>
         ${canGestionRhWrite ? `<td class="actions-float">
           <button type="button" class="act-edit" data-edit="${a.id}">Modifier</button>
@@ -712,7 +713,7 @@
   function fillAgentFormServices(col){
     let list = servicesForCollectivite(col);
     if (isScoped) list = list.filter(s => myServices.includes(s));
-    $("agFService").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+    $("agFService").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
   }
   fillAgentFormServices("Ville");
   $("agFCollectivite").addEventListener("change", (e) => fillAgentFormServices(e.target.value));
@@ -720,9 +721,9 @@
   function fillManagerOptions(excludeId, selectedId){
     const excluded = excludeId ? getDescendantIds(excludeId) : new Set();
     if (excludeId) excluded.add(excludeId);
-    const opts = AGENTS.filter(a => a.actif !== false && !excluded.has(a.id))
+    const opts = AGENTS.filter(a => (a.actif !== false || a.id === selectedId) && !excluded.has(a.id))
       .sort((a,b) => (a.nom||"").localeCompare(b.nom||"", 'fr'))
-      .map(a => `<option value="${a.id}" ${a.id === selectedId ? 'selected' : ''}>${a.nom} ${a.prenom} — ${a.service}</option>`).join("");
+      .map(a => `<option value="${esc(a.id)}" ${a.id === selectedId ? 'selected' : ''}>${esc(a.nom)} ${esc(a.prenom)} — ${esc(a.service)}</option>`).join("");
     return `<option value="" ${selectedId ? '' : 'selected'}>— Aucun (sommet)</option>` + opts;
   }
 
@@ -816,9 +817,9 @@
       const children = (byManager.get(a.id) || []).sort((x,y) => (x.nom||"").localeCompare(y.nom||"", 'fr'));
       return `<li>
         <div class="org-node">
-          <span class="org-node-name">${a.nom} ${a.prenom}</span>
-          <span class="org-node-svc">${a.service}</span>
-          ${canGestionRhWrite ? `<select data-reassign="${a.id}" data-current="${a.managerId || ''}"><option value="${a.managerId || ''}" selected>${a.managerId ? (nameById.get(a.managerId) || '—') : '— Aucun (sommet)'}</option></select>` : ''}
+          <span class="org-node-name">${esc(a.nom)} ${esc(a.prenom)}</span>
+          <span class="org-node-svc">${esc(a.service)}</span>
+          ${canGestionRhWrite ? `<select data-reassign="${a.id}" data-current="${a.managerId || ''}"><option value="${a.managerId || ''}" selected>${a.managerId ? esc(nameById.get(a.managerId) || '—') : '— Aucun (sommet)'}</option></select>` : ''}
         </div>
         ${children.length ? `<ul>${children.map(renderNode).join("")}</ul>` : ''}
       </li>`;
@@ -860,7 +861,7 @@
   function fillHeuresFormServices(col){
     let list = servicesForCollectivite(col);
     if (isScoped) list = list.filter(s => myServices.includes(s));
-    $("hFService").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+    $("hFService").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
   }
   fillHeuresFormServices("Ville");
   $("hFCollectivite").addEventListener("change", (e) => fillHeuresFormServices(e.target.value));
@@ -876,8 +877,8 @@
     }
     tbody.innerHTML = rows.map(h => `
       <tr data-id="${h.id}">
-        <td>${h.periode}</td><td>${h.collectivite}</td><td>${h.service}</td>
-        <td>${Number(h.heures).toLocaleString('fr-FR')}</td><td>${h.auteur || '—'}</td>
+        <td>${esc(h.periode)}</td><td>${esc(h.collectivite)}</td><td>${esc(h.service)}</td>
+        <td>${Number(h.heures).toLocaleString('fr-FR')}</td><td>${esc(h.auteur || '—')}</td>
         ${canGestionRhWrite ? `<td class="actions-float"><button type="button" class="act-del" data-id="${h.id}">Suppr.</button></td>` : '<td></td>'}
       </tr>`).join("");
   }
@@ -913,7 +914,7 @@
   });
 
   // ==================== ONGLET INDICATEURS ====================
-  $("iFService").innerHTML += allServicesSorted().map(s => `<option value="${s}">${s}</option>`).join("");
+  $("iFService").innerHTML += allServicesSorted().map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
   function periodeInRange(periode, debut, fin){ return (!debut || periode >= debut) && (!fin || periode <= fin); }
   // `atmpAll` est lu et scopé UNE fois par rendu (renderIndicateurs) : HEURES est déjà limité aux
   // services du manager, les AT doivent donc l'être aussi pour rester sur le même périmètre.
@@ -945,7 +946,7 @@
 
     const rowsByService = allServicesSorted().map(s => Object.assign({ service:s }, sommeReel(debut, fin, s, atmpAll))).filter(x => x.heuresReelles > 0);
     $("indTbody").innerHTML = rowsByService.length ? rowsByService.map(x => `
-      <tr><td>${x.service}</td><td>${x.heuresReelles.toLocaleString('fr-FR')}</td><td>${x.atAvec}</td><td>${fmtTaux(x.tf)}</td><td>${fmtTaux(x.tg)}</td></tr>
+      <tr><td>${esc(x.service)}</td><td>${x.heuresReelles.toLocaleString('fr-FR')}</td><td>${x.atAvec}</td><td>${fmtTaux(x.tf)}</td><td>${fmtTaux(x.tg)}</td></tr>
     `).join("") : `<tr class="empty-row"><td colspan="5">Aucune heure saisie pour la période sélectionnée.</td></tr>`;
 
     const globalReel = sommeReel("", "", "all", atmpAll);

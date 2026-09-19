@@ -163,7 +163,7 @@
   .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
   .field{ display:flex; flex-direction:column; gap:5px; }
   .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
-  select, input[type="text"], input[type="date"], input[type="number"], textarea{
+  select, input[type="text"], input[type="date"], input[type="time"], input[type="number"], textarea{
     appearance:none; -webkit-appearance:none;
     background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
     padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease;
@@ -213,6 +213,50 @@
   .act-del:hover{ text-decoration:underline; }
   .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
   .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+
+  /* ---------- Onglets (même pattern qu'epi-dotation.html) ---------- */
+  .sv-tabs{ display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .sv-tab{ display:flex; align-items:center; gap:7px; padding:10px 15px; font:600 13px "IBM Plex Sans",sans-serif; color:var(--text-muted); background:none; border:none; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  .sv-tab:hover{ color:var(--text); }
+  .sv-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .sv-tab .icon{ width:15px; height:15px; }
+  .tab-panel{ display:none; }
+  .tab-panel.show{ display:block; }
+  .act-plan{ color:var(--accent-violet); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; margin-right:10px; }
+  .act-plan:hover{ text-decoration:underline; }
+  table.reg thead th#thActionsRdv{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
+
+  /* ---------- Agenda mensuel ---------- */
+  .agenda-nav{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .agenda-nav .btn{ padding:7px 12px; }
+  .agenda-grid{ display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--r-md); overflow:hidden; }
+  .ag-head{ background:var(--bg-2); padding:7px 8px; font-size:11px; font-weight:600; color:var(--text-muted); text-align:center; text-transform:uppercase; letter-spacing:.04em; }
+  .ag-cell{ background:var(--surface-el); min-height:96px; padding:5px 6px 6px; display:flex; flex-direction:column; gap:3px; cursor:pointer; }
+  .ag-cell.empty{ background:var(--bg-2); cursor:default; }
+  .ag-cell:hover:not(.empty){ background:var(--bg-2); }
+  .ag-cell.today .ag-num{ background:var(--accent); color:#fff; }
+  .ag-cell.selected{ outline:2px solid var(--accent); outline-offset:-2px; }
+  .ag-num{ align-self:flex-start; font:600 11.5px "IBM Plex Mono",monospace; color:var(--text-muted); padding:1px 6px; border-radius:99px; }
+  .rdv-chip{ display:block; width:100%; text-align:left; font:600 10.5px "IBM Plex Sans",sans-serif; padding:2px 6px; border-radius:6px; border:1px solid transparent; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rdv-chip.st-aconvoquer{ color:var(--warning); background:var(--warning-bg); border-color:rgba(var(--warning-rgb),.4); }
+  .rdv-chip.st-convoque{ color:var(--accent); background:rgba(var(--accent-rgb),.10); border-color:rgba(var(--accent-rgb),.35); }
+  .rdv-chip.st-confirme{ color:var(--success); background:var(--success-bg); border-color:rgba(var(--success-rgb),.4); }
+  .rdv-chip.st-realise{ color:var(--text-muted); background:var(--bg-2); border-color:var(--border); }
+  .rdv-chip.st-annule{ color:var(--text-faint); background:var(--bg-2); border-color:var(--border); text-decoration:line-through; }
+  .ag-more{ font-size:10.5px; color:var(--text-faint); padding-left:4px; }
+  .day-list{ list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .day-list li{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:9px 12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface); font-size:12.8px; }
+  .day-list .dl-time{ font:600 13px "IBM Plex Mono",monospace; min-width:48px; }
+  .day-list .dl-actions{ margin-left:auto; display:flex; gap:12px; }
+  @media (max-width:760px){ .ag-cell{ min-height:64px; } .rdv-chip{ font-size:9.5px; } }
+
+  /* ---------- Convocation imprimable ---------- */
+  #letterPrint{ display:none; }
+  @media print{
+    .app-shell{ display:none !important; }
+    body{ background:#fff !important; }
+    #letterPrint{ display:block; padding:28px 34px; font:14px/1.65 "IBM Plex Sans",Georgia,serif; color:#000; white-space:pre-wrap; }
+  }
 </style>
 
 <script>
@@ -250,6 +294,8 @@
   <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
   <symbol id="i-life-buoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></symbol>
   <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 6 12 13 2 6"/></symbol>
   <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
 </defs>
 </svg>
@@ -347,6 +393,10 @@
             <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
             <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiLate">–</span><span class="ps-kpi-label">En retard</span></div>
           </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon violet"><svg class="icon"><use href="#i-calendar"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiRdv">–</span><span class="ps-kpi-label">RDV à venir (30 j)</span></div>
+          </div>
         </div>
       </header>
 
@@ -360,6 +410,13 @@
         <span>Données d'habilitations pas encore chargées dans ce navigateur : la surveillance renforcée (§Q4) ne peut rien détecter pour l'instant. Ouvrez <a href="formation-habilitation.html" style="color:var(--accent);">Formation / Habilitation</a> une fois, puis revenez ici.</span>
       </div>
 
+      <div class="sv-tabs">
+        <button type="button" class="sv-tab active" data-tab="suivi"><svg class="icon"><use href="#i-heart-pulse"/></svg> Suivi</button>
+        <button type="button" class="sv-tab" data-tab="agenda"><svg class="icon"><use href="#i-calendar"/></svg> Agenda &amp; RDV</button>
+        <button type="button" class="sv-tab" data-tab="modeles"><svg class="icon"><use href="#i-mail"/></svg> Modèles de convocation</button>
+      </div>
+
+      <section class="tab-panel show" id="tab-suivi">
       <div class="panel console">
         <div class="field"><span class="flabel">Collectivité</span>
           <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
@@ -417,12 +474,119 @@
       </div>
 
       <p class="footnote">Périodicité par défaut : 12 mois pour les services les plus exposés (Voirie, Espaces Verts, Propreté Déchet, Propreté Urbaine, Mécanique, Sécurité Tranquilité Publique), 24 mois pour les autres — ajustable fiche par fiche.</p>
+      </section>
+
+      <section class="tab-panel" id="tab-agenda">
+        <div class="panel form-panel" id="rdvFormPanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title" id="rdvFormTitle">Nouveau rendez-vous</h3></div>
+          <form id="rdvForm">
+            <input type="hidden" id="rdvId">
+            <div class="form-grid">
+              <div class="span2"><label for="rdvVisite">Agent (fiche de suivi)</label><select id="rdvVisite" required style="width:100%"></select></div>
+              <div><label for="rdvDate">Date</label><input type="date" id="rdvDate" required></div>
+              <div><label for="rdvHeure">Heure</label><input type="time" id="rdvHeure"></div>
+              <div><label for="rdvLieu">Lieu</label><input type="text" id="rdvLieu" placeholder="Centre de santé au travail…"></div>
+              <div><label for="rdvMedecin">Médecin / professionnel</label><input type="text" id="rdvMedecin"></div>
+              <div><label for="rdvStatut">Statut de la convocation</label>
+                <select id="rdvStatut"><option>À convoquer</option><option>Convoqué</option><option>Confirmé</option><option>Réalisé</option><option>Annulé</option></select>
+              </div>
+              <div class="span3"><label for="rdvNotes">Notes</label><textarea id="rdvNotes" placeholder="Informations pratiques (ne pas saisir de données médicales)…"></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <button type="button" class="btn btn-ghost" id="rdvCancel">Annuler</button>
+              <button type="button" class="btn btn-ghost" id="rdvConvoc" style="display:none;"><svg class="icon"><use href="#i-mail"/></svg> Convocation…</button>
+              <button type="button" class="btn btn-ghost" id="rdvDelete" style="display:none; margin-left:auto; color:var(--danger);">Supprimer ce RDV</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel form-panel" id="letterPanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title" id="letterTitle">Convocation</h3></div>
+          <div class="form-grid">
+            <div><label for="letterTpl">Modèle</label><select id="letterTpl" style="width:100%"></select></div>
+            <div class="span2"><label for="letterObjet">Objet</label><input type="text" id="letterObjet" style="width:100%"></div>
+            <div class="span3"><label for="letterBody">Texte de la convocation (modifiable avant copie ou impression)</label><textarea id="letterBody" style="min-height:230px"></textarea></div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="letterCopy"><svg class="icon"><use href="#i-clipboard"/></svg> Copier</button>
+            <button type="button" class="btn btn-ghost" id="letterPrintBtn"><svg class="icon"><use href="#i-mail"/></svg> Imprimer / PDF</button>
+            <button type="button" class="btn btn-ghost" id="letterClose">Fermer</button>
+            <span id="letterMsg" style="align-self:center; font-size:12px; color:var(--text-muted);"></span>
+          </div>
+        </div>
+
+        <div class="panel" style="padding:20px 22px 22px; margin-bottom:18px;">
+          <div class="panel-head">
+            <div class="agenda-nav">
+              <button type="button" class="btn btn-ghost" id="agPrev" aria-label="Mois précédent">‹</button>
+              <h3 class="panel-title" id="agTitle" style="min-width:150px; text-align:center;">—</h3>
+              <button type="button" class="btn btn-ghost" id="agNext" aria-label="Mois suivant">›</button>
+              <button type="button" class="btn btn-ghost" id="agToday">Aujourd'hui</button>
+            </div>
+            <div class="panel-actions" id="agActions"></div>
+          </div>
+          <div class="agenda-grid" id="agGrid"></div>
+          <div id="dayPanel" style="display:none; margin-top:16px;">
+            <div class="panel-head" style="margin-bottom:0;"><h3 class="panel-title" id="dayTitle">—</h3><div class="panel-actions" id="dayActions"></div></div>
+            <ul class="day-list" id="dayList"></ul>
+          </div>
+        </div>
+
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Prochains rendez-vous</h3>
+            <div class="panel-actions">
+              <select id="rdvFStatut"><option value="all">Tous les statuts</option><option>À convoquer</option><option>Convoqué</option><option>Confirmé</option><option>Réalisé</option><option>Annulé</option></select>
+              <span class="result-count" style="margin-left:0;"><b id="rdvCount">–</b> RDV</span>
+            </div>
+          </div>
+          <div class="table-panel">
+            <table class="reg" style="min-width:900px;">
+              <thead>
+                <tr id="theadRdv">
+                  <th>Date</th><th>Heure</th><th>Agent</th><th>Service</th><th>Lieu</th><th>Médecin</th><th>Statut</th>
+                  <th id="thActionsRdv"></th>
+                </tr>
+              </thead>
+              <tbody id="rdvTbody"></tbody>
+            </table>
+          </div>
+          <p class="footnote" style="text-align:left; margin-top:12px;">Avec « Tous les statuts » : les rendez-vous à venir, ainsi que ceux dont la date est passée mais qui ne sont pas clôturés (ni « Réalisé », ni « Annulé »). Choisir un statut affiche tout l'historique de ce statut.</p>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-modeles">
+        <div class="panel form-panel">
+          <div class="panel-head"><h3 class="panel-title">Modèles de convocation</h3>
+            <div class="panel-actions"><button type="button" class="btn btn-ghost" id="tplNew"><svg class="icon"><use href="#i-plus"/></svg> Nouveau modèle</button></div>
+          </div>
+          <form id="tplForm">
+            <div class="form-grid">
+              <div><label for="tplSelect">Modèle</label><select id="tplSelect" style="width:100%"></select></div>
+              <div class="span2"><label for="tplNom">Nom du modèle</label><input type="text" id="tplNom" required style="width:100%"></div>
+              <div class="span3"><label for="tplObjet">Objet</label><input type="text" id="tplObjet" style="width:100%"></div>
+              <div class="span3"><label for="tplCorps">Texte</label><textarea id="tplCorps" style="min-height:260px" required></textarea></div>
+            </div>
+            <p class="footnote" style="text-align:left; margin:10px 0 0;">Champs automatiques disponibles : <code>{{prenom}}</code> <code>{{nom}}</code> <code>{{service}}</code> <code>{{collectivite}}</code> <code>{{typeVisite}}</code> <code>{{date}}</code> <code>{{heure}}</code> <code>{{lieu}}</code> <code>{{medecin}}</code>. Un champ resté vide à la génération est remplacé par « (à préciser) ».</p>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer le modèle</button>
+              <button type="button" class="btn btn-ghost" id="tplReset" style="display:none;">Rétablir le texte d'origine</button>
+              <button type="button" class="btn btn-ghost" id="tplDelete" style="margin-left:auto; color:var(--danger);">Supprimer</button>
+              <span id="tplMsg" style="align-self:center; font-size:12px; color:var(--text-muted);"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+
     </div>
   </div>
 </div>
+<div id="letterPrint" aria-hidden="true"></div>
 
 <script>
   const $ = (id) => document.getElementById(id);
+  const esc = VigieRoster.esc;
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -667,17 +831,18 @@
       return;
     }
     tbody.innerHTML = rows.map(v => `
-      <tr class="${v.cls === 'late' ? 'retard' : ''}" data-id="${v.id}">
-        <td>${v.nom}</td>
-        <td>${v.prenom}</td>
-        <td>${v.service}</td>
-        <td>${v.typeVisite}${v.renforcee ? `<br><span class="badge-renforcee" title="Périodicité ramenée à ${v.periodiciteEffective} mois du fait de l'habilitation « ${v.renforceePar} » détenue par l'agent">⚠ Renforcée — ${v.renforceePar} (${v.periodiciteEffective} mois)</span>` : ''}</td>
-        <td>${v.dateDerniere}</td>
-        <td>${v.prochaine}</td>
+      <tr class="${v.cls === 'late' ? 'retard' : ''}" data-id="${esc(v.id)}">
+        <td>${esc(v.nom)}</td>
+        <td>${esc(v.prenom)}</td>
+        <td>${esc(v.service)}</td>
+        <td>${esc(v.typeVisite)}${v.renforcee ? `<br><span class="badge-renforcee" title="Périodicité ramenée à ${v.periodiciteEffective} mois du fait de l'habilitation « ${esc(v.renforceePar)} » détenue par l'agent">⚠ Renforcée — ${esc(v.renforceePar)} (${v.periodiciteEffective} mois)</span>` : ''}</td>
+        <td>${esc(v.dateDerniere)}</td>
+        <td>${esc(v.prochaine)}</td>
         <td><span class="status-chip ${v.cls}">${v.statut}</span></td>
         ${canEdit ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${v.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${v.id}">Suppr.</button>
+          <button type="button" class="act-plan" data-plan="${esc(v.id)}" title="Planifier un rendez-vous médical">Planifier</button>
+          <button type="button" class="act-edit" data-edit="${esc(v.id)}">Modifier</button>
+          <button type="button" class="act-del" data-id="${esc(v.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`).join("");
   }
@@ -839,6 +1004,7 @@
       if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);
       saveDataset(DATASET);
       logAudit("Santé & Visites", isNew ? "Création" : "Modification", `Fiche « ${rec.nom} ${rec.prenom} » — ${rec.service}`);
+      if (!isNew) syncRdvIdentity(rec);
       formPanel.style.display = "none";
       form.reset();
       render();
@@ -851,15 +1017,446 @@
       if (delBtn){
         const rec = DATASET.find(d => d.id === delBtn.dataset.id);
         if (!rec) return;
-        if (confirm(`Supprimer la fiche de « ${rec.nom} ${rec.prenom} » ?`)){
+        const nRdv = linkedRdvCount(rec.id);
+        if (confirm(`Supprimer la fiche de « ${rec.nom} ${rec.prenom} » ?` + (nRdv ? `\n${nRdv} rendez-vous lié(s) seront supprimé(s) avec elle.` : ""))){
           DATASET = DATASET.filter(d => d.id !== rec.id);
           saveDataset(DATASET);
+          onVisiteDeleted(rec.id);
           logAudit("Santé & Visites", "Suppression", `Fiche « ${rec.nom} ${rec.prenom} » — ${rec.service}`);
           render();
         }
       }
     });
   }
+
+  // ==========================================================================
+  // ---------- Onglets + agenda des RDV médicaux + convocations (module 7, extension) ----------
+  // Deux clés : vigie_hse_rdv_medicaux (CRUD, écrit par fusion de SA part — un RH limité à certains
+  // services ne doit jamais écraser les RDV des autres) et vigie_hse_modeles_convocation (always-merge,
+  // modèle par défaut d'id stable "tpl-defaut"). La forme des fiches vigie_hse_visites ne change pas.
+  const RDV_KEY = "vigie_hse_rdv_medicaux";
+  const TPL_KEY = "vigie_hse_modeles_convocation";
+  const RDV_ACTIFS = ["À convoquer","Convoqué","Confirmé"];
+  const RDV_CLS = { "À convoquer":"st-aconvoquer", "Convoqué":"st-convoque", "Confirmé":"st-confirme", "Réalisé":"st-realise", "Annulé":"st-annule" };
+  const RDV_CHIP = { "À convoquer":"soon", "Convoqué":"soon", "Confirmé":"ok", "Réalisé":"ok", "Annulé":"" };
+  const MOIS_FR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  const pad2 = (n) => String(n).padStart(2, "0");
+  // Dates formatées en LOCAL (toISOString() est en UTC : un RDV à 00h30 changerait de jour).
+  const ymd = (d) => d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+  function parseYmd(s){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ""); return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null; }
+  function fmtDateFr(s){ const d = parseYmd(s); return d ? d.toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long", year:"numeric" }) : ""; }
+  function fmtHeure(h){ return /^\d{2}:\d{2}$/.test(h || "") ? h.replace(":", "h") : ""; }
+  const rdvGenId = () => "rdv-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const inScope = (r) => !isScoped || myServices.includes(r.service);
+  function loadRdvAll(){
+    try { const raw = localStorage.getItem(RDV_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p.filter(r => r && r.id); } } catch(e){}
+    return [];
+  }
+  let RDV = loadRdvAll().filter(inScope);
+  function saveRdv(){
+    const others = loadRdvAll().filter(r => !inScope(r));
+    try { localStorage.setItem(RDV_KEY, JSON.stringify(others.concat(RDV))); } catch(e){}
+  }
+  const sortRdv = (a, b) => (a.date + " " + (a.heure || "")).localeCompare(b.date + " " + (b.heure || "")) || (a.nom + a.prenom).localeCompare(b.nom + b.prenom, "fr");
+
+  // Appelés par le tableau de suivi (suppression / modification d'une fiche).
+  function linkedRdvCount(visiteId){ return RDV.filter(r => r.visiteId === visiteId).length; }
+  function onVisiteDeleted(visiteId){
+    const n = linkedRdvCount(visiteId);
+    if (!n) return;
+    RDV = RDV.filter(r => r.visiteId !== visiteId);
+    saveRdv();
+    logAudit("Santé & Visites", "Suppression", `${n} rendez-vous supprimé(s) avec leur fiche de suivi`);
+    renderRdv();
+  }
+  function syncRdvIdentity(v){
+    let changed = false;
+    RDV.forEach(r => {
+      if (r.visiteId !== v.id) return;
+      if (r.nom !== v.nom || r.prenom !== v.prenom || r.service !== v.service || r.collectivite !== v.collectivite){
+        r.nom = v.nom; r.prenom = v.prenom; r.service = v.service; r.collectivite = v.collectivite; changed = true;
+      }
+    });
+    if (changed){ saveRdv(); renderRdv(); }
+  }
+
+  // ---------- Onglets ----------
+  function showTab(name){
+    document.querySelectorAll(".sv-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("show", p.id === "tab-" + name));
+  }
+  document.querySelectorAll(".sv-tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+  if (!canEdit){
+    const t = document.querySelector('.sv-tab[data-tab="modeles"]'); if (t) t.remove();
+    const p = $("tab-modeles"); if (p) p.remove();
+  }
+
+  // ---------- Agenda mensuel (lundi en premier) ----------
+  const now0 = new Date();
+  let agYear = now0.getFullYear(), agMonth = now0.getMonth(), selectedDay = "";
+  let openRdvFormFn = null;   // renseignés plus bas (droits d'écriture uniquement)
+
+  function renderAgenda(){
+    $("agTitle").textContent = MOIS_FR[agMonth] + " " + agYear;
+    const lead = (new Date(agYear, agMonth, 1).getDay() + 6) % 7;
+    const nDays = new Date(agYear, agMonth + 1, 0).getDate();
+    const today = ymd(new Date());
+    const byDay = {};
+    RDV.forEach(r => { (byDay[r.date] = byDay[r.date] || []).push(r); });
+    let html = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map(d => `<div class="ag-head">${d}</div>`).join("");
+    for (let i = 0; i < lead; i++) html += `<div class="ag-cell empty"></div>`;
+    for (let d = 1; d <= nDays; d++){
+      const key = agYear + "-" + pad2(agMonth + 1) + "-" + pad2(d);
+      const list = (byDay[key] || []).slice().sort(sortRdv);
+      const chips = list.slice(0, 3).map(r => `<button type="button" class="rdv-chip ${RDV_CLS[r.statutConvocation] || ""}" data-rdv="${esc(r.id)}" title="${esc(r.nom + " " + r.prenom + " — " + r.statutConvocation)}">${esc((r.heure ? r.heure + " · " : "") + r.prenom + " " + r.nom)}</button>`).join("");
+      const more = list.length > 3 ? `<span class="ag-more">+ ${list.length - 3} autre(s)</span>` : "";
+      html += `<div class="ag-cell${key === today ? " today" : ""}${key === selectedDay ? " selected" : ""}" data-date="${key}"><span class="ag-num">${d}</span>${chips}${more}</div>`;
+    }
+    const trail = (7 - (lead + nDays) % 7) % 7;
+    for (let i = 0; i < trail; i++) html += `<div class="ag-cell empty"></div>`;
+    $("agGrid").innerHTML = html;
+  }
+
+  function renderDay(){
+    const panel = $("dayPanel");
+    if (!selectedDay){ panel.style.display = "none"; return; }
+    panel.style.display = "";
+    const t = fmtDateFr(selectedDay);
+    $("dayTitle").textContent = t.charAt(0).toUpperCase() + t.slice(1);
+    $("dayActions").innerHTML = canEdit ? `<button type="button" class="btn btn-primary" id="dayNew"><svg class="icon"><use href="#i-plus"/></svg> Nouveau RDV ce jour</button>` : "";
+    const list = RDV.filter(r => r.date === selectedDay).sort(sortRdv);
+    $("dayList").innerHTML = list.length ? list.map(r => `<li>
+        <span class="dl-time">${esc(r.heure || "—")}</span>
+        <span><b>${esc(r.prenom + " " + r.nom)}</b> · ${esc(r.service)}</span>
+        <span>${esc(r.lieu || "")}</span>
+        <span class="status-chip ${RDV_CHIP[r.statutConvocation] || ""}">${esc(r.statutConvocation)}</span>
+        ${canEdit ? `<span class="dl-actions"><button type="button" class="act-edit" data-edit-rdv="${esc(r.id)}">Modifier</button><button type="button" class="act-plan" data-convoc-rdv="${esc(r.id)}">Convocation</button></span>` : ""}
+      </li>`).join("") : `<li style="color:var(--text-faint);">Aucun rendez-vous ce jour.</li>`;
+  }
+
+  function selectDay(key){ selectedDay = key; renderAgenda(); renderDay(); }
+
+  $("agPrev").addEventListener("click", () => { agMonth--; if (agMonth < 0){ agMonth = 11; agYear--; } renderAgenda(); });
+  $("agNext").addEventListener("click", () => { agMonth++; if (agMonth > 11){ agMonth = 0; agYear++; } renderAgenda(); });
+  $("agToday").addEventListener("click", () => { const n = new Date(); agYear = n.getFullYear(); agMonth = n.getMonth(); selectDay(ymd(n)); });
+  $("agGrid").addEventListener("click", (e) => {
+    const chip = e.target.closest(".rdv-chip");
+    if (chip && canEdit && openRdvFormFn){
+      const r = RDV.find(x => x.id === chip.dataset.rdv);
+      if (r){ selectDay(r.date); openRdvFormFn(r); return; }
+    }
+    const cell = e.target.closest(".ag-cell[data-date]");
+    if (cell) selectDay(cell.dataset.date);
+  });
+
+  // ---------- Prochains RDV ----------
+  const triRdv = VigieTri.create({
+    columns: [
+      { key:"date",              label:"Date" },
+      { key:"heure",             label:"Heure" },
+      { key:"agent",             label:"Agent" },
+      { key:"service",           label:"Service" },
+      { key:"lieu",              label:"Lieu" },
+      { key:"medecin",           label:"Médecin" },
+      { key:"statutConvocation", label:"Statut" },
+      { key:"actions",           label:"", noFilter:true },
+    ],
+    onChange: () => renderRdvTable(),
+  });
+  triRdv.decorate($("theadRdv"));
+
+  function renderRdvTable(){
+    const st = $("rdvFStatut").value, today = ymd(new Date());
+    // « Tous » : à venir + passés non clôturés ; un statut précis : tout l'historique de ce statut.
+    let rows = RDV.filter(r => st === "all" ? (r.date >= today || RDV_ACTIFS.includes(r.statutConvocation)) : r.statutConvocation === st)
+      .map(r => Object.assign({}, r, { agent: r.nom + " " + r.prenom }));
+    rows.sort(sortRdv);
+    rows = triRdv.apply(rows);
+    $("rdvCount").textContent = rows.length;
+    const colspan = canEdit ? 8 : 7;
+    $("rdvTbody").innerHTML = rows.length ? rows.map(r => `
+      <tr class="${r.date < today && RDV_ACTIFS.includes(r.statutConvocation) ? "retard" : ""}" data-rdv="${esc(r.id)}">
+        <td>${esc(r.date)}</td><td>${esc(r.heure || "—")}</td><td>${esc(r.agent)}</td><td>${esc(r.service)}</td><td>${esc(r.lieu || "")}</td><td>${esc(r.medecin || "")}</td>
+        <td><span class="status-chip ${RDV_CHIP[r.statutConvocation] || ""}">${esc(r.statutConvocation)}</span></td>
+        ${canEdit ? `<td class="actions-float"><button type="button" class="act-edit" data-edit-rdv="${esc(r.id)}">Modifier</button> <button type="button" class="act-plan" data-convoc-rdv="${esc(r.id)}" style="margin-left:10px;">Convocation</button></td>` : ""}
+      </tr>`).join("") : `<tr class="empty-row"><td colspan="${colspan}">${RDV.length === 0 ? "Aucun rendez-vous planifié pour le moment." : "Aucun rendez-vous ne correspond au filtre."}</td></tr>`;
+  }
+  $("rdvFStatut").addEventListener("change", renderRdvTable);
+
+  function renderRdvKpi(){
+    const today = ymd(new Date());
+    const lim = new Date(); lim.setDate(lim.getDate() + 30);
+    const limStr = ymd(lim);
+    $("kpiRdv").textContent = RDV.filter(r => RDV_ACTIFS.includes(r.statutConvocation) && r.date >= today && r.date <= limStr).length;
+  }
+  function renderRdv(){ renderAgenda(); renderDay(); renderRdvTable(); renderRdvKpi(); }
+
+  if (canEdit){
+    $("agActions").innerHTML = `<button type="button" class="btn btn-ghost" id="rdvExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="rdvNew"><svg class="icon"><use href="#i-plus"/></svg> Nouveau RDV</button>`;
+
+    // ---------- Modèles de convocation (always-merge, modèle par défaut non supprimable) ----------
+    const TPL_DEFAULT = {
+      id: "tpl-defaut",
+      nom: "Convocation — visite médicale (modèle par défaut)",
+      objet: "Convocation à une visite médicale — {{typeVisite}}",
+      corps: "Bonjour {{prenom}} {{nom}},\n\nVous êtes convoqué(e) à une visite auprès du service de santé au travail :\n\n- Nature de la visite : {{typeVisite}}\n- Date : {{date}}\n- Heure : {{heure}}\n- Lieu : {{lieu}}\n- Médecin / professionnel de santé : {{medecin}}\n\nMerci de vous présenter à l'heure indiquée. En cas d'empêchement, prévenez sans délai le service des Ressources Humaines afin de reprogrammer le rendez-vous.\n\nCordialement,\nLe service des Ressources Humaines — {{collectivite}}",
+    };
+    function loadTemplates(){
+      let stored = [];
+      try { const raw = localStorage.getItem(TPL_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p.filter(t => t && t.id && typeof t.corps === "string"); } } catch(e){}
+      const stockedDefault = stored.find(t => t.id === TPL_DEFAULT.id);
+      const merged = [stockedDefault || TPL_DEFAULT].concat(stored.filter(t => t.id !== TPL_DEFAULT.id));
+      try { localStorage.setItem(TPL_KEY, JSON.stringify(merged)); } catch(e){}
+      return merged;
+    }
+    let TPL = loadTemplates();
+    function saveTemplates(){ try { localStorage.setItem(TPL_KEY, JSON.stringify(TPL)); } catch(e){} }
+
+    // Placeholders {{...}} : inconnu → laissé tel quel ; valeur vide → « (à préciser) ».
+    function fillTemplate(text, rdv, visite){
+      const vals = {
+        prenom: rdv.prenom, nom: rdv.nom, service: rdv.service, collectivite: rdv.collectivite,
+        typeVisite: visite ? visite.typeVisite : "", date: fmtDateFr(rdv.date), heure: fmtHeure(rdv.heure),
+        lieu: rdv.lieu, medecin: rdv.medecin,
+      };
+      return String(text || "").replace(/\{\{\s*(\w+)\s*\}\}/g, (m, k) => Object.prototype.hasOwnProperty.call(vals, k) ? (String(vals[k] || "").trim() || "(à préciser)") : m);
+    }
+
+    // ---------- Formulaire RDV ----------
+    const rdvForm = $("rdvForm"), rdvPanel = $("rdvFormPanel");
+    function fillVisiteOptions(selectedId, rdv){
+      const list = DATASET.slice().sort((a, b) => (a.nom + a.prenom).localeCompare(b.nom + b.prenom, "fr"));
+      let html = `<option value="">— Choisir un agent —</option>` + list.map(v => `<option value="${esc(v.id)}">${esc(v.nom + " " + v.prenom + " — " + v.service)}</option>`).join("");
+      if (rdv && !list.some(v => v.id === rdv.visiteId)) html += `<option value="${esc(rdv.visiteId)}">${esc(rdv.nom + " " + rdv.prenom + " (fiche de suivi introuvable)")}</option>`;
+      $("rdvVisite").innerHTML = html;
+      $("rdvVisite").value = selectedId || "";
+    }
+    function openRdvForm(rec, preset){
+      preset = preset || {};
+      closeLetter();
+      rdvForm.reset();
+      $("rdvId").value = rec ? rec.id : "";
+      $("rdvFormTitle").textContent = rec ? "Modifier le rendez-vous" : "Nouveau rendez-vous";
+      fillVisiteOptions(rec ? rec.visiteId : preset.visiteId, rec);
+      $("rdvDate").value = rec ? rec.date : (preset.date || selectedDay || ymd(new Date()));
+      $("rdvHeure").value = rec ? (rec.heure || "") : "";
+      $("rdvLieu").value = rec ? (rec.lieu || "") : "";
+      $("rdvMedecin").value = rec ? (rec.medecin || "") : "";
+      $("rdvStatut").value = rec ? rec.statutConvocation : "À convoquer";
+      $("rdvNotes").value = rec ? (rec.notes || "") : "";
+      $("rdvConvoc").style.display = rec ? "" : "none";
+      $("rdvDelete").style.display = rec ? "" : "none";
+      rdvPanel.style.display = "";
+      rdvPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+    function closeRdvForm(){ rdvPanel.style.display = "none"; rdvForm.reset(); $("rdvId").value = ""; }
+    openRdvFormFn = openRdvForm;
+    $("rdvNew").addEventListener("click", () => openRdvForm(null));
+    $("rdvCancel").addEventListener("click", closeRdvForm);
+    $("dayActions").addEventListener("click", (e) => { if (e.target.closest("#dayNew")) openRdvForm(null, { date: selectedDay }); });
+
+    // « Réalisé » : propose (sans rien imposer) de mettre à jour la date de dernière visite de la fiche.
+    // On ne réécrit que ce champ dans le stockage complet (jamais la tranche filtrée d'un RH limité).
+    function setDerniereVisite(id, date){
+      const v = DATASET.find(x => x.id === id);
+      if (v) v.dateDerniere = date;
+      try {
+        const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        const s = Array.isArray(all) ? all.find(x => x.id === id) : null;
+        if (s){ s.dateDerniere = date; localStorage.setItem(STORAGE_KEY, JSON.stringify(all)); }
+      } catch(e){}
+    }
+    rdvForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = $("rdvId").value;
+      const prev = id ? RDV.find(r => r.id === id) : null;
+      const visite = DATASET.find(v => v.id === $("rdvVisite").value);
+      const src = visite || prev;
+      if (!src){ alert("Choisissez l'agent concerné par ce rendez-vous."); return; }
+      const rec = {
+        id: id || rdvGenId(),
+        visiteId: $("rdvVisite").value,
+        nom: src.nom, prenom: src.prenom, service: src.service, collectivite: src.collectivite || "Ville",
+        date: $("rdvDate").value,
+        heure: $("rdvHeure").value,
+        lieu: $("rdvLieu").value.trim(),
+        medecin: $("rdvMedecin").value.trim(),
+        statutConvocation: $("rdvStatut").value,
+        notes: $("rdvNotes").value.trim(),
+        auteur: prev ? prev.auteur : (session.user || "—"),
+        dateCreation: prev ? prev.dateCreation : new Date().toISOString(),
+      };
+      const idx = RDV.findIndex(r => r.id === rec.id);
+      if (idx >= 0) RDV[idx] = rec; else RDV.push(rec);
+      saveRdv();
+      logAudit("Santé & Visites", prev ? "Modification" : "Création", `RDV médical « ${rec.nom} ${rec.prenom} » le ${rec.date} — ${rec.statutConvocation}`);
+      const becameDone = rec.statutConvocation === "Réalisé" && (!prev || prev.statutConvocation !== "Réalisé");
+      closeRdvForm();
+      // Si la date du RDV est dans un autre mois, l'agenda s'y déplace pour montrer le RDV enregistré.
+      const d = parseYmd(rec.date);
+      if (d){ agYear = d.getFullYear(); agMonth = d.getMonth(); selectedDay = rec.date; }
+      renderRdv();
+      if (becameDone && visite && rec.date > (visite.dateDerniere || "")){
+        if (confirm(`Mettre à jour la date de dernière visite de ${rec.prenom} ${rec.nom} au ${rec.date} ?\nLa prochaine échéance sera recalculée.`)){
+          setDerniereVisite(visite.id, rec.date);
+          logAudit("Santé & Visites", "Modification", `Dernière visite de « ${rec.nom} ${rec.prenom} » mise à jour au ${rec.date} (RDV réalisé)`);
+          render();
+        }
+      }
+    });
+    $("rdvDelete").addEventListener("click", () => {
+      const rec = RDV.find(r => r.id === $("rdvId").value);
+      if (!rec) return;
+      if (!confirm(`Supprimer le rendez-vous de « ${rec.nom} ${rec.prenom} » du ${rec.date} ?`)) return;
+      RDV = RDV.filter(r => r.id !== rec.id);
+      saveRdv();
+      logAudit("Santé & Visites", "Suppression", `RDV médical « ${rec.nom} ${rec.prenom} » du ${rec.date}`);
+      closeRdvForm();
+      renderRdv();
+    });
+
+    // Bouton « Planifier » du tableau de suivi
+    $("tbody").addEventListener("click", (e) => {
+      const b = e.target.closest(".act-plan");
+      if (!b) return;
+      showTab("agenda");
+      openRdvForm(null, { visiteId: b.dataset.plan });
+    });
+    function onRdvAction(e){
+      const ed = e.target.closest("[data-edit-rdv]");
+      if (ed){ const r = RDV.find(x => x.id === ed.dataset.editRdv); if (r) openRdvForm(r); return; }
+      const cv = e.target.closest("[data-convoc-rdv]");
+      if (cv){ const r = RDV.find(x => x.id === cv.dataset.convocRdv); if (r) openLetter(r); }
+    }
+    $("dayList").addEventListener("click", onRdvAction);
+    $("rdvTbody").addEventListener("click", onRdvAction);
+
+    // ---------- Convocation : génération, copie, impression ----------
+    const letterPanel = $("letterPanel");
+    let letterRdvId = "";
+    function fillLetterTplSelect(){
+      $("letterTpl").innerHTML = TPL.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
+    }
+    function regenLetter(){
+      const r = RDV.find(x => x.id === letterRdvId);
+      if (!r) return;
+      const t = TPL.find(x => x.id === $("letterTpl").value) || TPL[0];
+      const v = DATASET.find(x => x.id === r.visiteId);
+      $("letterObjet").value = fillTemplate(t.objet, r, v);
+      $("letterBody").value = fillTemplate(t.corps, r, v);
+    }
+    function openLetter(rdv){
+      letterRdvId = rdv.id;
+      $("letterTitle").textContent = "Convocation — " + rdv.prenom + " " + rdv.nom;
+      fillLetterTplSelect();
+      $("letterMsg").textContent = "";
+      regenLetter();
+      letterPanel.style.display = "";
+      letterPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+    function closeLetter(){ letterPanel.style.display = "none"; letterRdvId = ""; $("letterMsg").textContent = ""; }
+    $("letterTpl").addEventListener("change", regenLetter);
+    $("letterClose").addEventListener("click", closeLetter);
+    $("rdvConvoc").addEventListener("click", () => { const r = RDV.find(x => x.id === $("rdvId").value); if (r) openLetter(r); });
+    function letterText(){ return "Objet : " + $("letterObjet").value.trim() + "\n\n" + $("letterBody").value; }
+    async function copyText(text){
+      try { if (navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); return true; } } catch(e){}
+      // Repli (page ouverte en file:// ou navigateur sans API Clipboard)
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        return !!ok;
+      } catch(e){ return false; }
+    }
+    // Une fois la convocation copiée/imprimée, un RDV « À convoquer » passe à « Convoqué » (dit à l'écran).
+    function markConvoque(){
+      const r = RDV.find(x => x.id === letterRdvId);
+      if (!r || r.statutConvocation !== "À convoquer") return "";
+      r.statutConvocation = "Convoqué";
+      saveRdv();
+      logAudit("Santé & Visites", "Modification", `RDV médical « ${r.nom} ${r.prenom} » du ${r.date} — statut « Convoqué » (convocation générée)`);
+      if ($("rdvId").value === r.id) $("rdvStatut").value = "Convoqué";
+      renderRdv();
+      return " Statut passé à « Convoqué ».";
+    }
+    $("letterCopy").addEventListener("click", async () => {
+      const ok = await copyText(letterText());
+      $("letterMsg").textContent = ok ? "Texte copié." + markConvoque() : "Copie impossible dans ce navigateur : sélectionnez le texte manuellement (Ctrl+A puis Ctrl+C dans la zone).";
+    });
+    $("letterPrintBtn").addEventListener("click", () => {
+      $("letterPrint").textContent = letterText();
+      window.print();
+      const extra = markConvoque();
+      if (extra) $("letterMsg").textContent = extra.trim();
+    });
+
+    // ---------- Onglet « Modèles de convocation » ----------
+    let tplEditingId = TPL[0].id;
+    function renderTplEditor(){
+      let opts = TPL.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
+      if (tplEditingId === "") opts += `<option value="">(nouveau modèle)</option>`;
+      $("tplSelect").innerHTML = opts;
+      $("tplSelect").value = tplEditingId;
+      const t = TPL.find(x => x.id === tplEditingId);
+      $("tplNom").value = t ? t.nom : "";
+      $("tplObjet").value = t ? t.objet : "";
+      $("tplCorps").value = t ? t.corps : "";
+      $("tplDelete").style.display = (t && t.id !== TPL_DEFAULT.id) ? "" : "none";
+      $("tplReset").style.display = (t && t.id === TPL_DEFAULT.id) ? "" : "none";
+    }
+    renderTplEditor();
+    $("tplSelect").addEventListener("change", () => { tplEditingId = $("tplSelect").value; $("tplMsg").textContent = ""; renderTplEditor(); });
+    $("tplNew").addEventListener("click", () => { tplEditingId = ""; $("tplMsg").textContent = ""; renderTplEditor(); $("tplNom").focus(); });
+    $("tplForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nom = $("tplNom").value.trim(), corps = $("tplCorps").value;
+      if (!nom || !corps.trim()) return;
+      const rec = { id: tplEditingId || ("tpl-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)), nom, objet: $("tplObjet").value.trim(), corps };
+      const idx = TPL.findIndex(t => t.id === rec.id);
+      if (idx >= 0) TPL[idx] = rec; else TPL.push(rec);
+      saveTemplates();
+      logAudit("Santé & Visites", idx >= 0 ? "Modification" : "Création", `Modèle de convocation « ${rec.nom} »`);
+      tplEditingId = rec.id;
+      renderTplEditor();
+      $("tplMsg").textContent = "Modèle enregistré.";
+    });
+    $("tplDelete").addEventListener("click", () => {
+      const t = TPL.find(x => x.id === tplEditingId);
+      if (!t || t.id === TPL_DEFAULT.id) return;
+      if (!confirm(`Supprimer le modèle « ${t.nom} » ?`)) return;
+      TPL = TPL.filter(x => x.id !== t.id);
+      saveTemplates();
+      logAudit("Santé & Visites", "Suppression", `Modèle de convocation « ${t.nom} »`);
+      tplEditingId = TPL[0].id;
+      renderTplEditor();
+      $("tplMsg").textContent = "";
+    });
+    $("tplReset").addEventListener("click", () => {
+      if (!confirm("Rétablir le texte d'origine du modèle par défaut ? Vos modifications seront perdues.")) return;
+      const idx = TPL.findIndex(x => x.id === TPL_DEFAULT.id);
+      if (idx >= 0) TPL[idx] = Object.assign({}, TPL_DEFAULT);
+      saveTemplates();
+      renderTplEditor();
+      $("tplMsg").textContent = "Texte d'origine rétabli.";
+    });
+
+    // ---------- Export ----------
+    $("rdvExport").addEventListener("click", () => {
+      const rows = RDV.slice().sort(sortRdv).map(r => ({
+        "ID": r.id, "ID fiche de suivi": r.visiteId, "Nom": r.nom, "Prénom": r.prenom, "Collectivité": r.collectivite || "Ville", "Service": r.service,
+        "Date": r.date, "Heure": r.heure || "", "Lieu": r.lieu || "", "Médecin": r.medecin || "", "Statut de la convocation": r.statutConvocation, "Notes": r.notes || "",
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "RDV médicaux");
+      XLSX.writeFile(wb, `rdv-medicaux_${ymd(new Date())}.xlsx`);
+    });
+  }
+
+  renderRdv();
 
   render();
 

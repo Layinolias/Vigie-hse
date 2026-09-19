@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
+<script src="assets/echeance.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -560,15 +561,9 @@
     if (!mois || mois <= 0){
       return { prochaine: "—", statut: "Périodicité manquante", cls: "soon" };
     }
-    const d = new Date(dateStr);
-    const prochaine = new Date(d);
-    prochaine.setMonth(prochaine.getMonth() + mois);
-    const today = new Date();
-    const in60 = new Date(today); in60.setDate(in60.getDate() + 60);
-    let statut = "À jour", cls = "ok";
-    if (prochaine < today){ statut = "En retard"; cls = "late"; }
-    else if (prochaine <= in60){ statut = "À programmer"; cls = "soon"; }
-    return { prochaine: prochaine.toISOString().slice(0,10), statut, cls };
+    const { prochaine, cls } = VigieEcheance.classify(dateStr, mois);
+    const statut = cls === "late" ? "En retard" : cls === "soon" ? "À programmer" : "À jour";
+    return { prochaine, statut, cls };
   }
   function computeEcheances(){
     const groups = new Map();

@@ -5,6 +5,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/roster.js"></script>
+<script src="assets/habilitations-ref.js"></script>
+<script src="assets/echeance.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -506,15 +508,9 @@
   function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
 
   // ---------- Types d'habilitation & durées de validité standard ----------
-  const HAB_TYPES = [
-    ["CACES", 60],
-    ["Habilitation électrique", 36],
-    ["SST (Sauveteur Secouriste du Travail)", 24],
-    ["Permis de conduire poids lourd / remorque", 60],
-    ["AIPR (Autorisation d'Intervention à Proximité des Réseaux)", 60],
-    ["Habilitation travail en hauteur", 12],
-  ];
-  const HAB_DUREE = Object.fromEntries(HAB_TYPES);
+  // Table partagée avec sante-visites.html via assets/habilitations-ref.js (VigieHabilitations).
+  const HAB_TYPES = VigieHabilitations.HAB_TYPES;
+  const HAB_DUREE = VigieHabilitations.HAB_DUREE;
 
   // ---------- Roster de départ (dérivé du Registre AT/MP) ----------
   // Hash + dédoublonnage factorisés dans assets/roster.js (VigieRoster) : partagés
@@ -577,15 +573,9 @@
   if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
 
   function computeStatus(h){
-    const d = new Date(h.dateObtention);
-    const expiration = new Date(d);
-    expiration.setMonth(expiration.getMonth() + (Number(h.dureeValiditeMois) || 24));
-    const today = new Date();
-    const in60 = new Date(today); in60.setDate(in60.getDate() + 60);
-    let statut = "À jour", cls = "ok";
-    if (expiration < today){ statut = "Expirée"; cls = "late"; }
-    else if (expiration <= in60){ statut = "À renouveler"; cls = "soon"; }
-    return { dateExpiration: expiration.toISOString().slice(0,10), statut, cls };
+    const { prochaine, cls } = VigieEcheance.classify(h.dateObtention, Number(h.dureeValiditeMois) || 24);
+    const statut = cls === "late" ? "Expirée" : cls === "soon" ? "À renouveler" : "À jour";
+    return { dateExpiration: prochaine, statut, cls };
   }
 
   // ---------- Filtres ----------

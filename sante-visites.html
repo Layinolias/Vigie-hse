@@ -3,6 +3,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/roster.js"></script>
+<script src="assets/habilitations-ref.js"></script>
+<script src="assets/echeance.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -559,18 +561,11 @@
   // ---------- Surveillance renforcée par habilitation (Q4 du Cahier du préventeur, répondue le
   // 2026-09-16) : « la saisie d'un type d'habilitation doit permettre de déterminer une
   // périodicité/validité » (pas d'autre critère — âge, exposition, etc. — écartés par le préventeur).
-  // Même table de durées que formation-habilitation.html (dupliquée volontairement, comme les
-  // rosters d'agents indépendants déjà notés dans ETAT-DU-PROJET.md) : la durée de validité d'une
-  // habilitation détenue par l'agent devient un plafond sur la périodicité de sa visite si elle est
-  // plus stricte que la périodicité saisie manuellement — jamais plus large.
-  const HAB_DUREE_SURVEILLANCE = {
-    "CACES": 60,
-    "Habilitation électrique": 36,
-    "SST (Sauveteur Secouriste du Travail)": 24,
-    "Permis de conduire poids lourd / remorque": 60,
-    "AIPR (Autorisation d'Intervention à Proximité des Réseaux)": 60,
-    "Habilitation travail en hauteur": 12,
-  };
+  // Même table de durées que formation-habilitation.html, partagée via assets/habilitations-ref.js
+  // (VigieHabilitations) : la durée de validité d'une habilitation détenue par l'agent devient un
+  // plafond sur la périodicité de sa visite si elle est plus stricte que la périodicité saisie
+  // manuellement — jamais plus large.
+  const HAB_DUREE_SURVEILLANCE = VigieHabilitations.HAB_DUREE;
   let habilitationsKeyMissing = false;
   function loadHabilitationsRef(){
     try {
@@ -604,15 +599,9 @@
     const basePeriodicite = Number(v.periodiciteMois) || 24;
     const renforcee = !!(renfort && renfort.duree < basePeriodicite);
     const periodiciteEffective = renforcee ? renfort.duree : basePeriodicite;
-    const d = new Date(v.dateDerniere);
-    const prochaine = new Date(d);
-    prochaine.setMonth(prochaine.getMonth() + periodiciteEffective);
-    const today = new Date();
-    const in60 = new Date(today); in60.setDate(in60.getDate() + 60);
-    let statut = "À jour", cls = "ok";
-    if (prochaine < today){ statut = "En retard"; cls = "late"; }
-    else if (prochaine <= in60){ statut = "À programmer"; cls = "soon"; }
-    return { prochaine: prochaine.toISOString().slice(0,10), statut, cls, periodiciteEffective, renforcee, renforceePar: renforcee ? renfort.type : "" };
+    const { prochaine, cls } = VigieEcheance.classify(v.dateDerniere, periodiciteEffective);
+    const statut = cls === "late" ? "En retard" : cls === "soon" ? "À programmer" : "À jour";
+    return { prochaine, statut, cls, periodiciteEffective, renforcee, renforceePar: renforcee ? renfort.type : "" };
   }
 
   // ---------- Filtres ----------

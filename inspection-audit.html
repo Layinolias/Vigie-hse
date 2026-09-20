@@ -733,7 +733,7 @@
   fStatut.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
     tri.reset();
-    fCollectivite.value = "all"; fillServiceOptions(); fTrame.value = "all"; fStatut.value = "all"; render();
+    fCollectivite.value = "all"; fillServiceOptions(); fService.value = "all"; fTrame.value = "all"; fStatut.value = "all"; render();
   });
 
   if (canEdit){

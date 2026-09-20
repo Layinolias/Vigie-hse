@@ -861,7 +861,7 @@
   fService.addEventListener("change", render);
   fStatut.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fillServiceOptions(); fStatut.value = "all"; tri.reset(); render();
+    fCollectivite.value = "all"; fillServiceOptions(); fService.value = "all"; fStatut.value = "all"; tri.reset(); render();
   });
 
   if (canEdit){

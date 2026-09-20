@@ -142,7 +142,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] Filtrer sur deux colonnes en même temps : les deux filtres se cumulent.
 - [ ] En ouvrant l'entonnoir d'une **autre** colonne, les valeurs proposées tiennent compte du filtre déjà actif ; en rouvrant celui de la colonne **déjà filtrée**, toutes ses valeurs restent proposées.
 - [ ] Le compteur « X affichés sur Y » et les KPI du haut de page suivent bien les filtres de colonne.
-- [ ] Le bouton « Réinitialiser » efface aussi le tri et les filtres de colonne.
+- [ ] Le bouton « Réinitialiser » efface aussi le tri et les filtres de colonne. Sur chaque page à filtres (Plan d'actions, Santé, Registre SST, Vérifications, Inspections, Produits chimiques, Formations, Accidents, Dossiers AT/MP, Urgences, Entreprises extérieures) : choisir une collectivité **et** un service, puis « Réinitialiser » — le filtre **Service** doit bien revenir à « Tous les services », pas rester sur le service choisi.
 - [ ] Le panneau se ferme en cliquant ailleurs, avec Échap, ou en faisant défiler la page — et reste toujours entièrement visible à l'écran, y compris sur une fenêtre étroite.
 - [ ] En thème sombre, le panneau est bien lisible (fond sombre, texte clair).
 - [ ] Se connecter en `AG2` (moins de colonnes visibles) : le tri d'une colonne trie bien **cette** colonne (pas de décalage).

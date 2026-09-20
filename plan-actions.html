@@ -808,7 +808,7 @@
   fStatut.addEventListener("change", render);
   fPriorite.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fillServiceOptions(); fStatut.value = "all"; fPriorite.value = "all";
+    fCollectivite.value = "all"; fillServiceOptions(); fService.value = "all"; fStatut.value = "all"; fPriorite.value = "all";
     tri.reset(); render();
   });
 

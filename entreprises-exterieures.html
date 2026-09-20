@@ -699,7 +699,7 @@
   fService.addEventListener("change", render);
   fEntreprise.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fillServiceOptions(); fEntreprise.value = "all"; tri.reset(); render();
+    fCollectivite.value = "all"; fillServiceOptions(); fService.value = "all"; fEntreprise.value = "all"; tri.reset(); render();
   });
 
   // ---------- Actions correctives (sous-formulaire dynamique) ----------

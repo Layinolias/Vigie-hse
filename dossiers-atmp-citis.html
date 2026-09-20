@@ -703,7 +703,7 @@
   fCollectivite.addEventListener("change", () => { fillServiceOptions(); render(); });
   fService.addEventListener("change", render);
   fStatutDossier.addEventListener("change", render);
-  $("btnReset").addEventListener("click", () => { fCollectivite.value = "all"; fillServiceOptions(); fStatutDossier.value = "all"; render(); });
+  $("btnReset").addEventListener("click", () => { fCollectivite.value = "all"; fillServiceOptions(); fService.value = "all"; fStatutDossier.value = "all"; render(); });
 
   // ---------- Panneau détail ----------
   let currentAtmpId = null;

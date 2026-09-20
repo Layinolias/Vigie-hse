@@ -24,10 +24,6 @@ demande une session ouverte par l'utilisateur._
 
 ## Reste à faire (hors travail en cours)
 
-- Faire pointer les 3 copies de `RISK_TAXONOMY_DEFAULT` (`administration.html`, `document-unique.html`,
-  `saisie-duerp.html`) sur `assets/risques-ref.js`. **Attention** : passer par une copie
-  (`VigieRisques.FAMILLES.map(f => [f[0], f[1]])`), l'éditeur de référentiels d'`administration.html`
-  pouvant muter le tableau.
 - Revue de code des modules 12 (Accueil au poste) et 8 (Base documentaire), jamais relus.
 - Modules 5 (Pénibilité) et 13 (Dialogue social) : bloqués, respectivement par la réponse à Q5/Q8-Q10 et
   par la refonte des rôles (jalon J0).

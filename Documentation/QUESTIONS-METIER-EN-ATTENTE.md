@@ -22,7 +22,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 - Chaque question est rédigée pour être comprise **sans connaître le code** : contexte, ce que fait le logiciel aujourd'hui, la question, les options.
 - Une fois la réponse écrite dans la case « Décision », la mise en œuvre est faite côté technique et la question passe en ✅.
 
-**Légende statut :** 🔴 Bloquante (un écran affiche déjà un chiffre discutable) · 🟠 À anticiper (le module concerné n'est pas encore construit) · ✅ Répondue
+**Légende statut :** 🔴 Bloquante (un écran affiche déjà un chiffre discutable) · 🟠 En attente de réponse — soit le module n'est pas encore construit, soit il est en service mais une règle y a été posée par défaut, à confirmer · ✅ Répondue
 
 ---
 
@@ -37,7 +37,9 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 5 | Quel niveau de fidélité réglementaire pour la pénibilité / C2P ? | Module Pénibilité (à construire) | ✅ réponse consignée, module pas encore construit |
 | 6 | Quelle périodicité réglementaire pour les exercices d'évacuation ? | Module Situations d'urgence (à construire) | ✅ réponse consignée, module pas encore construit |
 | 7 | Plan de prévention : seuil des 400 h et qualifications des sous-traitants | Module Entreprises extérieures | ✅ répondue, mise en œuvre le 2026-09-19 |
-| 8 | Seuil des 400 h : « plus de » ou « au moins » ? Quelle période ? | Module Entreprises extérieures (existant) | 🟠 à poser au préventeur |
+| 8 | Seuil des 400 h : « plus de » ou « au moins » ? Quelle période ? | Module Entreprises extérieures (existant) | 🟠 posée le 2026-09-20, en attente |
+| 9 | Accueil sécurité d'un nouvel agent : contenu, délai, trace signée | Module Accueil au poste (existant) | 🟠 posée le 2026-09-20, en attente |
+| 10 | Base documentaire : trame des fiches de risque, documents obligatoires | Module Base documentaire (existant) | 🟠 posée le 2026-09-20, en attente |
 
 ---
 
@@ -246,7 +248,41 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ### Décision
 
-> *(en attente de réponse du préventeur — non encore posée sur le Cahier en ligne)*
+> *(posée sur le Cahier du préventeur le 2026-09-20 — en attente de réponse)*
+
+---
+
+## 🟠 Question 9 — Accueil sécurité d'un nouvel agent : contenu, délai, trace signée
+
+**Contexte.** Le module « Accueil au poste » (livré le 2026-09-19) suit, pour chaque nouvel agent, les points vus avec lui à son arrivée : on les coche (avec la date et le nom de la personne qui l'a fait), on peut en ajouter de spécifiques au poste, et on imprime une fiche à faire signer par l'agent et son référent.
+
+**Ce que fait le logiciel aujourd'hui.** Le parcours par défaut contient **8 points volontairement neutres**, tous modifiables (présentation du service et du référent ; livret d'accueil et consignes générales ; visite des locaux et du poste ; issues de secours, évacuation, point de rassemblement ; risques du poste issus du document unique ; remise et essai des EPI ; personnes ressources ; comment signaler un accident ou une situation dangereuse). **Ces 8 points ont été écrits sans s'appuyer sur un texte réglementaire** — délibérément, pour ne pas inventer une obligation. Aucun délai n'est calculé, aucune alerte n'existe.
+
+**La question.**
+- Que faut-il retirer, reformuler ou ajouter à ces 8 points ? Faut-il des parcours différents selon le métier (espaces verts, cuisine, administratif, voirie…) ?
+- Y a-t-il un **délai** à respecter (accueil avant la prise de poste ? dans les X jours ?), et l'application doit-elle alerter quand il est dépassé ?
+- La **trace signée** est-elle exigée, combien de temps faut-il la conserver, et cela concerne-t-il aussi remplaçants, saisonniers et stagiaires ?
+
+### Décision
+
+> *(posée sur le Cahier du préventeur le 2026-09-20 — en attente de réponse)*
+
+---
+
+## 🟠 Question 10 — Base documentaire : trame des fiches de risque et documents obligatoires
+
+**Contexte.** Le module « Base documentaire » (livré le 2026-09-19) est **consultable par tous les comptes** ; la rédaction est réservée aux RH/admin et aux comptes autorisés. Il contient des articles classés par thème et un registre de documents officiels.
+
+**Ce que fait le logiciel aujourd'hui.** Les 33 familles de risque du document unique ont chacune une fiche, remplie avec la **seule définition courte déjà présente dans l'application** (`assets/risques-ref.js`) — **rien n'a été ajouté**. Le registre des documents enregistre titre, catégorie, référence, version, date, statut et un lien externe : **le fichier lui-même n'est pas stocké** (impossible sans serveur).
+
+**La question.**
+- Quelle **trame** attend-on d'une fiche de famille de risque (définition · comment le reconnaître sur le terrain · mesures de prévention habituelles · ce que l'agent doit faire · références) ? Qui la rédige, qui la valide ?
+- Quels documents doivent **obligatoirement** figurer au registre, et lesquels doivent être visibles de tous les agents plutôt que des seuls encadrants ?
+- Faut-il aussi des fiches **par poste ou par tâche** (ce que l'agent doit savoir avant d'intervenir), en plus des fiches par famille de risque ?
+
+### Décision
+
+> *(posée sur le Cahier du préventeur le 2026-09-20 — en attente de réponse)*
 
 ---
 
@@ -267,4 +303,6 @@ Ce n'est pas un défaut : le choix a été de ne pas inventer une fausse date d'
 - **Q3** : champ `typeAtMp`, défini dans `saisie-rh.html` et affiché par `typeChip()` dans `registre-at-mp.html` ; impacte `dossiers-atmp-citis.html`.
 - **Q4** : `sante-visites.html`, fonctions `loadHabilitationsRef()`, `buildSurveillanceRenforceeMap()`, `computeStatus()` (constante `HAB_DUREE_SURVEILLANCE`, dupliquée depuis `HAB_TYPES`/`HAB_DUREE` de `formation-habilitation.html`).
 - **Q5** : module non créé — voir `ROADMAP-MODULES-FUTURS.md` section 5. **Q6** : `urgences-exercices.html`. **Q7/Q8** : `entreprises-exterieures.html`, constante `SEUIL_HEURES` et fonction `isPlanObligatoire()`.
+- **Q9** : `accueil-poste.html`, constante `TPL_DEFAULT` (les 8 points) et clé `vigie_hse_modeles_accueil` ; un délai imposerait un champ d'échéance sur `vigie_hse_accueils`.
+- **Q10** : `base-documentaire.html`, fonction `buildSeeds()` et `assets/risques-ref.js` (trame des fiches) ; `DOC_CATEGORIES` pour les catégories de documents.
 - **Point DUERP** : champ `dateEvaluation` écrit par `saisie-duerp.html` ; import sans date dans `document-unique.html`.

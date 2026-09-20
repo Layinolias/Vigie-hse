@@ -6,21 +6,13 @@ session**, avec `CLAUDE.md`. Le reste de l'état durable est dans `ETAT-DU-PROJE
 
 ## Travail en cours, non terminé
 
-**Correction du bouton « Réinitialiser » — écrite sur disque, NI testée NI commitée.**
-Sur 10 pages (`accident-analyse`, `dossiers-atmp-citis`, `entreprises-exterieures`,
-`formation-habilitation`, `inspection-audit`, `plan-actions`, `produits-chimiques`, `registre-sst`,
-`sante-visites`, `urgences-exercices`), une ligne a été ajoutée dans le handler de `#btnReset` :
-`fService.value = "all";` juste après `fillServiceOptions()`.
-
-Motif : `fillServiceOptions()` **conserve** la valeur courante (`fService.value = list.includes(current)
-? current : "all"`), donc « Réinitialiser » laissait le filtre Service sur l'ancien service.
-`accueil-poste.html` était déjà correct ; `document-unique.html`, `registre-at-mp.html` et
-`verifications-periodiques.html` ont un autre mécanisme — **restent à vérifier**.
-
-Contrôle de syntaxe JS passé sur les 10 fichiers. Reste à faire : un test jsdom qui, sur **toutes** les
-pages ayant `#btnReset` et `#fService` (13), choisit un service puis clique « Réinitialiser » et vérifie
-que le filtre revient à « Tous ». Puis commit + push + vérification en ligne.
-Si on préfère repartir propre : `git checkout -- .`
+_Rien en cours. La correction du bouton « Réinitialiser » a été testée, commitée et poussée
+(`638a09e`, 20 septembre 2026) : sur 10 pages, `fService.value = "all"` est désormais posé
+explicitement après `fillServiceOptions()`, qui conservait la valeur courante du filtre Service.
+`accueil-poste.html`, `document-unique.html` et `registre-at-mp.html` étaient déjà corrects ;
+`verifications-periodiques.html` n'a pas de filtre Service. Harnais `test-reset.js` : les 13 pages
+ayant `#btnReset` et `#fService` reviennent bien à « Tous ». Reste la vérification en direct, qui
+demande une session ouverte par l'utilisateur._
 
 ## Ce qui revient à l'utilisateur (je ne peux pas le faire)
 

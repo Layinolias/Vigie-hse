@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 109 points au 2026-09-19 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 110 points au 2026-09-20 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -107,6 +107,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Recherche : taper « amiante », puis « electrique » (sans accent), puis « chute hauteur » (deux mots) — les bonnes fiches ressortent, le titre passe avant le texte ; filtrer par thème ; « Réinitialiser » remet tout.
 - [ ] En `RH1` : créer un article (titre, thème, mots-clés, texte sur plusieurs lignes) — il s'affiche avec ses retours à la ligne ; le modifier, puis le supprimer. Créer un article en **Brouillon** : `AG2` ne le voit ni dans la liste ni via la recherche. Une fiche « Famille de risque » n'a pas de bouton « Supprimer » (on peut la passer en brouillon ou rétablir son texte d'origine).
 - [ ] Onglet « Documents officiels » : ajouter un document (catégorie, référence, version, lien `https://…`) — le lien s'ouvre dans un nouvel onglet ; un lien `javascript:…` ou sans `http(s)://` est refusé avec un message ; filtrer par catégorie/statut ; modifier et supprimer.
+- [ ] **Liens contextuels** : dans le **Document Unique**, une ligne dont la famille de risque est connue affiche une pastille « fiche » qui ouvre la bonne fiche (essayer aussi avec un compte en lecture seule) ; une famille ajoutée à la main dans les référentiels n'affiche pas de pastille. Dans **Évaluer un risque**, choisir une famille fait apparaître « Lire la fiche de ce risque » sous le champ. Ouvrir une adresse `base-documentaire.html?fiche=nimportequoi` affiche un message clair au lieu d'une page vide.
 - [ ] `AG2` (sans permission) : aucun bouton de création, de modification ni d'export, mais lecture complète ; donner la case « Peut rédiger » à un compte depuis Administration (badge « Doc · rédacteur ») : ses boutons de rédaction apparaissent à la reconnexion.
 
 ### Accueil au poste (`RH1`/`RH2` ou `admin` — accès write d'office ; permission granulaire `accueil-poste` pour les autres)

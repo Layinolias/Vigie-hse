@@ -37,5 +37,33 @@
     ["VSST","Agissements sexistes ou actes de harcèlement/agression sexuelle de la part de l'entourage professionnel ou de tiers."],
     ["Autres","Risques divers non listés spécifiquement dans la nomenclature standard, identifiés lors de l'analyse de situations de travail particulières."],
   ];
-  window.VigieRisques = { FAMILLES: FAMILLES };
+
+  // Identifiant de la fiche wiki d'une famille de risque. C'est la SEULE source de cet identifiant :
+  // base-documentaire.html amorce ses fiches avec, document-unique.html et saisie-duerp.html y renvoient.
+  function sansAccents(s){
+    return String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
+  function slug(s){
+    return sansAccents(s).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  // Retrouve la famille officielle derrière un libellé saisi ou importé : la comparaison passe par le slug,
+  // si bien que « Chute de plain pied » (import Excel) retrouve « Chute de plain-pied » (taxonomie).
+  function trouver(nom){
+    var s = slug(nom);
+    if (!s) return null;
+    for (var i = 0; i < FAMILLES.length; i++){ if (slug(FAMILLES[i][0]) === s) return FAMILLES[i]; }
+    return null;
+  }
+  function idFiche(nom){
+    var f = trouver(nom);
+    return f ? "wiki-risque-" + slug(f[0]) : "";
+  }
+  // Lien vers la fiche, ou "" si le libellé ne correspond à aucune famille connue (famille ajoutée
+  // à la main dans les référentiels : aucune fiche n'existe pour elle, on n'affiche donc pas de lien).
+  function lienFiche(nom){
+    var id = idFiche(nom);
+    return id ? "base-documentaire.html?fiche=" + encodeURIComponent(id) : "";
+  }
+
+  window.VigieRisques = { FAMILLES: FAMILLES, slug: slug, trouver: trouver, idFiche: idFiche, lienFiche: lienFiche };
 })();

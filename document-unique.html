@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
+<script src="assets/risques-ref.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -247,6 +248,9 @@
   .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
   .act-del:hover{ text-decoration:underline; }
 
+  /* Lien vers la fiche de la famille de risque (Base documentaire) */
+  .fiche-lien{ display:inline-block; margin-left:8px; font-size:10.5px; font-weight:600; color:var(--accent); text-decoration:none; border:1px solid rgba(var(--accent-rgb),.45); border-radius:var(--r-pill); padding:1px 8px; white-space:nowrap; }
+  .fiche-lien:hover{ background:rgba(var(--accent-rgb),.10); }
   .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
   .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
   .footnote button{ background:none; border:none; color:var(--text-faint); text-decoration:underline; cursor:pointer; font-size:11.5px; font-family:"IBM Plex Sans",sans-serif; padding:0; }
@@ -738,6 +742,17 @@
   let DATASET = loadDataset();
   if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
 
+  // Renvoie un lien vers la fiche de la famille de risque, ou "" si le libellé ne correspond
+  // à aucune famille connue. L'URL et l'infobulle sont bâties sur le nom officiel de la taxonomie,
+  // jamais sur le texte de la ligne : rien de saisi par un utilisateur ne finit dans le lien.
+  function ficheLien(nom){
+    const fam = VigieRisques.trouver(nom);
+    if (!fam) return "";
+    const url = VigieRisques.lienFiche(fam[0]);
+    const titre = "Ouvrir la fiche « " + fam[0] + " » dans la Base documentaire";
+    return `<a class="fiche-lien" href="${url}" title="${titre.replace(/"/g, "&quot;")}">fiche</a>`;
+  }
+
   function riskLevel(score){
     if (score <= 3) return { label:"Faible", cls:"faible" };
     if (score <= 6) return { label:"Modéré", cls:"modere" };
@@ -827,7 +842,7 @@
       <tr class="${lvl.cls}" data-id="${r.id}">
         <td><span class="collectivite-chip ${r.collectivite === 'Agglomération' ? 'agglo' : 'ville'}">${r.collectivite || 'Ville'}</span></td>
         <td>${r.service}</td>
-        <td class="wrap">${r.risque}</td>
+        <td class="wrap">${r.risque}${ficheLien(r.risque)}</td>
         <td class="wrap">${r.taches || ''}</td>
         <td class="wrap">${r.danger || ''}</td>
         <td class="num">${r.frequence}</td>

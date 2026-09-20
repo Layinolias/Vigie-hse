@@ -431,6 +431,7 @@
           <div class="article-body" id="articleBody"></div>
         </div>
 
+        <p id="ficheNotice" class="empty-block" style="display:none;"></p>
         <div id="wikiList" class="wiki-grid"></div>
       </section>
 
@@ -614,7 +615,7 @@
   function fmtFr(s){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ""); return m ? m[3] + "/" + m[2] + "/" + m[1] : (s || ""); }
   // Comparaison insensible à la casse et aux accents.
   const norm = (s) => String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  const slug = (s) => norm(s).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const slug = VigieRisques.slug;   // même calcul que les pages qui renvoient ici (assets/risques-ref.js)
   // Seule une adresse http(s) est cliquable : refuse javascript:, data:, etc. (à l'enregistrement ET à l'affichage).
   const safeUrl = (u) => { const t = String(u == null ? "" : u).trim(); return /^https?:\/\/[^\s]+$/i.test(t) ? t : ""; };
 
@@ -891,6 +892,22 @@
   fillThemeFilter();
   renderWiki();
   renderDocs();
+
+  // ---------- Ouverture directe d'une fiche : base-documentaire.html?fiche=<id> ----------
+  // Utilisé par les liens contextuels du Document Unique et du formulaire d'évaluation.
+  (function(){
+    var cible = "";
+    try { cible = new URLSearchParams(location.search).get("fiche") || ""; } catch(e){}
+    if (!cible) return;
+    var a = ARTICLES.find(function(x){ return x.id === cible; });
+    var lisible = a && (canDocWrite || a.statut !== "Brouillon");
+    if (lisible){ openArticle(cible); return; }
+    var notice = $("ficheNotice");
+    notice.textContent = a
+      ? "Cette fiche est en brouillon : elle n'est pas encore publiée."
+      : "La fiche demandée n'existe pas (ou plus) dans la base documentaire.";
+    notice.style.display = "";
+  })();
 
   function tickClock(){
     const now = new Date();

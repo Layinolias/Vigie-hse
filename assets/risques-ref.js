@@ -1,6 +1,7 @@
-// Taxonomie des familles de risque (nom, définition courte) — copie de RISK_TAXONOMY_DEFAULT (administration.html,
-// document-unique.html, saisie-duerp.html). Utilisée par base-documentaire.html pour amorcer une fiche par famille.
-// Les trois pages d'origine gardent leur propre copie pour l'instant (à factoriser sur ce fichier lors d'une prochaine passe).
+// Taxonomie des familles de risque (nom, définition courte) — SOURCE UNIQUE depuis le 2026-09-20 :
+// administration.html, document-unique.html et saisie-duerp.html construisent leur RISK_TAXONOMY_DEFAULT
+// à partir d'ici (par copie : l'éditeur de référentiels d'administration.html modifie son tableau),
+// et base-documentaire.html amorce une fiche wiki par famille.
 (function(){
   var FAMILLES = [
     ["Agressions verbales / physique","Risque de violence externe (de la part de clients, usagers ou tiers) ou interne (entre collègues ou hiérarchie), se traduisant par des insultes, des menaces, des intimidations ou des coups, générant un impact sévère sur la santé mentale et physique."],

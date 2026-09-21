@@ -1,4 +1,4 @@
-# Point de reprise — 20 septembre 2026
+# Point de reprise — 21 septembre 2026
 
 Fichier de passage de relais entre sessions. **À relire en premier après une compaction ou en début de
 session**, avec `CLAUDE.md`. Le reste de l'état durable est dans `ETAT-DU-PROJET.md`,
@@ -6,8 +6,12 @@ session**, avec `CLAUDE.md`. Le reste de l'état durable est dans `ETAT-DU-PROJE
 
 ## Travail en cours, non terminé
 
-_Rien en cours. La correction du bouton « Réinitialiser » a été testée, commitée et poussée
-(`638a09e`, 20 septembre 2026) : sur 10 pages, `fService.value = "all"` est désormais posé
+_Rien en cours. Les réponses Q8, Q9 et Q10 du préventeur (2026-09-21) sont consignées dans
+`QUESTIONS-METIER-EN-ATTENTE.md` et **toutes les trois mises en œuvre et déployées** : seuil « au moins
+400 h » (`50ec301`), accueil au poste — type, délai de 8 j, butoir, alerte (`852fbb5`), base documentaire —
+trame en 4 sections, types de document créés par le préventeur, afficher/masquer (`7c60848`). Plus aucune
+question métier en attente. Auparavant : la correction du bouton « Réinitialiser », testée, commitée et poussée
+(`638a09e`, 20 septembre 2026) — sur 10 pages, `fService.value = "all"` est désormais posé
 explicitement après `fillServiceOptions()`, qui conservait la valeur courante du filtre Service.
 `accueil-poste.html`, `document-unique.html` et `registre-at-mp.html` étaient déjà corrects ;
 `verifications-periodiques.html` n'a pas de filtre Service. Harnais `test-reset.js` : les 13 pages
@@ -16,22 +20,28 @@ demande une session ouverte par l'utilisateur._
 
 ## Ce qui revient à l'utilisateur (je ne peux pas le faire)
 
-- **Cahier du préventeur** : les visiteurs voient une **version épinglée à 7 questions**. Q8, Q9 et Q10
-  sont publiées mais invisibles pour le préventeur tant que l'épingle n'est pas déplacée depuis le menu
-  **Partager** de la page. Vérifier aussi l'épingle du Poste de pilotage.
+- **Épingles de partage** : la lecture du Poste de pilotage du 2026-09-21 confirme que **les visiteurs
+  voient une version épinglée, plus ancienne que la version publiée**. À corriger depuis le menu
+  **Partager** de chaque page (Poste de pilotage, Cahier du préventeur, Checklist QA) — je ne peux pas le
+  faire moi-même. Sans cela, le préventeur et les testeurs travaillent sur des chiffres périmés.
 - **Tests en direct** : ils exigent une session ouverte par l'utilisateur (je ne saisis pas de mot de
   passe et je ne me déconnecte jamais du panneau navigateur). Modules 12 et 8 jamais testés en direct.
 
 ## Reste à faire (hors travail en cours)
 
-- Revue de code des modules 12 (Accueil au poste) et 8 (Base documentaire), jamais relus.
-- Modules 5 (Pénibilité) et 13 (Dialogue social) : bloqués, respectivement par la réponse à Q5/Q8-Q10 et
-  par la refonte des rôles (jalon J0).
+- Revue de code des modules 12 (Accueil au poste) et 8 (Base documentaire), jamais relus — et tous deux
+  étendus le 2026-09-21 par les réponses Q9 et Q10.
+- Tests en direct des modules 12 et 8 (session ouverte par l'utilisateur nécessaire).
+- Module 5 (Pénibilité) : la réponse Q5 (« voir la réglementation en vigueur, conforme au texte ») est
+  consignée mais le module reste à construire — et la fidélité réglementaire attendue demandera de
+  repasser par le préventeur, texte par texte.
+- Module 13 (Dialogue social) : bloqué par la refonte des rôles (jalon J0).
 - Autres liens contextuels vers la base documentaire (produit chimique → sa fiche, etc.).
 
 ## Où sont les tests
 
-Les harnais jsdom (`test-bd.js`, `test-accueil.js`, `test-rdv.js`, `test-liens.js`, `audit2.js`,
+Les harnais jsdom (`test-bd.js`, `test-accueil.js`, `test-rdv.js`, `test-liens.js`, `test-reset.js`,
+`test-taxo.js`, `test-q8.js`, `test-q9.js`, `test-q10.js`, `audit2.js`,
 `check-script-tags.js`, `node_modules/jsdom`…) vivent dans le **scratchpad de la session**, pas dans le
 dépôt : une nouvelle session en reçoit un vide et devra les réécrire. Modèle : charger uniquement les
 `<script src>` déclarés par la page, `process.env.TZ='Pacific/Auckland'` pour révéler les décalages UTC,

@@ -238,6 +238,8 @@
   .kw{ display:inline-block; padding:2px 9px; border-radius:var(--r-pill); background:var(--bg-2); border:1px solid var(--border); font-size:11px; color:var(--text-muted); }
   .types-liste{ list-style:none; margin:0 0 12px; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
   .types-liste li{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; background:var(--bg-2); border:1px solid var(--border); border-radius:var(--r-pill); padding:4px 6px 4px 12px; }
+  .types-liste li.t-livre{ background:var(--inset); }
+  .types-liste .t-note{ font-size:10.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--text-faint); padding-right:6px; }
   .types-liste button{ border:none; background:none; color:var(--text-faint); cursor:pointer; font-size:13px; line-height:1; padding:2px 4px; border-radius:4px; }
   .types-liste button:hover{ color:var(--danger); background:var(--danger-bg); }
   .types-ajout{ display:flex; flex-wrap:wrap; gap:8px; }
@@ -452,7 +454,7 @@
       <section class="tab-panel" id="tab-documents">
         <div class="panel form-panel" id="typesPanel" style="display:none;">
           <div class="panel-head"><h3 class="panel-title">Types de document</h3></div>
-          <p class="form-sub-intro">La liste proposée au moment d'enregistrer un document. Ajoutez les types dont vous avez besoin (procédure, consigne, note de service, arrêté, flash sécurité, fiche métier…). Retirer un type ne modifie aucun document déjà enregistré.</p>
+          <p class="form-sub-intro">La liste proposée au moment d'enregistrer un document. Les types marqués « exemple » sont livrés avec l'application et restent toujours disponibles. Ajoutez ceux dont vous avez besoin : eux seuls peuvent être retirés ensuite, et retirer un type ne modifie aucun document déjà enregistré.</p>
           <ul class="types-liste" id="typesListe"></ul>
           <div class="types-ajout">
             <input type="text" id="typeNouveau" placeholder="Nouveau type de document…" aria-label="Nouveau type de document">
@@ -667,15 +669,17 @@
     try { const raw = localStorage.getItem(key); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p.filter(r => r && r.id); } } catch(e){}
     return [];
   }
-  // Même sémantique que les référentiels partagés (loadReferentials) : la liste stockée fait foi, celle
-  // livrée ne sert qu'à l'amorçage et de repli si tout a été retiré. Un « always-merge » ferait revenir
-  // au rechargement suivant un type que le préventeur vient de retirer.
+  // Always-merge : les types livrés sont des EXEMPLES permanents, toujours présents et non supprimables
+  // (même principe que le modèle de parcours par défaut d'accueil-poste.html). Seuls les types ajoutés
+  // par un rédacteur se retirent — et ce retrait-là tient au rechargement, puisqu'ils ne sont pas
+  // réintroduits par la liste livrée.
+  const estTypeLivre = (t) => DOC_TYPES_DEFAUT.includes(t);
   function loadDocTypes(){
     let liste = [];
     try { const raw = localStorage.getItem(DOC_TYPES_KEY); if (raw){ const parsed = JSON.parse(raw); if (Array.isArray(parsed)) liste = parsed.filter(t => typeof t === "string" && t.trim()); } } catch(e){}
-    const retenue = liste.length ? liste : DOC_TYPES_DEFAUT.slice();
-    try { localStorage.setItem(DOC_TYPES_KEY, JSON.stringify(retenue)); } catch(e){}
-    return retenue;
+    const merged = DOC_TYPES_DEFAUT.concat(liste.filter(t => !estTypeLivre(t)));
+    try { localStorage.setItem(DOC_TYPES_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
   }
   let DOC_TYPES = loadDocTypes();
   function saveDocTypes(){ try { localStorage.setItem(DOC_TYPES_KEY, JSON.stringify(DOC_TYPES)); } catch(e){} }
@@ -972,9 +976,15 @@
     $("typesPanel").style.display = "";
     function renderTypes(){
       const utilises = new Set(DOCS.map(d => d.categorie).filter(Boolean));
-      $("typesListe").innerHTML = DOC_TYPES.map(t => `<li>${esc(t)}` +
-        (utilises.has(t) ? `<span style="color:var(--text-faint);font-size:11px;">(utilisé)</span>` : `<button type="button" data-rm-type="${esc(t)}" title="Retirer ce type" aria-label="Retirer le type ${esc(t)}">✕</button>`) +
-        `</li>`).join("");
+      $("typesListe").innerHTML = DOC_TYPES.map(t => {
+        // Un type livré est un exemple permanent ; un type utilisé par un document ne se retire pas non
+        // plus par mégarde. Dans les deux cas on dit pourquoi, plutôt que d'afficher une croix inerte.
+        let fin;
+        if (estTypeLivre(t)) fin = `<span class="t-note">exemple</span>`;
+        else if (utilises.has(t)) fin = `<span class="t-note">utilisé</span>`;
+        else fin = `<button type="button" data-rm-type="${esc(t)}" title="Retirer ce type" aria-label="Retirer le type ${esc(t)}">✕</button>`;
+        return `<li${estTypeLivre(t) ? ` class="t-livre"` : ""}>${esc(t)}${fin}</li>`;
+      }).join("");
     }
     renderTypes();
     $("typeAdd").addEventListener("click", () => {
@@ -993,7 +1003,7 @@
       const b = e.target.closest("[data-rm-type]");
       if (!b) return;
       const t = b.dataset.rmType;
-      if (DOC_TYPES.length <= 1){ $("typeMsg").textContent = "Gardez au moins un type de document."; return; }
+      if (estTypeLivre(t)){ $("typeMsg").textContent = "Les types donnés en exemple ne se retirent pas."; return; }
       if (!confirm(`Retirer le type « ${t} » de la liste ? Les documents déjà enregistrés gardent leur type.`)) return;
       DOC_TYPES = DOC_TYPES.filter(x => x !== t);
       saveDocTypes();

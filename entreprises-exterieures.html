@@ -353,7 +353,7 @@
 
       <div class="panel" style="padding:16px 20px; margin-bottom:18px;">
         <div class="panel-head" style="margin-bottom:8px;"><h3 class="panel-title" style="font-size:14px;">Repère par entreprise &amp; année</h3></div>
-        <p style="margin:0 0 10px; font-size:11.5px; color:var(--text-faint);">Le seuil des 400h s'apprécie <b>par intervention / opération</b> (réponse du préventeur) : le plan de prévention est signalé obligatoire pour une intervention dont les heures estimées dépassent 400h, ou marquée "Travaux dangereux" (case cochée manuellement, aucune liste réglementaire n'est devinée par l'application). Le cumul ci-dessous est purement indicatif.</p>
+        <p style="margin:0 0 10px; font-size:11.5px; color:var(--text-faint);">Le seuil des 400h s'apprécie <b>par intervention / opération</b> (réponse du préventeur) : le plan de prévention est signalé obligatoire pour une intervention d'au moins 400h estimées, ou marquée "Travaux dangereux" (case cochée manuellement, aucune liste réglementaire n'est devinée par l'application). Le cumul ci-dessous est purement indicatif.</p>
         <div style="overflow-x:auto;">
           <table class="ee-table" id="seuilTable"></table>
         </div>
@@ -438,7 +438,7 @@
         </div>
       </div>
 
-      <p class="footnote">Le seuil des 400h et la liste des travaux dangereux relèvent du Code du travail (art. R4511-1 et suivants) — l'application compare les heures estimées de chaque intervention au seuil de 400h mais ne devine jamais si une intervention relève des "travaux dangereux" : c'est à cocher manuellement au cas par cas. La frontière exacte (« plus de » ou « au moins » 400h) est en attente de confirmation du préventeur. Les habilitations des intervenants extérieurs ne sont pas tracées ici (responsabilité contractuelle de l'entreprise extérieure — réponse du préventeur, Cahier de liaison, 2026-09-16).</p>
+      <p class="footnote">Le seuil des 400h et la liste des travaux dangereux relèvent du Code du travail (art. R4511-1 et suivants) — l'application compare les heures estimées de chaque intervention au seuil de 400h mais ne devine jamais si une intervention relève des "travaux dangereux" : c'est à cocher manuellement au cas par cas. La frontière est « au moins 400h » : une intervention de 400h pile est signalée (réponse du préventeur, Cahier de liaison, 2026-09-21). Les habilitations des intervenants extérieurs ne sont pas tracées ici (responsabilité contractuelle de l'entreprise extérieure — réponse du préventeur, Cahier de liaison, 2026-09-16).</p>
     </div>
   </div>
 </div>
@@ -582,11 +582,14 @@
 
   // ---------- Seuil des 400h — apprécié PAR INTERVENTION (réponse Q7 du préventeur) ----------
   // Le verdict "plan de prévention obligatoire" se lit sur chaque intervention/opération
-  // (durée > 400h, ou case "Travaux dangereux" cochée). Le cumul par entreprise et par année
-  // n'est qu'un repère indicatif : il ne déclenche jamais le verdict à lui seul.
+  // (durée d'AU MOINS 400h, ou case "Travaux dangereux" cochée). Le cumul par entreprise et par
+  // année n'est qu'un repère indicatif : il ne déclenche jamais le verdict à lui seul.
+  // « Au moins » et non « plus de » : réponse Q8 du préventeur (Cahier, 2026-09-21) — une
+  // intervention de 400h pile est donc signalée. Le seuil porte sur la durée totale saisie de
+  // l'intervention, sans fenêtre glissante (la question de la période n'a pas été tranchée).
   const SEUIL_HEURES = 400;
   function isPlanObligatoire(r){
-    return (Number(r.heuresEstimees) || 0) > SEUIL_HEURES || !!r.travauxDangereux;
+    return (Number(r.heuresEstimees) || 0) >= SEUIL_HEURES || !!r.travauxDangereux;
   }
   function computeCumuls(){
     const groups = new Map();

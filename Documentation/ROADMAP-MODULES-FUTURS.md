@@ -85,7 +85,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 14 | Gestion administrative RH | ✅ Fait (2026-09-19) — `gestion-rh.html`, les deux volets (données RH + organigramme) |
 | 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
 | 16 | Situations d'urgence & exercices d'évacuation | ✅ Fait (2026-09-18) — volet "exercices réalisés" ; plans d'urgence par site reportés |
-| 17 | Entreprises extérieures & Plan de Prévention | ✅ Fait (2026-09-19) — `entreprises-exterieures.html` ; frontière exacte du seuil 400 h en attente (Q8) |
+| 17 | Entreprises extérieures & Plan de Prévention | ✅ Fait (2026-09-19) — `entreprises-exterieures.html` ; seuil précisé « au moins 400 h » le 2026-09-21 (réponse Q8) |
 | 18 | Gestion administrative des dossiers AT/MP & CITIS | ✅ Fait (2026-09-13) — `dossiers-atmp-citis.html`, premier cas d'usage du modèle de permissions granulaires (voir J0) |
 
 ---
@@ -425,7 +425,7 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - Habilitations des intervenants extérieurs : **non tracées** (hors périmètre, réponse Q7).
 - Actions correctives → Plan d'Actions (`origine:"Prévention EE"`). Export `.xlsx` (feuilles Interventions + Actions, colonne « ID Intervention »). Pas d'import ni de DATATEST en V1.
 - Permission granulaire `entreprises-ext` (read/write).
-- **Question ouverte (Q8, `QUESTIONS-METIER-EN-ATTENTE.md`)** : le seuil est appliqué « strictement > 400 h » ; à confirmer avec le préventeur (« plus de » ou « au moins » 400 h, et fenêtre de temps éventuelle).
+- **Seuil précisé le 2026-09-21 (réponse Q8)** : « **au moins** 400 h » — une intervention de 400 h pile est signalée (`>=`). La question d'une fenêtre de temps n'a pas été tranchée : le seuil porte sur la durée totale saisie de l'intervention, conformément à la réponse Q7 (par intervention/opération).
 
 *Texte d'origine de la demande, conservé ci-dessous :*
 

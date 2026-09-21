@@ -37,9 +37,9 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 5 | Quel niveau de fidélité réglementaire pour la pénibilité / C2P ? | Module Pénibilité (à construire) | ✅ réponse consignée, module pas encore construit |
 | 6 | Quelle périodicité réglementaire pour les exercices d'évacuation ? | Module Situations d'urgence (à construire) | ✅ réponse consignée, module pas encore construit |
 | 7 | Plan de prévention : seuil des 400 h et qualifications des sous-traitants | Module Entreprises extérieures | ✅ répondue, mise en œuvre le 2026-09-19 |
-| 8 | Seuil des 400 h : « plus de » ou « au moins » ? Quelle période ? | Module Entreprises extérieures (existant) | 🟠 posée le 2026-09-20, en attente |
-| 9 | Accueil sécurité d'un nouvel agent : contenu, délai, trace signée | Module Accueil au poste (existant) | 🟠 posée le 2026-09-20, en attente |
-| 10 | Base documentaire : trame des fiches de risque, documents obligatoires | Module Base documentaire (existant) | 🟠 posée le 2026-09-20, en attente |
+| 8 | Seuil des 400 h : « plus de » ou « au moins » ? Quelle période ? | Module Entreprises extérieures (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
+| 9 | Accueil sécurité d'un nouvel agent : contenu, délai, trace signée | Module Accueil au poste (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
+| 10 | Base documentaire : trame des fiches de risque, documents obligatoires | Module Base documentaire (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
 
 ---
 
@@ -236,7 +236,7 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ---
 
-## 🟠 Question 8 — Seuil des 400 h : « plus de » ou « au moins » ? Et quelle période ?
+## ✅ Question 8 — Seuil des 400 h : « plus de » ou « au moins » ? Et quelle période ?
 
 **Contexte.** Le module « Entreprises extérieures » signale « plan de prévention obligatoire » pour une intervention dont la durée estimée dépasse 400 heures (ou qui est cochée « travaux dangereux »). Le collègue a répondu que les heures se comptent *par intervention/opération, comme la réglementation le prévoit*.
 
@@ -248,11 +248,17 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ### Décision
 
-> *(posée sur le Cahier du préventeur le 2026-09-20 — en attente de réponse)*
+> **Réponse du préventeur (Cahier, 2026-09-21) : « au moins 400 h ».**
+>
+> Une intervention de **400 h pile est donc signalée** : le seuil s'apprécie en « supérieur ou égal ».
+> La question de la période bornée n'a pas été tranchée ; on s'en tient donc à la réponse Q7 — le seuil
+> s'apprécie **sur la durée totale saisie de l'intervention/opération**, sans fenêtre glissante.
+>
+> *Mise en œuvre le 2026-09-21 : `entreprises-exterieures.html`, comparaison `>` devenue `>=`.*
 
 ---
 
-## 🟠 Question 9 — Accueil sécurité d'un nouvel agent : contenu, délai, trace signée
+## ✅ Question 9 — Accueil sécurité d'un nouvel agent : contenu, délai, trace signée
 
 **Contexte.** Le module « Accueil au poste » (livré le 2026-09-19) suit, pour chaque nouvel agent, les points vus avec lui à son arrivée : on les coche (avec la date et le nom de la personne qui l'a fait), on peut en ajouter de spécifiques au poste, et on imprime une fiche à faire signer par l'agent et son référent.
 
@@ -265,11 +271,25 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ### Décision
 
-> *(posée sur le Cahier du préventeur le 2026-09-20 — en attente de réponse)*
+> **Réponse du préventeur (Cahier, 2026-09-21).**
+>
+> - **Les 8 points conviennent tels quels** (« c'est parfait »). Pas de parcours imposé par métier, mais il
+>   faut un **type d'accueil** choisi dans un menu déroulant : nouvel embauché, changement de poste,
+>   reprise après accident du travail, reprise après arrêt long, etc.
+> - Trois dates doivent apparaître : la **date d'arrivée au poste**, la **date de l'accueil** (quand il a
+>   effectivement été fait) et la **date butoir**.
+> - **Délai à respecter : oui.** L'accueil doit être réalisé dans un nombre de jours défini à l'avance,
+>   **standard 8 jours**. Une **alerte** doit figurer dans le tableau de suivi en haut du module, avec un
+>   repère visuel et un **tri** permettant de voir si la date butoir est dépassée ou non.
+> - **Trace signée : à conserver sans limite de durée, pour tous les types de contrat** (y compris
+>   remplaçants, saisonniers et stagiaires).
+>
+> *Mise en œuvre le 2026-09-21 : `accueil-poste.html` — type d'accueil, délai paramétrable (8 j par
+> défaut), date butoir calculée, date de réalisation, panneau d'alerte et tri par retard.*
 
 ---
 
-## 🟠 Question 10 — Base documentaire : trame des fiches de risque et documents obligatoires
+## ✅ Question 10 — Base documentaire : trame des fiches de risque et documents obligatoires
 
 **Contexte.** Le module « Base documentaire » (livré le 2026-09-19) est **consultable par tous les comptes** ; la rédaction est réservée aux RH/admin et aux comptes autorisés. Il contient des articles classés par thème et un registre de documents officiels.
 
@@ -282,7 +302,20 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ### Décision
 
-> *(posée sur le Cahier du préventeur le 2026-09-20 — en attente de réponse)*
+> **Réponse du préventeur (Cahier, 2026-09-21).**
+>
+> - **Trame d'une fiche de famille de risque** : la **définition**, des **exemples de situation**, le
+>   **danger**, et les **mesures de prévention**. **C'est le préventeur qui rédige** ces fiches et les met
+>   à disposition — le logiciel fournit la structure, pas le contenu.
+> - **Types de documents** : le préventeur doit pouvoir **créer lui-même les types** (procédures,
+>   consignes, notes de service, arrêtés, flash sécurité…). Les documents sont **visibles par tous**, et le
+>   préventeur doit pouvoir **afficher ou masquer** un document.
+> - **Fiches par métier/poste : oui** — c'est un type de document parmi d'autres, le préventeur ayant la
+>   main sur les types à créer.
+>
+> *Mise en œuvre le 2026-09-21 : `base-documentaire.html` — les 33 fiches passent à la trame en quatre
+> sections (définition reprise, les trois autres à remplir par le préventeur), catégories de documents
+> éditables, et bascule afficher/masquer sur chaque document.*
 
 ---
 

@@ -29,8 +29,10 @@ demande une session ouverte par l'utilisateur._
 
 ## Reste à faire (hors travail en cours)
 
-- Revue de code des modules 12 (Accueil au poste) et 8 (Base documentaire), jamais relus — et tous deux
-  étendus le 2026-09-21 par les réponses Q9 et Q10.
+- ~~Revue de code des modules 12 et 8~~ : faite le 2026-09-21 (`2e1df61`). Deux défauts trouvés et corrigés
+  dans la base documentaire (retrait d'un type de document qui revenait au rechargement ; filtre laissant
+  deviner un document masqué). Leçon retenue : tester la **persistance après rechargement**, pas seulement
+  l'état immédiat du stockage.
 - Tests en direct des modules 12 et 8 (session ouverte par l'utilisateur nécessaire).
 - Module 5 (Pénibilité) : la réponse Q5 (« voir la réglementation en vigueur, conforme au texte ») est
   consignée mais le module reste à construire — et la fidélité réglementaire attendue demandera de

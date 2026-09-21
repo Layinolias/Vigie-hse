@@ -228,9 +228,20 @@
   .wiki-card h4{ margin:0; font:600 15.5px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
   .wiki-card .snip{ font-size:12.3px; line-height:1.5; color:var(--text-muted); }
   .wiki-card .meta{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:11px; color:var(--text-faint); margin-top:auto; }
+  .art-sect{ margin:0 0 16px; }
+  .art-sect:last-child{ margin-bottom:0; }
+  .art-sect h4{ font-family:"Barlow Condensed",sans-serif; font-size:15px; font-weight:600; letter-spacing:.02em; text-transform:uppercase; color:var(--text-muted); margin:0 0 4px; }
+  .art-sect p{ margin:0; white-space:pre-wrap; }
+  .art-vide{ color:var(--text-faint); font-style:italic; }
   .article-body{ white-space:pre-wrap; line-height:1.7; font-size:14px; max-width:78ch; margin:14px 0 0; }
   .article-meta{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:12px; color:var(--text-muted); }
   .kw{ display:inline-block; padding:2px 9px; border-radius:var(--r-pill); background:var(--bg-2); border:1px solid var(--border); font-size:11px; color:var(--text-muted); }
+  .types-liste{ list-style:none; margin:0 0 12px; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
+  .types-liste li{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; background:var(--bg-2); border:1px solid var(--border); border-radius:var(--r-pill); padding:4px 6px 4px 12px; }
+  .types-liste button{ border:none; background:none; color:var(--text-faint); cursor:pointer; font-size:13px; line-height:1; padding:2px 4px; border-radius:4px; }
+  .types-liste button:hover{ color:var(--danger); background:var(--danger-bg); }
+  .types-ajout{ display:flex; flex-wrap:wrap; gap:8px; }
+  .types-ajout input{ min-width:240px; }
   .doc-link{ color:var(--accent); font-weight:600; font-size:12px; text-decoration:none; }
   .doc-link:hover{ text-decoration:underline; }
   .empty-block{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; }
@@ -407,7 +418,10 @@
               <div><label for="aTheme">Thème</label><input type="text" id="aTheme" list="themesList" required placeholder="ex. Consignes de sécurité"><datalist id="themesList"></datalist></div>
               <div class="span2"><label for="aMotsCles">Mots-clés (séparés par des virgules)</label><input type="text" id="aMotsCles" style="width:100%" placeholder="ex. échelle, travaux en hauteur"></div>
               <div><label for="aStatut">Statut</label><select id="aStatut"><option value="Publié">Publié (visible de tous)</option><option value="Brouillon">Brouillon (rédacteurs seulement)</option></select></div>
-              <div class="span3"><label for="aContenu">Contenu</label><textarea id="aContenu" required style="min-height:260px" placeholder="Texte de l'article. Les retours à la ligne sont conservés à l'affichage."></textarea></div>
+              <div class="span3"><label for="aContenu">Définition</label><textarea id="aContenu" required style="min-height:170px" placeholder="Texte de l'article. Les retours à la ligne sont conservés à l'affichage."></textarea></div>
+              <div class="span3"><label for="aExemples">Exemples de situation</label><textarea id="aExemples" placeholder="Situations concrètes rencontrées sur le terrain (facultatif)."></textarea></div>
+              <div class="span3"><label for="aDanger">Le danger</label><textarea id="aDanger" placeholder="Ce à quoi l'agent s'expose (facultatif)."></textarea></div>
+              <div class="span3"><label for="aPrevention">Mesures de prévention</label><textarea id="aPrevention" placeholder="Mesures habituelles et consignes à appliquer (facultatif)."></textarea></div>
             </div>
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">Enregistrer</button>
@@ -436,8 +450,19 @@
       </section>
 
       <section class="tab-panel" id="tab-documents">
+        <div class="panel form-panel" id="typesPanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title">Types de document</h3></div>
+          <p class="form-sub-intro">La liste proposée au moment d'enregistrer un document. Ajoutez les types dont vous avez besoin (procédure, consigne, note de service, arrêté, flash sécurité, fiche métier…). Retirer un type ne modifie aucun document déjà enregistré.</p>
+          <ul class="types-liste" id="typesListe"></ul>
+          <div class="types-ajout">
+            <input type="text" id="typeNouveau" placeholder="Nouveau type de document…" aria-label="Nouveau type de document">
+            <button type="button" class="btn btn-ghost" id="typeAdd">Ajouter</button>
+            <span id="typeMsg" style="align-self:center; font-size:12px; color:var(--text-muted);"></span>
+          </div>
+        </div>
+
         <div class="panel console">
-          <div class="field"><span class="flabel">Catégorie</span><select id="dCategorieFiltre"></select></div>
+          <div class="field"><span class="flabel">Type</span><select id="dCategorieFiltre"></select></div>
           <div class="field"><span class="flabel">Statut</span>
             <select id="dStatutFiltre"><option value="all">Tous</option><option value="En vigueur">En vigueur</option><option value="Obsolète">Obsolète</option></select>
           </div>
@@ -451,7 +476,7 @@
             <input type="hidden" id="dId">
             <div class="form-grid">
               <div class="span2"><label for="dTitre">Titre</label><input type="text" id="dTitre" required style="width:100%"></div>
-              <div><label for="dCategorie">Catégorie</label><select id="dCategorie" required></select></div>
+              <div><label for="dCategorie">Type de document</label><select id="dCategorie" required></select></div>
               <div><label for="dReference">Référence</label><input type="text" id="dReference" placeholder="N° d'arrêté, code interne…"></div>
               <div><label for="dVersion">Version</label><input type="text" id="dVersion" placeholder="ex. v2"></div>
               <div><label for="dDate">Date du document</label><input type="date" id="dDate"></div>
@@ -475,7 +500,7 @@
             <table class="reg" style="min-width:980px;">
               <thead>
                 <tr id="theadDocs">
-                  <th>Titre</th><th>Catégorie</th><th>Référence</th><th>Version</th><th>Date</th><th>Statut</th><th>Lien</th>
+                  <th>Titre</th><th>Type</th><th>Référence</th><th>Version</th><th>Date</th><th>Statut</th><th>Lien</th>
                   <th id="thActions"></th>
                 </tr>
               </thead>
@@ -607,7 +632,19 @@
   const DOCS_KEY = "vigie_hse_documents";
   const THEME_RISQUES = "Familles de risque";
   const SEED_DATE = "2026-09-19";
-  const DOC_CATEGORIES = ["Politique HSE","Procédure","Consigne de sécurité","Note de service","Texte officiel (loi, décret, arrêté)","Compte-rendu","Autre"];
+  // Trame d'une fiche de famille de risque, demandée par le préventeur (Q10, 2026-09-21) : définition,
+  // exemples de situation, danger, mesures de prévention. L'application fournit la structure ; le CONTENU
+  // des trois dernières sections est rédigé par le préventeur (rien n'est inventé ici — règle 9).
+  const SECTIONS = [
+    { cle:"contenu",    titre:"Définition" },
+    { cle:"exemples",   titre:"Exemples de situation" },
+    { cle:"danger",     titre:"Le danger" },
+    { cle:"prevention", titre:"Mesures de prévention" },
+  ];
+  // Types de documents : le préventeur les crée lui-même (réponse Q10), donc la liste vit dans cette page
+  // — accessible à tout compte rédacteur — et non dans Administration, réservée aux administrateurs.
+  const DOC_TYPES_KEY = "vigie_hse_doc_types";
+  const DOC_TYPES_DEFAUT = ["Politique HSE","Procédure","Consigne de sécurité","Note de service","Arrêté","Flash sécurité","Fiche métier","Texte officiel (loi, décret, arrêté)","Compte-rendu","Autre"];
   function genId(prefix){ return (prefix || "bd") + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
   const pad2 = (n) => String(n).padStart(2, "0");
   // Dates formatées en LOCAL (toISOString() est en UTC : décalage d'un jour possible le soir).
@@ -630,6 +667,16 @@
     try { const raw = localStorage.getItem(key); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p.filter(r => r && r.id); } } catch(e){}
     return [];
   }
+  // Always-merge : les types livrés sont toujours présents, ceux ajoutés par le préventeur sont conservés.
+  function loadDocTypes(){
+    let liste = [];
+    try { const raw = localStorage.getItem(DOC_TYPES_KEY); if (raw){ const parsed = JSON.parse(raw); if (Array.isArray(parsed)) liste = parsed.filter(t => typeof t === "string" && t.trim()); } } catch(e){}
+    const merged = DOC_TYPES_DEFAUT.concat(liste.filter(t => !DOC_TYPES_DEFAUT.includes(t)));
+    try { localStorage.setItem(DOC_TYPES_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  let DOC_TYPES = loadDocTypes();
+  function saveDocTypes(){ try { localStorage.setItem(DOC_TYPES_KEY, JSON.stringify(DOC_TYPES)); } catch(e){} }
   function saveArticles(){ try { localStorage.setItem(ARTICLES_KEY, JSON.stringify(ARTICLES)); } catch(e){} }
   function saveDocs(){ try { localStorage.setItem(DOCS_KEY, JSON.stringify(DOCS)); } catch(e){} }
   function loadArticles(){
@@ -646,6 +693,8 @@
   let DOCS = readList(DOCS_KEY);
   const isSeed = (a) => a.source === "famille-risque";
   const visibleArticles = () => canDocWrite ? ARTICLES : ARTICLES.filter(a => a.statut !== "Brouillon");
+  // « Masqué » est distinct d'« Obsolète » : le préventeur choisit ce qu'il montre (réponse Q10).
+  const visibleDocs = () => canDocWrite ? DOCS : DOCS.filter(d => !d.masque);
 
   // ----- Onglets -----
   function showTab(name){
@@ -656,28 +705,31 @@
 
   // ----- Recherche plein texte (tous les mots doivent être trouvés ; titre > thème/mots-clés > texte) -----
   function scoreArticle(a, terms){
-    const t = norm(a.titre), th = norm(a.theme), k = norm(a.motsCles), c = norm(a.contenu);
+    const t = norm(a.titre), th = norm(a.theme), k = norm(a.motsCles), c = norm(texteComplet(a));
     let total = 0;
     for (const term of terms){
       let s = 0;
       if (t.includes(term)) s += 5;
       if (th.includes(term) || k.includes(term)) s += 3;
-      if (c.includes(term)) s += 1;
+      if (c.includes(term)) s += 1;   // « c » couvre les quatre sections de la fiche
       if (!s) return 0;
       total += s;
     }
     return total;
   }
   function snippetOf(a, terms){
-    const txt = String(a.contenu || "");
+    const txt = texteComplet(a);
     const flat = txt.replace(/\s+/g, " ").trim();
     if (terms.length){
       const n = norm(flat);
-      const i = n.indexOf(terms.find(t => n.includes(t)) || " ");
+      const trouve = terms.find(t => n.includes(t));
+      const i = trouve ? n.indexOf(trouve) : -1;
       if (i > 60) return "… " + flat.slice(i - 50, i + 110).trim() + (flat.length > i + 110 ? " …" : "");
     }
     return flat.length > 160 ? flat.slice(0, 160).trim() + " …" : flat;
   }
+  // Texte de toutes les sections mises bout à bout : sert à la recherche et à l'extrait.
+  function texteComplet(a){ return SECTIONS.map(s => String(a[s.cle] || "")).filter(t => t.trim()).join("\n\n"); }
   function themesOf(list){ return [...new Set(list.map(a => a.theme).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr")); }
   function fillThemeFilter(){
     const cur = $("wikiTheme").value;
@@ -719,7 +771,15 @@
     $("articleTitle").textContent = a.titre;
     const kws = String(a.motsCles || "").split(",").map(s => s.trim()).filter(Boolean);
     $("articleMeta").innerHTML = `<span class="chip info">${esc(a.theme)}</span>${a.statut === "Brouillon" ? `<span class="chip soon">Brouillon</span>` : ""}<span>Mis à jour le ${esc(fmtFr(a.dateMaj))}</span>${kws.map(k => `<span class="kw">${esc(k)}</span>`).join("")}`;
-    $("articleBody").textContent = a.contenu || "";
+    // Une section vide sur une fiche de famille de risque est annoncée comme telle : c'est au préventeur
+    // de la rédiger, le logiciel n'invente ni exemple ni mesure de prévention.
+    const aRediger = isSeed(a);
+    $("articleBody").innerHTML = SECTIONS.map(s => {
+      const txt = String(a[s.cle] || "").trim();
+      if (!txt && !aRediger) return "";
+      return `<section class="art-sect"><h4>${esc(s.titre)}</h4>` +
+        (txt ? `<p>${esc(txt)}</p>` : `<p class="art-vide">À compléter par le préventeur.</p>`) + `</section>`;
+    }).join("");
     $("articleEdit").style.display = canDocWrite ? "" : "none";
     $("articleDelete").style.display = (canDocWrite && !isSeed(a)) ? "" : "none";
     panel.style.display = "";
@@ -737,6 +797,7 @@
     if (a){
       $("aTitre").value = a.titre; $("aTheme").value = a.theme || ""; $("aMotsCles").value = a.motsCles || "";
       $("aStatut").value = a.statut || "Publié"; $("aContenu").value = a.contenu || "";
+      $("aExemples").value = a.exemples || ""; $("aDanger").value = a.danger || ""; $("aPrevention").value = a.prevention || "";
     } else {
       $("aStatut").value = "Publié";
     }
@@ -755,6 +816,7 @@
     if (!titre || !theme || !contenu.trim()) return;
     const rec = Object.assign({}, prev || { id: genId("wiki"), source: "", auteur: (session && session.user) || "—", dateCreation: todayLocal() }, {
       titre, theme, contenu, motsCles: $("aMotsCles").value.trim(), statut: $("aStatut").value,
+      exemples: $("aExemples").value, danger: $("aDanger").value, prevention: $("aPrevention").value,
       dateMaj: todayLocal(), modifiePar: (session && session.user) || "—",
     });
     if (prev) ARTICLES[ARTICLES.findIndex(a => a.id === id)] = rec; else ARTICLES.push(rec);
@@ -770,6 +832,7 @@
     const seed = a && buildSeeds().find(s => s.id === a.id);
     if (!seed || !confirm("Rétablir le texte d'origine de cette fiche ? Votre texte actuel sera remplacé dans le formulaire (rien n'est enregistré avant « Enregistrer »).")) return;
     $("aContenu").value = seed.contenu;
+    $("aExemples").value = ""; $("aDanger").value = ""; $("aPrevention").value = "";
   });
   $("articleEdit").addEventListener("click", () => { const a = ARTICLES.find(x => x.id === openArticleId); if (a && canDocWrite) openArticleForm(a); });
   $("articleDelete").addEventListener("click", () => {
@@ -783,12 +846,24 @@
 
   // ----- Registre de documents officiels -----
   const dCategorieFiltre = $("dCategorieFiltre"), dStatutFiltre = $("dStatutFiltre");
-  dCategorieFiltre.innerHTML = `<option value="all">Toutes</option>` + DOC_CATEGORIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
-  $("dCategorie").innerHTML = DOC_CATEGORIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  // Les deux listes suivent les types définis par le préventeur, plus les valeurs déjà enregistrées
+  // sur des documents (un type retiré ne doit pas rendre un document inéditable).
+  function typesAffichables(){
+    const utilises = DOCS.map(d => d.categorie).filter(Boolean);
+    return DOC_TYPES.concat(utilises.filter(c => !DOC_TYPES.includes(c)));
+  }
+  function fillCategorieSelects(){
+    const liste = typesAffichables();
+    const curFiltre = dCategorieFiltre.value;
+    dCategorieFiltre.innerHTML = `<option value="all">Toutes</option>` + liste.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+    dCategorieFiltre.value = liste.includes(curFiltre) ? curFiltre : "all";
+    $("dCategorie").innerHTML = liste.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  }
+  fillCategorieSelects();
   const triDocs = VigieTri.create({
     columns: [
       { key:"titre",        label:"Titre" },
-      { key:"categorie",    label:"Catégorie" },
+      { key:"categorie",    label:"Type" },
       { key:"reference",    label:"Référence" },
       { key:"version",      label:"Version" },
       { key:"dateDocument", label:"Date" },
@@ -801,23 +876,24 @@
   triDocs.decorate($("theadDocs"));
   function renderDocs(){
     const cat = dCategorieFiltre.value, st = dStatutFiltre.value;
-    let rows = DOCS.filter(d => (cat === "all" || d.categorie === cat) && (st === "all" || d.statut === st));
+    const vis = visibleDocs();
+    let rows = vis.filter(d => (cat === "all" || d.categorie === cat) && (st === "all" || d.statut === st));
     rows = rows.slice().sort((a, b) => (b.dateDocument || "").localeCompare(a.dateDocument || "") || String(a.titre).localeCompare(String(b.titre), "fr"));
     rows = triDocs.apply(rows);
     $("dCount").textContent = rows.length;
-    $("dTotal").textContent = DOCS.length;
-    $("kpiDocs").textContent = DOCS.filter(d => d.statut === "En vigueur").length;
+    $("dTotal").textContent = vis.length;
+    $("kpiDocs").textContent = vis.filter(d => d.statut === "En vigueur").length;
     const colspan = canDocWrite ? 8 : 7;
     $("docTbody").innerHTML = rows.length ? rows.map(d => {
       const url = safeUrl(d.lien);
       return `<tr data-id="${esc(d.id)}">
         <td class="wrap"><b>${esc(d.titre)}</b>${d.description ? `<div style="font-size:11.5px;color:var(--text-faint);white-space:normal;">${esc(d.description)}</div>` : ""}</td>
         <td>${esc(d.categorie)}</td><td>${esc(d.reference || "—")}</td><td>${esc(d.version || "—")}</td><td>${esc(d.dateDocument || "—")}</td>
-        <td><span class="chip ${d.statut === "En vigueur" ? "ok" : "muted"}">${esc(d.statut)}</span></td>
+        <td><span class="chip ${d.statut === "En vigueur" ? "ok" : "muted"}">${esc(d.statut)}</span>${d.masque ? `<span class="chip soon">Masqué</span>` : ""}</td>
         <td>${url ? `<a class="doc-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Ouvrir</a>` : "—"}</td>
-        ${canDocWrite ? `<td class="actions-float"><button type="button" class="act-edit" data-edit="${esc(d.id)}">Modifier</button><button type="button" class="act-del" data-del="${esc(d.id)}">Suppr.</button></td>` : ""}
+        ${canDocWrite ? `<td class="actions-float"><button type="button" class="act-edit" data-masque="${esc(d.id)}">${d.masque ? "Afficher" : "Masquer"}</button><button type="button" class="act-edit" data-edit="${esc(d.id)}" style="margin-left:10px;">Modifier</button><button type="button" class="act-del" data-del="${esc(d.id)}">Suppr.</button></td>` : ""}
       </tr>`;
-    }).join("") : `<tr class="empty-row"><td colspan="${colspan}">${DOCS.length === 0 ? "Aucun document référencé pour le moment." : "Aucun document ne correspond aux filtres sélectionnés."}</td></tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="${colspan}">${vis.length === 0 ? "Aucun document référencé pour le moment." : "Aucun document ne correspond aux filtres sélectionnés."}</td></tr>`;
   }
   dCategorieFiltre.addEventListener("change", renderDocs);
   dStatutFiltre.addEventListener("change", renderDocs);
@@ -829,11 +905,11 @@
     $("dId").value = d ? d.id : "";
     $("docFormTitle").textContent = d ? "Modifier le document" : "Nouveau document";
     if (d){
-      $("dTitre").value = d.titre; $("dCategorie").value = DOC_CATEGORIES.includes(d.categorie) ? d.categorie : "Autre";
+      $("dTitre").value = d.titre; $("dCategorie").value = d.categorie || DOC_TYPES[0];
       $("dReference").value = d.reference || ""; $("dVersion").value = d.version || ""; $("dDate").value = d.dateDocument || "";
       $("dStatut").value = d.statut || "En vigueur"; $("dLien").value = d.lien || ""; $("dDescription").value = d.description || "";
     } else {
-      $("dCategorie").value = DOC_CATEGORIES[0]; $("dDate").value = todayLocal(); $("dStatut").value = "En vigueur";
+      $("dCategorie").value = DOC_TYPES[0]; $("dDate").value = todayLocal(); $("dStatut").value = "En vigueur";
     }
     docPanel.style.display = "";
     docPanel.scrollIntoView({ behavior:"smooth", block:"start" });
@@ -851,15 +927,28 @@
     const rec = Object.assign({}, prev || { id: genId("doc"), auteur: (session && session.user) || "—", dateCreation: todayLocal() }, {
       titre, categorie: $("dCategorie").value, reference: $("dReference").value.trim(), version: $("dVersion").value.trim(),
       dateDocument: $("dDate").value, statut: $("dStatut").value, lien: lienRaw, description: $("dDescription").value.trim(),
+      masque: prev ? !!prev.masque : false,
     });
     if (prev) DOCS[DOCS.findIndex(d => d.id === id)] = rec; else DOCS.push(rec);
     saveDocs();
     logAudit("Base documentaire", prev ? "Modification" : "Création", `Document « ${rec.titre} » (${rec.categorie}, ${rec.statut})`);
-    closeDocForm(); renderDocs();
+    closeDocForm(); fillCategorieSelects(); renderDocs();
   });
   $("dCancel").addEventListener("click", closeDocForm);
   $("docTbody").addEventListener("click", (e) => {
     if (!canDocWrite) return;
+    // Masquer / afficher : le préventeur choisit ce que les agents voient (réponse Q10). Distinct
+    // d'« Obsolète », qui reste une information sur le document lui-même.
+    const mq = e.target.closest("[data-masque]");
+    if (mq){
+      const d = DOCS.find(x => x.id === mq.dataset.masque);
+      if (!d) return;
+      d.masque = !d.masque;
+      saveDocs();
+      logAudit("Base documentaire", "Modification", `Document « ${d.titre} » ${d.masque ? "masqué" : "affiché"} pour les lecteurs`);
+      renderDocs();
+      return;
+    }
     const ed = e.target.closest("[data-edit]");
     if (ed){ const d = DOCS.find(x => x.id === ed.dataset.edit); if (d) openDocForm(d); return; }
     const del = e.target.closest("[data-del]");
@@ -869,19 +958,52 @@
       DOCS = DOCS.filter(x => x.id !== d.id);
       saveDocs();
       logAudit("Base documentaire", "Suppression", `Document « ${d.titre} » (${d.categorie})`);
-      renderDocs();
+      fillCategorieSelects(); renderDocs();
     }
   });
 
   // ----- Actions de rédaction + export (rédacteurs) -----
   if (canDocWrite){
+    // ----- Types de document, créés par le préventeur lui-même (réponse Q10) -----
+    $("typesPanel").style.display = "";
+    function renderTypes(){
+      const utilises = new Set(DOCS.map(d => d.categorie).filter(Boolean));
+      $("typesListe").innerHTML = DOC_TYPES.map(t => `<li>${esc(t)}` +
+        (utilises.has(t) ? `<span style="color:var(--text-faint);font-size:11px;">(utilisé)</span>` : `<button type="button" data-rm-type="${esc(t)}" title="Retirer ce type" aria-label="Retirer le type ${esc(t)}">✕</button>`) +
+        `</li>`).join("");
+    }
+    renderTypes();
+    $("typeAdd").addEventListener("click", () => {
+      const v = $("typeNouveau").value.trim();
+      if (!v){ $("typeMsg").textContent = "Saisissez un nom de type."; return; }
+      if (DOC_TYPES.some(t => norm(t) === norm(v))){ $("typeMsg").textContent = "Ce type existe déjà."; return; }
+      DOC_TYPES.push(v);
+      saveDocTypes();
+      logAudit("Base documentaire", "Création", `Type de document « ${v} »`);
+      $("typeNouveau").value = "";
+      $("typeMsg").textContent = "Type ajouté.";
+      renderTypes(); fillCategorieSelects(); renderDocs();
+    });
+    $("typeNouveau").addEventListener("keydown", (e) => { if (e.key === "Enter"){ e.preventDefault(); $("typeAdd").click(); } });
+    $("typesListe").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-rm-type]");
+      if (!b) return;
+      const t = b.dataset.rmType;
+      if (!confirm(`Retirer le type « ${t} » de la liste ? Les documents déjà enregistrés gardent leur type.`)) return;
+      DOC_TYPES = DOC_TYPES.filter(x => x !== t);
+      saveDocTypes();
+      logAudit("Base documentaire", "Suppression", `Type de document « ${t} »`);
+      $("typeMsg").textContent = "Type retiré.";
+      renderTypes(); fillCategorieSelects(); renderDocs();
+    });
+
     $("wikiActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNewArticle"><svg class="icon"><use href="#i-plus"/></svg> Nouvel article</button>`;
     $("docActions").innerHTML = `<button type="button" class="btn btn-primary" id="btnNewDoc"><svg class="icon"><use href="#i-plus"/></svg> Nouveau document</button>`;
     $("btnNewArticle").addEventListener("click", () => openArticleForm(null));
     $("btnNewDoc").addEventListener("click", () => openDocForm(null));
     $("btnExport").addEventListener("click", () => {
-      const articles = ARTICLES.map(a => ({ "ID": a.id, "Titre": a.titre, "Thème": a.theme, "Mots-clés": a.motsCles || "", "Statut": a.statut, "Contenu": a.contenu || "", "Créé le": a.dateCreation || "", "Mis à jour le": a.dateMaj || "", "Auteur": a.auteur || "" }));
-      const documents = DOCS.map(d => ({ "ID": d.id, "Titre": d.titre, "Catégorie": d.categorie, "Référence": d.reference || "", "Version": d.version || "", "Date du document": d.dateDocument || "", "Statut": d.statut, "Lien": d.lien || "", "Description": d.description || "" }));
+      const articles = ARTICLES.map(a => ({ "ID": a.id, "Titre": a.titre, "Thème": a.theme, "Mots-clés": a.motsCles || "", "Statut": a.statut, "Définition": a.contenu || "", "Exemples de situation": a.exemples || "", "Le danger": a.danger || "", "Mesures de prévention": a.prevention || "", "Créé le": a.dateCreation || "", "Mis à jour le": a.dateMaj || "", "Auteur": a.auteur || "" }));
+      const documents = DOCS.map(d => ({ "ID": d.id, "Titre": d.titre, "Type": d.categorie, "Référence": d.reference || "", "Version": d.version || "", "Date du document": d.dateDocument || "", "Statut": d.statut, "Visible des agents": d.masque ? "non" : "oui", "Lien": d.lien || "", "Description": d.description || "" }));
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(articles), "Articles");
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(documents), "Documents");

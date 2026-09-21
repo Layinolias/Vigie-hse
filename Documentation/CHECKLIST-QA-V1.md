@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 110 points au 2026-09-20 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 113 points au 2026-09-21 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -111,9 +111,12 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] `AG2` (sans permission) : aucun bouton de création, de modification ni d'export, mais lecture complète ; donner la case « Peut rédiger » à un compte depuis Administration (badge « Doc · rédacteur ») : ses boutons de rédaction apparaissent à la reconnexion.
 
 ### Accueil au poste (`RH1`/`RH2` ou `admin` — accès write d'office ; permission granulaire `accueil-poste` pour les autres)
-- [ ] `RH1` voit « Accueil au poste » dans la sidebar (section « Administratif ») ; créer un accueil (agent du sélecteur ou saisie libre, poste, date d'arrivée, référent) : il apparaît dans le tableau en « À faire » avec 0/8, et l'ouvrir montre les 8 points du modèle par défaut.
+- [ ] `RH1` voit « Accueil au poste » dans la sidebar (section « Administratif ») ; créer un accueil (agent du sélecteur ou saisie libre, poste, **type d'accueil**, date d'arrivée, référent) : il apparaît dans le tableau en « À faire » avec 0/8, et l'ouvrir montre les 8 points du modèle par défaut.
+- [ ] **Délai et alerte** : à la création, le délai proposé est **8 jours** et la date butoir s'affiche sous le champ (arrivée + 8 j). Créer un accueil avec une date d'arrivée d'il y a un mois : la colonne « Échéance » affiche « En retard » avec le dépassement, la tuile « En retard » du bandeau se met à jour et un **panneau rouge apparaît en haut du module** en nommant l'agent. Cocher tous les points : l'échéance devient « Fait hors délai » et le panneau disparaît. Un accueil récent affiche « Dans les délais » avec le J-n restant.
+- [ ] **Le délai est figé par accueil** : dans l'onglet « Modèles de parcours », changer le délai par défaut (ex. 30 jours) puis revenir au tableau — les accueils **déjà créés** gardent leur date butoir d'origine ; seul un nouvel accueil part sur 30 jours. Le tri et le filtre de la colonne « Échéance » fonctionnent comme les autres colonnes.
+- [ ] **Types d'accueil** : dans Administration → Référentiels → « Types d'accueil au poste », ajouter un type ; il est proposé dans le formulaire d'accueil. Un accueil déjà enregistré avec un type retiré du référentiel garde son type à l'ouverture du formulaire (rien n'est écrasé).
 - [ ] Cocher des points : la date du jour et « par RH1 » s'affichent, la jauge et « n/8 » avancent, le statut passe « En cours » puis « Terminé » quand tout est coché ; décocher un point rouvre l'accueil. Ajouter un commentaire sur un point ; ajouter un point « spécifique au poste » (il porte un badge et un bouton « Retirer »).
-- [ ] « Imprimer la fiche » : l'aperçu contient uniquement la fiche (identité, points avec ☑/☐, date et auteur, deux zones de signature), pas le menu ; « Enregistrer au format PDF » fonctionne.
+- [ ] « Imprimer la fiche » : l'aperçu contient uniquement la fiche (identité, **type d'accueil**, points avec ☑/☐, date et auteur, deux zones de signature) et les **trois dates** — arrivée au poste, à réaliser avant le, accueil réalisé le —, pas le menu ; « Enregistrer au format PDF » fonctionne.
 - [ ] Onglet « Modèles de parcours » : modifier un point du modèle par défaut, créer un second modèle (ajouter, réordonner ↑↓, retirer des points), l'utiliser pour un nouvel accueil ; vérifier que **modifier le modèle ensuite ne change pas un accueil déjà créé**. Le modèle par défaut n'est pas supprimable mais peut être rétabli à son texte d'origine.
 - [ ] Se connecter en `manager` avec la permission « Accueil au poste : lecture seule » (à donner depuis Administration) : les accueils de son périmètre sont visibles et ouvrables, les cases sont grisées, aucun bouton de création/modification/suppression, pas d'onglet « Modèles de parcours » ; sans permission, le lien est absent et taper l'URL `accueil-poste.html` redirige vers `dashboard.html`.
 

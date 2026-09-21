@@ -173,6 +173,7 @@
   .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
   .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
   .form-sub{ font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin:20px 0 10px; }
+  .form-hint{ font-size:10.5px; color:var(--text-faint); margin-top:3px; line-height:1.5; }
   .form-sub-intro{ font-size:11.5px; color:var(--text-faint); margin:-4px 0 10px; }
   .checkline{ display:flex; align-items:center; gap:8px; }
   .checkline input[type="checkbox"]{ width:16px; height:16px; }
@@ -197,6 +198,15 @@
   .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
   .chip.ok{ color:var(--success); background:var(--success-bg); } .chip.ok::before{ background:var(--success); }
   .chip.late{ color:var(--danger); background:var(--danger-bg); } .chip.late::before{ background:var(--danger); }
+  /* Alerte « date butoir dépassée » (réponse Q9 du préventeur) */
+  .alerte-retard{ padding:16px 20px 18px; border-color:var(--danger); background:var(--danger-bg); }
+  .alerte-retard .panel-title{ color:var(--danger); display:flex; align-items:center; gap:8px; }
+  .alerte-retard .panel-title .icon{ width:15px; height:15px; }
+  .alerte-intro{ margin:2px 0 10px; font-size:12px; color:var(--text-muted); }
+  .alerte-liste{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .alerte-liste li{ display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; font-size:12.5px; }
+  .alerte-liste .a-nom{ font-weight:600; }
+  .alerte-liste .a-detail{ color:var(--text-muted); }
 
   .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
   .act-edit:hover{ text-decoration:underline; }
@@ -207,6 +217,7 @@
 
   .chip.soon{ color:var(--warning); background:var(--warning-bg); } .chip.soon::before{ background:var(--warning); }
   .chip.info{ color:var(--accent); background:rgba(var(--accent-rgb),.10); } .chip.info::before{ background:var(--accent); }
+  .ap-butoir{ display:block; margin-top:3px; font-size:10.5px; color:var(--text-faint); font-family:"IBM Plex Mono",monospace; }
 
   /* ---------- Onglets (même pattern que sante-visites / epi-dotation) ---------- */
   .ap-tabs{ display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--border); overflow-x:auto; }
@@ -390,6 +401,10 @@
             <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-circle"/></svg></div>
             <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTermines">–</span><span class="ps-kpi-label">Terminés</span></div>
           </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiRetard">–</span><span class="ps-kpi-label">En retard</span></div>
+          </div>
         </div>
       </header>
 
@@ -404,6 +419,12 @@
       </div>
 
       <section class="tab-panel show" id="tab-accueils">
+        <div class="panel alerte-retard" id="retardPanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title"><svg class="icon"><use href="#i-alert-triangle"/></svg> Accueils en retard</h3></div>
+          <p class="alerte-intro" id="retardIntro"></p>
+          <ul class="alerte-liste" id="retardListe"></ul>
+        </div>
+
         <div class="panel console">
           <div class="field"><span class="flabel">Collectivité</span>
             <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
@@ -429,7 +450,11 @@
               </div>
               <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
               <div><label for="fPoste">Poste</label><input type="text" id="fPoste" placeholder="ex. Agent d'entretien des espaces verts"></div>
-              <div><label for="fDateArrivee">Date d'arrivée</label><input type="date" id="fDateArrivee" required></div>
+              <div><label for="fTypeAccueil">Type d'accueil</label><select id="fTypeAccueil" required></select></div>
+              <div><label for="fDateArrivee">Date d'arrivée au poste</label><input type="date" id="fDateArrivee" required></div>
+              <div><label for="fDelai">Délai pour réaliser l'accueil (jours)</label><input type="number" id="fDelai" min="1" max="365" step="1">
+                <div class="form-hint" id="fButoirHint"></div>
+              </div>
               <div><label for="fReferent">Référent / tuteur</label><input type="text" id="fReferent" placeholder="Personne chargée d'accompagner l'agent"></div>
               <div id="fModeleWrap"><label for="fModele">Modèle de parcours</label><select id="fModele"></select></div>
             </div>
@@ -450,6 +475,7 @@
             </div>
           </div>
           <p class="detail-meta" id="detailMeta"></p>
+          <p id="detailAlerte" style="margin:0 0 10px;"></p>
           <div class="progress" aria-hidden="true"><div class="progress-bar" id="detailBar"></div></div>
           <p class="detail-count" id="detailCount"></p>
           <ul class="ap-items" id="detailItems"></ul>
@@ -468,7 +494,7 @@
             <table class="reg">
               <thead>
                 <tr id="theadFields">
-                  <th>Agent</th><th>Service</th><th>Poste</th><th>Arrivée</th><th>Avancement</th><th>Statut</th>
+                  <th>Agent</th><th>Type</th><th>Service</th><th>Poste</th><th>Arrivée</th><th>Échéance</th><th>Avancement</th><th>Statut</th>
                   <th id="thActions"></th>
                 </tr>
               </thead>
@@ -479,6 +505,17 @@
       </section>
 
       <section class="tab-panel" id="tab-modeles">
+        <div class="panel form-panel">
+          <div class="panel-head"><h3 class="panel-title">Délai de réalisation</h3></div>
+          <div class="form-grid">
+            <div><label for="setDelai">Délai par défaut (jours après l'arrivée)</label><input type="number" id="setDelai" min="1" max="365" step="1"></div>
+            <div style="align-self:end;"><button type="button" class="btn btn-ghost" id="setDelaiSave">Enregistrer le délai</button>
+              <span id="setDelaiMsg" style="margin-left:10px; font-size:12px; color:var(--text-muted);"></span>
+            </div>
+          </div>
+          <p class="footnote" style="text-align:left; margin:12px 0 0;">Délai standard : 8 jours. Il sert de valeur par défaut aux nouveaux accueils ; chaque accueil garde le délai retenu au moment de sa création, et il reste modifiable accueil par accueil.</p>
+        </div>
+
         <div class="panel form-panel">
           <div class="panel-head"><h3 class="panel-title">Modèles de parcours d'accueil</h3>
             <div class="panel-actions"><button type="button" class="btn btn-ghost" id="tplNew"><svg class="icon"><use href="#i-plus"/></svg> Nouveau modèle</button></div>
@@ -605,6 +642,9 @@
   const REF_DEFAULTS = {
     servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
     servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
+    // Types d'accueil demandés par le préventeur (Q9, 2026-09-21). Liste ouverte : elle s'édite
+    // dans Administration → Référentiels, la réponse citant ces cas « par exemple ».
+    typesAccueil: ["Nouvel embauché","Changement de poste","Reprise après accident du travail","Reprise après arrêt long","Autre"],
   };
   function loadReferentials(){
     let stored = {};
@@ -646,6 +686,35 @@
   const todayLocal = () => { const d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); };
   function fmtFr(s){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ""); return m ? m[3] + "/" + m[2] + "/" + m[1] : (s || ""); }
 
+  // ---------- Délai d'accueil (réponse Q9 du préventeur, 2026-09-21) ----------
+  // L'accueil doit être réalisé dans un nombre de jours défini à l'avance, 8 par défaut. Le délai retenu
+  // est COPIÉ sur chaque accueil à sa création, comme les points du parcours : changer le réglage ensuite
+  // ne déplace pas la date butoir des accueils déjà ouverts.
+  const DELAI_KEY = "vigie_hse_accueil_delai";
+  const DELAI_DEFAUT = 8;
+  function delaiValide(v){ const n = parseInt(v, 10); return (n >= 1 && n <= 365) ? n : null; }
+  function loadDelai(){ try { return delaiValide(localStorage.getItem(DELAI_KEY)) || DELAI_DEFAUT; } catch(e){ return DELAI_DEFAUT; } }
+  let DELAI = loadDelai();
+  function delaiOf(a){ return delaiValide(a && a.delaiJours) || DELAI; }
+  // Arithmétique de dates en LOCAL (jamais Date.parse sur "YYYY-MM-DD", qui lit de l'UTC).
+  function parseLocal(iso){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ""); return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null; }
+  function addDays(iso, n){ const d = parseLocal(iso); if (!d) return ""; d.setDate(d.getDate() + n); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
+  function joursEntre(isoA, isoB){ const a = parseLocal(isoA), b = parseLocal(isoB); return (a && b) ? Math.round((b - a) / 86400000) : 0; }
+  function butoirOf(a){ return addDays(a.dateArrivee, delaiOf(a)); }
+  // « Dépassé ou non » : c'est la seule distinction demandée. La nuance « fait hors délai » ne fait que
+  // rapporter le constat une fois l'accueil terminé.
+  function alerteOf(a){
+    const b = butoirOf(a);
+    if (!b) return { libelle:"—", cls:"", retard:false, detail:"" };
+    if (statutOf(a) === "Terminé"){
+      const hors = !!a.dateCloture && a.dateCloture > b;
+      return { libelle: hors ? "Fait hors délai" : "Fait dans les délais", cls: hors ? "soon" : "ok", retard: false, detail:"" };
+    }
+    const t = todayLocal();
+    if (t > b) return { libelle:"En retard", cls:"late", retard:true, detail: joursEntre(b, t) + " j" };
+    return { libelle:"Dans les délais", cls:"info", retard:false, detail:"J-" + joursEntre(t, b) };
+  }
+
   function progress(a){ const items = a.items || []; return { done: items.filter(i => i.fait).length, total: items.length }; }
   function statutOf(a){
     const p = progress(a);
@@ -676,9 +745,11 @@
   const tri = VigieTri.create({
     columns: [
       { key:"agent",       label:"Agent" },
+      { key:"typeAccueil", label:"Type" },
       { key:"service",     label:"Service" },
       { key:"poste",       label:"Poste" },
       { key:"dateArrivee", label:"Arrivée" },
+      { key:"alerte",      label:"Échéance" },
       { key:"avancement",  label:"Avancement", noFilter:true },
       { key:"statut",      label:"Statut" },
       { key:"actions",     label:"", noFilter:true },
@@ -689,26 +760,40 @@
 
   function render(){
     const col = fCollectivite.value, svc = fService.value, st = fStatut.value;
-    const all = DATASET.map(a => Object.assign({}, a, { agent: a.nom + " " + a.prenom, statut: statutOf(a), prog: progress(a) }));
+    // « alerte » est une colonne calculée : elle se trie et se filtre comme les autres (demande Q9).
+    const all = DATASET.map(a => { const al = alerteOf(a); return Object.assign({}, a, {
+      agent: a.nom + " " + a.prenom, statut: statutOf(a), prog: progress(a),
+      typeAccueil: a.typeAccueil || "—", butoir: butoirOf(a), al: al, alerte: al.libelle,
+    }); });
     let rows = all.filter(a => (col === "all" || a.collectivite === col) && (svc === "all" || a.service === svc) && (st === "all" || a.statut === st));
     rows.sort((a,b) => (b.dateArrivee || "").localeCompare(a.dateArrivee || ""));
     rows = tri.apply(rows);
     $("kpiTotal").textContent = all.length;
     $("kpiEnCours").textContent = all.filter(a => a.statut !== "Terminé").length;
     $("kpiTermines").textContent = all.filter(a => a.statut === "Terminé").length;
+    const enRetard = all.filter(a => a.al.retard).sort((x, y) => (x.butoir || "").localeCompare(y.butoir || ""));
+    $("kpiRetard").textContent = enRetard.length;
+    $("retardPanel").style.display = enRetard.length ? "" : "none";
+    $("retardIntro").textContent = enRetard.length === 1
+      ? "1 accueil n'est pas terminé alors que sa date butoir est passée."
+      : enRetard.length + " accueils ne sont pas terminés alors que leur date butoir est passée.";
+    $("retardListe").innerHTML = enRetard.map(a => `<li><span class="a-nom">${esc(a.agent)}</span>
+      <span class="a-detail">${esc(a.service)}${a.poste ? " · " + esc(a.poste) : ""} — butoir du ${esc(fmtFr(a.butoir))}, dépassé de ${esc(a.al.detail)}</span>
+      <span class="chip late">${a.prog.done}/${a.prog.total} points</span></li>`).join("");
     $("resultCount").textContent = rows.length;
     $("totalCount").textContent = all.length;
     $("tbody").innerHTML = rows.length ? rows.map(a => {
       const pct = a.prog.total ? Math.round(100 * a.prog.done / a.prog.total) : 0;
       return `<tr data-id="${esc(a.id)}">
-        <td>${esc(a.agent)}</td><td>${esc(a.service)}</td><td>${esc(a.poste || "—")}</td><td>${esc(a.dateArrivee || "—")}</td>
+        <td>${esc(a.agent)}</td><td>${esc(a.typeAccueil)}</td><td>${esc(a.service)}</td><td>${esc(a.poste || "—")}</td><td>${esc(a.dateArrivee || "—")}</td>
+        <td>${a.butoir ? `<span class="chip ${a.al.cls}">${esc(a.al.libelle)}</span><span class="ap-butoir">${esc(fmtFr(a.butoir))}${a.al.detail ? " · " + esc(a.al.detail) : ""}</span>` : "—"}</td>
         <td><span class="progress mini"><span class="progress-bar" style="width:${pct}%"></span></span><span class="mono">${a.prog.done}/${a.prog.total}</span></td>
         <td><span class="chip ${STATUT_CLS[a.statut]}">${esc(a.statut)}</span></td>
         <td class="actions-float"><button type="button" class="act-edit" data-open="${esc(a.id)}">Ouvrir</button>${canAccueilWrite ? `
           <button type="button" class="act-edit" data-edit="${esc(a.id)}" style="margin-left:10px;">Modifier</button>
           <button type="button" class="act-del" data-del="${esc(a.id)}">Suppr.</button>` : ""}</td>
       </tr>`;
-    }).join("") : `<tr class="empty-row"><td colspan="7">${DATASET.length === 0 ? "Aucun accueil enregistré pour le moment." : "Aucun accueil ne correspond aux filtres sélectionnés."}</td></tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="9">${DATASET.length === 0 ? "Aucun accueil enregistré pour le moment." : "Aucun accueil ne correspond aux filtres sélectionnés."}</td></tr>`;
   }
   fCollectivite.addEventListener("change", () => { fillServiceOptions(); render(); });
   fService.addEventListener("change", render);
@@ -731,7 +816,13 @@
     const p = progress(a);
     const pct = p.total ? Math.round(100 * p.done / p.total) : 0;
     $("detailTitle").textContent = "Parcours d'accueil — " + a.prenom + " " + a.nom;
-    $("detailMeta").textContent = [a.service, a.poste, a.dateArrivee ? "arrivée le " + fmtFr(a.dateArrivee) : "", a.referent ? "référent : " + a.referent : "", a.modeleNom ? "modèle « " + a.modeleNom + " »" : ""].filter(Boolean).join(" · ");
+    const but = butoirOf(a), al = alerteOf(a);
+    $("detailMeta").textContent = [a.typeAccueil || "", a.service, a.poste,
+      a.dateArrivee ? "arrivée le " + fmtFr(a.dateArrivee) : "",
+      but ? "à réaliser avant le " + fmtFr(but) : "",
+      a.dateCloture ? "accueil réalisé le " + fmtFr(a.dateCloture) : "",
+      a.referent ? "référent : " + a.referent : "", a.modeleNom ? "modèle « " + a.modeleNom + " »" : ""].filter(Boolean).join(" · ");
+    $("detailAlerte").innerHTML = but ? `<span class="chip ${al.cls}">${esc(al.libelle)}${al.detail ? " · " + esc(al.detail) : ""}</span>` : "";
     $("detailBar").style.width = pct + "%";
     $("detailCount").textContent = p.done + " / " + p.total + " points faits" + (a.dateCloture ? " — accueil terminé le " + fmtFr(a.dateCloture) : "");
     $("detailItems").innerHTML = (a.items || []).length ? a.items.map(i => `
@@ -801,7 +892,8 @@
     $("accueilPrint").innerHTML = `
       <h1>Fiche d'accueil au poste</h1>
       <p><b>Agent :</b> ${esc(a.prenom)} ${esc(a.nom)} — ${esc(a.service)} (${esc(a.collectivite || "")})</p>
-      <p><b>Poste :</b> ${esc(a.poste || "—")} &nbsp; <b>Arrivée le :</b> ${esc(fmtFr(a.dateArrivee) || "—")} &nbsp; <b>Référent :</b> ${esc(a.referent || "—")}</p>
+      <p><b>Poste :</b> ${esc(a.poste || "—")} &nbsp; <b>Type d'accueil :</b> ${esc(a.typeAccueil || "—")} &nbsp; <b>Référent :</b> ${esc(a.referent || "—")}</p>
+      <p><b>Arrivée au poste le :</b> ${esc(fmtFr(a.dateArrivee) || "—")} &nbsp; <b>À réaliser avant le :</b> ${esc(fmtFr(butoirOf(a)) || "—")} &nbsp; <b>Accueil réalisé le :</b> ${esc(fmtFr(a.dateCloture) || "—")}</p>
       <table><thead><tr><th></th><th>Point vu avec l'agent</th><th>Fait le / par</th></tr></thead><tbody>${lines}</tbody></table>
       <div class="sign"><div>Lu et pris connaissance — signature de l'agent<br>Date :</div><div>Signature du référent / de l'encadrant<br>Date :</div></div>`;
     window.print();
@@ -815,8 +907,10 @@
   $("btnExport").addEventListener("click", () => {
     const accueils = DATASET.map(a => { const p = progress(a); return {
       "ID": a.id, "Nom": a.nom, "Prénom": a.prenom, "Collectivité": a.collectivite || "", "Service": a.service, "Poste": a.poste || "",
-      "Date d'arrivée": a.dateArrivee || "", "Référent": a.referent || "", "Modèle": a.modeleNom || "",
-      "Points faits": p.done, "Points au total": p.total, "Statut": statutOf(a), "Date de clôture": a.dateCloture || "",
+      "Type d'accueil": a.typeAccueil || "", "Date d'arrivée": a.dateArrivee || "", "Délai (jours)": delaiOf(a),
+      "Date butoir": butoirOf(a), "Référent": a.referent || "", "Modèle": a.modeleNom || "",
+      "Points faits": p.done, "Points au total": p.total, "Statut": statutOf(a), "Échéance": alerteOf(a).libelle,
+      "Accueil réalisé le": a.dateCloture || "",
     }; });
     const points = [];
     DATASET.forEach(a => (a.items || []).forEach(i => points.push({
@@ -856,6 +950,18 @@
     }
     let TPL = loadTemplates();
     function saveTemplates(){ try { localStorage.setItem(TPL_KEY, JSON.stringify(TPL)); } catch(e){} }
+
+    // Réglage du délai par défaut : ne touche pas aux accueils existants (chacun porte le sien).
+    $("setDelai").value = DELAI;
+    $("setDelaiSave").addEventListener("click", () => {
+      const v = delaiValide($("setDelai").value);
+      if (!v){ $("setDelaiMsg").textContent = "Indiquez un nombre de jours entre 1 et 365."; return; }
+      DELAI = v;
+      try { localStorage.setItem(DELAI_KEY, String(v)); } catch(e){}
+      logAudit("Accueil au poste", "Modification", `Délai de réalisation par défaut : ${v} jours`);
+      $("setDelaiMsg").textContent = "Délai enregistré (" + v + " jours).";
+      render();
+    });
 
     let tplEditingId = TPL[0].id;
     let tplDraft = [];   // points en cours d'édition (copie de travail)
@@ -936,6 +1042,21 @@
 
     // ---------- Formulaire d'accueil ----------
     const formPanel = $("formPanel"), form = $("accueilForm");
+    function fillTypeOptions(valeur){
+      const liste = Array.isArray(REF.typesAccueil) && REF.typesAccueil.length ? REF.typesAccueil : ["Autre"];
+      // Un accueil plus ancien peut porter un type retiré du référentiel depuis : on le conserve dans la liste.
+      const opts = (valeur && !liste.includes(valeur)) ? liste.concat([valeur]) : liste;
+      $("fTypeAccueil").innerHTML = opts.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join("");
+      $("fTypeAccueil").value = valeur && opts.includes(valeur) ? valeur : opts[0];
+    }
+    function refreshButoirHint(){
+      const jours = delaiValide($("fDelai").value) || DELAI;
+      const b = addDays($("fDateArrivee").value, jours);
+      $("fButoirHint").textContent = b ? "Date butoir : " + fmtFr(b) + " (arrivée + " + jours + " j)" : "Renseignez la date d'arrivée pour voir la date butoir.";
+    }
+    $("fDelai").addEventListener("input", refreshButoirHint);
+    $("fDateArrivee").addEventListener("change", refreshButoirHint);
+
     function fillFormServiceOptions(col){
       $("fServiceForm").innerHTML = servicesForCollectivite(col).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     }
@@ -964,10 +1085,15 @@
         fillFormServiceOptions(rec.collectivite || "Ville");
         $("fServiceForm").value = rec.service;
         $("fPoste").value = rec.poste || ""; $("fDateArrivee").value = rec.dateArrivee || ""; $("fReferent").value = rec.referent || "";
+        fillTypeOptions(rec.typeAccueil || "");
+        $("fDelai").value = delaiOf(rec);
       } else {
         fillFormServiceOptions("Ville");
         $("fDateArrivee").value = todayLocal();
+        fillTypeOptions("");
+        $("fDelai").value = DELAI;
       }
+      refreshButoirHint();
       formPanel.style.display = "";
       formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
     }
@@ -981,6 +1107,7 @@
         nom: $("fNom").value.trim(), prenom: $("fPrenom").value.trim(),
         collectivite: $("fCollectiviteForm").value, service: $("fServiceForm").value,
         poste: $("fPoste").value.trim(), dateArrivee: $("fDateArrivee").value, referent: $("fReferent").value.trim(),
+        typeAccueil: $("fTypeAccueil").value, delaiJours: delaiValide($("fDelai").value) || DELAI,
       };
       let rec;
       if (prev){

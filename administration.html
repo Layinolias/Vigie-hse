@@ -479,6 +479,7 @@
               <option value="servicesVille">Services — Ville</option>
               <option value="servicesAgglo">Services — Agglomération</option>
               <option value="risqueFamillesDUERP">Familles de risque (Document Unique)</option>
+              <option value="typesAccueil">Types d'accueil au poste</option>
             </select>
           </div>
           <div id="refEditorHost"></div>
@@ -719,6 +720,8 @@
     servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
     servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
     risqueFamillesDUERP: RISK_TAXONOMY_DEFAULT,
+    // Types d'accueil au poste (réponse Q9 du préventeur, 2026-09-21) — liste ouverte, à compléter ici.
+    typesAccueil: ["Nouvel embauché","Changement de poste","Reprise après accident du travail","Reprise après arrêt long","Autre"],
   };
   function loadReferentials(){
     let stored = {};
@@ -733,6 +736,7 @@
   const REF_LABELS = {
     risquesATMP:"Risques (Registre AT/MP)", sieges:"Sièges de lésion", natures:"Natures de lésion", statutsRH:"Statuts RH",
     servicesVille:"Services — Ville", servicesAgglo:"Services — Agglomération", risqueFamillesDUERP:"Familles de risque (Document Unique)",
+    typesAccueil:"Types d'accueil au poste",
   };
 
   function allServices(){ return [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')); }

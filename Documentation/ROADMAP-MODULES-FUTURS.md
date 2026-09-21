@@ -80,7 +80,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 9 | Indicateurs & reporting KPI | ✅ Fait — `reporting.html`, sélecteur calendaire + tous modules période-conscients + graphiques par risque (2026-09-14) |
 | 10 | EPI, dotation & entretien | ✅ Fait — `epi-dotation.html` |
 | 11 | Dashboard mobile simplifié | ✅ Fait |
-| 12 | Accueil au poste | ✅ Fait (2026-09-19) — `accueil-poste.html` : parcours d'accueil sécurité d'un nouvel agent à partir de modèles modifiables, suivi de complétion, fiche imprimable à signer |
+| 12 | Accueil au poste | ✅ Fait (2026-09-19), étendu le 2026-09-21 (réponse Q9) — `accueil-poste.html` : parcours d'accueil à partir de modèles modifiables, type d'accueil, délai de 8 jours et alerte de dépassement, fiche imprimable à signer |
 | 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — nécessite un nouveau rôle/compte "Représentant du personnel" |
 | 14 | Gestion administrative RH | ✅ Fait (2026-09-19) — `gestion-rh.html`, les deux volets (données RH + organigramme) |
 | 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
@@ -344,7 +344,14 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - **Modèles de parcours modifiables par le RH** (`vigie_hse_modeles_accueil`, onglet de la page, always-merge, modèle par défaut d'id `tpl-accueil-defaut` **neutre** — aucune obligation réglementaire ni délai inventés —, non supprimable mais rétablissable ; points réordonnables).
 - **Émargement : coché par le RH/manager + fiche imprimable** avec zones de signature (agent + référent) — « Enregistrer au format PDF » depuis l'impression ; **pas de signature électronique**.
 - Permission granulaire `accueil-poste` (read/write ; RH/admin en écriture d'office), lien « Accueil au poste » dans la section « Administratif » de la sidebar. Un compte limité à certains services ne voit et ne modifie que ses services (fusion de sa part). Export `.xlsx` (feuilles Accueils + Points, colonne « ID accueil »). Pas d'import ni de DATATEST en V1.
-- **Hors périmètre (assumé)** : rappels/relances automatiques, délai réglementaire d'accueil (aucune règle métier codée — voir règle 9), lien avec le Plan d'Actions, signature électronique, pièces jointes (livret d'accueil en PDF : le navigateur seul ne stocke pas de vrais fichiers).
+- **Complété le 2026-09-21 (réponse Q9 du préventeur)** : les 8 points du modèle par défaut sont **validés tels quels**. S'y ajoutent :
+  - un **type d'accueil** au choix (nouvel embauché, changement de poste, reprise après accident du travail, reprise après arrêt long, Autre) — référentiel `typesAccueil` éditable dans Administration, la réponse citant ces cas « par exemple » ;
+  - un **délai de réalisation**, 8 jours par défaut (réglage global dans l'onglet Modèles, **copié sur chaque accueil à sa création** puis modifiable accueil par accueil : changer le réglage ne déplace pas un butoir déjà annoncé) ;
+  - une **date butoir** calculée (arrivée + délai) et une colonne **« Échéance »** triable et filtrable : *Dans les délais* (avec le J-n restant), *En retard* (avec le dépassement en jours), *Fait dans les délais*, *Fait hors délai* ;
+  - une **tuile KPI « En retard »** et un **panneau d'alerte en haut du module** listant les accueils non terminés dont le butoir est passé ;
+  - les trois dates demandées figurent sur la fiche imprimable : arrivée au poste, à réaliser avant le, accueil réalisé le.
+- **Conservation** : le préventeur demande de garder la trace **sans limite de durée et pour tous les types de contrat**. Rien n'est purgé par l'application ; à rappeler le jour où un backend et une politique de purge apparaîtront.
+- **Hors périmètre (assumé)** : rappels/relances automatiques par message ou courriel (pas de backend), lien avec le Plan d'Actions, signature électronique, pièces jointes (livret d'accueil en PDF : le navigateur seul ne stocke pas de vrais fichiers).
 
 *Note d'origine et annotation de cadrage, conservées ci-dessous :*
 

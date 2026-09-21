@@ -667,13 +667,15 @@
     try { const raw = localStorage.getItem(key); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p.filter(r => r && r.id); } } catch(e){}
     return [];
   }
-  // Always-merge : les types livrés sont toujours présents, ceux ajoutés par le préventeur sont conservés.
+  // Même sémantique que les référentiels partagés (loadReferentials) : la liste stockée fait foi, celle
+  // livrée ne sert qu'à l'amorçage et de repli si tout a été retiré. Un « always-merge » ferait revenir
+  // au rechargement suivant un type que le préventeur vient de retirer.
   function loadDocTypes(){
     let liste = [];
     try { const raw = localStorage.getItem(DOC_TYPES_KEY); if (raw){ const parsed = JSON.parse(raw); if (Array.isArray(parsed)) liste = parsed.filter(t => typeof t === "string" && t.trim()); } } catch(e){}
-    const merged = DOC_TYPES_DEFAUT.concat(liste.filter(t => !DOC_TYPES_DEFAUT.includes(t)));
-    try { localStorage.setItem(DOC_TYPES_KEY, JSON.stringify(merged)); } catch(e){}
-    return merged;
+    const retenue = liste.length ? liste : DOC_TYPES_DEFAUT.slice();
+    try { localStorage.setItem(DOC_TYPES_KEY, JSON.stringify(retenue)); } catch(e){}
+    return retenue;
   }
   let DOC_TYPES = loadDocTypes();
   function saveDocTypes(){ try { localStorage.setItem(DOC_TYPES_KEY, JSON.stringify(DOC_TYPES)); } catch(e){} }
@@ -849,7 +851,9 @@
   // Les deux listes suivent les types définis par le préventeur, plus les valeurs déjà enregistrées
   // sur des documents (un type retiré ne doit pas rendre un document inéditable).
   function typesAffichables(){
-    const utilises = DOCS.map(d => d.categorie).filter(Boolean);
+    // visibleDocs() et non DOCS : sinon le filtre d'un lecteur laisse deviner qu'un document masqué
+    // existe, par le seul fait que son type apparaisse dans la liste.
+    const utilises = visibleDocs().map(d => d.categorie).filter(Boolean);
     return DOC_TYPES.concat(utilises.filter(c => !DOC_TYPES.includes(c)));
   }
   function fillCategorieSelects(){
@@ -989,6 +993,7 @@
       const b = e.target.closest("[data-rm-type]");
       if (!b) return;
       const t = b.dataset.rmType;
+      if (DOC_TYPES.length <= 1){ $("typeMsg").textContent = "Gardez au moins un type de document."; return; }
       if (!confirm(`Retirer le type « ${t} » de la liste ? Les documents déjà enregistrés gardent leur type.`)) return;
       DOC_TYPES = DOC_TYPES.filter(x => x !== t);
       saveDocTypes();

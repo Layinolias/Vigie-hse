@@ -2,6 +2,7 @@
 <meta name="description" content="Suivi des visites médicales et de la surveillance santé au travail des agents.">
 <script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/import-fichier.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
@@ -868,7 +869,7 @@
   });
 
   if (canEdit){
-    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle fiche</button>`;
+    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.ods,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle fiche</button>`;
 
     VigieImpression.brancher("btnExport");
     $("btnExport").addEventListener("click", () => {
@@ -925,7 +926,7 @@
       if (!file) return;
       try {
         const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const wb = VigieImport.lireClasseur(buf);
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
         if (rawRows.length === 0){
@@ -1493,7 +1494,7 @@
       return "";
     }
     const TYPES_VISITE = ["Embauche","Périodique","Reprise","Occasionnelle","Surveillance renforcée"];
-    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const wb = VigieImport.lireClasseur(buf);
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
     let changed = false;

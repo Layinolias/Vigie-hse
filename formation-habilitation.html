@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/import-fichier.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
@@ -683,7 +684,7 @@
   });
 
   if (canEdit){
-    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle habilitation</button>`;
+    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.ods,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle habilitation</button>`;
 
     function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
     function parseDateValueImp(v){
@@ -731,7 +732,7 @@
       if (!file) return;
       try {
         const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const wb = VigieImport.lireClasseur(buf);
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
         if (rawRows.length === 0){
@@ -888,7 +889,7 @@
       if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
       return "";
     }
-    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const wb = VigieImport.lireClasseur(buf);
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
     let changed = false;

@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/import-fichier.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <style>
@@ -836,7 +837,7 @@
   // Import volontairement limité aux champs plats déjà présents dans l'export (méthode, conclusion,
   // date, auteur, actions) : l'arbre causal (faits / pourquoi / ishikawa) est structurellement mal
   // adapté à un aller-retour tableur et n'est pas ré-importé — seul un aller simple (export) existe pour lui.
-  $("panelActionsBtns").innerHTML = (canAnalyseWrite ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none">` : "") +
+  $("panelActionsBtns").innerHTML = (canAnalyseWrite ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.ods,.csv" style="display:none">` : "") +
     `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
 
   function normKey(s){
@@ -869,7 +870,7 @@
       if (!file) return;
       try {
         const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const wb = VigieImport.lireClasseur(buf);
         let anAdded = 0, anUpdated = 0, anSkipped = 0, actAdded = 0, actSkipped = 0;
 
         const anSheet = wb.Sheets["Analyses"] || wb.Sheets[wb.SheetNames[0]];

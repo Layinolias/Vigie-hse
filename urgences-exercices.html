@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/import-fichier.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
@@ -819,7 +820,7 @@
   });
 
   // ---------- Import / Export .xlsx ----------
-  $("panelActionsBtns").innerHTML = (canUrgencesWrite ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none">` : "") +
+  $("panelActionsBtns").innerHTML = (canUrgencesWrite ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.ods,.csv" style="display:none">` : "") +
     `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>` +
     (canUrgencesWrite ? `<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel exercice</button>` : "");
   if (canUrgencesWrite){ $("btnNew").addEventListener("click", () => openForm(null)); }
@@ -878,7 +879,7 @@
       if (!file) return;
       try {
         const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const wb = VigieImport.lireClasseur(buf);
         let exAdded = 0, exUpdated = 0, exSkipped = 0, actAdded = 0, actSkipped = 0;
 
         const exSheet = wb.Sheets["Exercices"] || wb.Sheets[wb.SheetNames[0]];
@@ -952,7 +953,7 @@
   fetch("DATATEST/11-REF-urgences-exercices.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
     if (!buf || typeof XLSX === "undefined") return;
     const full = loadDataset();
-    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const wb = VigieImport.lireClasseur(buf);
     const sheet = wb.Sheets["Exercices"] || wb.Sheets[wb.SheetNames[0]];
     const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
     let changed = false;

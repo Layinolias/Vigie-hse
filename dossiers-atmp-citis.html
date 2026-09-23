@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/import-fichier.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <style>
@@ -846,7 +847,7 @@
   }
 
   // ---------- Import / Export .xlsx (dossiers + arrêtés) ----------
-  $("panelActionsBtns").innerHTML = (canAtmpWrite ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none">` : "") +
+  $("panelActionsBtns").innerHTML = (canAtmpWrite ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.ods,.csv" style="display:none">` : "") +
     `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
 
   function normKey(s){
@@ -879,7 +880,7 @@
       if (!file) return;
       try {
         const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const wb = VigieImport.lireClasseur(buf);
         let dAdded = 0, dUpdated = 0, dSkipped = 0, aAdded = 0, aSkipped = 0;
 
         // une date saisie comme vraie date Excel arrive en objet Date (cellDates) : on la ramène à

@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/import-fichier.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
@@ -863,7 +864,7 @@
       </tr>`).join("");
   }
   if (canEdit){
-    $("catActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="catImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="catImportFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="catExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="catNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel article</button>`;
+    $("catActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="catImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="catImportFile" accept=".xlsx,.xls,.ods,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="catExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="catNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel article</button>`;
     function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
     function mapImportedCatRow(raw){
       const n = {};
@@ -890,7 +891,7 @@
       if (!file) return;
       try {
         const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const wb = VigieImport.lireClasseur(buf);
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
         if (rawRows.length === 0){
@@ -1112,7 +1113,7 @@
     }).join("");
   }
   if (canEdit){
-    $("dotActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="dotImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="dotImportFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="dotExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="dotNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle dotation</button>`;
+    $("dotActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="dotImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="dotImportFile" accept=".xlsx,.xls,.ods,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="dotExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="dotNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle dotation</button>`;
     function normKeyImpDot(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
     function parseDateImpDot(v){
       if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
@@ -1153,7 +1154,7 @@
       if (!file) return;
       try {
         const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const wb = VigieImport.lireClasseur(buf);
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
         if (rawRows.length === 0){
@@ -1366,7 +1367,7 @@
   }
   fetch("DATATEST/3-REF-epi-catalogue.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
     if (buf && typeof XLSX !== "undefined"){
-      const wb = XLSX.read(buf, { type: "array", cellDates: true });
+      const wb = VigieImport.lireClasseur(buf);
       const sheet = wb.Sheets[wb.SheetNames[0]];
       const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
       let changed = false;
@@ -1391,7 +1392,7 @@
     }
   }).catch(() => {}).then(() => fetch("DATATEST/7-REF-epi-dotation.xlsx")).then(res => res && res.ok ? res.arrayBuffer() : null).then(buf => {
     if (!buf || typeof XLSX === "undefined") return;
-    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const wb = VigieImport.lireClasseur(buf);
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
     let changed = false;

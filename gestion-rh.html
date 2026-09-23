@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/import-fichier.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
@@ -806,7 +807,7 @@
     }
   });
 
-  $("agentPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnImportAgents"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importAgentsFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNewAgent"><svg class="icon"><use href="#i-plus"/></svg> Nouvel agent</button>` : `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`);
+  $("agentPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnImportAgents"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importAgentsFile" accept=".xlsx,.xls,.ods,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNewAgent"><svg class="icon"><use href="#i-plus"/></svg> Nouvel agent</button>` : `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`);
   if (canGestionRhWrite){ $("btnNewAgent").addEventListener("click", () => openAgentForm(null)); }
   VigieImpression.brancher("btnExportAgents");
   $("btnExportAgents").addEventListener("click", () => {
@@ -832,7 +833,7 @@
       if (!file) return;
       try {
         const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const wb = VigieImport.lireClasseur(buf);
         const lignes = XLSX.utils.sheet_to_json(wb.Sheets["Agents"] || wb.Sheets[wb.SheetNames[0]], { defval: "" }).map(champsImp);
         if (!lignes.length){ alert("Le fichier semble vide — aucune ligne n'a été trouvée dans la première feuille."); e.target.value = ""; return; }
         let added = 0, updated = 0, skipped = 0, horsPerimetre = 0, sansResponsable = 0;
@@ -980,7 +981,7 @@
   // Une ligne par mois, collectivité et service. À l'import, une ligne qui existe déjà pour le même
   // mois, la même collectivité et le même service est ignorée : réimporter un fichier de paie ne doit
   // jamais compter deux fois les mêmes heures (le TF/TG « réel » serait divisé d'autant).
-  $("heuresPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnImportHeures"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importHeuresFile" accept=".xlsx,.xls,.csv" style="display:none">` : "") +
+  $("heuresPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnImportHeures"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importHeuresFile" accept=".xlsx,.xls,.ods,.csv" style="display:none">` : "") +
     `<button type="button" class="btn btn-ghost" id="btnExportHeures"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
   VigieImpression.brancher("btnExportHeures");
   $("btnExportHeures").addEventListener("click", () => {
@@ -1005,7 +1006,7 @@
       if (!file) return;
       try {
         const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const wb = VigieImport.lireClasseur(buf);
         const lignes = XLSX.utils.sheet_to_json(wb.Sheets["Heures"] || wb.Sheets[wb.SheetNames[0]], { defval: "" }).map(champsImp);
         if (!lignes.length){ alert("Le fichier semble vide — aucune ligne n'a été trouvée dans la première feuille."); e.target.value = ""; return; }
         let added = 0, doublons = 0, skipped = 0, horsPerimetre = 0;

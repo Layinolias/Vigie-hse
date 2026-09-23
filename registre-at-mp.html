@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/import-fichier.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/hse-formulas.js"></script>
@@ -460,7 +461,7 @@
             <button class="btn btn-ghost" id="btnImport" type="button"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button>
             <button class="btn btn-ghost" id="btnExport" type="button"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>
             <button class="btn btn-ghost no-print" id="btnExportPdf" type="button" title="Utilise l'impression du navigateur — choisissez « Enregistrer au format PDF » comme imprimante."><svg class="icon"><use href="#i-download"/></svg> Exporter en PDF</button>
-            <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none">
+            <input type="file" id="importFile" accept=".xlsx,.xls,.ods,.csv" style="display:none">
             <a class="btn btn-primary" href="saisie-rh.html"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle déclaration</a>
           </div>
         </div>
@@ -974,7 +975,7 @@
       if (!file) return;
       try {
         const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const wb = VigieImport.lireClasseur(buf);
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
         if (rawRows.length === 0){
@@ -1058,7 +1059,7 @@
   fetch("DATATEST/1-IMPORT-registre-at-mp.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
     if (!buf || typeof XLSX === "undefined") return;
     const full = loadDataset();
-    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+    const wb = VigieImport.lireClasseur(buf);
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
     let changed = false;

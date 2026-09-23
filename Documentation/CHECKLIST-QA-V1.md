@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 130 points au 2026-09-24 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 133 points au 2026-09-24 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -176,6 +176,9 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] **Serveur local — données partagées** (sur ce poste, pas sur le site en ligne) : dans un terminal, à la racine du dépôt, lancer `node serveur/serveur.js`, puis ouvrir http://localhost:8780 et se connecter en `RH1` ; créer une fiche dans le Registre SST. Ouvrir un **autre navigateur** (ou une fenêtre privée) sur la même adresse, se connecter en `AG1` : la fiche y est. Arrêter le serveur (Ctrl+C), le relancer, recharger : la fiche est toujours là.
 - [ ] **Serveur local — deux personnes en même temps** : ouvrir le Registre SST dans deux onglets. Dans le premier, créer une fiche ; dans le second, **sans recharger**, en créer une autre : après rechargement (F5), les deux fiches sont là. Ensuite, dans les deux onglets à nouveau ouverts en même temps, modifier **la même description** de deux façons différentes : le second enregistrement affiche en bas un bandeau « Quelqu'un a modifié les mêmes informations… » et la version du premier est gardée.
 - [ ] **Serveur local — garde-fous** : avec une page ouverte, arrêter le serveur puis enregistrer une modification → bandeau rouge « Le serveur VIGIE HSE ne répond pas… ». Serveur relancé, dans Administration : le panneau s'intitule « Stockage sur le serveur » (plus de jauge), et « Réinitialiser toutes les données » prévient que l'effacement vaut pour **tous les utilisateurs** ; après confirmation, un fichier `sauvegarde-avant-effacement-….db` est apparu dans `serveur/donnees/`.
+- [ ] **Serveur local — connexion** : serveur arrêté, supprimer le dossier `serveur/donnees/` (base neuve), relancer `node serveur/serveur.js` et se connecter en `admin@verchamps.fr` : ça fonctionne (les comptes de démonstration sont créés au premier passage), et le terminal du serveur prévient que les mots de passe de démonstration sont actifs. Dans une fenêtre privée, ouvrir directement http://localhost:8780/dashboard.html : renvoi vers l'écran de connexion. Cinq mauvais mots de passe de suite pour `AG2` : « Trop d'essais infructueux… », même avec le bon. Après « Déconnexion », le bouton Précédent du navigateur ne rouvre pas la page.
+- [ ] **Serveur local — comptes et droits** : dans Administration → Utilisateurs, réinitialiser le mot de passe de `RH2` : l'ancien (`1234`) est refusé, le nouveau accepté. Dans un autre navigateur, connecté en `AG1`, déposer une observation dans le Registre SST : elle est enregistrée. Puis, depuis l'administrateur, désactiver `AG1` : à sa modification suivante, `AG1` voit le bandeau « Votre session a pris fin… ».
+- [ ] **Types d'accueil conservés** (site en ligne aussi) : dans Administration → Référentiels, liste « Types d'accueil au poste », ajouter « Stagiaire ». Ouvrir le Document Unique, puis revenir dans Administration : « Stagiaire » est toujours là, et il est proposé dans le formulaire d'Accueil au poste.
 
 ## 5. Responsive / mobile
 

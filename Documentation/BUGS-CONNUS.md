@@ -89,6 +89,11 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Constaté** : http://localhost:8765/.git/config renvoyait la configuration git — dont l'adresse du dépôt distant avec son jeton d'accès. Limité à ce poste (le serveur n'écoute que 127.0.0.1), mais inutile de l'exposer.
 - **Corrigé** : 2026-09-24 — les chemins commençant par un point et le dossier `serveur/` (la base) renvoient 404, comme dans `serveur/serveur.js`. Vérifié : `/.git/config` et `/serveur/serveur.js` → 404, les pages → 200.
 
+### Référentiels : ouvrir le Document Unique effaçait la liste des types d'accueil
+- **Où** : `document-unique.html`, `saisie-duerp.html`, `saisie-rh.html`, `administration.html` (chargement des référentiels). **Remonté** : 2026-09-24, en mesurant les écritures du serveur — les référentiels étaient réécrits deux fois à chaque passage sur les pages.
+- **Constaté** : ces quatre pages reconstruisaient `vigie_hse_referentials` avec leurs seules valeurs par défaut et en retiraient les listes qu'elles ne connaissent pas — dont « Types d'accueil au poste » : une modification faite dans Administration disparaissait dès qu'on ouvrait le Document Unique, et la page Accueil au poste remettait la liste par défaut. Même effet en mode navigateur.
+- **Corrigé** : 2026-09-24 — elles partent de ce qui est stocké, comme les quinze autres pages. Vérifié : plus aucune réécriture des référentiels au passage sur les 23 pages ; en mode navigateur, 8 listes conservées au lieu de 7.
+
 ---
 
 ## Ouverts / reportés (pas des bugs à corriger maintenant)

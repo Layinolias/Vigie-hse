@@ -619,10 +619,14 @@
   let DATASET = loadDataset();
   if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
 
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML : les données
+  // du registre viennent d'un import Excel et du formulaire de déclaration, elles ne sont jamais sûres.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+
   function fmtDate(iso){
     if (!iso) return "—";
     const [y,m,d] = String(iso).split("-");
-    return (y && m && d) ? `${d}/${m}/${y}` : String(iso);
+    return (y && m && d) ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(iso);
   }
 
   function typeChip(t){
@@ -632,47 +636,47 @@
     else if (t === "Incident bénin" || t === "Bénin"){ cls = "benin"; label = "Incident bénin"; }
     else if (t === "Presque accident"){ cls = "presque"; label = "Presque accident"; }
     else if (t === "Maladie professionnelle"){ cls = "mp"; label = "MP"; }
-    return `<span class="type-chip ${cls}">${label}</span>`;
+    return `<span class="type-chip ${cls}">${esc(label)}</span>`;
   }
 
   const COLUMNS = [
-    { key:"statut",         label:"Statut",           group:"Agent",        render:r => r.statut || "" },
-    { key:"civilite",       label:"Civilité",         group:"Agent",        render:r => r.civilite || "" },
-    { key:"nom",            label:"Nom",              group:"Agent",        render:r => r.nom || "" },
-    { key:"prenom",         label:"Prénom",           group:"Agent",        render:r => r.prenom || "" },
+    { key:"statut",         label:"Statut",           group:"Agent",        render:r => esc(r.statut) },
+    { key:"civilite",       label:"Civilité",         group:"Agent",        render:r => esc(r.civilite) },
+    { key:"nom",            label:"Nom",              group:"Agent",        render:r => esc(r.nom) },
+    { key:"prenom",         label:"Prénom",           group:"Agent",        render:r => esc(r.prenom) },
     { key:"dateNaissance",  label:"Naissance",        group:"Agent",        cls:"mono", render:r => fmtDate(r.dateNaissance) },
-    { key:"age",            label:"Âge",              group:"Agent",        cls:"num", render:r => r.age ?? "" },
-    { key:"categorie",      label:"Catégorie",        group:"Agent",        render:r => `<span class="cat-chip">${(r.categorie||"").replace("Catégorie ","")}</span>` },
-    { key:"filiere",        label:"Filière",          group:"Agent",        render:r => r.filiere || "" },
-    { key:"cadreEmploi",    label:"Cadre d'emploi",   group:"Agent",        cls:"wrap", render:r => r.cadreEmploi || "" },
-    { key:"grade",          label:"Grade",            group:"Agent",        render:r => r.grade || "" },
-    { key:"collectivite",   label:"Collectivité",     group:"Localisation", render:r => `<span class="type-chip ${r.collectivite === 'Agglomération' ? 'trajet' : 'at'}">${r.collectivite || 'Ville'}</span>` },
-    { key:"serviceDetail",  label:"Service (détail)", group:"Localisation", cls:"wrap", render:r => r.serviceDetail || "" },
-    { key:"service",        label:"Service",          group:"Localisation", render:r => r.service || "" },
+    { key:"age",            label:"Âge",              group:"Agent",        cls:"num", render:r => esc(r.age ?? "") },
+    { key:"categorie",      label:"Catégorie",        group:"Agent",        render:r => `<span class="cat-chip">${esc(String(r.categorie || "").replace("Catégorie ",""))}</span>` },
+    { key:"filiere",        label:"Filière",          group:"Agent",        render:r => esc(r.filiere) },
+    { key:"cadreEmploi",    label:"Cadre d'emploi",   group:"Agent",        cls:"wrap", render:r => esc(r.cadreEmploi) },
+    { key:"grade",          label:"Grade",            group:"Agent",        render:r => esc(r.grade) },
+    { key:"collectivite",   label:"Collectivité",     group:"Localisation", render:r => `<span class="type-chip ${r.collectivite === 'Agglomération' ? 'trajet' : 'at'}">${esc(r.collectivite || 'Ville')}</span>` },
+    { key:"serviceDetail",  label:"Service (détail)", group:"Localisation", cls:"wrap", render:r => esc(r.serviceDetail) },
+    { key:"service",        label:"Service",          group:"Localisation", render:r => esc(r.service) },
     { key:"dateAT",         label:"Date",             group:"Événement",    cls:"mono", render:r => fmtDate(r.dateAT) },
     { key:"dateMois",       label:"Date (mois)",      group:"Événement",    cls:"mono", render:r => fmtDate(r.dateMois) },
-    { key:"jour",           label:"Jour",             group:"Événement",    render:r => r.jour || "" },
+    { key:"jour",           label:"Jour",             group:"Événement",    render:r => esc(r.jour) },
     { key:"typeAtMp",       label:"Type AT/MP",       group:"Événement",    render:r => typeChip(r.typeAtMp) },
-    { key:"circonstances",  label:"Circonstances",    group:"Événement",    cls:"wrap", render:r => r.circonstances || "" },
-    { key:"etat",           label:"État",             group:"Événement",    render:r => r.etat || "" },
-    { key:"risque",         label:"Risque",           group:"Événement",    cls:"wrap", render:r => r.risque || "" },
-    { key:"siege",          label:"Siège",            group:"Événement",    render:r => r.siege || "" },
-    { key:"nature",         label:"Nature",           group:"Événement",    render:r => r.nature || "" },
-    { key:"elementMateriel",label:"Élément matériel", group:"Événement",    cls:"wrap", render:r => r.elementMateriel || "" },
+    { key:"circonstances",  label:"Circonstances",    group:"Événement",    cls:"wrap", render:r => esc(r.circonstances) },
+    { key:"etat",           label:"État",             group:"Événement",    render:r => esc(r.etat) },
+    { key:"risque",         label:"Risque",           group:"Événement",    cls:"wrap", render:r => esc(r.risque) },
+    { key:"siege",          label:"Siège",            group:"Événement",    render:r => esc(r.siege) },
+    { key:"nature",         label:"Nature",           group:"Événement",    render:r => esc(r.nature) },
+    { key:"elementMateriel",label:"Élément matériel", group:"Événement",    cls:"wrap", render:r => esc(r.elementMateriel) },
     { key:"arretStatut",    label:"Statut",           group:"Conséquences", render:r => r.arret
-        ? `<span class="badge badge-danger">Avec arrêt</span> <span class="badge ${(r.statutArret || 'En cours') === 'Clôturé' ? 'badge-neutral' : 'badge-warning'}">${r.statutArret || 'En cours'}</span>`
+        ? `<span class="badge badge-danger">Avec arrêt</span> <span class="badge ${(r.statutArret || 'En cours') === 'Clôturé' ? 'badge-neutral' : 'badge-warning'}">${esc(r.statutArret || 'En cours')}</span>`
         : `<span class="badge badge-neutral">Sans arrêt</span>` },
-    { key:"joursArret",     label:"Jours d'arrêt",    group:"Conséquences", cls:"num", render:r => r.arret ? (r.joursArret ?? 0) : "—" },
-    { key:"mpTableau",              label:"N° tableau MP",         group:"Maladie professionnelle", render:r => r.mpTableau || "—" },
+    { key:"joursArret",     label:"Jours d'arrêt",    group:"Conséquences", cls:"num", render:r => r.arret ? esc(r.joursArret ?? 0) : "—" },
+    { key:"mpTableau",              label:"N° tableau MP",         group:"Maladie professionnelle", render:r => r.mpTableau ? esc(r.mpTableau) : "—" },
     { key:"mpDateConstatation",     label:"1ère constatation",     group:"Maladie professionnelle", cls:"mono", render:r => r.mpDateConstatation ? fmtDate(r.mpDateConstatation) : "—" },
     { key:"mpDateDeclaration",      label:"Date déclaration",      group:"Maladie professionnelle", cls:"mono", render:r => r.mpDateDeclaration ? fmtDate(r.mpDateDeclaration) : "—" },
-    { key:"mpAvisMedecinTravail",   label:"Avis médecin travail",  group:"Maladie professionnelle", cls:"wrap", render:r => r.mpAvisMedecinTravail || "—" },
-    { key:"mpAvisConseilMedical",   label:"Avis conseil médical",  group:"Maladie professionnelle", cls:"wrap", render:r => r.mpAvisConseilMedical || "—" },
-    { key:"mpDecisionCollectivite", label:"Décision collectivité", group:"Maladie professionnelle", cls:"wrap", render:r => r.mpDecisionCollectivite || "—" },
+    { key:"mpAvisMedecinTravail",   label:"Avis médecin travail",  group:"Maladie professionnelle", cls:"wrap", render:r => r.mpAvisMedecinTravail ? esc(r.mpAvisMedecinTravail) : "—" },
+    { key:"mpAvisConseilMedical",   label:"Avis conseil médical",  group:"Maladie professionnelle", cls:"wrap", render:r => r.mpAvisConseilMedical ? esc(r.mpAvisConseilMedical) : "—" },
+    { key:"mpDecisionCollectivite", label:"Décision collectivité", group:"Maladie professionnelle", cls:"wrap", render:r => r.mpDecisionCollectivite ? esc(r.mpDecisionCollectivite) : "—" },
     { key:"actions",        label:"Actions",          group:"",             cls:"actions", noFilter:true, render:r =>
         `${canEdit ? `<a href="saisie-rh.html?id=${encodeURIComponent(r.id)}" class="act-edit">Modifier</a>` : ""}
          ${canAccidentAnalyse ? `<a href="accident-analyse.html?atmpId=${encodeURIComponent(r.id)}" class="act-edit">Analyser</a>` : ""}
-         ${canEdit ? `<button type="button" class="act-del" data-id="${r.id}">Suppr.</button>` : ""}` },
+         ${canEdit ? `<button type="button" class="act-del" data-id="${esc(r.id)}">Suppr.</button>` : ""}` },
   ];
 
   // Valeurs métier utilisées pour le tri et les filtres de colonne (jamais le HTML rendu).

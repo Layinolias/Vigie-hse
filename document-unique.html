@@ -719,8 +719,12 @@
     if (!fam) return "";
     const url = VigieRisques.lienFiche(fam[0]);
     const titre = "Ouvrir la fiche « " + fam[0] + " » dans la Base documentaire";
-    return `<a class="fiche-lien" href="${url}" title="${titre.replace(/"/g, "&quot;")}">fiche</a>`;
+    return `<a class="fiche-lien" href="${esc(url)}" title="${esc(titre)}">fiche</a>`;
   }
+
+  // Tout texte issu d'une évaluation passe par ici avant d'entrer dans du innerHTML : il vient du
+  // formulaire d'évaluation ou d'un import Excel, il n'est jamais sûr.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
   function riskLevel(score){
     if (score <= 3) return { label:"Faible", cls:"faible" };
@@ -808,23 +812,23 @@
       const score = r.frequence * r.gravite;
       const lvl = riskLevel(score);
       return `
-      <tr class="${lvl.cls}" data-id="${r.id}">
-        <td><span class="collectivite-chip ${r.collectivite === 'Agglomération' ? 'agglo' : 'ville'}">${r.collectivite || 'Ville'}</span></td>
-        <td>${r.service}</td>
-        <td class="wrap">${r.risque}${ficheLien(r.risque)}</td>
-        <td class="wrap">${r.taches || ''}</td>
-        <td class="wrap">${r.danger || ''}</td>
-        <td class="num">${r.frequence}</td>
-        <td class="num">${r.gravite}</td>
-        <td class="num">${score}</td>
+      <tr class="${lvl.cls}" data-id="${esc(r.id)}">
+        <td><span class="collectivite-chip ${r.collectivite === 'Agglomération' ? 'agglo' : 'ville'}">${esc(r.collectivite || 'Ville')}</span></td>
+        <td>${esc(r.service)}</td>
+        <td class="wrap">${esc(r.risque)}${ficheLien(r.risque)}</td>
+        <td class="wrap">${esc(r.taches)}</td>
+        <td class="wrap">${esc(r.danger)}</td>
+        <td class="num">${esc(r.frequence)}</td>
+        <td class="num">${esc(r.gravite)}</td>
+        <td class="num">${esc(score)}</td>
         <td><span class="risk-chip ${lvl.cls}">${lvl.label}</span></td>
-        <td class="wrap">${r.moyensPrevention || ''}</td>
+        <td class="wrap">${esc(r.moyensPrevention)}</td>
         <td class="wrap">${priorityFor(lvl.cls)}</td>
-        <td class="wrap">${r.mesuresProposees || ''}</td>
-        <td><span class="maitrise-chip ${(r.maitrise||'').toLowerCase()}">${r.maitrise || ''}</span></td>
+        <td class="wrap">${esc(r.mesuresProposees)}</td>
+        <td><span class="maitrise-chip ${esc(String(r.maitrise||'').toLowerCase())}">${esc(r.maitrise)}</span></td>
         ${canEdit ? `<td class="actions-float">
           <a href="saisie-duerp.html?id=${encodeURIComponent(r.id)}" class="act-edit">Modifier</a>
-          <button type="button" class="act-del" data-id="${r.id}">Suppr.</button>
+          <button type="button" class="act-del" data-id="${esc(r.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`;
     }).join("");

@@ -17,12 +17,12 @@ Ce fichier-ci reste la version de référence (diff dans l'historique du dépôt
 ## 0. Préparation
 
 - [ ] Ouvrir le site dans un **onglet de navigation privée** au début de chaque section de test (évite de mélanger les données laissées par un test précédent).
-- [ ] Avoir sous la main les 6 comptes (visibles sur la page d'accueil elle-même) : `admin@verchamps.fr`/`admin1234`, `manager@verchamps.fr`/`manager1234`, `RH1`/`RH2` /`1234`, `AG1`/`AG2`/`1234`.
+- [ ] Avoir sous la main les comptes de test (visibles sur la page d'accueil elle-même) : `admin@verchamps.fr`/`admin1234`, `manager@verchamps.fr`/`manager1234`, `RH1`/`RH2` /`1234`, `AG1`/`AG2`/`1234`, `PREV1`/`1234`.
 
 ## 1. Page d'accueil (avant connexion)
 
 - [ ] `index.html` (l'URL racine) s'affiche sans erreur, sans passer par l'écran de connexion.
-- [ ] La grille des 11 modules est complète et lisible.
+- [ ] La grille des modules est complète et lisible : 19 cartes, dans l'ordre du menu latéral (de « Registre AT/MP » à « Administration »), chacune avec son icône.
 - [ ] Le bouton "Accéder à la démonstration" mène bien à l'écran de connexion.
 - [ ] Le bouton "Réinitialiser les données de démonstration" fonctionne (demande confirmation, puis redirige vers la connexion).
 - [ ] Basculer le thème du système (clair/sombre) et recharger la page : les couleurs suivent bien.

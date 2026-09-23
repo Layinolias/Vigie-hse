@@ -63,7 +63,7 @@ Chaque version est un dossier autonome et complet (pas de dépendance croisée).
 | Fichier | Rôle |
 |---|---|
 | `login.html` | Écran de connexion. Lit les comptes depuis `vigie_hse_users` (localStorage), pas en dur. |
-| `index.html` | Cockpit/dashboard : météo Verchamps en direct, Score HSE, KPI globaux, Flash Info (interne + actus secteur), tendance AT/MP, grille des modules. |
+| `index.html` | Page vitrine publique, avant connexion (V0.5.0) : présentation du produit, grille des modules **dans l'ordre du menu latéral** (19 cartes au 2026-09-23 — en ajouter une à chaque nouveau module, avec son symbole recopié depuis le sprite de `dashboard.html`), les comptes de démonstration dont `PREV1`, l'avertissement « prototype » (pas de serveur, données locales au navigateur, données fictives, authentification simplifiée) et le bouton « Réinitialiser les données de démonstration » (`localStorage.clear()` : toutes les clés, y compris celles des modules à venir). Le cockpit (météo, Score HSE, KPI, Flash Info, tendance AT/MP) est `dashboard.html`. |
 | `registre-at-mp.html` | Registre des accidents du travail / maladies professionnelles — table filtrable, CRUD, import/export Excel. Depuis le 2026-09-23, la colonne « Risque » porte une pastille « fiche » vers la famille correspondante de la Base documentaire (même mécanisme que le Document Unique, via `VigieRisques.trouver()`) ; tri et filtres de la colonne portent toujours sur le libellé brut. |
 | `saisie-rh.html` | Formulaire de déclaration/édition d'un AT/MP (accès rh/admin). |
 | `document-unique.html` | Registre DUERP — évaluations de risques par service, cotation, table filtrable, CRUD, import/export Excel. |
@@ -175,7 +175,7 @@ modulePermissions: {
 | `vigie_hse_duerp_dataset` | Évaluations DUERP. Depuis 2026-09-14 : `dateEvaluation` (ISO, fixée à la création, préservée sur modification) pour permettre le filtrage par période dans `reporting.html` — présente uniquement sur les évaluations saisies manuellement via `saisie-duerp.html` depuis cette date ; les évaluations importées (Excel ou `DATATEST/`) n'en ont pas et restent donc toujours comptabilisées quelle que soit la période choisie. | `saisie-duerp.html`, lu/édité par `document-unique.html`, `plan-actions.html`, `reporting.html` |
 | `vigie_hse_duerp_log` | Journal de saisie local (feed) côté formulaire DUERP | `saisie-duerp.html` |
 | `vigie_hse_referentials` | Listes déroulantes éditables (risques, sièges, natures, statuts RH, services Ville/Agglo, familles DUERP) | `administration.html` (onglet Référentiels), lu par tous les formulaires/filtres |
-| `vigie_hse_news` | Flash Info interne (actus rédigées par l'admin) | `administration.html` (onglet Flash Info), affiché sur `index.html` |
+| `vigie_hse_news` | Flash Info interne (actus rédigées par l'admin) | `administration.html` (onglet Flash Info), affiché sur `dashboard.html` |
 | `vigie_hse_veille` | Veille réglementaire / actualités du secteur HSE (titre, source, date ISO, catégorie, résumé, url, statut "À lire"/"Lu"/"Archivé") — remplace depuis 2026-09-13 l'ancien tableau codé en dur `SECTOR_NEWS` | `administration.html` (onglet Veille réglementaire, CRUD complet), affiché sur `dashboard.html` (statut "Archivé" masqué côté cockpit) |
 | `vigie_hse_audit_log` | Journal d'audit global (création/modification/suppression, tous modules) | Toute page qui modifie des données, lu par `administration.html` (onglet Journal) |
 | `vigie_hse_actions` | Actions du Plan d'Actions | `plan-actions.html` |
@@ -238,7 +238,7 @@ Les IDs des seeds sont **stables et déterministes** (ex. `pa-<id du risque DUER
 
 - Modules RSST et Vérifications Périodiques : terminés et vérifiés.
 - Séparation Flash Info interne / Actualités du secteur HSE : terminée.
-- Widgets météo (Open-Meteo, Verchamps) et Score HSE compact intégrés à la topbar de `index.html`, cliquables (météo → portail Météo France, score → ancre vers le détail sur la page).
+- Widgets météo (Open-Meteo, Verchamps) et Score HSE compact intégrés à la topbar de `dashboard.html` (anciennement `index.html`), cliquables (météo → portail Météo France, score → ancre vers le détail sur la page).
 - Généralisation de l'en-tête compact/sticky (`.page-summary`) à tous les modules : terminée.
 - Modules Indicateurs & Reporting KPI, Mode démonstration, Exports professionnels (PDF/Excel généralisé), EPI/dotation, Dashboard mobile simplifié : tous terminés — voir `ROADMAP-MODULES-FUTURS.md` pour le détail par module.
 - Menu latéral : bouton "épingler" pour empêcher le repli automatique, et zone de navigation rendue défilante indépendamment de l'en-tête/pied de sidebar (corrige un cas où trop d'éléments de menu rendaient le bouton de déconnexion inatteignable sur un écran bas).

@@ -72,7 +72,9 @@ Volontairement non détaillé maintenant : après une ou deux démos réelles à
 ### V1.0.0 — Gel
 Checklist de sortie proposée (à valider ensemble avant de taguer `v1.0.0`) :
 - [x] Tous les modules du périmètre actuel ont un golden path testé pour chaque rôle (admin/rh/manager/ag). — vérifié le 2026-09-15 (checklist QA V1, 75 points, tous rôles y compris `PREV1`).
-- [ ] Aucune page ne renvoie d'erreur JS en usage normal (vérifié, pas supposé).
+- [x] Aucune page ne renvoie d'erreur JS en usage normal (vérifié, pas supposé). — vérifié le 2026-09-23 : les **24 pages × 5 comptes de test** (admin, RH1, manager limité à ses services, AG1, PREV1), soit 120 visites, chargées avec les **vraies données de démonstration** (`DATATEST/*.xlsx` lus par le vrai SheetJS), puis onglets, tous les filtres, réinitialisations, ouverture et fermeture des formulaires, ouverture d'une fiche, export. **Aucune erreur** : ni exception au chargement, ni dans un gestionnaire d'événement ou une minuterie, ni promesse rejetée sans gestionnaire.
+  - Le harnais a d'abord été **éprouvé sur une page piégée** (quatre pannes volontaires : synchrone, minuterie, promesse, gestionnaire de clic) : il les signale toutes. Sa première version ne voyait pas les promesses rejetées, que jsdom ne relaie pas à la fenêtre — sans ce témoin, le « zéro erreur » n'aurait rien prouvé.
+  - Il a en revanche révélé un **import de démonstration silencieusement raté** : `urgences-exercices.html` demandait un fichier `DATATEST/11-REF-urgences-exercices.xlsx` qui n'avait jamais été produit (404 en ligne, module vide en démonstration, erreur réseau dans la console du navigateur). Fichier créé le même jour — voir `PROMPT-GENERATION-DONNEES-TEST.md`, fichier 11.
 - [ ] Exports PDF/Excel disponibles sur tous les registres qui en ont l'usage.
 - [ ] Site en ligne sur un vrai hébergement, à une URL stable, testé (pas seulement en local).
 - [ ] Mode démo + page vitrine en place.
@@ -83,7 +85,7 @@ Checklist de sortie proposée (à valider ensemble avant de taguer `v1.0.0`) :
 ## Ce qui reste explicitement HORS scope de V1.0
 
 - Le backend multi-tenant, l'authentification réelle, le **partage de données entre utilisateurs même en ligne**, la généralisation collectivité/privé (jalon J0) — volontairement repoussé après V1.0, voir plus haut. (La mise en ligne *statique*, elle, est bien dans le scope de V1.0 via `V0.3.0` — seule la version multi-utilisateurs partagée est repoussée.)
-- Les modules 2, 4, 5, 6, 8 du backlog fonctionnel (Inspection/Audit sauf si retenu en V0.6.0, Produits chimiques, Pénibilité, Formation/Habilitation, Gestion documentaire) — à réévaluer une fois V1.0 validée en conditions réelles.
+- ~~Les modules 2, 4, 5, 6, 8 du backlog fonctionnel~~ — **périmé** : Inspection/Audit, Produits chimiques, Formation/Habilitation et Gestion documentaire ont été construits depuis la rédaction de ce plan (voir `ROADMAP-MODULES-FUTURS.md`, 16 modules sur 18). Restent hors V1.0 : **Pénibilité** (module 5, fidélité réglementaire à établir texte par texte avec le préventeur) et **Dialogue social** (module 13, suspendu à la refonte des rôles du jalon J0).
 
 ## Prochaine étape concrète
 

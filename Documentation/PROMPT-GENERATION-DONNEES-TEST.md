@@ -192,6 +192,19 @@ Propose 3 trames (une ligne par point de contrôle, plusieurs lignes par trame) 
 
 ---
 
+## Fichier 11 — `11-REF-urgences-exercices.xlsx` → chargé automatiquement par `urgences-exercices.html`
+
+Ajouté le 2026-09-23 : la page le demandait depuis sa création, mais il n'avait jamais été produit. Il a été **généré directement** (pas via Gemini), avec les sites déjà utilisés par les autres fichiers. Une feuille `Exercices`, **13 lignes**. Colonnes exactes (identiques à l'export de la page, donc réimportables à la main) :
+
+`Site | Date exercice | Collectivité | Service | Type | Durée minutes | Participation | Périodicité mois | Constatations | Auteur`
+
+- **Type** : un parmi `Évacuation incendie`, `Intrusion`, `Risque environnemental` (réponse Q6 du préventeur) — tout autre libellé est ramené à « Évacuation incendie » à l'import.
+- **Périodicité mois** : obligatoire (une ligne sans périodicité est ignorée, la page ne l'invente jamais). Les valeurs `6` et `12` du fichier sont des **valeurs de démonstration**, saisies comme le ferait un utilisateur — pas une règle réglementaire.
+- **Dates** : réparties pour que le panneau d'échéances montre les trois statuts (à jour, à programmer sous 60 jours, en retard) **à la date de génération**. Comme pour tous les fichiers de démonstration datés, ces statuts glissent avec le temps : régénérer le fichier avec `Documentation/outils/generer-datatest-urgences.js` (après avoir décalé les dates) si la démo ne montre plus que des retards.
+- Un même site/type apparaît deux fois (Ateliers municipaux) pour montrer que l'échéance se recalcule sur le **dernier** exercice.
+
+---
+
 ## Livraison attendue
 
 - 10 fichiers `.xlsx` nommés comme indiqué, un fichier par lien de téléchargement (le Fichier 10 contient 2 onglets dans le même fichier).

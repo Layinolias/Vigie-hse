@@ -50,7 +50,8 @@ demande une session ouverte par l'utilisateur._
 ## Où sont les tests
 
 Les harnais jsdom (`test-bd.js`, `test-accueil.js`, `test-rdv.js`, `test-liens.js`, `test-reset.js`,
-`test-taxo.js`, `test-q8.js`, `test-q9.js`, `test-q10.js`, `audit2.js`,
+`test-taxo.js`, `test-q8.js`, `test-q9.js`, `test-q10.js`, `usage-normal.js` (24 pages × 5 comptes avec les
+vraies données DATATEST et le vrai SheetJS — `npm i jsdom xlsx`), `sweep.js`, `audit2.js`,
 `check-script-tags.js`, `node_modules/jsdom`…) vivent dans le **scratchpad de la session**, pas dans le
 dépôt : une nouvelle session en reçoit un vide et devra les réécrire. Modèle : charger uniquement les
 `<script src>` déclarés par la page, `process.env.TZ='Pacific/Auckland'` pour révéler les décalages UTC,

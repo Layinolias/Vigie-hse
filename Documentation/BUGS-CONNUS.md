@@ -33,6 +33,13 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Cause** : aucune de ces pages ne disposait d'un assistant d'échappement ; les gabarits interpolaient directement `${r.champ}` dans `innerHTML`. Les données arrivent par import Excel, par les formulaires de saisie et par les référentiels — aucune n'est de confiance. Les composants partagés, eux, étaient sains (`assets/tri-filtres.js` construit ses panneaux avec `createElement`/`textContent`).
 - **Corrigé** : 2026-09-23 — commits `0fad9f7` (Registre AT/MP et Document Unique) et `445d67a` (les quatorze autres). Chaque page déclare `esc()` et l'applique à toutes ses interpolations de texte. Vérifié page par page : plus aucun élément injecté, et le corps rendu avec des données normales est identique au caractère près à celui d'avant.
 
+### Le module Situations d'urgence était toujours vide en démonstration
+- **Où** : `urgences-exercices.html`, chargement automatique des données de démonstration.
+- **Remonté** : 2026-09-23, par le contrôle « aucune erreur JS en usage normal » du plan de version V1.
+- **Constaté** : la page demande `DATATEST/11-REF-urgences-exercices.xlsx` à chaque visite ; le fichier n'existait pas (404 sur le site déployé). L'erreur étant avalée par un `.catch(() => {})`, rien ne le signalait — sinon une erreur réseau rouge dans la console du navigateur et un module vide pendant les démonstrations.
+- **Cause** : le fichier de démonstration n'avait jamais été produit lors de la livraison du module 16.
+- **Corrigé** : 2026-09-23 — fichier créé (13 exercices, trois types, deux collectivités, les trois statuts d'échéance représentés). Vérifié : import complet, pas de doublon au rechargement.
+
 ---
 
 ## Ouverts / reportés (pas des bugs à corriger maintenant)

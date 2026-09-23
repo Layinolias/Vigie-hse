@@ -246,6 +246,7 @@
   <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
   <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
   <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
   <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
@@ -456,7 +457,7 @@
           </form>
         </div>
         <div class="panel" style="padding:20px 22px 22px;">
-          <div class="panel-head"><h3 class="panel-title">Historique des saisies</h3></div>
+          <div class="panel-head"><h3 class="panel-title">Historique des saisies</h3><div class="panel-actions" id="heuresPanelActions"></div></div>
           <div class="table-panel">
             <table class="reg">
               <thead><tr><th>Période</th><th>Collectivité</th><th>Service</th><th>Heures</th><th>Auteur</th><th id="thHeuresActions"></th></tr></thead>
@@ -805,7 +806,7 @@
     }
   });
 
-  $("agentPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNewAgent"><svg class="icon"><use href="#i-plus"/></svg> Nouvel agent</button>` : `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`);
+  $("agentPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnImportAgents"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importAgentsFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNewAgent"><svg class="icon"><use href="#i-plus"/></svg> Nouvel agent</button>` : `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`);
   if (canGestionRhWrite){ $("btnNewAgent").addEventListener("click", () => openAgentForm(null)); }
   VigieImpression.brancher("btnExportAgents");
   $("btnExportAgents").addEventListener("click", () => {
@@ -814,6 +815,67 @@
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Nom", "Prénom", "Collectivité", "Service", "Responsable", "Date d'entrée", "Actif"] }), "Agents");
     XLSX.writeFile(wb, `gestion-rh-agents_${VigieDates.aujourdhui()}.xlsx`);
   });
+
+  // ---------- Import des agents (2026-09-23 : premier fichier d'une reprise de données) ----------
+  // Mêmes colonnes que l'export. Un agent existant est reconnu à son nom + prénom (+ service si le
+  // fichier en donne un) et mis à jour ; une colonne absente du fichier ne change rien. Le
+  // responsable est rattaché par son nom, en second passage (il peut figurer plus bas dans le
+  // fichier), avec le même garde-fou anti-boucle que l'organigramme.
+  function normImp(s){ return String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+  function champsImp(raw){ const n = {}; Object.keys(raw).forEach(k => { n[normImp(k)] = raw[k]; }); return n; }
+  const dateImp = v => (v instanceof Date && !isNaN(v)) ? VigieDates.iso(v) : String(v == null ? "" : v).trim();
+  const collectiviteImp = v => /agglo/i.test(String(v)) ? "Agglomération" : "Ville";
+  if (canGestionRhWrite){
+    $("btnImportAgents").addEventListener("click", () => $("importAgentsFile").click());
+    $("importAgentsFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const lignes = XLSX.utils.sheet_to_json(wb.Sheets["Agents"] || wb.Sheets[wb.SheetNames[0]], { defval: "" }).map(champsImp);
+        if (!lignes.length){ alert("Le fichier semble vide — aucune ligne n'a été trouvée dans la première feuille."); e.target.value = ""; return; }
+        let added = 0, updated = 0, skipped = 0, horsPerimetre = 0, sansResponsable = 0;
+        const aRattacher = [];
+        lignes.forEach(n => {
+          const nom = String(n["nom"] || "").trim(), prenom = String(n["prenom"] || "").trim();
+          if (!nom){ skipped++; return; }
+          const service = n["service"] !== undefined ? String(n["service"]).trim() : undefined;
+          const trouve = AGENTS.find(a => normImp(a.nom) === normImp(nom) && normImp(a.prenom) === normImp(prenom) && (!service || a.service === service));
+          const svcFinal = service !== undefined && service !== "" ? service : (trouve ? trouve.service : "");
+          if (isScoped && !myServices.includes(svcFinal)){ horsPerimetre++; return; }
+          const rec = trouve ? Object.assign({}, trouve) : { id: genId(), nom, prenom, collectivite: "Ville", service: "", managerId: "", dateEntree: "", actif: true,
+            auteur: (session && session.user) || "—", dateCreation: VigieDates.aujourdhui() };
+          rec.nom = nom; rec.prenom = prenom; rec.service = svcFinal;
+          if (n["collectivite"] !== undefined) rec.collectivite = collectiviteImp(n["collectivite"]);
+          if (n["date d entree"] !== undefined) rec.dateEntree = dateImp(n["date d entree"]);
+          if (n["actif"] !== undefined) rec.actif = !/^(non|0|false|inactif|n)$/i.test(String(n["actif"]).trim());
+          if (trouve){ AGENTS[AGENTS.indexOf(trouve)] = rec; updated++; } else { AGENTS.push(rec); added++; }
+          if (n["responsable"] !== undefined) aRattacher.push([rec.id, String(n["responsable"]).trim()]);
+        });
+        aRattacher.forEach(([id, nomResp]) => {
+          const agent = AGENTS.find(a => a.id === id);
+          if (!nomResp){ agent.managerId = ""; return; }
+          const resp = AGENTS.find(a => a.id !== id && normImp(a.nom + " " + a.prenom) === normImp(nomResp));
+          if (!resp || getDescendantIds(id).has(resp.id)){ sansResponsable++; return; }
+          agent.managerId = resp.id;
+        });
+        saveAgents(AGENTS);
+        logAudit("Gestion RH", "Import", `Import .xlsx — ${added} agent(s) ajouté(s), ${updated} mis à jour`);
+        renderAgents();
+        if (added + updated === 0){
+          alert(`Aucune ligne n'a pu être importée (${skipped + horsPerimetre} ignorée(s)). Vérifiez que le fichier contient bien les colonnes attendues (Nom, Prénom, Service…).`);
+        } else {
+          alert(`Import terminé — ${added} agent(s) ajouté(s), ${updated} mis à jour, ${skipped} ignoré(s)` +
+            (horsPerimetre ? `, ${horsPerimetre} hors de vos services` : "") +
+            (sansResponsable ? `. ${sansResponsable} responsable(s) introuvable(s) ou créant une boucle : à rattacher dans l'organigramme` : "") + ".");
+        }
+      } catch (err){
+        alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
+      }
+      e.target.value = "";
+    });
+  }
 
   // ==================== ONGLET ORGANIGRAMME ====================
   function renderOrgTree(){
@@ -913,6 +975,62 @@
     $("heuresForm").reset();
     renderHeures();
   });
+
+  // ---------- Export / import des heures travaillées (2026-09-23) ----------
+  // Une ligne par mois, collectivité et service. À l'import, une ligne qui existe déjà pour le même
+  // mois, la même collectivité et le même service est ignorée : réimporter un fichier de paie ne doit
+  // jamais compter deux fois les mêmes heures (le TF/TG « réel » serait divisé d'autant).
+  $("heuresPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnImportHeures"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importHeuresFile" accept=".xlsx,.xls,.csv" style="display:none">` : "") +
+    `<button type="button" class="btn btn-ghost" id="btnExportHeures"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+  VigieImpression.brancher("btnExportHeures");
+  $("btnExportHeures").addEventListener("click", () => {
+    const rows = HEURES.slice().sort((a, b) => String(a.periode).localeCompare(String(b.periode)))
+      .map(h => ({ "Période": h.periode, "Collectivité": h.collectivite, "Service": h.service, "Heures": h.heures }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Période", "Collectivité", "Service", "Heures"] }), "Heures");
+    XLSX.writeFile(wb, `gestion-rh-heures_${VigieDates.aujourdhui()}.xlsx`);
+  });
+  if (canGestionRhWrite){
+    // « 2026-03 », « 03/2026 » ou une vraie date Excel → « AAAA-MM »
+    const periodeImp = v => {
+      if (v instanceof Date && !isNaN(v)) return VigieDates.iso(v).slice(0, 7);
+      const s = String(v == null ? "" : v).trim();
+      let m = /^(\d{4})-(\d{1,2})/.exec(s); if (m) return m[1] + "-" + m[2].padStart(2, "0");
+      m = /^(\d{1,2})[\/.-](\d{4})$/.exec(s); if (m) return m[2] + "-" + m[1].padStart(2, "0");
+      return "";
+    };
+    $("btnImportHeures").addEventListener("click", () => $("importHeuresFile").click());
+    $("importHeuresFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: "array", cellDates: true });
+        const lignes = XLSX.utils.sheet_to_json(wb.Sheets["Heures"] || wb.Sheets[wb.SheetNames[0]], { defval: "" }).map(champsImp);
+        if (!lignes.length){ alert("Le fichier semble vide — aucune ligne n'a été trouvée dans la première feuille."); e.target.value = ""; return; }
+        let added = 0, doublons = 0, skipped = 0, horsPerimetre = 0;
+        lignes.forEach(n => {
+          const periode = periodeImp(n["periode"]), service = String(n["service"] || "").trim();
+          const heures = Number(String(n["heures"]).replace(/\s/g, "").replace(",", "."));
+          if (!periode || !service || !(heures > 0)){ skipped++; return; }
+          if (isScoped && !myServices.includes(service)){ horsPerimetre++; return; }
+          const collectivite = collectiviteImp(n["collectivite"]);
+          if (HEURES.some(h => h.periode === periode && h.service === service && h.collectivite === collectivite)){ doublons++; return; }
+          HEURES.push({ id: genId("heu"), periode, collectivite, service, heures, auteur: (session && session.user) || "—", dateCreation: VigieDates.aujourdhui() });
+          added++;
+        });
+        saveHeures(HEURES);
+        logAudit("Gestion RH", "Import heures", `Import .xlsx — ${added} saisie(s) ajoutée(s)`);
+        renderHeures();
+        alert(added === 0 && doublons === 0
+          ? `Aucune ligne n'a pu être importée (${skipped + horsPerimetre} ignorée(s)). Vérifiez les colonnes attendues (Période, Collectivité, Service, Heures).`
+          : `Import terminé — ${added} saisie(s) ajoutée(s), ${doublons} déjà présente(s) (même mois, collectivité et service) donc ignorée(s), ${skipped} incomplète(s)` + (horsPerimetre ? `, ${horsPerimetre} hors de vos services` : "") + ".");
+      } catch (err){
+        alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
+      }
+      e.target.value = "";
+    });
+  }
   $("heuresTbody").addEventListener("click", (e) => {
     const delBtn = e.target.closest(".act-del[data-id]");
     if (!delBtn) return;

@@ -8,7 +8,7 @@
 
 **➡️ À faire en reprenant :** relire les réponses et idées du préventeur sur le *Cahier* (outil Artifact, collections `reponses` et `idees` — procédure en tête de `QUESTIONS-METIER-EN-ATTENTE.md`), puis `POINT-DE-REPRISE.md` pour l'état technique détaillé et les harnais de test.
 
-**Chantier technique connu, sans avis métier nécessaire :** les « aujourd'hui » calculés en UTC (environ 75 occurrences, voir `BUGS-CONNUS.md`) — campagne page par page sur `assets/dates-locales.js`. Pistes écartées pour l'instant par le métier : section « Pistes gardées en réserve » en fin de fichier.
+**Aucun chantier technique connu en attente** — le dernier (les « aujourd'hui » calculés en UTC) a été traité le 2026-09-23, voir `BUGS-CONNUS.md`. Pistes écartées pour l'instant par le métier : section « Pistes gardées en réserve » en fin de fichier.
 
 ---
 

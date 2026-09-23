@@ -53,10 +53,15 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Constaté** : sans aucune fiche, le fichier exporté n'avait même pas la ligne d'en-têtes — impossible de s'en servir comme modèle pour un import. Le nom du fichier pouvait aussi porter la date de la veille entre minuit et 2 h.
 - **Corrigé** : 2026-09-23 — chaque export déclare ses colonnes ; nom de fichier daté à l'heure locale. Vérifié : les 41 feuilles vides ont désormais leurs en-têtes, et l'ordre des colonnes des 55 feuilles non vides est strictement identique à avant (les fichiers existants et les réimports ne bougent pas).
 
+### La date du jour était la veille entre minuit et 2 h du matin
+- **Où** : 18 pages, 61 endroits — dates préremplies des formulaires de création, dates de création des fiches, date d'une suite donnée (Registre SST), borne de fin par défaut du Reporting, échéances et dates des actions générées du Plan d'actions, données de démonstration datées « il y a n jours ».
+- **Remonté** : 2026-09-23, pendant la correction des échéances (même cause).
+- **Constaté** : `new Date().toISOString().slice(0,10)` formate la date en UTC. En France (UTC+1/+2), entre minuit et 2 h, cela donnait la veille : une fiche créée à 0 h 30 était datée de la veille, et le Reporting excluait par défaut les événements du jour. Sans effet le reste de la journée.
+- **Corrigé** : 2026-09-23 — `VigieDates.aujourdhui()` et `VigieDates.iso(date)` (`assets/dates-locales.js`) partout ; les imports Excel, qui passaient déjà par les champs locaux de la date, n'étaient pas concernés. Vérifié par un rendu avant/après de chaque page avec deux comptes, horloge figée : **à l'heure UTC, 48 rendus sur 48 strictement identiques** (le changement ne modifie rien là où local = UTC) ; **à 0 h 30 à Paris le 24**, 24 rendus changent et **uniquement par des dates avancées d'exactement un jour** (formulaires préremplis au 24 au lieu du 23, période par défaut du Reporting se terminant le 24). Le harnais avait d'abord été rejoué sur le code inchangé : 0 différence.
+
 ---
 
 ## Ouverts / reportés (pas des bugs à corriger maintenant)
 
 - **Taille des titres/menu sur mobile** — remonté le 2026-09-15 (checklist §5) : tout fonctionne, mais le porteur du projet veut augmenter la taille des titres et du menu côté mobile pour plus de confort. Amélioration reportée, pas urgente.
-- **« Aujourd'hui » calculé en UTC** — remonté le 2026-09-23 : environ 75 `new Date().toISOString().slice(0,10)` restent dans 18 pages pour la date du jour (date de création d'une fiche, date préremplie d'un formulaire, borne de fin par défaut du Reporting, échéance des actions générées du Plan d'actions). Entre minuit et 2 h du matin en France, ils donnent la veille — par exemple une fiche créée à 0 h 30 datée de la veille, ou le Reporting qui exclut par défaut les événements du jour. Sans effet le reste de la journée. Correction prévue par une campagne page par page sur `assets/dates-locales.js`, comme celle de l'échappement HTML.
 - **Présentation à un professionnel HSE externe** — toujours en recherche (checklist §7, 2026-09-15). Ne dépend pas du code ; c'est le dernier point du gel `v1.0.0` dans `PLAN-VERSIONS-V1.md`.

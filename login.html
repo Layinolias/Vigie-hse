@@ -153,6 +153,21 @@
     e.preventDefault();
     const idInput = document.getElementById("username").value.trim();
     const pass = document.getElementById("password").value;
+    // Servie par le serveur VIGIE (serveur/serveur.js) : c'est lui qui vérifie le mot de passe — la page
+    // ne reçoit plus la liste des comptes. Base neuve : les comptes de démonstration y sont d'abord inscrits.
+    if (VigieStore.mode() === "serveur"){
+      if (VigieStore.premierLancement()) loadUsers();
+      const r = VigieStore.connecter(idInput, pass);
+      if (r.ok){ location.href = "dashboard.html"; return; }
+      errorBox.textContent = r.erreur === "desactive" ? "Ce compte a été désactivé. Contactez un administrateur."
+        : r.erreur === "attente" ? "Trop d'essais infructueux : réessayez dans " + Math.ceil((r.secondes || 300) / 60) + " minute(s)."
+        : r.erreur === "injoignable" ? "Le serveur VIGIE HSE ne répond pas. Vérifiez qu'il est lancé."
+        : "Identifiant ou mot de passe incorrect.";
+      errorBox.classList.add("show");
+      document.getElementById("password").value = "";
+      document.getElementById("password").focus();
+      return;
+    }
     const users = loadUsers();
     const idLower = idInput.toLowerCase();
     const account = users.find(u =>

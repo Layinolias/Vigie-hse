@@ -4,10 +4,15 @@
 //
 // Contrat (les valeurs sont les chaînes JSON que les pages écrivent aujourd'hui dans le navigateur) :
 //   lireTout()                         → { cle: { valeur, revision } } (valeur null : clé supprimée)
+//   lire(cle)                          → la valeur seule (null si absente)
 //   ecrire(cle, valeur, revisionVue)   → { ok:true, revision } ou, si quelqu'un a écrit entre-temps,
 //                                        { ok:false, revision, valeur } (la version actuelle)
 //   supprimer(cle, revisionVue)        → idem
 //   effacerTout()                      → chemin de la copie de sauvegarde prise juste avant
+// Comptes (étape P1b) — les mots de passe ne sont jamais dans les données, seulement leur empreinte ici :
+//   empreinte(idCompte) / poserEmpreinte(idCompte, empreinte) / retirerEmpreintes(idsGardes)
+//   ouvrirSession(empreinteJeton, idCompte, expire) / lireSession(empreinteJeton) / prolongerSession(…, expire)
+//   fermerSession(empreinteJeton) / purgerSessions(maintenant)
 // La révision d'une clé jamais écrite vaut 0 ; une clé supprimée reste en base, vide, et sa révision
 // continue de croître — sans quoi une page restée ouverte sur une ancienne version pourrait écraser la
 // suivante. Chaque écriture garde l'ancienne valeur dans « historique » (les HISTORIQUE dernières par
@@ -26,7 +31,9 @@ function ouvrir(fichier){
       cle TEXT PRIMARY KEY, valeur TEXT, revision INTEGER NOT NULL, maj TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS historique (
       cle TEXT NOT NULL, valeur TEXT, revision INTEGER NOT NULL, maj TEXT NOT NULL, motif TEXT NOT NULL);
-    CREATE INDEX IF NOT EXISTS historique_cle ON historique (cle, revision);`);
+    CREATE INDEX IF NOT EXISTS historique_cle ON historique (cle, revision);
+    CREATE TABLE IF NOT EXISTS empreintes (compte TEXT PRIMARY KEY, empreinte TEXT NOT NULL, maj TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS sessions (jeton TEXT PRIMARY KEY, compte TEXT NOT NULL, creee TEXT NOT NULL, expire INTEGER NOT NULL);`);
 
   const q = {
     tout:      db.prepare('SELECT cle, valeur, revision FROM donnees'),
@@ -38,6 +45,17 @@ function ouvrir(fichier){
                           '(SELECT rowid FROM historique WHERE cle = ? ORDER BY rowid DESC LIMIT ' + HISTORIQUE + ')'),
     compte:    db.prepare('SELECT COUNT(*) AS n FROM donnees WHERE valeur IS NOT NULL'),
     viderTout: db.prepare('UPDATE donnees SET valeur = NULL, revision = revision + 1, maj = ? WHERE valeur IS NOT NULL'),
+    empreinte: db.prepare('SELECT empreinte FROM empreintes WHERE compte = ?'),
+    poserEmpreinte: db.prepare('INSERT INTO empreintes (compte, empreinte, maj) VALUES (?, ?, ?) ON CONFLICT (compte) DO UPDATE SET empreinte = excluded.empreinte, maj = excluded.maj'),
+    comptesEmpreintes: db.prepare('SELECT compte FROM empreintes'),
+    retirerEmpreinte: db.prepare('DELETE FROM empreintes WHERE compte = ?'),
+    ouvrirSession: db.prepare('INSERT INTO sessions (jeton, compte, creee, expire) VALUES (?, ?, ?, ?)'),
+    lireSession: db.prepare('SELECT compte, expire FROM sessions WHERE jeton = ?'),
+    prolongerSession: db.prepare('UPDATE sessions SET expire = ? WHERE jeton = ?'),
+    fermerSession: db.prepare('DELETE FROM sessions WHERE jeton = ?'),
+    fermerSessionsCompte: db.prepare('DELETE FROM sessions WHERE compte = ?'),
+    purgerSessions: db.prepare('DELETE FROM sessions WHERE expire < ?'),
+    purgerHistorique: db.prepare('DELETE FROM historique WHERE cle = ?'),
   };
   const maintenant = () => new Date().toISOString();
 
@@ -85,6 +103,23 @@ function ouvrir(fichier){
       return copie;
     },
     nombre: () => q.compte.get().n,
+    lire: cle => { const l = q.une.get(cle); return l && l.valeur !== null ? l.valeur : null; },
+    // écriture interne du serveur (reprise d'une ancienne base), hors contrôle de révision
+    remplacer(cle, valeur, motif){ const a = q.une.get(cle); return changer(cle, valeur, a ? a.revision : 0, motif || 'remplacée'); },
+    oublierHistorique: cle => { q.purgerHistorique.run(cle); },
+    empreinte: compte => { const l = q.empreinte.get(compte); return l ? l.empreinte : null; },
+    poserEmpreinte: (compte, e) => { q.poserEmpreinte.run(compte, e, maintenant()); },
+    // un compte supprimé perd son mot de passe et ses sessions
+    retirerEmpreintes(idsGardes){
+      const garder = new Set(idsGardes);
+      for (const l of q.comptesEmpreintes.all()) if (!garder.has(l.compte)){ q.retirerEmpreinte.run(l.compte); q.fermerSessionsCompte.run(l.compte); }
+    },
+    ouvrirSession: (jeton, compte, expire) => { q.ouvrirSession.run(jeton, compte, maintenant(), expire); },
+    lireSession: jeton => q.lireSession.get(jeton) || null,
+    prolongerSession: (jeton, expire) => { q.prolongerSession.run(expire, jeton); },
+    fermerSession: jeton => { q.fermerSession.run(jeton); },
+    fermerSessionsCompte: compte => { q.fermerSessionsCompte.run(compte); },
+    purgerSessions: t => { q.purgerSessions.run(t); },
     fermer: () => db.close(),
   };
 }

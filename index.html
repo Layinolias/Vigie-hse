@@ -188,10 +188,12 @@
   } catch(e){}
 
   document.getElementById("btnResetDemo").addEventListener("click", () => {
-    const texte = VigieStore.mode() === "serveur"
-      ? "Réinitialiser toutes les données du serveur, pour TOUS les utilisateurs ? Le serveur garde une copie de la base prise juste avant."
-      : "Réinitialiser toutes les données de démonstration stockées dans ce navigateur ? Cette action est irréversible.";
-    if (confirm(texte)) {
+    // Serveur VIGIE : effacer la base commune depuis la vitrine, sans être connecté, n'a pas de sens
+    if (VigieStore.mode() === "serveur"){
+      alert("Sur le serveur VIGIE HSE, les données sont communes à tous les utilisateurs : leur réinitialisation se fait depuis Administration, avec un compte administrateur.");
+      return;
+    }
+    if (confirm("Réinitialiser toutes les données de démonstration stockées dans ce navigateur ? Cette action est irréversible.")) {
       VigieStore.clear();
       sessionStorage.clear();
       location.href = "login.html";

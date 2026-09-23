@@ -1,24 +1,27 @@
-// Serveur VIGIE HSE — étape P1a (Documentation/PLAN-MISE-EN-PRODUCTION.md) : les données ne vivent plus
-// dans chaque navigateur mais dans une base partagée, sur ce poste. Les pages sont les mêmes que sur le
-// site en ligne : en les servant, le serveur glisse avant assets/stockage.js l'état de la base
-// (window.__VIGIE_SERVEUR__), et VigieStore bascule tout seul — lecture dans cet état, écriture par l'API.
-// Ouverte sans ce serveur (fichier local, GitHub Pages), une page garde son stockage navigateur habituel.
+// Serveur VIGIE HSE — étapes P1a et P1b (Documentation/PLAN-MISE-EN-PRODUCTION.md §4 bis et §4 ter) :
+// les données vivent dans une base partagée au lieu de chaque navigateur, et l'on s'y connecte.
+// Les pages sont les mêmes que sur le site en ligne : en les servant, le serveur glisse avant
+// assets/stockage.js l'état de la base et la session (window.__VIGIE_SERVEUR__), et VigieStore bascule
+// tout seul — lecture dans cet état, écriture par l'API. Ouverte sans ce serveur (fichier local,
+// GitHub Pages), une page garde son stockage navigateur habituel.
 //
 // Lancement, depuis la racine du dépôt (Node 22.5 ou plus récent, rien à installer) :
 //   node serveur/serveur.js            → http://localhost:8780
-// Variables : PORT (8780 par défaut), VIGIE_BASE (fichier de la base, serveur/donnees/vigie.db par défaut).
+// Variables : PORT (8780 par défaut), VIGIE_BASE (fichier de la base, serveur/donnees/vigie.db par défaut),
+// VIGIE_HTTPS=1 derrière un proxy HTTPS (cookie de session réservé aux connexions chiffrées).
 //
-// Limites assumées de P1a : pas encore d'authentification ni de droits appliqués côté serveur (les rôles
-// restent vérifiés par les pages, comme aujourd'hui) — c'est pourquoi le serveur n'écoute QUE sur ce
-// poste (127.0.0.1) : aucun autre ordinateur du réseau ne peut s'y connecter. L'ouvrir au réseau
-// attendra l'authentification (P1b).
+// P1b : connexion vérifiée ici (serveur/comptes.js — mots de passe hachés, jamais conservés en clair),
+// aucune page de l'application ni aucune donnée sans session, droits d'écriture appliqués par le serveur
+// (serveur/droits.js). Le serveur n'écoute encore que ce poste (127.0.0.1).
 'use strict';
 const http = require('http'), fs = require('fs'), path = require('path');
 const { ouvrir } = require('./base-sqlite.js');
+const Comptes = require('./comptes.js');
 
 const RACINE = path.resolve(__dirname, '..');
 const PORT = Number(process.env.PORT) || 8780;
 const BASE = process.env.VIGIE_BASE || path.join(__dirname, 'donnees', 'vigie.db');
+const HTTPS = process.env.VIGIE_HTTPS === '1';
 const TAILLE_MAX = 50 * 1024 * 1024;          // une clé = un registre entier ; l'historique complet d'un client tient large
 const CLE_VALIDE = /^vigie_hse_[a-z0-9_]{1,80}$/;
 const TYPES = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
@@ -27,22 +30,40 @@ const TYPES = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; char
 // Noms sous lesquels le serveur accepte d'être appelé : refuser les autres bloque qu'un site piégé,
 // ouvert dans le navigateur de ce poste, fasse passer son propre nom de domaine pour celui-ci.
 const HOTES = new Set(['localhost:' + PORT, '127.0.0.1:' + PORT, '[::1]:' + PORT]);
+// pages accessibles sans être connecté : la vitrine et l'écran de connexion
+const PUBLIQUES = new Set(['/index.html', '/login.html']);
+const COOKIE = 'vigie_session';
 
 const base = ouvrir(BASE);
+const comptes = Comptes.creer(base);
 const journal = (...m) => console.log(new Date().toLocaleString('fr-FR') + ' ' + m.join(' '));
+// droits d'écriture par registre (étape P1b, 2e partie) ; tout est permis tant que le module est absent
+let droits = { peutEcrire: () => true, peutEffacer: () => true };
+try { droits = require('./droits.js'); } catch(e){ if (e.code !== 'MODULE_NOT_FOUND') throw e; }
 
-function repondre(res, statut, corps, type){
-  res.writeHead(statut, { 'Content-Type': type || 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+function repondre(res, statut, corps, type, entetes){
+  res.writeHead(statut, Object.assign({ 'Content-Type': type || 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }, entetes || {}));
   res.end(type ? corps : JSON.stringify(corps));
 }
+const texte = (res, statut, t, entetes) => repondre(res, statut, t, 'text/plain; charset=utf-8', entetes);
 
-// État de la base glissé dans chaque page. « < » est encodé : une valeur contenant « </script> » ne peut
-// pas refermer la balise ; U+2028/2029 le sont aussi (fins de ligne pour les anciens moteurs JavaScript).
-function injection(){
-  const donnees = {};
-  for (const [cle, d] of Object.entries(base.lireTout())) donnees[cle] = { v: d.valeur, r: d.revision };
-  const json = JSON.stringify({ api: '/api/', donnees })
-    .replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+function jetonDe(req){
+  const c = String(req.headers.cookie || '').split(';').map(x => x.trim()).find(x => x.startsWith(COOKIE + '='));
+  if (!c) return null;
+  try { return decodeURIComponent(c.slice(COOKIE.length + 1)); } catch(e){ return null; }
+}
+const poserCookie = jeton => COOKIE + '=' + encodeURIComponent(jeton) + '; HttpOnly; SameSite=Strict; Path=/' + (HTTPS ? '; Secure' : '');
+const effacerCookie = COOKIE + '=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0' + (HTTPS ? '; Secure' : '');
+const depuisCePoste = req => ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress);
+
+// État glissé dans chaque page. Sans session : aucune donnée. « < » est encodé : une valeur contenant
+// « </script> » ne peut pas refermer la balise ; U+2028/2029 le sont aussi (fins de ligne pour les
+// anciens moteurs JavaScript).
+function injection(session){
+  const etat = { api: '/api/', donnees: {}, session: session ? session.page : null };
+  if (session) for (const [cle, d] of Object.entries(base.lireTout())) etat.donnees[cle] = { v: d.valeur, r: d.revision };
+  else etat.premierLancement = comptes.aucun();
+  const json = JSON.stringify(etat).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
   return '<script>window.__VIGIE_SERVEUR__ = ' + json + ';</script>\n';
 }
 
@@ -60,47 +81,88 @@ async function api(req, res, chemin){
   // ce serveur sans son accord (contrôle CORS du navigateur, que ce serveur ne donne jamais).
   if (req.method !== 'GET' && req.headers['x-vigie'] !== '1') return repondre(res, 403, { erreur: 'en-tête X-Vigie manquant' });
 
+  if (chemin === '/api/connexion' && req.method === 'POST'){
+    let d = {}; try { d = JSON.parse(await lireCorps(req)) || {}; } catch(e){}
+    const r = comptes.connecter(d.identifiant, d.motDePasse);
+    if (!r.ok){
+      journal('connexion refusée :', String(d.identifiant || '').slice(0, 60), '(' + r.erreur + ')');
+      return repondre(res, r.erreur === 'attente' ? 429 : 401, { ok: false, erreur: r.erreur, secondes: r.secondes });
+    }
+    journal('connexion :', r.session.user);
+    return repondre(res, 200, { ok: true, session: r.session }, null, { 'Set-Cookie': poserCookie(r.jeton) });
+  }
+  if (chemin === '/api/deconnexion' && req.method === 'POST'){
+    comptes.deconnecter(jetonDe(req));
+    return repondre(res, 200, { ok: true }, null, { 'Set-Cookie': effacerCookie });
+  }
+
+  const session = comptes.session(jetonDe(req));
+  const m = /^\/api\/donnees\/([^/]+)$/.exec(chemin);
+  const cle = m ? m[1] : null;   // chemin déjà décodé
+  // Premier lancement, base sans aucun compte : l'écran de connexion y inscrit les comptes de
+  // démonstration, comme il le fait dans un navigateur — depuis ce poste seulement.
+  const amorce = !session && cle === comptes.CLE_COMPTES && req.method === 'PUT' && comptes.aucun() && depuisCePoste(req);
+  if (!session && !amorce) return repondre(res, 401, { erreur: 'non connecté' });
+
   if (chemin === '/api/donnees' && req.method === 'GET') return repondre(res, 200, base.lireTout());
 
   if (chemin === '/api/effacer' && req.method === 'POST'){
+    if (!droits.peutEffacer(session.page)) return repondre(res, 403, { erreur: 'réservé à un administrateur' });
     const copie = base.effacerTout();
-    journal('EFFACEMENT GÉNÉRAL — copie prise avant :', path.relative(RACINE, copie));
+    journal('EFFACEMENT GÉNÉRAL par', session.page.user, '— copie prise avant :', path.relative(RACINE, copie));
     return repondre(res, 200, { ok: true });
   }
 
-  const m = /^\/api\/donnees\/([^/]+)$/.exec(chemin);
-  if (m){
-    const cle = m[1];   // chemin déjà décodé
+  if (cle){
     if (!CLE_VALIDE.test(cle)) return repondre(res, 400, { erreur: 'clé inconnue' });
     const revisionVue = Number(req.headers['x-vigie-revision']);
     if (!Number.isInteger(revisionVue) || revisionVue < 0) return repondre(res, 400, { erreur: 'en-tête X-Vigie-Revision manquant' });
-    let r;
-    if (req.method === 'PUT') r = base.ecrire(cle, await lireCorps(req), revisionVue);
-    else if (req.method === 'DELETE') r = base.supprimer(cle, revisionVue);
-    else return repondre(res, 405, { erreur: 'méthode' });
+    if (req.method !== 'PUT' && req.method !== 'DELETE') return repondre(res, 405, { erreur: 'méthode' });
+    let valeur = req.method === 'PUT' ? await lireCorps(req) : null;
+    if (session && !droits.peutEcrire(session.page, cle, valeur, base.lire(cle))){
+      journal('écriture refusée :', cle, 'par', session.page.user);
+      return repondre(res, 403, { erreur: 'droits insuffisants' });
+    }
+    let mots = [];
+    if (cle === comptes.CLE_COMPTES && valeur !== null) ({ valeur, mots } = comptes.epurer(valeur));
+    const r = valeur === null ? base.supprimer(cle, revisionVue) : base.ecrire(cle, valeur, revisionVue);
     if (!r.ok){ journal('conflit', cle, '(vue', revisionVue, '/ actuelle', r.revision + ')'); return repondre(res, 409, r); }
-    journal(req.method === 'PUT' ? 'écrit' : 'supprimé', cle, '→ révision', r.revision);
+    if (cle === comptes.CLE_COMPTES) comptes.apresEcriture(mots);
+    journal(req.method === 'PUT' ? 'écrit' : 'supprimé', cle, '→ révision', r.revision, 'par', session ? session.page.user : '(premier lancement)');
     return repondre(res, 200, r);
   }
   return repondre(res, 404, { erreur: 'inconnu' });
 }
 
 function fichier(req, res, chemin){
-  if (req.method !== 'GET' && req.method !== 'HEAD') return repondre(res, 405, 'méthode', 'text/plain; charset=utf-8');
+  if (req.method !== 'GET' && req.method !== 'HEAD') return texte(res, 405, 'méthode');
   if (chemin === '/') chemin = '/index.html';
   const relatif = path.normalize(chemin).replace(/^[\\/]+/, '');
   const f = path.join(RACINE, relatif);
-  // ni hors du dépôt, ni ses fichiers cachés (.git contient le jeton du dépôt distant), ni ce dossier (la base)
+  // ni hors du dépôt, ni ses fichiers cachés (.git), ni ce dossier (la base)
   const segments = relatif.split(/[\\/]/);
   if (!f.startsWith(RACINE + path.sep) || segments.some(s => s.startsWith('.')) || segments[0] === 'serveur')
-    return repondre(res, 404, '404', 'text/plain; charset=utf-8');
+    return texte(res, 404, '404');
+  const html = path.extname(f).toLowerCase() === '.html';
+  let session = null;
+  const entetes = {};
+  if (html){
+    const jeton = jetonDe(req);
+    if (chemin === '/login.html'){
+      // toutes les pages s'y rendent pour se déconnecter : la session prend fin ici aussi
+      if (jeton){ comptes.deconnecter(jeton); entetes['Set-Cookie'] = effacerCookie; }
+    } else {
+      session = comptes.session(jeton);
+      if (!session && !PUBLIQUES.has(chemin)) return texte(res, 302, 'connexion requise', { Location: '/login.html' });
+    }
+  }
   fs.readFile(f, (err, data) => {
-    if (err) return repondre(res, 404, '404', 'text/plain; charset=utf-8');
+    if (err) return texte(res, 404, '404');
     const type = TYPES[path.extname(f).toLowerCase()] || 'application/octet-stream';
-    if (path.extname(f).toLowerCase() === '.html'){
-      const html = data.toString('utf8'), balise = '<script src="assets/stockage.js"></script>';
+    if (html){
+      const page = data.toString('utf8'), balise = '<script src="assets/stockage.js"></script>';
       // lue à chaque page : on voit toujours la dernière version enregistrée par quiconque
-      return repondre(res, 200, html.includes(balise) ? html.replace(balise, injection() + balise) : html, type);
+      return repondre(res, 200, page.includes(balise) ? page.replace(balise, injection(session) + balise) : page, type, entetes);
     }
     repondre(res, 200, data, type);
   });
@@ -108,7 +170,7 @@ function fichier(req, res, chemin){
 
 const serveur = http.createServer(async (req, res) => {
   try {
-    if (!HOTES.has(String(req.headers.host))) return repondre(res, 421, 'hôte refusé', 'text/plain; charset=utf-8');
+    if (!HOTES.has(String(req.headers.host))) return texte(res, 421, 'hôte refusé');
     const chemin = decodeURIComponent(req.url.split('?')[0]);
     if (chemin.startsWith('/api/')) return await api(req, res, chemin);
     return fichier(req, res, chemin);
@@ -118,9 +180,13 @@ const serveur = http.createServer(async (req, res) => {
   }
 });
 
+const repris = comptes.reprendreAncienneBase();
 serveur.listen(PORT, '127.0.0.1', () => {
   journal('VIGIE HSE — serveur local : http://localhost:' + PORT);
-  journal('Base :', BASE, '(' + base.nombre() + ' registre(s) enregistré(s))');
+  journal('Base : ' + BASE + ' (' + base.nombre() + ' registre(s) enregistré(s))');
+  if (repris) journal('Base antérieure à P1b : ' + repris + ' mot(s) de passe retiré(s) des données et haché(s).');
+  if (comptes.aucun()) journal('Aucun compte : le premier passage sur l\'écran de connexion, depuis ce poste, crée les comptes de démonstration.');
+  else if (comptes.demoActive()) journal('ATTENTION : les comptes de démonstration (mots de passe publiés dans le dépôt) sont actifs — à changer avant tout usage réel.');
 });
 const arreter = () => { serveur.close(); base.fermer(); process.exit(0); };
 process.on('SIGINT', arreter); process.on('SIGTERM', arreter);

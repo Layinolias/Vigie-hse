@@ -202,6 +202,14 @@
     });
   }
   if (SERVEUR) initialiserEtat();
+  // P1b : la session est celle du serveur. Les pages continuent de la lire dans sessionStorage, comme
+  // avant ; elle y est recopiée à chaque page (rôle et droits à jour), et retirée si le serveur n'en a pas.
+  if (SERVEUR){
+    try {
+      if (SERVEUR.session) sessionStorage.setItem("vigie_hse_session", JSON.stringify(SERVEUR.session));
+      else sessionStorage.removeItem("vigie_hse_session");
+    } catch(e){}
+  }
   var resteLocale = function(cle){ return !!CLES[cle] && CLES[cle].nature === "preference"; };
   var entree = function(cle){ return etat[cle] || (etat[cle] = { serveur: null, vue: null, revision: 0 }); };
 
@@ -222,6 +230,14 @@
   function injoignable(){
     bandeau("vigie-serveur-injoignable", "#8a1c1c", "Le serveur VIGIE HSE ne répond pas : la dernière modification n'a PAS été enregistrée. Vérifiez qu'il est lancé, puis rechargez la page.");
     return echec("VigieServeurInjoignable", "serveur injoignable");
+  }
+  function sessionFinie(){
+    bandeau("vigie-session-finie", "#8a1c1c", "Votre session a pris fin (déconnexion ou 8 h sans activité) : la dernière modification n'a PAS été enregistrée. Reconnectez-vous, puis refaites-la.");
+    return echec("VigieSessionFinie", "session terminée");
+  }
+  function refuse(){
+    bandeau("vigie-droits", "#8a3b12", "Votre compte n'a pas le droit de modifier ces informations : la modification n'a PAS été enregistrée.");
+    return echec("VigieDroitsInsuffisants", "droits insuffisants");
   }
   function conflit(cle){
     var module = CLES[cle] ? CLES[cle].module : cle;
@@ -247,6 +263,8 @@
         continue;
       }
       if (r.statut === 413){ signalerPlein(); throw echec("QuotaExceededError", "trop volumineux pour le serveur"); }
+      if (r.statut === 401) throw sessionFinie();
+      if (r.statut === 403) throw refuse();
       throw injoignable();
     }
     throw conflit(cle);
@@ -258,6 +276,8 @@
     removeItem: function(cle){ if (resteLocale(cle)) return fond().removeItem(cle); ecrireDistant(cle, null); },
     clear: function(){
       var r = appeler("POST", "effacer", null, null);
+      if (r.statut === 401) throw sessionFinie();
+      if (r.statut === 403) throw refuse();
       if (r.statut !== 200) throw injoignable();
       // même règle que le serveur : seule une clé qui avait une valeur change de révision
       Object.keys(etat).forEach(function(k){ var e = etat[k]; etat[k] = { serveur: null, vue: null, revision: e.revision + (e.serveur !== null ? 1 : 0) }; });
@@ -287,6 +307,20 @@
     persistant: function(){ return !!SERVEUR || fond() !== memoire; },
     // « serveur » (base partagée), « navigateur » (ce navigateur seulement) ou « memoire » (rien n'est conservé)
     mode: function(){ return SERVEUR ? "serveur" : (fond() === memoire ? "memoire" : "navigateur"); },
+    // Mode serveur : connexion vérifiée par le serveur → { ok, erreur: "invalide" | "desactive" | "attente", secondes }.
+    // En cas de succès, la session est rangée dans sessionStorage comme le faisait login.html.
+    connecter: function(identifiant, motDePasse){
+      if (!SERVEUR) return { ok: false, erreur: "hors serveur" };
+      var r = appeler("POST", "connexion", JSON.stringify({ identifiant: identifiant, motDePasse: motDePasse }), null);
+      if (r.statut === 0) return { ok: false, erreur: "injoignable" };
+      if (r.statut === 200 && r.reponse && r.reponse.session){
+        try { sessionStorage.setItem("vigie_hse_session", JSON.stringify(r.reponse.session)); } catch(e){}
+        return { ok: true };
+      }
+      return { ok: false, erreur: (r.reponse && r.reponse.erreur) || "invalide", secondes: r.reponse && r.reponse.secondes };
+    },
+    // base neuve, sans aucun compte : l'écran de connexion y inscrit les comptes de démonstration
+    premierLancement: function(){ return !!(SERVEUR && SERVEUR.premierLancement); },
     _fusionner: fusionner,   // exposé pour les tests
   };
   // vérifié dès le chargement : la vitrine et l'écran de connexion préviennent avant toute saisie

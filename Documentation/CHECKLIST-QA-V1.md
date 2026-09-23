@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 119 points au 2026-09-23 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 120 points au 2026-09-23 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -161,6 +161,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] **Menu latéral** : se réduit/étend correctement au survol sur grand écran ; devient un tiroir accessible via le bouton menu sur petit écran (voir §5).
 - [ ] **Texte affiché tel quel, jamais interprété** : dans n'importe quel module, enregistrer une fiche dont un champ texte contient des chevrons — par exemple un risque nommé `<b>essai</b>` ou une circonstance `1 < 2`. Le tableau doit afficher ces caractères **tels quels**, sans mise en gras ni disparition de texte. Même contrôle après un import Excel contenant de tels libellés.
 - [ ] **Import Excel** (disponible sur tous les modules désormais, pas seulement AT/MP et Document Unique) : importer un fichier volontairement invalide (mauvais format, colonnes manquantes) → message d'erreur clair, pas de plantage silencieux.
+- [ ] **Imprimer / PDF sur chaque registre** : dans un registre qui n'en avait pas (par exemple Vérifications périodiques), filtrer sur « En retard » puis cliquer « Imprimer / PDF » → l'aperçu ne contient que le tableau, avec exactement les lignes filtrées, sans menu ni boutons, sous un en-tête (titre, date et heure, compte, nombre de lignes, « Filtres : Statut planning : En retard ») ; « Enregistrer au format PDF » fonctionne. Avec `AG1`, là où il n'y a pas d'export, il n'y a pas non plus d'impression.
 - [ ] **Export d'un registre vide** : sur un module qui n'a encore aucune fiche (par exemple Entreprises extérieures ou Analyse d'accident, avant toute saisie), cliquer sur l'export Excel → le fichier contient la ligne d'en-têtes des colonnes, utilisable comme modèle d'import.
 - [ ] **Échéances au bon jour** : dans Situations d'urgence, l'exercice d'évacuation de la crèche Les Petits Pas (fait le 2026-01-20, tous les 6 mois) affiche une prochaine échéance au **2026-07-20** — pas au 19.
 - [ ] **Auto-chargement DATATEST** : sur le site déployé (pas en local), chaque module se remplit tout seul au chargement avec les données de `DATATEST/` (pas de bouton à cliquer). Vérifier qu'un rechargement ne duplique pas les lignes (IDs stables `dtst-*`).

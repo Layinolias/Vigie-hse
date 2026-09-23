@@ -41,6 +41,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 9 | Accueil sécurité d'un nouvel agent : contenu, délai, trace signée | Module Accueil au poste (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
 | 10 | Base documentaire : trame des fiches de risque, documents obligatoires | Module Base documentaire (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
 | 11 | Risques du Registre AT/MP : à quelle fiche de risque les rattacher ? | Registre AT/MP + Base documentaire (existants) | 🟠 posée le 2026-09-23, en attente |
+| 12 | Impression et PDF : quels documents méritent une vraie mise en page ? | Tous les registres (impression générique en service) | 🟠 posée le 2026-09-23, en attente |
 
 ---
 
@@ -351,6 +352,24 @@ Les deux derniers n'ont **pas** été rattachés, parce que ce serait trancher u
 
 ---
 
+## 🟠 Question 12 — Impression et PDF : quels documents méritent une vraie mise en page ?
+
+**Contexte.** Depuis le 2026-09-23, chaque registre peut s'imprimer ou s'enregistrer en PDF : l'application imprime le tableau **tel qu'il est affiché** (filtres, périmètre du compte, colonnes masquées comprises), précédé d'un en-tête — titre, date et heure, compte qui imprime, nombre de lignes, filtres appliqués. C'est une liste, pas un document mis en forme.
+
+**Ce que fait le logiciel aujourd'hui.** Trois impressions ont une mise en page dédiée : la **convocation** à une visite médicale (lettre tirée d'un modèle modifiable), la **fiche d'accueil au poste** (points vus, trois dates, deux zones de signature), le **Registre AT/MP** et le **Document Unique** complets. Tous les autres registres (14 pages, 18 tableaux) impriment la liste. Seule la Base documentaire n'a pas d'impression : ses fiches se lisent à l'écran.
+
+**La question.** Certains documents se remettent, s'affichent ou se signent ; une ligne de tableau ne suffit pas, il faudrait une page par fiche, avec ses mentions et ses signatures. Candidats repérés, **sans savoir lesquels servent vraiment** : le plan de prévention d'une entreprise extérieure (signé par les deux parties), le compte rendu d'un exercice d'évacuation, le rapport d'analyse d'un accident, la fiche de remise d'EPI signée par l'agent, le rapport d'une inspection, une fiche de la base documentaire à afficher ou remettre.
+- Lesquels faut-il, par ordre de priorité ? Que doit contenir chacun (mentions obligatoires, signatures, visas) ?
+- À qui sont-ils remis ou présentés (agent, entreprise extérieure, F3SCT, inspection…), et faut-il les conserver signés — combien de temps ?
+
+**Options.** (A) la liste imprimée suffit pour la première version ; (B) certains documents ont besoin d'une mise en page dédiée — lesquels.
+
+### Décision
+
+> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse ; choix de l'utilisateur le même jour : impression générique livrée tout de suite, mises en page dédiées selon cette réponse)*
+
+---
+
 # À savoir aussi (pas une question, point d'interprétation)
 
 Les **évaluations DUERP importées** via Excel ou chargées automatiquement depuis `DATATEST/` **n'ont pas de date d'évaluation** : le fichier source ne comporte pas de colonne date. Conséquence : elles sont **toujours comptées, quelle que soit la période choisie** dans le reporting. Seules les évaluations saisies manuellement depuis le 2026-09-14 portent une date et réagissent au filtre.
@@ -371,4 +390,5 @@ Ce n'est pas un défaut : le choix a été de ne pas inventer une fausse date d'
 - **Q9** : `accueil-poste.html`, constante `TPL_DEFAULT` (les 8 points) et clé `vigie_hse_modeles_accueil` ; un délai imposerait un champ d'échéance sur `vigie_hse_accueils`.
 - **Q10** : `base-documentaire.html`, fonction `buildSeeds()` et `assets/risques-ref.js` (trame des fiches) ; `DOC_CATEGORIES` pour les catégories de documents.
 - **Q11** : `assets/risques-ref.js`, table `EQUIVALENCES` — une ligne par rattachement accepté (slug du libellé du registre → nom exact de la famille).
+- **Q12** : `assets/impression.js` (`VigieImpression.brancher`, l'impression générique) ; une mise en page dédiée suivrait le modèle de la fiche d'accueil (`#accueilPrint` dans `accueil-poste.html`) ou de la convocation (`#letterPrint` dans `sante-visites.html`).
 - **Point DUERP** : champ `dateEvaluation` écrit par `saisie-duerp.html` ; import sans date dans `document-unique.html`.

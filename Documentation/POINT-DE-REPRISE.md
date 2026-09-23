@@ -42,9 +42,9 @@ demande une session ouverte par l'utilisateur._
   consignée mais le module reste à construire — et la fidélité réglementaire attendue demandera de
   repasser par le préventeur, texte par texte.
 - Module 13 (Dialogue social) : bloqué par la refonte des rôles (jalon J0).
-- **Q11 posee le 2026-09-23** (rattachement de « Chute d'objet » et « Deplacement » a une fiche de risque) :
-  la reponse se lit dans `reponses/q11` (champ `option` : LES_DEUX / OBJET_SEUL / AUCUN, puis `remarques`,
-  `remarques2`). Mise en oeuvre = une ligne par rattachement dans `EQUIVALENCES` (`assets/risques-ref.js`).
+- **Q11 et Q12 repondues et traitees le 2026-09-23** : les 9 risques du Registre AT/MP ouvrent une fiche ;
+  l'impression generique suffit (mises en page dediees gardees en reserve dans la roadmap). Aucune question
+  n'est plus en attente sur le Cahier.
 - Autres liens contextuels : produit chimique → sa fiche, module de suivi → article pertinent.
 
 ## Où sont les tests

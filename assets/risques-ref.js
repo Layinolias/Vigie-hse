@@ -55,6 +55,9 @@
   var EQUIVALENCES = {
     "routier": "Routiers",                              // singulier / pluriel
     "activite-physique": "Activité Physique (TMS)",    // même famille, sans la précision
+    // tranchés par le préventeur (question 11, 2026-09-23) — ces deux lignes demandaient son avis
+    "chute-d-objet": "Effondrements et aux chutes d'objets",
+    "deplacement": "Déplacement dans les locaux",       // déplacement dans les locaux, pas sur la route (« Routier » à part)
   };
   function trouver(nom){
     var s = slug(nom);

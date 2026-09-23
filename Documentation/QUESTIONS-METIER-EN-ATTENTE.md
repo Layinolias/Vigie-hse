@@ -40,8 +40,8 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 8 | Seuil des 400 h : « plus de » ou « au moins » ? Quelle période ? | Module Entreprises extérieures (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
 | 9 | Accueil sécurité d'un nouvel agent : contenu, délai, trace signée | Module Accueil au poste (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
 | 10 | Base documentaire : trame des fiches de risque, documents obligatoires | Module Base documentaire (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
-| 11 | Risques du Registre AT/MP : à quelle fiche de risque les rattacher ? | Registre AT/MP + Base documentaire (existants) | 🟠 posée le 2026-09-23, en attente |
-| 12 | Impression et PDF : quels documents méritent une vraie mise en page ? | Tous les registres (impression générique en service) | 🟠 posée le 2026-09-23, en attente |
+| 11 | Risques du Registre AT/MP : à quelle fiche de risque les rattacher ? | Registre AT/MP + Base documentaire (existants) | ✅ répondue le 2026-09-23, mise en œuvre le jour même |
+| 12 | Impression et PDF : quels documents méritent une vraie mise en page ? | Tous les registres (impression générique en service) | ✅ répondue le 2026-09-23 : la liste suffit, piste gardée en réserve |
 
 ---
 
@@ -321,7 +321,7 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ---
 
-## 🟠 Question 11 — Risques du Registre AT/MP : à quelle fiche de risque les rattacher ?
+## ✅ Question 11 — Risques du Registre AT/MP : à quelle fiche de risque les rattacher ?
 
 **Contexte.** Le Registre AT/MP a sa propre liste de 9 risques, héritée du fichier source (`DB.xlsx`). Le Document Unique, lui, utilise 33 familles de risque, et chacune a désormais sa fiche dans la Base documentaire. Depuis le 2026-09-23, la colonne « Risque » du registre porte une pastille « fiche » qui ouvre la fiche correspondante — **à condition de savoir à quelle famille correspond chaque libellé**.
 
@@ -348,11 +348,13 @@ Les deux derniers n'ont **pas** été rattachés, parce que ce serait trancher u
 
 ### Décision
 
-> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse)*
+> **Réponse du préventeur (Cahier, 2026-09-23) : option A, « Rattacher les deux ».** Il confirme aussi les deux rattachements déjà faits (« Oui »).
+>
+> **Mis en œuvre le 2026-09-23** : deux lignes dans `EQUIVALENCES` (`assets/risques-ref.js`) — « Chute d'objet » → **Effondrements et aux chutes d'objets**, « Déplacement » → **Déplacement dans les locaux** (et non « Routiers », le registre ayant « Routier » à part). Les 9 risques du Registre AT/MP ouvrent désormais tous une fiche. Vérifié : harnais des liens contextuels, 47 contrôles, dont le lien de chacune des deux lignes vers la bonne fiche.
 
 ---
 
-## 🟠 Question 12 — Impression et PDF : quels documents méritent une vraie mise en page ?
+## ✅ Question 12 — Impression et PDF : quels documents méritent une vraie mise en page ?
 
 **Contexte.** Depuis le 2026-09-23, chaque registre peut s'imprimer ou s'enregistrer en PDF : l'application imprime le tableau **tel qu'il est affiché** (filtres, périmètre du compte, colonnes masquées comprises), précédé d'un en-tête — titre, date et heure, compte qui imprime, nombre de lignes, filtres appliqués. C'est une liste, pas un document mis en forme.
 
@@ -366,7 +368,9 @@ Les deux derniers n'ont **pas** été rattachés, parce que ce serait trancher u
 
 ### Décision
 
-> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse ; choix de l'utilisateur le même jour : impression générique livrée tout de suite, mises en page dédiées selon cette réponse)*
+> **Réponse du préventeur (Cahier, 2026-09-23) : option A, « La liste imprimée suffit ».** Remarque : « Pas de besoin de plus pour le moment, mais gardez une note pour ne pas oublier que c'est possible ».
+>
+> **Suite donnée** : rien à coder ; l'impression générique livrée le même jour reste la réponse. La piste des mises en page dédiées est notée dans `ROADMAP-MODULES-FUTURS.md`, section « Pistes gardées en réserve », avec la liste des documents candidats.
 
 ---
 

@@ -49,10 +49,19 @@
   }
   // Retrouve la famille officielle derrière un libellé saisi ou importé : la comparaison passe par le slug,
   // si bien que « Chute de plain pied » (import Excel) retrouve « Chute de plain-pied » (taxonomie).
+  // Libellés d'autres référentiels (risques du Registre AT/MP) qui désignent SANS AMBIGUÏTÉ une famille
+  // de la taxonomie mais s'écrivent autrement. N'ajouter ici aucun rapprochement qui demande un jugement
+  // de préventeur : un rapprochement discutable se pose d'abord comme question métier (règle 9).
+  var EQUIVALENCES = {
+    "routier": "Routiers",                              // singulier / pluriel
+    "activite-physique": "Activité Physique (TMS)",    // même famille, sans la précision
+  };
   function trouver(nom){
     var s = slug(nom);
     if (!s) return null;
     for (var i = 0; i < FAMILLES.length; i++){ if (slug(FAMILLES[i][0]) === s) return FAMILLES[i]; }
+    var cible = EQUIVALENCES[s];
+    if (cible){ for (var j = 0; j < FAMILLES.length; j++){ if (FAMILLES[j][0] === cible) return FAMILLES[j]; } }
     return null;
   }
   function idFiche(nom){

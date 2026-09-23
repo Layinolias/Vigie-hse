@@ -40,6 +40,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 8 | Seuil des 400 h : « plus de » ou « au moins » ? Quelle période ? | Module Entreprises extérieures (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
 | 9 | Accueil sécurité d'un nouvel agent : contenu, délai, trace signée | Module Accueil au poste (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
 | 10 | Base documentaire : trame des fiches de risque, documents obligatoires | Module Base documentaire (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
+| 11 | Risques du Registre AT/MP : à quelle fiche de risque les rattacher ? | Registre AT/MP + Base documentaire (existants) | 🟠 posée le 2026-09-23, en attente |
 
 ---
 
@@ -319,6 +320,37 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ---
 
+## 🟠 Question 11 — Risques du Registre AT/MP : à quelle fiche de risque les rattacher ?
+
+**Contexte.** Le Registre AT/MP a sa propre liste de 9 risques, héritée du fichier source (`DB.xlsx`). Le Document Unique, lui, utilise 33 familles de risque, et chacune a désormais sa fiche dans la Base documentaire. Depuis le 2026-09-23, la colonne « Risque » du registre porte une pastille « fiche » qui ouvre la fiche correspondante — **à condition de savoir à quelle famille correspond chaque libellé**.
+
+**Ce que fait le logiciel aujourd'hui.** Sur les 9 libellés du registre, 7 sont rattachés :
+
+| Libellé du registre | Fiche ouverte | Pourquoi |
+|---|---|---|
+| Chute de hauteur · Chute de plain pied · Equipement de travail · RPS · Autres | la famille du même nom | même libellé (aux accents et tirets près) |
+| Routier | Routiers | singulier / pluriel |
+| Activité Physique | Activité Physique (TMS) | même famille, sans la précision |
+| **Chute d'objet** | *aucune* | voir la question |
+| **Déplacement** | *aucune* | voir la question |
+
+Les deux derniers n'ont **pas** été rattachés, parce que ce serait trancher une question de métier :
+- **« Chute d'objet »** correspond sans doute à la famille « Effondrements et aux chutes d'objets » — mais celle-ci couvre aussi les effondrements, plus larges qu'une simple chute d'objet.
+- **« Déplacement »** peut désigner un déplacement dans les locaux (famille « Déplacement dans les locaux ») ou un déplacement professionnel sur la route (famille « Routiers »). Le registre ayant déjà un libellé « Routier » à part, la première lecture est probable, mais pas certaine.
+
+**La question.**
+- Faut-il rattacher « Chute d'objet » à « Effondrements et aux chutes d'objets » ?
+- Faut-il rattacher « Déplacement » à « Déplacement dans les locaux », à « Routiers », ou à aucune des deux ?
+- Les deux rattachements déjà faits (Routier → Routiers, Activité Physique → Activité Physique (TMS)) vous conviennent-ils ?
+
+**Options.** (A) rattacher les deux comme proposé ci-dessus ; (B) rattacher « Chute d'objet » seulement ; (C) n'en rattacher aucun — ils restent sans pastille.
+
+### Décision
+
+> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse)*
+
+---
+
 # À savoir aussi (pas une question, point d'interprétation)
 
 Les **évaluations DUERP importées** via Excel ou chargées automatiquement depuis `DATATEST/` **n'ont pas de date d'évaluation** : le fichier source ne comporte pas de colonne date. Conséquence : elles sont **toujours comptées, quelle que soit la période choisie** dans le reporting. Seules les évaluations saisies manuellement depuis le 2026-09-14 portent une date et réagissent au filtre.
@@ -338,4 +370,5 @@ Ce n'est pas un défaut : le choix a été de ne pas inventer une fausse date d'
 - **Q5** : module non créé — voir `ROADMAP-MODULES-FUTURS.md` section 5. **Q6** : `urgences-exercices.html`. **Q7/Q8** : `entreprises-exterieures.html`, constante `SEUIL_HEURES` et fonction `isPlanObligatoire()`.
 - **Q9** : `accueil-poste.html`, constante `TPL_DEFAULT` (les 8 points) et clé `vigie_hse_modeles_accueil` ; un délai imposerait un champ d'échéance sur `vigie_hse_accueils`.
 - **Q10** : `base-documentaire.html`, fonction `buildSeeds()` et `assets/risques-ref.js` (trame des fiches) ; `DOC_CATEGORIES` pour les catégories de documents.
+- **Q11** : `assets/risques-ref.js`, table `EQUIVALENCES` — une ligne par rattachement accepté (slug du libellé du registre → nom exact de la famille).
 - **Point DUERP** : champ `dateEvaluation` écrit par `saisie-duerp.html` ; import sans date dans `document-unique.html`.

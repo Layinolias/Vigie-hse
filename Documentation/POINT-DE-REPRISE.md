@@ -42,11 +42,10 @@ demande une session ouverte par l'utilisateur._
   consignée mais le module reste à construire — et la fidélité réglementaire attendue demandera de
   repasser par le préventeur, texte par texte.
 - Module 13 (Dialogue social) : bloqué par la refonte des rôles (jalon J0).
-- Autres liens contextuels vers la base documentaire : pastille « fiche » sur la colonne Risque du
-  Registre AT/MP, produit chimique → sa fiche, etc. **Attention** : quatre libelles de risque du registre
-  ne correspondent a aucune famille du DUERP par simple slug (Routier/Routiers, Activite Physique/
-  Activite Physique (TMS), Chute d'objet, Deplacement) — les deux derniers demandent l'avis du
-  preventeur avant d'etre rapproches (question a poser).
+- **Q11 posee le 2026-09-23** (rattachement de « Chute d'objet » et « Deplacement » a une fiche de risque) :
+  la reponse se lit dans `reponses/q11` (champ `option` : LES_DEUX / OBJET_SEUL / AUCUN, puis `remarques`,
+  `remarques2`). Mise en oeuvre = une ligne par rattachement dans `EQUIVALENCES` (`assets/risques-ref.js`).
+- Autres liens contextuels : produit chimique → sa fiche, module de suivi → article pertinent.
 
 ## Où sont les tests
 

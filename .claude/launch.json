@@ -4,8 +4,18 @@
     {
       "name": "vigie-local",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["Documentation/outils/serveur-local.js"],
+      "runtimeArgs": [
+        "Documentation/outils/serveur-local.js"
+      ],
       "port": 8765
+    },
+    {
+      "name": "vigie-serveur",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "serveur/serveur.js"
+      ],
+      "port": 8780
     }
   ]
 }

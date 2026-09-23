@@ -188,7 +188,10 @@
   } catch(e){}
 
   document.getElementById("btnResetDemo").addEventListener("click", () => {
-    if (confirm("Réinitialiser toutes les données de démonstration stockées dans ce navigateur ? Cette action est irréversible.")) {
+    const texte = VigieStore.mode() === "serveur"
+      ? "Réinitialiser toutes les données du serveur, pour TOUS les utilisateurs ? Le serveur garde une copie de la base prise juste avant."
+      : "Réinitialiser toutes les données de démonstration stockées dans ce navigateur ? Cette action est irréversible.";
+    if (confirm(texte)) {
       VigieStore.clear();
       sessionStorage.clear();
       location.href = "login.html";

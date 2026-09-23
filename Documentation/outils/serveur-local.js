@@ -13,7 +13,9 @@ http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
   if (p === '/') p = '/index.html';
   const f = path.join(RACINE, path.normalize(p).replace(/^([\\/])+/, ''));
-  if (!f.startsWith(RACINE)) { res.writeHead(403); return res.end(); }   // pas de sortie du dossier du projet
+  // ni sortie du dossier du projet, ni fichiers cachés (.git contient le jeton du dépôt distant), ni la base du serveur
+  const segments = path.relative(RACINE, f).split(/[\\/]/);
+  if (!f.startsWith(RACINE + path.sep) || segments.some(x => x.startsWith('.')) || segments[0] === 'serveur') { res.writeHead(404); return res.end('404'); }
   fs.readFile(f, (err, data) => {
     if (err) { res.writeHead(404); return res.end('404'); }
     res.writeHead(200, { 'Content-Type': TYPES[path.extname(f).toLowerCase()] || 'application/octet-stream' });

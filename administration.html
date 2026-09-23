@@ -592,7 +592,7 @@
 
       <div class="panel section-block" style="padding:20px; margin-top:18px;">
         <div class="panel-head">
-          <h3 class="panel-title">Stockage de ce navigateur</h3>
+          <h3 class="panel-title" id="stockTitre">Stockage de ce navigateur</h3>
           <span class="panel-note" id="stockNote"></span>
         </div>
         <div style="height:8px; border-radius:99px; background:var(--bg-2); overflow:hidden;"><div id="stockBarre" style="height:100%; width:0; border-radius:99px; background:var(--success);"></div></div>
@@ -642,11 +642,19 @@
   function afficherStockage(){
     const LIMITE = 5000000;
     const utilise = VigieStore.occupation();
+    const fmt = n => (n / 1e6).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+    // servie par le serveur VIGIE (serveur/serveur.js) : base partagée, la limite du navigateur ne s'applique plus
+    if (VigieStore.mode() === "serveur"){
+      $("stockTitre").textContent = "Stockage sur le serveur";
+      $("stockBarre").parentNode.style.display = "none";
+      $("stockNote").textContent = fmt(utilise) + " million(s) de caractères";
+      $("stockDetail").textContent = "Les données sont enregistrées dans la base du serveur VIGIE HSE, partagée par tous les utilisateurs ; la limite d'environ 5 millions de caractères d'un navigateur ne s'applique pas.";
+      return;
+    }
     const part = Math.min(100, Math.round(utilise / LIMITE * 100));
     const barre = $("stockBarre");
     barre.style.width = Math.max(part, 1) + "%";
     barre.style.background = part >= 90 ? "var(--danger)" : part >= 70 ? "var(--warning)" : "var(--success)";
-    const fmt = n => (n / 1e6).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
     $("stockNote").textContent = fmt(utilise) + " million(s) de caractères sur environ 5 · " + part + " %";
     const parModule = {};
     Object.entries(VigieStore.CLES).forEach(([k, def]) => { const v = VigieStore.getItem(k); if (v) parModule[def.module] = (parModule[def.module] || 0) + k.length + v.length; });
@@ -659,7 +667,10 @@
   setTimeout(afficherStockage, 0);
 
   $("btnResetAll").addEventListener("click", () => {
-    if (confirm("Réinitialiser TOUTES les données de démonstration stockées dans ce navigateur (utilisateurs, référentiels, registres, journal d'audit) ? Cette action est irréversible et vous déconnectera.")) {
+    const texte = VigieStore.mode() === "serveur"
+      ? "Réinitialiser TOUTES les données du serveur (utilisateurs, référentiels, registres, journal d'audit), pour TOUS les utilisateurs ? Le serveur garde une copie de la base prise juste avant. Vous serez déconnecté."
+      : "Réinitialiser TOUTES les données de démonstration stockées dans ce navigateur (utilisateurs, référentiels, registres, journal d'audit) ? Cette action est irréversible et vous déconnectera.";
+    if (confirm(texte)) {
       VigieStore.clear();
       sessionStorage.clear();
       location.href = "login.html";

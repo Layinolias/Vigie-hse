@@ -90,10 +90,39 @@
     if (document.body) poser(); else document.addEventListener("DOMContentLoaded", poser);
   }
 
+  // Stockage plein (le navigateur accorde environ 5 millions de caractères par site) : l'écriture échoue,
+  // et la plupart des pages enveloppent leur enregistrement dans un try/catch muet — la saisie était
+  // perdue sans un mot. On garde l'erreur (même comportement pour la page) et on le dit à l'écran.
+  // Réponse du préventeur à la question 13 : tout l'historique d'un client est à reprendre.
+  function estPlein(e){
+    return !!e && (e.name === "QuotaExceededError" || e.name === "NS_ERROR_DOM_QUOTA_REACHED" || e.code === 22 || e.code === 1014);
+  }
+  function signalerPlein(){
+    var poser = function(){
+      if (document.getElementById("vigie-stockage-plein")) return;
+      var b = document.createElement("div");
+      b.id = "vigie-stockage-plein";
+      b.setAttribute("role", "alert");
+      b.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:9999;padding:10px 16px;background:#8a1c1c;color:#fff;font:600 13px/1.4 system-ui,sans-serif;text-align:center;";
+      b.textContent = "L'espace de stockage de ce navigateur est plein : la dernière modification n'a PAS été enregistrée. Exportez vos registres en Excel pour les garder, puis prévenez l'administrateur.";
+      document.body.appendChild(b);
+    };
+    if (document.body) poser(); else document.addEventListener("DOMContentLoaded", poser);
+  }
+
   window.VigieStore = {
     CLES: CLES,
     getItem: function(cle){ return fond().getItem(cle); },
-    setItem: function(cle, valeur){ fond().setItem(cle, valeur); },
+    setItem: function(cle, valeur){
+      try { fond().setItem(cle, valeur); }
+      catch(e){ if (estPlein(e)) signalerPlein(); throw e; }
+    },
+    // caractères occupés par les clés de l'application (clé + valeur), pour suivre l'approche de la limite
+    occupation: function(){
+      var f = fond(), n = 0;
+      Object.keys(CLES).forEach(function(k){ var v = f.getItem(k); if (v != null) n += k.length + v.length; });
+      return n;
+    },
     removeItem: function(cle){ fond().removeItem(cle); },
     // « Réinitialiser les données de démonstration » : tout ce que l'application a stocké
     clear: function(){ fond().clear(); },

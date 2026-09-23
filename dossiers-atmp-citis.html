@@ -882,24 +882,60 @@
         const wb = XLSX.read(buf, { type: "array", cellDates: true });
         let dAdded = 0, dUpdated = 0, dSkipped = 0, aAdded = 0, aSkipped = 0;
 
+        // une date saisie comme vraie date Excel arrive en objet Date (cellDates) : on la ramène à
+        // « AAAA-MM-JJ » local, comme les autres modules — sinon elle s'enregistrait en texte illisible
+        const dateCell = v => (v instanceof Date && !isNaN(v)) ? VigieDates.iso(v) : String(v == null ? "" : v).trim();
+        const oui = v => normKey(v).includes("oui");
+        let pAdded = 0, pSkipped = 0;
+
         const dSheet = wb.Sheets["Dossiers"] || wb.Sheets[wb.SheetNames[0]];
         if (dSheet){
           XLSX.utils.sheet_to_json(dSheet, { defval: "" }).forEach(raw => {
             const atmpId = resolveAtmpId(raw, ["nom"]);
             if (!atmpId){ dSkipped++; return; }
-            const rec = {
-              id: "dos-" + atmpId, atmpId,
-              cmi: { recu: normKey(rawPick(raw,["cmi recu"])).includes("oui"), date: String(rawPick(raw,["cmi date"])).trim(), ref: "" },
-              prolongations: [],
-              certificatFinal: { type: String(rawPick(raw,["certificat final"])).trim() || "Guérison", recu: normKey(rawPick(raw,["certificat final recu"])).includes("oui"), date: "", ref: "" },
-              ipp: { applicable: normKey(rawPick(raw,["ipp applicable"])).includes("oui"), taux: String(rawPick(raw,["taux ipp"])).trim(), date: "", ref: "" },
-              enquete: { realisee: normKey(rawPick(raw,["enquete realisee"])).includes("oui"), date: "", conclusions: "" },
-              coutTotal: Number(rawPick(raw,["cout total"])) || 0,
-              coutDetail: "",
+            // une colonne absente du fichier ne doit rien écraser : avant le 2026-09-23, réimporter un
+            // fichier sans « Certificat final date » effaçait la date saisie dans l'application
+            const presentes = new Set(Object.keys(raw).map(normKey));
+            const col = (alias, conv) => presentes.has(alias) ? conv(rawPick(raw, [alias])) : undefined;
+            const lu = {
+              cmi: { recu: col("cmi recu", oui), date: col("cmi date", dateCell), ref: col("cmi ref", dateCell) },
+              certificatFinal: { type: col("certificat final", v => String(v).trim() || "Guérison"), recu: col("certificat final recu", oui),
+                                 date: col("certificat final date", dateCell), ref: col("certificat final ref", dateCell) },
+              ipp: { applicable: col("ipp applicable", oui), taux: col("taux ipp", v => String(v).trim()), date: col("ipp date", dateCell), ref: col("ipp ref", dateCell) },
+              enquete: { realisee: col("enquete realisee", oui), date: col("enquete date", dateCell), conclusions: col("enquete conclusions", v => String(v).trim()) },
+              coutTotal: col("cout total", v => Number(v) || 0),
+              coutDetail: col("cout detail", v => String(v).trim()),
             };
             const idx = DOSSIERS.findIndex(x => x.atmpId === atmpId);
-            if (idx >= 0){ DOSSIERS[idx] = Object.assign({}, DOSSIERS[idx], rec, { prolongations: DOSSIERS[idx].prolongations || [] }); dUpdated++; }
+            const base = idx >= 0 ? DOSSIERS[idx] : emptyDossier(atmpId);
+            const rec = Object.assign({}, base, { id: "dos-" + atmpId, atmpId, prolongations: base.prolongations || [] });
+            ["cmi", "certificatFinal", "ipp", "enquete"].forEach(g => {
+              rec[g] = Object.assign({}, base[g]);
+              Object.entries(lu[g]).forEach(([k, v]) => { if (v !== undefined) rec[g][k] = v; });
+            });
+            if (lu.coutTotal !== undefined) rec.coutTotal = lu.coutTotal;
+            if (lu.coutDetail !== undefined) rec.coutDetail = lu.coutDetail;
+            if (idx >= 0){ DOSSIERS[idx] = rec; dUpdated++; }
             else { DOSSIERS.push(rec); dAdded++; }
+          });
+          saveDossiers(DOSSIERS);
+        }
+
+        // feuille « Prolongations » (une ligne par prolongation) : remplace la liste des dossiers qu'elle cite
+        const pSheet = wb.Sheets["Prolongations"];
+        if (pSheet){
+          const parDossier = {};
+          XLSX.utils.sheet_to_json(pSheet, { defval: "" }).forEach(raw => {
+            const atmpId = resolveAtmpId(raw, ["agent"]);
+            const date = dateCell(rawPick(raw, ["date"])), ref = dateCell(rawPick(raw, ["ref"]));
+            if (!atmpId || !(date || ref)){ pSkipped++; return; }
+            (parDossier[atmpId] = parDossier[atmpId] || []).push({ date, ref });
+          });
+          Object.entries(parDossier).forEach(([atmpId, liste]) => {
+            let d = DOSSIERS.find(x => x.atmpId === atmpId);
+            if (!d){ d = emptyDossier(atmpId); DOSSIERS.push(d); dAdded++; }
+            d.prolongations = liste;
+            pAdded += liste.length;
           });
           saveDossiers(DOSSIERS);
         }
@@ -913,9 +949,9 @@
             ARRETES.push({
               id: genId("arr"), atmpId, type,
               statut: String(rawPick(raw,["statut"])).trim() || "Brouillon",
-              dateCreation: String(rawPick(raw,["cree le","date creation"])).trim() || VigieDates.aujourdhui(),
-              dateTransmission: String(rawPick(raw,["transmis le","date transmission"])).trim(),
-              dateSignature: String(rawPick(raw,["signe le","date signature"])).trim(),
+              dateCreation: dateCell(rawPick(raw,["cree le","date creation"])) || VigieDates.aujourdhui(),
+              dateTransmission: dateCell(rawPick(raw,["transmis le","date transmission"])),
+              dateSignature: dateCell(rawPick(raw,["signe le","date signature"])),
               autorite: String(rawPick(raw,["autorite"])).trim(),
             });
             aAdded++;
@@ -925,11 +961,11 @@
 
         render();
         if (currentAtmpId) openDossier(currentAtmpId);
-        const total = dAdded + dUpdated + aAdded;
+        const total = dAdded + dUpdated + aAdded + pAdded;
         if (total === 0){
           alert(`Aucune ligne n'a pu être importée (${dSkipped + aSkipped} ignorée(s)). Vérifiez que le fichier contient bien des feuilles "Dossiers"/"Arretes" avec des lignes rattachées à un événement AT/MP existant.`);
         } else {
-          alert(`Import terminé — dossiers : ${dAdded} ajouté(s), ${dUpdated} mis à jour, ${dSkipped} ignoré(s). Arrêtés : ${aAdded} ajouté(s), ${aSkipped} ignoré(s).`);
+          alert(`Import terminé — dossiers : ${dAdded} ajouté(s), ${dUpdated} mis à jour, ${dSkipped} ignoré(s). Arrêtés : ${aAdded} ajouté(s), ${aSkipped} ignoré(s).${pSheet ? ` Prolongations : ${pAdded} importée(s), ${pSkipped} ignorée(s).` : ""}`);
         }
         logAudit("Dossiers AT/MP & CITIS", "Import", `Import .xlsx — ${dAdded + dUpdated} dossier(s), ${aAdded} arrêté(s)`);
       } catch (err){
@@ -952,14 +988,25 @@
         "IPP applicable": d.ipp.applicable ? "Oui" : "Non", "Taux IPP": d.ipp.taux || "",
         "Enquête réalisée": d.enquete.realisee ? "Oui" : "Non", "Coût total": d.coutTotal || 0,
         "Statut dossier": isDossierComplet(d) ? "Complet" : "Incomplet",
+        // ajoutées le 2026-09-23 (en fin de feuille, l'ordre existant ne bouge pas) : sans elles, un
+        // export réimporté perdait les dates, références et conclusions du dossier
+        "CMI réf": d.cmi.ref || "", "Certificat final date": d.certificatFinal.date || "", "Certificat final réf": d.certificatFinal.ref || "",
+        "IPP date": d.ipp.date || "", "IPP réf": d.ipp.ref || "", "Enquête date": d.enquete.date || "", "Enquête conclusions": d.enquete.conclusions || "",
+        "Coût détail": d.coutDetail || "",
       };
+    });
+    const prolongationRows = [];
+    ATMP_EVENTS.forEach(evt => {
+      const d = dossierFor(evt.id);
+      (d && d.prolongations || []).forEach(p => prolongationRows.push({ "ID AT/MP": evt.id, "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Date": p.date || "", "Réf": p.ref || "" }));
     });
     const arreteRows = ARRETES.map(a => {
       const evt = ATMP_EVENTS.find(e => e.id === a.atmpId) || {};
       return { "ID AT/MP": a.atmpId, "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Type": a.type, "Statut": a.statut, "Créé le": a.dateCreation, "Transmis le": a.dateTransmission, "Signé le": a.dateSignature, "Autorité": a.autorite };
     });
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossierRows, { header: ["ID AT/MP", "Nom", "Prénom", "Date AT", "Service", "CMI reçu", "CMI date", "Nb prolongations", "Certificat final", "Certificat final reçu", "IPP applicable", "Taux IPP", "Enquête réalisée", "Coût total", "Statut dossier"] }), "Dossiers");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossierRows, { header: ["ID AT/MP", "Nom", "Prénom", "Date AT", "Service", "CMI reçu", "CMI date", "Nb prolongations", "Certificat final", "Certificat final reçu", "IPP applicable", "Taux IPP", "Enquête réalisée", "Coût total", "Statut dossier", "CMI réf", "Certificat final date", "Certificat final réf", "IPP date", "IPP réf", "Enquête date", "Enquête conclusions", "Coût détail"] }), "Dossiers");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(prolongationRows, { header: ["ID AT/MP", "Agent", "Date", "Réf"] }), "Prolongations");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(arreteRows, { header: ["ID AT/MP", "Agent", "Type", "Statut", "Créé le", "Transmis le", "Signé le", "Autorité"] }), "Arretes");
     XLSX.writeFile(wb, `dossiers-atmp-citis_${VigieDates.aujourdhui()}.xlsx`);
   });

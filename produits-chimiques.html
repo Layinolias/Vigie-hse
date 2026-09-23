@@ -423,6 +423,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -602,7 +604,7 @@
     fService.value = list.includes(current) ? current : "all";
   }
   fillServiceOptions();
-  fPicto.innerHTML = `<option value="all">Tous</option>` + PICTOGRAMMES.map(p => `<option value="${p.code}">${p.code} — ${p.label}</option>`).join("");
+  fPicto.innerHTML = `<option value="all">Tous</option>` + PICTOGRAMMES.map(p => `<option value="${esc(p.code)}">${esc(p.code)} — ${esc(p.label)}</option>`).join("");
 
   // Tri & filtres par colonne (composant partagé assets/tri-filtres.js).
   // L'ordre des colonnes suit celui des <th> de #theadFields.
@@ -645,16 +647,16 @@
       return;
     }
     tbody.innerHTML = rows.map(p => `
-      <tr class="${isFdsOld(p) ? 'fds-old' : ''}" data-id="${p.id}">
-        <td class="wrap">${p.nom}</td>
-        <td>${p.fournisseur || '—'}</td>
-        <td>${p.service}</td>
-        <td>${p.quantiteStockee != null ? p.quantiteStockee + ' ' + (p.unite || '') : '—'}</td>
+      <tr class="${isFdsOld(p) ? 'fds-old' : ''}" data-id="${esc(p.id)}">
+        <td class="wrap">${esc(p.nom)}</td>
+        <td>${esc(p.fournisseur || '—')}</td>
+        <td>${esc(p.service)}</td>
+        <td>${p.quantiteStockee != null ? esc(p.quantiteStockee) + ' ' + esc(p.unite || '') : '—'}</td>
         <td class="pictos">${(p.pictogrammes || []).map(c => `<span class="ghs-badge ${badgeCls(c)}">${c}</span>`).join("") || '<span style="color:var(--text-faint)">—</span>'}</td>
-        <td class="${isFdsOld(p) ? 'fds-flag' : ''}">${p.dateMajFDS || '—'}${isFdsOld(p) ? ' ⚠' : ''}</td>
+        <td class="${isFdsOld(p) ? 'fds-flag' : ''}">${esc(p.dateMajFDS || '—')}${isFdsOld(p) ? ' ⚠' : ''}</td>
         ${canEdit ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${p.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${p.id}">Suppr.</button>
+          <button type="button" class="act-edit" data-edit="${esc(p.id)}">Modifier</button>
+          <button type="button" class="act-del" data-id="${esc(p.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`).join("");
   }
@@ -758,7 +760,7 @@
 
     const formPanel = $("formPanel"), form = $("prodForm");
     $("pictosCheck").innerHTML = PICTOGRAMMES.map(p => `
-      <label><input type="checkbox" class="picto-cb" value="${p.code}"><span>${p.code} — ${p.label}</span></label>
+      <label><input type="checkbox" class="picto-cb" value="${esc(p.code)}"><span>${esc(p.code)} — ${esc(p.label)}</span></label>
     `).join("");
     function fillFormServiceOptions(col){
       const list = servicesForCollectivite(col);

@@ -448,6 +448,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const sessRole = (session && session.role) || "ag";
@@ -788,7 +790,7 @@
     if (editingRecord){
       $("pageTitle").textContent = "Modifier la déclaration";
       $("pageH1").textContent = "Modifier la déclaration";
-      $("pageSub").innerHTML = `Mise à jour d'un événement existant du Registre AT/MP <span class="edit-flag">ID ${editingRecord.id}</span>`;
+      $("pageSub").innerHTML = `Mise à jour d'un événement existant du Registre AT/MP <span class="edit-flag">ID ${esc(editingRecord.id)}</span>`;
       $("pageSub").title = `Mise à jour d'un événement existant du Registre AT/MP — ID ${editingRecord.id}`;
       $("btnSubmit").textContent = "Enregistrer les modifications";
       const cancel = document.createElement("a");
@@ -809,14 +811,14 @@
         <div class="feed-item-top">
           <span class="feed-date mono">${fmtDate(r.dateAT)}</span>
           <span class="feed-action">${entry.action === 'update' ? 'Modifiée' : 'Créée'}</span>
-          <span class="type-chip ${typeChipClass(r.typeAtMp)}">${r.typeAtMp}</span>
+          <span class="type-chip ${typeChipClass(r.typeAtMp)}">${esc(r.typeAtMp)}</span>
         </div>
-        <div class="feed-service">${r.nom || ''} ${r.prenom || ''} — ${r.service}</div>
-        <div class="feed-sub-service">${r.serviceDetail}</div>
-        <div class="feed-nature">${r.nature}${r.siege ? ' · ' + r.siege : ''}</div>
+        <div class="feed-service">${esc(r.nom || '')} ${esc(r.prenom || '')} — ${esc(r.service)}</div>
+        <div class="feed-sub-service">${esc(r.serviceDetail)}</div>
+        <div class="feed-nature">${esc(r.nature)}${r.siege ? ' · ' + r.siege : ''}</div>
         <div class="feed-bottom">
           ${r.arret
-            ? `<span class="badge badge-danger">Avec arrêt</span><span class="mono" style="font-size:11px;color:var(--text-muted);">${r.joursArret} j</span>`
+            ? `<span class="badge badge-danger">Avec arrêt</span><span class="mono" style="font-size:11px;color:var(--text-muted);">${esc(r.joursArret)} j</span>`
             : `<span class="badge badge-neutral">Sans arrêt</span><span></span>`}
         </div>
       </div>`;

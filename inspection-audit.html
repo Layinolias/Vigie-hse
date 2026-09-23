@@ -464,6 +464,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -664,7 +666,7 @@
     fService.value = list.includes(current) ? current : "all";
   }
   fillServiceOptions();
-  fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+  fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
 
   const statutCls = { "Conforme":"s-conforme", "Avec réserves":"s-reserves", "Non conforme":"s-non" };
 
@@ -712,16 +714,16 @@
     tbody.innerHTML = rows.map(d => {
       const ncCount = (d.reponses || []).filter(r => r.statut === "Non conforme").length;
       return `
-      <tr class="${d.statutGlobal === 'Non conforme' ? 'nonconforme' : ''}" data-id="${d.id}">
-        <td>${d.dateInspection || '—'}</td>
-        <td class="wrap">${d.trameNom}</td>
-        <td>${d.service}</td>
-        <td>${d.inspecteur}</td>
-        <td><span class="status-chip ${statutCls[d.statutGlobal] || 's-conforme'}">${d.statutGlobal}</span></td>
+      <tr class="${d.statutGlobal === 'Non conforme' ? 'nonconforme' : ''}" data-id="${esc(d.id)}">
+        <td>${esc(d.dateInspection || '—')}</td>
+        <td class="wrap">${esc(d.trameNom)}</td>
+        <td>${esc(d.service)}</td>
+        <td>${esc(d.inspecteur)}</td>
+        <td><span class="status-chip ${statutCls[d.statutGlobal] || 's-conforme'}">${esc(d.statutGlobal)}</span></td>
         <td>${ncCount}</td>
         ${canEdit ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${d.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${d.id}">Suppr.</button>
+          <button type="button" class="act-edit" data-edit="${esc(d.id)}">Modifier</button>
+          <button type="button" class="act-del" data-id="${esc(d.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`;
     }).join("");
@@ -783,8 +785,8 @@
         });
         saveTrames(TRAMES);
         renderTramesList();
-        fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
-        $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+        fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
+        $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
         alert(`Import des trames terminé — ${added} créée(s), ${updated} mise(s) à jour.`);
       } catch (err){
         alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
@@ -884,7 +886,7 @@
     });
 
     const formPanel = $("formPanel"), form = $("inspForm"), pointsContainer = $("pointsContainer");
-    $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+    $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
     function fillFormServiceOptions(col){
       const list = servicesForCollectivite(col);
       $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
@@ -899,14 +901,14 @@
       pointsContainer.innerHTML = trame.points.map(p => {
         const existing = byId.get(p.id) || { statut:"Conforme", commentaire:"" };
         return `
-        <div class="point-row" data-point-id="${p.id}" data-point-label="${p.libelle.replace(/"/g,'&quot;')}">
-          <div class="point-label">${p.libelle} <span style="color:var(--text-faint); font-weight:500;">· ${p.categorie}</span></div>
+        <div class="point-row" data-point-id="${esc(p.id)}" data-point-label="${p.libelle.replace(/"/g,'&quot;')}">
+          <div class="point-label">${esc(p.libelle)} <span style="color:var(--text-faint); font-weight:500;">· ${esc(p.categorie)}</span></div>
           <div class="point-radios">
-            <label><input type="radio" name="pt-${p.id}" value="Conforme" ${existing.statut === 'Conforme' ? 'checked' : ''}> Conforme</label>
-            <label><input type="radio" name="pt-${p.id}" value="Non conforme" ${existing.statut === 'Non conforme' ? 'checked' : ''}> Non conforme</label>
-            <label><input type="radio" name="pt-${p.id}" value="NA" ${existing.statut === 'NA' ? 'checked' : ''}> N/A</label>
+            <label><input type="radio" name="pt-${esc(p.id)}" value="Conforme" ${existing.statut === 'Conforme' ? 'checked' : ''}> Conforme</label>
+            <label><input type="radio" name="pt-${esc(p.id)}" value="Non conforme" ${existing.statut === 'Non conforme' ? 'checked' : ''}> Non conforme</label>
+            <label><input type="radio" name="pt-${esc(p.id)}" value="NA" ${existing.statut === 'NA' ? 'checked' : ''}> N/A</label>
           </div>
-          <textarea placeholder="Commentaire (optionnel)">${existing.commentaire || ''}</textarea>
+          <textarea placeholder="Commentaire (optionnel)">${esc(existing.commentaire || '')}</textarea>
         </div>`;
       }).join("");
     }
@@ -995,18 +997,18 @@
 
     function renderTramesList(){
       $("tramesList").innerHTML = TRAMES.map(t => `
-        <div class="trame-card" data-id="${t.id}">
+        <div class="trame-card" data-id="${esc(t.id)}">
           <div class="trame-card-head">
             <div>
-              <div class="trame-card-name">${t.nom}</div>
-              <div class="trame-card-desc">${t.description || ''}</div>
+              <div class="trame-card-name">${esc(t.nom)}</div>
+              <div class="trame-card-desc">${esc(t.description || '')}</div>
             </div>
             <div class="panel-actions">
-              <button type="button" class="act-edit" data-edit-trame="${t.id}">Modifier</button>
-              <button type="button" class="act-del" data-del-trame="${t.id}">Suppr.</button>
+              <button type="button" class="act-edit" data-edit-trame="${esc(t.id)}">Modifier</button>
+              <button type="button" class="act-del" data-del-trame="${esc(t.id)}">Suppr.</button>
             </div>
           </div>
-          <div class="trame-points-list">${t.points.map(p => `<span>${p.libelle}</span>`).join("")}</div>
+          <div class="trame-points-list">${t.points.map(p => `<span>${esc(p.libelle)}</span>`).join("")}</div>
         </div>`).join("");
     }
     renderTramesList();
@@ -1066,8 +1068,8 @@
       logAudit("Inspection / Audit", isNew ? "Création" : "Modification", `Trame « ${nom} »`);
       trameForm.style.display = "none";
       renderTramesList();
-      $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
-      fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+      $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
+      fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
     });
 
     $("tramesList").addEventListener("click", (e) => {
@@ -1082,8 +1084,8 @@
           saveTrames(TRAMES);
           logAudit("Inspection / Audit", "Suppression", `Trame « ${t.nom} »`);
           renderTramesList();
-          $("fTrameForm").innerHTML = TRAMES.map(x => `<option value="${x.id}">${x.nom}</option>`).join("");
-          fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(x => `<option value="${x.id}">${x.nom}</option>`).join("");
+          $("fTrameForm").innerHTML = TRAMES.map(x => `<option value="${esc(x.id)}">${esc(x.nom)}</option>`).join("");
+          fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(x => `<option value="${esc(x.id)}">${esc(x.nom)}</option>`).join("");
         }
       }
     });
@@ -1140,8 +1142,8 @@
     if (tramesChanged){
       saveTrames(TRAMES);
       if (typeof renderTramesList === "function") renderTramesList();
-      if (typeof fTrame !== "undefined") fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
-      if ($("fTrameForm")) $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${t.id}">${t.nom}</option>`).join("");
+      if (typeof fTrame !== "undefined") fTrame.innerHTML = `<option value="all">Toutes</option>` + TRAMES.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
+      if ($("fTrameForm")) $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
     }
 
     // Onglet 2 : Inspections réalisées

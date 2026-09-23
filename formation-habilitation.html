@@ -425,6 +425,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -654,18 +656,18 @@
       return;
     }
     tbody.innerHTML = rows.map(v => `
-      <tr class="${v.cls === 'late' ? 'late' : ''}" data-id="${v.id}">
-        <td>${v.nom}</td>
-        <td>${v.prenom}</td>
-        <td>${v.service} <span style="color:var(--text-faint)">· ${v.collectivite}</span></td>
-        <td class="wrap">${v.typeHabilitation}</td>
-        <td>${v.organismeFormateur || '—'}</td>
-        <td>${v.dateObtention}</td>
-        <td class="${v.cls === 'late' ? 'echeance-overdue' : ''}">${v.dateExpiration}</td>
-        <td><span class="status-chip ${v.cls}">${v.statut}</span></td>
+      <tr class="${v.cls === 'late' ? 'late' : ''}" data-id="${esc(v.id)}">
+        <td>${esc(v.nom)}</td>
+        <td>${esc(v.prenom)}</td>
+        <td>${esc(v.service)} <span style="color:var(--text-faint)">· ${esc(v.collectivite)}</span></td>
+        <td class="wrap">${esc(v.typeHabilitation)}</td>
+        <td>${esc(v.organismeFormateur || '—')}</td>
+        <td>${esc(v.dateObtention)}</td>
+        <td class="${v.cls === 'late' ? 'echeance-overdue' : ''}">${esc(v.dateExpiration)}</td>
+        <td><span class="status-chip ${esc(v.cls)}">${esc(v.statut)}</span></td>
         ${canEdit ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${v.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${v.id}">Suppr.</button>
+          <button type="button" class="act-edit" data-edit="${esc(v.id)}">Modifier</button>
+          <button type="button" class="act-del" data-id="${esc(v.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`).join("");
   }

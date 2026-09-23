@@ -728,6 +728,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
   // ---------- Session ----------
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
@@ -898,8 +900,8 @@
         <div class="action-item">
           <div class="action-dot" style="background:var(--${LEVEL_COLOR[r.lvl]})"></div>
           <div class="action-body">
-            <div class="action-title">${r.risque}</div>
-            <div class="action-meta"><span>${r.service}</span> · ${r.taches || ''} · Score ${r.score}</div>
+            <div class="action-title">${esc(r.risque)}</div>
+            <div class="action-meta"><span>${esc(r.service)}</span> · ${esc(r.taches || '')} · Score ${esc(r.score)}</div>
           </div>
           <span class="badge ${LEVEL_COLOR[r.lvl]}">${LEVEL_LABEL[r.lvl]}</span>
         </div>`).join("");
@@ -917,8 +919,8 @@
       const lvl = riskLevel(Math.round(r.avg));
       return `<div class="risk-row">
         <span class="badge ${LEVEL_COLOR[lvl]}">${LEVEL_LABEL[lvl]}</span>
-        <span class="risk-name">${r.name}</span>
-        <span class="risk-count mono">${r.count}</span>
+        <span class="risk-name">${esc(r.name)}</span>
+        <span class="risk-count mono">${esc(r.count)}</span>
       </div>`;
     }).join("") || `<div class="empty-hint">Aucune évaluation enregistrée.</div>`;
 
@@ -986,7 +988,7 @@
         const info = weatherCodeInfo(cur.weathercode);
         $("weatherTemp").textContent = Math.round(cur.temperature_2m) + "°C";
         $("weatherWind").textContent = Math.round(cur.wind_speed_10m) + " km/h";
-        $("weatherIcon").innerHTML = `<use href="#${info.icon}"/>`;
+        $("weatherIcon").innerHTML = `<use href="#${esc(info.icon)}"/>`;
         $("weatherCond").textContent = cityName ? `${info.label} · ${cityName}` : info.label;
       })
       .catch(() => {
@@ -1043,7 +1045,7 @@
           if (results.length === 0){ weatherResults.innerHTML = `<div class="weather-result-empty">Aucun résultat.</div>`; return; }
           weatherResults.innerHTML = results.map((r, i) => `
             <div class="weather-result-item" data-idx="${i}">
-              <span>${r.name}</span>
+              <span>${esc(r.name)}</span>
               <span class="wr-sub">${[r.admin1, r.country].filter(Boolean).join(", ")}</span>
             </div>`).join("");
           weatherResults.querySelectorAll(".weather-result-item").forEach(el => {
@@ -1077,7 +1079,7 @@
     if (stored === null){ stored = defaultNews(); try { localStorage.setItem(NEWS_KEY, JSON.stringify(stored)); } catch(e){} }
     return stored;
   }
-  function fmtDateFr(iso){ if (!iso) return ""; const [y,m,d] = String(iso).split("-"); return (y && m && d) ? `${d}/${m}/${y}` : String(iso); }
+  function fmtDateFr(iso){ if (!iso) return ""; const [y,m,d] = String(iso).split("-"); return (y && m && d) ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(iso); }
   // Fond de l'en-tête des cartes actu : la vraie image envoyée par l'admin si elle existe,
   // sinon un dégradé (parmi la palette de tokens) choisi de façon stable via un hash du titre.
   const NEWS_HEAD_GRADIENTS = [
@@ -1099,11 +1101,11 @@
     : NEWS.slice(0,6).map(n => `
       <div class="news-card">
         <div class="news-card-head" style="${newsHeadBg(n.titre, n.image)}">
-          <div class="news-title">${n.titre}</div>
+          <div class="news-title">${esc(n.titre)}</div>
         </div>
         <div class="news-body">
-          <div class="news-text">${n.texte}</div>
-          <div class="news-foot">${fmtDateFr(n.date)}${n.auteur ? " · " + n.auteur : ""}</div>
+          <div class="news-text">${esc(n.texte)}</div>
+          <div class="news-foot">${fmtDateFr(n.date)}${n.auteur ? " · " + esc(n.auteur) : ""}</div>
         </div>
       </div>`).join("");
 
@@ -1132,33 +1134,33 @@
     : SECTOR_NEWS.map(n => `
     <div class="news-card external">
       <div class="news-card-head" style="${newsHeadBg(n.titre + n.source)}">
-        <div class="news-source">${n.source} · ${fmtDateFr(n.date)}</div>
-        <div class="news-title">${n.titre}</div>
+        <div class="news-source">${esc(n.source)} · ${fmtDateFr(n.date)}</div>
+        <div class="news-title">${esc(n.titre)}</div>
       </div>
       <div class="news-body">
-        <div class="news-text">${n.resume}</div>
-        <a class="news-link" href="${n.url}" target="_blank" rel="noopener">Lire l'article <svg class="icon"><use href="#i-external-link"/></svg></a>
+        <div class="news-text">${esc(n.resume)}</div>
+        <a class="news-link" href="${esc(n.url)}" target="_blank" rel="noopener">Lire l'article <svg class="icon"><use href="#i-external-link"/></svg></a>
       </div>
     </div>`).join("");
 
   // ---------- Derniers AT / MP (RGPD : colonnes personnelles réservées RH/Admin) ----------
-  function fmtDateMini(iso){ if (!iso) return "—"; const [y,m,d] = String(iso).split("-"); return (y && m && d) ? `${d}/${m}/${y}` : String(iso); }
+  function fmtDateMini(iso){ if (!iso) return "—"; const [y,m,d] = String(iso).split("-"); return (y && m && d) ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(iso); }
   const MINI_COLUMNS = [
     { key:"dateAT", label:"Date", roles:["rh","ag"], cls:"mono", render:r => fmtDateMini(r.dateAT) },
-    { key:"statut", label:"Statut", roles:["rh"], render:r => r.statut || "" },
-    { key:"nom", label:"Nom", roles:["rh"], render:r => r.nom || "" },
-    { key:"prenom", label:"Prénom", roles:["rh"], render:r => r.prenom || "" },
-    { key:"service", label:"Service", roles:["rh","ag"], render:r => r.service || "" },
-    { key:"serviceDetail", label:"Sous-service", roles:["rh"], cls:"wrap", render:r => r.serviceDetail || "" },
-    { key:"circonstances", label:"Circonstances", roles:["rh","ag"], cls:"wrap", render:r => r.circonstances || "" },
-    { key:"risque", label:"Risque", roles:["rh","ag"], render:r => r.risque || "" },
-    { key:"siege", label:"Siège de lésion", roles:["rh","ag"], render:r => r.siege || "" },
-    { key:"nature", label:"Nature", roles:["rh","ag"], render:r => r.nature || "" },
-    { key:"joursArret", label:"Jours d'arrêt", roles:["rh","ag"], cls:"num", render:r => r.arret ? (r.joursArret ?? 0) : "—" },
+    { key:"statut", label:"Statut", roles:["rh"], render:r => esc(r.statut) },
+    { key:"nom", label:"Nom", roles:["rh"], render:r => esc(r.nom) },
+    { key:"prenom", label:"Prénom", roles:["rh"], render:r => esc(r.prenom) },
+    { key:"service", label:"Service", roles:["rh","ag"], render:r => esc(r.service) },
+    { key:"serviceDetail", label:"Sous-service", roles:["rh"], cls:"wrap", render:r => esc(r.serviceDetail) },
+    { key:"circonstances", label:"Circonstances", roles:["rh","ag"], cls:"wrap", render:r => esc(r.circonstances) },
+    { key:"risque", label:"Risque", roles:["rh","ag"], render:r => esc(r.risque) },
+    { key:"siege", label:"Siège de lésion", roles:["rh","ag"], render:r => esc(r.siege) },
+    { key:"nature", label:"Nature", roles:["rh","ag"], render:r => esc(r.nature) },
+    { key:"joursArret", label:"Jours d'arrêt", roles:["rh","ag"], cls:"num", render:r => r.arret ? esc(r.joursArret ?? 0) : "—" },
   ];
   const miniVisRole = canEdit ? "rh" : "ag";
   const MINI_VISIBLE = MINI_COLUMNS.filter(c => c.roles.includes(miniVisRole));
-  $("miniHead").innerHTML = MINI_VISIBLE.map(c => `<th>${c.label}</th>`).join("");
+  $("miniHead").innerHTML = MINI_VISIBLE.map(c => `<th>${esc(c.label)}</th>`).join("");
 
   const miniServices = [...new Set(ATMP.map(r => r.service).filter(Boolean))].sort((a,b) => a.localeCompare(b,'fr'));
   const miniServiceSel = $("miniService");
@@ -1171,7 +1173,7 @@
     $("miniCount").textContent = rows.length;
     $("miniBody").innerHTML = rows.length === 0
       ? `<tr><td colspan="${MINI_VISIBLE.length}" style="text-align:center;color:var(--text-faint);padding:24px;">Aucun événement ne correspond aux filtres sélectionnés.</td></tr>`
-      : rows.map(r => `<tr>${MINI_VISIBLE.map(c => `<td class="${c.cls||''}">${c.render(r)}</td>`).join("")}</tr>`).join("");
+      : rows.map(r => `<tr>${MINI_VISIBLE.map(c => `<td class="${esc(c.cls||'')}">${c.render(r)}</td>`).join("")}</tr>`).join("");
   }
   miniServiceSel.addEventListener("change", renderMini);
   $("miniStatut").addEventListener("change", renderMini);

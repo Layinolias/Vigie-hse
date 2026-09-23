@@ -437,6 +437,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -629,7 +631,7 @@
     }
     $("echeanceTable").innerHTML =
       `<thead><tr><th>Site</th><th>Type</th><th>Dernier exercice</th><th>Prochaine échéance</th><th>Statut</th></tr></thead><tbody>` +
-      rows.map(r => `<tr><td>${r.site}</td><td><span class="type-tag">${r.type}</span></td><td>${r.dateExercice}</td><td>${r.prochaine}</td><td><span class="chip ${r.cls}">${r.statut}</span></td></tr>`).join("") +
+      rows.map(r => `<tr><td>${esc(r.site)}</td><td><span class="type-tag">${esc(r.type)}</span></td><td>${esc(r.dateExercice)}</td><td>${esc(r.prochaine)}</td><td><span class="chip ${esc(r.cls)}">${esc(r.statut)}</span></td></tr>`).join("") +
       `</tbody>`;
   }
 
@@ -659,18 +661,18 @@
       return;
     }
     tbody.innerHTML = rows.map(r => `
-      <tr data-id="${r.id}">
-        <td>${r.dateExercice || '—'}</td>
-        <td>${r.site}</td>
-        <td><span class="type-tag">${r.type}</span></td>
-        <td>${r.service}</td>
-        <td>${r.dureeMinutes ? r.dureeMinutes + ' min' : '—'}</td>
-        <td>${r.participation || '—'}</td>
-        <td>${r.periodiciteMois} mois</td>
-        <td class="wrap">${r.constatations || '—'}${(r.actions && r.actions.length) ? `<br><span style="color:var(--text-faint);font-size:11px;">${r.actions.length} action(s) corrective(s)</span>` : ''}</td>
+      <tr data-id="${esc(r.id)}">
+        <td>${esc(r.dateExercice || '—')}</td>
+        <td>${esc(r.site)}</td>
+        <td><span class="type-tag">${esc(r.type)}</span></td>
+        <td>${esc(r.service)}</td>
+        <td>${r.dureeMinutes ? esc(r.dureeMinutes) + ' min' : '—'}</td>
+        <td>${esc(r.participation || '—')}</td>
+        <td>${esc(r.periodiciteMois)} mois</td>
+        <td class="wrap">${esc(r.constatations || '—')}${(r.actions && r.actions.length) ? `<br><span style="color:var(--text-faint);font-size:11px;">${esc(r.actions.length)} action(s) corrective(s)</span>` : ''}</td>
         ${canUrgencesWrite ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${r.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${r.id}">Suppr.</button>
+          <button type="button" class="act-edit" data-edit="${esc(r.id)}">Modifier</button>
+          <button type="button" class="act-del" data-id="${esc(r.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`).join("");
   }
@@ -689,7 +691,7 @@
       <div class="dyn-row" data-idx="${i}">
         <input type="text" class="act-description" placeholder="Action corrective…" value="${(a.description||'').replace(/"/g,'&quot;')}" style="flex:2 1 220px;" ${canUrgencesWrite ? '' : 'disabled'}>
         <input type="text" class="act-responsable" placeholder="Responsable" value="${(a.responsable||'').replace(/"/g,'&quot;')}" ${canUrgencesWrite ? '' : 'disabled'}>
-        <input type="date" class="act-echeance" value="${a.echeance || ''}" ${canUrgencesWrite ? '' : 'disabled'}>
+        <input type="date" class="act-echeance" value="${esc(a.echeance || '')}" ${canUrgencesWrite ? '' : 'disabled'}>
         <select class="act-statut" ${canUrgencesWrite ? '' : 'disabled'}>
           <option value="À faire" ${(a.statut||"À faire") === "À faire" ? "selected" : ""}>À faire</option>
           <option value="En cours" ${a.statut === "En cours" ? "selected" : ""}>En cours</option>

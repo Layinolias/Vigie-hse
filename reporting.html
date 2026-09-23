@@ -394,6 +394,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -660,9 +662,9 @@
     ];
     $("moduleGrid").innerHTML = MODULES.map(m => `
       <div class="panel module-card">
-        <div class="module-top"><div class="module-icon"><svg class="icon"><use href="#${m.icon}"/></svg></div><div class="module-name">${m.name}</div></div>
+        <div class="module-top"><div class="module-icon"><svg class="icon"><use href="#${esc(m.icon)}"/></svg></div><div class="module-name">${esc(m.name)}</div></div>
         ${m.stats ? `<div class="module-stats">${m.stats.map(s => `
-          <div class="mstat"><span class="mstat-value ${s.cls||''}">${s.v}</span><span class="mstat-label">${s.l}</span></div>`).join("")}</div>`
+          <div class="mstat"><span class="mstat-value ${esc(s.cls||'')}">${esc(s.v)}</span><span class="mstat-label">${esc(s.l)}</span></div>`).join("")}</div>`
           : `<div class="module-empty">Aucune donnée dans ce navigateur pour ce module.</div>`}
       </div>`).join("");
 
@@ -690,9 +692,9 @@
         ? `<div class="module-empty">Aucun événement AT/MP sur la période.</div>`
         : entries.map(([risque, v]) => `
           <div class="risk-row">
-            <div class="risk-row-label">${risque}</div>
+            <div class="risk-row-label">${esc(risque)}</div>
             <div class="risk-row-track"><div class="risk-row-fill" style="width:${Math.max(3,(v/max)*100)}%"></div></div>
-            <div class="risk-row-value">${v}${unit||""}</div>
+            <div class="risk-row-value">${esc(v)}${unit||""}</div>
           </div>`).join("");
     }
     const riskCounts = {}, riskJours = {};

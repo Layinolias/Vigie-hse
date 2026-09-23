@@ -497,6 +497,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -688,15 +690,15 @@
       return;
     }
     tbody.innerHTML = rows.map(r => `
-      <tr data-id="${r.evt.id}">
-        <td>${r.evt.nom || '—'}</td>
-        <td>${r.evt.prenom || '—'}</td>
-        <td>${r.evt.dateAT || '—'}</td>
-        <td>${r.evt.typeAtMp || '—'}</td>
-        <td>${r.evt.service || '—'}</td>
+      <tr data-id="${esc(r.evt.id)}">
+        <td>${esc(r.evt.nom || '—')}</td>
+        <td>${esc(r.evt.prenom || '—')}</td>
+        <td>${esc(r.evt.dateAT || '—')}</td>
+        <td>${esc(r.evt.typeAtMp || '—')}</td>
+        <td>${esc(r.evt.service || '—')}</td>
         <td><span class="chip ${r.complet ? 'complet' : 'incomplet'}">${r.complet ? 'Complet' : 'Incomplet'}</span></td>
-        <td>${r.arretesCount}${r.arretesAttente ? ` <span style="color:var(--warning)">(${r.arretesAttente} en attente)</span>` : ''}</td>
-        <td class="actions-float"><button type="button" class="act-edit" data-open="${r.evt.id}">${canAtmpWrite ? 'Ouvrir' : 'Consulter'}</button></td>
+        <td>${esc(r.arretesCount)}${r.arretesAttente ? ` <span style="color:var(--warning)">(${esc(r.arretesAttente)} en attente)</span>` : ''}</td>
+        <td class="actions-float"><button type="button" class="act-edit" data-open="${esc(r.evt.id)}">${canAtmpWrite ? 'Ouvrir' : 'Consulter'}</button></td>
       </tr>`).join("");
   }
 
@@ -712,8 +714,8 @@
   function renderProlongList(){
     $("prolongList").innerHTML = currentProlongations.map((p, i) => `
       <div class="prolong-item" data-idx="${i}">
-        <input type="date" class="prolong-date" value="${p.date || ''}" ${canAtmpWrite ? '' : 'disabled'}>
-        <input type="text" class="prolong-ref" placeholder="Référence pièce" value="${p.ref || ''}" ${canAtmpWrite ? '' : 'disabled'}>
+        <input type="date" class="prolong-date" value="${esc(p.date || '')}" ${canAtmpWrite ? '' : 'disabled'}>
+        <input type="text" class="prolong-ref" placeholder="Référence pièce" value="${esc(p.ref || '')}" ${canAtmpWrite ? '' : 'disabled'}>
         ${canAtmpWrite ? `<button type="button" class="act-del" data-remove-prolong="${i}">Suppr.</button>` : ''}
       </div>`).join("") || `<div style="font-size:12px;color:var(--text-faint)">Aucune prolongation enregistrée.</div>`;
   }
@@ -733,14 +735,14 @@
     $("arreteBody").innerHTML = list.length === 0
       ? `<tr><td colspan="7" style="text-align:center;color:var(--text-faint);padding:16px;">Aucun arrêté enregistré pour ce dossier.</td></tr>`
       : list.map(a => `
-        <tr data-id="${a.id}">
-          <td>${a.type}</td>
-          <td><span class="chip ${wStatutCls[a.statut] || 'w-brouillon'}">${a.statut}</span></td>
-          <td>${a.dateCreation || '—'}</td>
-          <td>${a.dateTransmission || '—'}</td>
-          <td>${a.dateSignature || '—'}</td>
-          <td>${a.autorite || '—'}</td>
-          <td>${canAtmpWrite ? `<button type="button" class="act-del" data-del-arrete="${a.id}">Suppr.</button>` : ''}</td>
+        <tr data-id="${esc(a.id)}">
+          <td>${esc(a.type)}</td>
+          <td><span class="chip ${wStatutCls[a.statut] || 'w-brouillon'}">${esc(a.statut)}</span></td>
+          <td>${esc(a.dateCreation || '—')}</td>
+          <td>${esc(a.dateTransmission || '—')}</td>
+          <td>${esc(a.dateSignature || '—')}</td>
+          <td>${esc(a.autorite || '—')}</td>
+          <td>${canAtmpWrite ? `<button type="button" class="act-del" data-del-arrete="${esc(a.id)}">Suppr.</button>` : ''}</td>
         </tr>`).join("");
   }
 
@@ -753,11 +755,11 @@
 
     $("detailTitle").textContent = `Dossier — ${evt.nom || ''} ${evt.prenom || ''}`;
     $("dossierHeader").innerHTML = `
-      <div><b>Agent</b><br>${evt.nom || '—'} ${evt.prenom || ''}</div>
-      <div><b>Date AT</b><br>${evt.dateAT || '—'}</div>
-      <div><b>Type</b><br>${evt.typeAtMp || '—'}</div>
-      <div><b>Service</b><br>${evt.service || '—'}</div>
-      <div><b>Collectivité</b><br>${evt.collectivite || 'Ville'}</div>`;
+      <div><b>Agent</b><br>${esc(evt.nom || '—')} ${esc(evt.prenom || '')}</div>
+      <div><b>Date AT</b><br>${esc(evt.dateAT || '—')}</div>
+      <div><b>Type</b><br>${esc(evt.typeAtMp || '—')}</div>
+      <div><b>Service</b><br>${esc(evt.service || '—')}</div>
+      <div><b>Collectivité</b><br>${esc(evt.collectivite || 'Ville')}</div>`;
 
     $("pCmiRecu").checked = !!d.cmi.recu; $("pCmiDate").value = d.cmi.date || ""; $("pCmiRef").value = d.cmi.ref || "";
     $("pFinalType").value = d.certificatFinal.type || "Guérison";

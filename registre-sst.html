@@ -466,6 +466,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -612,7 +614,7 @@
     const col = fCollectivite.value;
     const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
     const current = fService.value;
-    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
   }
   fillServiceOptions();
@@ -663,20 +665,20 @@
       return;
     }
     tbody.innerHTML = rows.map(a => {
-      const auteurDisplay = role === "ag" ? '<span style="color:var(--text-faint)">—</span>' : (a.auteur || "—");
-      const suite = a.suiteDonnee ? `<div class="suite-box"><b>Suite donnée${a.traitePar ? ' — ' + a.traitePar : ''} :</b> ${a.suiteDonnee}</div>` : "";
+      const auteurDisplay = role === "ag" ? '<span style="color:var(--text-faint)">—</span>' : esc(a.auteur || "—");
+      const suite = a.suiteDonnee ? `<div class="suite-box"><b>Suite donnée${a.traitePar ? ' — ' + esc(a.traitePar) : ''} :</b> ${esc(a.suiteDonnee)}</div>` : "";
       return `
-      <tr data-id="${a.id}">
-        <td>${a.date || '—'}</td>
-        <td>${a.service}</td>
-        <td>${a.nature}</td>
-        <td class="wrap desc-cell" data-toggle="${a.id}"><div class="desc-text">${a.description}</div>${suite}<div class="desc-more">voir plus / réduire</div></td>
-        <td><span class="chip ${graviteCls[a.gravite] || 'g-faible'}">${a.gravite}</span></td>
-        <td><span class="chip ${statutCls[a.statut] || 's-nouvelle'}">${a.statut}</span></td>
+      <tr data-id="${esc(a.id)}">
+        <td>${esc(a.date || '—')}</td>
+        <td>${esc(a.service)}</td>
+        <td>${esc(a.nature)}</td>
+        <td class="wrap desc-cell" data-toggle="${esc(a.id)}"><div class="desc-text">${esc(a.description)}</div>${suite}<div class="desc-more">voir plus / réduire</div></td>
+        <td><span class="chip ${graviteCls[a.gravite] || 'g-faible'}">${esc(a.gravite)}</span></td>
+        <td><span class="chip ${statutCls[a.statut] || 's-nouvelle'}">${esc(a.statut)}</span></td>
         <td>${auteurDisplay}</td>
         ${canRespond ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-respond="${a.id}">Répondre</button>
-          <button type="button" class="act-del" data-id="${a.id}">Suppr.</button>
+          <button type="button" class="act-edit" data-respond="${esc(a.id)}">Répondre</button>
+          <button type="button" class="act-del" data-id="${esc(a.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`;
     }).join("");
@@ -789,7 +791,7 @@
   function fillFormServiceOptions(col){
     let list = servicesForCollectivite(col);
     if (isScoped) list = list.filter(s => myServices.includes(s));
-    $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+    $("fServiceForm").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
   }
   fillFormServiceOptions("Ville");
   $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));

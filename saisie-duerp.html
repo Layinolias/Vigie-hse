@@ -430,6 +430,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const sessRole = (session && session.role) || "rh";
@@ -634,7 +636,7 @@
     if (editingRecord){
       $("pageTitle").textContent = "Modifier l'évaluation";
       $("pageH1").textContent = "Modifier l'évaluation";
-      $("pageSub").innerHTML = `Mise à jour d'une évaluation existante du Document Unique <span class="edit-flag">ID ${editingRecord.id}</span>`;
+      $("pageSub").innerHTML = `Mise à jour d'une évaluation existante du Document Unique <span class="edit-flag">ID ${esc(editingRecord.id)}</span>`;
       $("pageSub").title = `Mise à jour d'une évaluation existante du Document Unique — ID ${editingRecord.id}`;
       $("btnSubmit").textContent = "Enregistrer les modifications";
       const cancel = document.createElement("a");
@@ -652,16 +654,16 @@
     const r = entry.record;
     const lvl = riskLevel(r.frequence * r.gravite);
     return `
-      <div class="feed-item ${lvl.cls}">
+      <div class="feed-item ${esc(lvl.cls)}">
         <div class="feed-item-top">
           <span class="feed-date">${entry.action === 'update' ? 'Modifiée' : 'Créée'}</span>
-          <span class="risk-chip ${lvl.cls}">${lvl.label}</span>
+          <span class="risk-chip ${esc(lvl.cls)}">${esc(lvl.label)}</span>
         </div>
-        <div class="feed-service">${r.risque}</div>
-        <div class="feed-taches">${r.service} · ${r.taches}</div>
+        <div class="feed-service">${esc(r.risque)}</div>
+        <div class="feed-taches">${esc(r.service)} · ${esc(r.taches)}</div>
         <div class="feed-bottom">
           <span class="mono" style="font-size:11px;color:var(--text-muted);">Score ${r.frequence * r.gravite}</span>
-          <span class="mono" style="font-size:11px;color:var(--text-muted);">${r.maitrise}</span>
+          <span class="mono" style="font-size:11px;color:var(--text-muted);">${esc(r.maitrise)}</span>
         </div>
       </div>`;
   }

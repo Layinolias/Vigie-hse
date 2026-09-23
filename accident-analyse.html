@@ -445,6 +445,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -618,15 +620,15 @@
       return;
     }
     tbody.innerHTML = rows.map(r => `
-      <tr data-id="${r.evt.id}">
-        <td>${r.evt.nom || '—'}</td>
-        <td>${r.evt.prenom || '—'}</td>
-        <td>${r.evt.dateAT || '—'}</td>
-        <td>${r.evt.typeAtMp || '—'}</td>
-        <td>${r.evt.service || '—'}</td>
+      <tr data-id="${esc(r.evt.id)}">
+        <td>${esc(r.evt.nom || '—')}</td>
+        <td>${esc(r.evt.prenom || '—')}</td>
+        <td>${esc(r.evt.dateAT || '—')}</td>
+        <td>${esc(r.evt.typeAtMp || '—')}</td>
+        <td>${esc(r.evt.service || '—')}</td>
         <td>${(r.analyse && r.analyse.methode) || '—'}</td>
         <td><span class="chip ${r.faite ? 'complet' : 'incomplet'}">${r.faite ? 'Faite' : 'En attente'}</span></td>
-        <td class="actions-float"><button type="button" class="act-edit" data-open="${r.evt.id}">${canAnalyseWrite ? 'Ouvrir' : 'Consulter'}</button></td>
+        <td class="actions-float"><button type="button" class="act-edit" data-open="${esc(r.evt.id)}">${canAnalyseWrite ? 'Ouvrir' : 'Consulter'}</button></td>
       </tr>`).join("");
   }
 
@@ -644,7 +646,7 @@
   function renderFaitsList(){
     $("faitsList").innerHTML = currentFaits.map((f, i) => `
       <div class="dyn-row" data-idx="${i}">
-        <input type="date" class="fait-date" value="${f.date || ''}" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="date" class="fait-date" value="${esc(f.date || '')}" ${canAnalyseWrite ? '' : 'disabled'}>
         <input type="text" class="fait-texte" placeholder="Fait constaté…" value="${(f.texte||'').replace(/"/g,'&quot;')}" style="flex:2 1 220px;" ${canAnalyseWrite ? '' : 'disabled'}>
         <select class="fait-type" ${canAnalyseWrite ? '' : 'disabled'}>
           <option value="Fait" ${f.type !== "Opinion" ? "selected" : ""}>Fait</option>
@@ -687,7 +689,7 @@
       <div class="dyn-row" data-idx="${i}">
         <input type="text" class="act-description" placeholder="Action corrective…" value="${(a.description||'').replace(/"/g,'&quot;')}" style="flex:2 1 220px;" ${canAnalyseWrite ? '' : 'disabled'}>
         <input type="text" class="act-responsable" placeholder="Responsable" value="${(a.responsable||'').replace(/"/g,'&quot;')}" ${canAnalyseWrite ? '' : 'disabled'}>
-        <input type="date" class="act-echeance" value="${a.echeance || ''}" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="date" class="act-echeance" value="${esc(a.echeance || '')}" ${canAnalyseWrite ? '' : 'disabled'}>
         <select class="act-statut" ${canAnalyseWrite ? '' : 'disabled'}>
           <option value="À faire" ${(a.statut||"À faire") === "À faire" ? "selected" : ""}>À faire</option>
           <option value="En cours" ${a.statut === "En cours" ? "selected" : ""}>En cours</option>
@@ -740,11 +742,11 @@
 
     $("detailTitle").textContent = `Analyse — ${evt.nom || ''} ${evt.prenom || ''}`;
     $("analyseHeader").innerHTML = `
-      <div><b>Agent</b><br>${evt.nom || '—'} ${evt.prenom || ''}</div>
-      <div><b>Date AT</b><br>${evt.dateAT || '—'}</div>
-      <div><b>Type</b><br>${evt.typeAtMp || '—'}</div>
-      <div><b>Service</b><br>${evt.service || '—'}</div>
-      <div><b>Collectivité</b><br>${evt.collectivite || 'Ville'}</div>`;
+      <div><b>Agent</b><br>${esc(evt.nom || '—')} ${esc(evt.prenom || '')}</div>
+      <div><b>Date AT</b><br>${esc(evt.dateAT || '—')}</div>
+      <div><b>Type</b><br>${esc(evt.typeAtMp || '—')}</div>
+      <div><b>Service</b><br>${esc(evt.service || '—')}</div>
+      <div><b>Collectivité</b><br>${esc(evt.collectivite || 'Ville')}</div>`;
 
     $("anMethode").value = a.methode || "";
     updateMethodSections();

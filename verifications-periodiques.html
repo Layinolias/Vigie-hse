@@ -438,6 +438,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -636,18 +638,18 @@
       return;
     }
     tbody.innerHTML = rows.map(v => `
-      <tr class="${v.cls === 'late' ? 'late' : ''} ${v.conformite === 'Non conforme' ? 'nonconforme' : ''}" data-id="${v.id}">
-        <td class="wrap">${v.equipement}</td>
-        <td>${v.categorie}</td>
-        <td>${v.site} <span style="color:var(--text-faint)">· ${v.service}</span></td>
-        <td>${v.organisme || '—'}</td>
-        <td>${v.dateDerniere}</td>
-        <td class="${v.cls === 'late' ? 'echeance-overdue' : ''}">${v.prochaine}</td>
-        <td><span class="status-chip ${v.cls}">${v.statut}</span></td>
-        <td><span class="conf-chip ${confCls[v.conformite] || 'c-conforme'}">${v.conformite}</span></td>
+      <tr class="${v.cls === 'late' ? 'late' : ''} ${v.conformite === 'Non conforme' ? 'nonconforme' : ''}" data-id="${esc(v.id)}">
+        <td class="wrap">${esc(v.equipement)}</td>
+        <td>${esc(v.categorie)}</td>
+        <td>${esc(v.site)} <span style="color:var(--text-faint)">· ${esc(v.service)}</span></td>
+        <td>${esc(v.organisme || '—')}</td>
+        <td>${esc(v.dateDerniere)}</td>
+        <td class="${v.cls === 'late' ? 'echeance-overdue' : ''}">${esc(v.prochaine)}</td>
+        <td><span class="status-chip ${esc(v.cls)}">${esc(v.statut)}</span></td>
+        <td><span class="conf-chip ${confCls[v.conformite] || 'c-conforme'}">${esc(v.conformite)}</span></td>
         ${canEdit ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${v.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${v.id}">Suppr.</button>
+          <button type="button" class="act-edit" data-edit="${esc(v.id)}">Modifier</button>
+          <button type="button" class="act-del" data-id="${esc(v.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`).join("");
   }

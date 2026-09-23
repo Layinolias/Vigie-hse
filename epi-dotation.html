@@ -533,6 +533,8 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -847,13 +849,13 @@
     const body = $("catBody");
     if (lignesCat.length === 0){ body.innerHTML = `<tr class="empty-row"><td colspan="${canEdit?6:5}">Aucun article au catalogue.</td></tr>`; return; }
     body.innerHTML = lignesCat.map(c => `
-      <tr data-id="${c.id}">
-        <td>${c.nom}</td>
-        <td><span class="cat-chip ${c.categorie==='EPI'?'epi':'vetement'}">${c.categorie}</span></td>
-        <td>${c.norme || '—'}</td>
-        <td>${c.dureeVieMois ? c.dureeVieMois + " mois" : (c.nombreLavagesMax ? c.nombreLavagesMax + " lavages max" : "—")}</td>
-        <td class="wrap">${c.ficheTechnique || '—'}</td>
-        ${canEdit ? `<td class="actions-float"><button type="button" class="act-edit" data-edit="${c.id}">Modifier</button><button type="button" class="act-del" data-id="${c.id}">Suppr.</button></td>` : ''}
+      <tr data-id="${esc(c.id)}">
+        <td>${esc(c.nom)}</td>
+        <td><span class="cat-chip ${c.categorie==='EPI'?'epi':'vetement'}">${esc(c.categorie)}</span></td>
+        <td>${esc(c.norme || '—')}</td>
+        <td>${c.dureeVieMois ? esc(c.dureeVieMois) + " mois" : (c.nombreLavagesMax ? esc(c.nombreLavagesMax) + " lavages max" : "—")}</td>
+        <td class="wrap">${esc(c.ficheTechnique || '—')}</td>
+        ${canEdit ? `<td class="actions-float"><button type="button" class="act-edit" data-edit="${esc(c.id)}">Modifier</button><button type="button" class="act-del" data-id="${esc(c.id)}">Suppr.</button></td>` : ''}
       </tr>`).join("");
   }
   if (canEdit){
@@ -975,7 +977,7 @@
 
   // ================= STOCK TAB =================
   function fillArticleSelects(){
-    const opts = CATALOGUE.map(c => `<option value="${c.id}">${c.nom}</option>`).join("");
+    const opts = CATALOGUE.map(c => `<option value="${esc(c.id)}">${esc(c.nom)}</option>`).join("");
     if ($("stkArticle")) $("stkArticle").innerHTML = opts;
     if ($("dotArticle")) $("dotArticle").innerHTML = opts;
   }
@@ -993,13 +995,13 @@
       const c = catalogueById(s.articleId);
       const low = s.quantiteStock <= s.seuilAlerte;
       return `
-      <tr class="${low?'lowstock':''}" data-id="${s.id}">
+      <tr class="${low?'lowstock':''}" data-id="${esc(s.id)}">
         <td>${c ? c.nom : '—'}</td>
-        <td>${s.taille}</td>
-        <td class="mono">${s.quantiteStock}</td>
-        <td class="mono">${s.seuilAlerte}</td>
+        <td>${esc(s.taille)}</td>
+        <td class="mono">${esc(s.quantiteStock)}</td>
+        <td class="mono">${esc(s.seuilAlerte)}</td>
         <td>${low ? `<span class="status-chip soon">Stock bas</span>` : `<span class="status-chip ok">OK</span>`}</td>
-        ${canEdit ? `<td class="actions-float"><button type="button" class="act-edit" data-edit="${s.id}">Modifier</button><button type="button" class="act-del" data-id="${s.id}">Suppr.</button></td>` : ''}
+        ${canEdit ? `<td class="actions-float"><button type="button" class="act-edit" data-edit="${esc(s.id)}">Modifier</button><button type="button" class="act-del" data-id="${esc(s.id)}">Suppr.</button></td>` : ''}
       </tr>`;
     }).join("");
   }
@@ -1093,13 +1095,13 @@
     body.innerHTML = rows.map(d => {
       const c = catalogueById(d.articleId);
       return `
-      <tr class="${d.cls==='late'?'late':''}" data-id="${d.id}">
-        <td>${d.nom}</td><td>${d.prenom}</td>
-        <td>${d.service} <span style="color:var(--text-faint)">· ${d.collectivite}</span></td>
-        <td>${c ? c.nom : '—'}</td><td>${d.taille}</td><td>${d.dateRemise}</td>
-        <td class="${d.cls==='late'?'echeance-overdue':''}">${d.dateRenouvellement || '—'}</td>
-        <td><span class="status-chip ${d.cls}">${d.statut}</span></td>
-        ${canEdit ? `<td class="actions-float"><button type="button" class="act-edit" data-edit="${d.id}">Modifier</button><button type="button" class="act-del" data-id="${d.id}">Suppr.</button></td>` : ''}
+      <tr class="${d.cls==='late'?'late':''}" data-id="${esc(d.id)}">
+        <td>${esc(d.nom)}</td><td>${esc(d.prenom)}</td>
+        <td>${esc(d.service)} <span style="color:var(--text-faint)">· ${esc(d.collectivite)}</span></td>
+        <td>${c ? c.nom : '—'}</td><td>${esc(d.taille)}</td><td>${esc(d.dateRemise)}</td>
+        <td class="${d.cls==='late'?'echeance-overdue':''}">${esc(d.dateRenouvellement || '—')}</td>
+        <td><span class="status-chip ${esc(d.cls)}">${esc(d.statut)}</span></td>
+        ${canEdit ? `<td class="actions-float"><button type="button" class="act-edit" data-edit="${esc(d.id)}">Modifier</button><button type="button" class="act-del" data-id="${esc(d.id)}">Suppr.</button></td>` : ''}
       </tr>`;
     }).join("");
   }
@@ -1256,7 +1258,7 @@
   function washDotations(){ return DOTATIONS_ALL.filter(d => { const c = catalogueById(d.articleId); return c && c.nombreLavagesMax; }); }
   function fillLavageDotationSelect(){
     if (!$("lavDotation")) return;
-    $("lavDotation").innerHTML = washDotations().map(d => `<option value="${d.id}">${d.nom} ${d.prenom} — ${catalogueById(d.articleId)?.nom || d.articleId}</option>`).join("");
+    $("lavDotation").innerHTML = washDotations().map(d => `<option value="${esc(d.id)}">${esc(d.nom)} ${esc(d.prenom)} — ${catalogueById(d.articleId)?.nom || d.articleId}</option>`).join("");
   }
   fillLavageDotationSelect();
 
@@ -1271,13 +1273,13 @@
       const dot = DOTATIONS_ALL.find(d => d.id === l.dotationId);
       const c = dot ? catalogueById(dot.articleId) : null;
       return `
-      <tr class="${l.statut==='À réformer'?'late':''}" data-id="${l.id}">
+      <tr class="${l.statut==='À réformer'?'late':''}" data-id="${esc(l.id)}">
         <td>${dot ? dot.nom + " " + dot.prenom : '—'}</td>
         <td>${c ? c.nom : '—'}</td>
-        <td>${l.dateLavage}</td>
-        <td class="mono">${l.nombreLavagesCumules}${c && c.nombreLavagesMax ? ' / ' + c.nombreLavagesMax : ''}</td>
-        <td><span class="status-chip ${l.statut==='À réformer'?'late':'ok'}">${l.statut}</span></td>
-        ${canEdit ? `<td class="actions-float"><button type="button" class="act-del" data-id="${l.id}">Suppr.</button></td>` : ''}
+        <td>${esc(l.dateLavage)}</td>
+        <td class="mono">${esc(l.nombreLavagesCumules)}${c && c.nombreLavagesMax ? ' / ' + c.nombreLavagesMax : ''}</td>
+        <td><span class="status-chip ${l.statut==='À réformer'?'late':'ok'}">${esc(l.statut)}</span></td>
+        ${canEdit ? `<td class="actions-float"><button type="button" class="act-del" data-id="${esc(l.id)}">Suppr.</button></td>` : ''}
       </tr>`;
     }).join("");
   }

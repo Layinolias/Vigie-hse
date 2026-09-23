@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/risques-ref.js"></script>
 <style>
@@ -942,10 +943,10 @@
         "Proposition des mesures de prevention": r.mesuresProposees,
         "Maitrise du risque": r.maitrise,
       }));
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Collectivite", "Service", "Risques", "Taches", "Danger", "Fq", "Gravite", "Niv R", "Moyens de prevention existants", "Priorite des actions", "Proposition des mesures de prevention", "Maitrise du risque"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "EVR");
-      XLSX.writeFile(wb, `document-unique_${new Date().toISOString().slice(0,10)}.xlsx`);
+      XLSX.writeFile(wb, `document-unique_${VigieDates.aujourdhui()}.xlsx`);
     });
 
     $("btnExportPdf").addEventListener("click", () => { window.print(); });

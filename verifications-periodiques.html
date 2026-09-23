@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/echeance.js"></script>
 <style>
@@ -743,10 +744,10 @@
         "Site": v.site, "Service": v.service, "Organisme": v.organisme || "", "Dernière vérification": v.dateDerniere,
         "Prochaine échéance": v.prochaine, "Statut": v.statut, "Conformité": v.conformite, "Commentaire": v.commentaire || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Équipement", "Catégorie", "Collectivité", "Site", "Service", "Organisme", "Dernière vérification", "Prochaine échéance", "Statut", "Conformité", "Commentaire"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Vérifications");
-      const today = new Date().toISOString().slice(0,10);
+      const today = VigieDates.aujourdhui();
       XLSX.writeFile(wb, `verifications-periodiques_${today}.xlsx`);
     });
 

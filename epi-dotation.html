@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/roster.js"></script>
 <style>
@@ -789,13 +790,14 @@
   function computeDotationStatus(dot){
     const cat = catalogueById(dot.articleId) || {};
     if (!cat.dureeVieMois){ return { dateRenouvellement:null, statut:"N/A", cls:"neutral" }; }
-    const d = new Date(dot.dateRemise);
+    // à l'heure locale (voir assets/dates-locales.js : sinon la veille quand le renouvellement tombe en heure d'été)
+    const d = VigieDates.lire(dot.dateRemise);
     const renouv = new Date(d); renouv.setMonth(renouv.getMonth() + cat.dureeVieMois);
     const today = new Date(); const in60 = new Date(today); in60.setDate(in60.getDate()+60);
     let statut = "À jour", cls = "ok";
     if (renouv < today){ statut = "Expiré"; cls = "late"; }
     else if (renouv <= in60){ statut = "À renouveler"; cls = "soon"; }
-    return { dateRenouvellement: renouv.toISOString().slice(0,10), statut, cls };
+    return { dateRenouvellement: VigieDates.iso(renouv), statut, cls };
   }
 
   // ---------- Lavages (seed dérivée des dotations à cycle de lavage) ----------
@@ -920,10 +922,10 @@
         "Durée de vie (mois)": c.dureeVieMois || "", "Nombre de lavages max": c.nombreLavagesMax || "",
         "Fiche technique": c.ficheTechnique || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Nom", "Catégorie", "Norme", "Durée de vie (mois)", "Nombre de lavages max", "Fiche technique"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Catalogue");
-      XLSX.writeFile(wb, `epi-catalogue_${new Date().toISOString().slice(0,10)}.xlsx`);
+      XLSX.writeFile(wb, `epi-catalogue_${VigieDates.aujourdhui()}.xlsx`);
     });
     const catFormPanel = $("catFormPanel"), catForm = $("catForm");
     function openCatForm(rec){
@@ -1015,10 +1017,10 @@
           "Seuil d'alerte": s.seuilAlerte, "Stock bas": s.quantiteStock <= s.seuilAlerte ? "Oui" : "Non",
         };
       });
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Article", "Taille", "Quantité", "Seuil d'alerte", "Stock bas"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Stock");
-      XLSX.writeFile(wb, `epi-stock_${new Date().toISOString().slice(0,10)}.xlsx`);
+      XLSX.writeFile(wb, `epi-stock_${VigieDates.aujourdhui()}.xlsx`);
     });
     const stockFormPanel = $("stockFormPanel"), stockForm = $("stockForm");
     function openStockForm(rec){
@@ -1185,10 +1187,10 @@
           "Date de renouvellement": d.dateRenouvellement || "", "Statut": d.statut,
         };
       });
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Nom", "Prénom", "Collectivité", "Service", "Article", "Taille", "Date de remise", "Date de renouvellement", "Statut"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Dotations");
-      XLSX.writeFile(wb, `epi-dotations_${new Date().toISOString().slice(0,10)}.xlsx`);
+      XLSX.writeFile(wb, `epi-dotations_${VigieDates.aujourdhui()}.xlsx`);
     });
     const dotFormPanel = $("dotFormPanel"), dotForm = $("dotForm");
     function fillDotFormServices(col){ $("dotService").innerHTML = servicesForCollectivite(col).map(s => `<option value="${s}">${s}</option>`).join(""); }
@@ -1295,10 +1297,10 @@
           "Max autorisé": c && c.nombreLavagesMax ? c.nombreLavagesMax : "", "Statut": l.statut,
         };
       });
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Agent", "Article", "Date de lavage", "Lavages cumulés", "Max autorisé", "Statut"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Entretien & Lavage");
-      XLSX.writeFile(wb, `epi-lavages_${new Date().toISOString().slice(0,10)}.xlsx`);
+      XLSX.writeFile(wb, `epi-lavages_${VigieDates.aujourdhui()}.xlsx`);
     });
     const lavFormPanel = $("lavFormPanel"), lavForm = $("lavForm");
     $("lavNew").addEventListener("click", () => {

@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <style>
   :root{
@@ -893,10 +894,10 @@
         "Risque lié": r.risqueLie || "", "Origine": r.origine, "Responsable": r.responsable || "", "Échéance": r.echeance,
         "Priorité": r.priorite, "Statut": r.statut, "Date de création": r.dateCreation || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Titre", "Description", "Collectivité", "Service", "Risque lié", "Origine", "Responsable", "Échéance", "Priorité", "Statut", "Date de création"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Plan d'Actions");
-      const today = new Date().toISOString().slice(0,10);
+      const today = VigieDates.aujourdhui();
       XLSX.writeFile(wb, `plan-actions_${today}.xlsx`);
     });
 

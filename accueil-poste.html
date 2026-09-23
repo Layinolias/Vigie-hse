@@ -918,8 +918,8 @@
       "Fait": i.fait ? "oui" : "non", "Date": i.dateFait || "", "Par": i.faitPar || "", "Commentaire": i.commentaire || "",
     })));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(accueils), "Accueils");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(points), "Points");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(accueils, { header: ["ID", "Nom", "Prénom", "Collectivité", "Service", "Poste", "Type d'accueil", "Date d'arrivée", "Délai (jours)", "Date butoir", "Référent", "Modèle", "Points faits", "Points au total", "Statut", "Échéance", "Accueil réalisé le"] }), "Accueils");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(points, { header: ["ID accueil", "Agent", "Point", "Spécifique au poste", "Fait", "Date", "Par", "Commentaire"] }), "Points");
     XLSX.writeFile(wb, `accueil-poste_${todayLocal()}.xlsx`);
   });
 

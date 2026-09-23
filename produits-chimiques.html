@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <style>
   :root{
@@ -751,10 +752,10 @@
         "Pictogrammes": (p.pictogrammes || []).join(", "), "Dernière MAJ FDS": p.dateMajFDS || "",
         "Lien FDS": p.lienFDS || "", "Mesures de prévention": p.mesuresPrevention || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Produit", "Fournisseur", "Collectivité", "Service", "Quantité", "Unité", "Pictogrammes", "Dernière MAJ FDS", "Lien FDS", "Mesures de prévention"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Produits Chimiques");
-      const today = new Date().toISOString().slice(0,10);
+      const today = VigieDates.aujourdhui();
       XLSX.writeFile(wb, `produits-chimiques_${today}.xlsx`);
     });
 

@@ -1,6 +1,7 @@
 <title>Santé &amp; Visites</title>
 <meta name="description" content="Suivi des visites médicales et de la surveillance santé au travail des agents.">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/roster.js"></script>
 <script src="assets/habilitations-ref.js"></script>
@@ -877,10 +878,10 @@
           "Commentaire": v.commentaire || "",
         };
       });
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Nom", "Prénom", "Collectivité", "Service", "Type de visite", "Date dernière visite", "Périodicité (mois)", "Périodicité effective (mois)", "Surveillance renforcée par", "Commentaire"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Santé & Visites");
-      XLSX.writeFile(wb, `sante-visites_${new Date().toISOString().slice(0,10)}.xlsx`);
+      XLSX.writeFile(wb, `sante-visites_${VigieDates.aujourdhui()}.xlsx`);
     });
     function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
     function parseDateImp(v){
@@ -1459,7 +1460,7 @@
         "ID": r.id, "ID fiche de suivi": r.visiteId, "Nom": r.nom, "Prénom": r.prenom, "Collectivité": r.collectivite || "Ville", "Service": r.service,
         "Date": r.date, "Heure": r.heure || "", "Lieu": r.lieu || "", "Médecin": r.medecin || "", "Statut de la convocation": r.statutConvocation, "Notes": r.notes || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "ID fiche de suivi", "Nom", "Prénom", "Collectivité", "Service", "Date", "Heure", "Lieu", "Médecin", "Statut de la convocation", "Notes"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "RDV médicaux");
       XLSX.writeFile(wb, `rdv-medicaux_${ymd(new Date())}.xlsx`);

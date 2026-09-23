@@ -1020,8 +1020,8 @@
       const articles = ARTICLES.map(a => ({ "ID": a.id, "Titre": a.titre, "Thème": a.theme, "Mots-clés": a.motsCles || "", "Statut": a.statut, "Définition": a.contenu || "", "Exemples de situation": a.exemples || "", "Le danger": a.danger || "", "Mesures de prévention": a.prevention || "", "Créé le": a.dateCreation || "", "Mis à jour le": a.dateMaj || "", "Auteur": a.auteur || "" }));
       const documents = DOCS.map(d => ({ "ID": d.id, "Titre": d.titre, "Type": d.categorie, "Référence": d.reference || "", "Version": d.version || "", "Date du document": d.dateDocument || "", "Statut": d.statut, "Visible des agents": d.masque ? "non" : "oui", "Lien": d.lien || "", "Description": d.description || "" }));
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(articles), "Articles");
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(documents), "Documents");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(articles, { header: ["ID", "Titre", "Thème", "Mots-clés", "Statut", "Définition", "Exemples de situation", "Le danger", "Mesures de prévention", "Créé le", "Mis à jour le", "Auteur"] }), "Articles");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(documents, { header: ["ID", "Titre", "Type", "Référence", "Version", "Date du document", "Statut", "Visible des agents", "Lien", "Description"] }), "Documents");
       XLSX.writeFile(wb, `base-documentaire_${todayLocal()}.xlsx`);
     });
   }

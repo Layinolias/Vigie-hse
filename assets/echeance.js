@@ -4,11 +4,12 @@
 // statut (À jour/En retard/À programmer ou Expirée/À renouveler) et sa propre logique de
 // périodicité par défaut (12, 24, ou plafonnée par une surveillance renforcée) — seuls le calcul
 // de date et le seuil des 60 jours, identiques dans les 4 copies, sont mutualisés ici.
+// Dates lues et écrites à l'heure locale : nécessite assets/dates-locales.js, chargé avant.
 window.VigieEcheance = {
   SEUIL_JOURS_DEFAUT: 60,
   classify(dateBaseStr, periodiciteMois, seuilJours){
     if (seuilJours == null) seuilJours = this.SEUIL_JOURS_DEFAUT;
-    const d = new Date(dateBaseStr);
+    const d = VigieDates.lire(dateBaseStr);
     const prochaine = new Date(d);
     prochaine.setMonth(prochaine.getMonth() + periodiciteMois);
     const today = new Date();
@@ -17,6 +18,6 @@ window.VigieEcheance = {
     let cls = "ok";
     if (prochaine < today) cls = "late";
     else if (prochaine <= seuil) cls = "soon";
-    return { prochaine: prochaine.toISOString().slice(0,10), cls };
+    return { prochaine: VigieDates.iso(prochaine), cls };
   },
 };

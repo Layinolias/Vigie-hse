@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/dates-locales.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -955,9 +956,9 @@
       return { "ID AT/MP": a.atmpId, "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Type": a.type, "Statut": a.statut, "Créé le": a.dateCreation, "Transmis le": a.dateTransmission, "Signé le": a.dateSignature, "Autorité": a.autorite };
     });
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossierRows), "Dossiers");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(arreteRows), "Arretes");
-    XLSX.writeFile(wb, `dossiers-atmp-citis_${new Date().toISOString().slice(0,10)}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossierRows, { header: ["ID AT/MP", "Nom", "Prénom", "Date AT", "Service", "CMI reçu", "CMI date", "Nb prolongations", "Certificat final", "Certificat final reçu", "IPP applicable", "Taux IPP", "Enquête réalisée", "Coût total", "Statut dossier"] }), "Dossiers");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(arreteRows, { header: ["ID AT/MP", "Agent", "Type", "Statut", "Créé le", "Transmis le", "Signé le", "Autorité"] }), "Arretes");
+    XLSX.writeFile(wb, `dossiers-atmp-citis_${VigieDates.aujourdhui()}.xlsx`);
   });
 
   render();

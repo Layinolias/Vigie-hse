@@ -3,6 +3,8 @@
 <script src="assets/stockage.js"></script>
 <script src="assets/risques-ref.js"></script>
 <script src="assets/dates-locales.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/import-fichier.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -470,6 +472,7 @@
           <div class="panel-head">
             <h3 class="panel-title">Éditeur de listes déroulantes</h3>
             <span class="panel-note">Les modifications s'appliquent aux formulaires RH dès leur prochaine ouverture</span>
+            <div style="display:flex; gap:8px; margin-left:auto;"><button type="button" class="btn btn-ghost btn-sm" id="refImportBtn">Importer .xlsx</button><input type="file" id="refImportFile" accept=".xlsx,.xls,.ods,.csv" style="display:none"><button type="button" class="btn btn-ghost btn-sm" id="refExportBtn">Exporter .xlsx</button></div>
           </div>
           <div class="f" style="max-width:360px; margin-bottom:16px;">
             <label for="refSelect">Liste à modifier</label>
@@ -587,6 +590,15 @@
         </div>
       </section>
 
+      <div class="panel section-block" style="padding:20px; margin-top:18px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Stockage de ce navigateur</h3>
+          <span class="panel-note" id="stockNote"></span>
+        </div>
+        <div style="height:8px; border-radius:99px; background:var(--bg-2); overflow:hidden;"><div id="stockBarre" style="height:100%; width:0; border-radius:99px; background:var(--success);"></div></div>
+        <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:10px 0 0;" id="stockDetail"></p>
+      </div>
+
       <div class="panel section-block" style="padding:20px; margin-top:18px; border-color:rgba(var(--danger-rgb),.3);">
         <div class="panel-head">
           <h3 class="panel-title">Réinitialiser la démonstration</h3>
@@ -623,6 +635,28 @@
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  // ---------- Espace de stockage (2026-09-23) ----------
+  // Un navigateur accorde environ 5 millions de caractères par site ; l'historique complet d'un client
+  // (réponse Q13) peut s'en approcher. Au-delà, un enregistrement est refusé (bandeau de VigieStore).
+  function afficherStockage(){
+    const LIMITE = 5000000;
+    const utilise = VigieStore.occupation();
+    const part = Math.min(100, Math.round(utilise / LIMITE * 100));
+    const barre = $("stockBarre");
+    barre.style.width = Math.max(part, 1) + "%";
+    barre.style.background = part >= 90 ? "var(--danger)" : part >= 70 ? "var(--warning)" : "var(--success)";
+    const fmt = n => (n / 1e6).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+    $("stockNote").textContent = fmt(utilise) + " million(s) de caractères sur environ 5 · " + part + " %";
+    const parModule = {};
+    Object.entries(VigieStore.CLES).forEach(([k, def]) => { const v = VigieStore.getItem(k); if (v) parModule[def.module] = (parModule[def.module] || 0) + k.length + v.length; });
+    const lourds = Object.entries(parModule).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([m, n]) => m + " (" + fmt(n) + ")");
+    $("stockDetail").textContent = (!VigieStore.persistant() ? "Ce navigateur refuse l'enregistrement : rien n'est conservé. " : "")
+      + (part >= 70 ? "L'espace se remplit : exportez les registres en Excel pour les garder, et prévoyez le passage à un serveur. " : "")
+      + (lourds.length ? "Modules les plus lourds : " + lourds.join(", ") + "." : "Aucune donnée enregistrée.");
+  }
+  // après la fin du script : la page enregistre ses référentiels et ses comptes plus bas
+  setTimeout(afficherStockage, 0);
 
   $("btnResetAll").addEventListener("click", () => {
     if (confirm("Réinitialiser TOUTES les données de démonstration stockées dans ce navigateur (utilisateurs, référentiels, registres, journal d'audit) ? Cette action est irréversible et vous déconnectera.")) {
@@ -1107,6 +1141,49 @@
     });
   }
   $("refSelect").addEventListener("change", renderRefEditor);
+
+  // ---------- Export / import des référentiels (2026-09-23 : première étape d'une reprise de données) ----------
+  // Une feuille « Référentiels » : une ligne par valeur (Liste · Valeur · Définition — la définition ne
+  // sert qu'aux familles de risque). L'import AJOUTE les valeurs absentes, sans jamais en retirer : un
+  // retrait reste un geste volontaire, dans l'éditeur ci-dessus.
+  const refNorm = s => String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const refValeur = v => Array.isArray(v) ? v[0] : v;
+  $("refExportBtn").addEventListener("click", () => {
+    const rows = [];
+    Object.keys(REF_LABELS).forEach(cle => (REF[cle] || []).forEach(v => rows.push({ "Liste": REF_LABELS[cle], "Valeur": refValeur(v), "Définition": Array.isArray(v) ? (v[1] || "") : "" })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Liste", "Valeur", "Définition"] }), "Référentiels");
+    XLSX.writeFile(wb, `referentiels_${VigieDates.aujourdhui()}.xlsx`);
+  });
+  $("refImportBtn").addEventListener("click", () => $("refImportFile").click());
+  $("refImportFile").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const wb = VigieImport.lireClasseur(await file.arrayBuffer());
+      const lignes = XLSX.utils.sheet_to_json(wb.Sheets["Référentiels"] || wb.Sheets[wb.SheetNames[0]], { defval: "" });
+      // la liste se désigne par son libellé (« Services — Ville ») ou par son nom technique (« servicesVille »)
+      const parNom = {}; Object.entries(REF_LABELS).forEach(([cle, lib]) => { parNom[refNorm(lib)] = cle; parNom[refNorm(cle)] = cle; });
+      let added = 0, deja = 0, skipped = 0;
+      const touchees = new Set();
+      lignes.forEach(raw => {
+        const n = {}; Object.keys(raw).forEach(k => { n[refNorm(k)] = raw[k]; });
+        const cle = parNom[refNorm(n["liste"])], valeur = String(n["valeur"] == null ? "" : n["valeur"]).trim();
+        if (!cle || !valeur){ skipped++; return; }
+        const liste = REF[cle] = (REF[cle] || []).slice();
+        if (liste.some(v => refNorm(refValeur(v)) === refNorm(valeur))){ deja++; return; }
+        liste.push(cle === "risqueFamillesDUERP" ? [valeur, String(n["definition"] == null ? "" : n["definition"]).trim()] : valeur);
+        touchees.add(REF_LABELS[cle]); added++;
+      });
+      if (added){ saveReferentials(REF); renderRefEditor(); afficherStockage();logAudit("Référentiels", "Import", `Import .xlsx — ${added} valeur(s) ajoutée(s) (${[...touchees].join(", ")})`); }
+      alert(added + deja === 0
+        ? `Aucune ligne n'a pu être importée (${skipped} ignorée(s)). Vérifiez les colonnes « Liste » et « Valeur », et que la liste porte un des noms de l'éditeur.`
+        : `Import terminé — ${added} valeur(s) ajoutée(s), ${deja} déjà présente(s), ${skipped} ignorée(s).` + (touchees.size ? ` Listes complétées : ${[...touchees].join(", ")}.` : ""));
+    } catch (err){
+      alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel, LibreOffice ou CSV.");
+    }
+    e.target.value = "";
+  });
   renderRefEditor();
 
   // ===================================================================

@@ -833,10 +833,11 @@
     });
   }
 
-  // ---------- Import / Export .xlsx (analyses + actions) ----------
-  // Import volontairement limité aux champs plats déjà présents dans l'export (méthode, conclusion,
-  // date, auteur, actions) : l'arbre causal (faits / pourquoi / ishikawa) est structurellement mal
-  // adapté à un aller-retour tableur et n'est pas ré-importé — seul un aller simple (export) existe pour lui.
+  // ---------- Import / Export .xlsx (analyses, actions, arbre causal) ----------
+  // Jusqu'au 2026-09-23, l'arbre causal (faits / pourquoi / Ishikawa) n'était ni exporté ni importé.
+  // Réponse du préventeur à la question 13 (« tout l'historique est à reprendre ») : il l'est
+  // désormais, une feuille par partie, et l'aller-retour export → import est sans perte.
+  const ISHIKAWA_CATEGORIES = [["materiel","Matériel"], ["methode","Méthode"], ["mainOeuvre","Main-d'œuvre"], ["milieu","Milieu"], ["matiere","Matière"]];
   $("panelActionsBtns").innerHTML = (canAnalyseWrite ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.ods,.csv" style="display:none">` : "") +
     `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
 
@@ -871,7 +872,9 @@
       try {
         const buf = await file.arrayBuffer();
         const wb = VigieImport.lireClasseur(buf);
-        let anAdded = 0, anUpdated = 0, anSkipped = 0, actAdded = 0, actSkipped = 0;
+        let anAdded = 0, anUpdated = 0, anSkipped = 0, actAdded = 0, actUpdated = 0, actSkipped = 0, arbreAdded = 0, arbreSkipped = 0;
+        // une vraie date Excel arrive en objet Date : « AAAA-MM-JJ » local, comme dans les autres modules
+        const dateCell = v => (v instanceof Date && !isNaN(v)) ? VigieDates.iso(v) : String(v == null ? "" : v).trim();
 
         const anSheet = wb.Sheets["Analyses"] || wb.Sheets[wb.SheetNames[0]];
         if (anSheet){
@@ -882,7 +885,7 @@
             const flat = {
               methode,
               conclusion: String(rawPick(raw, ["conclusion"])).trim(),
-              dateAnalyse: String(rawPick(raw, ["date analyse"])).trim(),
+              dateAnalyse: dateCell(rawPick(raw, ["date analyse"])),
               auteur: String(rawPick(raw, ["auteur"])).trim(),
             };
             const idx = ANALYSES.findIndex(a => a.atmpId === atmpId);
@@ -901,24 +904,75 @@
             let a = ANALYSES.find(x => x.atmpId === atmpId);
             if (!a){ a = emptyAnalyse(atmpId); ANALYSES.push(a); }
             a.actions = a.actions || [];
-            a.actions.push({
-              id: genId("act"), description,
+            const champs = {
               responsable: String(rawPick(raw, ["responsable"])).trim(),
-              echeance: String(rawPick(raw, ["echeance"])).trim(),
+              echeance: dateCell(rawPick(raw, ["echeance"])),
               statut: String(rawPick(raw, ["statut"])).trim() || "À faire",
-            });
-            actAdded++;
+            };
+            // même action (même description) : mise à jour en gardant son identifiant — sinon réimporter
+            // un fichier dupliquait chaque action, jusque dans le Plan d'actions
+            const existante = a.actions.find(x => normKey(x.description) === normKey(description));
+            if (existante){ Object.assign(existante, champs); actUpdated++; }
+            else { a.actions.push(Object.assign({ id: genId("act"), description }, champs)); actAdded++; }
           });
           saveAnalyses(ANALYSES);
         }
 
+        // arbre causal : chaque feuille remplace, pour les analyses qu'elle cite, la partie correspondante
+        const parAnalyse = (nomFeuille, lire) => {
+          const f = wb.Sheets[nomFeuille];
+          if (!f) return null;
+          const groupes = {};
+          XLSX.utils.sheet_to_json(f, { defval: "" }).forEach(raw => {
+            const atmpId = resolveAtmpId(raw, ["agent"]);
+            const el = atmpId ? lire(raw) : null;
+            if (!el){ arbreSkipped++; return; }
+            (groupes[atmpId] = groupes[atmpId] || []).push(el);
+          });
+          Object.values(groupes).forEach(l => l.sort((x, y) => (x.n || 0) - (y.n || 0)));
+          return groupes;
+        };
+        const analysePour = atmpId => { let a = ANALYSES.find(x => x.atmpId === atmpId); if (!a){ a = emptyAnalyse(atmpId); ANALYSES.push(a); } return a; };
+        const faits = parAnalyse("Faits", raw => {
+          const texte = String(rawPick(raw, ["fait", "texte"])).trim();
+          if (!texte) return null;
+          return { n: Number(rawPick(raw, ["n"])) || 0, date: dateCell(rawPick(raw, ["date"])), texte,
+            type: normKey(rawPick(raw, ["type"])) === "opinion" ? "Opinion" : "Fait", depuis: Number(rawPick(raw, ["decoule du fait n"])) || 0 };
+        });
+        if (faits) Object.entries(faits).forEach(([atmpId, liste]) => {
+          const ids = liste.map(() => genId("f"));
+          const parNumero = {}; liste.forEach((f, i) => { if (f.n) parNumero[f.n] = ids[i]; });
+          analysePour(atmpId).faits = liste.map((f, i) => ({ id: ids[i], date: f.date, texte: f.texte, type: f.type, causeDe: (f.depuis && parNumero[f.depuis] && parNumero[f.depuis] !== ids[i]) ? parNumero[f.depuis] : "" }));
+          arbreAdded += liste.length;
+        });
+        const pourquoi = parAnalyse("Pourquoi", raw => {
+          const question = String(rawPick(raw, ["question"])).trim(), reponse = String(rawPick(raw, ["reponse"])).trim();
+          return (question || reponse) ? { n: Number(rawPick(raw, ["n"])) || 0, question, reponse } : null;
+        });
+        if (pourquoi) Object.entries(pourquoi).forEach(([atmpId, liste]) => {
+          analysePour(atmpId).pourquoi = liste.map(p => ({ question: p.question, reponse: p.reponse }));
+          arbreAdded += liste.length;
+        });
+        const CATEGORIE = {}; ISHIKAWA_CATEGORIES.forEach(([cle, libelle]) => { CATEGORIE[normKey(libelle)] = cle; CATEGORIE[normKey(cle)] = cle; });
+        const ishikawa = parAnalyse("Ishikawa", raw => {
+          const cle = CATEGORIE[normKey(rawPick(raw, ["categorie"]))], cause = String(rawPick(raw, ["cause"])).trim();
+          return (cle && cause) ? { cle, cause } : null;
+        });
+        if (ishikawa) Object.entries(ishikawa).forEach(([atmpId, liste]) => {
+          const ish = { materiel:[], methode:[], mainOeuvre:[], milieu:[], matiere:[] };
+          liste.forEach(x => ish[x.cle].push(x.cause));
+          analysePour(atmpId).ishikawa = ish;
+          arbreAdded += liste.length;
+        });
+        if (faits || pourquoi || ishikawa) saveAnalyses(ANALYSES);
+
         render();
         if (currentAtmpId) openAnalyse(currentAtmpId);
-        const total = anAdded + anUpdated + actAdded;
+        const total = anAdded + anUpdated + actAdded + actUpdated + arbreAdded;
         if (total === 0){
           alert(`Aucune ligne n'a pu être importée (${anSkipped + actSkipped} ignorée(s)). Vérifiez que le fichier contient bien des feuilles "Analyses"/"Actions" avec des lignes rattachées à un événement AT/MP existant.`);
         } else {
-          alert(`Import terminé — analyses : ${anAdded} ajoutée(s), ${anUpdated} mise(s) à jour, ${anSkipped} ignorée(s). Actions : ${actAdded} ajoutée(s), ${actSkipped} ignorée(s). (L'arbre causal — faits, pourquoi, Ishikawa — n'est pas importé, seuls les champs plats le sont.)`);
+          alert(`Import terminé — analyses : ${anAdded} ajoutée(s), ${anUpdated} mise(s) à jour, ${anSkipped} ignorée(s). Actions : ${actAdded} ajoutée(s), ${actUpdated} mise(s) à jour, ${actSkipped} ignorée(s).${arbreAdded || arbreSkipped ? ` Arbre causal : ${arbreAdded} élément(s) importé(s), ${arbreSkipped} ignoré(s).` : ""}`);
         }
         logAudit("Analyse d'accident", "Import", `Import .xlsx — ${anAdded + anUpdated} analyse(s), ${actAdded} action(s)`);
       } catch (err){
@@ -947,9 +1001,26 @@
         actionRows.push({ "ID AT/MP": a.atmpId, "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Action": act.description, "Responsable": act.responsable, "Échéance": act.echeance, "Statut": act.statut });
       });
     });
+    // l'arbre causal (2026-09-23) : une ligne par fait, par « pourquoi », par cause d'Ishikawa — le lien
+    // « découle de » entre faits s'exprime par le numéro du fait dans la même analyse
+    const faitRows = [], pourquoiRows = [], ishikawaRows = [];
+    ANALYSES.forEach(a => {
+      const evt = ATMP_EVENTS.find(e => e.id === a.atmpId) || {};
+      const agent = `${evt.nom || ''} ${evt.prenom || ''}`.trim();
+      const faits = (a.faits || []).filter(f => f.texte);
+      faits.forEach((f, i) => {
+        const n = f.causeDe ? faits.findIndex(x => x.id === f.causeDe) : -1;
+        faitRows.push({ "ID AT/MP": a.atmpId, "Agent": agent, "N°": i + 1, "Date": f.date || "", "Fait": f.texte, "Type": f.type === "Opinion" ? "Opinion" : "Fait", "Découle du fait n°": n >= 0 ? n + 1 : "" });
+      });
+      (a.pourquoi || []).filter(p => p.question || p.reponse).forEach((p, i) => pourquoiRows.push({ "ID AT/MP": a.atmpId, "Agent": agent, "N°": i + 1, "Question": p.question || "", "Réponse": p.reponse || "" }));
+      ISHIKAWA_CATEGORIES.forEach(([cle, libelle]) => ((a.ishikawa || {})[cle] || []).filter(Boolean).forEach(c => ishikawaRows.push({ "ID AT/MP": a.atmpId, "Agent": agent, "Catégorie": libelle, "Cause": c })));
+    });
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(analyseRows, { header: ["ID AT/MP", "Nom", "Prénom", "Date AT", "Service", "Méthode", "Statut", "Conclusion", "Date analyse", "Auteur"] }), "Analyses");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(actionRows, { header: ["ID AT/MP", "Agent", "Action", "Responsable", "Échéance", "Statut"] }), "Actions");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(faitRows, { header: ["ID AT/MP", "Agent", "N°", "Date", "Fait", "Type", "Découle du fait n°"] }), "Faits");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pourquoiRows, { header: ["ID AT/MP", "Agent", "N°", "Question", "Réponse"] }), "Pourquoi");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ishikawaRows, { header: ["ID AT/MP", "Agent", "Catégorie", "Cause"] }), "Ishikawa");
     XLSX.writeFile(wb, `analyses-accident_${VigieDates.aujourdhui()}.xlsx`);
   });
 

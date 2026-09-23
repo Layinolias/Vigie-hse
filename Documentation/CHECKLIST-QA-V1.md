@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 116 points au 2026-09-21 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 117 points au 2026-09-23 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -159,6 +159,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] **Score HSE** (topbar) : cliquer dessus fait défiler la page jusqu'au détail, sans que la barre du haut ne le cache.
 - [ ] **Sélecteur Ville/Agglomération/Tous** (topbar, cockpit) : change bien les chiffres affichés sur le tableau de bord.
 - [ ] **Menu latéral** : se réduit/étend correctement au survol sur grand écran ; devient un tiroir accessible via le bouton menu sur petit écran (voir §5).
+- [ ] **Texte affiché tel quel, jamais interprété** : dans n'importe quel module, enregistrer une fiche dont un champ texte contient des chevrons — par exemple un risque nommé `<b>essai</b>` ou une circonstance `1 < 2`. Le tableau doit afficher ces caractères **tels quels**, sans mise en gras ni disparition de texte. Même contrôle après un import Excel contenant de tels libellés.
 - [ ] **Import Excel** (disponible sur tous les modules désormais, pas seulement AT/MP et Document Unique) : importer un fichier volontairement invalide (mauvais format, colonnes manquantes) → message d'erreur clair, pas de plantage silencieux.
 - [ ] **Auto-chargement DATATEST** : sur le site déployé (pas en local), chaque module se remplit tout seul au chargement avec les données de `DATATEST/` (pas de bouton à cliquer). Vérifier qu'un rechargement ne duplique pas les lignes (IDs stables `dtst-*`).
 - [ ] **Centrage du contenu** : sur un écran large (>1500px), le contenu de chaque page est centré horizontalement dans la zone principale (pas collé à gauche sous le menu latéral).

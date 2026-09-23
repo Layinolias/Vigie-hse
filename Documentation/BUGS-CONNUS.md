@@ -26,6 +26,13 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
   - `dossiers-atmp-citis.html` : réimporte les 2 feuilles exportées ("Dossiers", "Arretes"), rattachées à l'événement AT/MP via une nouvelle colonne "ID AT/MP" ajoutée à l'export (avec repli sur nom + date si absente d'un fichier plus ancien).
   - `accident-analyse.html` : **périmètre volontairement limité** — le modèle de données d'une analyse est arborescent (faits, chaîne de pourquoi, 5 familles Ishikawa, actions imbriquées), mal adapté à un aller-retour fidèle par tableur. Seuls les champs plats déjà présents dans l'export (méthode, conclusion, date d'analyse, auteur, feuille "Actions" séparée) sont ré-importés ; l'arbre causal ne l'est pas. À revoir si le besoin d'un aller-retour complet se confirme.
 
+### Le texte des enregistrements était interprété comme du HTML dans toutes les pages de données
+- **Où** : les seize pages qui affichent des enregistrements — Registre AT/MP, Document Unique, cockpit, Administration, et les douze modules de suivi.
+- **Remonté** : 2026-09-23, en relisant le Registre AT/MP avant d'y ajouter un lien contextuel.
+- **Constaté** : une sonde jsdom a injecté `<img src=x onerror=…>` dans chaque champ, enregistrement par enregistrement. Sur le seul Registre AT/MP, **16 champs sur 16** produisaient une vraie balise active (nom, prénom, risque, circonstances, service, siège, nature, élément matériel, état, jour, grade, catégorie, collectivité, statut d'arrêt, avis médecin, et jusqu'à une date non conforme).
+- **Cause** : aucune de ces pages ne disposait d'un assistant d'échappement ; les gabarits interpolaient directement `${r.champ}` dans `innerHTML`. Les données arrivent par import Excel, par les formulaires de saisie et par les référentiels — aucune n'est de confiance. Les composants partagés, eux, étaient sains (`assets/tri-filtres.js` construit ses panneaux avec `createElement`/`textContent`).
+- **Corrigé** : 2026-09-23 — commits `0fad9f7` (Registre AT/MP et Document Unique) et `445d67a` (les quatorze autres). Chaque page déclare `esc()` et l'applique à toutes ses interpolations de texte. Vérifié page par page : plus aucun élément injecté, et le corps rendu avec des données normales est identique au caractère près à celui d'avant.
+
 ---
 
 ## Ouverts / reportés (pas des bugs à corriger maintenant)

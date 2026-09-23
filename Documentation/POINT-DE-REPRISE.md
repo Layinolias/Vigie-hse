@@ -1,4 +1,4 @@
-# Point de reprise — 21 septembre 2026
+# Point de reprise — 23 septembre 2026
 
 Fichier de passage de relais entre sessions. **À relire en premier après une compaction ou en début de
 session**, avec `CLAUDE.md`. Le reste de l'état durable est dans `ETAT-DU-PROJET.md`,
@@ -6,7 +6,11 @@ session**, avec `CLAUDE.md`. Le reste de l'état durable est dans `ETAT-DU-PROJE
 
 ## Travail en cours, non terminé
 
-_Rien en cours. Les réponses Q8, Q9 et Q10 du préventeur (2026-09-21) sont consignées dans
+_Rien en cours. **Campagne d'echappement terminee le 2026-09-23** : les seize pages qui affichent
+des enregistrements inseraient leur texte tel quel dans du HTML ; toutes echappent desormais (commits
+`0fad9f7` et `445d67a`, detail dans `BUGS-CONNUS.md`). Outil de campagne : `sweep.js` dans le scratchpad
+(sonde / propose / applique / compare / detail) — a reecrire si une nouvelle session en a besoin.
+Auparavant : Les réponses Q8, Q9 et Q10 du préventeur (2026-09-21) sont consignées dans
 `QUESTIONS-METIER-EN-ATTENTE.md` et **toutes les trois mises en œuvre et déployées** : seuil « au moins
 400 h » (`50ec301`), accueil au poste — type, délai de 8 j, butoir, alerte (`852fbb5`), base documentaire —
 trame en 4 sections, types de document créés par le préventeur, afficher/masquer (`7c60848`). Plus aucune
@@ -38,7 +42,11 @@ demande une session ouverte par l'utilisateur._
   consignée mais le module reste à construire — et la fidélité réglementaire attendue demandera de
   repasser par le préventeur, texte par texte.
 - Module 13 (Dialogue social) : bloqué par la refonte des rôles (jalon J0).
-- Autres liens contextuels vers la base documentaire (produit chimique → sa fiche, etc.).
+- Autres liens contextuels vers la base documentaire : pastille « fiche » sur la colonne Risque du
+  Registre AT/MP, produit chimique → sa fiche, etc. **Attention** : quatre libelles de risque du registre
+  ne correspondent a aucune famille du DUERP par simple slug (Routier/Routiers, Activite Physique/
+  Activite Physique (TMS), Chute d'objet, Deplacement) — les deux derniers demandent l'avis du
+  preventeur avant d'etre rapproches (question a poser).
 
 ## Où sont les tests
 

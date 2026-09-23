@@ -112,6 +112,7 @@
   <p class="footnote">Démonstration à données fictives : tout ce que vous saisissez reste dans ce navigateur (<span class="mono">localStorage</span>), n'est partagé avec personne et peut être réinitialisé à tout moment. <a href="index.html" style="color:var(--accent);">En savoir plus</a>.</p>
 </div>
 
+<script src="assets/stockage.js"></script>
 <script>
   const SESSION_KEY = "vigie_hse_session";
   const USERS_KEY = "vigie_hse_users";
@@ -130,12 +131,12 @@
   function loadUsers(){
     let stored = [];
     try {
-      const raw = localStorage.getItem(USERS_KEY);
+      const raw = VigieStore.getItem(USERS_KEY);
       if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; }
     } catch(e){}
     if (stored.length === 0){
       stored = defaultUsers();
-      try { localStorage.setItem(USERS_KEY, JSON.stringify(stored)); } catch(e){}
+      try { VigieStore.setItem(USERS_KEY, JSON.stringify(stored)); } catch(e){}
     }
     return stored;
   }

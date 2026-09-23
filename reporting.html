@@ -2,6 +2,7 @@
 <meta name="description" content="Rapport consolidé des indicateurs HSE de tous les modules — vue de pilotage pour la direction et les instances (F3SCT/CSSCT).">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/hse-formulas.js"></script>
@@ -430,7 +431,7 @@
   const appShell = document.querySelector(".app-shell");
   let collapseTimer = null;
   const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
   const pinBtn = document.getElementById("sidebarPin");
   function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function isDesktopWidth(){ return window.innerWidth > 980; }
@@ -446,7 +447,7 @@
 
   // ---------- Lecture défensive des jeux de données de chaque module (aucune génération de seed ici) ----------
   function readKey(key){
-    try { const raw = localStorage.getItem(key); if (!raw) return []; const p = JSON.parse(raw); return Array.isArray(p) ? p : []; }
+    try { const raw = VigieStore.getItem(key); if (!raw) return []; const p = JSON.parse(raw); return Array.isArray(p) ? p : []; }
     catch(e){ return []; }
   }
   const MOIS = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];

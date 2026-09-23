@@ -1,5 +1,6 @@
 <title>Santé &amp; Visites</title>
 <meta name="description" content="Suivi des visites médicales et de la surveillance santé au travail des agents.">
+<script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
@@ -645,9 +646,9 @@
   const AUDIT_KEY = "vigie_hse_audit_log";
   function logAudit(module, type, description){
     try {
-      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
       log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
-      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
     } catch(e){}
   }
 
@@ -657,7 +658,7 @@
   const appShell = document.querySelector(".app-shell");
   let collapseTimer = null;
   const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
   const pinBtn = document.getElementById("sidebarPin");
   function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function isDesktopWidth(){ return window.innerWidth > 980; }
@@ -675,7 +676,7 @@
   if (pinBtn) pinBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     sidebarLocked = !sidebarLocked;
-    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
     applyPinVisual();
     if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
   });
@@ -688,10 +689,10 @@
   };
   function loadReferentials(){
     let stored = {};
-    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
     const merged = Object.assign({}, stored);
     Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
-    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
   const REF = loadReferentials();
@@ -727,10 +728,10 @@
   // ---------- Dataset Santé & Visites (always-merge) ----------
   const STORAGE_KEY = "vigie_hse_visites";
   function genId(){ return "man-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-  function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
+  function saveDataset(ds){ try { VigieStore.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
   function loadDataset(){
     let stored = [];
-    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     const seedList = buildRosterSeeds();
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
@@ -754,7 +755,7 @@
   let habilitationsKeyMissing = false;
   function loadHabilitationsRef(){
     try {
-      const raw = localStorage.getItem("vigie_hse_habilitations");
+      const raw = VigieStore.getItem("vigie_hse_habilitations");
       if (raw === null){ habilitationsKeyMissing = true; return []; }
       const p = JSON.parse(raw);
       if (Array.isArray(p)) return p;
@@ -1062,13 +1063,13 @@
   const rdvGenId = () => "rdv-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const inScope = (r) => !isScoped || myServices.includes(r.service);
   function loadRdvAll(){
-    try { const raw = localStorage.getItem(RDV_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p.filter(r => r && r.id); } } catch(e){}
+    try { const raw = VigieStore.getItem(RDV_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p.filter(r => r && r.id); } } catch(e){}
     return [];
   }
   let RDV = loadRdvAll().filter(inScope);
   function saveRdv(){
     const others = loadRdvAll().filter(r => !inScope(r));
-    try { localStorage.setItem(RDV_KEY, JSON.stringify(others.concat(RDV))); } catch(e){}
+    try { VigieStore.setItem(RDV_KEY, JSON.stringify(others.concat(RDV))); } catch(e){}
   }
   const sortRdv = (a, b) => (a.date + " " + (a.heure || "")).localeCompare(b.date + " " + (b.heure || "")) || (a.nom + a.prenom).localeCompare(b.nom + b.prenom, "fr");
 
@@ -1216,14 +1217,14 @@
     };
     function loadTemplates(){
       let stored = [];
-      try { const raw = localStorage.getItem(TPL_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p.filter(t => t && t.id && typeof t.corps === "string"); } } catch(e){}
+      try { const raw = VigieStore.getItem(TPL_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p.filter(t => t && t.id && typeof t.corps === "string"); } } catch(e){}
       const stockedDefault = stored.find(t => t.id === TPL_DEFAULT.id);
       const merged = [stockedDefault || TPL_DEFAULT].concat(stored.filter(t => t.id !== TPL_DEFAULT.id));
-      try { localStorage.setItem(TPL_KEY, JSON.stringify(merged)); } catch(e){}
+      try { VigieStore.setItem(TPL_KEY, JSON.stringify(merged)); } catch(e){}
       return merged;
     }
     let TPL = loadTemplates();
-    function saveTemplates(){ try { localStorage.setItem(TPL_KEY, JSON.stringify(TPL)); } catch(e){} }
+    function saveTemplates(){ try { VigieStore.setItem(TPL_KEY, JSON.stringify(TPL)); } catch(e){} }
 
     // Placeholders {{...}} : inconnu → laissé tel quel ; valeur vide → « (à préciser) ».
     function fillTemplate(text, rdv, visite){
@@ -1274,9 +1275,9 @@
       const v = DATASET.find(x => x.id === id);
       if (v) v.dateDerniere = date;
       try {
-        const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        const all = JSON.parse(VigieStore.getItem(STORAGE_KEY) || "[]");
         const s = Array.isArray(all) ? all.find(x => x.id === id) : null;
-        if (s){ s.dateDerniere = date; localStorage.setItem(STORAGE_KEY, JSON.stringify(all)); }
+        if (s){ s.dateDerniere = date; VigieStore.setItem(STORAGE_KEY, JSON.stringify(all)); }
       } catch(e){}
     }
     rdvForm.addEventListener("submit", (e) => {

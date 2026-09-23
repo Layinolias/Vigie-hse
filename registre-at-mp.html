@@ -2,6 +2,7 @@
 <meta name="description" content="Console de suivi des accidents du travail et maladies professionnelles d'une collectivité territoriale.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
@@ -539,9 +540,9 @@
   const AUDIT_KEY = "vigie_hse_audit_log";
   function logAudit(module, type, description){
     try {
-      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
       log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
-      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
     } catch(e){}
   }
 
@@ -553,7 +554,7 @@
   const appShell = document.querySelector(".app-shell");
   let collapseTimer = null;
   const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
   const pinBtn = document.getElementById("sidebarPin");
   function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function isDesktopWidth(){ return window.innerWidth > 980; }
@@ -581,7 +582,7 @@
   if (pinBtn) pinBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     sidebarLocked = !sidebarLocked;
-    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
     applyPinVisual();
     if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
   });
@@ -601,13 +602,13 @@
   function genId(){ return "d-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
   function saveDataset(ds){
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){ /* stockage indisponible */ }
+    try { VigieStore.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){ /* stockage indisponible */ }
   }
 
   function loadDataset(){
     let stored = [];
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = VigieStore.getItem(STORAGE_KEY);
       if (raw){ const parsed = JSON.parse(raw); if (Array.isArray(parsed)) stored = parsed; }
     } catch(e){ /* stockage local indisponible ou corrompu */ }
 
@@ -820,7 +821,7 @@
     // (collectivité, service, année, services du manager scopé) : les filtres "arrêt" et de
     // colonne n'entrent pas ici, ils ne concernent pas les heures. "—" si aucune heure saisie.
     let heuresSaisies = [];
-    try { const raw = localStorage.getItem("vigie_hse_heures_travaillees"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) heuresSaisies = p; } } catch(e){}
+    try { const raw = VigieStore.getItem("vigie_hse_heures_travaillees"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) heuresSaisies = p; } } catch(e){}
     const atPerimetre = DATASET.filter(d =>
       (col === "all" || (d.collectivite || "Ville") === col) &&
       (svc === "all" || d.service === svc) &&

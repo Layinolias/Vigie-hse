@@ -400,6 +400,7 @@
   }
 </style>
 
+<script src="assets/stockage.js"></script>
 <script>
   (function(){
     try {
@@ -772,7 +773,7 @@
   const appShell = document.querySelector(".app-shell");
   let collapseTimer = null;
   const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
   const pinBtn = document.getElementById("sidebarPin");
   function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function isDesktopWidth(){ return window.innerWidth > 980; }
@@ -800,7 +801,7 @@
   if (pinBtn) pinBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     sidebarLocked = !sidebarLocked;
-    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
     applyPinVisual();
     if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
   });
@@ -813,7 +814,7 @@
 
   function loadMerged(storageKey, mock){
     let stored = [];
-    try { const raw = localStorage.getItem(storageKey); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(storageKey); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = mock.map(r => storedById.has(r.id) ? storedById.get(r.id) : {...r});
     const seedIds = new Set(seeded.map(r => r.id));
@@ -878,11 +879,11 @@
 
     // -- Compteurs Modules RSST / Vérifications (lecture directe, pas de duplication de la génération de seed) --
     try {
-      const rsstRaw = JSON.parse(localStorage.getItem("vigie_hse_rsst") || "null");
+      const rsstRaw = JSON.parse(VigieStore.getItem("vigie_hse_rsst") || "null");
       $("modRsstCount").textContent = Array.isArray(rsstRaw) ? rsstRaw.length : "–";
     } catch(e){ $("modRsstCount").textContent = "–"; }
     try {
-      const verifRaw = JSON.parse(localStorage.getItem("vigie_hse_verifications") || "null");
+      const verifRaw = JSON.parse(VigieStore.getItem("vigie_hse_verifications") || "null");
       $("modVerifCount").textContent = Array.isArray(verifRaw) ? verifRaw.length : "–";
     } catch(e){ $("modVerifCount").textContent = "–"; }
 
@@ -966,8 +967,8 @@
   // via une recherche (API de géocodage Open-Meteo, gratuite, sans clé). Le choix est mémorisé
   // dans le navigateur (localStorage) et réutilisé aux visites suivantes.
   const WEATHER_LOC_KEY = "vigie_hse_weather_location";
-  function loadWeatherLocation(){ try { return JSON.parse(localStorage.getItem(WEATHER_LOC_KEY) || "null"); } catch(e){ return null; } }
-  function saveWeatherLocation(loc){ try { localStorage.setItem(WEATHER_LOC_KEY, JSON.stringify(loc)); } catch(e){} }
+  function loadWeatherLocation(){ try { return JSON.parse(VigieStore.getItem(WEATHER_LOC_KEY) || "null"); } catch(e){ return null; } }
+  function saveWeatherLocation(loc){ try { VigieStore.setItem(WEATHER_LOC_KEY, JSON.stringify(loc)); } catch(e){} }
   function weatherCodeInfo(code){
     if (code === 0) return { label:"Ciel dégagé", icon:"i-sun" };
     if (code === 1 || code === 2) return { label:"Peu nuageux", icon:"i-sun" };
@@ -1075,8 +1076,8 @@
   }
   function loadNews(){
     let stored = null;
-    try { const raw = localStorage.getItem(NEWS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    if (stored === null){ stored = defaultNews(); try { localStorage.setItem(NEWS_KEY, JSON.stringify(stored)); } catch(e){} }
+    try { const raw = VigieStore.getItem(NEWS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    if (stored === null){ stored = defaultNews(); try { VigieStore.setItem(NEWS_KEY, JSON.stringify(stored)); } catch(e){} }
     return stored;
   }
   function fmtDateFr(iso){ if (!iso) return ""; const [y,m,d] = String(iso).split("-"); return (y && m && d) ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(iso); }
@@ -1124,8 +1125,8 @@
   }
   function loadVeille(){
     let stored = null;
-    try { const raw = localStorage.getItem(VEILLE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    if (stored === null){ stored = defaultVeille(); try { localStorage.setItem(VEILLE_KEY, JSON.stringify(stored)); } catch(e){} }
+    try { const raw = VigieStore.getItem(VEILLE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    if (stored === null){ stored = defaultVeille(); try { VigieStore.setItem(VEILLE_KEY, JSON.stringify(stored)); } catch(e){} }
     return stored;
   }
   const SECTOR_NEWS = loadVeille().filter(n => n.statut !== "Archivé").sort((a,b) => (b.date||"").localeCompare(a.date||""));

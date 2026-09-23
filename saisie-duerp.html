@@ -1,5 +1,6 @@
 <title>Évaluation DUERP</title>
 <meta name="description" content="Espace RH — création et modification d'une évaluation de risque professionnel dans le Document Unique.">
+<script src="assets/stockage.js"></script>
 <script src="assets/risques-ref.js"></script>
 <script src="assets/dates-locales.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -447,9 +448,9 @@
   const AUDIT_KEY = "vigie_hse_audit_log";
   function logAudit(module, type, description){
     try {
-      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
       log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
-      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
     } catch(e){}
   }
 
@@ -462,7 +463,7 @@
   let collapseTimer = null;
   function isDesktopWidth(){ return window.innerWidth > 980; }
   const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
   const pinBtn = document.getElementById("sidebarPin");
   function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function sidebarExpand(){
@@ -489,7 +490,7 @@
   if (pinBtn) pinBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     sidebarLocked = !sidebarLocked;
-    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
     applyPinVisual();
     if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
   });
@@ -514,10 +515,10 @@
   };
   function loadReferentials(){
     let stored = {};
-    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
     const merged = {};
     Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
-    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
   const REF = loadReferentials();
@@ -530,11 +531,11 @@
   const STORAGE_KEY = "vigie_hse_duerp_dataset";
   const LOG_KEY = "vigie_hse_duerp_log";
   function genId(){ return "r-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-  function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
+  function saveDataset(ds){ try { VigieStore.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
   function loadDataset(){
     let stored = [];
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = VigieStore.getItem(STORAGE_KEY);
       if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; }
     } catch(e){}
 
@@ -556,8 +557,8 @@
     saveDataset(merged);
     return merged;
   }
-  function loadLog(){ try { const v = JSON.parse(localStorage.getItem(LOG_KEY) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } }
-  function saveLog(v){ try { localStorage.setItem(LOG_KEY, JSON.stringify(v)); } catch(e){} }
+  function loadLog(){ try { const v = JSON.parse(VigieStore.getItem(LOG_KEY) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } }
+  function saveLog(v){ try { VigieStore.setItem(LOG_KEY, JSON.stringify(v)); } catch(e){} }
 
   let DATASET = loadDataset();
 

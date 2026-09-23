@@ -1,5 +1,6 @@
 <title>Administration</title>
 <meta name="description" content="Panneau d'administration VIGIE HSE — utilisateurs, référentiels, flash info et journal des modifications.">
+<script src="assets/stockage.js"></script>
 <script src="assets/risques-ref.js"></script>
 <script src="assets/dates-locales.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -625,7 +626,7 @@
 
   $("btnResetAll").addEventListener("click", () => {
     if (confirm("Réinitialiser TOUTES les données de démonstration stockées dans ce navigateur (utilisateurs, référentiels, registres, journal d'audit) ? Cette action est irréversible et vous déconnectera.")) {
-      localStorage.clear();
+      VigieStore.clear();
       sessionStorage.clear();
       location.href = "login.html";
     }
@@ -639,7 +640,7 @@
   const appShell = document.querySelector(".app-shell");
   let collapseTimer = null;
   const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
   const pinBtn = document.getElementById("sidebarPin");
   function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function isDesktopWidth(){ return window.innerWidth > 980; }
@@ -667,7 +668,7 @@
   if (pinBtn) pinBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     sidebarLocked = !sidebarLocked;
-    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
     applyPinVisual();
     if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
   });
@@ -699,13 +700,13 @@
   const AUDIT_KEY = "vigie_hse_audit_log";
   function logAudit(module, type, description){
     try {
-      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
       log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
-      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
     } catch(e){}
   }
   function loadAudit(){
-    try { const v = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]"); return Array.isArray(v) ? v : []; }
+    try { const v = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]"); return Array.isArray(v) ? v : []; }
     catch(e){ return []; }
   }
 
@@ -728,13 +729,13 @@
   };
   function loadReferentials(){
     let stored = {};
-    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
     const merged = {};
     Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
-    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
-  function saveReferentials(ref){ try { localStorage.setItem(REF_KEY, JSON.stringify(ref)); } catch(e){} }
+  function saveReferentials(ref){ try { VigieStore.setItem(REF_KEY, JSON.stringify(ref)); } catch(e){} }
   let REF = loadReferentials();
   const REF_LABELS = {
     risquesATMP:"Risques (Registre AT/MP)", sieges:"Sièges de lésion", natures:"Natures de lésion", statutsRH:"Statuts RH",
@@ -767,11 +768,11 @@
   }
   function loadUsers(){
     let stored = [];
-    try { const raw = localStorage.getItem(USERS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(USERS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     if (stored.length === 0){ stored = defaultUsers(); saveUsers(stored); }
     return stored;
   }
-  function saveUsers(u){ try { localStorage.setItem(USERS_KEY, JSON.stringify(u)); } catch(e){} }
+  function saveUsers(u){ try { VigieStore.setItem(USERS_KEY, JSON.stringify(u)); } catch(e){} }
   let USERS = loadUsers();
 
   const ROLE_CHIP_LABEL = { admin:"Administrateur", rh:"RH", manager:"Manager", ag:"Agent" };
@@ -1117,11 +1118,11 @@
   }
   function loadNews(){
     let stored = null;
-    try { const raw = localStorage.getItem(NEWS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(NEWS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     if (stored === null){ stored = defaultNews(); saveNews(stored); }
     return stored;
   }
-  function saveNews(n){ try { localStorage.setItem(NEWS_KEY, JSON.stringify(n)); } catch(e){} }
+  function saveNews(n){ try { VigieStore.setItem(NEWS_KEY, JSON.stringify(n)); } catch(e){} }
   let NEWS = loadNews();
   function fmtDateFr(iso){ if (!iso) return ""; const [y,m,d] = String(iso).split("-"); return (y && m && d) ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(iso); }
 
@@ -1247,11 +1248,11 @@
   }
   function loadVeille(){
     let stored = null;
-    try { const raw = localStorage.getItem(VEILLE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(VEILLE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     if (stored === null){ stored = defaultVeille(); saveVeille(stored); }
     return stored;
   }
-  function saveVeille(v){ try { localStorage.setItem(VEILLE_KEY, JSON.stringify(v)); } catch(e){} }
+  function saveVeille(v){ try { VigieStore.setItem(VEILLE_KEY, JSON.stringify(v)); } catch(e){} }
   let VEILLE = loadVeille();
   const veilleStatutCls = { "À lire":"ag", "Lu":"active-yes", "Archivé":"active-no" };
 

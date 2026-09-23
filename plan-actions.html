@@ -2,6 +2,7 @@
 <meta name="description" content="Suivi des actions correctives issues du Document Unique et du Registre AT/MP.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
@@ -487,9 +488,9 @@
   const AUDIT_KEY = "vigie_hse_audit_log";
   function logAudit(module, type, description){
     try {
-      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
       log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
-      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
     } catch(e){}
   }
 
@@ -499,7 +500,7 @@
   const appShell = document.querySelector(".app-shell");
   let collapseTimer = null;
   const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
   const pinBtn = document.getElementById("sidebarPin");
   function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function isDesktopWidth(){ return window.innerWidth > 980; }
@@ -517,7 +518,7 @@
   if (pinBtn) pinBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     sidebarLocked = !sidebarLocked;
-    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
     applyPinVisual();
     if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
   });
@@ -530,10 +531,10 @@
   };
   function loadReferentials(){
     let stored = {};
-    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
     const merged = Object.assign({}, stored);
     Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
-    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
   const REF = loadReferentials();
@@ -544,7 +545,7 @@
   const DUERP_STORAGE_KEY = "vigie_hse_duerp_dataset";
   function loadDuerpDataset(){
     let stored = [];
-    try { const raw = localStorage.getItem(DUERP_STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(DUERP_STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     stored.forEach(r => {
       if (r.service === "Propreté de la Ville" && r.taches && r.taches.startsWith("Déchetterie")){ r.service = "Collecte & Propreté"; r.collectivite = "Agglomération"; }
     });
@@ -553,7 +554,7 @@
     const seedIds = new Set(seeded.map(r => r.id));
     const userExtra = stored.filter(r => !seedIds.has(r.id));
     const merged = seeded.concat(userExtra);
-    try { localStorage.setItem(DUERP_STORAGE_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(DUERP_STORAGE_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
   function riskCls(score){ if (score <= 3) return "faible"; if (score <= 6) return "modere"; if (score <= 12) return "eleve"; return "critique"; }
@@ -592,7 +593,7 @@
   const INSPECTIONS_KEY = "vigie_hse_inspections";
   function generateInspectionActionSeeds(){
     let inspections = [];
-    try { const raw = localStorage.getItem(INSPECTIONS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) inspections = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(INSPECTIONS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) inspections = p; } } catch(e){}
     const out = [];
     const today = new Date();
     inspections.forEach(insp => {
@@ -624,9 +625,9 @@
   const ANALYSES_KEY = "vigie_hse_analyses_accident";
   function generateAnalyseActionSeeds(){
     let analyses = [];
-    try { const raw = localStorage.getItem(ANALYSES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) analyses = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(ANALYSES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) analyses = p; } } catch(e){}
     let atmpEvents = [];
-    try { const raw = localStorage.getItem("vigie_hse_dataset"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) atmpEvents = p; } } catch(e){}
+    try { const raw = VigieStore.getItem("vigie_hse_dataset"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) atmpEvents = p; } } catch(e){}
     const atmpById = Object.fromEntries(atmpEvents.map(r => [r.id, r]));
     const out = [];
     const today = new Date();
@@ -657,7 +658,7 @@
   const URGENCES_KEY = "vigie_hse_exercices_urgence";
   function generateUrgenceActionSeeds(){
     let exercices = [];
-    try { const raw = localStorage.getItem(URGENCES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) exercices = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(URGENCES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) exercices = p; } } catch(e){}
     const out = [];
     const today = new Date();
     exercices.forEach(ex => {
@@ -686,7 +687,7 @@
   const EE_KEY = "vigie_hse_interventions_ee";
   function generateEntrepriseExtActionSeeds(){
     let interventions = [];
-    try { const raw = localStorage.getItem(EE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) interventions = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(EE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) interventions = p; } } catch(e){}
     const out = [];
     const today = new Date();
     interventions.forEach(ee => {
@@ -714,10 +715,10 @@
   // ---------- Dataset Plan d'Actions (always-merge) ----------
   const STORAGE_KEY = "vigie_hse_actions";
   function genId(){ return "man-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-  function saveDataset(ds){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
+  function saveDataset(ds){ try { VigieStore.setItem(STORAGE_KEY, JSON.stringify(ds)); } catch(e){} }
   function loadDataset(){
     let stored = [];
-    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds());
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);

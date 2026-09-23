@@ -178,6 +178,7 @@
   <footer>VIGIE HSE — démonstration. Code source et documentation sur <a href="https://github.com/Layinolias/Vigie-hse" style="text-decoration:underline;">GitHub</a>.</footer>
 </div>
 
+<script src="assets/stockage.js"></script>
 <script>
   try {
     const existing = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
@@ -188,7 +189,7 @@
 
   document.getElementById("btnResetDemo").addEventListener("click", () => {
     if (confirm("Réinitialiser toutes les données de démonstration stockées dans ce navigateur ? Cette action est irréversible.")) {
-      localStorage.clear();
+      VigieStore.clear();
       sessionStorage.clear();
       location.href = "login.html";
     }

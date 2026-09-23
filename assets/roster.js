@@ -57,7 +57,7 @@
    * `myServices` = session.services : un manager scopé ne voit que les agents de ses services. */
   function loadActiveAgents(myServices){
     var list = [];
-    try { var raw = localStorage.getItem("vigie_hse_agents"); if (raw){ var p = JSON.parse(raw); if (Array.isArray(p)) list = p; } } catch (e) {}
+    try { var raw = VigieStore.getItem("vigie_hse_agents"); if (raw){ var p = JSON.parse(raw); if (Array.isArray(p)) list = p; } } catch (e) {}
     var services = myServices || ["*"];
     return list
       .filter(function (a) { return a.actif !== false && (services.indexOf("*") >= 0 || services.indexOf(a.service) >= 0); })

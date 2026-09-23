@@ -2,6 +2,7 @@
 <meta name="description" content="Catalogue des équipements de protection individuelle et vêtements de travail, stock, dotations par agent et suivi de l'entretien.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
@@ -585,9 +586,9 @@
   const AUDIT_KEY = "vigie_hse_audit_log";
   function logAudit(module, type, description){
     try {
-      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
       log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
-      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
     } catch(e){}
   }
 
@@ -597,7 +598,7 @@
   const appShell = document.querySelector(".app-shell");
   let collapseTimer = null;
   const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
   const pinBtn = document.getElementById("sidebarPin");
   function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function isDesktopWidth(){ return window.innerWidth > 980; }
@@ -615,7 +616,7 @@
   if (pinBtn) pinBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     sidebarLocked = !sidebarLocked;
-    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
     applyPinVisual();
     if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
   });
@@ -637,10 +638,10 @@
   };
   function loadReferentials(){
     let stored = {};
-    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
     const merged = Object.assign({}, stored);
     Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
-    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
   const REF = loadReferentials();
@@ -651,16 +652,16 @@
   const CAT_KEY = "vigie_hse_epi_catalogue";
   function loadCatalogue(){
     let stored = [];
-    try { const raw = localStorage.getItem(CAT_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(CAT_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = CATALOGUE_SEED.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
     const extra = stored.filter(r => !seedIds.has(r.id));
     const merged = seeded.concat(extra);
-    try { localStorage.setItem(CAT_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(CAT_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
-  function saveCatalogue(ds){ try { localStorage.setItem(CAT_KEY, JSON.stringify(ds)); } catch(e){} }
+  function saveCatalogue(ds){ try { VigieStore.setItem(CAT_KEY, JSON.stringify(ds)); } catch(e){} }
   let CATALOGUE = loadCatalogue();
   function catalogueById(id){ return CATALOGUE.find(c => c.id === id); }
 
@@ -721,16 +722,16 @@
   const STOCK_KEY = "vigie_hse_epi_stock";
   function loadStock(){
     let stored = [];
-    try { const raw = localStorage.getItem(STOCK_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(STOCK_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = STOCK_SEED.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
     const extra = stored.filter(r => !seedIds.has(r.id));
     const merged = seeded.concat(extra);
-    try { localStorage.setItem(STOCK_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(STOCK_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
-  function saveStock(ds){ try { localStorage.setItem(STOCK_KEY, JSON.stringify(ds)); } catch(e){} }
+  function saveStock(ds){ try { VigieStore.setItem(STOCK_KEY, JSON.stringify(ds)); } catch(e){} }
   let STOCK = loadStock();
 
   // ---------- Roster (dérivé du Registre AT/MP) ----------
@@ -773,17 +774,17 @@
   const DOT_KEY = "vigie_hse_epi_dotations";
   function loadDotations(){
     let stored = [];
-    try { const raw = localStorage.getItem(DOT_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(DOT_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     const seedList = buildDotationSeeds();
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
     const extra = stored.filter(r => !seedIds.has(r.id));
     const merged = seeded.concat(extra);
-    try { localStorage.setItem(DOT_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(DOT_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
-  function saveDotations(ds){ try { localStorage.setItem(DOT_KEY, JSON.stringify(ds)); } catch(e){} }
+  function saveDotations(ds){ try { VigieStore.setItem(DOT_KEY, JSON.stringify(ds)); } catch(e){} }
   let DOTATIONS = loadDotations();
   const DOTATIONS_ALL = DOTATIONS;
   if (isScoped){ DOTATIONS = DOTATIONS.filter(d => myServices.includes(d.service)); }
@@ -820,17 +821,17 @@
   const LAV_KEY = "vigie_hse_epi_lavages";
   function loadLavages(){
     let stored = [];
-    try { const raw = localStorage.getItem(LAV_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
+    try { const raw = VigieStore.getItem(LAV_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
     const seedList = buildLavageSeeds();
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
     const extra = stored.filter(r => !seedIds.has(r.id));
     const merged = seeded.concat(extra);
-    try { localStorage.setItem(LAV_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(LAV_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
-  function saveLavages(ds){ try { localStorage.setItem(LAV_KEY, JSON.stringify(ds)); } catch(e){} }
+  function saveLavages(ds){ try { VigieStore.setItem(LAV_KEY, JSON.stringify(ds)); } catch(e){} }
   let LAVAGES = loadLavages();
 
   function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }

@@ -2,6 +2,7 @@
 <meta name="description" content="Suivi administratif des dossiers AT/MP et maladies professionnelles : checklist documentaire, arrêtés d'imputabilité et de CITIS, workflow de signature.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
@@ -556,9 +557,9 @@
   const AUDIT_KEY = "vigie_hse_audit_log";
   function logAudit(module, type, description){
     try {
-      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
       log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
-      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
     } catch(e){}
   }
 
@@ -568,7 +569,7 @@
   const appShell = document.querySelector(".app-shell");
   let collapseTimer = null;
   const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
   const pinBtn = document.getElementById("sidebarPin");
   function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function isDesktopWidth(){ return window.innerWidth > 980; }
@@ -586,7 +587,7 @@
   if (pinBtn) pinBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     sidebarLocked = !sidebarLocked;
-    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
     applyPinVisual();
     if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
   });
@@ -599,10 +600,10 @@
   };
   function loadReferentials(){
     let stored = {};
-    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
     const merged = Object.assign({}, stored);
     Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
-    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
   const REF = loadReferentials();
@@ -612,7 +613,7 @@
   // consulté au moins une fois dans ce navigateur (auto-chargement DATATEST
   // ou saisie manuelle), et lit simplement sa clé de stockage.
   function loadAtmpEvents(){
-    try { const raw = localStorage.getItem("vigie_hse_dataset"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
+    try { const raw = VigieStore.getItem("vigie_hse_dataset"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
     return [];
   }
   let ATMP_EVENTS = loadAtmpEvents();
@@ -621,10 +622,10 @@
   // ---------- Dossiers administratifs (checklist) ----------
   const DOSSIERS_KEY = "vigie_hse_atmp_dossiers";
   function loadDossiers(){
-    try { const raw = localStorage.getItem(DOSSIERS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
+    try { const raw = VigieStore.getItem(DOSSIERS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
     return [];
   }
-  function saveDossiers(ds){ try { localStorage.setItem(DOSSIERS_KEY, JSON.stringify(ds)); } catch(e){} }
+  function saveDossiers(ds){ try { VigieStore.setItem(DOSSIERS_KEY, JSON.stringify(ds)); } catch(e){} }
   let DOSSIERS = loadDossiers();
   function dossierFor(atmpId){ return DOSSIERS.find(d => d.atmpId === atmpId) || null; }
   function emptyDossier(atmpId){
@@ -646,10 +647,10 @@
   // ---------- Arrêtés (imputabilité & CITIS) ----------
   const ARRETES_KEY = "vigie_hse_atmp_arretes";
   function loadArretes(){
-    try { const raw = localStorage.getItem(ARRETES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
+    try { const raw = VigieStore.getItem(ARRETES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){}
     return [];
   }
-  function saveArretes(a){ try { localStorage.setItem(ARRETES_KEY, JSON.stringify(a)); } catch(e){} }
+  function saveArretes(a){ try { VigieStore.setItem(ARRETES_KEY, JSON.stringify(a)); } catch(e){} }
   let ARRETES = loadArretes();
   function arretesFor(atmpId){ return ARRETES.filter(a => a.atmpId === atmpId); }
   function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }

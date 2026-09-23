@@ -2,6 +2,7 @@
 <meta name="description" content="Base documentaire HSE : articles et fiches pratiques cherchables, familles de risque, registre des documents officiels.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="assets/stockage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/risques-ref.js"></script>
@@ -575,9 +576,9 @@
   const AUDIT_KEY = "vigie_hse_audit_log";
   function logAudit(module, type, description){
     try {
-      const log = JSON.parse(localStorage.getItem(AUDIT_KEY) || "[]");
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
       log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
-      localStorage.setItem(AUDIT_KEY, JSON.stringify(log));
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
     } catch(e){}
   }
 
@@ -587,7 +588,7 @@
   const appShell = document.querySelector(".app-shell");
   let collapseTimer = null;
   const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = localStorage.getItem(SIDEBAR_PIN_KEY) === "true";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
   const pinBtn = document.getElementById("sidebarPin");
   function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
   function isDesktopWidth(){ return window.innerWidth > 980; }
@@ -605,7 +606,7 @@
   if (pinBtn) pinBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     sidebarLocked = !sidebarLocked;
-    localStorage.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
     applyPinVisual();
     if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
   });
@@ -618,10 +619,10 @@
   };
   function loadReferentials(){
     let stored = {};
-    try { const raw = localStorage.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
     const merged = Object.assign({}, stored);
     Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
-    try { localStorage.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
   const REF = loadReferentials();
@@ -666,7 +667,7 @@
     }));
   }
   function readList(key){
-    try { const raw = localStorage.getItem(key); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p.filter(r => r && r.id); } } catch(e){}
+    try { const raw = VigieStore.getItem(key); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p.filter(r => r && r.id); } } catch(e){}
     return [];
   }
   // Always-merge : les types livrés sont des EXEMPLES permanents, toujours présents et non supprimables
@@ -676,15 +677,15 @@
   const estTypeLivre = (t) => DOC_TYPES_DEFAUT.includes(t);
   function loadDocTypes(){
     let liste = [];
-    try { const raw = localStorage.getItem(DOC_TYPES_KEY); if (raw){ const parsed = JSON.parse(raw); if (Array.isArray(parsed)) liste = parsed.filter(t => typeof t === "string" && t.trim()); } } catch(e){}
+    try { const raw = VigieStore.getItem(DOC_TYPES_KEY); if (raw){ const parsed = JSON.parse(raw); if (Array.isArray(parsed)) liste = parsed.filter(t => typeof t === "string" && t.trim()); } } catch(e){}
     const merged = DOC_TYPES_DEFAUT.concat(liste.filter(t => !estTypeLivre(t)));
-    try { localStorage.setItem(DOC_TYPES_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(DOC_TYPES_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
   let DOC_TYPES = loadDocTypes();
-  function saveDocTypes(){ try { localStorage.setItem(DOC_TYPES_KEY, JSON.stringify(DOC_TYPES)); } catch(e){} }
-  function saveArticles(){ try { localStorage.setItem(ARTICLES_KEY, JSON.stringify(ARTICLES)); } catch(e){} }
-  function saveDocs(){ try { localStorage.setItem(DOCS_KEY, JSON.stringify(DOCS)); } catch(e){} }
+  function saveDocTypes(){ try { VigieStore.setItem(DOC_TYPES_KEY, JSON.stringify(DOC_TYPES)); } catch(e){} }
+  function saveArticles(){ try { VigieStore.setItem(ARTICLES_KEY, JSON.stringify(ARTICLES)); } catch(e){} }
+  function saveDocs(){ try { VigieStore.setItem(DOCS_KEY, JSON.stringify(DOCS)); } catch(e){} }
   function loadArticles(){
     const stored = readList(ARTICLES_KEY);
     const seeds = buildSeeds();
@@ -692,7 +693,7 @@
     const seeded = seeds.map(s => storedById.has(s.id) ? storedById.get(s.id) : s);
     const seedIds = new Set(seeds.map(s => s.id));
     const merged = seeded.concat(stored.filter(a => !seedIds.has(a.id)));
-    try { localStorage.setItem(ARTICLES_KEY, JSON.stringify(merged)); } catch(e){}
+    try { VigieStore.setItem(ARTICLES_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
   let ARTICLES = loadArticles();

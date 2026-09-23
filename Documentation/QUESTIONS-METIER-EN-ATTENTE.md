@@ -323,7 +323,7 @@ Rappel utile : dans la fonction publique territoriale, tous les facteurs C2P ne 
 
 ## ✅ Question 11 — Risques du Registre AT/MP : à quelle fiche de risque les rattacher ?
 
-**Contexte.** Le Registre AT/MP a sa propre liste de 9 risques, héritée du fichier source (`DB.xlsx`). Le Document Unique, lui, utilise 33 familles de risque, et chacune a désormais sa fiche dans la Base documentaire. Depuis le 2026-09-23, la colonne « Risque » du registre porte une pastille « fiche » qui ouvre la fiche correspondante — **à condition de savoir à quelle famille correspond chaque libellé**.
+**Contexte.** Le Registre AT/MP a sa propre liste de 9 risques, héritée du fichier source d'origine du prototype (`DB.xlsx`, hors dépôt). Le Document Unique, lui, utilise 33 familles de risque, et chacune a désormais sa fiche dans la Base documentaire. Depuis le 2026-09-23, la colonne « Risque » du registre porte une pastille « fiche » qui ouvre la fiche correspondante — **à condition de savoir à quelle famille correspond chaque libellé**.
 
 **Ce que fait le logiciel aujourd'hui.** Sur les 9 libellés du registre, 7 sont rattachés :
 

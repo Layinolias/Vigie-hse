@@ -37,7 +37,7 @@ Réutilise ce roster (mêmes noms/prénoms/services) dans les fichiers 1, 6, 7, 
 
 ---
 
-## Fichier 1 — `1-registre-at-mp.xlsx` → importer sur `registre-at-mp.html`
+## Fichier 1 — `1-registre-at-mp.xlsx` (dans le dépôt : `DATATEST/1-IMPORT-registre-at-mp.xlsx`, chargé automatiquement à l'ouverture de la page) → importer sur `registre-at-mp.html`
 
 Génère **25 lignes**. Colonnes exactes :
 
@@ -58,7 +58,7 @@ Valeurs à respecter :
 
 ---
 
-## Fichier 2 — `2-document-unique.xlsx` → importer sur `document-unique.html`
+## Fichier 2 — `2-document-unique.xlsx` (dans le dépôt : `DATATEST/2-IMPORT-document-unique.xlsx`, chargé automatiquement à l'ouverture de la page) → importer sur `document-unique.html`
 
 Génère **30 lignes** (couvrant plusieurs services et plusieurs niveaux de risque). Colonnes exactes :
 
@@ -78,7 +78,7 @@ Valeurs à respecter :
 
 ---
 
-## Fichier 3 — `3-epi-catalogue.xlsx` → importer sur `epi-dotation.html`, onglet **Catalogue**
+## Fichier 3 — `3-epi-catalogue.xlsx` (dans le dépôt : `DATATEST/3-REF-epi-catalogue.xlsx`, chargé automatiquement à l'ouverture de la page) → importer sur `epi-dotation.html`, onglet **Catalogue**
 
 ⚠️ À importer **avant** le Fichier 7 (Dotations), qui référence ces articles par leur nom.
 
@@ -93,7 +93,7 @@ Génère **12 lignes**. Colonnes exactes :
 
 ---
 
-## Fichier 4 — `4-produits-chimiques.xlsx` → importer sur `produits-chimiques.html`
+## Fichier 4 — `4-produits-chimiques.xlsx` (dans le dépôt : `DATATEST/4-REF-produits-chimiques.xlsx`, chargé automatiquement à l'ouverture de la page) → importer sur `produits-chimiques.html`
 
 Génère **15 lignes**. Colonnes exactes :
 
@@ -108,7 +108,7 @@ Génère **15 lignes**. Colonnes exactes :
 
 ---
 
-## Fichier 5 — `5-verifications-periodiques.xlsx` → importer sur `verifications-periodiques.html`
+## Fichier 5 — `5-verifications-periodiques.xlsx` (dans le dépôt : `DATATEST/5-REF-verifications-periodiques.xlsx`, chargé automatiquement à l'ouverture de la page) → importer sur `verifications-periodiques.html`
 
 Génère **20 lignes**. Colonnes exactes :
 
@@ -122,7 +122,7 @@ Génère **20 lignes**. Colonnes exactes :
 
 ---
 
-## Fichier 6 — `6-formation-habilitation.xlsx` → importer sur `formation-habilitation.html`
+## Fichier 6 — `6-formation-habilitation.xlsx` (dans le dépôt : `DATATEST/6-REF-formation-habilitation.xlsx`, chargé automatiquement à l'ouverture de la page) → importer sur `formation-habilitation.html`
 
 Génère **20 lignes** en réutilisant des agents du roster. Colonnes exactes :
 
@@ -133,7 +133,7 @@ Génère **20 lignes** en réutilisant des agents du roster. Colonnes exactes :
 
 ---
 
-## Fichier 7 — `7-epi-dotation.xlsx` → importer sur `epi-dotation.html`, onglet **Dotation**
+## Fichier 7 — `7-epi-dotation.xlsx` (dans le dépôt : `DATATEST/7-REF-epi-dotation.xlsx`, chargé automatiquement à l'ouverture de la page) → importer sur `epi-dotation.html`, onglet **Dotation**
 
 ⚠️ À importer **après** le Fichier 3 (Catalogue) — chaque ligne référence un article par son nom exact, qui doit déjà exister dans le catalogue.
 
@@ -146,7 +146,7 @@ Génère **20 lignes** en réutilisant des agents du roster et des noms d'articl
 
 ---
 
-## Fichier 8 — `8-registre-sst.xlsx` → importer sur `registre-sst.html`
+## Fichier 8 — `8-registre-sst.xlsx` (dans le dépôt : `DATATEST/8-REF-registre-sst.xlsx`, chargé automatiquement à l'ouverture de la page) → importer sur `registre-sst.html`
 
 Génère **15 lignes**. Colonnes exactes :
 
@@ -160,7 +160,7 @@ Génère **15 lignes**. Colonnes exactes :
 
 ---
 
-## Fichier 9 — `9-sante-visites.xlsx` → importer sur `sante-visites.html`
+## Fichier 9 — `9-sante-visites.xlsx` (dans le dépôt : `DATATEST/9-REF-sante-visites.xlsx`, chargé automatiquement à l'ouverture de la page) → importer sur `sante-visites.html`
 
 Génère **15 lignes** en réutilisant des agents du roster. Colonnes exactes :
 
@@ -171,7 +171,7 @@ Génère **15 lignes** en réutilisant des agents du roster. Colonnes exactes :
 
 ---
 
-## Fichier 10 — `10-inspection-audit.xlsx` → importer sur `inspection-audit.html` (2 étapes)
+## Fichier 10 — `10-inspection-audit.xlsx` (dans le dépôt : `DATATEST/10-REF-inspection-audit.xlsx`, chargé automatiquement à l'ouverture de la page) → importer sur `inspection-audit.html` (2 étapes)
 
 Ce fichier contient **2 onglets**, à importer dans cet ordre via les deux boutons dédiés de la page (« Importer trames .xlsx » puis « Importer inspections .xlsx ») :
 

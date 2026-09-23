@@ -516,7 +516,8 @@
   function loadReferentials(){
     let stored = {};
     try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
-    const merged = {};
+    // part de ce qui est stocké : une liste qu'une autre page a ajoutée (ex. typesAccueil) n'est pas effacée
+    const merged = Object.assign({}, stored);
     Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
     try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;

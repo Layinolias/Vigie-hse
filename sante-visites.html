@@ -1,6 +1,7 @@
 <title>Santé &amp; Visites</title>
 <meta name="description" content="Suivi des visites médicales et de la surveillance santé au travail des agents.">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/roster.js"></script>
@@ -868,6 +869,7 @@
   if (canEdit){
     $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle fiche</button>`;
 
+    VigieImpression.brancher("btnExport");
     $("btnExport").addEventListener("click", () => {
       const rows = DATASET.map(v => {
         const s = computeStatus(v);
@@ -1455,6 +1457,7 @@
     });
 
     // ---------- Export ----------
+    VigieImpression.brancher("rdvExport", { table: "#rdvTbody" });
     $("rdvExport").addEventListener("click", () => {
       const rows = RDV.slice().sort(sortRdv).map(r => ({
         "ID": r.id, "ID fiche de suivi": r.visiteId, "Nom": r.nom, "Prénom": r.prenom, "Collectivité": r.collectivite || "Ville", "Service": r.service,

@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/echeance.js"></script>
@@ -924,6 +925,7 @@
     });
   }
 
+  VigieImpression.brancher("btnExport");
   $("btnExport").addEventListener("click", () => {
     const exRows = DATASET.map(r => ({
       "ID": r.id, "Site": r.site, "Date exercice": r.dateExercice, "Collectivité": r.collectivite || "Ville", "Service": r.service,

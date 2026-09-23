@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/hse-formulas.js"></script>
@@ -805,6 +806,7 @@
 
   $("agentPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNewAgent"><svg class="icon"><use href="#i-plus"/></svg> Nouvel agent</button>` : `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`);
   if (canGestionRhWrite){ $("btnNewAgent").addEventListener("click", () => openAgentForm(null)); }
+  VigieImpression.brancher("btnExportAgents");
   $("btnExportAgents").addEventListener("click", () => {
     const rows = AGENTS.map(a => ({ "Nom":a.nom, "Prénom":a.prenom, "Collectivité":a.collectivite, "Service":a.service, "Responsable":a.managerId ? agentName(a.managerId) : "", "Date d'entrée":a.dateEntree||"", "Actif":a.actif !== false ? "Oui" : "Non" }));
     const wb = XLSX.utils.book_new();

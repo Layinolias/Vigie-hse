@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/roster.js"></script>
 <style>
@@ -904,6 +905,7 @@
   const panelBtns = [`<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`];
   if (canAccueilWrite) panelBtns.push(`<button type="button" class="btn btn-primary" id="btnNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvel accueil</button>`);
   $("panelActionsBtns").innerHTML = panelBtns.join("");
+  VigieImpression.brancher("btnExport");
   $("btnExport").addEventListener("click", () => {
     const accueils = DATASET.map(a => { const p = progress(a); return {
       "ID": a.id, "Nom": a.nom, "Prénom": a.prenom, "Collectivité": a.collectivite || "", "Service": a.service, "Poste": a.poste || "",

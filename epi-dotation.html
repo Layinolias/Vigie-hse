@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/roster.js"></script>
@@ -916,6 +917,7 @@
       }
       e.target.value = "";
     });
+    VigieImpression.brancher("catExport");
     $("catExport").addEventListener("click", () => {
       const rows = CATALOGUE.map(c => ({
         "ID": c.id, "Nom": c.nom, "Catégorie": c.categorie, "Norme": c.norme || "",
@@ -1009,6 +1011,7 @@
   }
   if (canEdit){
     $("stockActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="stkExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="stkNew"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle ligne de stock</button>`;
+    VigieImpression.brancher("stkExport");
     $("stkExport").addEventListener("click", () => {
       const rows = STOCK.map(s => {
         const c = catalogueById(s.articleId);
@@ -1178,6 +1181,7 @@
       }
       e.target.value = "";
     });
+    VigieImpression.brancher("dotExport");
     $("dotExport").addEventListener("click", () => {
       const rows = DOTATIONS.map(d => Object.assign({}, d, computeDotationStatus(d))).map(d => {
         const c = catalogueById(d.articleId);
@@ -1287,6 +1291,7 @@
   }
   if (canEdit){
     $("lavActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="lavExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="lavNew"><svg class="icon"><use href="#i-plus"/></svg> Enregistrer un lavage</button>`;
+    VigieImpression.brancher("lavExport");
     $("lavExport").addEventListener("click", () => {
       const rows = LAVAGES.map(l => {
         const dot = DOTATIONS_ALL.find(d => d.id === l.dotationId);

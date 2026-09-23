@@ -40,9 +40,23 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Cause** : le fichier de démonstration n'avait jamais été produit lors de la livraison du module 16.
 - **Corrigé** : 2026-09-23 — fichier créé (13 exercices, trois types, deux collectivités, les trois statuts d'échéance représentés). Vérifié : import complet, pas de doublon au rechargement.
 
+### Les échéances s'affichaient un jour trop tôt quand elles tombaient en heure d'été
+- **Où** : `assets/echeance.js` (Formation & Habilitation, Santé & Visites, Situations d'urgence, Vérifications périodiques) et le renouvellement des dotations d'`epi-dotation.html`.
+- **Remonté** : 2026-09-23, pendant l'audit des exports du plan de version V1.
+- **Constaté** : une date d'hiver plus une périodicité tombant en heure d'été affichait la veille, à toute heure et pour tout utilisateur en France — 2026-01-20 + 6 mois → 2026-07-19. Quatre échéances des données de démonstration étaient concernées.
+- **Cause** : la date était lue en UTC (`new Date("AAAA-MM-JJ")`), décalée en mois à l'heure locale, puis réécrite en UTC (`toISOString()`) : l'heure d'été retirait une heure de trop et faisait reculer d'un jour.
+- **Corrigé** : 2026-09-23 — lecture et écriture à l'heure locale (`assets/dates-locales.js`). Vérifié dans six fuseaux (Paris, Martinique, Réunion, Nouméa, Auckland, UTC) et en comparant avant/après les cinq pages sur les vraies données : 912 cellules, seules les 4 échéances fautives changent, d'exactement +1 jour. Une date illisible lève la même erreur qu'avant.
+
+### Un registre vide s'exportait en fichier Excel blanc
+- **Où** : les 27 feuilles d'export Excel de 17 pages.
+- **Remonté** : 2026-09-23, par l'audit des exports du plan de version V1.
+- **Constaté** : sans aucune fiche, le fichier exporté n'avait même pas la ligne d'en-têtes — impossible de s'en servir comme modèle pour un import. Le nom du fichier pouvait aussi porter la date de la veille entre minuit et 2 h.
+- **Corrigé** : 2026-09-23 — chaque export déclare ses colonnes ; nom de fichier daté à l'heure locale. Vérifié : les 41 feuilles vides ont désormais leurs en-têtes, et l'ordre des colonnes des 55 feuilles non vides est strictement identique à avant (les fichiers existants et les réimports ne bougent pas).
+
 ---
 
 ## Ouverts / reportés (pas des bugs à corriger maintenant)
 
 - **Taille des titres/menu sur mobile** — remonté le 2026-09-15 (checklist §5) : tout fonctionne, mais le porteur du projet veut augmenter la taille des titres et du menu côté mobile pour plus de confort. Amélioration reportée, pas urgente.
+- **« Aujourd'hui » calculé en UTC** — remonté le 2026-09-23 : environ 75 `new Date().toISOString().slice(0,10)` restent dans 18 pages pour la date du jour (date de création d'une fiche, date préremplie d'un formulaire, borne de fin par défaut du Reporting, échéance des actions générées du Plan d'actions). Entre minuit et 2 h du matin en France, ils donnent la veille — par exemple une fiche créée à 0 h 30 datée de la veille, ou le Reporting qui exclut par défaut les événements du jour. Sans effet le reste de la journée. Correction prévue par une campagne page par page sur `assets/dates-locales.js`, comme celle de l'échappement HTML.
 - **Présentation à un professionnel HSE externe** — toujours en recherche (checklist §7, 2026-09-15). Ne dépend pas du code ; c'est le dernier point du gel `v1.0.0` dans `PLAN-VERSIONS-V1.md`.

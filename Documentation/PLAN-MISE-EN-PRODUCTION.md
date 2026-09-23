@@ -19,7 +19,8 @@ VIGIE HSE est aujourd'hui un **prototype complet côté écran** (24 pages, 16 m
 - **Un kit de reprise des données** (`KIT-REPRISE/`, détail dans `KIT-REPRISE-DONNEES.md`) : un modèle Excel par module, dans l'ordre de chargement, avec des consignes mesurées sur la vraie application.
 - **Des imports fiables** : un aller-retour export → import a été vérifié sur les 14 modules importables, champ par champ ; il a fait corriger les dossiers AT/MP (dates, références et prolongations perdues) et ajouter l'import des agents et des heures travaillées.
 - **Tout type de tableur** (réponse du préventeur, question 13) : Excel `.xlsx`/`.xls`, LibreOffice `.ods`, CSV en point-virgule ou virgule et dans tous les encodages courants (`assets/import-fichier.js`) — un CSV UTF-8 sans BOM arrivait jusque-là avec des accents cassés, sans erreur signalée.
-- **Stockage plein signalé** : un enregistrement refusé faute de place n'est plus perdu en silence (bandeau), et `VigieStore.occupation()` mesure l'espace utilisé.
+- **Stockage plein signalé** : un enregistrement refusé faute de place n'est plus perdu en silence (bandeau), et `VigieStore.occupation()` mesure l'espace utilisé — affiché en jauge dans Administration.
+- **Reprise complète** : les référentiels s'importent (premier fichier du kit) et l'arbre causal des analyses d'accident aussi — les 14 modules importables font un aller-retour export → import sans perte, champ par champ.
 
 ## 3. Trois façons de déployer — un seul logiciel
 

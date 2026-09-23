@@ -79,6 +79,11 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Constaté** : au-delà d'environ 5 millions de caractères, le navigateur refuse l'écriture ; la plupart des pages enveloppent leur enregistrement dans un `try/catch` muet.
 - **Corrigé** : 2026-09-23 — `VigieStore.setItem` affiche un bandeau et relance l'erreur. Vérifié : quota réduit en jsdom, bandeau affiché une fois ; rendu de chaque page identique en usage normal (48/48).
 
+### Analyse d'accident : réimporter un fichier dupliquait les actions correctives
+- **Où** : `accident-analyse.html`, import. **Remonté** : 2026-09-23, en rendant l'arbre causal importable.
+- **Constaté** : chaque import ajoutait les actions du fichier à celles déjà enregistrées — deux imports du même fichier donnaient trois fois la même action, reprise d'autant dans le Plan d'actions.
+- **Corrigé** : 2026-09-23 — une action de même description est mise à jour, en gardant son identifiant. Vérifié : test de réimport 5/5 ; sur la version précédente, 3 actions au lieu d'une.
+
 ---
 
 ## Ouverts / reportés (pas des bugs à corriger maintenant)

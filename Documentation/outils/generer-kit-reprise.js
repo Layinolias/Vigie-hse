@@ -20,6 +20,7 @@ const XLSX = require('xlsx');
 const ROOT = path.join(__dirname, '..', '..') + path.sep;
 const SORTIE = path.join(ROOT, 'KIT-REPRISE');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const ADMIN = { user:'admin@verchamps.fr', role:'admin', email:'admin@verchamps.fr', services:['*'], modulePermissions:{} };
 const RH = { user:'RH1', role:'rh', email:'RH1', services:['*'], modulePermissions:{ 'atmp-admin':'write','atmp-declare':'write','accident-analyse':'write','urgences':'write' } };
 const EXEMPLES = 3;          // lignes d'exemple par feuille
 const INCONNUE = 'ZZ-valeur-inconnue';
@@ -35,13 +36,14 @@ function fetchDisque(url){
   }
   return Promise.reject(new TypeError('hors réseau'));
 }
-async function charger(page, { datatest = true, stockage = null, attente = 700 } = {}){
+async function charger(page, { datatest = true, stockage = null, attente = 700, session = RH } = {}){
   const errs = []; courantes = errs;
   const html = fs.readFileSync(ROOT + page, 'utf8');
   const vc = new VirtualConsole();
   vc.on('jsdomError', e => { const m = String(e && e.message || e); if (!/Not implemented|Could not load/.test(m)) errs.push(m.split('\n')[0]); });
   const w = new JSDOM(html, { runScripts:'outside-only', pretendToBeVisual:true, virtualConsole:vc, url:'https://layinolias.github.io/Vigie-hse/' + page }).window;
-  w.sessionStorage.setItem('vigie_hse_session', JSON.stringify(RH));
+  w.sessionStorage.setItem('vigie_hse_session', JSON.stringify(session));
+  if (!w.TextDecoder) w.TextDecoder = TextDecoder;   // présent dans les navigateurs, absent de jsdom
   if (stockage) for (const [k, v] of Object.entries(stockage)) w.localStorage.setItem(k, v);
   w.fetch = datatest ? fetchDisque : () => Promise.reject(new TypeError('hors réseau'));
   w.captures = []; w.messages = [];
@@ -60,6 +62,7 @@ async function charger(page, { datatest = true, stockage = null, attente = 700 }
   await sleep(attente);
   return { w, errs };
 }
+const lireObjet = (w, k) => { try { return JSON.parse(w.localStorage.getItem(k) || '{}') || {}; } catch(e){ return {}; } };
 const lireStock = (w, k) => { try { return JSON.parse(w.localStorage.getItem(k) || '[]'); } catch(e){ return []; } };
 const somme = (liste, champ) => liste.reduce((n, r) => n + ((r[champ] || []).length), 0);
 
@@ -67,14 +70,21 @@ const somme = (liste, champ) => liste.reduce((n, r) => n + ((r[champ] || []).len
 // source : comment obtenir le classeur d'exemple ; compter : combien d'éléments l'import a créés, par feuille ;
 // prerequis : ce que la page d'import doit déjà contenir (données chargées avant, dans le même ordre).
 const EVT = 'vigie_hse_dataset';
+const NOUVEAUX_REF = ['Police municipale', 'Transports urbains', "Conduite d'engins de déneigement"];
 const MODULES = [
+  { fichier:'00-referentiels', nom:'Référentiels (services, familles de risque, listes)', page:'administration.html', session: ADMIN, exp:'refExportBtn', imp:'refImportFile', ou:'Administration → Référentiels → Importer .xlsx',
+    source:{ enrichir:{ cle:'vigie_hse_referentials', f: r => { r.servicesVille = ['Police municipale'].concat(r.servicesVille || []); r.servicesAgglo = ['Transports urbains'].concat(r.servicesAgglo || []);
+      r.risqueFamillesDUERP = (r.risqueFamillesDUERP || []).concat([["Conduite d'engins de déneigement", 'Déneigement de la voirie par engins, de nuit et par grand froid.']]); return r; } } },
+    exemplesUtiles:{ 'Référentiels': r => NOUVEAUX_REF.includes(r['Valeur']) },
+    compter:{ 'Référentiels': w => Object.values(lireObjet(w, 'vigie_hse_referentials')).reduce((n, l) => n + (Array.isArray(l) ? l.length : 0), 0) },
+    note:"À charger en tout premier : les colonnes « Service » des autres fichiers doivent reprendre exactement ces libellés. L'import ajoute les valeurs manquantes et n'en retire jamais ; la colonne « Définition » ne sert qu'aux familles de risque." },
   { fichier:'01-agents', nom:'Agents (Gestion RH)', page:'gestion-rh.html', exp:'btnExportAgents', imp:'importAgentsFile', ou:'Gestion RH → onglet Agents → Importer .xlsx',
     source:{ stock:{ vigie_hse_agents: [
       { id:'ag-1', nom:'Leroy', prenom:'Anne', collectivite:'Ville', service:'Voirie & Réseaux', managerId:'', dateEntree:'2012-01-09', actif:true },
       { id:'ag-2', nom:'Durand', prenom:'Paul', collectivite:'Ville', service:'Voirie & Réseaux', managerId:'ag-1', dateEntree:'2019-09-02', actif:true },
       { id:'ag-3', nom:'Petit', prenom:'Luc', collectivite:'Agglomération', service:'Collecte & Propreté', managerId:'', dateEntree:'2021-04-12', actif:false } ] } },
     compter:{ Agents: w => lireStock(w, 'vigie_hse_agents').length },
-    note:"À charger en premier : les autres modules peuvent ensuite proposer ces agents dans leurs formulaires. Le responsable se désigne par son « Nom Prénom » ; il peut figurer plus bas dans le fichier." },
+    note:"À charger juste après les référentiels : les autres modules peuvent ensuite proposer ces agents dans leurs formulaires. Le responsable se désigne par son « Nom Prénom » ; il peut figurer plus bas dans le fichier." },
   { fichier:'02-heures-travaillees', nom:'Heures travaillées (Gestion RH)', page:'gestion-rh.html', exp:'btnExportHeures', imp:'importHeuresFile', ou:'Gestion RH → onglet Heures travaillées → Importer .xlsx',
     source:{ stock:{ vigie_hse_heures_travaillees: [
       { id:'h1', periode:'2026-01', collectivite:'Ville', service:'Voirie & Réseaux', heures:12450 },
@@ -96,11 +106,18 @@ const MODULES = [
     note:"Chaque ligne se rattache à un accident déjà présent dans le Registre AT/MP, par sa colonne « ID AT/MP » ou, à défaut, par « Nom » + « Date AT »." },
   { fichier:'05-analyses-accident', nom:'Analyses d\'accident', page:'accident-analyse.html', exp:'btnExport', imp:'importFile', ou:'Analyse d\'accident → Importer .xlsx',
     prerequis:[EVT], source:{ atmp:true, stock: ev => ({ vigie_hse_analyses_accident: [
-      { atmpId: ev[0].id, methode:'5 Pourquoi', faits:[], pourquoi:[], ishikawa:{ materiel:[], methode:[], mainOeuvre:[], milieu:[], matiere:[] },
+      { atmpId: ev[0].id, methode:'Arbre des causes',
+        faits:[ { id:'f-1', date:'2026-03-01', texte:"Fuite de toiture au-dessus de l'entrée", type:'Fait', causeDe:'' },
+                { id:'f-2', date:'2026-03-02', texte:"Flaque sur le sol de l'entrée", type:'Fait', causeDe:'f-1' },
+                { id:'f-3', date:'2026-03-02', texte:'Personne ne pensait devoir signaler la fuite', type:'Opinion', causeDe:'f-2' } ],
+        pourquoi:[ { question:"Pourquoi l'agent a-t-il glissé ?", reponse:'Le sol était mouillé' }, { question:'Pourquoi le sol était-il mouillé ?', reponse:'La fuite de toiture n\'avait pas été signalée' } ],
+        ishikawa:{ materiel:['Toiture non entretenue'], methode:['Pas de consigne de signalement des fuites'], mainOeuvre:[], milieu:["Entrée sans tapis"], matiere:[] },
         conclusion:'Fuite de toiture non signalée au service Patrimoine', actions:[{ id:'act-1', description:'Poser un tapis antidérapant à l\'entrée', responsable:'Chef d\'équipe', echeance:'2026-10-15', statut:'En cours' }], dateAnalyse:'2026-09-10', auteur:'RH1' } ] }) },
     exemplesUtiles:{ Analyses: r => r['Statut'] === 'Faite' },
-    compter:{ Analyses: w => lireStock(w, 'vigie_hse_analyses_accident').length, Actions: w => somme(lireStock(w, 'vigie_hse_analyses_accident'), 'actions') },
-    note:"La méthode, la conclusion et les actions correctives se reprennent ; l'arbre des causes lui-même (faits, « pourquoi », diagramme d'Ishikawa) se ressaisit à l'écran — la page le signale à l'import." },
+    compter:{ Analyses: w => lireStock(w, 'vigie_hse_analyses_accident').length, Actions: w => somme(lireStock(w, 'vigie_hse_analyses_accident'), 'actions'),
+      Faits: w => somme(lireStock(w, 'vigie_hse_analyses_accident'), 'faits'), Pourquoi: w => somme(lireStock(w, 'vigie_hse_analyses_accident'), 'pourquoi'),
+      Ishikawa: w => lireStock(w, 'vigie_hse_analyses_accident').reduce((n, a) => n + Object.values(a.ishikawa || {}).reduce((m, l) => m + (l || []).length, 0), 0) },
+    note:"La méthode, la conclusion, les actions correctives et l'arbre causal (feuilles « Faits », « Pourquoi », « Ishikawa ») se reprennent. Dans « Faits », la colonne « Découle du fait n° » désigne un autre fait de la même analyse par son numéro." },
   { fichier:'06-document-unique', nom:'Document Unique (DUERP)', page:'document-unique.html', exp:'btnExport', imp:'importFile', ou:'Document Unique → Importer .xlsx',
     source:{ datatest:true }, compter:{ EVR: w => lireStock(w, 'vigie_hse_duerp_dataset').length },
     note:"Une ligne par unité de travail et par risque." },
@@ -138,7 +155,6 @@ const MODULES = [
     prerequis:['vigie_hse_epi_catalogue'], source:{ datatest:true }, compter:{ Dotations: w => lireStock(w, 'vigie_hse_epi_dotations').length } },
 ];
 const SAISIE_ECRAN = [
-  ['Référentiels (services, sites, familles de risque…)', 'Administration → Référentiels', "À faire AVANT tout import : les colonnes « Service » des fichiers doivent reprendre exactement ces libellés."],
   ['Comptes utilisateurs', 'Administration → Utilisateurs', "Créés un par un (ils relèveront de la future authentification)."],
   ['Accueil au poste', 'Accueil au poste', "Pas d'import : les parcours se créent à l'arrivée de chaque agent."],
   ['Entreprises extérieures', 'Entreprises extérieures', "Pas d'import : une fiche par intervention."],
@@ -156,14 +172,14 @@ function classeur(feuilles, ordre){
   return wb;
 }
 async function importerDans(m, feuilles, ordre, prerequis){
-  const B = await charger(m.page, { datatest:false, stockage: prerequis, attente: 300 });
+  const B = await charger(m.page, { datatest:false, stockage: prerequis, attente: 300, session: m.session });
   if (m.onglet){ const t = B.w.document.querySelector('[data-tab="' + m.onglet + '"]'); if (t) t.click(); }
   const input = B.w.document.getElementById(m.imp);
   const buf = XLSX.write(classeur(feuilles, ordre), { type:'array', bookType:'xlsx' });
   Object.defineProperty(input, 'files', { configurable:true, value:[new B.w.File([buf], 'import.xlsx')] });
   input.dispatchEvent(new B.w.Event('change', { bubbles:true }));
   await sleep(350);
-  const comptes = {}; for (const [sn, f] of Object.entries(m.compter)) comptes[sn] = f(B.w);
+  const comptes = {}; for (const [sn, f] of Object.entries(m.compter)) comptes[sn] = f(B.w) - ((m.base && m.base[sn]) || 0);
   let reexport = null;
   if (m.exp){ B.w.document.getElementById(m.exp).click(); reexport = B.w.captures[0] ? lignesDe(B.w.captures[0]) : null; }
   // tout ce qui a été stocké, journaux exclus (ils citent les noms saisis) : sert à voir si une valeur a été gardée
@@ -196,18 +212,21 @@ function formatDe(valeurs){
     if (m.source.atmp) stockSource[EVT] = DATASET;
     const s = typeof m.source.stock === 'function' ? m.source.stock(JSON.parse(DATASET)) : (m.source.stock || {});
     for (const [k, v] of Object.entries(s)) stockSource[k] = JSON.stringify(v);
-    let A = await charger(m.page, { datatest: !!m.source.datatest, stockage: stockSource });
+    let A = await charger(m.page, { datatest: !!m.source.datatest, stockage: stockSource, session: m.session });
     if (m.source.enrichir){
       // données de démonstration complétées (ex. une action corrective), rechargées sans DATATEST
       const e = m.source.enrichir, tout = {};
       for (let i = 0; i < A.w.localStorage.length; i++){ const k = A.w.localStorage.key(i); tout[k] = A.w.localStorage.getItem(k); }
       tout[e.cle] = JSON.stringify(e.f(JSON.parse(tout[e.cle] || '[]')));
       A.w.close();
-      A = await charger(m.page, { datatest:false, stockage: tout });
+      A = await charger(m.page, { datatest:false, stockage: tout, session: m.session });
     }
     if (m.onglet){ const t = A.w.document.querySelector('[data-tab="' + m.onglet + '"]'); if (t) t.click(); }
     const prerequis = {};
-    ['vigie_hse_referentials', ...(m.prerequis || [])].forEach(k => { const v = A.w.localStorage.getItem(k); if (v != null) prerequis[k] = v; });
+    // les référentiels de la page source servent de prérequis aux autres modules — pas au module des
+    // référentiels lui-même, dont ils sont justement les données à importer
+    (m.fichier === '00-referentiels' ? (m.prerequis || []) : ['vigie_hse_referentials', ...(m.prerequis || [])])
+      .forEach(k => { const v = A.w.localStorage.getItem(k); if (v != null) prerequis[k] = v; });
     let wbSource;
     if (m.source.trames){
       const trames = lireStock(A.w, 'vigie_hse_inspection_trames');
@@ -230,6 +249,9 @@ function formatDe(valeurs){
       feuilles[sn] = { entetes: entetes(wbSource, sn), lignes: ex, toutes: toutes[sn] };
     }
 
+    // 1 bis. ce que la page d'import contient déjà sans rien importer (ex. les référentiels par défaut)
+    { const B0 = await charger(m.page, { datatest:false, stockage: prerequis, attente: 300, session: m.session }); m.base = {};
+      for (const [sn, f] of Object.entries(m.compter)) m.base[sn] = f(B0.w); B0.w.close(); }
     // 2. référence : les exemples s'importent-ils ?
     const ref = await importerDans(m, feuilles, ordre, prerequis);
     // 3. chaque colonne : vidée, puis valeur inconnue
@@ -326,9 +348,9 @@ function formatDe(valeurs){
 
   // ---------------------------------------------------------------- mode d'emploi (Excel) et documentation
   const emploi = [
-    ...SAISIE_ECRAN.slice(0, 2).map(([quoi, ou, rem], i) => ({ 'Étape': 'Avant', 'Fichier': '(saisie à l\'écran)', 'Contenu': quoi, 'Où l\'importer': ou, 'Remarques': rem })),
+    ...SAISIE_ECRAN.slice(0, 1).map(([quoi, ou, rem], i) => ({ 'Étape': 'Avant', 'Fichier': '(saisie à l\'écran)', 'Contenu': quoi, 'Où l\'importer': ou, 'Remarques': rem })),
     ...bilan.map(b => ({ 'Étape': b.m.fichier.slice(0, 2), 'Fichier': b.m.fichier + '.xlsx', 'Contenu': b.m.nom, 'Où l\'importer': b.m.ou, 'Remarques': b.m.note || '' })),
-    ...SAISIE_ECRAN.slice(2).map(([quoi, ou, rem]) => ({ 'Étape': '—', 'Fichier': '(saisie à l\'écran)', 'Contenu': quoi, 'Où l\'importer': ou, 'Remarques': rem })),
+    ...SAISIE_ECRAN.slice(1).map(([quoi, ou, rem]) => ({ 'Étape': '—', 'Fichier': '(saisie à l\'écran)', 'Contenu': quoi, 'Où l\'importer': ou, 'Remarques': rem })),
   ];
   const wbE = XLSX.utils.book_new();
   const wsE = XLSX.utils.json_to_sheet(emploi);
@@ -353,7 +375,7 @@ function formatDe(valeurs){
     '',
     "Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes (registres Excel, historique des accidents, suivi des visites…) se chargent par les imports de chaque module. Le dossier `KIT-REPRISE/` contient un modèle Excel par module importable et un mode d'emploi (`00-mode-d-emploi.xlsx`).",
     '',
-    "**Comment les modèles sont faits.** Chaque modèle est l'export réel du module : mêmes feuilles, mêmes colonnes. Un aller-retour export → import a été vérifié sur tous les modules (les enregistrements reviennent à l'identique, champ par champ ; seule exception connue, l'arbre des causes d'une analyse d'accident, que la page signale). Les consignes de chaque colonne ne sont pas rédigées à la main : le générateur **importe réellement** les exemples dans la page, vide chaque colonne pour voir si les lignes sont refusées (colonne obligatoire), et y met une valeur inconnue pour voir si elle est gardée (texte libre), remplacée ou refusée (liste).",
+    "**Comment les modèles sont faits.** Chaque modèle est l'export réel du module : mêmes feuilles, mêmes colonnes. Un aller-retour export → import a été vérifié sur tous les modules (les enregistrements reviennent à l'identique, champ par champ, arbre causal des analyses d'accident compris). Les consignes de chaque colonne ne sont pas rédigées à la main : le générateur **importe réellement** les exemples dans la page, vide chaque colonne pour voir si les lignes sont refusées (colonne obligatoire), et y met une valeur inconnue pour voir si elle est gardée (texte libre), remplacée ou refusée (liste).",
     '',
     '## Ordre de chargement',
     '',
@@ -374,9 +396,8 @@ function formatDe(valeurs){
     '',
     '## Limites connues',
     '',
-    "- **Arbre des causes** d'une analyse d'accident (faits, « pourquoi », diagramme d'Ishikawa) : non repris par l'import, à ressaisir à l'écran — la page l'annonce.",
     "- **Formats** : Excel (`.xlsx`, `.xls`), LibreOffice (`.ods`) et CSV (point-virgule ou virgule, UTF-8 avec ou sans BOM, Windows-1252 — `assets/import-fichier.js`). Un document Word, PDF ou papier se recopie d'abord dans le modèle : le préventeur prévient que « tout type de fichier est à prévoir » (question 13) — la reprise d'un client devra donc souvent passer par une transcription accompagnée.",
-    "- **Référentiels** (services, sites, familles de risque) et **comptes** : pas d'import ; à saisir dans Administration avant les fichiers, car les colonnes « Service » doivent reprendre exactement ces libellés.",
+    "- **Comptes utilisateurs** : pas d'import (ils relèveront de la future authentification). Les **référentiels** s'importent (fichier `00-referentiels.xlsx`) et se chargent en premier : les colonnes « Service » des autres fichiers doivent reprendre exactement leurs libellés.",
     "- **Accueil au poste, entreprises extérieures, base documentaire, stock et lavages d'EPI, rendez-vous médicaux** : pas d'import, saisie à l'écran.",
     "- **Données dans le navigateur** : tant que l'application n'a pas de serveur, la reprise se fait sur le poste qui servira (voir `PLAN-MISE-EN-PRODUCTION.md`).",
     '',

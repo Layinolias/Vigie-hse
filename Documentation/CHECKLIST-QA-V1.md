@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 125 points au 2026-09-23 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 127 points au 2026-09-23 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -41,6 +41,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Voit tous les modules, y compris **Administration** et **Indicateurs & Reporting**.
 - [ ] Dans **Administration** : créer un utilisateur test, modifier son rôle, le désactiver, le supprimer — sans erreur.
 - [ ] Dans **Administration** → Référentiels : ajouter un élément à une liste (ex. un service), vérifier qu'il apparaît dans un formulaire d'un autre module (ex. Déclarer un AT/MP).
+- [ ] Dans **Administration** → Référentiels : « Exporter .xlsx » donne une ligne par valeur ; ajouter au fichier un service « Police municipale » dans « Services — Ville » et une ligne « patrimoine bati » (déjà présente, écrite autrement), puis « Importer .xlsx » : le service apparaît, le doublon est annoncé « déjà présent », rien n'est retiré. Plus bas, le panneau « Stockage de ce navigateur » indique l'espace utilisé et les modules les plus lourds.
 - [ ] Dans **Administration** : publier une actualité Flash Info, vérifier qu'elle apparaît sur le cockpit.
 - [ ] Dans **Administration** → Veille réglementaire : ajouter une actualité, vérifier qu'elle apparaît sur le cockpit ; passer son statut à "Archivé", vérifier qu'elle disparaît du cockpit (mais reste visible/éditable dans Administration).
 - [ ] Tester le bouton "Réinitialiser la démonstration" dans Administration (⚠️ à faire en dernier, ça remet tout à zéro).
@@ -72,6 +73,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Peut ajouter un arrêté (type + statut + dates), le voir apparaître dans le tableau des arrêtés du dossier.
 - [ ] Peut déclarer un AT/MP complet depuis `saisie-rh.html`, le retrouver dans le Registre AT/MP.
 - [ ] Peut ouvrir "Analyse d'accident" sur un événement existant, choisir une méthode (tester les 3 : Arbre des causes, 5 Pourquoi, Ishikawa sur des événements différents), ajouter une action corrective, enregistrer, rouvrir et retrouver les données.
+- [ ] Exporter les analyses d'accident : le fichier contient les feuilles « Faits », « Pourquoi » et « Ishikawa ». Le réimporter deux fois : l'arbre causal revient à l'identique et l'action corrective n'est pas dupliquée (ni ici, ni dans le Plan d'actions).
 - [ ] L'action corrective créée apparaît bien dans **Plan d'Actions** avec l'origine "Analyse".
 - [ ] Depuis le Registre AT/MP, cliquer "Analyser" sur une ligne ouvre directement le bon événement dans Analyse d'accident.
 - [ ] Peut créer un exercice d'urgence (site, type, date, périodicité) dans "Situations d'urgence", ajouter une action corrective, enregistrer, modifier l'exercice et retrouver les données.

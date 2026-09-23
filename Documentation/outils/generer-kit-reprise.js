@@ -337,6 +337,7 @@ function formatDe(valeurs){
   const regles = [
     { 'Règle': "Chaque fichier contient une feuille de données vide (à remplir), une feuille « Exemple » (jamais importée) et une feuille « Consignes »." },
     { 'Règle': "Ne renommez pas les colonnes et ne changez pas le nom des feuilles de données : l'import les reconnaît par leur nom." },
+    { 'Règle': "Formats acceptés : Excel (.xlsx, .xls), LibreOffice (.ods) et CSV (séparateur point-virgule ou virgule, quel que soit l'encodage). Un document Word, PDF ou papier, ou l'export d'un autre logiciel sous un autre format, se recopie d'abord dans le modèle." },
     { 'Règle': "Respectez l'ordre des fichiers : certains se rattachent à des données chargées avant (accidents, trames, catalogue d'EPI)." },
     { 'Règle': "Après chaque import, l'application affiche combien de lignes ont été ajoutées, mises à jour ou ignorées : notez les lignes ignorées et corrigez-les." },
     { 'Règle': "Un fichier réimporté met à jour les lignes qu'il reconnaît ; une colonne absente du fichier ne modifie pas ce qui est déjà enregistré (Gestion RH, Dossiers AT/MP)." },
@@ -374,6 +375,7 @@ function formatDe(valeurs){
     '## Limites connues',
     '',
     "- **Arbre des causes** d'une analyse d'accident (faits, « pourquoi », diagramme d'Ishikawa) : non repris par l'import, à ressaisir à l'écran — la page l'annonce.",
+    "- **Formats** : Excel (`.xlsx`, `.xls`), LibreOffice (`.ods`) et CSV (point-virgule ou virgule, UTF-8 avec ou sans BOM, Windows-1252 — `assets/import-fichier.js`). Un document Word, PDF ou papier se recopie d'abord dans le modèle : le préventeur prévient que « tout type de fichier est à prévoir » (question 13) — la reprise d'un client devra donc souvent passer par une transcription accompagnée.",
     "- **Référentiels** (services, sites, familles de risque) et **comptes** : pas d'import ; à saisir dans Administration avant les fichiers, car les colonnes « Service » doivent reprendre exactement ces libellés.",
     "- **Accueil au poste, entreprises extérieures, base documentaire, stock et lavages d'EPI, rendez-vous médicaux** : pas d'import, saisie à l'écran.",
     "- **Données dans le navigateur** : tant que l'application n'a pas de serveur, la reprise se fait sur le poste qui servira (voir `PLAN-MISE-EN-PRODUCTION.md`).",

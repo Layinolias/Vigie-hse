@@ -69,6 +69,16 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Constaté** : l'export ne donnait que le nombre de prolongations et omettait les dates et références (certificat final, IPP, enquête) ; un réimport ramenait donc des dossiers sans prolongations ni ces dates. Pire, **réimporter un fichier qui n'avait pas ces colonnes effaçait les valeurs déjà enregistrées**, et une vraie date Excel s'enregistrait en texte (« Mon Mar 02 2026… »).
 - **Corrigé** : 2026-09-23 — colonnes ajoutées en fin de feuille, feuille « Prolongations » ; une colonne absente ne modifie plus rien ; dates Excel lues comme des dates. Vérifié : test dédié 9/9, en échec 7 fois sur 9 sur la version précédente ; aller-retour sans perte.
 
+### Un CSV importé pouvait arriver avec des accents cassés, sans erreur
+- **Où** : tous les imports (28 lectures de fichier, 14 pages). **Remonté** : 2026-09-23, en testant « tout type de fichier » (réponse du préventeur, question 13).
+- **Constaté** : SheetJS lisait un CSV octet par octet. Un CSV UTF-8 sans BOM (LibreOffice, la plupart des logiciels) donnait « PropretÃ© », et « Agglomération » devenait méconnaissable, donc remplacée par « Ville » — l'import annonçait pourtant un succès. Un CSV Windows-1252 (Excel français) perdait « — », « ’ », « œ », « € ».
+- **Corrigé** : 2026-09-23 — `assets/import-fichier.js` décode le texte avant lecture ; `.ods` accepté. Vérifié : 7 variantes, 7/7 correctes (3/7 avant).
+
+### Stockage plein : une saisie refusée était perdue sans message
+- **Où** : toutes les pages. **Remonté** : 2026-09-23, en mesurant le volume d'un historique complet (réponse du préventeur, question 13).
+- **Constaté** : au-delà d'environ 5 millions de caractères, le navigateur refuse l'écriture ; la plupart des pages enveloppent leur enregistrement dans un `try/catch` muet.
+- **Corrigé** : 2026-09-23 — `VigieStore.setItem` affiche un bandeau et relance l'erreur. Vérifié : quota réduit en jsdom, bandeau affiché une fois ; rendu de chaque page identique en usage normal (48/48).
+
 ---
 
 ## Ouverts / reportés (pas des bugs à corriger maintenant)

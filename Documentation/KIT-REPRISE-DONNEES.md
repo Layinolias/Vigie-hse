@@ -60,6 +60,7 @@ Le détail complet (format, valeurs acceptées, remarques) est dans la feuille �
 ## Limites connues
 
 - **Arbre des causes** d'une analyse d'accident (faits, « pourquoi », diagramme d'Ishikawa) : non repris par l'import, à ressaisir à l'écran — la page l'annonce.
+- **Formats** : Excel (`.xlsx`, `.xls`), LibreOffice (`.ods`) et CSV (point-virgule ou virgule, UTF-8 avec ou sans BOM, Windows-1252 — `assets/import-fichier.js`). Un document Word, PDF ou papier se recopie d'abord dans le modèle : le préventeur prévient que « tout type de fichier est à prévoir » (question 13) — la reprise d'un client devra donc souvent passer par une transcription accompagnée.
 - **Référentiels** (services, sites, familles de risque) et **comptes** : pas d'import ; à saisir dans Administration avant les fichiers, car les colonnes « Service » doivent reprendre exactement ces libellés.
 - **Accueil au poste, entreprises extérieures, base documentaire, stock et lavages d'EPI, rendez-vous médicaux** : pas d'import, saisie à l'écran.
 - **Données dans le navigateur** : tant que l'application n'a pas de serveur, la reprise se fait sur le poste qui servira (voir `PLAN-MISE-EN-PRODUCTION.md`).

@@ -42,8 +42,8 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 10 | Base documentaire : trame des fiches de risque, documents obligatoires | Module Base documentaire (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
 | 11 | Risques du Registre AT/MP : à quelle fiche de risque les rattacher ? | Registre AT/MP + Base documentaire (existants) | ✅ répondue le 2026-09-23, mise en œuvre le jour même |
 | 12 | Impression et PDF : quels documents méritent une vraie mise en page ? | Tous les registres (impression générique en service) | ✅ répondue le 2026-09-23 : la liste suffit, piste gardée en réserve |
-| 13 | Reprise des données : qu'apporte un client, et jusqu'où remonter ? | Mise en service chez un client (kit de reprise) | 🟠 posée le 2026-09-23, en attente |
-| 14 | Données de santé : lesquelles le logiciel doit-il vraiment garder ? | Registre AT/MP, dossiers AT/MP, visites médicales | 🟠 posée le 2026-09-23, en attente |
+| 13 | Reprise des données : qu'apporte un client, et jusqu'où remonter ? | Mise en service chez un client (kit de reprise) | ✅ répondue le 2026-09-23 : tout l'historique, tout type de fichier |
+| 14 | Données de santé : lesquelles le logiciel doit-il vraiment garder ? | Registre AT/MP, dossiers AT/MP, visites médicales | ✅ répondue le 2026-09-23 : à voir avec le délégué à la protection des données, pas encore sollicité |
 
 ---
 
@@ -376,7 +376,7 @@ Les deux derniers n'ont **pas** été rattachés, parce que ce serait trancher u
 
 ---
 
-## 🟠 Question 13 — Reprise des données : qu'apporte un client, et jusqu'où remonter ?
+## ✅ Question 13 — Reprise des données : qu'apporte un client, et jusqu'où remonter ?
 
 **Contexte.** Pour une mise en service réelle, un kit de reprise des données est prêt (`KIT-REPRISE/`, voir `KIT-REPRISE-DONNEES.md`) : un modèle Excel par module importable, 17 fichiers, dans l'ordre de chargement, avec pour chaque colonne ce qui est obligatoire et le format attendu — mesurés en important dans la vraie application.
 
@@ -391,11 +391,13 @@ Les deux derniers n'ont **pas** été rattachés, parce que ce serait trancher u
 
 ### Décision
 
-> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse)*
+> **Réponse du préventeur (Cahier, 2026-09-23) : option C, « tout l'historique disponible ».** Formats : « Tout type de fichier est à prévoir ». Fichiers indispensables pour démarrer : « Je n'ai pas encore de réponse ».
+>
+> **Suite donnée le 2026-09-23.** (1) Les imports lisent désormais tout CSV (point-virgule ou virgule, UTF-8 avec ou sans BOM, Windows-1252) et les classeurs LibreOffice `.ods`, en plus d'Excel : un CSV UTF-8 sans BOM arrivait jusque-là avec des accents cassés, sans erreur signalée (`assets/import-fichier.js`, 7 formats vérifiés). Un document Word, PDF ou papier se recopie dans le modèle : la reprise d'un client passera souvent par une transcription accompagnée (noté dans le kit et le plan de mise en production). (2) « Tout l'historique » : mesuré, 865 caractères par accident et jusqu'à 1 000 par inspection — une collectivité moyenne approche la limite d'environ 5 millions de caractères qu'un navigateur accorde à un site. Un enregistrement refusé faute de place était perdu sans message : un bandeau le signale désormais. C'est un argument de plus pour le serveur (`PLAN-MISE-EN-PRODUCTION.md` §6 bis). (3) L'ordre de priorité des 17 fichiers reste à préciser : le kit garde son ordre de chargement technique.
 
 ---
 
-## 🟠 Question 14 — Données de santé : lesquelles le logiciel doit-il vraiment garder ?
+## ✅ Question 14 — Données de santé : lesquelles le logiciel doit-il vraiment garder ?
 
 **Contexte.** Avant tout hébergement sur un vrai serveur (`PLAN-MISE-EN-PRODUCTION.md` §6), une règle pèse lourd : les données de santé sont protégées plus strictement (article 9 du RGPD) et leur hébergement peut exiger un prestataire certifié HDS. La question juridique va à un juriste ou au délégué à la protection des données ; la question métier va au préventeur : moins le logiciel détient d'informations médicales, plus tout est simple.
 
@@ -411,7 +413,9 @@ Rien n'a été retiré : une donnée métier ne se supprime pas sans l'avis du p
 
 ### Décision
 
-> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse)*
+> **Réponse du préventeur (Cahier, 2026-09-23) : option C, « à voir avec le délégué à la protection des données ».** Un délégué a-t-il déjà été sollicité ou un avis rendu : « Pas encore ».
+>
+> **Suite donnée** : rien n'est retiré ; les clés concernées restent marquées `sensible` dans `VigieStore.CLES`. La question passe au délégué à la protection des données d'un client (ou d'un juriste), en même temps que celle de l'hébergement HDS — c'est une **décision à obtenir avant le choix de l'hébergeur** (`PLAN-MISE-EN-PRODUCTION.md` §6 et §8).
 
 ---
 

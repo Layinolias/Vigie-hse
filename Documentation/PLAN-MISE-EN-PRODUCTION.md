@@ -18,6 +18,8 @@ VIGIE HSE est aujourd'hui un **prototype complet côté écran** (24 pages, 16 m
 - **Un navigateur qui refuse le stockage** ne fait plus planter les pages : elles fonctionnent sur une mémoire temporaire, avec un bandeau qui prévient que rien ne sera conservé.
 - **Un kit de reprise des données** (`KIT-REPRISE/`, détail dans `KIT-REPRISE-DONNEES.md`) : un modèle Excel par module, dans l'ordre de chargement, avec des consignes mesurées sur la vraie application.
 - **Des imports fiables** : un aller-retour export → import a été vérifié sur les 14 modules importables, champ par champ ; il a fait corriger les dossiers AT/MP (dates, références et prolongations perdues) et ajouter l'import des agents et des heures travaillées.
+- **Tout type de tableur** (réponse du préventeur, question 13) : Excel `.xlsx`/`.xls`, LibreOffice `.ods`, CSV en point-virgule ou virgule et dans tous les encodages courants (`assets/import-fichier.js`) — un CSV UTF-8 sans BOM arrivait jusque-là avec des accents cassés, sans erreur signalée.
+- **Stockage plein signalé** : un enregistrement refusé faute de place n'est plus perdu en silence (bandeau), et `VigieStore.occupation()` mesure l'espace utilisé.
 
 ## 3. Trois façons de déployer — un seul logiciel
 
@@ -72,6 +74,10 @@ VIGIE HSE est aujourd'hui un **prototype complet côté écran** (24 pages, 16 m
 - **Analyse d'impact (AIPD).** Un traitement de données de santé à grande échelle appelle en général une analyse d'impact relative à la protection des données ; à confirmer avec le même interlocuteur.
 - **Hébergeurs** candidats, en France : OVHcloud, Scaleway, Outscale, entre autres — plusieurs ont des offres certifiées HDS ; certaines collectivités exigent en plus la qualification SecNumCloud.
 
+## 6 bis. Volume : « tout l'historique » dans un navigateur
+
+Le préventeur demande de reprendre **tout l'historique** d'un client (question 13). Mesuré sur les données de démonstration : **865 caractères par accident**, 445 par ligne du document unique, environ 1 000 par inspection, 285 par habilitation, 260 par suivi de visite. Pour une collectivité moyenne (quinze ans d'accidents, 850 agents avec habilitations et EPI, plusieurs années d'inspections, un journal d'audit qui ne fait que grandir), l'ordre de grandeur est de **3,5 à 4 millions de caractères** — or un navigateur accorde **environ 5 millions** à un site (et GitHub Pages partage ce quota entre tous les sites d'un même compte). **La reprise d'un historique complet chez un vrai client est donc un argument de plus pour le serveur de l'étape P1**, pas pour le prototype. En attendant, un enregistrement refusé faute de place affiche un bandeau au lieu d'être perdu.
+
 ## 7. GitHub : dépôt privé et site en ligne
 
 - **Rendre le dépôt privé est gratuit** (les dépôts privés sont inclus dans l'offre gratuite de GitHub) : cela cache le code.
@@ -85,7 +91,7 @@ VIGIE HSE est aujourd'hui un **prototype complet côté écran** (24 pages, 16 m
 | Décision | Qui | Pourquoi maintenant |
 |---|---|---|
 | Profil du premier client (collectivité ? entreprise ? taille ?) | Porteur du projet | Il fixe l'hébergement, le vocabulaire et le modèle de déploiement |
-| Hébergement HDS nécessaire ou non | Juriste / délégué à la protection des données | Conditionne le choix de l'hébergeur |
-| Données de santé réellement nécessaires | Préventeur (question 14) | Moins on en garde, plus tout est simple |
-| Données qu'un client apporte, et combien d'années d'historique | Préventeur (question 13) | Complète le kit de reprise |
+| Hébergement HDS nécessaire ou non | Juriste / délégué à la protection des données — le préventeur n'en a pas encore sollicité (question 14) | Conditionne le choix de l'hébergeur |
+| Données de santé réellement nécessaires | Délégué à la protection des données (le préventeur l'a renvoyée vers lui, question 14) | Moins on en garde, plus tout est simple |
+| ~~Données qu'un client apporte, et combien d'années d'historique~~ | Tranché (question 13) : tout l'historique, tout type de fichier ; la priorité entre les 17 fichiers reste à préciser | — |
 | Dépôt privé, et où garder la démonstration | Porteur du projet | Voir §7 |

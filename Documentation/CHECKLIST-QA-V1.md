@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 124 points au 2026-09-23 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 125 points au 2026-09-23 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -165,6 +165,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] **Import Excel** (disponible sur tous les modules désormais, pas seulement AT/MP et Document Unique) : importer un fichier volontairement invalide (mauvais format, colonnes manquantes) → message d'erreur clair, pas de plantage silencieux.
 - [ ] **Imprimer / PDF sur chaque registre** : dans un registre qui n'en avait pas (par exemple Vérifications périodiques), filtrer sur « En retard » puis cliquer « Imprimer / PDF » → l'aperçu ne contient que le tableau, avec exactement les lignes filtrées, sans menu ni boutons, sous un en-tête (titre, date et heure, compte, nombre de lignes, « Filtres : Statut planning : En retard ») ; « Enregistrer au format PDF » fonctionne. Avec `AG1`, là où il n'y a pas d'export, il n'y a pas non plus d'impression.
 - [ ] **Navigateur qui bloque le stockage** : dans les réglages du navigateur, bloquer les cookies et données de site pour l'adresse de la démonstration, puis ouvrir une page : elle s'affiche normalement, avec en bas un bandeau rouge « Ce navigateur bloque l'enregistrement des données… ». Rétablir le réglage : le bandeau disparaît.
+- [ ] **Import d'un CSV** : ouvrir `KIT-REPRISE/08-registre-sst.xlsx` dans Excel, recopier les lignes d'exemple dans la feuille « RSST », l'enregistrer au format « CSV (séparateur : point-virgule) », puis l'importer dans le Registre SST : les accents (« Propreté », « Agglomération ») arrivent intacts. Même essai avec un fichier enregistré depuis LibreOffice (CSV ou `.ods`).
 - [ ] **Kit de reprise** : ouvrir `KIT-REPRISE/00-mode-d-emploi.xlsx` (adresse du site + `/KIT-REPRISE/00-mode-d-emploi.xlsx`) — l'ordre des 17 fichiers et les règles se lisent sans connaître l'application ; dans un modèle, la feuille « Consignes » dit pour chaque colonne si elle est obligatoire et son format.
 - [ ] **Export d'un registre vide** : sur un module qui n'a encore aucune fiche (par exemple Entreprises extérieures ou Analyse d'accident, avant toute saisie), cliquer sur l'export Excel → le fichier contient la ligne d'en-têtes des colonnes, utilisable comme modèle d'import.
 - [ ] **Échéances au bon jour** : dans Situations d'urgence, l'exercice d'évacuation de la crèche Les Petits Pas (fait le 2026-01-20, tous les 6 mois) affiche une prochaine échéance au **2026-07-20** — pas au 19.

@@ -37,9 +37,7 @@ const COOKIE = 'vigie_session';
 const base = ouvrir(BASE);
 const comptes = Comptes.creer(base);
 const journal = (...m) => console.log(new Date().toLocaleString('fr-FR') + ' ' + m.join(' '));
-// droits d'écriture par registre (étape P1b, 2e partie) ; tout est permis tant que le module est absent
-let droits = { peutEcrire: () => true, peutEffacer: () => true };
-try { droits = require('./droits.js'); } catch(e){ if (e.code !== 'MODULE_NOT_FOUND') throw e; }
+const droits = require('./droits.js');   // droits d'écriture par registre, appliqués ici
 
 function repondre(res, statut, corps, type, entetes){
   res.writeHead(statut, Object.assign({ 'Content-Type': type || 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }, entetes || {}));
@@ -61,7 +59,10 @@ const depuisCePoste = req => ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(r
 // anciens moteurs JavaScript).
 function injection(session){
   const etat = { api: '/api/', donnees: {}, session: session ? session.page : null };
-  if (session) for (const [cle, d] of Object.entries(base.lireTout())) etat.donnees[cle] = { v: d.valeur, r: d.revision };
+  if (session){
+    for (const [cle, d] of Object.entries(base.lireTout())) etat.donnees[cle] = { v: d.valeur, r: d.revision };
+    etat.droits = droits.resume(session.page);
+  }
   else etat.premierLancement = comptes.aucun();
   const json = JSON.stringify(etat).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
   return '<script>window.__VIGIE_SERVEUR__ = ' + json + ';</script>\n';

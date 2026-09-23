@@ -210,6 +210,18 @@
       else sessionStorage.removeItem("vigie_hse_session");
     } catch(e){}
   }
+  // Droits d'écriture de la session (P1b), fournis par le serveur, qui les applique de toute façon.
+  // Une page écrit parfois d'elle-même — fusion de valeurs par défaut, import des données de
+  // démonstration — sans que la personne ait rien fait : si son compte n'a pas le droit, la page garde
+  // ce résultat pour elle, sans alerte. Après un clic ou une frappe, c'est une vraie action : un refus
+  // s'affiche.
+  var interaction = false;
+  if (SERVEUR) ["pointerdown", "keydown"].forEach(function(t){ window.addEventListener(t, function(){ interaction = true; }, true); });
+  var niveauDroit = function(cle){
+    var d = SERVEUR && SERVEUR.droits;
+    if (!d) return "complet";   // premier lancement, sans session : le serveur décide
+    return (d.cles && d.cles[cle]) || d.defaut || "aucun";
+  };
   var resteLocale = function(cle){ return !!CLES[cle] && CLES[cle].nature === "preference"; };
   var entree = function(cle){ return etat[cle] || (etat[cle] = { serveur: null, vue: null, revision: 0 }); };
 
@@ -250,6 +262,8 @@
     var e = entree(cle);
     if (valeur === e.serveur){ e.vue = valeur; return; }       // rien de nouveau pour le serveur
     if (valeur === e.vue) return;                               // la page réécrit ce qu'elle avait lu : rien à envoyer
+    var garderPourLaPage = function(){ e.serveur = valeur; e.vue = valeur; };
+    if (niveauDroit(cle) === "aucun"){ if (!interaction) return garderPourLaPage(); throw refuse(); }
     var aEnvoyer = e.serveur === e.vue ? valeur : fusionner(e.vue, valeur, e.serveur);
     for (var essai = 0; essai < 5; essai++){
       if (aEnvoyer === CONFLIT) throw conflit(cle);
@@ -264,7 +278,7 @@
       }
       if (r.statut === 413){ signalerPlein(); throw echec("QuotaExceededError", "trop volumineux pour le serveur"); }
       if (r.statut === 401) throw sessionFinie();
-      if (r.statut === 403) throw refuse();
+      if (r.statut === 403){ if (!interaction) return garderPourLaPage(); throw refuse(); }
       throw injoignable();
     }
     throw conflit(cle);

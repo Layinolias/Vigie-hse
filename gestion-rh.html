@@ -776,7 +776,7 @@
       dateEntree: $("agFDateEntree").value || "",
       actif: $("agFActif").checked,
       auteur: (session && session.user) || "—",
-      dateCreation: id ? (AGENTS.find(a => a.id === id) || {}).dateCreation || new Date().toISOString().slice(0,10) : new Date().toISOString().slice(0,10),
+      dateCreation: id ? (AGENTS.find(a => a.id === id) || {}).dateCreation || VigieDates.aujourdhui() : VigieDates.aujourdhui(),
     };
     const idx = AGENTS.findIndex(a => a.id === rec.id);
     if (idx >= 0){ AGENTS[idx] = rec; logAudit("Gestion RH", "Modification", `Agent ${rec.nom} ${rec.prenom}`); }
@@ -903,7 +903,7 @@
       service: $("hFService").value,
       heures: Number($("hFHeures").value) || 0,
       auteur: (session && session.user) || "—",
-      dateCreation: new Date().toISOString().slice(0,10),
+      dateCreation: VigieDates.aujourdhui(),
     };
     if (!rec.periode || !rec.heures){ return; }
     HEURES.push(rec);

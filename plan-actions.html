@@ -578,10 +578,10 @@
           risqueLie: r.risque,
           origine: "DUERP",
           responsable: "",
-          echeance: echeance.toISOString().slice(0,10),
+          echeance: VigieDates.iso(echeance),
           priorite: isCritique ? "Critique" : "Haute",
           statut: "À faire",
-          dateCreation: today.toISOString().slice(0,10),
+          dateCreation: VigieDates.iso(today),
         });
       }
     });
@@ -609,10 +609,10 @@
             risqueLie: rep.libelle,
             origine: "Inspection",
             responsable: "",
-            echeance: echeance.toISOString().slice(0,10),
+            echeance: VigieDates.iso(echeance),
             priorite: "Haute",
             statut: "À faire",
-            dateCreation: today.toISOString().slice(0,10),
+            dateCreation: VigieDates.iso(today),
           });
         }
       });
@@ -643,10 +643,10 @@
           risqueLie: evt.risque || "",
           origine: "Analyse",
           responsable: act.responsable || "",
-          echeance: act.echeance || today.toISOString().slice(0,10),
+          echeance: act.echeance || VigieDates.iso(today),
           priorite: "Haute",
           statut: act.statut || "À faire",
-          dateCreation: an.dateAnalyse || today.toISOString().slice(0,10),
+          dateCreation: an.dateAnalyse || VigieDates.iso(today),
         });
       });
     });
@@ -672,10 +672,10 @@
           risqueLie: ex.type || "",
           origine: "Urgence",
           responsable: act.responsable || "",
-          echeance: act.echeance || today.toISOString().slice(0,10),
+          echeance: act.echeance || VigieDates.iso(today),
           priorite: "Haute",
           statut: act.statut || "À faire",
-          dateCreation: ex.dateExercice || today.toISOString().slice(0,10),
+          dateCreation: ex.dateExercice || VigieDates.iso(today),
         });
       });
     });
@@ -701,10 +701,10 @@
           risqueLie: "Coactivité",
           origine: "Prévention EE",
           responsable: act.responsable || "",
-          echeance: act.echeance || today.toISOString().slice(0,10),
+          echeance: act.echeance || VigieDates.iso(today),
           priorite: "Haute",
           statut: act.statut || "À faire",
-          dateCreation: ee.dateDebut || today.toISOString().slice(0,10),
+          dateCreation: ee.dateDebut || VigieDates.iso(today),
         });
       });
     });
@@ -730,7 +730,7 @@
   let DATASET = loadDataset();
   if (isScoped){ DATASET = DATASET.filter(d => myServices.includes(d.service)); }
 
-  function isOverdue(a){ return a.statut !== "Fait" && a.echeance && a.echeance < new Date().toISOString().slice(0,10); }
+  function isOverdue(a){ return a.statut !== "Fait" && a.echeance && a.echeance < VigieDates.aujourdhui(); }
 
   // ---------- Filtres ----------
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatut = $("fStatut"), fPriorite = $("fPriorite");
@@ -851,7 +851,7 @@
         echeance: parseDateImp(pick(["echeance"])),
         priorite: ["Critique","Haute","Moyenne","Basse"].includes(priorite) ? priorite : "Moyenne",
         statut: ["À faire","En cours","Fait"].includes(statut) ? statut : "À faire",
-        dateCreation: parseDateImp(pick(["date de creation"])) || new Date().toISOString().slice(0,10),
+        dateCreation: parseDateImp(pick(["date de creation"])) || VigieDates.aujourdhui(),
       };
     }
     $("btnImport").addEventListener("click", () => $("importFile").click());
@@ -930,7 +930,7 @@
         $("formTitle").textContent = "Nouvelle action";
         $("fId").value = "";
         fillFormServiceOptions("Ville");
-        $("fEcheance").value = new Date().toISOString().slice(0,10);
+        $("fEcheance").value = VigieDates.aujourdhui();
       }
       formPanel.style.display = "";
       formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
@@ -954,7 +954,7 @@
         echeance: $("fEcheance").value,
         priorite: $("fPrioriteForm").value,
         statut: $("fStatutForm").value,
-        dateCreation: isNew ? new Date().toISOString().slice(0,10) : (DATASET.find(d => d.id === id) || {}).dateCreation || new Date().toISOString().slice(0,10),
+        dateCreation: isNew ? VigieDates.aujourdhui() : (DATASET.find(d => d.id === id) || {}).dateCreation || VigieDates.aujourdhui(),
       };
       const idx = DATASET.findIndex(d => d.id === rec.id);
       if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);

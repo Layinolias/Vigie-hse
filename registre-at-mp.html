@@ -792,7 +792,7 @@
     // les années civiles distinctes présentes dans les données. Formule (EFFECTIF/HEURES_AN)
     // partagée avec reporting.html via assets/hse-formulas.js.
     const dureeAtJours = (() => {
-      const todayStr = new Date().toISOString().slice(0,10);
+      const todayStr = VigieDates.aujourdhui();
       let debut, fin;
       if (yr === "all"){
         const dates = rows.map(r => r.dateAT).filter(Boolean).sort();

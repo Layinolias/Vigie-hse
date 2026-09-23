@@ -561,7 +561,7 @@
         quantiteStockee: p.quantite,
         unite: p.unite,
         pictogrammes: p.pictos,
-        dateMajFDS: d.toISOString().slice(0,10),
+        dateMajFDS: VigieDates.iso(d),
         lienFDS: "",
         mesuresPrevention: p.pictos.includes("GHS06") || p.pictos.includes("GHS08")
           ? "EPI complets (gants, lunettes, protection respiratoire si besoin), stockage ventilé, fiche de données de sécurité à disposition."
@@ -796,7 +796,7 @@
         $("formTitle").textContent = "Nouveau produit";
         $("fId").value = "";
         fillFormServiceOptions("Ville");
-        $("fDateMajFDS").value = new Date().toISOString().slice(0,10);
+        $("fDateMajFDS").value = VigieDates.aujourdhui();
       }
       formPanel.style.display = "";
       formPanel.scrollIntoView({ behavior:"smooth", block:"start" });

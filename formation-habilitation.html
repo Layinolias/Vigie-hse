@@ -566,7 +566,7 @@
           nom: r.nom, prenom: r.prenom, service: r.service, collectivite: r.collectivite || "Ville",
           typeHabilitation: type,
           organismeFormateur: ORGANISMES_FORMATION[h2 % ORGANISMES_FORMATION.length],
-          dateObtention: d.toISOString().slice(0,10),
+          dateObtention: VigieDates.iso(d),
           dureeValiditeMois: duree,
           commentaire: "",
         });
@@ -706,7 +706,7 @@
       if (!nom && !typeHabilitation) return null;
       const collectiviteRaw = normKeyImp(pick(["collectivite","structure"]));
       const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
-      const dateObtention = parseDateValueImp(pick(["date d obtention","date obtention"])) || new Date().toISOString().slice(0,10);
+      const dateObtention = parseDateValueImp(pick(["date d obtention","date obtention"])) || VigieDates.aujourdhui();
       const dateExpirationRaw = parseDateValueImp(pick(["date d expiration","date expiration"]));
       let dureeValiditeMois = Number(pick(["duree de validite mois","duree"])) || 0;
       if (!dureeValiditeMois && dateExpirationRaw){
@@ -818,7 +818,7 @@
         fillFormServiceOptions("Ville");
         $("fTypeForm").value = HAB_TYPES[0][0];
         $("fDuree").value = HAB_TYPES[0][1];
-        $("fDateObtention").value = new Date().toISOString().slice(0,10);
+        $("fDateObtention").value = VigieDates.aujourdhui();
       }
       formPanel.style.display = "";
       formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
@@ -899,7 +899,7 @@
       const typeHabilitation = String(pick(["type d habilitation","type"])).trim();
       if (!nom && !typeHabilitation) return;
       const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
-      const dateObtention = parseDateDtst(pick(["date d obtention","date obtention"])) || new Date().toISOString().slice(0,10);
+      const dateObtention = parseDateDtst(pick(["date d obtention","date obtention"])) || VigieDates.aujourdhui();
       const dateExpirationRaw = parseDateDtst(pick(["date d expiration","date expiration"]));
       let dureeValiditeMois = Number(pick(["duree de validite mois","duree"])) || 0;
       if (!dureeValiditeMois && dateExpirationRaw){

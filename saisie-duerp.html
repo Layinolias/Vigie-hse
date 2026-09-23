@@ -1,6 +1,7 @@
 <title>Évaluation DUERP</title>
 <meta name="description" content="Espace RH — création et modification d'une évaluation de risque professionnel dans le Document Unique.">
 <script src="assets/risques-ref.js"></script>
+<script src="assets/dates-locales.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -696,7 +697,7 @@
       moyensPrevention: fd.get("moyensPrevention") || "",
       mesuresProposees: fd.get("mesuresProposees") || "",
       maitrise: fd.get("maitrise"),
-      dateEvaluation: (editingRecord && editingRecord.dateEvaluation) || new Date().toISOString().slice(0,10),
+      dateEvaluation: (editingRecord && editingRecord.dateEvaluation) || VigieDates.aujourdhui(),
     };
 
     if (editingRecord){

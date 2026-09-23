@@ -764,7 +764,7 @@
         out.push({
           id: "dot-" + h2.toString(36),
           nom: r.nom, prenom: r.prenom, service: r.service, collectivite: r.collectivite || "Ville",
-          articleId, taille, dateRemise: d.toISOString().slice(0,10),
+          articleId, taille, dateRemise: VigieDates.iso(d),
         });
       });
     });
@@ -812,7 +812,7 @@
       const dd = new Date(); dd.setMonth(dd.getMonth() - monthsAgo);
       return {
         id: "lav-" + h.toString(36), dotationId: d.id,
-        dateLavage: dd.toISOString().slice(0,10), nombreLavagesCumules: cumul,
+        dateLavage: VigieDates.iso(dd), nombreLavagesCumules: cumul,
         statut: cumul >= c.nombreLavagesMax ? "À réformer" : "OK",
       };
     });
@@ -1143,7 +1143,7 @@
         service: String(pick(["service"])).trim(),
         articleId: article.id,
         taille: String(pick(["taille"])).trim(),
-        dateRemise: parseDateImpDot(pick(["date de remise"])) || new Date().toISOString().slice(0,10),
+        dateRemise: parseDateImpDot(pick(["date de remise"])) || VigieDates.aujourdhui(),
       };
     }
     $("dotImport").addEventListener("click", () => $("dotImportFile").click());
@@ -1220,7 +1220,7 @@
         $("dotArticle").value = rec.articleId; $("dotTaille").value = rec.taille; $("dotDateRemise").value = rec.dateRemise;
       } else {
         $("dotFormTitle").textContent = "Nouvelle dotation"; $("dotId").value = "";
-        fillDotFormServices("Ville"); $("dotDateRemise").value = new Date().toISOString().slice(0,10);
+        fillDotFormServices("Ville"); $("dotDateRemise").value = VigieDates.aujourdhui();
       }
       dotFormPanel.style.display = ""; dotFormPanel.scrollIntoView({ behavior:"smooth", block:"start" });
     }
@@ -1310,7 +1310,7 @@
     const lavFormPanel = $("lavFormPanel"), lavForm = $("lavForm");
     $("lavNew").addEventListener("click", () => {
       lavForm.reset(); fillLavageDotationSelect();
-      $("lavDate").value = new Date().toISOString().slice(0,10);
+      $("lavDate").value = VigieDates.aujourdhui();
       lavFormPanel.style.display = ""; lavFormPanel.scrollIntoView({ behavior:"smooth", block:"start" });
     });
     $("lavCancel").addEventListener("click", () => { lavFormPanel.style.display = "none"; lavForm.reset(); });

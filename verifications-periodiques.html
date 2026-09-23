@@ -788,7 +788,7 @@
         fillFormServiceOptions("Ville");
         $("fCategorieForm").value = CATEGORIES[0][0];
         $("fPeriodicite").value = CATEGORIES[0][1];
-        $("fDateDerniere").value = new Date().toISOString().slice(0,10);
+        $("fDateDerniere").value = VigieDates.aujourdhui();
       }
       formPanel.style.display = "";
       formPanel.scrollIntoView({ behavior:"smooth", block:"start" });

@@ -590,7 +590,7 @@
   // ---------- Inspections (always-merge) ----------
   const STORAGE_KEY = "vigie_hse_inspections";
   function genId(){ return "insp-man-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-  function daysAgoISO(n){ const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); }
+  function daysAgoISO(n){ const d = new Date(); d.setDate(d.getDate() - n); return VigieDates.iso(d); }
   function computeStatutGlobal(reponses){
     const nc = reponses.filter(r => r.statut === "Non conforme").length;
     if (nc >= 3) return "Non conforme";
@@ -829,7 +829,7 @@
         trameId: trame.id, trameNom: trame.nom,
         service: String(pick(["service"])).trim(),
         collectivite,
-        dateInspection: parseDateImp(pick(["date"])) || new Date().toISOString().slice(0,10),
+        dateInspection: parseDateImp(pick(["date"])) || VigieDates.aujourdhui(),
         inspecteur: String(pick(["inspecteur"])).trim(),
         reponses,
         statutGlobal: computeStatutGlobal(reponses),
@@ -934,7 +934,7 @@
         $("fId").value = "";
         fillFormServiceOptions("Ville");
         $("fTrameForm").value = TRAMES[0] ? TRAMES[0].id : "";
-        $("fDateForm").value = new Date().toISOString().slice(0,10);
+        $("fDateForm").value = VigieDates.aujourdhui();
         renderPoints($("fTrameForm").value, null);
       }
       $("trameManagerPanel").style.display = "none";

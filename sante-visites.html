@@ -716,7 +716,7 @@
         id: "sv-" + h.toString(36),
         nom: r.nom, prenom: r.prenom, service: r.service, collectivite: r.collectivite || "Ville",
         typeVisite: "Périodique",
-        dateDerniere: d.toISOString().slice(0,10),
+        dateDerniere: VigieDates.iso(d),
         periodiciteMois,
         commentaire: "",
       });
@@ -913,7 +913,7 @@
         nom, prenom: String(pick(["prenom"])).trim(), collectivite,
         service: String(pick(["service"])).trim(),
         typeVisite: TYPES_VISITE.includes(typeVisite) ? typeVisite : "Périodique",
-        dateDerniere: parseDateImp(pick(["date derniere visite","date derniere"])) || new Date().toISOString().slice(0,10),
+        dateDerniere: parseDateImp(pick(["date derniere visite","date derniere"])) || VigieDates.aujourdhui(),
         periodiciteMois: Number(pick(["periodicite mois","periodicite"])) || 24,
         commentaire: String(pick(["commentaire"])).trim(),
       };
@@ -989,7 +989,7 @@
         $("formTitle").textContent = "Nouvelle fiche de suivi";
         $("fId").value = "";
         fillFormServiceOptions("Ville");
-        $("fDateDerniere").value = new Date().toISOString().slice(0,10);
+        $("fDateDerniere").value = VigieDates.aujourdhui();
         $("fPeriodicite").value = 24;
       }
       formPanel.style.display = "";

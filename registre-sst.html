@@ -572,7 +572,7 @@
   function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
 
   // ---------- Seed RSST ----------
-  function daysAgoISO(n){ const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); }
+  function daysAgoISO(n){ const d = new Date(); d.setDate(d.getDate() - n); return VigieDates.iso(d); }
   const SEED_RSST_RAW = [];
   function buildSeed(){
     return SEED_RSST_RAW.map(r => ({
@@ -801,7 +801,7 @@
 
   $("btnNew").addEventListener("click", () => {
     form.reset();
-    $("fDate").value = new Date().toISOString().slice(0,10);
+    $("fDate").value = VigieDates.aujourdhui();
     fillFormServiceOptions("Ville");
     $("responsePanel").style.display = "none";
     formPanel.style.display = "";
@@ -856,7 +856,7 @@
       rec.statut = $("rStatut").value;
       rec.suiteDonnee = $("rSuite").value.trim();
       rec.traitePar = (session && session.user) || "—";
-      rec.dateSuite = new Date().toISOString().slice(0,10);
+      rec.dateSuite = VigieDates.aujourdhui();
       saveDataset(DATASET);
       logAudit("Registre Santé & Sécurité", "Modification", `Réponse à « ${rec.nature} » (${rec.service}) — statut ${rec.statut}`);
       responsePanel.style.display = "none";

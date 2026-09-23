@@ -819,7 +819,7 @@
         },
         conclusion: $("anConclusion").value.trim(),
         actions: currentActions,
-        dateAnalyse: (existing && existing.dateAnalyse) || new Date().toISOString().slice(0,10),
+        dateAnalyse: (existing && existing.dateAnalyse) || VigieDates.aujourdhui(),
         auteur: session.user,
       };
       const idx = ANALYSES.findIndex(x => x.atmpId === currentAtmpId);

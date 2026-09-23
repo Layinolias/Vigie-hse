@@ -472,12 +472,12 @@
   function applyPreset(){
     const preset = $("fPeriodePreset").value;
     const today = new Date();
-    $("fDateFin").value = today.toISOString().slice(0,10);
+    $("fDateFin").value = VigieDates.iso(today);
     if (preset === "all"){
       $("fDateDebut").value = "";
     } else {
       const d = new Date(today); d.setMonth(d.getMonth() - Number(preset));
-      $("fDateDebut").value = d.toISOString().slice(0,10);
+      $("fDateDebut").value = VigieDates.iso(d);
     }
   }
 
@@ -505,7 +505,7 @@
     // part de l'événement le plus ancien affiché jusqu'à la borne de fin. Formule (EFFECTIF/
     // HEURES_AN) partagée avec registre-at-mp.html via assets/hse-formulas.js.
     const dureeAtJours = (() => {
-      let fin = dFin || today.toISOString().slice(0,10);
+      let fin = dFin || VigieDates.iso(today);
       let debut = dDebut;
       if (!debut){
         const dates = ATMP.map(r => r.dateAT).filter(Boolean).sort();
@@ -542,7 +542,7 @@
     // ---- Plan d'Actions ----
     const ACTIONS = readKey("vigie_hse_actions").filter(a => inPeriod(a.dateCreation, dDebut, dFin));
     const paTotal = ACTIONS.length;
-    const todayStr = today.toISOString().slice(0,10);
+    const todayStr = VigieDates.iso(today);
     const paRetard = ACTIONS.filter(a => a.statut !== "Fait" && a.echeance && a.echeance < todayStr).length;
     const paEnCours = ACTIONS.filter(a => a.statut === "En cours").length;
     const paFait = ACTIONS.filter(a => a.statut === "Fait").length;

@@ -818,7 +818,7 @@
       const rec = {
         id: genId("arr"), atmpId: currentAtmpId,
         type: $("aType").value, statut: $("aStatut").value,
-        dateCreation: new Date().toISOString().slice(0,10),
+        dateCreation: VigieDates.aujourdhui(),
         dateTransmission: $("aDateTransmission").value,
         dateSignature: $("aDateSignature").value,
         autorite: $("aAutorite").value.trim(),
@@ -912,7 +912,7 @@
             ARRETES.push({
               id: genId("arr"), atmpId, type,
               statut: String(rawPick(raw,["statut"])).trim() || "Brouillon",
-              dateCreation: String(rawPick(raw,["cree le","date creation"])).trim() || new Date().toISOString().slice(0,10),
+              dateCreation: String(rawPick(raw,["cree le","date creation"])).trim() || VigieDates.aujourdhui(),
               dateTransmission: String(rawPick(raw,["transmis le","date transmission"])).trim(),
               dateSignature: String(rawPick(raw,["signe le","date signature"])).trim(),
               autorite: String(rawPick(raw,["autorite"])).trim(),

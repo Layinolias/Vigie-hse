@@ -756,7 +756,7 @@
     } else {
       $("formTitle").textContent = "Nouvel exercice";
       $("fId").value = "";
-      $("fDateExercice").value = new Date().toISOString().slice(0,10);
+      $("fDateExercice").value = VigieDates.aujourdhui();
       fillFormServiceOptions("Ville");
     }
     renderActionsList();
@@ -790,7 +790,7 @@
       constatations: $("fConstatations").value.trim(),
       actions: currentActions.filter(a => a.description),
       auteur: (session && session.user) || "—",
-      dateCreation: id ? (DATASET.find(d => d.id === id) || {}).dateCreation || new Date().toISOString().slice(0,10) : new Date().toISOString().slice(0,10),
+      dateCreation: id ? (DATASET.find(d => d.id === id) || {}).dateCreation || VigieDates.aujourdhui() : VigieDates.aujourdhui(),
     };
     const idx = DATASET.findIndex(d => d.id === rec.id);
     if (idx >= 0){ DATASET[idx] = rec; logAudit("Situations d'urgence", "Modification", `Exercice ${rec.type} — ${rec.site} (${rec.dateExercice})`); }
@@ -866,7 +866,7 @@
       constatations: String(rawPick(raw, ["constatations"])).trim(),
       actions: [],
       auteur: String(rawPick(raw, ["auteur"])).trim() || "—",
-      dateCreation: new Date().toISOString().slice(0,10),
+      dateCreation: VigieDates.aujourdhui(),
     };
   }
 

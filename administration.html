@@ -1,6 +1,7 @@
 <title>Administration</title>
 <meta name="description" content="Panneau d'administration VIGIE HSE — utilisateurs, référentiels, flash info et journal des modifications.">
 <script src="assets/risques-ref.js"></script>
+<script src="assets/dates-locales.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -1144,7 +1145,7 @@
         </div>`).join("");
   }
   renderNewsAdmin();
-  $("nDate").value = new Date().toISOString().slice(0,10);
+  $("nDate").value = VigieDates.aujourdhui();
 
   let editingNewsId = null;
   $("newsAdminGrid").addEventListener("click", (e) => {
@@ -1179,7 +1180,7 @@
     editingNewsId = null;
     $("newsForm").reset();
     $("nId").value = "";
-    $("nDate").value = new Date().toISOString().slice(0,10);
+    $("nDate").value = VigieDates.aujourdhui();
     $("newsFormTitle").textContent = "Publier une actualité";
     $("newsSubmitBtn").textContent = "Publier";
     $("newsCancelBtn").style.display = "none";
@@ -1226,7 +1227,7 @@
     }
     renderNewsAdmin();
     e.target.reset();
-    $("nDate").value = new Date().toISOString().slice(0,10);
+    $("nDate").value = VigieDates.aujourdhui();
   });
 
   // ===================================================================
@@ -1273,7 +1274,7 @@
         </tr>`).join("");
   }
   renderVeille();
-  $("vDate").value = new Date().toISOString().slice(0,10);
+  $("vDate").value = VigieDates.aujourdhui();
 
   let editingVeilleId = null;
   $("veilleBody").addEventListener("click", (e) => {
@@ -1312,7 +1313,7 @@
     editingVeilleId = null;
     $("veilleForm").reset();
     $("vId").value = "";
-    $("vDate").value = new Date().toISOString().slice(0,10);
+    $("vDate").value = VigieDates.aujourdhui();
     $("veilleFormTitle").textContent = "Ajouter une actualité";
     $("veilleSubmitBtn").textContent = "Ajouter";
     $("veilleCancelBtn").style.display = "none";
@@ -1350,7 +1351,7 @@
     }
     renderVeille();
     e.target.reset();
-    $("vDate").value = new Date().toISOString().slice(0,10);
+    $("vDate").value = VigieDates.aujourdhui();
   });
 
   // ===================================================================

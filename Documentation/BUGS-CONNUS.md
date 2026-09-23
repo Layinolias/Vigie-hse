@@ -59,6 +59,16 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Constaté** : `new Date().toISOString().slice(0,10)` formate la date en UTC. En France (UTC+1/+2), entre minuit et 2 h, cela donnait la veille : une fiche créée à 0 h 30 était datée de la veille, et le Reporting excluait par défaut les événements du jour. Sans effet le reste de la journée.
 - **Corrigé** : 2026-09-23 — `VigieDates.aujourdhui()` et `VigieDates.iso(date)` (`assets/dates-locales.js`) partout ; les imports Excel, qui passaient déjà par les champs locaux de la date, n'étaient pas concernés. Vérifié par un rendu avant/après de chaque page avec deux comptes, horloge figée : **à l'heure UTC, 48 rendus sur 48 strictement identiques** (le changement ne modifie rien là où local = UTC) ; **à 0 h 30 à Paris le 24**, 24 rendus changent et **uniquement par des dates avancées d'exactement un jour** (formulaires préremplis au 24 au lieu du 23, période par défaut du Reporting se terminant le 24). Le harnais avait d'abord été rejoué sur le code inchangé : 0 différence.
 
+### Un navigateur qui refuse le stockage arrêtait la plupart des pages
+- **Où** : toutes les pages. **Remonté** : 2026-09-23, en éprouvant `assets/stockage.js` en « navigation privée stricte ».
+- **Constaté** : quand le navigateur refuse tout stockage (cookies bloqués, certaines navigations privées, postes verrouillés), 44 rendus de page sur 48 s'arrêtaient sur une erreur.
+- **Corrigé** : 2026-09-23 — `VigieStore` bascule sur une mémoire de page et un bandeau prévient que rien ne sera conservé. Vérifié : les 24 pages s'affichent sans erreur, bandeau présent une fois ; en stockage normal, rendu strictement identique à avant (48/48).
+
+### Dossiers AT/MP & CITIS : un export réimporté perdait des données
+- **Où** : `dossiers-atmp-citis.html`, export et import. **Remonté** : 2026-09-23, par l'aller-retour export → import de tous les modules importables (13 sur 14 sans perte).
+- **Constaté** : l'export ne donnait que le nombre de prolongations et omettait les dates et références (certificat final, IPP, enquête) ; un réimport ramenait donc des dossiers sans prolongations ni ces dates. Pire, **réimporter un fichier qui n'avait pas ces colonnes effaçait les valeurs déjà enregistrées**, et une vraie date Excel s'enregistrait en texte (« Mon Mar 02 2026… »).
+- **Corrigé** : 2026-09-23 — colonnes ajoutées en fin de feuille, feuille « Prolongations » ; une colonne absente ne modifie plus rien ; dates Excel lues comme des dates. Vérifié : test dédié 9/9, en échec 7 fois sur 9 sur la version précédente ; aller-retour sans perte.
+
 ---
 
 ## Ouverts / reportés (pas des bugs à corriger maintenant)

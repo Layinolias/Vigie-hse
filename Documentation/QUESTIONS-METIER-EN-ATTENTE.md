@@ -42,6 +42,8 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 10 | Base documentaire : trame des fiches de risque, documents obligatoires | Module Base documentaire (existant) | ✅ répondue le 2026-09-21, mise en œuvre le 2026-09-21 |
 | 11 | Risques du Registre AT/MP : à quelle fiche de risque les rattacher ? | Registre AT/MP + Base documentaire (existants) | ✅ répondue le 2026-09-23, mise en œuvre le jour même |
 | 12 | Impression et PDF : quels documents méritent une vraie mise en page ? | Tous les registres (impression générique en service) | ✅ répondue le 2026-09-23 : la liste suffit, piste gardée en réserve |
+| 13 | Reprise des données : qu'apporte un client, et jusqu'où remonter ? | Mise en service chez un client (kit de reprise) | 🟠 posée le 2026-09-23, en attente |
+| 14 | Données de santé : lesquelles le logiciel doit-il vraiment garder ? | Registre AT/MP, dossiers AT/MP, visites médicales | 🟠 posée le 2026-09-23, en attente |
 
 ---
 
@@ -374,6 +376,45 @@ Les deux derniers n'ont **pas** été rattachés, parce que ce serait trancher u
 
 ---
 
+## 🟠 Question 13 — Reprise des données : qu'apporte un client, et jusqu'où remonter ?
+
+**Contexte.** Pour une mise en service réelle, un kit de reprise des données est prêt (`KIT-REPRISE/`, voir `KIT-REPRISE-DONNEES.md`) : un modèle Excel par module importable, 17 fichiers, dans l'ordre de chargement, avec pour chaque colonne ce qui est obligatoire et le format attendu — mesurés en important dans la vraie application.
+
+**Ce que fait le logiciel aujourd'hui.** Tout se reprend par les imports de chaque module, dans l'ordre du kit. Ce qui n'a pas d'import (référentiels, comptes, accueils au poste, entreprises extérieures, base documentaire, stock et lavages d'EPI, rendez-vous médicaux) se saisit à l'écran.
+
+**La question.**
+- Quels documents de prévention un client a-t-il en général au moment de s'équiper, et sous quelle forme (Excel, Word, papier, autre logiciel) ?
+- Combien d'années d'historique des accidents reprendre (le taux de fréquence et de gravité se lit d'habitude sur plusieurs années) ?
+- Parmi les 17 fichiers, lesquels sont indispensables pour démarrer ? Manque-t-il des données sans modèle ?
+
+**Options (historique).** (A) 3 dernières années ; (B) 5 dernières années ; (C) tout l'historique disponible.
+
+### Décision
+
+> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse)*
+
+---
+
+## 🟠 Question 14 — Données de santé : lesquelles le logiciel doit-il vraiment garder ?
+
+**Contexte.** Avant tout hébergement sur un vrai serveur (`PLAN-MISE-EN-PRODUCTION.md` §6), une règle pèse lourd : les données de santé sont protégées plus strictement (article 9 du RGPD) et leur hébergement peut exiger un prestataire certifié HDS. La question juridique va à un juriste ou au délégué à la protection des données ; la question métier va au préventeur : moins le logiciel détient d'informations médicales, plus tout est simple.
+
+**Ce que fait le logiciel aujourd'hui.**
+- **Registre AT/MP** : nature de la lésion (ex. « Entorse »), siège (ex. « Cheville »), avis du médecin du travail, avis du conseil médical, n° de tableau de maladie professionnelle, date de première constatation médicale.
+- **Dossiers AT/MP & CITIS** : certificat médical initial, prolongations, certificat final (guérison / consolidation), taux d'IPP.
+- **Santé & visites** : type et date des visites, périodicité, surveillance renforcée, commentaire libre, rendez-vous.
+Rien n'a été retiré : une donnée métier ne se supprime pas sans l'avis du préventeur.
+
+**La question.** Lesquelles servent vraiment la prévention (analyser les accidents, organiser les visites), et lesquelles relèvent du seul dossier médical ou administratif tenu ailleurs ? La collectivité a-t-elle un délégué à la protection des données joignable ?
+
+**Options.** (A) tout garder ; (B) en retirer ou en simplifier une partie — lesquelles ; (C) à voir avec le délégué à la protection des données.
+
+### Décision
+
+> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse)*
+
+---
+
 # À savoir aussi (pas une question, point d'interprétation)
 
 Les **évaluations DUERP importées** via Excel ou chargées automatiquement depuis `DATATEST/` **n'ont pas de date d'évaluation** : le fichier source ne comporte pas de colonne date. Conséquence : elles sont **toujours comptées, quelle que soit la période choisie** dans le reporting. Seules les évaluations saisies manuellement depuis le 2026-09-14 portent une date et réagissent au filtre.
@@ -395,4 +436,6 @@ Ce n'est pas un défaut : le choix a été de ne pas inventer une fausse date d'
 - **Q10** : `base-documentaire.html`, fonction `buildSeeds()` et `assets/risques-ref.js` (trame des fiches) ; `DOC_CATEGORIES` pour les catégories de documents.
 - **Q11** : `assets/risques-ref.js`, table `EQUIVALENCES` — une ligne par rattachement accepté (slug du libellé du registre → nom exact de la famille).
 - **Q12** : `assets/impression.js` (`VigieImpression.brancher`, l'impression générique) ; une mise en page dédiée suivrait le modèle de la fiche d'accueil (`#accueilPrint` dans `accueil-poste.html`) ou de la convocation (`#letterPrint` dans `sante-visites.html`).
+- **Q13** : `Documentation/outils/generer-kit-reprise.js` (liste `MODULES` : ordre, notes, fichiers) — relancer le générateur après toute décision.
+- **Q14** : champs `siege`, `nature`, `mpAvisMedecinTravail`, `mpAvisConseilMedical`… de `vigie_hse_dataset` (`registre-at-mp.html`, `saisie-rh.html`), dossiers `vigie_hse_atmp_dossiers`, visites `vigie_hse_visites` ; drapeau `sensible` du registre `VigieStore.CLES` (`assets/stockage.js`).
 - **Point DUERP** : champ `dateEvaluation` écrit par `saisie-duerp.html` ; import sans date dans `document-unique.html`.

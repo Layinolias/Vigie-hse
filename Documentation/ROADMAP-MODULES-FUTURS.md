@@ -6,6 +6,8 @@
 
 **Gel V1.0 :** les critères vérifiables par le code sont cochés dans `PLAN-VERSIONS-V1.md` (aucune erreur JS en usage normal, exports Excel et impression / PDF sur tous les registres, mode démo et vitrine, documentation). Restent deux points qui demandent l'utilisateur : le **test en conditions réelles** sur le site hébergé (checklist QA V1, 120 points) et la **présentation à un professionnel externe**.
 
+**Vers un produit en service (2026-09-23) :** le chemin est posé dans `PLAN-MISE-EN-PRODUCTION.md` (modèles de déploiement, architecture, étapes P1 à P4, hébergement et données de santé). Déjà prêts : le point de passage unique vers le stockage (`assets/stockage.js`), le kit de reprise des données (`KIT-REPRISE/`, `KIT-REPRISE-DONNEES.md`), des imports vérifiés par aller-retour. Deux questions au préventeur en attente (13 : ce qu'un client apporte ; 14 : données de santé nécessaires).
+
 **➡️ À faire en reprenant :** relire les réponses et idées du préventeur sur le *Cahier* (outil Artifact, collections `reponses` et `idees` — procédure en tête de `QUESTIONS-METIER-EN-ATTENTE.md`), puis `POINT-DE-REPRISE.md` pour l'état technique détaillé et les harnais de test.
 
 **Aucun chantier technique connu en attente** — le dernier (les « aujourd'hui » calculés en UTC) a été traité le 2026-09-23, voir `BUGS-CONNUS.md`. Pistes écartées pour l'instant par le métier : section « Pistes gardées en réserve » en fin de fichier.

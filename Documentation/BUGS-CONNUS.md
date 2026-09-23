@@ -84,6 +84,11 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Constaté** : chaque import ajoutait les actions du fichier à celles déjà enregistrées — deux imports du même fichier donnaient trois fois la même action, reprise d'autant dans le Plan d'actions.
 - **Corrigé** : 2026-09-23 — une action de même description est mise à jour, en gardant son identifiant. Vérifié : test de réimport 5/5 ; sur la version précédente, 3 actions au lieu d'une.
 
+### Serveur de prévisualisation : les fichiers cachés du dépôt étaient servis
+- **Où** : `Documentation/outils/serveur-local.js`. **Remonté** : 2026-09-24, en écrivant le serveur P1a.
+- **Constaté** : http://localhost:8765/.git/config renvoyait la configuration git — dont l'adresse du dépôt distant avec son jeton d'accès. Limité à ce poste (le serveur n'écoute que 127.0.0.1), mais inutile de l'exposer.
+- **Corrigé** : 2026-09-24 — les chemins commençant par un point et le dossier `serveur/` (la base) renvoient 404, comme dans `serveur/serveur.js`. Vérifié : `/.git/config` et `/serveur/serveur.js` → 404, les pages → 200.
+
 ---
 
 ## Ouverts / reportés (pas des bugs à corriger maintenant)

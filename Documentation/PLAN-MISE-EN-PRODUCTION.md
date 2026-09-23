@@ -21,6 +21,7 @@ VIGIE HSE est aujourd'hui un **prototype complet côté écran** (24 pages, 16 m
 - **Tout type de tableur** (réponse du préventeur, question 13) : Excel `.xlsx`/`.xls`, LibreOffice `.ods`, CSV en point-virgule ou virgule et dans tous les encodages courants (`assets/import-fichier.js`) — un CSV UTF-8 sans BOM arrivait jusque-là avec des accents cassés, sans erreur signalée.
 - **Stockage plein signalé** : un enregistrement refusé faute de place n'est plus perdu en silence (bandeau), et `VigieStore.occupation()` mesure l'espace utilisé — affiché en jauge dans Administration.
 - **Reprise complète** : les référentiels s'importent (premier fichier du kit) et l'arbre causal des analyses d'accident aussi — les 14 modules importables font un aller-retour export → import sans perte, champ par champ.
+- **Un serveur local qui fonctionne (étape P1a, 2026-09-24)** : `serveur/serveur.js` sert les pages et garde les données dans une vraie base (SQLite, un fichier sur le disque) partagée par tous ceux qui l'utilisent. Les 24 pages n'ont pas changé : c'est `VigieStore` qui bascule. Détail au §4 bis.
 
 ## 3. Trois façons de déployer — un seul logiciel
 
@@ -55,14 +56,39 @@ VIGIE HSE est aujourd'hui un **prototype complet côté écran** (24 pages, 16 m
 
 **Ce qui se déplace vers le serveur** : la vérification des droits (les rôles et les permissions par module existent déjà — `ETAT-DU-PROJET.md` §7 — ils deviennent des règles appliquées par le serveur, la page ne faisant plus qu'afficher), les mots de passe (hachés, jamais en clair), le journal d'audit, la séparation des organisations. Le motif « always-merge seed + stockage » garde son sens pour les **paramètres par défaut** (référentiels, modèles) ; les **données de démonstration** ne vivront plus que dans une organisation de démonstration.
 
-**Question ouverte, à trancher à ce moment-là** : deux personnes qui modifient le même enregistrement en même temps. Le plus simple (« le dernier qui enregistre gagne ») convient au démarrage ; un contrôle de version par enregistrement évitera ensuite d'écraser sans le savoir.
+**Deux personnes qui modifient les mêmes données en même temps** — tranché à l'étape P1a (§4 bis) : ni « le dernier qui enregistre gagne », ni un refus systématique. Chaque registre porte un numéro de version ; si quelqu'un a enregistré entre-temps, les deux modifications sont **fusionnées enregistrement par enregistrement, puis champ par champ**. Seul le même champ du même enregistrement modifié différemment des deux côtés est refusé — la seconde personne en est avertie, rien n'est écrasé.
+
+## 4 bis. Étape P1a — le serveur local (fait le 2026-09-24)
+
+**Ce que c'est.** Un petit serveur Node (`serveur/serveur.js`, aucune dépendance à installer — Node 22.5 ou plus récent suffit) qui sert les pages et garde les données dans une base **SQLite** : un seul fichier, `serveur/donnees/vigie.db`, jamais versionné (`.gitignore`). Lancement, depuis la racine du dépôt :
+
+```
+node serveur/serveur.js
+```
+
+puis ouvrir http://localhost:8780. Plusieurs onglets, plusieurs navigateurs ou plusieurs comptes sur ce poste voient **les mêmes données**, et elles survivent à la fermeture du navigateur.
+
+**Comment ça marche, sans toucher aux pages.** En servant une page, le serveur glisse juste avant `assets/stockage.js` l'état de la base (`window.__VIGIE_SERVEUR__`). `VigieStore` le voit et bascule : `getItem` lit cet état (toujours synchrone), `setItem` envoie l'écriture au serveur **de façon synchrone**, comme `localStorage` — une page qui enregistre puis change d'écran ne perd donc pas sa saisie, et l'étape `VigieStore.pret()` prévue au §4 n'est pas nécessaire. Ouverte sans ce serveur (fichier local, GitHub Pages), une page garde exactement son stockage navigateur d'avant. Les préférences d'appareil (menu épinglé, ville de la météo) restent dans le navigateur.
+
+**Écritures simultanées.** Chaque clé a une révision ; le serveur refuse une écriture faite sur une révision périmée, et la page fusionne alors sa modification avec la version actuelle (voir §4) avant de réessayer. Mesuré : deux ajouts simultanés dans le même registre sont gardés tous les deux, une page restée ouverte sur une vieille liste n'efface pas l'ajout de l'autre, le même champ modifié des deux côtés est refusé avec un bandeau. Le journal d'audit, écrit par toutes les pages, se fusionne de la même façon (ajouts des deux côtés).
+
+**Garde-fous.**
+- Chaque écriture garde l'ancienne valeur (les 20 dernières par registre, table `historique`) ; « Réinitialiser les données » prend d'abord une **copie complète de la base** (`serveur/donnees/sauvegarde-avant-effacement-….db`) — et le message de confirmation dit que l'effacement vaut pour tous les utilisateurs.
+- Serveur arrêté ou injoignable : bandeau « la dernière modification n'a PAS été enregistrée », jamais de perte silencieuse.
+- Le serveur n'écoute que ce poste (127.0.0.1), refuse un autre nom d'hôte que `localhost` (un site piégé ne peut pas se faire passer pour lui), exige un en-tête propre à l'application pour écrire (un autre site ne peut pas écrire à sa place), et ne sert ni les fichiers cachés du dépôt (`.git` contient le jeton du dépôt distant) ni sa propre base.
+- La base est le seul fichier qui connaît SQLite (`serveur/base-sqlite.js`, quatre fonctions) : passer à PostgreSQL remplacera ce fichier, ni le serveur ni les pages.
+
+**Ce que P1a ne fait pas encore — c'est P1b.** Pas d'authentification côté serveur (les rôles restent vérifiés par les pages, les mots de passe sont encore ceux de la démonstration) ; c'est pourquoi il n'écoute que ce poste : **ne pas l'ouvrir au réseau avant P1b**. Pas encore de séparation des organisations (P3). Les écritures synchrones sont idéales sur un même poste ; à travers Internet, P1b devra mesurer si elles restent assez rapides ou s'il faut une file d'attente. Enfin, les données déjà saisies dans un navigateur n'y sont pas transférées d'office : on les reprend avec les exports Excel et le kit de reprise.
+
+**Vérifié** (harnais `test-serveur.js` et `test-fusion.js`, dans le vrai serveur avec une base jetable) : les 24 pages, deux fois chacune, avec leurs données de test : 0 erreur, mêmes registres et mêmes nombres d'enregistrements qu'en mode navigateur ; 20 cas de fusion ; sécurité (hôte étranger, écriture sans en-tête, `.git`, base, sortie du dépôt, clé inconnue) ; valeur piégée `</script>` relue à l'identique sans être exécutée ; réinitialisation avec copie ; serveur arrêté ; redémarrage. Mode navigateur inchangé : `usage-normal.js` (120 visites, 0 erreur), `aller-retour.js`, `test-stockage.js`. Contrôlé aussi dans un vrai Chromium.
 
 ## 5. Les étapes
 
 | Étape | Contenu | Condition pour passer à la suivante |
 |---|---|---|
 | **P0 — fait** | Point de passage unique, kit de reprise, imports fiables, V1.0 du prototype | Checklist QA V1 déroulée en direct, regard d'un professionnel externe |
-| **P1 — serveur minimal** | API + PostgreSQL + authentification, une seule organisation, bascule de `VigieStore` | Toutes les pages fonctionnent à l'identique sur le serveur (mêmes harnais qu'aujourd'hui) |
+| **P1a — fait (2026-09-24)** | Serveur local : API, base SQLite, bascule de `VigieStore`, fusion des écritures simultanées (§4 bis) | Toutes les pages fonctionnent à l'identique sur le serveur — **vérifié** |
+| **P1b — serveur minimal** | Authentification (mots de passe hachés, droits appliqués par le serveur), PostgreSQL, ouverture au réseau, une seule organisation | Mêmes harnais, plus : un compte sans droit ne lit ni n'écrit un registre par l'API |
 | **P2 — pilote** | Un premier client réel, hébergement France/UE, reprise de ses données avec le kit | Sauvegardes testées (restauration comprise), retours du pilote traités |
 | **P3 — plusieurs clients** | Séparation des organisations, vocabulaire configurable (jalon J0 de la roadmap : collectivités **et** privé) | Deux organisations en service sans fuite de l'une à l'autre |
 | **P4 — autres déploiements** | Instance dédiée, puis installation sur site si un client l'exige | — |

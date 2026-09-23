@@ -244,6 +244,8 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 **Réponse du préventeur (Q5, Cahier du préventeur, 2026-09-16) :** niveau retenu = **avec calcul des seuils** (pas un simple déclaratif). Facteurs et seuils exacts : *« voir réglementation en vigueur, conforme au texte »* — à vérifier précisément au moment de construire ce module (les seuils C2P évoluent par décret, ne pas les figer aujourd'hui). Voir `QUESTIONS-METIER-EN-ATTENTE.md` Q5 pour le détail.
 
+**2026-09-23 — texte relu, question 15 posée.** Seuils de l'article D4163-2 en vigueur depuis le 1er septembre 2023 relevés sur Légifrance (tableau dans la question 15) ; surtout, le compte professionnel de prévention est ouvert aux salariés de droit privé et au personnel des personnes publiques employé dans les conditions du droit privé (L4163-4) — pas explicitement aux fonctionnaires. Le module attend donc la réponse à la question 15 : suivi de prévention pour tous, déclaration selon le statut, ou secteur privé d'abord.
+
 ## 6. Formation / Habilitation — ✅ Fait
 
 `formation-habilitation.html` : CACES, habilitation électrique, SST, AIPR, permis PL, travail en hauteur — durées de validité standards par type, roster dérivé du Registre AT/MP (même technique que Santé & Visites), statut À jour/À renouveler/Expirée calculé. **Remarque toujours valable pour un futur module Pénibilité** : envisager un roster d'agents partagé plutôt qu'une troisième dérivation indépendante du Registre AT/MP — il y en a maintenant deux (Santé & Visites, Formation/Habilitation) construites indépendamment l'une de l'autre.
@@ -374,6 +376,7 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 **Annotation pour reprise :**
 - Objectif probable : donner aux représentants du personnel (élus CST/F3SCT actuellement, CSE/CSSCT dans la version généralisée — voir tableau de correspondance dans la section J0 ci-dessus) un accès dédié à des informations HSE/RH sans leur donner les droits RH/admin complets — un cas d'usage concret de permissions à grain fin, à construire main dans la main avec la réflexion sur la refonte des rôles (voir section J0 ci-dessus, "Réflexion actée — refonte complète du système de comptes/rôles/permissions").
 - À préciser avec l'utilisateur avant de coder : quel contenu concret ce module doit exposer (ordre du jour/comptes-rendus de F3SCT ? accès en lecture à des indicateurs agrégés et anonymisés du Registre AT/MP et du RSST ? un espace de questions/réponses avec la direction ?).
+- **2026-09-23 — question 16 posée** (contenu attendu, bénéficiaires, limites). Le frein technique est levé : le modèle de permissions par module existe (§7 d'`ETAT-DU-PROJET.md`, compte PREV1) ; un représentant sera un compte doté d'accès choisis, pas un rôle codé en dur.
 - Ne pas construire ce module avant d'avoir au moins esquissé le modèle de permissions générique (section J0) — sinon "Représentant du personnel" devient un 5ᵉ rôle codé en dur de plus, exactement le problème que la réflexion sur les permissions cherche à éviter.
 
 ## 14. Gestion administrative RH — ✅ Fait (2026-09-19)

@@ -44,6 +44,8 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 12 | Impression et PDF : quels documents méritent une vraie mise en page ? | Tous les registres (impression générique en service) | ✅ répondue le 2026-09-23 : la liste suffit, piste gardée en réserve |
 | 13 | Reprise des données : qu'apporte un client, et jusqu'où remonter ? | Mise en service chez un client (kit de reprise) | ✅ répondue le 2026-09-23 : tout l'historique, tout type de fichier |
 | 14 | Données de santé : lesquelles le logiciel doit-il vraiment garder ? | Registre AT/MP, dossiers AT/MP, visites médicales | ✅ répondue le 2026-09-23 : à voir avec le délégué à la protection des données, pas encore sollicité |
+| 15 | Pénibilité : le tableau des seuils est-il le bon, et pour quels agents ? | Module 5 Pénibilité (à construire) | 🟠 posée le 2026-09-23, en attente |
+| 16 | Dialogue social : que doivent trouver les représentants du personnel ? | Module 13 Dialogue social (à construire) | 🟠 posée le 2026-09-23, en attente |
 
 ---
 
@@ -419,6 +421,52 @@ Rien n'a été retiré : une donnée métier ne se supprime pas sans l'avis du p
 
 ---
 
+## 🟠 Question 15 — Pénibilité : le tableau des seuils est-il le bon, et pour quels agents ?
+
+**Contexte.** Réponse à la question 5 : module **avec calcul des seuils**, « conforme au texte ». Le texte a été relu sur Légifrance le 2026-09-23 : article **D4163-2** du Code du travail, en vigueur depuis le **1er septembre 2023** (décret n° 2023-760 : le travail de nuit est passé de 120 à 100 nuits par an, les équipes successives alternantes de 50 à 30).
+
+| Facteur | Intensité minimale | Durée minimale |
+|---|---|---|
+| Activités en milieu hyperbare | Interventions ou travaux à au moins 1 200 hectopascals | 60 interventions ou travaux par an |
+| Températures extrêmes | Température ≤ 5 °C ou ≥ 30 °C | 900 heures par an |
+| Bruit | Niveau d'exposition rapporté à 8 heures d'au moins 81 dB(A) | 600 heures par an |
+| Bruit (crête) | Pression acoustique de crête d'au moins 135 dB(C) | 120 fois par an |
+| Travail de nuit | Une heure de travail entre minuit et 5 heures | 100 nuits par an |
+| Équipes successives alternantes | Au moins une heure de travail entre minuit et 5 heures | 30 nuits par an |
+| Travail répétitif | Temps de cycle ≤ 30 s : 15 actions techniques ou plus ; temps de cycle > 30 s, variable ou absent : 30 actions techniques ou plus par minute | 900 heures par an |
+
+Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, postures pénibles, vibrations mécaniques, agents chimiques dangereux — n'ont pas de seuil dans ce tableau (hors déclaration C2P depuis 2017), mais restent des risques à prévenir.
+
+**Le point décisif pour une collectivité.** L'article **L4163-4** ouvre le compte professionnel de prévention aux « salariés des employeurs de droit privé, salariés régis par un statut particulier et personnel des personnes publiques employé dans les conditions du droit privé » : il ne cite ni les fonctionnaires ni les contractuels de droit public. L'article **D4163-4** prévoit une **fiche de suivi individuel** (remise chaque année, conservée cinq ans) pour les travailleurs exposés qui ne peuvent pas acquérir de droits au compte ; son application aux agents d'une collectivité reste à confirmer. Ce n'est pas au logiciel de trancher.
+
+**La question.** Le tableau est-il juste et complet ? Faut-il suivre aussi les quatre facteurs sans seuil ? Pour les agents d'une collectivité, le module doit-il faire du suivi de prévention, une déclaration C2P selon le statut, ou d'abord servir le secteur privé ? Qui saisit les expositions — par poste ou par agent, au fil de l'eau ou une fois par an ?
+
+**Options.** (A) suivi des expositions pour la prévention, pour tous, sans déclaration C2P ; (B) selon le statut de l'agent : suivi pour tous, déclaration C2P ou fiche de suivi individuel pour les seuls concernés (il faut alors le statut de chaque agent) ; (C) déclaration C2P d'abord, pour les clients du secteur privé.
+
+**Sources** : [D4163-2](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000036410046), [D4163-4](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000036407573), [chapitre L4163-1 à L4163-22](https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000028496411/), [L4161-1](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035640694) — consultés le 2026-09-23. **Les seuils se relisent au moment de construire le module** : ils changent par décret.
+
+### Décision
+
+> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse)*
+
+---
+
+## 🟠 Question 16 — Dialogue social : que doivent trouver les représentants du personnel ?
+
+**Contexte.** Retour de test du 2026-09-12 : un module réservé aux représentants du personnel, avec leur propre compte. Le frein technique noté dans la roadmap (ne pas coder un rôle de plus en dur) est levé : le modèle de permissions par module existe (§7 d'`ETAT-DU-PROJET.md`, démontré par le compte PREV1) ; un représentant peut recevoir un accès à des écrans choisis sans devenir RH ni administrateur.
+
+**Ce qui manque : le contenu.** Pistes, sans savoir lesquelles servent : ordre du jour et comptes rendus des réunions de la formation spécialisée (F3SCT) et suivi de ses avis ; indicateurs anonymisés (accidents, observations du registre santé et sécurité, sans aucun nom) ; consultation du document unique et du registre santé et sécurité ; questions à la direction ; suivi des visites et enquêtes de la formation spécialisée.
+
+**La question.** Quels contenus, par ordre de priorité, et y en a-t-il dont l'accès est imposé par la réglementation ? Qui reçoit un compte (titulaires, suppléants, secrétaire…) et que ne doivent-ils jamais voir (noms des victimes, données de santé) ?
+
+**Options.** (A) d'abord la consultation (indicateurs anonymisés, documents en lecture seule) ; (B) d'abord l'espace de travail de la F3SCT (ordres du jour, comptes rendus, avis) ; (C) les deux.
+
+### Décision
+
+> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse)*
+
+---
+
 # À savoir aussi (pas une question, point d'interprétation)
 
 Les **évaluations DUERP importées** via Excel ou chargées automatiquement depuis `DATATEST/` **n'ont pas de date d'évaluation** : le fichier source ne comporte pas de colonne date. Conséquence : elles sont **toujours comptées, quelle que soit la période choisie** dans le reporting. Seules les évaluations saisies manuellement depuis le 2026-09-14 portent une date et réagissent au filtre.
@@ -442,4 +490,6 @@ Ce n'est pas un défaut : le choix a été de ne pas inventer une fausse date d'
 - **Q12** : `assets/impression.js` (`VigieImpression.brancher`, l'impression générique) ; une mise en page dédiée suivrait le modèle de la fiche d'accueil (`#accueilPrint` dans `accueil-poste.html`) ou de la convocation (`#letterPrint` dans `sante-visites.html`).
 - **Q13** : `Documentation/outils/generer-kit-reprise.js` (liste `MODULES` : ordre, notes, fichiers) — relancer le générateur après toute décision.
 - **Q14** : champs `siege`, `nature`, `mpAvisMedecinTravail`, `mpAvisConseilMedical`… de `vigie_hse_dataset` (`registre-at-mp.html`, `saisie-rh.html`), dossiers `vigie_hse_atmp_dossiers`, visites `vigie_hse_visites` ; drapeau `sensible` du registre `VigieStore.CLES` (`assets/stockage.js`).
+- **Q15** : module 5 à construire — seuils à placer dans une table de référence (comme `assets/habilitations-ref.js`), relue sur Légifrance au moment de coder ; statut de l'agent à ajouter à `vigie_hse_agents` si l'option (B) est retenue.
+- **Q16** : module 13 à construire — permission granulaire à créer (§7 d'`ETAT-DU-PROJET.md`), nouveau compte de démonstration sur le modèle de `PREV1` (`login.html`).
 - **Point DUERP** : champ `dateEvaluation` écrit par `saisie-duerp.html` ; import sans date dans `document-unique.html`.

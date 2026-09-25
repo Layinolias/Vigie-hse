@@ -2,7 +2,7 @@
 
 ## 🔝 Point de reprise (2026-09-23)
 
-**16 modules sur 18 sont livrés.** Restent le **5** (Pénibilité — fidélité réglementaire à établir texte par texte avec le préventeur) et le **13** (Dialogue social — suspendu à la refonte des rôles du jalon J0). Les douze questions du *Cahier du préventeur* sont répondues et mises en œuvre ; aucune n'est en attente.
+**17 modules sur 18 sont livrés.** Le **5** (Pénibilité) l'a été le 2026-09-25 d'après la réponse Q15 ; reste le **13** (Dialogue social), cadré par la réponse Q16 : accès par permission de module, sans attendre la refonte des rôles du jalon J0. Les seize questions du *Cahier du préventeur* sont répondues ; aucune n'est en attente.
 
 **Gel V1.0 :** les critères vérifiables par le code sont cochés dans `PLAN-VERSIONS-V1.md` (aucune erreur JS en usage normal, exports Excel et impression / PDF sur tous les registres, mode démo et vitrine, documentation). Restent deux points qui demandent l'utilisateur : le **test en conditions réelles** sur le site hébergé (checklist QA V1, 120 points) et la **présentation à un professionnel externe**.
 
@@ -75,7 +75,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 2 | Inspection / Audit | ✅ Fait — `inspection-audit.html`, alimente le Plan d'Actions |
 | 3 | Plan d'Actions (hub transverse) | ✅ Fait — agrège désormais DUERP + Inspection/Audit |
 | 4 | Gestion des produits chimiques | ✅ Fait — `produits-chimiques.html` |
-| 5 | Pénibilité & fiches individuelles | ❌ Non démarré — cadré par la réponse Q15 (2026-09-24), prêt à construire |
+| 5 | Pénibilité & fiches individuelles | ✅ Fait (2026-09-25) — `penibilite.html` |
 | 6 | Formation / Habilitation | ✅ Fait — `formation-habilitation.html` |
 | 7 | Santé au travail — planning des visites médicales | ✅ Fait (2026-09-19) — `sante-visites.html` : agenda mensuel, RDV, convocations à partir de modèles modifiables (envoi automatique hors périmètre) |
 | 8 | Gestion documentaire (wiki++ HSE) | ✅ Fait (2026-09-19) — `base-documentaire.html` : wiki d'articles cherchable + fiches « familles de risque » + registre de documents officiels (métadonnées et lien, pas de stockage de fichiers) |
@@ -232,7 +232,7 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 `produits-chimiques.html` : inventaire par service (`vigie_hse_produits_chimiques`), 9 pictogrammes CLP en taxonomie multi-sélection, suivi de date de mise à jour FDS (seuil illustratif : >3 ans), lien explicite avec le risque DUERP "Produits chimiques" mentionné dans l'intro de page. Pas de vrai stockage de fichier FDS (limite localStorage assumée, lien texte/URL en attendant) — cette limite reste valable si le module évolue.
 
-## 5. Pénibilité & fiches individuelles — ❌ Non démarré
+## 5. Pénibilité & fiches individuelles — ✅ Fait (2026-09-25)
 
 **Note d'origine :** "Pénibilité et fiches individuelles :" *(vide, à préciser)*
 
@@ -245,6 +245,13 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 **Réponse du préventeur (Q5, Cahier du préventeur, 2026-09-16) :** niveau retenu = **avec calcul des seuils** (pas un simple déclaratif). Facteurs et seuils exacts : *« voir réglementation en vigueur, conforme au texte »* — à vérifier précisément au moment de construire ce module (les seuils C2P évoluent par décret, ne pas les figer aujourd'hui). Voir `QUESTIONS-METIER-EN-ATTENTE.md` Q5 pour le détail.
 
 **2026-09-23 — texte relu, question 15 posée.** Seuils de l'article D4163-2 en vigueur depuis le 1er septembre 2023 relevés sur Légifrance (tableau dans la question 15) ; surtout, le compte professionnel de prévention est ouvert aux salariés de droit privé et au personnel des personnes publiques employé dans les conditions du droit privé (L4163-4) — pas explicitement aux fonctionnaires. Le module attend donc la réponse à la question 15 : suivi de prévention pour tous, déclaration selon le statut, ou secteur privé d'abord.
+
+**2026-09-25 — livré** (`penibilite.html`, `assets/penibilite-ref.js`), d'après la réponse Q15 (option B, « selon le statut » ; saisie par poste, une fois par an, par qui a les droits) :
+- **Par poste, une campagne par an** : pour chaque poste, la durée d'exposition au-delà de l'intensité minimale, critère par critère ; les quatre facteurs sans seuil sont tracés (case + précision) sans calcul. « Reprendre l'année précédente » recopie une campagne à vérifier.
+- **L'agent hérite de son poste** : Gestion RH reçoit deux champs facultatifs, **Poste** et **Statut** (décidé avec l'utilisateur le 2026-09-25 : un seul roster, pas de liste d'affectations propre au module) ; exportés et importés, repris dans le kit de reprise.
+- **Suite selon le statut** : déclaration C2P pour les statuts cochés, fiche de suivi individuel pour les autres agents exposés. **Aucun statut n'est coché d'office** : quel statut ouvre droit au compte professionnel de prévention (article L4163-4) est une question juridique, laissée au préventeur ou au RH.
+- **Seuils** relus sur Légifrance le 2026-09-25 : article D4163-2 inchangé depuis le 1er septembre 2023 ; la durée de 900 h du travail répétitif vaut pour ses deux cas (confirmé sur entreprendre.service-public.gouv.fr, fiche F15504). Un seuil est une **durée minimale** : atteint dès qu'égalé.
+- **Hors périmètre V1** : import des postes et des campagnes ; déclaration elle-même (elle passe par la DSN de l'employeur) ; exposition individuelle différente de celle du poste (un agent à mi-temps sur un poste de nuit hérite des nuits du poste — à corriger à la main sur sa fiche imprimée).
 
 ## 6. Formation / Habilitation — ✅ Fait
 

@@ -4,7 +4,7 @@
 
 ## 1. Où on en est
 
-VIGIE HSE est aujourd'hui un **prototype complet côté écran** (24 pages, 16 modules sur 18) dont **toutes les données vivent dans le navigateur** (`localStorage`). C'est parfait pour une démonstration, et c'est ce qui l'empêche d'être un produit :
+VIGIE HSE est aujourd'hui un **prototype complet côté écran** (24 pages, 17 modules sur 18) dont **toutes les données vivent dans le navigateur** (`localStorage`). C'est parfait pour une démonstration, et c'est ce qui l'empêche d'être un produit :
 
 - **Rien n'est partagé.** Ce que RH1 saisit sur son poste, le préventeur ne le voit pas sur le sien. Vider le navigateur efface tout.
 - **La sécurité est décorative.** Les mots de passe sont stockés en clair et les droits (rôles, permissions par module) sont vérifiés dans la page : quelqu'un qui sait ouvrir les outils du navigateur peut se les attribuer.

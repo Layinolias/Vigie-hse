@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 133 points au 2026-09-24 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 139 points au 2026-09-25 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -126,6 +126,14 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] « Imprimer la fiche » : l'aperçu contient uniquement la fiche (identité, **type d'accueil**, points avec ☑/☐, date et auteur, deux zones de signature) et les **trois dates** — arrivée au poste, à réaliser avant le, accueil réalisé le —, pas le menu ; « Enregistrer au format PDF » fonctionne.
 - [ ] Onglet « Modèles de parcours » : modifier un point du modèle par défaut, créer un second modèle (ajouter, réordonner ↑↓, retirer des points), l'utiliser pour un nouvel accueil ; vérifier que **modifier le modèle ensuite ne change pas un accueil déjà créé**. Le modèle par défaut n'est pas supprimable mais peut être rétabli à son texte d'origine.
 - [ ] Se connecter en `manager` avec la permission « Accueil au poste : lecture seule » (à donner depuis Administration) : les accueils de son périmètre sont visibles et ouvrables, les cases sont grisées, aucun bouton de création/modification/suppression, pas d'onglet « Modèles de parcours » ; sans permission, le lien est absent et taper l'URL `accueil-poste.html` redirige vers `dashboard.html`.
+
+### Pénibilité (`RH1`/`RH2` ou `admin` — accès write d'office ; permission granulaire `penibilite` pour les autres)
+- [ ] `RH1` voit « Pénibilité » dans le menu (section « Suivi ») ; « Nouveau poste » : créer « Agent de collecte » dans le service Collecte & Propreté (Agglomération). Dans Gestion RH, rattacher deux agents actifs à ce poste, l'un avec le statut « Titulaire (FPT) », l'autre « CONT - Remplaçant ».
+- [ ] Revenir dans Pénibilité, « Saisir » la campagne de l'année du poste : 120 nuits de travail de nuit, 900 heures de travail répétitif, 899 heures de températures extrêmes. En tapant, la colonne État passe « Seuil atteint » pour la nuit et le travail répétitif (900 = le seuil), « Sous le seuil » pour les températures. Cocher « Manutentions manuelles » avec une précision, enregistrer : la ligne du poste affiche les deux facteurs atteints et la manutention en « Autres facteurs ».
+- [ ] Onglet « Agents exposés » : les deux agents sont en « Fiche de suivi individuel » (aucun statut n'est coché d'office). Dans « Seuils & statuts », cocher « CONT - Remplaçant » : le contractuel passe en « Déclaration C2P », le titulaire reste en fiche. Un agent sans poste affiche « Poste non renseigné ».
+- [ ] « Fiche » d'un agent exposé : l'aperçu contient uniquement la fiche (agent, poste, statut, tableau des facteurs avec l'exposition et l'état, facteurs sans seuil, deux zones de signature). « Exporter .xlsx » donne trois feuilles : Postes, Expositions, Agents de l'année.
+- [ ] Changer l'année (celle d'avant) : le poste est « À saisir », les agents en « Campagne non saisie » ; revenir à l'année en cours, rien n'a bougé. L'onglet « Seuils & statuts » affiche le tableau des seuils avec sa source (article D4163-2) et sa date de relecture.
+- [ ] `AG1` ne voit pas le lien « Pénibilité » et une ouverture directe de `penibilite.html` renvoie au tableau de bord. Avec la permission « Pénibilité : lecture seule » (Administration → Utilisateurs), `manager` voit les postes de ses services et leurs campagnes, sans « Nouveau poste » ni case modifiable.
 
 ### Visibilité des données par tableau (tous rôles)
 Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le rôle" (§2) n'avait été vérifié en détail que sur le Registre AT/MP. Un point par module à tableau pour couvrir le reste — même geste à chaque fois : se connecter avec au moins deux comptes de rôles différents (ex. `RH1` puis `AG1`, ou `manager`) et vérifier que les lignes/colonnes affichées sont cohérentes avec le périmètre du rôle (scope service pour `manager`, colonnes personnelles masquées pour `ag`, etc. — voir §3 ci-dessus pour le détail attendu par rôle).

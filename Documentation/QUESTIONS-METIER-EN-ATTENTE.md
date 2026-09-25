@@ -473,6 +473,8 @@ Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, 
 
 # À savoir aussi (pas une question, point d'interprétation)
 
+**Pénibilité : un seuil est atteint dès qu'il est égalé.** Le tableau de l'article D4163-2 donne des « durées minimales » : 900 heures de travail répétitif atteignent le seuil, 899 non. C'est la lecture du texte, déjà retenue pour les 400 heures du plan de prévention (question 8) ; si le préventeur lit le texte autrement, c'est une ligne à changer dans `assets/penibilite-ref.js`.
+
 Les **évaluations DUERP importées** via Excel ou chargées automatiquement depuis `DATATEST/` **n'ont pas de date d'évaluation** : le fichier source ne comporte pas de colonne date. Conséquence : elles sont **toujours comptées, quelle que soit la période choisie** dans le reporting. Seules les évaluations saisies manuellement depuis le 2026-09-14 portent une date et réagissent au filtre.
 
 Ce n'est pas un défaut : le choix a été de ne pas inventer une fausse date d'import plutôt que de fausser l'historique. Mais c'est bon à savoir en lisant un rapport DUERP sur une période donnée.

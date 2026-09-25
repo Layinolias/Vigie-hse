@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 139 points au 2026-09-25 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 145 points au 2026-09-25 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -134,6 +134,14 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] « Fiche » d'un agent exposé : l'aperçu contient uniquement la fiche (agent, poste, statut, tableau des facteurs avec l'exposition et l'état, facteurs sans seuil, deux zones de signature). « Exporter .xlsx » donne trois feuilles : Postes, Expositions, Agents de l'année.
 - [ ] Changer l'année (celle d'avant) : le poste est « À saisir », les agents en « Campagne non saisie » ; revenir à l'année en cours, rien n'a bougé. L'onglet « Seuils & statuts » affiche le tableau des seuils avec sa source (article D4163-2) et sa date de relecture.
 - [ ] `AG1` ne voit pas le lien « Pénibilité » et une ouverture directe de `penibilite.html` renvoie au tableau de bord. Avec la permission « Pénibilité : lecture seule » (Administration → Utilisateurs), `manager` voit les postes de ses services et leurs campagnes, sans « Nouveau poste » ni case modifiable.
+
+### Dialogue social (direction : `RH1`/`RH2` ou `admin` ; représentants : permission granulaire `dialogue-social`)
+- [ ] Dans Administration → Utilisateurs, donner à `AG2` la permission « Dialogue social : lecture / écriture ». Connecté en `AG2`, le menu « Ressources » montre « Dialogue social » ; « Nouvelle question » : poser une question à la direction — elle apparaît « En attente de réponse », et `AG2` n'a pas de bouton « Clore ».
+- [ ] Connecté en `RH1` (la direction) : l'indicateur « Questions en attente » vaut 1 ; ouvrir la question, répondre → « Répondue », la réponse s'affiche à droite du fil. `AG2` complète → de nouveau « En attente » ; `RH1` clôt → « Close », plus personne ne peut répondre.
+- [ ] Onglet « Réunions de la formation spécialisée » : créer une réunion avec un ordre du jour, un compte rendu et un avis sans suite — la liste signale « suite à donner ». Onglet « Visites de site » : une visite avec deux actions (l'une « Fait ») → « 1 / 2 faite(s) » ; dans le Plan d'actions, les deux actions apparaissent avec l'origine « Dialogue social ».
+- [ ] Onglet « Indicateurs anonymisés » : nombre d'accidents, avec arrêt, jours d'arrêt, par famille de risque et par service — aucun nom, aucune lésion ; un service qui n'a qu'un ou deux accidents affiche « moins de 3 ».
+- [ ] **Compte anonymisé** : dans Administration, cocher « Compte anonymisé » pour `AG2` (badge « Anonymisé » dans la liste). Sur le site en ligne, la page Dialogue social de `AG2` affiche l'avertissement « seul l'affichage de cette page est anonymisé ». Sur le serveur local (`node serveur/serveur.js`), `AG2` ouvre le Registre AT/MP : les accidents y sont, mais sans nom ni lésion, et Dossiers AT/MP, Analyse d'accident et Santé & Visites ne montrent aucune donnée.
+- [ ] `AG1` (sans permission) ne voit pas « Dialogue social » et une ouverture directe de `dialogue-social.html` renvoie au tableau de bord.
 
 ### Visibilité des données par tableau (tous rôles)
 Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le rôle" (§2) n'avait été vérifié en détail que sur le Registre AT/MP. Un point par module à tableau pour couvrir le reste — même geste à chaque fois : se connecter avec au moins deux comptes de rôles différents (ex. `RH1` puis `AG1`, ou `manager`) et vérifier que les lignes/colonnes affichées sont cohérentes avec le périmètre du rôle (scope service pour `manager`, colonnes personnelles masquées pour `ag`, etc. — voir §3 ci-dessus pour le détail attendu par rôle).

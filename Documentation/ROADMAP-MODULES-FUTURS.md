@@ -2,7 +2,7 @@
 
 ## 🔝 Point de reprise (2026-09-23)
 
-**17 modules sur 18 sont livrés.** Le **5** (Pénibilité) l'a été le 2026-09-25 d'après la réponse Q15 ; reste le **13** (Dialogue social), cadré par la réponse Q16 : accès par permission de module, sans attendre la refonte des rôles du jalon J0. Les seize questions du *Cahier du préventeur* sont répondues ; aucune n'est en attente.
+**Les 18 modules sont livrés.** Les deux derniers l'ont été le 2026-09-25 : le **5** (Pénibilité, réponse Q15) et le **13** (Dialogue social, réponse Q16, avec les comptes anonymisés côté serveur). Les seize questions du *Cahier du préventeur* sont répondues ; aucune n'est en attente.
 
 **Gel V1.0 :** les critères vérifiables par le code sont cochés dans `PLAN-VERSIONS-V1.md` (aucune erreur JS en usage normal, exports Excel et impression / PDF sur tous les registres, mode démo et vitrine, documentation). Restent deux points qui demandent l'utilisateur : le **test en conditions réelles** sur le site hébergé (checklist QA V1, 120 points) et la **présentation à un professionnel externe**.
 
@@ -83,7 +83,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 10 | EPI, dotation & entretien | ✅ Fait — `epi-dotation.html` |
 | 11 | Dashboard mobile simplifié | ✅ Fait |
 | 12 | Accueil au poste | ✅ Fait (2026-09-19), étendu le 2026-09-21 (réponse Q9) — `accueil-poste.html` : parcours d'accueil à partir de modèles modifiables, type d'accueil, délai de 8 jours et alerte de dépassement, fiche imprimable à signer |
-| 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — cadré par la réponse Q16 (2026-09-24) : permission de module, pas de rôle codé en dur ; prêt à construire |
+| 13 | Dialogue social | ✅ Fait (2026-09-25) — `dialogue-social.html`, comptes anonymisés côté serveur |
 | 14 | Gestion administrative RH | ✅ Fait (2026-09-19) — `gestion-rh.html`, les deux volets (données RH + organigramme) |
 | 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
 | 16 | Situations d'urgence & exercices d'évacuation | ✅ Fait (2026-09-18) — volet "exercices réalisés" ; plans d'urgence par site reportés |
@@ -376,7 +376,8 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 **Annotation pour reprise :** objectif probable — un parcours d'intégration/accueil sécurité pour un nouvel agent prenant son poste (livret d'accueil, points de vigilance du poste, consignes de sécurité spécifiques, émargement de prise de connaissance). À préciser avec l'utilisateur avant de coder quoi que ce soit : périmètre exact, qui déclenche le parcours (RH à l'embauche ? manager à l'affectation ?), et si un suivi de complétion est attendu (comme pour Formation/Habilitation).
 
-## 13. Dialogue social — ❌ Non démarré
+## 13. Dialogue social — ✅ Fait (2026-09-25)
+
 
 **Note d'origine (retour alpha, 2026-09-12) :** nouveau module demandé, réservé aux représentants du personnel — implique la création d'un nouveau compte/rôle **"Représentant du personnel"**.
 
@@ -385,6 +386,14 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - À préciser avec l'utilisateur avant de coder : quel contenu concret ce module doit exposer (ordre du jour/comptes-rendus de F3SCT ? accès en lecture à des indicateurs agrégés et anonymisés du Registre AT/MP et du RSST ? un espace de questions/réponses avec la direction ?).
 - **2026-09-23 — question 16 posée** (contenu attendu, bénéficiaires, limites). Le frein technique est levé : le modèle de permissions par module existe (§7 d'`ETAT-DU-PROJET.md`, compte PREV1) ; un représentant sera un compte doté d'accès choisis, pas un rôle codé en dur.
 - Ne pas construire ce module avant d'avoir au moins esquissé le modèle de permissions générique (section J0) — sinon "Représentant du personnel" devient un 5ᵉ rôle codé en dur de plus, exactement le problème que la réflexion sur les permissions cherche à éviter.
+
+**2026-09-25 — livré** (`dialogue-social.html`), d'après la réponse Q16 (option C, « les deux ») :
+- **Pas de rôle codé en dur** : les représentants reçoivent la permission de module `dialogue-social` (lecture ou écriture), comme les neuf modules existants ; la direction, ce sont les comptes RH et administrateurs.
+- **En priorité, les questions à la direction** (réponse Q16 : « l'échange question-réponse est important ») : un fil par question, statut calculé, clôture par la direction.
+- **Espace de travail de la formation spécialisée** : réunions (ordre du jour, compte rendu, avis rendus et suite donnée), **visites de site** dont les actions rejoignent le Plan d'actions (origine « Dialogue social ») et s'y suivent.
+- **Consultation anonymisée** : indicateurs sans nom ni donnée de santé ; dans un service, un effectif de 1 ou 2 s'affiche « moins de 3 » (point d'interprétation, `QUESTIONS-METIER-EN-ATTENTE.md`). Le document unique et le registre SST se consultent sur leurs propres pages, selon les droits du compte.
+- **Compte anonymisé** (« le compte doit anonymiser toutes les données sensibles », quel qu'en soit le titulaire) : case dans Administration ; en mode serveur, **le serveur ne transmet à ce compte aucune donnée de santé** (`serveur/anonymisation.js`) — pas un masquage à l'écran. Sur la démonstration hébergée, où tout est dans le navigateur, seul l'affichage du module est anonymisé, et la page le dit.
+- **Hors périmètre V1** : envoi de notifications ; pièces jointes ; vote en séance ; vocabulaire « formation spécialisée / F3SCT » propre au secteur public (à rendre configurable au jalon J0, avec « CSE » pour le privé).
 
 ## 14. Gestion administrative RH — ✅ Fait (2026-09-19)
 

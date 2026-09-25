@@ -84,6 +84,18 @@ function injection(session){
   return '<script>window.__VIGIE_SERVEUR__ = ' + json + ';</script>\n';
 }
 
+// Journal d'audit : le nom inscrit dans une ligne nouvelle est celui de la session, pas celui qu'envoie la
+// page (un appel direct à l'API pourrait sinon en inventer un). Les lignes existantes ne changent pas.
+const CLE_AUDIT = 'vigie_hse_audit_log';
+function signerJournal(avant, valeur, utilisateur){
+  let l, connus;
+  try { l = JSON.parse(valeur); connus = new Set((JSON.parse(avant || '[]') || []).map(r => r && String(r.id))); } catch(e){ return valeur; }
+  if (!Array.isArray(l)) return valeur;
+  let change = false;
+  for (const r of l) if (r && typeof r === 'object' && !connus.has(String(r.id)) && r.utilisateur !== utilisateur){ r.utilisateur = utilisateur; change = true; }
+  return change ? JSON.stringify(l) : valeur;
+}
+
 function lireCorps(req){
   return new Promise((ok, echec) => {
     const morceaux = []; let taille = 0;
@@ -145,6 +157,7 @@ async function api(req, res, chemin){
       journal('écriture refusée :', cle, 'par', session.page.user);
       return repondre(res, 403, { erreur: 'droits insuffisants' });
     }
+    if (session && cle === CLE_AUDIT && valeur !== null) valeur = signerJournal(base.lire(cle), valeur, session.page.user);
     let mots = [];
     if (cle === comptes.CLE_COMPTES && valeur !== null) ({ valeur, mots } = comptes.epurer(valeur));
     const r = valeur === null ? base.supprimer(cle, revisionVue) : base.ecrire(cle, valeur, revisionVue);

@@ -75,7 +75,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 2 | Inspection / Audit | ✅ Fait — `inspection-audit.html`, alimente le Plan d'Actions |
 | 3 | Plan d'Actions (hub transverse) | ✅ Fait — agrège désormais DUERP + Inspection/Audit |
 | 4 | Gestion des produits chimiques | ✅ Fait — `produits-chimiques.html` |
-| 5 | Pénibilité & fiches individuelles | ❌ Non démarré |
+| 5 | Pénibilité & fiches individuelles | ❌ Non démarré — cadré par la réponse Q15 (2026-09-24), prêt à construire |
 | 6 | Formation / Habilitation | ✅ Fait — `formation-habilitation.html` |
 | 7 | Santé au travail — planning des visites médicales | ✅ Fait (2026-09-19) — `sante-visites.html` : agenda mensuel, RDV, convocations à partir de modèles modifiables (envoi automatique hors périmètre) |
 | 8 | Gestion documentaire (wiki++ HSE) | ✅ Fait (2026-09-19) — `base-documentaire.html` : wiki d'articles cherchable + fiches « familles de risque » + registre de documents officiels (métadonnées et lien, pas de stockage de fichiers) |
@@ -83,7 +83,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 10 | EPI, dotation & entretien | ✅ Fait — `epi-dotation.html` |
 | 11 | Dashboard mobile simplifié | ✅ Fait |
 | 12 | Accueil au poste | ✅ Fait (2026-09-19), étendu le 2026-09-21 (réponse Q9) — `accueil-poste.html` : parcours d'accueil à partir de modèles modifiables, type d'accueil, délai de 8 jours et alerte de dépassement, fiche imprimable à signer |
-| 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — nécessite un nouveau rôle/compte "Représentant du personnel" |
+| 13 | Dialogue social | ❌ Non démarré (nouveau, retour alpha 2026-09-12) — cadré par la réponse Q16 (2026-09-24) : permission de module, pas de rôle codé en dur ; prêt à construire |
 | 14 | Gestion administrative RH | ✅ Fait (2026-09-19) — `gestion-rh.html`, les deux volets (données RH + organigramme) |
 | 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
 | 16 | Situations d'urgence & exercices d'évacuation | ✅ Fait (2026-09-18) — volet "exercices réalisés" ; plans d'urgence par site reportés |

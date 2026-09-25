@@ -421,7 +421,7 @@ Rien n'a été retiré : une donnée métier ne se supprime pas sans l'avis du p
 
 ---
 
-## 🟠 Question 15 — Pénibilité : le tableau des seuils est-il le bon, et pour quels agents ?
+## ✅ Question 15 — Pénibilité : le tableau des seuils est-il le bon, et pour quels agents ?
 
 **Contexte.** Réponse à la question 5 : module **avec calcul des seuils**, « conforme au texte ». Le texte a été relu sur Légifrance le 2026-09-23 : article **D4163-2** du Code du travail, en vigueur depuis le **1er septembre 2023** (décret n° 2023-760 : le travail de nuit est passé de 120 à 100 nuits par an, les équipes successives alternantes de 50 à 30).
 
@@ -447,11 +447,13 @@ Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, 
 
 ### Décision
 
-> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse)*
+> **Réponse du préventeur (Cahier, 2026-09-24) : option B, « selon le statut de l'agent ».** Le tableau est-il juste, faut-il suivre les quatre facteurs sans seuil : « Oui et oui ». Qui saisit, comment : « Celui qui a les droits, préventeur ou RH, par poste, 1 fois par an ».
+>
+> **Suite donnée** (module 5, `ROADMAP-MODULES-FUTURS.md`) : suivi des expositions pour tous les agents, les dix facteurs de L4161-1 (les six à seuil calculés d'après le tableau ci-dessus, les quatre autres tracés sans calcul) ; saisie **par poste, une campagne par an**, réservée à RH/admin ou à une permission de module ; chaque agent hérite des expositions de son poste. La déclaration C2P ou la fiche de suivi individuel ne vaut que pour les statuts concernés — **et le logiciel ne décide pas lesquels** : quel statut de la liste (« Titulaire (FPT) », « CONT - … »…) ouvre droit au compte professionnel de prévention est une question juridique ; chaque statut porte une case à cocher, renseignée par le préventeur ou le RH, vide par défaut. Les seuils seront relus sur Légifrance au moment de construire le module.
 
 ---
 
-## 🟠 Question 16 — Dialogue social : que doivent trouver les représentants du personnel ?
+## ✅ Question 16 — Dialogue social : que doivent trouver les représentants du personnel ?
 
 **Contexte.** Retour de test du 2026-09-12 : un module réservé aux représentants du personnel, avec leur propre compte. Le frein technique noté dans la roadmap (ne pas coder un rôle de plus en dur) est levé : le modèle de permissions par module existe (§7 d'`ETAT-DU-PROJET.md`, démontré par le compte PREV1) ; un représentant peut recevoir un accès à des écrans choisis sans devenir RH ni administrateur.
 
@@ -463,7 +465,9 @@ Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, 
 
 ### Décision
 
-> *(posée sur le Cahier du préventeur le 2026-09-23 — en attente de réponse)*
+> **Réponse du préventeur (Cahier, 2026-09-24) : option C, « les deux ».** « Tous les contenus sont gérés à travers la gestion de droits, avec anonymisation des contenus qui doivent l'être ; l'espace de communication avec la direction et la possibilité d'un échange question-réponse est important. Suivi et visite de site avec un suivi des actions. » Qui reçoit un compte, que ne doit-il jamais voir : « Je ne sais pas qui va recevoir le compte, mais le compte doit anonymiser toutes les données sensibles. »
+>
+> **Suite donnée** (module 13, `ROADMAP-MODULES-FUTURS.md`) : accès par permission de module, comme les huit modules existants (pas de rôle codé en dur) ; en priorité l'**échange questions / réponses avec la direction**, puis la consultation anonymisée (indicateurs, document unique et registre santé et sécurité en lecture) et l'espace de travail de la formation spécialisée (ordres du jour, comptes rendus, avis), avec les **visites de site** et le suivi de leurs actions dans le Plan d'actions. L'anonymisation vaut pour **le compte**, quel que soit son titulaire : noms des victimes et des déclarants, données de santé (nature et siège des lésions, avis médicaux, certificats), jamais transmis à ce compte — en mode serveur, retirés par le serveur lui-même, pas seulement masqués à l'écran.
 
 ---
 

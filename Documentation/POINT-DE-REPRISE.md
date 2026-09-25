@@ -38,10 +38,13 @@ demande une session ouverte par l'utilisateur._
   deviner un document masqué). Leçon retenue : tester la **persistance après rechargement**, pas seulement
   l'état immédiat du stockage.
 - Tests en direct des modules 12 et 8 (session ouverte par l'utilisateur nécessaire).
-- Module 5 (Pénibilité) : la réponse Q5 (« voir la réglementation en vigueur, conforme au texte ») est
-  consignée mais le module reste à construire — et la fidélité réglementaire attendue demandera de
-  repasser par le préventeur, texte par texte.
-- Module 13 (Dialogue social) : bloqué par la refonte des rôles (jalon J0).
+- ~~Module 5 (Pénibilité)~~ et ~~module 13 (Dialogue social)~~ : construits le 2026-09-25 après les réponses
+  Q15 et Q16 (`penibilite.html`, `dialogue-social.html`, comptes anonymisés). Deux points d'interprétation
+  restent à faire confirmer par le préventeur (« égalé = atteint », « moins de 3 ») — voir
+  `QUESTIONS-METIER-EN-ATTENTE.md`.
+- ~~Étape P1c~~ : faite le 2026-09-25 (périmètre des lectures, HTTPS, refus d'ouvrir au réseau tant que ce
+  n'est pas sûr, journal signé, sauvegardes — `PLAN-MISE-EN-PRODUCTION.md` §4 quater). Suite : P2, un
+  pilote — un vrai poste du réseau avec un certificat au vrai nom, sauvegardes recopiées hors du disque.
 - **Q11 et Q12 repondues et traitees le 2026-09-23** : les 9 risques du Registre AT/MP ouvrent une fiche ;
   l'impression generique suffit (mises en page dediees gardees en reserve dans la roadmap). Aucune question
   n'est plus en attente sur le Cahier.
@@ -54,7 +57,7 @@ Les harnais jsdom (`test-bd.js`, `test-accueil.js`, `test-rdv.js`, `test-liens.j
 vraies données DATATEST et le vrai SheetJS — `npm i jsdom xlsx`), `audit-exports.js` (chaque export relu, en-têtes et
 périmètre du manager), `cmp-echeance.js` (échéances avant/après), `tz-echeance.js` (six fuseaux), `test-impression.js` (189 contrôles de l'impression), `cmp-utc.js` (chaque page avant/après, horloge figée à l'heure UTC puis à 0 h 30 à Paris), `test-stockage.js` (VigieStore : accès unique, registre, repli si stockage refusé), `aller-retour.js` (export → import de
 chaque module, comparé feuille par feuille et champ par champ), `test-import-dossiers.js` (aussi `avant` : doit échouer sur
-l'ancienne version), `test-import-rh.js`, `test-csv.js` (7 formats de fichier importés), `test-admin-ref.js` (référentiels, jauge), `test-serveur.js` (serveur P1a de bout en bout, base jetable — compare au relevé du même parcours en mode navigateur), `test-fusion.js` (20 cas de fusion à trois), `test-droits.js` (droits d'écriture du serveur, 5 comptes), `mesure-ecritures.js` (qui écrit quoi au chargement des pages), `harnais-serveur.js` + `xhr-sync-aide.js` (outils communs : requêtes synchrones fidèles au navigateur, un pot de cookies par personne — le XHR synchrone de jsdom mélange les sessions entre fenêtres), `test-reimport-analyses.js` (aussi `avant`), `taille.js` (caractères par enregistrement), `cmp-utc.js prive` (navigation privée stricte), `audit-docs.js` (documentation confrontée au code :
+l'ancienne version), `test-import-rh.js`, `test-csv.js` (7 formats de fichier importés), `test-admin-ref.js` (référentiels, jauge), `test-serveur.js` (serveur P1a de bout en bout, base jetable — compare au relevé du même parcours en mode navigateur), `test-fusion.js` (20 cas de fusion à trois), `test-droits.js` (droits d'écriture du serveur, 5 comptes), `test-perimetre.js` (lectures filtrées au périmètre, greffe des écritures, journal signé), `test-perimetre-photo.js` (`preparer`, puis `photo avant` / `photo apres` et `compare-photos.js` : les 25 pages vues par deux comptes limités, avant/après un changement du serveur), `test-reseau.js` (HTTPS avec le certificat de test `tls/`, refus de s'ouvrir, types servis, sauvegardes et restauration), `mesure-ecritures.js` (qui écrit quoi au chargement des pages), `harnais-serveur.js` + `xhr-sync-aide.js` (outils communs : requêtes synchrones fidèles au navigateur, un pot de cookies par personne — le XHR synchrone de jsdom mélange les sessions entre fenêtres), `test-reimport-analyses.js` (aussi `avant`), `taille.js` (caractères par enregistrement), `cmp-utc.js prive` (navigation privée stricte), `audit-docs.js` (documentation confrontée au code :
 pages, composants, clés, permissions, fichiers cités — à relancer après chaque module), `serve.js` (serveur local pour le
 panneau navigateur : le fichier ouvert directement n'a pas de stockage), `sweep.js`, `audit2.js`,
 `check-script-tags.js`, `node_modules/jsdom`…) vivent dans le **scratchpad de la session**, pas dans le

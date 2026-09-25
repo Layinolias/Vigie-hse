@@ -23,6 +23,7 @@ VIGIE HSE est aujourd'hui un **prototype complet côté écran** (24 pages, 17 m
 - **Reprise complète** : les référentiels s'importent (premier fichier du kit) et l'arbre causal des analyses d'accident aussi — les 14 modules importables font un aller-retour export → import sans perte, champ par champ.
 - **Un serveur local qui fonctionne (étape P1a, 2026-09-24)** : `serveur/serveur.js` sert les pages et garde les données dans une vraie base (SQLite, un fichier sur le disque) partagée par tous ceux qui l'utilisent. Les 24 pages n'ont pas changé : c'est `VigieStore` qui bascule. Détail au §4 bis.
 - **On s'y connecte, et le serveur applique les droits (étape P1b, 2026-09-24)** : mot de passe vérifié par le serveur et conservé seulement sous forme d'empreinte, aucune page ni donnée sans session, droits d'écriture de chaque registre appliqués par le serveur. Détail au §4 ter.
+- **Prêt à s'ouvrir au réseau (étape P1c, 2026-09-25)** : HTTPS, chacun ne reçoit que les données de ses services, journal d'audit signé par le serveur, sauvegardes planifiées ; le serveur refuse de s'ouvrir tant que ce n'est pas sûr. Détail au §4 quater.
 
 ## 3. Trois façons de déployer — un seul logiciel
 
@@ -101,9 +102,40 @@ Les pages écrivent parfois d'elles-mêmes (fusion de valeurs par défaut, impor
 
 **Comptes anonymisés (2026-09-25, module 13).** Un compte coché « anonymisé » dans Administration — pour un représentant du personnel, réponse du préventeur à la question 16 — ne reçoit du serveur aucune donnée de santé : les dossiers AT/MP, arrêtés, analyses d'accident, visites et rendez-vous médicaux ne lui sont pas transmis, et le registre AT/MP lui arrive réduit (service, mois, type, arrêt, jours, famille de risque ; ni nom, ni lésion), réponses de conflit comprises. Il ne peut qu'y ajouter, et ses ajouts sont greffés sur le registre complet qu'il n'a jamais reçu (`serveur/anonymisation.js`, vérifié par `test-anonymisation.js`, 13/13). C'est la première lecture filtrée par le serveur ; le périmètre d'un manager viendra en P1c.
 
-**Ce que P1b ne fait pas encore (P1c).** Pas de HTTPS : le mot de passe circule en clair entre le navigateur et le serveur, ce qui est sans risque sur un même poste mais exclut le réseau. Les **lectures** ne sont pas filtrées par le serveur : un manager reçoit tous les registres, et c'est l'écran qui n'affiche que ses services. Le nom inscrit dans une ligne du journal d'audit vient encore de la page (un appel direct à l'API pourrait l'inventer) ; le serveur, lui, trace la vraie session.
+**Ce que P1b ne faisait pas — fait depuis en P1c (§4 quater).** Pas de HTTPS (le mot de passe circulait en clair : sans risque sur un même poste, exclu sur le réseau) ; lectures non filtrées (un manager recevait tous les registres, c'était l'écran qui n'affichait que ses services) ; nom d'une ligne du journal d'audit venu de la page.
 
 **Vérifié** : `test-serveur.js` 44/44 (pages derrière la connexion, empreintes sans mot de passe, cookie HttpOnly, jeton seulement haché en base, pause après cinq échecs, changement de mot de passe, compte désactivé, déconnexion, rôle trafiqué, reprise d'une base d'avant P1b), `test-droits.js` 25/25 (agent premier sur une base neuve, quatre comptes × 23 pages sans erreur ni bandeau, contournements par l'API refusés, ajouts seuls acceptés, refus annoncé seulement après une action). Le harnais émule les requêtes synchrones du navigateur avec un pot de cookies par personne : celui de l'outil de test (jsdom) mélangeait les sessions entre fenêtres.
+
+## 4 quater. Étape P1c — ouverture au réseau (fait le 2026-09-25)
+
+**Chacun ne reçoit que son périmètre** (`serveur/perimetre.js`). Un compte limité à certains services — un manager, un RH d'une direction — ne reçoit plus du serveur que les enregistrements de ses services : API, état glissé dans la page, réponses de conflit. Une règle unique pour tous les registres : un enregistrement dont le champ `service` nomme un service hors du périmètre n'est pas transmis ; ce qui n'a pas de service (référentiels, modèles, catalogues, trames) l'est, comme avant. En écriture, le compte ne renvoie que sa part, greffée sur le registre complet : il ne peut ni toucher un enregistrement qu'il ne voit pas (même en reprenant son identifiant), ni en créer un hors de ses services, et effacer un registre n'efface que sa part. Les enregistrements des autres services gardent leur version et leur place.
+
+Mesuré avant et après, pour le manager et pour un RH limité à un service, sur chacune des 25 pages : 19 pages identiques au caractère près. Les 6 autres :
+- Administration (jauge de stockage) et la vitrine (état glissé) : moins de données reçues — attendu.
+- EPI : la liste « Dotation concernée » du lavage proposait les dotations des agents **des autres services** — une fuite, close.
+- Tableau de bord : la carte Registre SST comptait les observations de toute la collectivité (15) alors que le registre n'affiche que celles du compte (4) ; elle compte désormais les mêmes.
+- **Reporting et indicateurs du Dialogue social** : ils montraient à un tel compte les chiffres de toute la collectivité ; ils portent désormais sur ses services, et un avertissement le dit — « Périmètre : vos services (…) — les chiffres ne portent que sur eux », à l'écran et sur le rapport imprimé — pour qu'un chiffre partiel ne soit pas présenté comme celui de toute la collectivité. Un compte qui doit présenter les chiffres de tous les services (en F3SCT) reçoit « tous services » dans Administration.
+
+**Journal d'audit signé par le serveur** : le nom inscrit dans une ligne nouvelle est celui de la session, pas celui qu'envoie la page ; les lignes existantes ne changent pas.
+
+**Ouverture au réseau** — variables d'environnement, données au lancement de `node serveur/serveur.js` :
+
+| Variable | Rôle |
+|---|---|
+| `VIGIE_CERT`, `VIGIE_CLE` | Certificat et clé (fichiers PEM) : le serveur parle HTTPS lui-même |
+| `VIGIE_HTTPS=1` | Ou bien : derrière un proxy HTTPS (IIS, nginx, Caddy…) qui lui transmet les requêtes |
+| `VIGIE_ECOUTE` | Adresse d'écoute — `127.0.0.1` par défaut (ce poste seul), `0.0.0.0` pour le réseau |
+| `VIGIE_HOTES` | Noms sous lesquels on l'appelle, séparés par des virgules (`vigie.mairie.local`), acceptés avec ou sans port |
+
+Le serveur **refuse de démarrer** ouvert au réseau (`VIGIE_ECOUTE` autre que ce poste, `VIGIE_HOTES` ou `VIGIE_HTTPS` donnés) : sans HTTPS ; sans aucun compte (les créer d'abord sur ce poste seul) ; tant qu'un des sept comptes de démonstration garde son mot de passe publié dans le dépôt (il les nomme — les changer ou les désactiver dans Administration, sur ce poste seul). En HTTPS : cookie de session `Secure`, en-tête HSTS. Un nom d'hôte qui n'est pas dans la liste reste refusé (421). La création des comptes au premier lancement exige, en plus de l'adresse de ce poste, un nom local : derrière un proxy installé sur le même poste, l'adresse seule ne suffisait pas. Enfin, seuls les types de fichiers de l'application sont servis (pages, scripts, styles, images, `.xlsx`, `.md`) : une clé de certificat ou une copie de base posée par erreur dans le dossier ne sort pas.
+
+Sous Windows, la première écoute sur le réseau fait demander par le pare-feu l'autorisation d'ouvrir le port — c'est à l'administrateur du poste d'y répondre.
+
+**Sauvegardes planifiées** (`serveur/sauvegardes.js`) : une copie complète au démarrage si la dernière a plus d'un intervalle, puis à chaque intervalle, prise sans arrêter le serveur (`VACUUM INTO`) ; les plus anciennes au-delà du nombre gardé sont supprimées. `VIGIE_SAUVEGARDES` (dossier, `serveur/donnees/sauvegardes` par défaut), `VIGIE_SAUVEGARDE_HEURES` (24 ; 0 les désactive), `VIGIE_SAUVEGARDES_GARDER` (14). **Restaurer** : arrêter le serveur, remplacer `serveur/donnees/vigie.db` par la copie choisie (supprimer `vigie.db-wal` et `vigie.db-shm` s'ils existent), relancer. Une copie sur le même disque protège d'une erreur ou d'une base abîmée, pas d'une panne du disque : le dossier doit être recopié ailleurs, ou pointer vers un autre disque.
+
+**Ce qui reste pour le pilote (P2)** : un vrai poste du réseau avec un certificat au vrai nom (autorité de la collectivité, ou Let's Encrypt derrière un proxy) ; la copie des sauvegardes hors du disque ; PostgreSQL si l'hébergeur l'impose (seul `serveur/base-sqlite.js` change). La liste des comptes (`vigie_hse_users` : identifiants, rôles, services — jamais de mot de passe) reste transmise à tout compte connecté : à restreindre avant plusieurs organisations (P3).
+
+**Vérifié** : `test-perimetre.js` 29/29 (greffe : modification, suppression, écrasement d'un enregistrement invisible, création hors périmètre, registre absent ; API, page et réponse 409 filtrées ; dépôt SST du manager et modification d'un RH limité sans rien perdre des autres services ; journal signé), photo des 25 pages avant/après pour deux comptes limités, `test-reseau.js` 22/22 (certificat de test : les quatre refus de démarrer, HTTPS sous le nom configuré, HSTS, 421, pas de réponse en clair, ancien mot de passe publié refusé, cookie `Secure`, clé `.pem` non servie, sauvegarde au démarrage sans doublon, copie identique à la base révisions et empreintes comprises, rotation), et les suites précédentes inchangées (`test-serveur.js` 44/44, `test-droits.js` 30/30, `test-anonymisation.js` 13/13, `test-fusion.js` 20/20).
 
 ## 5. Les étapes
 
@@ -112,7 +144,7 @@ Les pages écrivent parfois d'elles-mêmes (fusion de valeurs par défaut, impor
 | **P0 — fait** | Point de passage unique, kit de reprise, imports fiables, V1.0 du prototype | Checklist QA V1 déroulée en direct, regard d'un professionnel externe |
 | **P1a — fait (2026-09-24)** | Serveur local : API, base SQLite, bascule de `VigieStore`, fusion des écritures simultanées (§4 bis) | Toutes les pages fonctionnent à l'identique sur le serveur — **vérifié** |
 | **P1b — fait (2026-09-24)** | Connexion vérifiée par le serveur, mots de passe hachés, aucune donnée sans session, droits d'écriture appliqués par le serveur (§4 ter) | Mêmes harnais, plus : un compte sans droit n'écrit pas un registre par l'API — **vérifié** |
-| **P1c — ouverture au réseau** | HTTPS (proxy devant le serveur), adresse d'écoute et noms d'hôte configurables, lectures filtrées au périmètre d'un manager, sauvegardes planifiées ; PostgreSQL si l'hébergement l'impose | Un poste du réseau se connecte en HTTPS ; un manager ne reçoit que ses services |
+| **P1c — fait (2026-09-25)** | HTTPS (natif ou derrière un proxy), adresse d'écoute et noms d'hôte configurables, refus de s'ouvrir tant que ce n'est pas sûr, lectures filtrées au périmètre d'un compte, journal signé par le serveur, sauvegardes planifiées (§4 quater) ; PostgreSQL si l'hébergement l'impose | Un manager ne reçoit que ses services — **vérifié** ; HTTPS sous un nom configuré — **vérifié sur ce poste** (un vrai poste du réseau : au pilote) |
 | **P2 — pilote** | Un premier client réel, hébergement France/UE, reprise de ses données avec le kit | Sauvegardes testées (restauration comprise), retours du pilote traités |
 | **P3 — plusieurs clients** | Séparation des organisations, vocabulaire configurable (jalon J0 de la roadmap : collectivités **et** privé) | Deux organisations en service sans fuite de l'une à l'autre |
 | **P4 — autres déploiements** | Instance dédiée, puis installation sur site si un client l'exige | — |

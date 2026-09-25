@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 148 points au 2026-09-25 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 149 points au 2026-09-25 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -197,6 +197,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] **Serveur local — périmètre d'un manager** : connecté en `manager@verchamps.fr` (services Voirie & Réseaux et Espaces Verts), le Registre SST ne montre que les observations de ces deux services ; Reporting affiche en haut « Périmètre : vos services (…) — les chiffres ne portent que sur eux ». Le manager dépose une observation : dans un autre navigateur, l'administrateur la voit, **et toutes celles des autres services sont toujours là**. En administrateur, Reporting n'affiche pas l'avertissement.
 - [ ] **Serveur local — sauvegardes** : au lancement de `node serveur/serveur.js`, le terminal écrit « Sauvegarde : …serveur\donnees\sauvegardes\vigie-AAAA-MM-JJ_HH-MM-SS.db » ; relancé aussitôt, pas de nouvelle copie. Restauration : créer une fiche, arrêter le serveur, copier la sauvegarde à la place de `serveur/donnees/vigie.db` (supprimer `vigie.db-wal` et `vigie.db-shm`), relancer : la fiche créée après la copie a disparu, tout le reste est là.
 - [ ] **Serveur local — pas d'ouverture au réseau sans HTTPS** : dans PowerShell, `$env:VIGIE_ECOUTE="0.0.0.0"; node serveur/serveur.js` → le serveur refuse de démarrer (« pas de HTTPS : les mots de passe circuleraient en clair… »). Remettre ensuite la variable à zéro : `Remove-Item Env:VIGIE_ECOUTE`.
+- [ ] **Paquet pour le poste d'un utilisateur** : `node serveur/preparer-livraison.js`, décompresser le zip de `livraison/` sur le Bureau, double-cliquer sur `Lancer VIGIE HSE.bat` : le navigateur s'ouvre sur la connexion, et après connexion en administrateur les registres sont **vides** (aucune donnée de Verchamps). Créer une fiche dans le Registre SST, fermer la fenêtre noire, supprimer le dossier décompressé, décompresser à nouveau et relancer : la fiche est toujours là, et `C:\Users\<nom>\VIGIE HSE\sauvegardes` contient une copie. Un second double-clic pendant que VIGIE HSE tourne ouvre seulement le navigateur.
 - [ ] **Types d'accueil conservés** (site en ligne aussi) : dans Administration → Référentiels, liste « Types d'accueil au poste », ajouter « Stagiaire ». Ouvrir le Document Unique, puis revenir dans Administration : « Stagiaire » est toujours là, et il est proposé dans le formulaire d'Accueil au poste.
 
 ## 5. Responsive / mobile

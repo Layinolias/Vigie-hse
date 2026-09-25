@@ -24,6 +24,7 @@ VIGIE HSE est aujourd'hui un **prototype complet côté écran** (24 pages, 17 m
 - **Un serveur local qui fonctionne (étape P1a, 2026-09-24)** : `serveur/serveur.js` sert les pages et garde les données dans une vraie base (SQLite, un fichier sur le disque) partagée par tous ceux qui l'utilisent. Les 24 pages n'ont pas changé : c'est `VigieStore` qui bascule. Détail au §4 bis.
 - **On s'y connecte, et le serveur applique les droits (étape P1b, 2026-09-24)** : mot de passe vérifié par le serveur et conservé seulement sous forme d'empreinte, aucune page ni donnée sans session, droits d'écriture de chaque registre appliqués par le serveur. Détail au §4 ter.
 - **Prêt à s'ouvrir au réseau (étape P1c, 2026-09-25)** : HTTPS, chacun ne reçoit que les données de ses services, journal d'audit signé par le serveur, sauvegardes planifiées ; le serveur refuse de s'ouvrir tant que ce n'est pas sûr. Détail au §4 quater.
+- **Un paquet pour le poste d'un utilisateur (2026-09-25)** : un zip, un double-clic, ses données hors du dossier de l'application et copiées avant chaque nouvelle version, sans données de démonstration, import/export sans Internet — pour que le préventeur l'essaie avec ses propres données. Détail dans `LIVRAISON-POSTE.md`.
 
 ## 3. Trois façons de déployer — un seul logiciel
 

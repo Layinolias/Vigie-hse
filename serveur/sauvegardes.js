@@ -47,4 +47,26 @@ function planifier(base, { dossier, heures, garder, journal }){
   return () => { clearTimeout(premiere); if (minuteur) clearInterval(minuteur); };
 }
 
-module.exports = { planifier, sauvegarder, existantes };
+// Avant une nouvelle version de l'application : une copie de la base, prise avant que la nouvelle
+// version n'y écrive quoi que ce soit. La version est reconnue à l'empreinte de ses fichiers (rien à
+// numéroter à la main), notée dans un fichier à côté de la base. Ces copies ne suivent pas la rotation
+// quotidienne : les AVANT_MAJ dernières restent.
+const MOTIF_MAJ = /^vigie-avant-mise-a-jour-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.db$/;
+const AVANT_MAJ = 5;
+function avantMiseAJour(base, { dossier, fichierVersion, empreinte, journal }){
+  let precedente = null;
+  try { precedente = fs.readFileSync(fichierVersion, 'utf8').trim(); } catch(e){}
+  if (precedente === empreinte) return null;
+  let copie = null;
+  if (base.nombre() > 0){
+    fs.mkdirSync(dossier, { recursive: true });
+    copie = base.copier(path.join(dossier, nom(new Date()).replace(/^vigie-/, 'vigie-avant-mise-a-jour-')));
+    const liste = fs.readdirSync(dossier).filter(f => MOTIF_MAJ.test(f)).sort();
+    for (const vieille of liste.slice(0, Math.max(0, liste.length - AVANT_MAJ))) fs.rmSync(path.join(dossier, vieille), { force: true });
+    journal((precedente ? "Nouvelle version de l'application" : 'Première version suivie') + ' : copie de la base prise avant tout changement — ' + copie);
+  }
+  fs.writeFileSync(fichierVersion, empreinte + '\n');
+  return copie;
+}
+
+module.exports = { planifier, sauvegarder, existantes, avantMiseAJour };

@@ -1,2 +1,4 @@
 # Base du serveur local (serveur/serveur.js) : données réelles, copies de sauvegarde — jamais dans le dépôt
 serveur/donnees/
+# Paquets préparés pour un utilisateur (serveur/preparer-livraison.js)
+livraison/

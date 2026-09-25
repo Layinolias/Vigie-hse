@@ -1,0 +1,5 @@
+# Fichiers ouverts sous Windows par l'utilisateur (lanceur, guide) : fins de ligne Windows
+*.bat text eol=crlf
+LISEZ-MOI.txt text eol=crlf
+# Bibliotheque externe embarquee : copie a l'identique, jamais convertie
+assets/xlsx.full.min.js -text

@@ -16,7 +16,10 @@
 // Le serveur refuse de s'ouvrir au réseau sans HTTPS, sans compte, ou avec un compte de démonstration
 // encore sur son mot de passe publié.
 // Sauvegardes (serveur/sauvegardes.js) : VIGIE_SAUVEGARDES (dossier, serveur/donnees/sauvegardes par défaut),
-// VIGIE_SAUVEGARDE_HEURES (24 ; 0 les désactive), VIGIE_SAUVEGARDES_GARDER (14).
+// VIGIE_SAUVEGARDE_HEURES (24 ; 0 les désactive), VIGIE_SAUVEGARDES_GARDER (14). À chaque nouvelle version de
+// l'application (empreinte de ses fichiers), une copie de la base est prise avant qu'elle n'y écrive.
+// VIGIE_DEMO=0 : les fichiers de démonstration (DATATEST/) ne sont pas servis — les pages, qui les importent
+// d'elles-mêmes quand elles les trouvent, restent vides (poste d'un utilisateur avec ses propres données).
 //
 // P1b : connexion vérifiée ici (serveur/comptes.js — mots de passe hachés, jamais conservés en clair),
 // aucune page de l'application ni aucune donnée sans session, droits d'écriture appliqués par le serveur
@@ -36,6 +39,7 @@ const PORT = Number(process.env.PORT) || 8780;
 const BASE = process.env.VIGIE_BASE || path.join(__dirname, 'donnees', 'vigie.db');
 const CERT = process.env.VIGIE_CERT, CLE_TLS = process.env.VIGIE_CLE;
 const HTTPS_NATIF = !!(CERT && CLE_TLS);
+const DEMO = process.env.VIGIE_DEMO !== '0';
 const HTTPS = HTTPS_NATIF || process.env.VIGIE_HTTPS === '1';
 const ECOUTE = process.env.VIGIE_ECOUTE || '127.0.0.1';
 const NOMS = String(process.env.VIGIE_HOTES || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
@@ -199,7 +203,7 @@ function fichier(req, res, chemin){
   const f = path.join(RACINE, relatif);
   // ni hors du dépôt, ni ses fichiers cachés (.git), ni ce dossier (la base)
   const segments = relatif.split(/[\\/]/);
-  if (!f.startsWith(RACINE + path.sep) || segments.some(s => s.startsWith('.')) || segments[0] === 'serveur')
+  if (!f.startsWith(RACINE + path.sep) || segments.some(s => s.startsWith('.')) || segments[0] === 'serveur' || (!DEMO && segments[0] === 'DATATEST'))
     return texte(res, 404, '404');
   // seuls les types de l'application : une clé de certificat, une copie de base… posées dans le dossier ne sortent pas
   const type = TYPES[path.extname(f).toLowerCase()];
@@ -253,20 +257,38 @@ let serveur;
 try { serveur = HTTPS_NATIF ? https.createServer({ cert: fs.readFileSync(CERT), key: fs.readFileSync(CLE_TLS) }, traiter) : http.createServer(traiter); }
 catch(e){ console.error('VIGIE HSE — certificat illisible (' + e.message + ').'); process.exit(1); }
 
+// Empreinte de cette version de l'application : ses pages, ses composants et son serveur.
+function empreinteApplication(){
+  const h = require('crypto').createHash('sha256');
+  const fichiers = [];
+  for (const [dossier, ext] of [['', '.html'], ['assets', '.js'], ['serveur', '.js']]){
+    const d = path.join(RACINE, dossier);
+    for (const f of fs.readdirSync(d).filter(x => x.endsWith(ext)).sort()) fichiers.push(path.join(dossier, f));
+  }
+  for (const f of fichiers){ h.update(f + '\0'); h.update(fs.readFileSync(path.join(RACINE, f))); }
+  return h.digest('hex').slice(0, 16);
+}
+const DOSSIER_SAUVEGARDES = process.env.VIGIE_SAUVEGARDES || path.join(path.dirname(BASE), 'sauvegardes');
+Sauvegardes.avantMiseAJour(base, { dossier: DOSSIER_SAUVEGARDES, fichierVersion: path.join(path.dirname(BASE), 'version-application.txt'), empreinte: empreinteApplication(), journal });
 const repris = comptes.reprendreAncienneBase();
 const refus = refusReseau();
 if (refus){ console.error('VIGIE HSE — ouverture au réseau refusée : ' + refus); base.fermer(); process.exit(1); }
 const arreterSauvegardes = Sauvegardes.planifier(base, {
-  dossier: process.env.VIGIE_SAUVEGARDES || path.join(path.dirname(BASE), 'sauvegardes'),
+  dossier: DOSSIER_SAUVEGARDES,
   heures: process.env.VIGIE_SAUVEGARDE_HEURES === undefined ? 24 : Number(process.env.VIGIE_SAUVEGARDE_HEURES),
   garder: Number(process.env.VIGIE_SAUVEGARDES_GARDER) || 14,
   journal });
+serveur.on('error', e => {
+  console.error(e.code === 'EADDRINUSE' ? 'VIGIE HSE — le port ' + PORT + ' est déjà utilisé : le serveur tourne sans doute déjà (une autre fenêtre ?).' : 'VIGIE HSE — ' + e.message);
+  base.fermer(); process.exit(1);
+});
 serveur.listen(PORT, ECOUTE, () => {
   // derrière un proxy, l'adresse à donner aux utilisateurs est celle du proxy (port HTTPS habituel)
   const adresse = HTTPS && !HTTPS_NATIF ? 'https://' + (NOMS[0] || 'nom-du-proxy') : (HTTPS_NATIF ? 'https' : 'http') + '://' + (NOMS[0] || 'localhost') + ':' + PORT;
   journal('VIGIE HSE — serveur ' + (RESEAU ? 'ouvert au réseau (écoute ' + ECOUTE + (HTTPS_NATIF ? ', HTTPS' : ', derrière un proxy HTTPS') + ')' : 'local') + ' : ' + adresse);
   journal('Base : ' + BASE + ' (' + base.nombre() + ' registre(s) enregistré(s))');
   if (repris) journal('Base antérieure à P1b : ' + repris + ' mot(s) de passe retiré(s) des données et haché(s).');
+  if (!DEMO) journal('Données de démonstration désactivées (VIGIE_DEMO=0) : les registres ne se remplissent pas tout seuls.');
   if (comptes.aucun()) journal('Aucun compte : le premier passage sur l\'écran de connexion, depuis ce poste, crée les comptes de démonstration.');
   else if (comptes.demoActive()) journal('ATTENTION : les comptes de démonstration (mots de passe publiés dans le dépôt) sont actifs — à changer avant tout usage réel.');
 });

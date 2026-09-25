@@ -1,0 +1,104 @@
+VIGIE HSE — installation sur votre ordinateur
+=============================================
+
+VIGIE HSE fonctionne sur cet ordinateur : vos données ne le quittent pas, et personne d'autre sur
+le réseau ne peut s'y connecter. Avec Internet, les pages chargent seulement leurs polices de
+caractères et, sur le tableau de bord, la météo — sans aucune de vos données. Sans Internet, tout
+fonctionne quand même. Vos données sont rangées dans un dossier à part, que les nouvelles
+versions de l'application ne touchent jamais.
+
+
+1. UNE SEULE FOIS : INSTALLER NODE.JS
+-------------------------------------
+VIGIE HSE a besoin d'un programme gratuit, Node.js.
+  - Aller sur https://nodejs.org et télécharger la version « LTS ».
+  - L'installer en acceptant les choix proposés.
+
+
+2. INSTALLER VIGIE HSE
+----------------------
+  - Décompresser le fichier VIGIE-HSE-....zip où vous voulez (par exemple sur le Bureau) :
+    clic droit sur le fichier, « Extraire tout ».
+  - Ouvrir le dossier VIGIE-HSE obtenu.
+
+
+3. LANCER VIGIE HSE
+-------------------
+  - Double-cliquer sur « Lancer VIGIE HSE.bat ».
+  - Si Windows affiche « Windows a protégé votre ordinateur » : cliquer sur « Informations
+    complémentaires », puis « Exécuter quand même » (le fichier vient d'Internet, c'est normal).
+  - Une fenêtre noire s'ouvre : LA LAISSER OUVERTE pendant l'utilisation. La fermer arrête VIGIE HSE.
+  - Le navigateur s'ouvre sur l'écran de connexion. Sinon, taper l'adresse : http://localhost:8780
+
+Pour arrêter : fermer la fenêtre noire. Pour relancer : double-cliquer à nouveau sur le fichier.
+
+
+4. PREMIÈRE CONNEXION — À FAIRE TOUT DE SUITE
+----------------------------------------------
+  - Se connecter avec : admin@verchamps.fr   mot de passe : admin1234
+  - Ces comptes d'essai ont des mots de passe connus de tous. Dans Administration → Utilisateurs :
+      * changer le mot de passe de l'administrateur ;
+      * désactiver les autres comptes d'essai (RH1, RH2, AG1, AG2, PREV1, manager@verchamps.fr),
+        ou changer leurs mots de passe si vous voulez vous en servir.
+
+
+5. ADAPTER À VOTRE COLLECTIVITÉ
+-------------------------------
+  - Administration → Référentiels : remplacer les listes d'exemple (services de la Ville et de
+    l'Agglomération, etc.) par les vôtres.
+  - L'application distingue deux structures, « Ville » et « Agglomération ». Si votre organisation
+    est différente, rangez vos services au mieux et signalez-le : c'est prévu dans une version future.
+  - Les registres sont vides au départ : c'est normal, il n'y a aucune donnée d'exemple.
+
+
+6. METTRE VOS DONNÉES
+---------------------
+  - Les saisir directement dans chaque module ;
+  - ou les importer depuis Excel : le dossier KIT-REPRISE contient un modèle par module.
+    Commencer par ouvrir KIT-REPRISE\00-mode-d-emploi.xlsx, qui explique l'ordre et les règles.
+
+
+7. OÙ SONT VOS DONNÉES
+----------------------
+  Dans le dossier :   C:\Users\<votre nom>\VIGIE HSE\
+    - vigie.db        : toutes vos données (un seul fichier) ;
+    - sauvegardes\    : une copie complète chaque jour (les 14 dernières), et une copie avant chaque
+                        nouvelle version de l'application.
+  Ces copies sont sur le même disque : copiez de temps en temps le dossier « sauvegardes » sur une
+  clé USB ou un disque externe, pour ne rien perdre si l'ordinateur tombe en panne.
+
+
+8. INSTALLER UNE NOUVELLE VERSION
+---------------------------------
+  - Fermer la fenêtre noire (VIGIE HSE s'arrête).
+  - Supprimer l'ancien dossier VIGIE-HSE : vos données n'y sont pas, elles ne bougent pas.
+  - Décompresser le nouveau fichier .zip, puis double-cliquer sur « Lancer VIGIE HSE.bat ».
+  - Au premier lancement, une copie de vos données est prise avant tout changement.
+  - Le fichier VERSION.txt indique la version que vous avez.
+
+
+9. REVENIR À UNE SAUVEGARDE
+---------------------------
+  - Fermer la fenêtre noire.
+  - Dans C:\Users\<votre nom>\VIGIE HSE\ : renommer vigie.db en vigie-ancienne.db, et supprimer
+    vigie.db-wal et vigie.db-shm s'ils existent.
+  - Copier la sauvegarde choisie (dans « sauvegardes ») dans ce dossier, et la renommer vigie.db.
+  - Relancer VIGIE HSE.
+
+
+10. CONFIDENTIALITÉ
+-------------------
+  - Le registre des accidents et les visites médicales sont des données de santé : utiliser un
+    ordinateur protégé par un mot de passe de session, et ne pas déplacer le dossier des données
+    dans OneDrive, Dropbox ou un autre stockage en ligne.
+  - Le navigateur ne garde aucune de vos données : elles restent dans vigie.db. Seuls les fichiers
+    que vous exportez vous-même (Excel, PDF) vont dans « Téléchargements » : les supprimer quand ils
+    ne servent plus.
+  - Après « Déconnexion », ou 8 heures sans activité, il faut se reconnecter.
+
+
+11. EN CAS DE PROBLÈME
+----------------------
+  - La fenêtre noire affiche un message : il dit ce qui ne va pas.
+  - « Le port 8780 est déjà utilisé » : VIGIE HSE est déjà ouvert dans une autre fenêtre noire.
+  - « VIGIE HSE a besoin de Node.js » : refaire l'étape 1.

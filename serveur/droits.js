@@ -15,6 +15,7 @@
 // pour les autres. Les lectures ne sont pas filtrées ici (le périmètre d'un manager reste appliqué par
 // les écrans) — voir PLAN-MISE-EN-PRODUCTION.md §4 ter.
 'use strict';
+const Anonymisation = require('./anonymisation.js');
 const PREFIXE = 'vigie_hse_';
 const estAdmin = s => s.role === 'admin';
 const estRh = s => s.role === 'admin' || s.role === 'rh';
@@ -37,13 +38,22 @@ const REGLES = {
   accueils: parModule('accueil-poste'), modeles_accueil: parModule('accueil-poste'), accueil_delai: parModule('accueil-poste'),
   wiki: parModule('documentation'), documents: parModule('documentation'), doc_types: parModule('documentation'),
   postes: parModule('penibilite'), expositions: parModule('penibilite'), penibilite_parametres: parModule('penibilite'),
+  ds_questions: parModule('dialogue-social'), ds_reunions: parModule('dialogue-social'), ds_visites: parModule('dialogue-social'),
   // ouverts à tous, en ajout seulement
   rsst: ajoutPourTous, audit_log: ajoutPourTous, duerp_log: ajoutPourTous, rh_log: ajoutPourTous,
 };
 const regleGenerale = s => estRh(s) ? 'complet' : 'aucun';
 const nomCourt = cle => cle.startsWith(PREFIXE) ? cle.slice(PREFIXE.length) : cle;
 
-function niveau(session, cle){ return (REGLES[nomCourt(cle)] || regleGenerale)(session); }
+function niveau(session, cle){
+  const n = (REGLES[nomCourt(cle)] || regleGenerale)(session);
+  // compte anonymisé : rien sur les données de santé retirées, au plus l'ajout sur un registre réduit
+  if (Anonymisation.estAnonyme(session)){
+    if (Anonymisation.RETIREES.has(PREFIXE + nomCourt(cle))) return 'aucun';
+    if (Anonymisation.PROJETEES[PREFIXE + nomCourt(cle)]) return n === 'aucun' ? 'aucun' : 'ajout';
+  }
+  return n;
+}
 
 // « ajout » : chaque élément déjà enregistré doit se retrouver, identique, dans la nouvelle valeur
 function queDesAjouts(ancienne, nouvelle){
@@ -76,7 +86,8 @@ module.exports = {
   // ce que la page reçoit pour ne pas tenter d'écritures vouées au refus (assets/stockage.js)
   resume(session){
     const cles = {};
-    for (const k of Object.keys(REGLES)) cles[PREFIXE + k] = REGLES[k](session);
+    for (const k of Object.keys(REGLES)) cles[PREFIXE + k] = niveau(session, PREFIXE + k);
+    if (Anonymisation.estAnonyme(session)) for (const k of Anonymisation.RETIREES) cles[k] = 'aucun';
     return { defaut: regleGenerale(session), cles };
   },
   _queDesAjouts: queDesAjouts,

@@ -1,0 +1,967 @@
+<title>Dialogue social</title>
+<meta name="description" content="Dialogue social : questions des représentants du personnel à la direction, réunions de la formation spécialisée, visites de site et suivi de leurs actions, indicateurs anonymisés.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="assets/stockage.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
+<script src="assets/tri-filtres.js"></script>
+<script src="assets/roster.js"></script>
+<script src="assets/dates-locales.js"></script>
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B; --critical-rgb:201,94,107;
+    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px; --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; flex-shrink:0; }
+  .sidebar nav{ flex:1 1 auto; min-height:0; overflow-y:auto; margin-left:-14px; padding-left:14px; scrollbar-width:thin; }
+  .sidebar-pin{ margin-left:auto; flex-shrink:0; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:var(--r-sm); background:none; border:none; color:var(--text-faint); cursor:pointer; transition:background .15s ease, color .15s ease; }
+  .sidebar-pin:hover{ background:var(--bg-2); color:var(--text-muted); }
+  .sidebar-pin.active{ color:var(--accent); background:rgba(var(--accent-rgb),.12); }
+  .sidebar-pin .icon{ width:15px; height:15px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item .icon{ width:17px; height:17px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .role-chip.ag{ background:rgba(var(--accent-blue-rgb),.16); color:var(--accent-blue); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .page-summary-kpis{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ps-kpi{ display:flex; align-items:center; gap:7px; padding:5px 11px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); }
+  .ps-kpi-icon{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ps-kpi-icon .icon{ width:12px; height:12px; }
+  .ps-kpi-icon.blue{ background:rgba(var(--accent-rgb),.14); color:var(--accent); }
+  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
+  .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  .mobile-notice{ display:none; }
+  @media (max-width:640px){
+    .mobile-notice.show{ display:flex; align-items:center; gap:8px; padding:8px 12px; margin-bottom:14px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); font-size:11.5px; color:var(--text-muted); }
+    .mobile-notice.show button{ margin-left:auto; background:none; border:none; color:var(--text-faint); font-size:16px; line-height:1; cursor:pointer; padding:0 2px; flex-shrink:0; }
+  }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } .ps-kpi-label{ display:none; } }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn .icon{ width:15px; height:15px; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+
+  .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
+  select, input[type="text"], input[type="date"], input[type="number"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:170px; cursor:pointer;
+  }
+  select:hover, input:hover, textarea:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:64px; width:100%; font-weight:400; line-height:1.5; }
+  .result-count{ align-self:center; margin-left:auto; font-size:12px; color:var(--text-faint); }
+  .result-count b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-title{ font-size:16.5px; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+
+  .form-panel{ padding:20px 22px 22px; margin-bottom:18px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px 16px; }
+  .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; }
+  @media (max-width:680px){ .form-grid .span2, .form-grid .span3{ grid-column:span 1; } }
+  @media (max-width:640px){
+    select, input[type="text"], input[type="date"], input[type="number"], textarea{ font-size:16px; }
+    .form-actions{ flex-direction:column; align-items:stretch; }
+    .form-actions .btn{ width:100%; justify-content:center; min-height:46px; }
+  }
+  .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  .form-sub{ font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin:20px 0 10px; }
+  .form-hint{ font-size:10.5px; color:var(--text-faint); margin-top:3px; line-height:1.5; }
+  .form-sub-intro{ font-size:11.5px; color:var(--text-faint); margin:-4px 0 10px; }
+  .checkline{ display:flex; align-items:center; gap:8px; }
+  .checkline input[type="checkbox"]{ width:16px; height:16px; }
+
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input[type="text"]{ flex:1 1 160px; }
+  .dyn-row input[type="date"]{ flex:0 0 150px; }
+  .dyn-row select{ flex:0 0 120px; min-width:0; }
+
+  .table-panel{ overflow:auto; max-height:70vh; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:1150px; }
+  table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr{ transition:background .12s ease; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg tbody td.wrap{ white-space:normal; min-width:200px; max-width:320px; }
+  table.reg thead th#thActions{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
+  table.reg tbody td.actions-float{ position:sticky; right:0; z-index:1; background:var(--surface-el); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); white-space:nowrap; }
+  table.reg tbody tr:hover td.actions-float{ background:var(--bg-2); }
+
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.ok{ color:var(--success); background:var(--success-bg); } .chip.ok::before{ background:var(--success); }
+  .chip.late{ color:var(--danger); background:var(--danger-bg); } .chip.late::before{ background:var(--danger); }
+  /* Alerte « date butoir dépassée » (réponse Q9 du préventeur) */
+  .alerte-retard{ padding:16px 20px 18px; border-color:var(--danger); background:var(--danger-bg); }
+  .alerte-retard .panel-title{ color:var(--danger); display:flex; align-items:center; gap:8px; }
+  .alerte-retard .panel-title .icon{ width:15px; height:15px; }
+  .alerte-intro{ margin:2px 0 10px; font-size:12px; color:var(--text-muted); }
+  .alerte-liste{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .alerte-liste li{ display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; font-size:12.5px; }
+  .alerte-liste .a-nom{ font-weight:600; }
+  .alerte-liste .a-detail{ color:var(--text-muted); }
+
+  .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
+  .act-del:hover{ text-decoration:underline; }
+  .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+
+  .chip.soon{ color:var(--warning); background:var(--warning-bg); } .chip.soon::before{ background:var(--warning); }
+  .chip.info{ color:var(--accent); background:rgba(var(--accent-rgb),.10); } .chip.info::before{ background:var(--accent); }
+  .ap-butoir{ display:block; margin-top:3px; font-size:10.5px; color:var(--text-faint); font-family:"IBM Plex Mono",monospace; }
+
+  /* ---------- Onglets (même pattern que sante-visites / epi-dotation) ---------- */
+  .ap-tabs{ display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .ap-tab{ display:flex; align-items:center; gap:7px; padding:10px 15px; font:600 13px "IBM Plex Sans",sans-serif; color:var(--text-muted); background:none; border:none; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  .ap-tab:hover{ color:var(--text); }
+  .ap-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .ap-tab .icon{ width:15px; height:15px; }
+  .tab-panel{ display:none; }
+  .tab-panel.show{ display:block; }
+  #formPanel, #detailPanel{ scroll-margin-top:150px; } /* le bandeau récapitulatif est collant : sans marge, il masque le haut du panneau ouvert */
+
+  /* ---------- Avancement + points du parcours ---------- */
+  .progress{ height:8px; background:var(--bg-2); border-radius:var(--r-pill); overflow:hidden; }
+  .progress.mini{ display:inline-block; width:90px; height:6px; vertical-align:middle; margin-right:8px; }
+  .progress-bar{ display:block; height:100%; width:0; background:linear-gradient(90deg, var(--accent), var(--accent-violet)); transition:width .2s ease; }
+  .detail-meta{ margin:0 0 10px; font-size:12.5px; color:var(--text-muted); line-height:1.55; }
+  .detail-count{ font-size:11.5px; color:var(--text-faint); margin:6px 0 14px; }
+  .ap-items{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .ap-items li{ display:flex; align-items:flex-start; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface); flex-wrap:wrap; }
+  .ap-items li.done{ background:var(--success-bg); }
+  .ap-items input[type="checkbox"]{ width:18px; height:18px; margin-top:2px; flex-shrink:0; }
+  .ap-items .ap-lib{ flex:1 1 260px; font-size:13px; line-height:1.45; }
+  .ap-items .ap-when{ display:block; margin-top:3px; font-size:11px; color:var(--text-faint); }
+  .ap-items input[type="text"]{ flex:1 1 200px; font-size:12px; padding:6px 10px; }
+  .ap-items .ap-com{ flex:1 1 200px; font-size:12px; color:var(--text-muted); }
+  .ap-add{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .ap-add input[type="text"]{ flex:1 1 260px; }
+  .tpl-row{ display:flex; gap:6px; align-items:center; margin-bottom:8px; }
+  .tpl-row input[type="text"]{ flex:1 1 auto; }
+  .tpl-row .btn{ padding:7px 10px; }
+
+  /* ---------- Fiche imprimable (hors .app-shell : sinon masquée à l'impression) ---------- */
+  #accueilPrint{ display:none; }
+  @media print{
+    .app-shell{ display:none !important; }
+    body{ background:#fff !important; }
+    #accueilPrint{ display:block; padding:26px 32px; font:13px/1.55 "IBM Plex Sans",Arial,sans-serif; color:#000; }
+    #accueilPrint h1{ font-size:22px; margin:0 0 4px; }
+    #accueilPrint p{ margin:2px 0; }
+    #accueilPrint table{ width:100%; border-collapse:collapse; margin-top:14px; }
+    #accueilPrint th, #accueilPrint td{ border:1px solid #444; padding:6px 8px; text-align:left; vertical-align:top; }
+    #accueilPrint td.c{ width:28px; text-align:center; font-size:16px; }
+    #accueilPrint .pc{ font-size:11px; color:#333; margin-top:2px; }
+    #accueilPrint .sign{ display:flex; gap:30px; margin-top:36px; }
+    #accueilPrint .sign > div{ flex:1; border:1px solid #444; height:96px; padding:6px 8px; font-size:12px; }
+  }
+  /* dialogue social */
+  .chip.off{ color:var(--text-muted); background:var(--bg-2); } .chip.off::before{ background:var(--text-faint); }
+  .form-sub{ font:600 13px "IBM Plex Sans",sans-serif; color:var(--text); }
+  .ds-notice{ padding:12px 16px; font-size:12.5px; color:var(--text); border-left:3px solid var(--accent); margin-bottom:14px; }
+  .ds-fil{ list-style:none; margin:10px 0 14px; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .ds-fil li{ padding:10px 13px; border-radius:var(--r-md); background:var(--bg-2); max-width:86%; }
+  .ds-fil li.dir{ align-self:flex-end; background:rgba(var(--accent-rgb),.10); }
+  .ds-qui{ font-size:11px; color:var(--text-muted); margin-bottom:3px; } .ds-txt{ white-space:pre-wrap; font-size:13px; }
+  .dyn-row{ display:flex; gap:8px; margin:6px 0; } .dyn-row input, .dyn-row select{ flex:1; min-width:0; } .dyn-row .btn{ flex:0 0 auto; }
+  .ds-grille{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; margin-bottom:14px; }
+  .ds-carte{ padding:16px 18px; } .ds-sous{ font-size:11px; color:var(--text-muted); margin:10px 0 2px; text-transform:uppercase; letter-spacing:.05em; }
+  .ds-ind{ list-style:none; margin:8px 0 0; padding:0; } .ds-ind li{ display:flex; justify-content:space-between; gap:10px; padding:4px 0; border-bottom:1px solid var(--border); font-size:12.5px; }
+  @media (max-width:640px){ .dyn-row{ flex-wrap:wrap; } }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M12 14l4-5"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.2"/></symbol>
+  <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
+  <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-life-buoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+  <symbol id="i-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></symbol>
+  <symbol id="i-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+  <symbol id="i-messages" viewBox="0 0 24 24"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="dashboard.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre SST</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+        <a class="nav-item" id="navPenibilite" href="penibilite.html" style="display:none;"><svg class="icon"><use href="#i-gauge"/></svg> Pénibilité</a>
+      </div>
+      <div class="nav-section" id="navRh" style="display:none;">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item" id="navDeclarerAtmp" href="saisie-rh.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" id="navEvaluerDuerp" href="saisie-duerp.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section" id="navAdministratif" style="display:none;">
+        <div class="nav-label">Administratif</div>
+        <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
+        <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
+        <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
+        <a class="nav-item" id="navGestionRh" href="gestion-rh.html" style="display:none;"><svg class="icon"><use href="#i-users"/></svg> Gestion RH</a>
+        <a class="nav-item" id="navEntreprisesExt" href="entreprises-exterieures.html" style="display:none;"><svg class="icon"><use href="#i-briefcase"/></svg> Entreprises extérieures</a>
+        <a class="nav-item" id="navAccueilPoste" href="accueil-poste.html" style="display:none;"><svg class="icon"><use href="#i-user-plus"/></svg> Accueil au poste</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Ressources</div>
+        <a class="nav-item" id="navBaseDoc" href="base-documentaire.html"><svg class="icon"><use href="#i-book"/></svg> Base documentaire</a>
+        <a class="nav-item active" id="navDialogueSocial" href="dialogue-social.html"><svg class="icon"><use href="#i-messages"/></svg> Dialogue social</a>
+      </div>
+      <div class="nav-section" id="navPilotage" style="display:none;">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item" id="navReportingLink" href="reporting.html" style="display:none;"><svg class="icon"><use href="#i-bar-chart"/></svg> Indicateurs &amp; Reporting</a>
+        <a class="nav-item" id="navAdminLink" href="administration.html" style="display:none;"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Ressources / <b>Dialogue social</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-messages"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Dialogue social</h1>
+            <p title="Questions des représentants du personnel à la direction, réunions de la formation spécialisée, visites de site et suivi de leurs actions, indicateurs anonymisés.">Questions à la direction, réunions, visites de site, indicateurs anonymisés.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-messages"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiAttente">–</span><span class="ps-kpi-label">Questions en attente</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-list"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiQuestions">–</span><span class="ps-kpi-label">Questions</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiReunions">–</span><span class="ps-kpi-label">Réunions</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiActionsOuvertes">–</span><span class="ps-kpi-label">Actions ouvertes</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel ds-notice" id="anonymeNotice" style="display:none;"></div>
+
+      <div class="ap-tabs">
+        <button type="button" class="ap-tab active" data-tab="questions"><svg class="icon"><use href="#i-messages"/></svg> Questions à la direction</button>
+        <button type="button" class="ap-tab" data-tab="reunions"><svg class="icon"><use href="#i-clipboard"/></svg> Réunions de la formation spécialisée</button>
+        <button type="button" class="ap-tab" data-tab="visites"><svg class="icon"><use href="#i-search"/></svg> Visites de site</button>
+        <button type="button" class="ap-tab" data-tab="indicateurs"><svg class="icon"><use href="#i-bar-chart"/></svg> Indicateurs anonymisés</button>
+      </div>
+
+      <section class="tab-panel show" id="tab-questions">
+        <div class="panel console">
+          <div class="field"><span class="flabel">Statut</span>
+            <select id="fStatutQ"><option value="all">Tous</option><option value="En attente de réponse">En attente de réponse</option><option value="Répondue">Répondue</option><option value="Close">Close</option></select>
+          </div>
+          <button type="button" class="btn btn-ghost" id="btnResetQ">Réinitialiser</button>
+          <span class="result-count"><b id="qCount">–</b> / <span id="qTotal">–</span> questions</span>
+        </div>
+
+        <div class="panel form-panel" id="qFormPanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title">Nouvelle question à la direction</h3></div>
+          <form id="qForm">
+            <div class="form-grid">
+              <div style="grid-column:1/-1;"><label for="qObjet">Objet</label><input type="text" id="qObjet" required placeholder="ex. Aménagement du local de pause de l'atelier"></div>
+            </div>
+            <div style="margin-top:10px;"><label for="qTexte">Question</label><textarea id="qTexte" rows="4" required></textarea></div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Envoyer la question</button>
+              <button type="button" class="btn btn-ghost" id="btnCancelQ">Annuler</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel form-panel" id="qDetailPanel" style="display:none;">
+          <div class="panel-head">
+            <h3 class="panel-title" id="qDetailTitle">Question</h3>
+            <div class="panel-actions">
+              <button type="button" class="btn btn-ghost" id="btnCloreQ" style="display:none;">Clore la question</button>
+              <button type="button" class="btn btn-ghost" id="btnFermerQ">Fermer</button>
+            </div>
+          </div>
+          <p class="detail-meta" id="qDetailMeta"></p>
+          <ul class="ds-fil" id="qFil"></ul>
+          <form id="qReponseForm" style="display:none;">
+            <label for="qReponse" id="qReponseLabel">Répondre</label>
+            <textarea id="qReponse" rows="3" required></textarea>
+            <div class="form-actions"><button type="submit" class="btn btn-primary" id="qReponseBtn">Envoyer</button></div>
+          </form>
+        </div>
+
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Échanges avec la direction</h3>
+            <div class="panel-actions" id="qActions"></div>
+          </div>
+          <div class="table-panel">
+            <table class="reg" id="qTable">
+              <thead><tr><th>Objet</th><th>Posée par</th><th>Le</th><th>Messages</th><th>Statut</th><th></th></tr></thead>
+              <tbody id="qTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-reunions">
+        <div class="panel form-panel" id="rFormPanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title" id="rFormTitle">Nouvelle réunion</h3></div>
+          <form id="rForm">
+            <input type="hidden" id="rId">
+            <div class="form-grid">
+              <div><label for="rDate">Date</label><input type="date" id="rDate" required></div>
+              <div><label for="rType">Type</label><select id="rType"><option>Ordinaire</option><option>Extraordinaire</option></select></div>
+            </div>
+            <div style="margin-top:10px;"><label for="rOdj">Ordre du jour</label><textarea id="rOdj" rows="3" placeholder="Un point par ligne"></textarea></div>
+            <div style="margin-top:10px;"><label for="rCr">Compte rendu</label><textarea id="rCr" rows="4"></textarea></div>
+            <h4 class="form-sub" style="margin:16px 0 6px;">Avis rendus et suite donnée</h4>
+            <div id="rAvis"></div>
+            <button type="button" class="btn btn-ghost" id="btnAddAvis" style="margin-top:6px;"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un avis</button>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer la réunion</button>
+              <button type="button" class="btn btn-ghost" id="btnCancelR">Annuler</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Réunions, ordres du jour, comptes rendus et avis</h3>
+            <div class="panel-actions" id="rActions"></div>
+          </div>
+          <div class="table-panel">
+            <table class="reg" id="rTable">
+              <thead><tr><th>Date</th><th>Type</th><th>Ordre du jour</th><th>Compte rendu</th><th>Avis</th><th></th></tr></thead>
+              <tbody id="rTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-visites">
+        <div class="panel form-panel" id="vFormPanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title" id="vFormTitle">Nouvelle visite de site</h3></div>
+          <form id="vForm">
+            <input type="hidden" id="vId">
+            <div class="form-grid">
+              <div><label for="vDate">Date</label><input type="date" id="vDate" required></div>
+              <div><label for="vSite">Site visité</label><input type="text" id="vSite" required placeholder="ex. Centre technique municipal"></div>
+              <div><label for="vCollectivite">Collectivité</label><select id="vCollectivite"><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select></div>
+              <div><label for="vService">Service</label><select id="vService"></select></div>
+            </div>
+            <div style="margin-top:10px;"><label for="vParticipants">Participants</label><input type="text" id="vParticipants" placeholder="Représentants, encadrement, préventeur…"></div>
+            <div style="margin-top:10px;"><label for="vConstats">Constats</label><textarea id="vConstats" rows="3"></textarea></div>
+            <h4 class="form-sub" style="margin:16px 0 6px;">Actions décidées — reprises dans le Plan d'actions (origine « Dialogue social »)</h4>
+            <div id="vActionsForm"></div>
+            <button type="button" class="btn btn-ghost" id="btnAddAction" style="margin-top:6px;"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une action</button>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer la visite</button>
+              <button type="button" class="btn btn-ghost" id="btnCancelV">Annuler</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Visites de site et suivi des actions</h3>
+            <div class="panel-actions" id="vActions"></div>
+          </div>
+          <div class="table-panel">
+            <table class="reg" id="vTable">
+              <thead><tr><th>Date</th><th>Site</th><th>Service</th><th>Constats</th><th>Actions</th><th></th></tr></thead>
+              <tbody id="vTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-indicateurs">
+        <div class="panel console">
+          <div class="field"><span class="flabel">Année</span><select id="fAnneeInd"></select></div>
+          <span class="result-count" style="margin-left:auto;">Aucun nom, aucune donnée de santé ; un effectif inférieur à 3 s'affiche « moins de 3 ».</span>
+        </div>
+        <div class="ds-grille">
+          <div class="panel ds-carte"><h3 class="panel-title">Accidents du travail et maladies professionnelles</h3><div id="indAtmp"></div></div>
+          <div class="panel ds-carte"><h3 class="panel-title">Registre santé et sécurité au travail</h3><div id="indRsst"></div></div>
+          <div class="panel ds-carte"><h3 class="panel-title">Document unique</h3><div id="indDuerp"></div></div>
+          <div class="panel ds-carte"><h3 class="panel-title">Plan d'actions</h3><div id="indActions"></div></div>
+        </div>
+        <div class="panel" style="padding:18px 22px;">
+          <h3 class="panel-title">Accidents par service (<span id="indAnnee"></span>)</h3>
+          <div class="table-panel"><table class="reg"><thead><tr><th>Service</th><th>Accidents</th><th>Avec arrêt</th></tr></thead><tbody id="indServices"></tbody></table></div>
+          <p class="form-sub-intro" style="margin-bottom:0;">Pour consulter les documents eux-mêmes : <a href="document-unique.html">Document unique</a> · <a href="registre-sst.html">Registre santé et sécurité au travail</a> (lecture seule selon le compte).</p>
+        </div>
+      </section>
+
+      <p class="footnote">Cette page organise les échanges entre les représentants du personnel et la direction. Les indicateurs n'affichent ni nom ni donnée de santé ; un compte coché « anonymisé » dans Administration ne reçoit du serveur aucune donnée de santé — sur la démonstration hébergée, où tout est dans le navigateur, seul l'affichage de cette page est anonymisé.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const role = (session && session.role) || "ag";
+  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const myServices = (session && session.services) || ["*"];
+  const isScoped = !myServices.includes("*");
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("roleChip").textContent = role.toUpperCase();
+  if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
+
+  // ---------- Contrôle d'accès (permission granulaire "dialogue-social") ----------
+  const dsPermLevel = (role === "admin" || role === "rh") ? "write" : ((session && session.modulePermissions && session.modulePermissions["dialogue-social"]) || "none");
+  const canDs = dsPermLevel !== "none";
+  const canDsWrite = dsPermLevel === "write";
+  if (!canDs){ location.href = "dashboard.html"; }
+
+  const canEdit = role === "rh" || role === "admin";
+  const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
+  if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
+  if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
+  const canAtmpAdmin = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
+  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
+  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
+  const canGestionRh = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
+  const canEntreprisesExt = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
+  if (canAtmpAdmin){ $("navAtmpAdmin").style.display = ""; }
+  if (canAccidentAnalyse){ $("navAccidentAnalyse").style.display = ""; }
+  if (canUrgences){ $("navUrgences").style.display = ""; }
+  if (canGestionRh){ $("navGestionRh").style.display = ""; }
+  if (canEntreprisesExt){ $("navEntreprisesExt").style.display = ""; }
+  const canAccueilPoste = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accueil-poste"]) || "none") !== "none");
+  if (canAccueilPoste){ $("navAccueilPoste").style.display = ""; }
+  // la section « Administratif » n'apparaît que si l'un de ses liens est permis
+  if ([...document.querySelectorAll("#navAdministratif .nav-item")].some(a => a.style.display !== "none")){ $("navAdministratif").style.display = ""; }
+  if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
+  if (role === "admin"){ $("navAdminLink").style.display = ""; }
+  // Pénibilité (module 5) : RH, administrateurs, ou la permission « penibilite »
+  { const r = (session && session.role) || "ag", p = (session && session.modulePermissions && session.modulePermissions["penibilite"]) || "none";
+    if (r === "admin" || r === "rh" || p !== "none") document.getElementById("navPenibilite").style.display = ""; }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(module, type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
+  const pinBtn = document.getElementById("sidebarPin");
+  function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
+  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth() || sidebarLocked) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+  if (sidebarLocked) sidebarExpand();
+  applyPinVisual();
+  if (pinBtn) pinBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    sidebarLocked = !sidebarLocked;
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    applyPinVisual();
+    if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
+  });
+
+  // ---------- Référentiels partagés (services) ----------
+  const REF_KEY = "vigie_hse_referentials";
+  const REF_DEFAULTS = {
+    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
+    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
+  };
+  function loadReferentials(){
+    let stored = {};
+    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    const merged = Object.assign({}, stored);
+    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
+    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  const REF = loadReferentials();
+  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+
+  // ---------- Dialogue social (module 13, réponse Q16 du préventeur, 2026-09-24) ----------
+  // « Les deux » : l'espace de travail de la formation spécialisée ET la consultation. En priorité, l'échange
+  // questions / réponses avec la direction ; puis réunions (ordre du jour, compte rendu, avis), visites de
+  // site dont les actions rejoignent le Plan d'actions, indicateurs sans nom ni donnée de santé.
+  // Direction = comptes RH et administrateurs ; représentants = permission « dialogue-social ».
+  const Q_KEY = "vigie_hse_ds_questions", R_KEY = "vigie_hse_ds_reunions", V_KEY = "vigie_hse_ds_visites";
+  const estDirection = role === "admin" || role === "rh";
+  const moi = (session && session.user) || "—";
+  const lireListe = k => { try { const l = JSON.parse(VigieStore.getItem(k) || "[]"); return Array.isArray(l) ? l : []; } catch(e){ return []; } };
+  const ecrireListe = (k, l) => { try { VigieStore.setItem(k, JSON.stringify(l)); } catch(e){} };
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const fmtFr = iso => { const d = iso ? VigieDates.lire(String(iso).slice(0, 10)) : null; return d ? d.toLocaleDateString("fr-FR") : ""; };
+  const court = (t, n) => { const s = String(t || "").replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n - 1) + "…" : s; };
+  let QUESTIONS = lireListe(Q_KEY), REUNIONS = lireListe(R_KEY), VISITES = lireListe(V_KEY);
+
+  if (session && session.anonymise){
+    $("anonymeNotice").style.display = "";
+    $("anonymeNotice").textContent = VigieStore.mode() === "serveur"
+      ? "Compte anonymisé : le serveur ne transmet à ce compte aucune donnée de santé (registres d'accidents réduits, sans nom ni lésion ; dossiers, analyses et visites médicales non transmis)."
+      : "Compte anonymisé : sur cette démonstration, toutes les données sont dans le navigateur — seul l'affichage de cette page est anonymisé. Sur le serveur VIGIE, aucune donnée de santé n'est transmise à ce compte.";
+  }
+
+  // ---------- Questions à la direction ----------
+  // statut calculé : close si la direction l'a close ; répondue si le dernier message vient de la direction
+  function statutQ(q){
+    if (q.close) return "Close";
+    const m = (q.messages || []);
+    return m.length && m[m.length - 1].direction ? "Répondue" : "En attente de réponse";
+  }
+  const CHIP_Q = { "Close":"off", "Répondue":"ok", "En attente de réponse":"soon" };
+  let qOuverte = null;
+  function renderQuestions(){
+    const f = $("fStatutQ").value;
+    const tri = QUESTIONS.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    const rows = tri.filter(q => f === "all" || statutQ(q) === f);
+    $("qCount").textContent = rows.length; $("qTotal").textContent = QUESTIONS.length;
+    $("qTbody").innerHTML = rows.length ? rows.map(q => `<tr>
+      <td><b>${esc(q.objet)}</b></td><td>${esc(q.auteur)}</td><td>${esc(fmtFr(q.date))}</td>
+      <td class="mono">${(q.messages || []).length}</td><td><span class="chip ${CHIP_Q[statutQ(q)]}">${esc(statutQ(q))}</span></td>
+      <td class="actions-float"><button type="button" class="act-edit" data-q="${esc(q.id)}">Ouvrir</button></td></tr>`).join("")
+      : `<tr class="empty-row"><td colspan="6">${QUESTIONS.length ? "Aucune question ne correspond au filtre." : "Aucune question pour le moment."}</td></tr>`;
+    if (qOuverte) renderFil();
+    renderKpis();
+  }
+  function renderFil(){
+    const q = QUESTIONS.find(x => x.id === qOuverte); if (!q){ $("qDetailPanel").style.display = "none"; return; }
+    $("qDetailTitle").textContent = q.objet;
+    $("qDetailMeta").textContent = `Posée par ${q.auteur} le ${fmtFr(q.date)} — ${statutQ(q)}`;
+    $("qFil").innerHTML = (q.messages || []).map(m => `<li class="${m.direction ? 'dir' : 'rep'}">
+      <div class="ds-qui">${m.direction ? 'Direction' : 'Représentant'} — ${esc(m.auteur)} · ${esc(fmtFr(m.date))}</div><div class="ds-txt">${esc(m.texte)}</div></li>`).join("");
+    const peutRepondre = !q.close && (estDirection || canDsWrite);
+    $("qReponseForm").style.display = peutRepondre ? "" : "none";
+    $("qReponseLabel").textContent = estDirection ? "Réponse de la direction" : "Compléter la question";
+    $("btnCloreQ").style.display = estDirection && !q.close ? "" : "none";
+  }
+  $("fStatutQ").addEventListener("change", renderQuestions);
+  $("btnResetQ").addEventListener("click", () => { $("fStatutQ").value = "all"; renderQuestions(); });
+  $("qTbody").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-q]"); if (!b) return;
+    qOuverte = b.dataset.q; $("qFormPanel").style.display = "none"; $("qDetailPanel").style.display = ""; renderFil();
+    $("qDetailPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+  });
+  $("btnFermerQ").addEventListener("click", () => { qOuverte = null; $("qDetailPanel").style.display = "none"; });
+  $("btnCancelQ").addEventListener("click", () => { $("qFormPanel").style.display = "none"; });
+  $("qForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!canDsWrite && !estDirection) return;
+    const objet = $("qObjet").value.trim(), texte = $("qTexte").value.trim();
+    if (!objet || !texte) return;
+    const now = new Date().toISOString();
+    QUESTIONS.push({ id: genId("q"), objet, auteur: moi, date: now, close: false,
+      messages: [{ id: genId("m"), auteur: moi, direction: estDirection, texte, date: now }] });
+    ecrireListe(Q_KEY, QUESTIONS);
+    logAudit("Dialogue social", "Création", `Question « ${objet} »`);
+    $("qForm").reset(); $("qFormPanel").style.display = "none";
+    renderQuestions();
+  });
+  $("qReponseForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const q = QUESTIONS.find(x => x.id === qOuverte); if (!q || q.close) return;
+    const texte = $("qReponse").value.trim(); if (!texte) return;
+    q.messages = (q.messages || []).concat([{ id: genId("m"), auteur: moi, direction: estDirection, texte, date: new Date().toISOString() }]);
+    ecrireListe(Q_KEY, QUESTIONS);
+    logAudit("Dialogue social", estDirection ? "Réponse" : "Complément", `Question « ${q.objet} »`);
+    $("qReponse").value = "";
+    renderQuestions();
+  });
+  $("btnCloreQ").addEventListener("click", () => {
+    const q = QUESTIONS.find(x => x.id === qOuverte); if (!q || !estDirection) return;
+    if (!confirm(`Clore la question « ${q.objet} » ? Plus personne ne pourra y répondre.`)) return;
+    q.close = true; q.closePar = moi; q.closeLe = new Date().toISOString();
+    ecrireListe(Q_KEY, QUESTIONS);
+    logAudit("Dialogue social", "Clôture", `Question « ${q.objet} »`);
+    renderQuestions();
+  });
+
+  // ---------- Lignes dynamiques (avis d'une réunion, actions d'une visite) ----------
+  function ligneAvis(a){ a = a || {}; return `<div class="dyn-row ds-avis" data-id="${esc(a.id || genId("av"))}">
+    <input type="text" class="av-sujet" placeholder="Sujet" value="${esc(a.sujet || "")}">
+    <input type="text" class="av-avis" placeholder="Avis rendu" value="${esc(a.avis || "")}">
+    <input type="text" class="av-suite" placeholder="Suite donnée par la direction" value="${esc(a.suite || "")}">
+    <button type="button" class="btn btn-ghost av-del" title="Retirer">×</button></div>`; }
+  function ligneAction(a){ a = a || {}; const st = a.statut || "À faire"; return `<div class="dyn-row ds-action" data-id="${esc(a.id || genId("act"))}">
+    <input type="text" class="ac-desc" placeholder="Action" value="${esc(a.description || "")}">
+    <input type="text" class="ac-resp" placeholder="Responsable" value="${esc(a.responsable || "")}">
+    <input type="date" class="ac-ech" value="${esc(a.echeance || "")}">
+    <select class="ac-statut">${["À faire", "En cours", "Fait"].map(s => `<option ${s === st ? 'selected' : ''}>${s}</option>`).join("")}</select>
+    <button type="button" class="btn btn-ghost ac-del" title="Retirer">×</button></div>`; }
+  document.addEventListener("click", (e) => { const d = e.target.closest(".av-del, .ac-del"); if (d) d.closest(".dyn-row").remove(); });
+  $("btnAddAvis").addEventListener("click", () => $("rAvis").insertAdjacentHTML("beforeend", ligneAvis()));
+  $("btnAddAction").addEventListener("click", () => $("vActionsForm").insertAdjacentHTML("beforeend", ligneAction()));
+
+  // ---------- Réunions ----------
+  const peutEcrireEspace = estDirection || canDsWrite;
+  function renderReunions(){
+    const rows = REUNIONS.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    $("rTbody").innerHTML = rows.length ? rows.map(r => `<tr>
+      <td>${esc(fmtFr(r.date))}</td><td>${esc(r.type || "")}</td><td>${esc(court(r.ordreDuJour, 90))}</td>
+      <td>${r.compteRendu ? '<span class="chip ok">Rédigé</span>' : '<span class="chip soon">À rédiger</span>'}</td>
+      <td>${(r.avis || []).length ? (r.avis || []).map(a => esc(a.sujet || "") + (a.suite ? " — suite : " + esc(court(a.suite, 50)) : " — <i>suite à donner</i>")).join("<br>") : '—'}</td>
+      <td class="actions-float"><button type="button" class="act-edit" data-r="${esc(r.id)}">${peutEcrireEspace ? "Modifier" : "Voir"}</button></td></tr>`).join("")
+      : `<tr class="empty-row"><td colspan="6">Aucune réunion enregistrée.</td></tr>`;
+  }
+  function ouvrirReunion(r){
+    $("rForm").reset(); $("rId").value = r ? r.id : "";
+    $("rFormTitle").textContent = r ? "Réunion du " + fmtFr(r.date) : "Nouvelle réunion";
+    $("rDate").value = r ? r.date || "" : VigieDates.aujourdhui();
+    $("rType").value = r ? r.type || "Ordinaire" : "Ordinaire";
+    $("rOdj").value = r ? r.ordreDuJour || "" : ""; $("rCr").value = r ? r.compteRendu || "" : "";
+    $("rAvis").innerHTML = (r ? r.avis || [] : []).map(ligneAvis).join("");
+    $("rForm").querySelectorAll("input, textarea, select, button").forEach(el => { if (el.id !== "btnCancelR") el.disabled = !peutEcrireEspace; });
+    $("rFormPanel").style.display = ""; $("rFormPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  $("rTbody").addEventListener("click", (e) => { const b = e.target.closest("[data-r]"); if (b) ouvrirReunion(REUNIONS.find(r => r.id === b.dataset.r)); });
+  $("btnCancelR").addEventListener("click", () => { $("rFormPanel").style.display = "none"; });
+  $("rForm").addEventListener("submit", (e) => {
+    e.preventDefault(); if (!peutEcrireEspace) return;
+    const id = $("rId").value, avant = REUNIONS.find(r => r.id === id);
+    const avis = [...$("rAvis").querySelectorAll(".ds-avis")].map(d => ({ id: d.dataset.id, sujet: d.querySelector(".av-sujet").value.trim(), avis: d.querySelector(".av-avis").value.trim(), suite: d.querySelector(".av-suite").value.trim() })).filter(a => a.sujet || a.avis || a.suite);
+    const rec = Object.assign({}, avant || { id: genId("reu"), auteur: moi, dateCreation: VigieDates.aujourdhui() },
+      { date: $("rDate").value, type: $("rType").value, ordreDuJour: $("rOdj").value.trim(), compteRendu: $("rCr").value.trim(), avis });
+    if (avant) REUNIONS[REUNIONS.indexOf(avant)] = rec; else REUNIONS.push(rec);
+    ecrireListe(R_KEY, REUNIONS);
+    logAudit("Dialogue social", avant ? "Modification" : "Création", `Réunion du ${fmtFr(rec.date)}`);
+    $("rFormPanel").style.display = "none"; renderReunions(); renderKpis();
+  });
+
+  // ---------- Visites de site ----------
+  function servicesVisite(col, sel){
+    const liste = servicesForCollectivite(col);
+    $("vService").innerHTML = `<option value="">—</option>` + liste.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+    if (sel && !liste.includes(sel)) $("vService").insertAdjacentHTML("beforeend", `<option value="${esc(sel)}">${esc(sel)}</option>`);
+    $("vService").value = sel || "";
+  }
+  $("vCollectivite").addEventListener("change", () => servicesVisite($("vCollectivite").value));
+  function renderVisites(){
+    const rows = VISITES.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    $("vTbody").innerHTML = rows.length ? rows.map(v => { const acts = v.actions || [], faites = acts.filter(a => a.statut === "Fait").length; return `<tr>
+      <td>${esc(fmtFr(v.date))}</td><td><b>${esc(v.site)}</b></td><td>${esc(v.service || "")}</td><td>${esc(court(v.constats, 90))}</td>
+      <td>${acts.length ? `${faites} / ${acts.length} faite(s)` : '—'}</td>
+      <td class="actions-float"><button type="button" class="act-edit" data-v="${esc(v.id)}">${peutEcrireEspace ? "Modifier" : "Voir"}</button></td></tr>`; }).join("")
+      : `<tr class="empty-row"><td colspan="6">Aucune visite enregistrée.</td></tr>`;
+  }
+  function ouvrirVisite(v){
+    $("vForm").reset(); $("vId").value = v ? v.id : "";
+    $("vFormTitle").textContent = v ? "Visite du " + fmtFr(v.date) + " — " + v.site : "Nouvelle visite de site";
+    $("vDate").value = v ? v.date || "" : VigieDates.aujourdhui();
+    $("vSite").value = v ? v.site || "" : "";
+    $("vCollectivite").value = v ? v.collectivite || "Ville" : "Ville";
+    servicesVisite($("vCollectivite").value, v ? v.service : "");
+    $("vParticipants").value = v ? v.participants || "" : ""; $("vConstats").value = v ? v.constats || "" : "";
+    $("vActionsForm").innerHTML = (v ? v.actions || [] : []).map(ligneAction).join("");
+    $("vForm").querySelectorAll("input, textarea, select, button").forEach(el => { if (el.id !== "btnCancelV") el.disabled = !peutEcrireEspace; });
+    $("vFormPanel").style.display = ""; $("vFormPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  $("vTbody").addEventListener("click", (e) => { const b = e.target.closest("[data-v]"); if (b) ouvrirVisite(VISITES.find(v => v.id === b.dataset.v)); });
+  $("btnCancelV").addEventListener("click", () => { $("vFormPanel").style.display = "none"; });
+  $("vForm").addEventListener("submit", (e) => {
+    e.preventDefault(); if (!peutEcrireEspace) return;
+    const id = $("vId").value, avant = VISITES.find(v => v.id === id);
+    const actions = [...$("vActionsForm").querySelectorAll(".ds-action")].map(d => ({ id: d.dataset.id, description: d.querySelector(".ac-desc").value.trim(), responsable: d.querySelector(".ac-resp").value.trim(), echeance: d.querySelector(".ac-ech").value, statut: d.querySelector(".ac-statut").value })).filter(a => a.description);
+    const rec = Object.assign({}, avant || { id: genId("vis"), auteur: moi, dateCreation: VigieDates.aujourdhui() },
+      { date: $("vDate").value, site: $("vSite").value.trim(), collectivite: $("vCollectivite").value, service: $("vService").value, participants: $("vParticipants").value.trim(), constats: $("vConstats").value.trim(), actions });
+    if (!rec.site) return;
+    if (avant) VISITES[VISITES.indexOf(avant)] = rec; else VISITES.push(rec);
+    ecrireListe(V_KEY, VISITES);
+    logAudit("Dialogue social", avant ? "Modification" : "Création", `Visite de site « ${rec.site} » — ${actions.length} action(s)`);
+    $("vFormPanel").style.display = "none"; renderVisites(); renderKpis();
+  });
+
+  // ---------- Indicateurs anonymisés ----------
+  // Seuls des comptes, jamais de nom ni de donnée de santé (nature, siège, avis médicaux) ; un effectif
+  // inférieur à 3 dans un service s'affiche « moins de 3 », pour qu'un accident ne désigne pas une personne.
+  const SEUIL_PETIT = 3;
+  const petit = n => n > 0 && n < SEUIL_PETIT ? "moins de 3" : String(n);
+  const anneeDe = r => String(r.annee || (typeof r.dateAT === "string" ? r.dateAT.slice(0, 4) : "") || "");
+  function remplirAnneesInd(){
+    const ans = new Set([String(new Date().getFullYear())]);
+    lireListe("vigie_hse_dataset").forEach(r => { const a = anneeDe(r); if (/^\d{4}$/.test(a)) ans.add(a); });
+    const cur = $("fAnneeInd").value || String(new Date().getFullYear());
+    $("fAnneeInd").innerHTML = [...ans].sort().reverse().map(a => `<option ${a === cur ? 'selected' : ''}>${a}</option>`).join("");
+  }
+  const liste2 = (paires) => `<ul class="ds-ind">${paires.map(([k, v]) => `<li><span>${esc(k)}</span><b class="mono">${esc(v)}</b></li>`).join("")}</ul>`;
+  function renderIndicateurs(){
+    remplirAnneesInd();
+    const an = $("fAnneeInd").value;
+    $("indAnnee").textContent = an;
+    const at = lireListe("vigie_hse_dataset").filter(r => anneeDe(r) === an);
+    const arret = at.filter(r => /oui|avec/i.test(String(r.arret || "")) || Number(r.joursArret) > 0);
+    const jours = at.reduce((n, r) => n + (Number(r.joursArret) || 0), 0);
+    const parRisque = {};
+    at.forEach(r => { const k = r.risque || "Non précisé"; parRisque[k] = (parRisque[k] || 0) + 1; });
+    $("indAtmp").innerHTML = liste2([["Accidents et maladies déclarés", at.length], ["Dont avec arrêt", arret.length], ["Jours d'arrêt", jours]])
+      + (Object.keys(parRisque).length ? `<div class="ds-sous">Par famille de risque</div>` + liste2(Object.entries(parRisque).sort((a, b) => b[1] - a[1]).map(([k, n]) => [k, petit(n)])) : "");
+    const svc = {};
+    at.forEach(r => { const k = r.service || "Non précisé"; svc[k] = svc[k] || { n: 0, a: 0 }; svc[k].n++; if (arret.includes(r)) svc[k].a++; });
+    $("indServices").innerHTML = Object.keys(svc).length ? Object.entries(svc).sort((a, b) => b[1].n - a[1].n).map(([k, v]) => `<tr><td>${esc(k)}</td><td class="mono">${petit(v.n)}</td><td class="mono">${petit(v.a)}</td></tr>`).join("")
+      : `<tr class="empty-row"><td colspan="3">Aucun accident enregistré pour ${esc(an)}.</td></tr>`;
+    const rsst = lireListe("vigie_hse_rsst").filter(r => String(r.date || "").slice(0, 4) === an);
+    const parStatut = {}; rsst.forEach(r => { const k = r.statut || "Non précisé"; parStatut[k] = (parStatut[k] || 0) + 1; });
+    $("indRsst").innerHTML = liste2([["Observations déposées", rsst.length]].concat(Object.entries(parStatut)));
+    const duerp = lireListe("vigie_hse_duerp_dataset");
+    const parMaitrise = {}; duerp.forEach(r => { const k = r.maitrise || "Non précisé"; parMaitrise[k] = (parMaitrise[k] || 0) + 1; });
+    $("indDuerp").innerHTML = liste2([["Risques évalués (toutes années)", duerp.length]].concat(Object.entries(parMaitrise).map(([k, n]) => ["Maîtrise : " + k, n])));
+    const actions = lireListe("vigie_hse_actions");
+    const parSt = {}; actions.forEach(a => { const k = a.statut || "Non précisé"; parSt[k] = (parSt[k] || 0) + 1; });
+    $("indActions").innerHTML = liste2([["Actions (toutes origines)", actions.length]].concat(Object.entries(parSt)));
+  }
+  $("fAnneeInd").addEventListener("change", renderIndicateurs);
+
+  // ---------- Indicateurs d'en-tête, boutons, onglets ----------
+  function renderKpis(){
+    $("kpiAttente").textContent = QUESTIONS.filter(q => statutQ(q) === "En attente de réponse").length;
+    $("kpiQuestions").textContent = QUESTIONS.length;
+    $("kpiReunions").textContent = REUNIONS.length;
+    $("kpiActionsOuvertes").textContent = VISITES.reduce((n, v) => n + (v.actions || []).filter(a => a.statut !== "Fait").length, 0);
+  }
+  if (estDirection || canDsWrite) $("qActions").innerHTML = `<button type="button" class="btn btn-primary" id="btnNewQ"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle question</button>`;
+  if (peutEcrireEspace){
+    $("rActions").innerHTML = `<button type="button" class="btn btn-primary" id="btnNewR"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle réunion</button>`;
+    $("vActions").innerHTML = `<button type="button" class="btn btn-primary" id="btnNewV"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle visite</button>`;
+    $("btnNewR").addEventListener("click", () => ouvrirReunion(null));
+    $("btnNewV").addEventListener("click", () => ouvrirVisite(null));
+  }
+  if ($("btnNewQ")) $("btnNewQ").addEventListener("click", () => { $("qDetailPanel").style.display = "none"; $("qFormPanel").style.display = ""; $("qObjet").focus(); });
+  function showTab(name){
+    document.querySelectorAll(".ap-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("show", p.id === "tab-" + name));
+  }
+  document.querySelectorAll(".ap-tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+  renderQuestions(); renderReunions(); renderVisites(); renderIndicateurs(); renderKpis();
+
+  // ---------- Horloge ----------
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

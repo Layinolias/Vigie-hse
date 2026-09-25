@@ -180,6 +180,7 @@
         email: account.email,
         services: account.services || ["*"],
         modulePermissions: account.modulePermissions || {},
+        anonymise: account.anonymise === true,
       }));
       location.href = "dashboard.html";
     } else if (account && account.active === false){

@@ -34,7 +34,7 @@ const empreinteJeton = jeton => crypto.createHash('sha256').update(String(jeton)
 
 // la session telle que les pages la lisent aujourd'hui dans sessionStorage (login.html)
 function sessionDePage(u){
-  return { user: u.username || u.email, role: u.role, email: u.email, services: u.services || ['*'], modulePermissions: u.modulePermissions || {} };
+  return { user: u.username || u.email, role: u.role, email: u.email, services: u.services || ['*'], modulePermissions: u.modulePermissions || {}, anonymise: u.anonymise === true };
 }
 
 function creer(base){

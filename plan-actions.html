@@ -214,6 +214,7 @@
   .origine-chip.inspection{ color:var(--warning); border-color:rgba(var(--warning-rgb),.4); background:rgba(var(--warning-rgb),.1); }
   .origine-chip.analyse{ color:var(--accent-violet); border-color:rgba(var(--accent-violet-rgb),.4); background:rgba(var(--accent-violet-rgb),.1); }
   .origine-chip.urgence{ color:var(--danger); border-color:rgba(var(--danger-rgb),.4); background:rgba(var(--danger-rgb),.1); }
+  .origine-chip.ds{ color:var(--success); border-color:rgba(var(--success-rgb),.4); background:rgba(var(--success-rgb),.1); }
   .origine-chip.ee{ color:var(--critical); border-color:rgba(var(--critical-rgb),.4); background:rgba(var(--critical-rgb),.1); }
   .statut-select{ min-width:118px; padding:6px 28px 6px 10px; font-size:12px; }
   .echeance-overdue{ color:var(--danger); font-weight:600; }
@@ -252,6 +253,7 @@
   <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
   <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
   <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+  <symbol id="i-messages" viewBox="0 0 24 24"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></symbol>
   <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M12 14l4-5"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.2"/></symbol>
   <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
@@ -313,6 +315,7 @@
       <div class="nav-section">
         <div class="nav-label">Ressources</div>
         <a class="nav-item" id="navBaseDoc" href="base-documentaire.html"><svg class="icon"><use href="#i-book"/></svg> Base documentaire</a>
+        <a class="nav-item" id="navDialogueSocial" href="dialogue-social.html" style="display:none;"><svg class="icon"><use href="#i-messages"/></svg> Dialogue social</a>
       </div>
       <div class="nav-section" id="navPilotage" style="display:none;">
         <div class="nav-label">Pilotage</div>
@@ -489,6 +492,9 @@
   // Pénibilité (module 5) : RH, administrateurs, ou la permission « penibilite »
   { const r = (session && session.role) || "ag", p = (session && session.modulePermissions && session.modulePermissions["penibilite"]) || "none";
     if (r === "admin" || r === "rh" || p !== "none") document.getElementById("navPenibilite").style.display = ""; }
+  // Dialogue social (module 13) : RH, administrateurs, ou la permission « dialogue-social »
+  { const r = (session && session.role) || "ag", p = (session && session.modulePermissions && session.modulePermissions["dialogue-social"]) || "none";
+    if (r === "admin" || r === "rh" || p !== "none") document.getElementById("navDialogueSocial").style.display = ""; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   const AUDIT_KEY = "vigie_hse_audit_log";
@@ -718,6 +724,36 @@
     return out;
   }
 
+  // Actions décidées lors des visites de site du Dialogue social (module 13, réponse Q16 : « suivi et
+  // visite de site avec un suivi des actions »).
+  const DS_VISITES_KEY = "vigie_hse_ds_visites";
+  function generateDialogueSocialActionSeeds(){
+    let visites = [];
+    try { const raw = VigieStore.getItem(DS_VISITES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) visites = p; } } catch(e){}
+    const out = [];
+    const today = new Date();
+    visites.forEach(v => {
+      (v.actions || []).forEach(act => {
+        if (!act.description || !String(act.description).trim()) return;
+        out.push({
+          id: "pa-ds-" + v.id + "-" + act.id,
+          titre: "Visite de site — " + (v.site || ""),
+          description: act.description,
+          service: v.service || "",
+          collectivite: v.collectivite || "Ville",
+          risqueLie: "",
+          origine: "Dialogue social",
+          responsable: act.responsable || "",
+          echeance: act.echeance || VigieDates.iso(today),
+          priorite: "Moyenne",
+          statut: act.statut || "À faire",
+          dateCreation: v.date || VigieDates.iso(today),
+        });
+      });
+    });
+    return out;
+  }
+
   // ---------- Dataset Plan d'Actions (always-merge) ----------
   const STORAGE_KEY = "vigie_hse_actions";
   function genId(){ return "man-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -725,7 +761,7 @@
   function loadDataset(){
     let stored = [];
     try { const raw = VigieStore.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds());
+    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds()).concat(generateDialogueSocialActionSeeds());
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
@@ -798,7 +834,7 @@
       <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${a.id}">
         <td class="wrap">${esc(a.titre)}</td>
         <td>${a.service}</td>
-        <td><span class="origine-chip ${a.origine === 'DUERP' ? 'duerp' : (a.origine === 'Inspection' ? 'inspection' : (a.origine === 'Analyse' ? 'analyse' : (a.origine === 'Urgence' ? 'urgence' : (a.origine === 'Prévention EE' ? 'ee' : 'manuel'))))}">${a.origine}</span></td>
+        <td><span class="origine-chip ${a.origine === 'DUERP' ? 'duerp' : (a.origine === 'Inspection' ? 'inspection' : (a.origine === 'Analyse' ? 'analyse' : (a.origine === 'Urgence' ? 'urgence' : (a.origine === 'Prévention EE' ? 'ee' : (a.origine === 'Dialogue social' ? 'ds' : 'manuel')))))}">${a.origine}</span></td>
         <td>${a.responsable || '<span style="color:var(--text-faint)">—</span>'}</td>
         <td class="${isOverdue(a) ? 'echeance-overdue' : ''}">${a.echeance || '—'}</td>
         <td><span class="chip ${prioCls[a.priorite] || 'p-basse'}">${a.priorite}</span></td>

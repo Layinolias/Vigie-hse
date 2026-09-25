@@ -17,6 +17,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const { ouvrir } = require('./base-sqlite.js');
 const Comptes = require('./comptes.js');
+const Anonymisation = require('./anonymisation.js');
 
 const RACINE = path.resolve(__dirname, '..');
 const PORT = Number(process.env.PORT) || 8780;
@@ -60,7 +61,8 @@ const depuisCePoste = req => ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(r
 function injection(session){
   const etat = { api: '/api/', donnees: {}, session: session ? session.page : null };
   if (session){
-    for (const [cle, d] of Object.entries(base.lireTout())) etat.donnees[cle] = { v: d.valeur, r: d.revision };
+    const tout = Anonymisation.estAnonyme(session.page) ? Anonymisation.filtrer(base.lireTout()) : base.lireTout();
+    for (const [cle, d] of Object.entries(tout)) etat.donnees[cle] = { v: d.valeur, r: d.revision };
     etat.droits = droits.resume(session.page);
   }
   else etat.premierLancement = comptes.aucun();
@@ -105,7 +107,7 @@ async function api(req, res, chemin){
   const amorce = !session && cle === comptes.CLE_COMPTES && req.method === 'PUT' && comptes.aucun() && depuisCePoste(req);
   if (!session && !amorce) return repondre(res, 401, { erreur: 'non connecté' });
 
-  if (chemin === '/api/donnees' && req.method === 'GET') return repondre(res, 200, base.lireTout());
+  if (chemin === '/api/donnees' && req.method === 'GET') return repondre(res, 200, session && Anonymisation.estAnonyme(session.page) ? Anonymisation.filtrer(base.lireTout()) : base.lireTout());
 
   if (chemin === '/api/effacer' && req.method === 'POST'){
     if (!droits.peutEffacer(session.page)) return repondre(res, 403, { erreur: 'réservé à un administrateur' });
@@ -120,6 +122,9 @@ async function api(req, res, chemin){
     if (!Number.isInteger(revisionVue) || revisionVue < 0) return repondre(res, 400, { erreur: 'en-tête X-Vigie-Revision manquant' });
     if (req.method !== 'PUT' && req.method !== 'DELETE') return repondre(res, 405, { erreur: 'méthode' });
     let valeur = req.method === 'PUT' ? await lireCorps(req) : null;
+    const anonyme = session && Anonymisation.estAnonyme(session.page);
+    // compte anonymisé sur un registre réduit : ses seuls ajouts, greffés sur le registre complet
+    if (anonyme && Anonymisation.PROJETEES[cle] && valeur !== null) valeur = Anonymisation.grefferAjouts(base.lire(cle), valeur);
     if (session && !droits.peutEcrire(session.page, cle, valeur, base.lire(cle))){
       journal('écriture refusée :', cle, 'par', session.page.user);
       return repondre(res, 403, { erreur: 'droits insuffisants' });
@@ -127,7 +132,10 @@ async function api(req, res, chemin){
     let mots = [];
     if (cle === comptes.CLE_COMPTES && valeur !== null) ({ valeur, mots } = comptes.epurer(valeur));
     const r = valeur === null ? base.supprimer(cle, revisionVue) : base.ecrire(cle, valeur, revisionVue);
-    if (!r.ok){ journal('conflit', cle, '(vue', revisionVue, '/ actuelle', r.revision + ')'); return repondre(res, 409, r); }
+    if (!r.ok){
+      journal('conflit', cle, '(vue', revisionVue, '/ actuelle', r.revision + ')');
+      return repondre(res, 409, anonyme ? Object.assign({}, r, { valeur: Anonymisation.vue(cle, r.valeur) }) : r);
+    }
     if (cle === comptes.CLE_COMPTES) comptes.apresEcriture(mots);
     journal(req.method === 'PUT' ? 'écrit' : 'supprimé', cle, '→ révision', r.revision, 'par', session ? session.page.user : '(premier lancement)');
     return repondre(res, 200, r);

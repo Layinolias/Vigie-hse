@@ -1,0 +1,1014 @@
+<title>Pénibilité</title>
+<meta name="description" content="Suivi des expositions aux facteurs de pénibilité par poste, campagne annuelle, seuils de l'article D4163-2 du Code du travail, suite à donner par agent selon son statut.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="assets/stockage.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
+<script src="assets/tri-filtres.js"></script>
+<script src="assets/roster.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/penibilite-ref.js"></script>
+<style>
+  :root{
+    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
+    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
+    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
+    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
+    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
+    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B; --critical-rgb:201,94,107;
+    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6;
+    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
+    --sidebar-w:250px; --sidebar-w-collapsed:68px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
+    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
+    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
+    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
+    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
+    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
+    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12); --success-bg:rgba(134,199,172,.12);
+    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .mono{ font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; }
+  h1,h2,h3{ font-family:"Barlow Condensed",sans-serif; font-weight:600; margin:0; text-wrap:balance; }
+  .icon{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .app-shell{ display:flex; min-height:100vh; }
+  .sidebar{ width:var(--sidebar-w); flex-shrink:0; background:var(--surface-el); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:20px 14px; position:fixed; top:0; left:0; bottom:0; z-index:40; transition:transform .2s ease, width .3s ease-in-out; }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 20px; flex-shrink:0; }
+  .sidebar nav{ flex:1 1 auto; min-height:0; overflow-y:auto; margin-left:-14px; padding-left:14px; scrollbar-width:thin; }
+  .sidebar-pin{ margin-left:auto; flex-shrink:0; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:var(--r-sm); background:none; border:none; color:var(--text-faint); cursor:pointer; transition:background .15s ease, color .15s ease; }
+  .sidebar-pin:hover{ background:var(--bg-2); color:var(--text-muted); }
+  .sidebar-pin.active{ color:var(--accent); background:rgba(var(--accent-rgb),.12); }
+  .sidebar-pin .icon{ width:15px; height:15px; }
+  .brand-mark{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(150deg, rgba(var(--accent-rgb),.18), rgba(var(--accent-violet-rgb),.18)); color:var(--accent); }
+  .brand-name{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em; }
+  .brand-tag{ font-size:10px; color:var(--text-faint); letter-spacing:.06em; text-transform:uppercase; margin-top:1px; }
+  .nav-section{ margin-top:16px; } .nav-section:first-of-type{ margin-top:4px; }
+  .nav-label{ font-size:10.5px; color:var(--text-faint); letter-spacing:.09em; text-transform:uppercase; padding:0 12px 6px; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13.5px; font-weight:500; position:relative; margin-bottom:2px; transition:background .15s ease, color .15s ease; }
+  .nav-item:hover{ background:var(--bg-2); color:var(--text); }
+  .nav-item.active{ background:rgba(var(--accent-rgb),.10); color:var(--accent); font-weight:600; }
+  .nav-item.active::before{ content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+  .nav-item .icon{ width:17px; height:17px; }
+  .sidebar-foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
+  .user-row{ display:flex; align-items:center; gap:10px; padding:8px 12px; }
+  .user-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(var(--accent-rgb),.14); color:var(--accent); font:600 12px "IBM Plex Mono",monospace; }
+  .user-meta{ min-width:0; } .user-name{ font-size:12.5px; font-weight:600; color:var(--text); } .user-role{ font-size:10.5px; color:var(--text-faint); }
+  .logout-btn{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); color:var(--text-muted); font-size:13px; font-weight:500; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .sidebar-scrim{ display:none; position:fixed; inset:0; background:rgba(15,20,23,.35); z-index:39; }
+  .main{ flex:1; min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; transition:margin-left .3s ease-in-out; }
+  .topbar{ height:60px; flex-shrink:0; display:flex; align-items:center; gap:14px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); }
+  .menu-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--r-sm); width:34px; height:34px; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; }
+  .breadcrumb{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .breadcrumb b{ color:var(--text); font-weight:600; }
+  .topbar-right{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .clock{ text-align:right; } .clock .time{ font-size:14px; font-weight:600; color:var(--text); } .clock .date{ font-size:10.5px; color:var(--text-faint); }
+  .role-chip{ font-size:9.5px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:var(--r-pill); background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .role-chip.ag{ background:rgba(var(--accent-blue-rgb),.16); color:var(--accent-blue); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (max-width:980px){
+    .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); } .sidebar.open{ transform:translateX(0); }
+    .sidebar-scrim.show{ display:block; } .main{ margin-left:0; } .menu-toggle{ display:inline-flex; }
+  }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+
+  .panel{ background:var(--surface-el); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-sm); }
+
+  .page-summary{
+    position: sticky; top: 60px; z-index: 15;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    background: var(--surface-el); border:1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+    padding: 12px 20px; margin-bottom: 20px;
+  }
+  .page-summary-id{ display:flex; align-items:center; gap:12px; min-width:0; flex-shrink:1; }
+  .page-summary-icon{ width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:rgba(var(--accent-rgb),.12); color:var(--accent); flex-shrink:0; }
+  .page-summary-icon .icon{ width:18px; height:18px; }
+  .page-summary-text{ min-width:0; }
+  .page-summary-text h1{ font-size:16.5px; font-family:"Barlow Condensed",sans-serif; font-weight:600; line-height:1.2; white-space:nowrap; margin:0; }
+  .page-summary-text p{ margin:1px 0 0; font-size:11px; color:var(--text-muted); line-height:1.3; max-width:56ch; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .page-summary-kpis{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ps-kpi{ display:flex; align-items:center; gap:7px; padding:5px 11px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); }
+  .ps-kpi-icon{ width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ps-kpi-icon .icon{ width:12px; height:12px; }
+  .ps-kpi-icon.blue{ background:rgba(var(--accent-rgb),.14); color:var(--accent); }
+  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
+  .ps-kpi-icon.warn{ background:var(--warning-bg); color:var(--warning); }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .ps-kpi-value{ font-size:14.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .ps-kpi-label{ font-size:8.5px; color:var(--text-faint); white-space:nowrap; text-transform:uppercase; letter-spacing:.03em; }
+  @media (max-width:1100px){ .page-summary-text p{ display:none; } }
+  .mobile-notice{ display:none; }
+  @media (max-width:640px){
+    .mobile-notice.show{ display:flex; align-items:center; gap:8px; padding:8px 12px; margin-bottom:14px; border-radius:var(--r-sm); background:var(--bg-2); border:1px solid var(--border); font-size:11.5px; color:var(--text-muted); }
+    .mobile-notice.show button{ margin-left:auto; background:none; border:none; color:var(--text-faint); font-size:16px; line-height:1; cursor:pointer; padding:0 2px; flex-shrink:0; }
+  }
+  @media (max-width:640px){ .page-summary{ padding:9px 16px; } .ps-kpi-label{ display:none; } }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; font:600 12.5px "IBM Plex Sans",sans-serif; padding:9px 15px; border-radius:var(--r-sm); cursor:pointer; border:1px solid transparent; transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+  .btn .icon{ width:15px; height:15px; }
+  .btn-primary{ color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-violet)); box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--text-muted); }
+  .btn-ghost:hover{ background:var(--bg-2); color:var(--text); }
+
+  .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field .flabel{ font-size:10.5px; color:var(--text-faint); font-weight:500; }
+  select, input[type="text"], input[type="date"], input[type="number"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:170px; cursor:pointer;
+  }
+  select:hover, input:hover, textarea:hover{ border-color:rgba(var(--accent-rgb),.5); }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:64px; width:100%; font-weight:400; line-height:1.5; }
+  .result-count{ align-self:center; margin-left:auto; font-size:12px; color:var(--text-faint); }
+  .result-count b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-title{ font-size:16.5px; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+
+  .form-panel{ padding:20px 22px 22px; margin-bottom:18px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px 16px; }
+  .form-grid .span2{ grid-column:span 2; } .form-grid .span3{ grid-column:span 3; }
+  @media (max-width:680px){ .form-grid .span2, .form-grid .span3{ grid-column:span 1; } }
+  @media (max-width:640px){
+    select, input[type="text"], input[type="date"], input[type="number"], textarea{ font-size:16px; }
+    .form-actions{ flex-direction:column; align-items:stretch; }
+    .form-actions .btn{ width:100%; justify-content:center; min-height:46px; }
+  }
+  .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  .form-sub{ font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin:20px 0 10px; }
+  .form-hint{ font-size:10.5px; color:var(--text-faint); margin-top:3px; line-height:1.5; }
+  .form-sub-intro{ font-size:11.5px; color:var(--text-faint); margin:-4px 0 10px; }
+  .checkline{ display:flex; align-items:center; gap:8px; }
+  .checkline input[type="checkbox"]{ width:16px; height:16px; }
+
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input[type="text"]{ flex:1 1 160px; }
+  .dyn-row input[type="date"]{ flex:0 0 150px; }
+  .dyn-row select{ flex:0 0 120px; min-width:0; }
+
+  .table-panel{ overflow:auto; max-height:70vh; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:1150px; }
+  table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr{ transition:background .12s ease; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg tbody td.wrap{ white-space:normal; min-width:200px; max-width:320px; }
+  table.reg thead th#thActions{ position:sticky; right:0; z-index:3; background:var(--bg-2); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); }
+  table.reg tbody td.actions-float{ position:sticky; right:0; z-index:1; background:var(--surface-el); box-shadow:-8px 0 12px -8px rgba(0,0,0,.18); white-space:nowrap; }
+  table.reg tbody tr:hover td.actions-float{ background:var(--bg-2); }
+
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.ok{ color:var(--success); background:var(--success-bg); } .chip.ok::before{ background:var(--success); }
+  .chip.late{ color:var(--danger); background:var(--danger-bg); } .chip.late::before{ background:var(--danger); }
+  /* Alerte « date butoir dépassée » (réponse Q9 du préventeur) */
+  .alerte-retard{ padding:16px 20px 18px; border-color:var(--danger); background:var(--danger-bg); }
+  .alerte-retard .panel-title{ color:var(--danger); display:flex; align-items:center; gap:8px; }
+  .alerte-retard .panel-title .icon{ width:15px; height:15px; }
+  .alerte-intro{ margin:2px 0 10px; font-size:12px; color:var(--text-muted); }
+  .alerte-liste{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .alerte-liste li{ display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; font-size:12.5px; }
+  .alerte-liste .a-nom{ font-weight:600; }
+  .alerte-liste .a-detail{ color:var(--text-muted); }
+
+  .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
+  .act-del:hover{ text-decoration:underline; }
+  .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+
+  .chip.soon{ color:var(--warning); background:var(--warning-bg); } .chip.soon::before{ background:var(--warning); }
+  .chip.info{ color:var(--accent); background:rgba(var(--accent-rgb),.10); } .chip.info::before{ background:var(--accent); }
+  .ap-butoir{ display:block; margin-top:3px; font-size:10.5px; color:var(--text-faint); font-family:"IBM Plex Mono",monospace; }
+
+  /* ---------- Onglets (même pattern que sante-visites / epi-dotation) ---------- */
+  .ap-tabs{ display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .ap-tab{ display:flex; align-items:center; gap:7px; padding:10px 15px; font:600 13px "IBM Plex Sans",sans-serif; color:var(--text-muted); background:none; border:none; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  .ap-tab:hover{ color:var(--text); }
+  .ap-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .ap-tab .icon{ width:15px; height:15px; }
+  .tab-panel{ display:none; }
+  .tab-panel.show{ display:block; }
+  #formPanel, #detailPanel{ scroll-margin-top:150px; } /* le bandeau récapitulatif est collant : sans marge, il masque le haut du panneau ouvert */
+
+  /* ---------- Avancement + points du parcours ---------- */
+  .progress{ height:8px; background:var(--bg-2); border-radius:var(--r-pill); overflow:hidden; }
+  .progress.mini{ display:inline-block; width:90px; height:6px; vertical-align:middle; margin-right:8px; }
+  .progress-bar{ display:block; height:100%; width:0; background:linear-gradient(90deg, var(--accent), var(--accent-violet)); transition:width .2s ease; }
+  .detail-meta{ margin:0 0 10px; font-size:12.5px; color:var(--text-muted); line-height:1.55; }
+  .detail-count{ font-size:11.5px; color:var(--text-faint); margin:6px 0 14px; }
+  .ap-items{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .ap-items li{ display:flex; align-items:flex-start; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface); flex-wrap:wrap; }
+  .ap-items li.done{ background:var(--success-bg); }
+  .ap-items input[type="checkbox"]{ width:18px; height:18px; margin-top:2px; flex-shrink:0; }
+  .ap-items .ap-lib{ flex:1 1 260px; font-size:13px; line-height:1.45; }
+  .ap-items .ap-when{ display:block; margin-top:3px; font-size:11px; color:var(--text-faint); }
+  .ap-items input[type="text"]{ flex:1 1 200px; font-size:12px; padding:6px 10px; }
+  .ap-items .ap-com{ flex:1 1 200px; font-size:12px; color:var(--text-muted); }
+  .ap-add{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .ap-add input[type="text"]{ flex:1 1 260px; }
+  .tpl-row{ display:flex; gap:6px; align-items:center; margin-bottom:8px; }
+  .tpl-row input[type="text"]{ flex:1 1 auto; }
+  .tpl-row .btn{ padding:7px 10px; }
+
+  /* ---------- Fiche imprimable (hors .app-shell : sinon masquée à l'impression) ---------- */
+  #penibilitePrint{ display:none; }
+  @media print{
+    .app-shell{ display:none !important; }
+    body{ background:#fff !important; }
+    #penibilitePrint{ display:block; padding:26px 32px; font:13px/1.55 "IBM Plex Sans",Arial,sans-serif; color:#000; }
+    #penibilitePrint h1{ font-size:22px; margin:0 0 4px; }
+    #penibilitePrint p{ margin:2px 0; }
+    #penibilitePrint table{ width:100%; border-collapse:collapse; margin-top:14px; }
+    #penibilitePrint th, #penibilitePrint td{ border:1px solid #444; padding:6px 8px; text-align:left; vertical-align:top; }
+    #penibilitePrint td.c{ width:28px; text-align:center; font-size:16px; }
+    #penibilitePrint .pc{ font-size:11px; color:#333; margin-top:2px; }
+    #penibilitePrint .sign{ display:flex; gap:30px; margin-top:36px; }
+    #penibilitePrint .sign > div{ flex:1; border:1px solid #444; height:96px; padding:6px 8px; font-size:12px; }
+  }
+  /* pénibilité */
+  .chip.off{ color:var(--text-muted); background:var(--bg-2); } .chip.off::before{ background:var(--text-faint); }
+  #campagneCriteres input[type="number"]{ width:130px; }
+  #campagneSansSeuil input[type="text"]{ width:100%; }
+  .form-sub{ font:600 13px "IBM Plex Sans",sans-serif; color:var(--text); }
+  .statuts-c2p{ columns:2; column-gap:28px; }
+  @media (max-width:760px){ .statuts-c2p{ columns:1; } }
+</style>
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+  <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6.5a1 1 0 0 1 1-1 1 1 0 0 0 0-2H8a1 1 0 0 0 0 2 1 1 0 0 1 1 1z"/></symbol>
+  <symbol id="i-git-branch" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-life-buoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+  <symbol id="i-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></symbol>
+  <symbol id="i-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M12 14l4-5"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.2"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+</defs>
+</svg>
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav>
+      <div class="nav-section"><a class="nav-item" href="dashboard.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
+      <div class="nav-section">
+        <div class="nav-label">Santé au travail</div>
+        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
+        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre SST</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Sécurité &amp; Risques</div>
+        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
+        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Suivi</div>
+        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
+        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
+        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
+        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
+        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+        <a class="nav-item active" id="navPenibilite" href="penibilite.html"><svg class="icon"><use href="#i-gauge"/></svg> Pénibilité</a>
+      </div>
+      <div class="nav-section" id="navRh" style="display:none;">
+        <div class="nav-label">Espace RH</div>
+        <a class="nav-item" id="navDeclarerAtmp" href="saisie-rh.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
+        <a class="nav-item" id="navEvaluerDuerp" href="saisie-duerp.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
+      </div>
+      <div class="nav-section" id="navAdministratif" style="display:none;">
+        <div class="nav-label">Administratif</div>
+        <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
+        <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
+        <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
+        <a class="nav-item" id="navGestionRh" href="gestion-rh.html" style="display:none;"><svg class="icon"><use href="#i-users"/></svg> Gestion RH</a>
+        <a class="nav-item" id="navEntreprisesExt" href="entreprises-exterieures.html" style="display:none;"><svg class="icon"><use href="#i-briefcase"/></svg> Entreprises extérieures</a>
+        <a class="nav-item" id="navAccueilPoste" href="accueil-poste.html" style="display:none;"><svg class="icon"><use href="#i-user-plus"/></svg> Accueil au poste</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Ressources</div>
+        <a class="nav-item" id="navBaseDoc" href="base-documentaire.html"><svg class="icon"><use href="#i-book"/></svg> Base documentaire</a>
+      </div>
+      <div class="nav-section" id="navPilotage" style="display:none;">
+        <div class="nav-label">Pilotage</div>
+        <a class="nav-item" id="navReportingLink" href="reporting.html" style="display:none;"><svg class="icon"><use href="#i-bar-chart"/></svg> Indicateurs &amp; Reporting</a>
+        <a class="nav-item" id="navAdminLink" href="administration.html" style="display:none;"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Suivi / <b>Pénibilité</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-gauge"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Pénibilité</h1>
+            <p title="Expositions aux facteurs de pénibilité saisies par poste, une fois par an ; chaque agent hérite de celles de son poste ; déclaration C2P ou fiche de suivi individuel selon son statut.">Expositions par poste, campagne annuelle, suite à donner par agent selon son statut.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-briefcase"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiPostes">–</span><span class="ps-kpi-label">Postes actifs</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiSansCampagne">–</span><span class="ps-kpi-label">Campagne à saisir</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiC2P">–</span><span class="ps-kpi-label">Déclarations C2P</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-list"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiFiches">–</span><span class="ps-kpi-label">Fiches de suivi</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="ap-tabs">
+        <button type="button" class="ap-tab active" data-tab="postes"><svg class="icon"><use href="#i-gauge"/></svg> Postes &amp; expositions</button>
+        <button type="button" class="ap-tab" data-tab="agents"><svg class="icon"><use href="#i-users"/></svg> Agents exposés</button>
+        <button type="button" class="ap-tab" data-tab="parametres"><svg class="icon"><use href="#i-settings"/></svg> Seuils &amp; statuts</button>
+      </div>
+
+      <section class="tab-panel show" id="tab-postes">
+        <div class="panel console">
+          <div class="field"><span class="flabel">Année de la campagne</span><select id="fAnnee"></select></div>
+          <div class="field"><span class="flabel">Service</span><select id="fServicePoste"></select></div>
+          <button type="button" class="btn btn-ghost" id="btnResetPostes">Réinitialiser</button>
+          <span class="result-count"><b id="posteCount">–</b> / <span id="posteTotal">–</span> postes</span>
+        </div>
+
+        <div class="panel form-panel" id="postePanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title" id="posteFormTitle">Nouveau poste</h3></div>
+          <form id="posteForm">
+            <input type="hidden" id="pId">
+            <div class="form-grid">
+              <div><label for="pIntitule">Intitulé du poste</label><input type="text" id="pIntitule" required placeholder="ex. Agent de collecte des déchets"></div>
+              <div><label for="pCollectivite">Collectivité</label>
+                <select id="pCollectivite" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+              </div>
+              <div><label for="pService">Service</label><select id="pService" required></select></div>
+              <div><label for="pActif" style="display:flex;align-items:center;gap:8px;margin-top:22px;"><input type="checkbox" id="pActif" checked style="width:16px;height:16px;"> Poste actif</label></div>
+            </div>
+            <div style="margin-top:12px;"><label for="pDescription">Description (tâches, lieux, horaires)</label><textarea id="pDescription" rows="2" placeholder="ex. Collecte en porte-à-porte, départ 4 h 30, benne et bacs roulants"></textarea></div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer le poste</button>
+              <button type="button" class="btn btn-ghost" id="btnCancelPoste">Annuler</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel form-panel" id="campagnePanel" style="display:none;">
+          <div class="panel-head">
+            <h3 class="panel-title" id="campagneTitle">Expositions du poste</h3>
+            <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnReprendre" style="display:none;">Reprendre l'année précédente</button></div>
+          </div>
+          <p class="form-sub-intro">Pour chaque facteur, la <b>durée d'exposition au-delà de l'intensité minimale</b>, sur l'année, pour ce poste. Chaque agent du poste (Gestion RH) hérite de ces expositions. Un seuil est atteint dès que la durée l'égale.</p>
+          <form id="campagneForm">
+            <div class="table-panel">
+              <table class="reg">
+                <thead><tr><th>Facteur</th><th>Intensité minimale</th><th>Seuil annuel</th><th style="width:150px;">Durée d'exposition</th><th>État</th></tr></thead>
+                <tbody id="campagneCriteres"></tbody>
+              </table>
+            </div>
+            <h4 class="form-sub" style="margin:18px 0 6px;">Facteurs sans seuil réglementaire — suivis pour la prévention</h4>
+            <div class="table-panel">
+              <table class="reg">
+                <thead><tr><th>Facteur</th><th style="width:90px;">Exposé</th><th>Précision (tâche, durée, mesure de prévention)</th></tr></thead>
+                <tbody id="campagneSansSeuil"></tbody>
+              </table>
+            </div>
+            <div style="margin-top:12px;"><label for="cCommentaire">Commentaire</label><textarea id="cCommentaire" rows="2"></textarea></div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer la campagne</button>
+              <button type="button" class="btn btn-ghost" id="btnCancelCampagne">Fermer</button>
+              <span id="campagneMsg" style="align-self:center; font-size:12px; color:var(--text-muted);"></span>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Postes et expositions de l'année</h3>
+            <div class="panel-actions" id="postesActions"></div>
+          </div>
+          <div class="table-panel">
+            <table class="reg" id="postesTable">
+              <thead><tr><th>Poste</th><th>Service</th><th>Agents</th><th>Campagne</th><th>Seuils atteints</th><th>Autres facteurs</th><th id="thPosteActions"></th></tr></thead>
+              <tbody id="postesTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-agents">
+        <div class="panel console">
+          <div class="field"><span class="flabel">Service</span><select id="fServiceAgent"></select></div>
+          <div class="field"><span class="flabel">Suite à donner</span>
+            <select id="fSuite"><option value="all">Toutes</option><option value="c2p">Déclaration C2P</option><option value="fiche">Fiche de suivi individuel</option><option value="statut">Statut à renseigner</option><option value="sous">Sous les seuils</option><option value="incomplet">Poste ou campagne manquant</option></select>
+          </div>
+          <button type="button" class="btn btn-ghost" id="btnResetAgents">Réinitialiser</button>
+          <span class="result-count"><b id="agentCount">–</b> / <span id="agentTotal">–</span> agents actifs</span>
+        </div>
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head">
+            <h3 class="panel-title" id="agentsTitle">Agents et suite à donner</h3>
+            <div class="panel-actions" id="agentsActions"></div>
+          </div>
+          <p class="form-sub-intro" style="margin-top:0;">Chaque agent actif de <b>Gestion RH</b> hérite des expositions de son poste pour l'année choisie. La suite dépend de son statut : <b>déclaration C2P</b> pour les statuts cochés dans « Seuils &amp; statuts », <b>fiche de suivi individuel</b> pour les autres agents exposés au-delà d'un seuil.</p>
+          <div class="table-panel">
+            <table class="reg" id="agentsTable">
+              <thead><tr><th>Agent</th><th>Service</th><th>Poste</th><th>Statut</th><th>Seuils atteints</th><th>Suite à donner</th><th></th></tr></thead>
+              <tbody id="agentsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-parametres">
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head"><h3 class="panel-title">Statuts ouvrant droit au compte professionnel de prévention (C2P)</h3></div>
+          <p class="form-sub-intro" style="margin-top:0;">Le compte professionnel de prévention est ouvert aux salariés de droit privé et aux personnels des personnes publiques employés dans les conditions du droit privé (article L4163-4 du Code du travail). <b>Savoir quels statuts de la collectivité sont concernés est une question juridique : le logiciel ne la tranche pas.</b> Cochez les statuts concernés ; tant qu'aucun ne l'est, chaque agent exposé relève de la fiche de suivi individuel. La liste des statuts se modifie dans Administration → Référentiels.</p>
+          <div id="statutsListe" class="statuts-c2p"></div>
+          <p id="statutsMsg" style="font-size:12px; color:var(--text-muted); margin:8px 0 0;"></p>
+        </div>
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head"><h3 class="panel-title">Seuils appliqués</h3></div>
+          <p class="form-sub-intro" style="margin-top:0;" id="sourceSeuils"></p>
+          <div class="table-panel">
+            <table class="reg">
+              <thead><tr><th>Facteur</th><th>Intensité minimale</th><th>Durée minimale</th></tr></thead>
+              <tbody id="seuilsTbody"></tbody>
+            </table>
+          </div>
+          <p class="form-sub-intro" id="sansSeuilListe"></p>
+        </div>
+      </section>
+
+      <p class="footnote">Les seuils sont ceux de l'article D4163-2 du Code du travail ; ils changent par décret et doivent être relus à chaque version. Cette page organise le suivi des expositions : elle ne remplace ni la déclaration sociale nominative (DSN) par laquelle un employeur déclare les expositions au C2P, ni l'avis du préventeur ou du médecin du travail.</p>
+    </div>
+  </div>
+</div>
+<div id="penibilitePrint" aria-hidden="true"></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const role = (session && session.role) || "ag";
+  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const myServices = (session && session.services) || ["*"];
+  const isScoped = !myServices.includes("*");
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("roleChip").textContent = role.toUpperCase();
+  if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
+
+  // ---------- Contrôle d'accès (permission granulaire "penibilite") ----------
+  const penPermLevel = (role === "admin" || role === "rh") ? "write" : ((session && session.modulePermissions && session.modulePermissions["penibilite"]) || "none");
+  const canPen = penPermLevel !== "none";
+  const canPenWrite = penPermLevel === "write";
+  if (!canPen){ location.href = "dashboard.html"; }
+
+  const canEdit = role === "rh" || role === "admin";
+  const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
+  if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
+  if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
+  const canAtmpAdmin = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
+  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
+  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
+  const canGestionRh = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
+  const canEntreprisesExt = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
+  if (canAtmpAdmin){ $("navAtmpAdmin").style.display = ""; }
+  if (canAccidentAnalyse){ $("navAccidentAnalyse").style.display = ""; }
+  if (canUrgences){ $("navUrgences").style.display = ""; }
+  if (canGestionRh){ $("navGestionRh").style.display = ""; }
+  if (canEntreprisesExt){ $("navEntreprisesExt").style.display = ""; }
+  const canAccueilPoste = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accueil-poste"]) || "none") !== "none");
+  if (canAccueilPoste){ $("navAccueilPoste").style.display = ""; }
+  // la section « Administratif » n'apparaît que si l'un de ses liens est permis
+  if ([...document.querySelectorAll("#navAdministratif .nav-item")].some(a => a.style.display !== "none")){ $("navAdministratif").style.display = ""; }
+  if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
+  if (role === "admin"){ $("navAdminLink").style.display = ""; }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(module, type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:(session && session.user) || "—", module, type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+
+  const sidebar = $("sidebar"), scrim = $("scrim");
+  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
+  const appShell = document.querySelector(".app-shell");
+  let collapseTimer = null;
+  const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
+  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
+  const pinBtn = document.getElementById("sidebarPin");
+  function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
+  function isDesktopWidth(){ return window.innerWidth > 980; }
+  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
+  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth() || sidebarLocked) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
+  sidebar.addEventListener("mouseenter", sidebarExpand);
+  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
+  sidebar.addEventListener("focusin", sidebarExpand);
+  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
+  const mainEl = document.querySelector(".main");
+  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
+  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
+  if (sidebarLocked) sidebarExpand();
+  applyPinVisual();
+  if (pinBtn) pinBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    sidebarLocked = !sidebarLocked;
+    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
+    applyPinVisual();
+    if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
+  });
+
+  // ---------- Référentiels partagés (services) ----------
+  const REF_KEY = "vigie_hse_referentials";
+  const REF_DEFAULTS = {
+    statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
+    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
+    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
+  };
+  function loadReferentials(){
+    let stored = {};
+    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
+    const merged = Object.assign({}, stored);
+    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
+    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
+    return merged;
+  }
+  const REF = loadReferentials();
+  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+
+  // ---------- Pénibilité (module 5, réponse Q15 du préventeur, 2026-09-24) ----------
+  // Expositions saisies PAR POSTE, une campagne par an ; chaque agent (Gestion RH) hérite de celles de son
+  // poste. Suite donnée selon le statut de l'agent : déclaration C2P pour les statuts cochés dans
+  // « Seuils & statuts » (question juridique : aucun n'est coché d'office), fiche de suivi individuel
+  // pour les autres agents exposés au-delà d'un seuil. Seuils : assets/penibilite-ref.js (D4163-2).
+  const PEN = window.VigiePenibilite;
+  const POSTES_KEY = "vigie_hse_postes", EXPO_KEY = "vigie_hse_expositions", PARAM_KEY = "vigie_hse_penibilite_parametres", AGENTS_KEY = "vigie_hse_agents";
+  const lireListe = k => { try { const l = JSON.parse(VigieStore.getItem(k) || "[]"); return Array.isArray(l) ? l : []; } catch(e){ return []; } };
+  function lireParams(){ try { const o = JSON.parse(VigieStore.getItem(PARAM_KEY) || "{}"); return (o && typeof o === "object" && !Array.isArray(o)) ? o : {}; } catch(e){ return {}; } }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  let POSTES = lireListe(POSTES_KEY);
+  let EXPOS = lireListe(EXPO_KEY);
+  let PARAMS = Object.assign({ statutsC2P: [] }, lireParams());
+  if (!Array.isArray(PARAMS.statutsC2P)) PARAMS.statutsC2P = [];
+  const savePostes = () => { try { VigieStore.setItem(POSTES_KEY, JSON.stringify(POSTES)); } catch(e){} };
+  const saveExpos = () => { try { VigieStore.setItem(EXPO_KEY, JSON.stringify(EXPOS)); } catch(e){} };
+  const saveParams = () => { try { VigieStore.setItem(PARAM_KEY, JSON.stringify(PARAMS)); } catch(e){} };
+  // agents actifs du roster, dans le périmètre du compte (un manager ne voit que ses services)
+  const agentsVisibles = () => lireListe(AGENTS_KEY).filter(a => a.actif !== false && (!isScoped || myServices.includes(a.service)));
+  const postesVisibles = () => POSTES.filter(p => !isScoped || myServices.includes(p.service));
+  const nomAgent = a => ((a.nom || "") + " " + (a.prenom || "")).trim();
+
+  // une campagne par poste et par année, identifiant stable (deux saisies simultanées se fusionnent)
+  const idCampagne = (posteId, annee) => "exp-" + posteId + "-" + annee;
+  const campagne = (posteId, annee) => EXPOS.find(e => e.posteId === posteId && Number(e.annee) === Number(annee)) || null;
+  const anneeCourante = new Date().getFullYear();
+  let ANNEE = anneeCourante;
+
+  // situation d'un agent pour l'année : { poste, camp, ev, autres, suite, code }
+  function situation(a){
+    const poste = POSTES.find(p => p.id === a.posteId) || null;
+    const camp = poste ? campagne(poste.id, ANNEE) : null;
+    const ev = camp ? PEN.evaluer(camp.valeurs) : { criteres: [], facteurs: [] };
+    const autres = camp ? PEN.sansSeuilExposes(camp.sansSeuil) : [];
+    let code, suite;
+    if (!poste){ code = "incomplet"; suite = "Poste non renseigné (Gestion RH)"; }
+    else if (!camp){ code = "incomplet"; suite = "Campagne " + ANNEE + " non saisie"; }
+    else if (!ev.facteurs.length){ code = "sous"; suite = "Sous les seuils"; }
+    else if (!a.statut){ code = "statut"; suite = "Statut à renseigner (Gestion RH)"; }
+    else if (PARAMS.statutsC2P.includes(a.statut)){ code = "c2p"; suite = "Déclaration C2P"; }
+    else { code = "fiche"; suite = "Fiche de suivi individuel"; }
+    return { poste, camp, ev, autres, code, suite };
+  }
+  const CHIP_SUITE = { c2p:"late", fiche:"info", statut:"soon", incomplet:"soon", sous:"ok" };
+
+  // ---------- Listes de filtres ----------
+  function remplirServices(sel, liste){
+    const cur = sel.value || "all";
+    sel.innerHTML = `<option value="all">Tous</option>` + [...new Set(liste)].filter(Boolean).sort((x, y) => x.localeCompare(y, 'fr')).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+    sel.value = [...sel.options].some(o => o.value === cur) ? cur : "all";
+  }
+  function remplirAnnees(){
+    const annees = new Set([anneeCourante, anneeCourante - 1]);
+    EXPOS.forEach(e => { const n = Number(e.annee); if (n) annees.add(n); });
+    $("fAnnee").innerHTML = [...annees].sort((x, y) => y - x).map(n => `<option value="${n}" ${n === ANNEE ? 'selected' : ''}>${n}</option>`).join("");
+  }
+
+  // ---------- Onglet Postes & expositions ----------
+  function renderPostes(){
+    remplirAnnees();
+    remplirServices($("fServicePoste"), postesVisibles().map(p => p.service));
+    const svc = $("fServicePoste").value;
+    const agents = agentsVisibles();
+    const tous = postesVisibles().slice().sort((x, y) => String(x.intitule).localeCompare(String(y.intitule), 'fr'));
+    const rows = tous.filter(p => svc === "all" || p.service === svc);
+    $("posteCount").textContent = rows.length; $("posteTotal").textContent = tous.length;
+    const tbody = $("postesTbody");
+    if (!rows.length){
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">${tous.length ? "Aucun poste ne correspond au filtre." : "Aucun poste pour le moment." + (canPenWrite ? " Créez-en un avec « Nouveau poste », puis rattachez-y les agents dans Gestion RH." : "")}</td></tr>`;
+    } else {
+      tbody.innerHTML = rows.map(p => {
+        const camp = campagne(p.id, ANNEE);
+        const ev = camp ? PEN.evaluer(camp.valeurs) : null;
+        const autres = camp ? PEN.sansSeuilExposes(camp.sansSeuil) : [];
+        const nb = agents.filter(a => a.posteId === p.id).length;
+        return `<tr data-id="${esc(p.id)}">
+          <td><b>${esc(p.intitule)}</b>${p.actif === false ? ' <span class="chip off">Inactif</span>' : ''}${p.description ? `<div style="font-size:11.5px;color:var(--text-muted);">${esc(p.description)}</div>` : ''}</td>
+          <td>${esc(p.service)}</td>
+          <td class="mono">${nb}</td>
+          <td>${camp ? `<span class="chip ok">Saisie</span> <span style="font-size:11px;color:var(--text-muted);">${esc(camp.dateSaisie || "")}</span>` : `<span class="chip soon">À saisir</span>`}</td>
+          <td>${!camp ? '—' : ev.facteurs.length ? ev.facteurs.map(f => `<span class="chip late">${esc(f)}</span>`).join(" ") : '<span class="chip ok">Aucun</span>'}</td>
+          <td>${!camp ? '—' : autres.length ? esc(autres.join(", ")) : 'Aucun'}</td>
+          <td class="actions-float">
+            <button type="button" class="act-edit" data-campagne="${esc(p.id)}">${canPenWrite ? (camp ? "Modifier " : "Saisir ") + ANNEE : "Voir " + ANNEE}</button>
+            ${canPenWrite ? `<button type="button" class="act-edit" data-poste="${esc(p.id)}">Poste</button><button type="button" class="act-del" data-del="${esc(p.id)}">Suppr.</button>` : ''}
+          </td></tr>`;
+      }).join("");
+    }
+    renderKpis();
+  }
+
+  // ---------- Formulaire poste ----------
+  function servicesForm(col, sel){
+    const liste = servicesForCollectivite(col);
+    $("pService").innerHTML = liste.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+    if (sel && !liste.includes(sel)) $("pService").insertAdjacentHTML("beforeend", `<option value="${esc(sel)}">${esc(sel)}</option>`);
+    if (sel) $("pService").value = sel;
+  }
+  $("pCollectivite").addEventListener("change", () => servicesForm($("pCollectivite").value));
+  function ouvrirPoste(p){
+    $("posteForm").reset();
+    $("pId").value = p ? p.id : "";
+    $("posteFormTitle").textContent = p ? "Modifier le poste" : "Nouveau poste";
+    $("pIntitule").value = p ? p.intitule || "" : "";
+    $("pCollectivite").value = p ? p.collectivite || "Ville" : "Ville";
+    servicesForm($("pCollectivite").value, p ? p.service : "");
+    $("pDescription").value = p ? p.description || "" : "";
+    $("pActif").checked = p ? p.actif !== false : true;
+    $("campagnePanel").style.display = "none";
+    $("postePanel").style.display = "";
+    $("postePanel").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  $("btnCancelPoste").addEventListener("click", () => { $("postePanel").style.display = "none"; });
+  $("posteForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const id = $("pId").value;
+    const avant = POSTES.find(p => p.id === id);
+    const rec = Object.assign({}, avant || { id: genId("poste"), auteur: (session && session.user) || "—", dateCreation: VigieDates.aujourdhui() }, {
+      intitule: $("pIntitule").value.trim(), collectivite: $("pCollectivite").value, service: $("pService").value,
+      description: $("pDescription").value.trim(), actif: $("pActif").checked,
+    });
+    if (!rec.intitule) return;
+    if (avant){ POSTES[POSTES.indexOf(avant)] = rec; logAudit("Pénibilité", "Modification", `Poste « ${rec.intitule} »`); }
+    else { POSTES.push(rec); logAudit("Pénibilité", "Création", `Poste « ${rec.intitule} »`); }
+    savePostes();
+    $("postePanel").style.display = "none";
+    renderAll();
+  });
+
+  // ---------- Campagne annuelle d'un poste ----------
+  let campagnePoste = null;
+  function etatCritere(c, v){
+    const n = PEN.nombre(v);
+    if (!n) return '<span style="color:var(--text-faint);">—</span>';
+    return n >= c.seuil ? '<span class="chip late">Seuil atteint</span>' : '<span class="chip ok">Sous le seuil</span>';
+  }
+  function remplirCampagne(valeurs, sansSeuil, commentaire){
+    const ro = canPenWrite ? "" : " disabled";
+    $("campagneCriteres").innerHTML = PEN.CRITERES.map(c => `<tr>
+      <td><b>${esc(c.facteur)}</b></td><td style="font-size:12px;">${esc(c.intensite)}</td><td class="mono">${c.seuil} ${esc(c.unite)}</td>
+      <td><input type="number" min="0" step="1" class="c-val" data-critere="${c.id}" value="${esc(valeurs && valeurs[c.id] != null ? valeurs[c.id] : "")}"${ro}></td>
+      <td class="c-etat" data-etat="${c.id}">${etatCritere(c, valeurs && valeurs[c.id])}</td></tr>`).join("");
+    $("campagneSansSeuil").innerHTML = PEN.SANS_SEUIL.map(f => { const s = (sansSeuil && sansSeuil[f.id]) || {}; return `<tr>
+      <td><b>${esc(f.facteur)}</b></td>
+      <td><input type="checkbox" class="s-expose" data-facteur="${f.id}" ${s.expose ? 'checked' : ''}${ro} style="width:16px;height:16px;"></td>
+      <td><input type="text" class="s-precision" data-facteur="${f.id}" value="${esc(s.precision || "")}"${ro}></td></tr>`; }).join("");
+    $("cCommentaire").value = commentaire || "";
+    $("cCommentaire").disabled = !canPenWrite;
+  }
+  function ouvrirCampagne(posteId){
+    const p = POSTES.find(x => x.id === posteId); if (!p) return;
+    campagnePoste = posteId;
+    const camp = campagne(posteId, ANNEE);
+    $("campagneTitle").textContent = `Expositions ${ANNEE} — ${p.intitule} (${p.service})`;
+    remplirCampagne(camp ? camp.valeurs : {}, camp ? camp.sansSeuil : {}, camp ? camp.commentaire : "");
+    const prec = campagne(posteId, ANNEE - 1);
+    $("btnReprendre").style.display = canPenWrite && prec ? "" : "none";
+    $("btnReprendre").textContent = `Reprendre ${ANNEE - 1}`;
+    $("campagneMsg").textContent = camp ? `Saisie le ${camp.dateSaisie || "—"} par ${camp.auteur || "—"}.` : "Pas encore de saisie pour cette année.";
+    $("campagneForm").querySelector('button[type="submit"]').style.display = canPenWrite ? "" : "none";
+    $("postePanel").style.display = "none";
+    $("campagnePanel").style.display = "";
+    $("campagnePanel").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  $("campagneCriteres").addEventListener("input", (e) => {
+    const inp = e.target.closest(".c-val"); if (!inp) return;
+    const c = PEN.CRITERES.find(x => x.id === inp.dataset.critere);
+    const cell = $("campagneCriteres").querySelector(`[data-etat="${c.id}"]`);
+    if (cell) cell.innerHTML = etatCritere(c, inp.value);
+  });
+  $("btnReprendre").addEventListener("click", () => {
+    const prec = campagne(campagnePoste, ANNEE - 1); if (!prec) return;
+    remplirCampagne(prec.valeurs, prec.sansSeuil, prec.commentaire);
+    $("campagneMsg").textContent = `Valeurs de ${ANNEE - 1} reprises : vérifiez-les, puis enregistrez.`;
+  });
+  $("btnCancelCampagne").addEventListener("click", () => { $("campagnePanel").style.display = "none"; campagnePoste = null; });
+  $("campagneForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!canPenWrite || !campagnePoste) return;
+    const valeurs = {}, sansSeuil = {};
+    $("campagneCriteres").querySelectorAll(".c-val").forEach(i => { const n = PEN.nombre(i.value); if (n) valeurs[i.dataset.critere] = n; });
+    PEN.SANS_SEUIL.forEach(f => {
+      const expose = $("campagneSansSeuil").querySelector(`.s-expose[data-facteur="${f.id}"]`).checked;
+      const precision = $("campagneSansSeuil").querySelector(`.s-precision[data-facteur="${f.id}"]`).value.trim();
+      if (expose || precision) sansSeuil[f.id] = { expose, precision };
+    });
+    const id = idCampagne(campagnePoste, ANNEE);
+    const rec = { id, posteId: campagnePoste, annee: ANNEE, valeurs, sansSeuil, commentaire: $("cCommentaire").value.trim(),
+      auteur: (session && session.user) || "—", dateSaisie: VigieDates.aujourdhui() };
+    const i = EXPOS.findIndex(x => x.id === id || (x.posteId === campagnePoste && Number(x.annee) === ANNEE));
+    if (i >= 0) EXPOS[i] = rec; else EXPOS.push(rec);
+    saveExpos();
+    const p = POSTES.find(x => x.id === campagnePoste);
+    const ev = PEN.evaluer(valeurs);
+    logAudit("Pénibilité", i >= 0 ? "Modification" : "Création", `Campagne ${ANNEE} du poste « ${p ? p.intitule : campagnePoste} » — ${ev.facteurs.length} facteur(s) au-delà du seuil`);
+    $("campagneMsg").textContent = `Enregistré — ${ev.facteurs.length ? ev.facteurs.length + " facteur(s) au-delà du seuil." : "aucun seuil atteint."}`;
+    renderAll();
+  });
+
+  $("postesTbody").addEventListener("click", (e) => {
+    const bCamp = e.target.closest("[data-campagne]"), bPoste = e.target.closest("[data-poste]"), bDel = e.target.closest("[data-del]");
+    if (bCamp) ouvrirCampagne(bCamp.dataset.campagne);
+    else if (bPoste) ouvrirPoste(POSTES.find(p => p.id === bPoste.dataset.poste));
+    else if (bDel){
+      const p = POSTES.find(x => x.id === bDel.dataset.del); if (!p) return;
+      const nb = lireListe(AGENTS_KEY).filter(a => a.posteId === p.id).length;
+      const nbC = EXPOS.filter(x => x.posteId === p.id).length;
+      if (!confirm(`Supprimer le poste « ${p.intitule} » et ses ${nbC} campagne(s) d'exposition ?` + (nb ? `\n\n${nb} agent(s) y sont rattachés dans Gestion RH : leur poste deviendra « non renseigné ». Pour garder l'historique, décochez plutôt « Poste actif ».` : ""))) return;
+      POSTES = POSTES.filter(x => x.id !== p.id);
+      EXPOS = EXPOS.filter(x => x.posteId !== p.id);
+      savePostes(); saveExpos();
+      logAudit("Pénibilité", "Suppression", `Poste « ${p.intitule} » et ${nbC} campagne(s)`);
+      $("campagnePanel").style.display = "none"; $("postePanel").style.display = "none";
+      renderAll();
+    }
+  });
+
+  // ---------- Onglet Agents ----------
+  function renderAgents(){
+    const agents = agentsVisibles();
+    remplirServices($("fServiceAgent"), agents.map(a => a.service));
+    const svc = $("fServiceAgent").value, suite = $("fSuite").value;
+    const lignes = agents.map(a => ({ a, s: situation(a) }))
+      .filter(x => (svc === "all" || x.a.service === svc) && (suite === "all" || x.s.code === suite))
+      .sort((x, y) => nomAgent(x.a).localeCompare(nomAgent(y.a), 'fr'));
+    $("agentsTitle").textContent = `Agents et suite à donner — ${ANNEE}`;
+    $("agentCount").textContent = lignes.length; $("agentTotal").textContent = agents.length;
+    const tbody = $("agentsTbody");
+    if (!lignes.length){
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">${agents.length ? "Aucun agent ne correspond aux filtres." : "Aucun agent actif dans Gestion RH (ou dans vos services)."}</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = lignes.map(({ a, s }) => `<tr>
+      <td><b>${esc(nomAgent(a))}</b></td><td>${esc(a.service)}</td>
+      <td>${s.poste ? esc(s.poste.intitule) : '—'}</td><td>${a.statut ? esc(a.statut) : '—'}</td>
+      <td>${s.ev.facteurs.length ? s.ev.facteurs.map(f => `<span class="chip late">${esc(f)}</span>`).join(" ") : (s.camp ? 'Aucun' : '—')}${s.autres.length ? `<div style="font-size:11px;color:var(--text-muted);">Sans seuil : ${esc(s.autres.join(", "))}</div>` : ''}</td>
+      <td><span class="chip ${CHIP_SUITE[s.code]}">${esc(s.suite)}</span></td>
+      <td>${s.camp ? `<button type="button" class="act-edit" data-fiche="${esc(a.id)}">Fiche</button>` : ''}</td></tr>`).join("");
+  }
+  ["fServiceAgent", "fSuite"].forEach(id => $(id).addEventListener("change", renderAgents));
+  $("btnResetAgents").addEventListener("click", () => { $("fServiceAgent").value = "all"; $("fSuite").value = "all"; renderAgents(); });
+
+  // ---------- Fiche individuelle imprimable ----------
+  function imprimerFiche(a){
+    const s = situation(a); if (!s.camp) return;
+    const v = s.camp.valeurs || {}, ss = s.camp.sansSeuil || {};
+    const lignes = PEN.CRITERES.map(c => { const n = PEN.nombre(v[c.id]); return `<tr><td>${esc(c.facteur)}<div class="pc">${esc(c.intensite)}</div></td><td>${c.seuil} ${esc(c.unite)}</td><td>${n ? n : "—"}</td><td>${n >= c.seuil ? "<b>Seuil atteint</b>" : (n ? "Sous le seuil" : "—")}</td></tr>`; }).join("");
+    const autres = PEN.SANS_SEUIL.map(f => { const x = ss[f.id] || {}; return `<tr><td>${esc(f.facteur)}</td><td colspan="2">${x.expose ? "Exposé" : "Non"}</td><td>${esc(x.precision || "")}</td></tr>`; }).join("");
+    $("penibilitePrint").innerHTML = `
+      <h1>Fiche individuelle d'exposition aux facteurs de pénibilité — ${ANNEE}</h1>
+      <p><b>Agent :</b> ${esc(nomAgent(a))} — ${esc(a.service)} (${esc(a.collectivite || "")}) &nbsp; <b>Statut :</b> ${esc(a.statut || "non renseigné")}</p>
+      <p><b>Poste :</b> ${esc(s.poste.intitule)}${s.poste.description ? " — " + esc(s.poste.description) : ""}</p>
+      <p><b>Suite à donner :</b> ${esc(s.suite)} &nbsp; <b>Expositions saisies le :</b> ${esc(s.camp.dateSaisie || "—")} par ${esc(s.camp.auteur || "—")}</p>
+      <table><thead><tr><th>Facteur (article D4163-2)</th><th>Seuil annuel</th><th>Exposition du poste</th><th>État</th></tr></thead><tbody>${lignes}</tbody></table>
+      <table><thead><tr><th>Facteur sans seuil (article L4161-1)</th><th colspan="2">Exposition</th><th>Précision</th></tr></thead><tbody>${autres}</tbody></table>
+      ${s.camp.commentaire ? `<p style="margin-top:10px;"><b>Commentaire :</b> ${esc(s.camp.commentaire)}</p>` : ""}
+      <p class="pc" style="margin-top:10px;">Expositions du poste occupé, saisies par la collectivité pour l'année ${ANNEE} ; seuils : ${esc(PEN.SOURCE.texte)}.</p>
+      <div class="sign"><div>Pour l'employeur — nom, signature<br>Date :</div><div>Remis à l'agent — signature<br>Date :</div></div>`;
+    window.print();
+  }
+  $("agentsTbody").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-fiche]"); if (!b) return;
+    const a = agentsVisibles().find(x => x.id === b.dataset.fiche); if (a) imprimerFiche(a);
+  });
+
+  // ---------- Onglet Seuils & statuts ----------
+  function renderParametres(){
+    const statuts = [...new Set((REF.statutsRH || []).concat(PARAMS.statutsC2P))];
+    $("statutsListe").innerHTML = statuts.length ? statuts.map(s => `<label class="checkbox-row" style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+      <input type="checkbox" class="statut-c2p" value="${esc(s)}" ${PARAMS.statutsC2P.includes(s) ? 'checked' : ''} ${canPenWrite ? '' : 'disabled'} style="width:16px;height:16px;"> ${esc(s)}${(REF.statutsRH || []).includes(s) ? '' : ' <span class="chip off">plus dans la liste</span>'}</label>`).join("")
+      : "<p>Aucun statut dans les référentiels.</p>";
+    $("sourceSeuils").innerHTML = `Source : <a href="${esc(PEN.SOURCE.lien)}" target="_blank" rel="noopener">${esc(PEN.SOURCE.texte)}</a> — relu le ${esc(PEN.SOURCE.relu_le)}. Pour le bruit, un seul des deux critères suffit.`;
+    $("seuilsTbody").innerHTML = PEN.CRITERES.map(c => `<tr><td>${esc(c.facteur)}</td><td>${esc(c.intensite)}</td><td class="mono">${c.seuil} ${esc(c.unite)}</td></tr>`).join("");
+    $("sansSeuilListe").innerHTML = "Suivis sans seuil (article L4161-1) : " + PEN.SANS_SEUIL.map(f => esc(f.facteur)).join(" · ") + ".";
+  }
+  $("statutsListe").addEventListener("change", (e) => {
+    const c = e.target.closest(".statut-c2p"); if (!c || !canPenWrite) return;
+    PARAMS.statutsC2P = [...$("statutsListe").querySelectorAll(".statut-c2p:checked")].map(x => x.value);
+    saveParams();
+    logAudit("Pénibilité", "Paramètres", `Statut « ${c.value} » ${c.checked ? "coché" : "décoché"} : ouvre droit au C2P`);
+    $("statutsMsg").textContent = `Enregistré — ${PARAMS.statutsC2P.length} statut(s) ouvrant droit au C2P.`;
+    renderAgents(); renderKpis();
+  });
+
+  // ---------- Indicateurs ----------
+  function renderKpis(){
+    const s = agentsVisibles().map(situation);
+    $("kpiPostes").textContent = postesVisibles().filter(p => p.actif !== false).length;
+    $("kpiSansCampagne").textContent = postesVisibles().filter(p => p.actif !== false && !campagne(p.id, ANNEE)).length;
+    $("kpiC2P").textContent = s.filter(x => x.code === "c2p").length;
+    $("kpiFiches").textContent = s.filter(x => x.code === "fiche").length;
+  }
+
+  // ---------- Export ----------
+  const actions = [`<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`];
+  if (canPenWrite) actions.push(`<button type="button" class="btn btn-primary" id="btnNewPoste"><svg class="icon"><use href="#i-plus"/></svg> Nouveau poste</button>`);
+  $("postesActions").innerHTML = actions.join("");
+  $("agentsActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+  if (canPenWrite) $("btnNewPoste").addEventListener("click", () => ouvrirPoste(null));
+  VigieImpression.brancher("btnExport", { table: "#postesTable" });
+  VigieImpression.brancher("btnExportAgents", { table: "#agentsTable" });
+  function exporter(){
+    const postes = postesVisibles();
+    const nomPoste = id => { const p = POSTES.find(x => x.id === id); return p ? p.intitule : ""; };
+    const feuillePostes = postes.map(p => ({ "ID": p.id, "Intitulé": p.intitule, "Collectivité": p.collectivite || "", "Service": p.service, "Description": p.description || "", "Actif": p.actif === false ? "Non" : "Oui" }));
+    const feuilleExpos = EXPOS.filter(e => postes.some(p => p.id === e.posteId)).sort((x, y) => y.annee - x.annee).map(e => {
+      const ligne = { "ID Poste": e.posteId, "Poste": nomPoste(e.posteId), "Année": e.annee };
+      PEN.CRITERES.forEach(c => { ligne[c.facteur + " — " + c.unite + (c.id === "bruitCrete" ? " (crête)" : "")] = (e.valeurs || {})[c.id] || ""; });
+      PEN.SANS_SEUIL.forEach(f => { const x = (e.sansSeuil || {})[f.id] || {}; ligne[f.facteur] = x.expose ? "Oui" + (x.precision ? " — " + x.precision : "") : (x.precision || ""); });
+      ligne["Seuils atteints"] = PEN.evaluer(e.valeurs).facteurs.join(", ");
+      ligne["Commentaire"] = e.commentaire || ""; ligne["Saisi le"] = e.dateSaisie || ""; ligne["Par"] = e.auteur || "";
+      return ligne;
+    });
+    const feuilleAgents = agentsVisibles().map(a => { const s = situation(a); return { "Nom": a.nom, "Prénom": a.prenom, "Service": a.service, "Poste": s.poste ? s.poste.intitule : "", "Statut": a.statut || "", "Année": ANNEE, "Seuils atteints": s.ev.facteurs.join(", "), "Facteurs sans seuil": s.autres.join(", "), "Suite à donner": s.suite }; });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuillePostes, { header: ["ID", "Intitulé", "Collectivité", "Service", "Description", "Actif"] }), "Postes");
+    const enTetesExpos = ["ID Poste", "Poste", "Année"].concat(PEN.CRITERES.map(c => c.facteur + " — " + c.unite + (c.id === "bruitCrete" ? " (crête)" : "")), PEN.SANS_SEUIL.map(f => f.facteur), ["Seuils atteints", "Commentaire", "Saisi le", "Par"]);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuilleExpos, { header: enTetesExpos }), "Expositions");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuilleAgents, { header: ["Nom", "Prénom", "Service", "Poste", "Statut", "Année", "Seuils atteints", "Facteurs sans seuil", "Suite à donner"] }), "Agents " + ANNEE);
+    XLSX.writeFile(wb, `penibilite_${ANNEE}_${VigieDates.aujourdhui()}.xlsx`);
+  }
+  $("btnExport").addEventListener("click", exporter);
+  $("btnExportAgents").addEventListener("click", exporter);
+
+  // ---------- Onglets, filtres, rendu ----------
+  function showTab(name){
+    document.querySelectorAll(".ap-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("show", p.id === "tab-" + name));
+  }
+  document.querySelectorAll(".ap-tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+  $("fAnnee").addEventListener("change", () => { ANNEE = Number($("fAnnee").value) || anneeCourante; $("campagnePanel").style.display = "none"; renderAll(); });
+  $("fServicePoste").addEventListener("change", renderPostes);
+  $("btnResetPostes").addEventListener("click", () => { $("fServicePoste").value = "all"; ANNEE = anneeCourante; renderAll(); });
+  if (!canPenWrite){ $("thPosteActions").textContent = ""; }
+  function renderAll(){ renderPostes(); renderAgents(); renderParametres(); }
+  renderAll();
+
+  // ---------- Horloge ----------
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

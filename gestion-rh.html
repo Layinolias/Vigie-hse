@@ -246,6 +246,7 @@
   <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2v6L3 20a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
   <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
   <symbol id="i-package" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M12 14l4-5"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.2"/></symbol>
   <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
   <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
@@ -288,6 +289,7 @@
         <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
         <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
         <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
+        <a class="nav-item" id="navPenibilite" href="penibilite.html" style="display:none;"><svg class="icon"><use href="#i-gauge"/></svg> Pénibilité</a>
       </div>
       <div class="nav-section" id="navRh" style="display:none;">
         <div class="nav-label">Espace RH</div>
@@ -400,6 +402,8 @@
               <div><label for="agFService">Service</label><select id="agFService" required></select></div>
               <div><label for="agFManager">Responsable (organigramme)</label><select id="agFManager"><option value="">— Aucun (sommet)</option></select></div>
               <div><label for="agFDateEntree">Date d'entrée</label><input type="date" id="agFDateEntree"></div>
+              <div><label for="agFPoste">Poste (pénibilité)</label><select id="agFPoste"></select></div>
+              <div><label for="agFStatut">Statut</label><select id="agFStatut"></select></div>
               <div><label for="agFActif" style="display:flex;align-items:center;gap:8px;margin-top:22px;"><input type="checkbox" id="agFActif" checked style="width:16px;height:16px;"> Agent actif</label></div>
             </div>
             <div class="form-actions">
@@ -552,6 +556,9 @@
   if (canAccueilPoste){ $("navAdministratif").style.display = ""; $("navAccueilPoste").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
+  // Pénibilité (module 5) : RH, administrateurs, ou la permission « penibilite »
+  { const r = (session && session.role) || "ag", p = (session && session.modulePermissions && session.modulePermissions["penibilite"]) || "none";
+    if (r === "admin" || r === "rh" || p !== "none") document.getElementById("navPenibilite").style.display = ""; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   const AUDIT_KEY = "vigie_hse_audit_log";
@@ -606,6 +613,7 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
+    statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
     servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
     servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
@@ -620,6 +628,20 @@
   const REF = loadReferentials();
   function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
   function allServicesSorted(){ return [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b) => a.localeCompare(b,'fr')); }
+
+  // ---------- Postes (définis dans penibilite.html, lus ici pour rattacher un agent) ----------
+  const POSTES_KEY = "vigie_hse_postes";
+  function lirePostes(){ try { const l = JSON.parse(VigieStore.getItem(POSTES_KEY) || "[]"); return Array.isArray(l) ? l : []; } catch(e){ return []; } }
+  const intitulePoste = id => { const p = lirePostes().find(x => x.id === id); return p ? p.intitule : ""; };
+  function optionsPoste(selectedId){
+    const postes = lirePostes().filter(p => p.actif !== false || p.id === selectedId).sort((a, b) => String(a.intitule).localeCompare(String(b.intitule), 'fr'));
+    return `<option value="">— Non renseigné</option>` + postes.map(p => `<option value="${esc(p.id)}" ${p.id === selectedId ? 'selected' : ''}>${esc(p.intitule)}${p.service ? ' — ' + esc(p.service) : ''}</option>`).join("");
+  }
+  function optionsStatut(selected){
+    const liste = (REF.statutsRH || []).slice();
+    if (selected && !liste.includes(selected)) liste.push(selected);
+    return `<option value="">— Non renseigné</option>` + liste.map(s => `<option value="${esc(s)}" ${s === selected ? 'selected' : ''}>${esc(s)}</option>`).join("");
+  }
 
   // ---------- Dataset Agents (always-merge, CRUD classique) ----------
   const AGENTS_KEY = "vigie_hse_agents";
@@ -744,6 +766,8 @@
   function openAgentForm(rec){
     agentForm.reset();
     $("agFManager").innerHTML = fillManagerOptions(rec ? rec.id : null, rec ? rec.managerId : "");
+    $("agFPoste").innerHTML = optionsPoste(rec ? rec.posteId || "" : "");
+    $("agFStatut").innerHTML = optionsStatut(rec ? rec.statut || "" : "");
     if (rec){
       $("agentFormTitle").textContent = "Modifier l'agent";
       $("agFId").value = rec.id;
@@ -777,6 +801,8 @@
       service: $("agFService").value,
       managerId: $("agFManager").value || "",
       dateEntree: $("agFDateEntree").value || "",
+      posteId: $("agFPoste").value || "",
+      statut: $("agFStatut").value || "",
       actif: $("agFActif").checked,
       auteur: (session && session.user) || "—",
       dateCreation: id ? (AGENTS.find(a => a.id === id) || {}).dateCreation || VigieDates.aujourdhui() : VigieDates.aujourdhui(),
@@ -811,9 +837,9 @@
   if (canGestionRhWrite){ $("btnNewAgent").addEventListener("click", () => openAgentForm(null)); }
   VigieImpression.brancher("btnExportAgents");
   $("btnExportAgents").addEventListener("click", () => {
-    const rows = AGENTS.map(a => ({ "Nom":a.nom, "Prénom":a.prenom, "Collectivité":a.collectivite, "Service":a.service, "Responsable":a.managerId ? agentName(a.managerId) : "", "Date d'entrée":a.dateEntree||"", "Actif":a.actif !== false ? "Oui" : "Non" }));
+    const rows = AGENTS.map(a => ({ "Nom":a.nom, "Prénom":a.prenom, "Collectivité":a.collectivite, "Service":a.service, "Responsable":a.managerId ? agentName(a.managerId) : "", "Date d'entrée":a.dateEntree||"", "Poste":intitulePoste(a.posteId), "Statut":a.statut||"", "Actif":a.actif !== false ? "Oui" : "Non" }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Nom", "Prénom", "Collectivité", "Service", "Responsable", "Date d'entrée", "Actif"] }), "Agents");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Nom", "Prénom", "Collectivité", "Service", "Responsable", "Date d'entrée", "Poste", "Statut", "Actif"] }), "Agents");
     XLSX.writeFile(wb, `gestion-rh-agents_${VigieDates.aujourdhui()}.xlsx`);
   });
 
@@ -836,7 +862,7 @@
         const wb = VigieImport.lireClasseur(buf);
         const lignes = XLSX.utils.sheet_to_json(wb.Sheets["Agents"] || wb.Sheets[wb.SheetNames[0]], { defval: "" }).map(champsImp);
         if (!lignes.length){ alert("Le fichier semble vide — aucune ligne n'a été trouvée dans la première feuille."); e.target.value = ""; return; }
-        let added = 0, updated = 0, skipped = 0, horsPerimetre = 0, sansResponsable = 0;
+        let added = 0, updated = 0, skipped = 0, horsPerimetre = 0, sansResponsable = 0, postesInconnus = 0;
         const aRattacher = [];
         lignes.forEach(n => {
           const nom = String(n["nom"] || "").trim(), prenom = String(n["prenom"] || "").trim();
@@ -850,6 +876,13 @@
           rec.nom = nom; rec.prenom = prenom; rec.service = svcFinal;
           if (n["collectivite"] !== undefined) rec.collectivite = collectiviteImp(n["collectivite"]);
           if (n["date d entree"] !== undefined) rec.dateEntree = dateImp(n["date d entree"]);
+          if (n["poste"] !== undefined){
+            const intitule = String(n["poste"]).trim();
+            const p = intitule ? lirePostes().find(x => normImp(x.intitule) === normImp(intitule)) : null;
+            rec.posteId = p ? p.id : "";
+            if (intitule && !p) postesInconnus++;
+          }
+          if (n["statut"] !== undefined) rec.statut = String(n["statut"]).trim();
           if (n["actif"] !== undefined) rec.actif = !/^(non|0|false|inactif|n)$/i.test(String(n["actif"]).trim());
           if (trouve){ AGENTS[AGENTS.indexOf(trouve)] = rec; updated++; } else { AGENTS.push(rec); added++; }
           if (n["responsable"] !== undefined) aRattacher.push([rec.id, String(n["responsable"]).trim()]);
@@ -869,7 +902,8 @@
         } else {
           alert(`Import terminé — ${added} agent(s) ajouté(s), ${updated} mis à jour, ${skipped} ignoré(s)` +
             (horsPerimetre ? `, ${horsPerimetre} hors de vos services` : "") +
-            (sansResponsable ? `. ${sansResponsable} responsable(s) introuvable(s) ou créant une boucle : à rattacher dans l'organigramme` : "") + ".");
+            (sansResponsable ? `. ${sansResponsable} responsable(s) introuvable(s) ou créant une boucle : à rattacher dans l'organigramme` : "") +
+            (postesInconnus ? `. ${postesInconnus} poste(s) inconnu(s), laissé(s) vide(s) : créez d'abord les postes dans le module Pénibilité` : "") + ".");
         }
       } catch (err){
         alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");

@@ -36,6 +36,7 @@ const REGLES = {
   interventions_ee: parModule('entreprises-ext'),
   accueils: parModule('accueil-poste'), modeles_accueil: parModule('accueil-poste'), accueil_delai: parModule('accueil-poste'),
   wiki: parModule('documentation'), documents: parModule('documentation'), doc_types: parModule('documentation'),
+  postes: parModule('penibilite'), expositions: parModule('penibilite'), penibilite_parametres: parModule('penibilite'),
   // ouverts à tous, en ajout seulement
   rsst: ajoutPourTous, audit_log: ajoutPourTous, duerp_log: ajoutPourTous, rh_log: ajoutPourTous,
 };

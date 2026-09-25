@@ -9,6 +9,7 @@
 //                                        { ok:false, revision, valeur } (la version actuelle)
 //   supprimer(cle, revisionVue)        → idem
 //   effacerTout()                      → chemin de la copie de sauvegarde prise juste avant
+//   copier(chemin)                     → copie complète et cohérente de la base, prise sans l'arrêter
 // Comptes (étape P1b) — les mots de passe ne sont jamais dans les données, seulement leur empreinte ici :
 //   empreinte(idCompte) / poserEmpreinte(idCompte, empreinte) / retirerEmpreintes(idsGardes)
 //   ouvrirSession(empreinteJeton, idCompte, expire) / lireSession(empreinteJeton) / prolongerSession(…, expire)
@@ -91,10 +92,14 @@ function ouvrir(fichier){
     },
     ecrire: (cle, valeur, revisionVue) => changer(cle, String(valeur), revisionVue, 'remplacée'),
     supprimer: (cle, revisionVue) => changer(cle, null, revisionVue, 'supprimée'),
+    // copie d'un seul tenant (VACUUM INTO) : les écritures en cours ne la coupent pas en deux
+    copier(copie){
+      db.exec("VACUUM INTO '" + copie.replace(/'/g, "''") + "'");
+      return copie;
+    },
     // « Réinitialiser les données » : une copie complète de la base est prise avant d'effacer
     effacerTout(){
-      const copie = path.join(path.dirname(fichier), 'sauvegarde-avant-effacement-' + maintenant().replace(/[:.]/g, '-') + '.db');
-      db.exec("VACUUM INTO '" + copie.replace(/'/g, "''") + "'");
+      const copie = this.copier(path.join(path.dirname(fichier), 'sauvegarde-avant-effacement-' + maintenant().replace(/[:.]/g, '-') + '.db'));
       transaction(() => {
         const quand = maintenant();
         for (const l of q.tout.all()) if (l.valeur !== null) q.garder.run(l.cle, l.valeur, l.revision, quand, 'effacement général');

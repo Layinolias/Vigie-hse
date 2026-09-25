@@ -7,25 +7,41 @@
 //
 // Lancement, depuis la racine du dépôt (Node 22.5 ou plus récent, rien à installer) :
 //   node serveur/serveur.js            → http://localhost:8780
-// Variables : PORT (8780 par défaut), VIGIE_BASE (fichier de la base, serveur/donnees/vigie.db par défaut),
-// VIGIE_HTTPS=1 derrière un proxy HTTPS (cookie de session réservé aux connexions chiffrées).
+// Variables : PORT (8780 par défaut), VIGIE_BASE (fichier de la base, serveur/donnees/vigie.db par défaut).
+// Ouverture au réseau (P1c, Documentation/PLAN-MISE-EN-PRODUCTION.md §4 quater) :
+//   VIGIE_CERT, VIGIE_CLE     certificat et clé (fichiers PEM) : le serveur parle HTTPS lui-même ;
+//   VIGIE_HTTPS=1             ou bien : derrière un proxy HTTPS qui lui transmet les requêtes ;
+//   VIGIE_ECOUTE              adresse d'écoute (127.0.0.1 par défaut : ce poste seul ; 0.0.0.0 : le réseau) ;
+//   VIGIE_HOTES               noms sous lesquels on l'appelle, séparés par des virgules (vigie.mairie.local).
+// Le serveur refuse de s'ouvrir au réseau sans HTTPS, sans compte, ou avec un compte de démonstration
+// encore sur son mot de passe publié.
+// Sauvegardes (serveur/sauvegardes.js) : VIGIE_SAUVEGARDES (dossier, serveur/donnees/sauvegardes par défaut),
+// VIGIE_SAUVEGARDE_HEURES (24 ; 0 les désactive), VIGIE_SAUVEGARDES_GARDER (14).
 //
 // P1b : connexion vérifiée ici (serveur/comptes.js — mots de passe hachés, jamais conservés en clair),
 // aucune page de l'application ni aucune donnée sans session, droits d'écriture appliqués par le serveur
 // (serveur/droits.js).
 // P1c : lectures filtrées au périmètre d'un compte limité à certains services (serveur/perimetre.js).
-// Le serveur n'écoute encore que ce poste (127.0.0.1).
+// Par défaut, le serveur n'écoute que ce poste (127.0.0.1) ; voir plus haut pour l'ouvrir au réseau.
 'use strict';
-const http = require('http'), fs = require('fs'), path = require('path');
+const http = require('http'), https = require('https'), fs = require('fs'), path = require('path');
 const { ouvrir } = require('./base-sqlite.js');
 const Comptes = require('./comptes.js');
 const Anonymisation = require('./anonymisation.js');
 const Perimetre = require('./perimetre.js');
+const Sauvegardes = require('./sauvegardes.js');
 
 const RACINE = path.resolve(__dirname, '..');
 const PORT = Number(process.env.PORT) || 8780;
 const BASE = process.env.VIGIE_BASE || path.join(__dirname, 'donnees', 'vigie.db');
-const HTTPS = process.env.VIGIE_HTTPS === '1';
+const CERT = process.env.VIGIE_CERT, CLE_TLS = process.env.VIGIE_CLE;
+const HTTPS_NATIF = !!(CERT && CLE_TLS);
+const HTTPS = HTTPS_NATIF || process.env.VIGIE_HTTPS === '1';
+const ECOUTE = process.env.VIGIE_ECOUTE || '127.0.0.1';
+const NOMS = String(process.env.VIGIE_HOTES || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
+const BOUCLE = ['127.0.0.1', '::1', 'localhost'];
+// joignable depuis un autre poste : adresse d'écoute du réseau, proxy devant le serveur, ou nom de réseau
+const RESEAU = !BOUCLE.includes(ECOUTE) || process.env.VIGIE_HTTPS === '1' || NOMS.length > 0;
 const TAILLE_MAX = 50 * 1024 * 1024;          // une clé = un registre entier ; l'historique complet d'un client tient large
 const CLE_VALIDE = /^vigie_hse_[a-z0-9_]{1,80}$/;
 const TYPES = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
@@ -33,7 +49,9 @@ const TYPES = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; char
   '.xlsx':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.md':'text/plain; charset=utf-8' };
 // Noms sous lesquels le serveur accepte d'être appelé : refuser les autres bloque qu'un site piégé,
 // ouvert dans le navigateur de ce poste, fasse passer son propre nom de domaine pour celui-ci.
-const HOTES = new Set(['localhost:' + PORT, '127.0.0.1:' + PORT, '[::1]:' + PORT]);
+const HOTES_LOCAUX = new Set(['localhost:' + PORT, '127.0.0.1:' + PORT, '[::1]:' + PORT]);
+// un nom de réseau est accepté avec ou sans port (derrière un proxy, le port est celui du proxy)
+const HOTES = new Set([...HOTES_LOCAUX, ...NOMS, ...NOMS.map(n => n + ':' + PORT)]);
 // pages accessibles sans être connecté : la vitrine et l'écran de connexion
 const PUBLIQUES = new Set(['/index.html', '/login.html']);
 const COOKIE = 'vigie_session';
@@ -44,7 +62,8 @@ const journal = (...m) => console.log(new Date().toLocaleString('fr-FR') + ' ' +
 const droits = require('./droits.js');   // droits d'écriture par registre, appliqués ici
 
 function repondre(res, statut, corps, type, entetes){
-  res.writeHead(statut, Object.assign({ 'Content-Type': type || 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }, entetes || {}));
+  res.writeHead(statut, Object.assign({ 'Content-Type': type || 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
+    HTTPS ? { 'Strict-Transport-Security': 'max-age=31536000' } : {}, entetes || {}));
   res.end(type ? corps : JSON.stringify(corps));
 }
 const texte = (res, statut, t, entetes) => repondre(res, statut, t, 'text/plain; charset=utf-8', entetes);
@@ -56,7 +75,8 @@ function jetonDe(req){
 }
 const poserCookie = jeton => COOKIE + '=' + encodeURIComponent(jeton) + '; HttpOnly; SameSite=Strict; Path=/' + (HTTPS ? '; Secure' : '');
 const effacerCookie = COOKIE + '=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0' + (HTTPS ? '; Secure' : '');
-const depuisCePoste = req => ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress);
+// depuis ce poste : adresse de boucle ET nom local (derrière un proxy du même poste, l'adresse seule ne suffit pas)
+const depuisCePoste = req => ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress) && HOTES_LOCAUX.has(String(req.headers.host));
 
 // État glissé dans chaque page. Sans session : aucune donnée. « < » est encodé : une valeur contenant
 // « </script> » ne peut pas refermer la balise ; U+2028/2029 le sont aussi (fins de ligne pour les
@@ -181,6 +201,9 @@ function fichier(req, res, chemin){
   const segments = relatif.split(/[\\/]/);
   if (!f.startsWith(RACINE + path.sep) || segments.some(s => s.startsWith('.')) || segments[0] === 'serveur')
     return texte(res, 404, '404');
+  // seuls les types de l'application : une clé de certificat, une copie de base… posées dans le dossier ne sortent pas
+  const type = TYPES[path.extname(f).toLowerCase()];
+  if (!type) return texte(res, 404, '404');
   const html = path.extname(f).toLowerCase() === '.html';
   let session = null;
   const entetes = {};
@@ -196,7 +219,6 @@ function fichier(req, res, chemin){
   }
   fs.readFile(f, (err, data) => {
     if (err) return texte(res, 404, '404');
-    const type = TYPES[path.extname(f).toLowerCase()] || 'application/octet-stream';
     if (html){
       const page = data.toString('utf8'), balise = '<script src="assets/stockage.js"></script>';
       // lue à chaque page : on voit toujours la dernière version enregistrée par quiconque
@@ -206,7 +228,7 @@ function fichier(req, res, chemin){
   });
 }
 
-const serveur = http.createServer(async (req, res) => {
+const traiter = async (req, res) => {
   try {
     if (!HOTES.has(String(req.headers.host))) return texte(res, 421, 'hôte refusé');
     const chemin = decodeURIComponent(req.url.split('?')[0]);
@@ -216,15 +238,37 @@ const serveur = http.createServer(async (req, res) => {
     journal('erreur', e.message);
     if (!res.headersSent) repondre(res, e.statut || 500, { erreur: e.statut === 413 ? 'trop gros' : 'erreur du serveur' });
   }
-});
+};
+
+// Ouvrir au réseau n'est permis qu'une fois la connexion chiffrée et les comptes réels en place.
+function refusReseau(){
+  if (!RESEAU) return null;
+  if (!HTTPS) return 'pas de HTTPS : les mots de passe circuleraient en clair. Donner VIGIE_CERT et VIGIE_CLE, ou placer le serveur derrière un proxy HTTPS (VIGIE_HTTPS=1).';
+  if (comptes.aucun()) return "aucun compte. Lancer d'abord le serveur sur ce poste seul (sans VIGIE_ECOUTE, VIGIE_HOTES ni VIGIE_HTTPS), s'y connecter pour créer les comptes, puis changer leurs mots de passe.";
+  const demo = comptes.demoActifs();
+  if (demo.length) return 'compte(s) de démonstration encore sur leur mot de passe publié : ' + demo.join(', ') + '. Changer ces mots de passe (ou désactiver ces comptes) dans Administration, sur ce poste seul, puis relancer.';
+  return null;
+}
+let serveur;
+try { serveur = HTTPS_NATIF ? https.createServer({ cert: fs.readFileSync(CERT), key: fs.readFileSync(CLE_TLS) }, traiter) : http.createServer(traiter); }
+catch(e){ console.error('VIGIE HSE — certificat illisible (' + e.message + ').'); process.exit(1); }
 
 const repris = comptes.reprendreAncienneBase();
-serveur.listen(PORT, '127.0.0.1', () => {
-  journal('VIGIE HSE — serveur local : http://localhost:' + PORT);
+const refus = refusReseau();
+if (refus){ console.error('VIGIE HSE — ouverture au réseau refusée : ' + refus); base.fermer(); process.exit(1); }
+const arreterSauvegardes = Sauvegardes.planifier(base, {
+  dossier: process.env.VIGIE_SAUVEGARDES || path.join(path.dirname(BASE), 'sauvegardes'),
+  heures: process.env.VIGIE_SAUVEGARDE_HEURES === undefined ? 24 : Number(process.env.VIGIE_SAUVEGARDE_HEURES),
+  garder: Number(process.env.VIGIE_SAUVEGARDES_GARDER) || 14,
+  journal });
+serveur.listen(PORT, ECOUTE, () => {
+  // derrière un proxy, l'adresse à donner aux utilisateurs est celle du proxy (port HTTPS habituel)
+  const adresse = HTTPS && !HTTPS_NATIF ? 'https://' + (NOMS[0] || 'nom-du-proxy') : (HTTPS_NATIF ? 'https' : 'http') + '://' + (NOMS[0] || 'localhost') + ':' + PORT;
+  journal('VIGIE HSE — serveur ' + (RESEAU ? 'ouvert au réseau (écoute ' + ECOUTE + (HTTPS_NATIF ? ', HTTPS' : ', derrière un proxy HTTPS') + ')' : 'local') + ' : ' + adresse);
   journal('Base : ' + BASE + ' (' + base.nombre() + ' registre(s) enregistré(s))');
   if (repris) journal('Base antérieure à P1b : ' + repris + ' mot(s) de passe retiré(s) des données et haché(s).');
   if (comptes.aucun()) journal('Aucun compte : le premier passage sur l\'écran de connexion, depuis ce poste, crée les comptes de démonstration.');
   else if (comptes.demoActive()) journal('ATTENTION : les comptes de démonstration (mots de passe publiés dans le dépôt) sont actifs — à changer avant tout usage réel.');
 });
-const arreter = () => { serveur.close(); base.fermer(); process.exit(0); };
+const arreter = () => { arreterSauvegardes(); serveur.close(); base.fermer(); process.exit(0); };
 process.on('SIGINT', arreter); process.on('SIGTERM', arreter);

@@ -115,14 +115,18 @@ function creer(base){
 
   function deconnecter(jeton){ if (jeton) base.fermerSession(empreinteJeton(jeton)); }
 
-  // les comptes de démonstration (mots de passe publiés dans le dépôt) sont-ils encore actifs ?
-  function demoActive(){
-    const u = trouver('admin@verchamps.fr');
-    const e = u && base.empreinte(String(u.id));
-    return !!e && verifier('admin1234', e);
+  // les comptes de démonstration (mots de passe publiés dans le dépôt) encore actifs avec ce mot de passe
+  const DEMO = [['admin@verchamps.fr', 'admin1234'], ['manager@verchamps.fr', 'manager1234'], ['RH1', '1234'], ['RH2', '1234'], ['AG1', '1234'], ['AG2', '1234'], ['PREV1', '1234']];
+  function demoActifs(){
+    return DEMO.filter(([id, mdp]) => {
+      const u = trouver(id);
+      const e = u && u.active !== false && base.empreinte(String(u.id));
+      return !!e && verifier(mdp, e);
+    }).map(([id]) => id);
   }
+  const demoActive = () => demoActifs().length > 0;
 
-  return { CLE_COMPTES, aucun: () => comptes().length === 0, epurer, apresEcriture, reprendreAncienneBase, connecter, session, deconnecter, demoActive };
+  return { CLE_COMPTES, aucun: () => comptes().length === 0, epurer, apresEcriture, reprendreAncienneBase, connecter, session, deconnecter, demoActive, demoActifs };
 }
 
 module.exports = { creer, hacher, verifier };

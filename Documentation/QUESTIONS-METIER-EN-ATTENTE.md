@@ -44,8 +44,8 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 12 | Impression et PDF : quels documents méritent une vraie mise en page ? | Tous les registres (impression générique en service) | ✅ répondue le 2026-09-23 : la liste suffit, piste gardée en réserve |
 | 13 | Reprise des données : qu'apporte un client, et jusqu'où remonter ? | Mise en service chez un client (kit de reprise) | ✅ répondue le 2026-09-23 : tout l'historique, tout type de fichier |
 | 14 | Données de santé : lesquelles le logiciel doit-il vraiment garder ? | Registre AT/MP, dossiers AT/MP, visites médicales | ✅ répondue le 2026-09-23 : à voir avec le délégué à la protection des données, pas encore sollicité |
-| 15 | Pénibilité : le tableau des seuils est-il le bon, et pour quels agents ? | Module 5 Pénibilité (à construire) | 🟠 posée le 2026-09-23, en attente |
-| 16 | Dialogue social : que doivent trouver les représentants du personnel ? | Module 13 Dialogue social (à construire) | 🟠 posée le 2026-09-23, en attente |
+| 15 | Pénibilité : le tableau des seuils est-il le bon, et pour quels agents ? | Module 5 Pénibilité (à construire) | ✅ répondue le 2026-09-24 : selon le statut, par poste, une fois par an |
+| 16 | Dialogue social : que doivent trouver les représentants du personnel ? | Module 13 Dialogue social (à construire) | ✅ répondue le 2026-09-24 : les deux, questions/réponses avec la direction en priorité, compte anonymisé |
 
 ---
 

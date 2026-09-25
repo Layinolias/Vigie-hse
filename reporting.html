@@ -184,6 +184,7 @@
   .risk-row-fill{ height:100%; border-radius:var(--r-pill); background:linear-gradient(90deg, rgba(var(--accent-rgb),.55), rgba(var(--accent-rgb),.85)); }
   .risk-row-value{ grid-area:value; font-size:11.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; color:var(--text); white-space:nowrap; }
 
+  .perimetre-note{ margin:10px 0 0; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:600; color:var(--warning); background:var(--warning-bg); }
   .footnote{ margin-top:6px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
 
   .print-header{ display:none; }
@@ -316,6 +317,7 @@
         <div class="print-brand">VIGIE HSE</div>
         <h1>Rapport d'indicateurs HSE</h1>
         <div class="print-date" id="printDate"></div>
+        <div class="print-date" id="printPerimetre" hidden></div>
       </div>
 
       <header class="page-summary">
@@ -345,6 +347,7 @@
           </div>
         </div>
       </header>
+      <div class="perimetre-note no-print" id="perimetreNote" hidden></div>
 
       <div class="mobile-notice" id="mobileNotice">
         <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord ou la déclaration rapide.</span>
@@ -421,6 +424,13 @@
   const role = (session && session.role) || "ag";
   const canEdit = role === "rh" || role === "admin";
   const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  // P1c : sur le serveur, un compte limité à certains services ne reçoit que leurs données. Le dire, pour
+  // qu'un chiffre de ce périmètre ne soit pas présenté comme celui de toute la collectivité.
+  const perimetreServices = (session && session.services) || ["*"];
+  if (VigieStore.mode() === "serveur" && !perimetreServices.includes("*")){
+    const t = "Périmètre : vos services (" + perimetreServices.join(", ") + ") — les chiffres ne portent que sur eux.";
+    ["perimetreNote","printPerimetre"].forEach(id => { $(id).textContent = t; $(id).hidden = false; });
+  }
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
   $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";

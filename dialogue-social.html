@@ -216,6 +216,7 @@
   .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
   .act-del:hover{ text-decoration:underline; }
   .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .perimetre-note{ margin:10px 0 0; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:600; color:var(--warning); background:var(--warning-bg); }
   .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
 
   .chip.soon{ color:var(--warning); background:var(--warning-bg); } .chip.soon::before{ background:var(--warning); }
@@ -571,6 +572,7 @@
           <div class="field"><span class="flabel">Année</span><select id="fAnneeInd"></select></div>
           <span class="result-count" style="margin-left:auto;">Aucun nom, aucune donnée de santé ; un effectif inférieur à 3 s'affiche « moins de 3 ».</span>
         </div>
+        <div class="perimetre-note" id="perimetreNoteInd" hidden></div>
         <div class="ds-grille">
           <div class="panel ds-carte"><h3 class="panel-title">Accidents du travail et maladies professionnelles</h3><div id="indAtmp"></div></div>
           <div class="panel ds-carte"><h3 class="panel-title">Registre santé et sécurité au travail</h3><div id="indRsst"></div></div>
@@ -612,6 +614,13 @@
   const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
+  // P1c : sur le serveur, un compte limité à certains services ne reçoit que leurs données. Le dire, pour
+  // qu'un chiffre de ce périmètre ne soit pas présenté comme celui de toute la collectivité.
+  const perimetreServices = (session && session.services) || ["*"];
+  if (VigieStore.mode() === "serveur" && !perimetreServices.includes("*")){
+    const t = "Périmètre : vos services (" + perimetreServices.join(", ") + ") — les chiffres ne portent que sur eux.";
+    ["perimetreNoteInd"].forEach(id => { $(id).textContent = t; $(id).hidden = false; });
+  }
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
   $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";

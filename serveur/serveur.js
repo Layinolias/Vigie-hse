@@ -12,12 +12,15 @@
 //
 // P1b : connexion vérifiée ici (serveur/comptes.js — mots de passe hachés, jamais conservés en clair),
 // aucune page de l'application ni aucune donnée sans session, droits d'écriture appliqués par le serveur
-// (serveur/droits.js). Le serveur n'écoute encore que ce poste (127.0.0.1).
+// (serveur/droits.js).
+// P1c : lectures filtrées au périmètre d'un compte limité à certains services (serveur/perimetre.js).
+// Le serveur n'écoute encore que ce poste (127.0.0.1).
 'use strict';
 const http = require('http'), fs = require('fs'), path = require('path');
 const { ouvrir } = require('./base-sqlite.js');
 const Comptes = require('./comptes.js');
 const Anonymisation = require('./anonymisation.js');
+const Perimetre = require('./perimetre.js');
 
 const RACINE = path.resolve(__dirname, '..');
 const PORT = Number(process.env.PORT) || 8780;
@@ -58,11 +61,22 @@ const depuisCePoste = req => ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(r
 // État glissé dans chaque page. Sans session : aucune donnée. « < » est encodé : une valeur contenant
 // « </script> » ne peut pas refermer la balise ; U+2028/2029 le sont aussi (fins de ligne pour les
 // anciens moteurs JavaScript).
+// Ce que ce compte peut recevoir : rien de santé s'il est anonymisé, rien hors de ses services s'il y est limité.
+function donneesPour(page){
+  let d = base.lireTout();
+  if (Anonymisation.estAnonyme(page)) d = Anonymisation.filtrer(d);
+  if (Perimetre.limite(page)) d = Perimetre.filtrer(d, page.services);
+  return d;
+}
+function valeurPour(page, cle, valeur){
+  if (Anonymisation.estAnonyme(page)) valeur = Anonymisation.vue(cle, valeur);
+  return Perimetre.limite(page) ? Perimetre.vue(valeur, page.services) : valeur;
+}
+
 function injection(session){
   const etat = { api: '/api/', donnees: {}, session: session ? session.page : null };
   if (session){
-    const tout = Anonymisation.estAnonyme(session.page) ? Anonymisation.filtrer(base.lireTout()) : base.lireTout();
-    for (const [cle, d] of Object.entries(tout)) etat.donnees[cle] = { v: d.valeur, r: d.revision };
+    for (const [cle, d] of Object.entries(donneesPour(session.page))) etat.donnees[cle] = { v: d.valeur, r: d.revision };
     etat.droits = droits.resume(session.page);
   }
   else etat.premierLancement = comptes.aucun();
@@ -107,7 +121,7 @@ async function api(req, res, chemin){
   const amorce = !session && cle === comptes.CLE_COMPTES && req.method === 'PUT' && comptes.aucun() && depuisCePoste(req);
   if (!session && !amorce) return repondre(res, 401, { erreur: 'non connecté' });
 
-  if (chemin === '/api/donnees' && req.method === 'GET') return repondre(res, 200, session && Anonymisation.estAnonyme(session.page) ? Anonymisation.filtrer(base.lireTout()) : base.lireTout());
+  if (chemin === '/api/donnees' && req.method === 'GET') return repondre(res, 200, session ? donneesPour(session.page) : {});
 
   if (chemin === '/api/effacer' && req.method === 'POST'){
     if (!droits.peutEffacer(session.page)) return repondre(res, 403, { erreur: 'réservé à un administrateur' });
@@ -125,6 +139,8 @@ async function api(req, res, chemin){
     const anonyme = session && Anonymisation.estAnonyme(session.page);
     // compte anonymisé sur un registre réduit : ses seuls ajouts, greffés sur le registre complet
     if (anonyme && Anonymisation.PROJETEES[cle] && valeur !== null) valeur = Anonymisation.grefferAjouts(base.lire(cle), valeur);
+    // compte limité à certains services : sa part, greffée sur le registre complet
+    if (session && Perimetre.limite(session.page)) valeur = Perimetre.greffer(base.lire(cle), valeur, session.page.services);
     if (session && !droits.peutEcrire(session.page, cle, valeur, base.lire(cle))){
       journal('écriture refusée :', cle, 'par', session.page.user);
       return repondre(res, 403, { erreur: 'droits insuffisants' });
@@ -134,7 +150,7 @@ async function api(req, res, chemin){
     const r = valeur === null ? base.supprimer(cle, revisionVue) : base.ecrire(cle, valeur, revisionVue);
     if (!r.ok){
       journal('conflit', cle, '(vue', revisionVue, '/ actuelle', r.revision + ')');
-      return repondre(res, 409, anonyme ? Object.assign({}, r, { valeur: Anonymisation.vue(cle, r.valeur) }) : r);
+      return repondre(res, 409, session ? Object.assign({}, r, { valeur: valeurPour(session.page, cle, r.valeur) }) : r);
     }
     if (cle === comptes.CLE_COMPTES) comptes.apresEcriture(mots);
     journal(req.method === 'PUT' ? 'écrit' : 'supprimé', cle, '→ révision', r.revision, 'par', session ? session.page.user : '(premier lancement)');

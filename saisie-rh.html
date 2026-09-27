@@ -827,7 +827,7 @@
         </div>
         <div class="feed-service">${esc(r.nom || '')} ${esc(r.prenom || '')} — ${esc(r.service)}</div>
         <div class="feed-sub-service">${esc(r.serviceDetail)}</div>
-        <div class="feed-nature">${esc(r.nature)}${r.siege ? ' · ' + r.siege : ''}</div>
+        <div class="feed-nature">${esc(r.nature)}${r.siege ? ' · ' + esc(r.siege) : ''}</div>
         <div class="feed-bottom">
           ${r.arret
             ? `<span class="badge badge-danger">Avec arrêt</span><span class="mono" style="font-size:11px;color:var(--text-muted);">${esc(r.joursArret)} j</span>`
@@ -926,7 +926,7 @@
     saveDataset(DATASET);
 
     const log = loadLog();
-    log.push({ action: editingRecord ? "update" : "create", record });
+    log.push({ id: "log-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), action: editingRecord ? "update" : "create", record });
     saveLog(log);
     logAudit("Registre AT/MP", editingRecord ? "Modification" : "Création", `${record.typeAtMp} — ${record.nom || ''} ${record.prenom || ''} (${record.service})`.trim());
 

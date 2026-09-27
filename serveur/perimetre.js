@@ -12,7 +12,9 @@
 
 const limite = page => !!(page && Array.isArray(page.services) && !page.services.includes('*'));
 const liste = v => { if (v == null) return null; try { const l = JSON.parse(v); return Array.isArray(l) ? l : null; } catch(e){ return null; } };
-const hors = (r, services) => !!(r && typeof r === 'object' && typeof r.service === 'string' && r.service !== '' && !services.includes(r.service));
+// le service d'un enregistrement ; pour une ligne de journal ({ action, record }), celui de l'enregistrement
+const serviceDe = r => !r || typeof r !== 'object' ? null : typeof r.service === 'string' ? r.service : (r.record && typeof r.record.service === 'string' ? r.record.service : null);
+const hors = (r, services) => { const s = serviceDe(r); return !!s && !services.includes(s); };
 
 // la valeur telle que ce compte peut la recevoir
 function vue(valeur, services){

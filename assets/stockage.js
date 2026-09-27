@@ -65,7 +65,7 @@
     vigie_hse_penibilite_parametres:{ nature:"parametres", sensible:false, module:"Pénibilité" },
     vigie_hse_audit_log:          { nature:"journal",    sensible:false, module:"Journal d'audit" },
     vigie_hse_duerp_log:          { nature:"journal",    sensible:false, module:"Document Unique" },
-    vigie_hse_rh_log:             { nature:"journal",    sensible:false, module:"Registre AT/MP" },
+    vigie_hse_rh_log:             { nature:"journal",    sensible:true,  module:"Registre AT/MP" },
     vigie_hse_sidebar_locked:     { nature:"preference", sensible:false, module:"Menu latéral" },
     vigie_hse_weather_location:   { nature:"preference", sensible:false, module:"Météo du tableau de bord" },
   };

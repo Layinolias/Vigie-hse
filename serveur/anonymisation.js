@@ -10,7 +10,9 @@
 // Un tel compte ne peut rien modifier dans ces registres ; il peut au plus AJOUTER (déclarer un AT/MP
 // s'il en a la permission) : ses ajouts sont greffés sur le registre complet, qu'il n'a jamais reçu.
 'use strict';
-const RETIREES = new Set(['vigie_hse_atmp_dossiers', 'vigie_hse_atmp_arretes', 'vigie_hse_analyses_accident', 'vigie_hse_visites', 'vigie_hse_rdv_medicaux']);
+// le journal de saisie AT/MP (copie complète de chaque déclaration) et le journal d'audit (ses lignes nomment les
+// agents : « RDV médical « Dupont Jean » ») en font partie
+const RETIREES = new Set(['vigie_hse_atmp_dossiers', 'vigie_hse_atmp_arretes', 'vigie_hse_analyses_accident', 'vigie_hse_visites', 'vigie_hse_rdv_medicaux', 'vigie_hse_rh_log', 'vigie_hse_audit_log']);
 const PROJETEES = { vigie_hse_dataset: ['id', 'collectivite', 'service', 'dateMois', 'typeAtMp', 'arret', 'joursArret', 'risque'] };
 
 const estAnonyme = page => !!(page && page.anonymise);
@@ -32,11 +34,12 @@ function vue(cle, valeur){
   }));
 }
 
-// { cle: { valeur, revision } } filtré pour ce compte (les clés retirées disparaissent)
+// { cle: { valeur, revision } } filtré pour ce compte (les clés retirées arrivent vides, avec leur révision)
 function filtrer(donnees){
   const r = {};
   for (const [cle, d] of Object.entries(donnees)){
-    if (RETIREES.has(cle)) continue;
+    // rien de la valeur, mais sa révision : la page peut encore y ajouter (journal d'audit) sans conflit
+    if (RETIREES.has(cle)){ r[cle] = { valeur: null, revision: d.revision }; continue; }
     r[cle] = PROJETEES[cle] ? { valeur: vue(cle, d.valeur), revision: d.revision } : d;
   }
   return r;

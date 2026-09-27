@@ -24,7 +24,8 @@
 // P1b : connexion vérifiée ici (serveur/comptes.js — mots de passe hachés, jamais conservés en clair),
 // aucune page de l'application ni aucune donnée sans session, droits d'écriture appliqués par le serveur
 // (serveur/droits.js).
-// P1c : lectures filtrées au périmètre d'un compte limité à certains services (serveur/perimetre.js).
+// P1c : lectures filtrées au périmètre d'un compte limité à certains services (serveur/perimetre.js), et à ce
+// que les écrans de son rôle affichent (serveur/lecture.js).
 // Par défaut, le serveur n'écoute que ce poste (127.0.0.1) ; voir plus haut pour l'ouvrir au réseau.
 'use strict';
 const http = require('http'), https = require('https'), fs = require('fs'), path = require('path');
@@ -32,6 +33,7 @@ const { ouvrir } = require('./base-sqlite.js');
 const Comptes = require('./comptes.js');
 const Anonymisation = require('./anonymisation.js');
 const Perimetre = require('./perimetre.js');
+const Lecture = require('./lecture.js');
 const Sauvegardes = require('./sauvegardes.js');
 
 const RACINE = path.resolve(__dirname, '..');
@@ -85,14 +87,16 @@ const depuisCePoste = req => ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(r
 // État glissé dans chaque page. Sans session : aucune donnée. « < » est encodé : une valeur contenant
 // « </script> » ne peut pas refermer la balise ; U+2028/2029 le sont aussi (fins de ligne pour les
 // anciens moteurs JavaScript).
-// Ce que ce compte peut recevoir : rien de santé s'il est anonymisé, rien hors de ses services s'il y est limité.
+// Ce que ce compte peut recevoir : ce que les écrans de son rôle affichent, rien de santé s'il est anonymisé,
+// rien hors de ses services s'il y est limité.
 function donneesPour(page){
-  let d = base.lireTout();
+  let d = Lecture.filtrer(page, base.lireTout());
   if (Anonymisation.estAnonyme(page)) d = Anonymisation.filtrer(d);
   if (Perimetre.limite(page)) d = Perimetre.filtrer(d, page.services);
   return d;
 }
 function valeurPour(page, cle, valeur){
+  valeur = Lecture.vue(page, cle, valeur);
   if (Anonymisation.estAnonyme(page)) valeur = Anonymisation.vue(cle, valeur);
   return Perimetre.limite(page) ? Perimetre.vue(valeur, page.services) : valeur;
 }
@@ -174,6 +178,8 @@ async function api(req, res, chemin){
     let valeur = req.method === 'PUT' ? await lireCorps(req) : null;
     const anonyme = session && Anonymisation.estAnonyme(session.page);
     // compte anonymisé sur un registre réduit : ses seuls ajouts, greffés sur le registre complet
+    // compte qui ne reçoit qu'une vue réduite (ou rien) de ce registre : ses seuls ajouts, greffés sur le registre complet
+    if (session) valeur = Lecture.ecriture(session.page, cle, base.lire(cle), valeur);
     if (anonyme && Anonymisation.PROJETEES[cle] && valeur !== null) valeur = Anonymisation.grefferAjouts(base.lire(cle), valeur);
     // compte limité à certains services : sa part, greffée sur le registre complet
     if (session && Perimetre.limite(session.page)) valeur = Perimetre.greffer(base.lire(cle), valeur, session.page.services);

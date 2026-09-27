@@ -3,7 +3,7 @@ rem VIGIE HSE : double-cliquer sur ce fichier pour lancer l application (voir LI
 chcp 65001 >nul
 title VIGIE HSE
 cd /d "%~dp0"
-where node >/dev/null 2>nul
+where node >nul 2>nul
 if errorlevel 1 (
   echo.
   echo   VIGIE HSE a besoin de Node.js, qui n est pas installe sur cet ordinateur.

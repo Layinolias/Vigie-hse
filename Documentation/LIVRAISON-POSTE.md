@@ -33,7 +33,7 @@ Prérequis chez lui : **Node.js 22.5 ou plus récent** (version « LTS » de nod
 
 1. Commiter.
 2. `node test-mise-a-jour.js <commit du dernier paquet remis>` (tableau ci-dessous) : 0 KO.
-3. `node test-paquet.js` : le paquet préparé, décompressé dans un dossier vide et lancé par son lanceur — contenu (ni documentation, ni démonstration, ni base), fins de ligne Windows du lanceur et du guide, aucun avertissement technique au lancement, première connexion, 25 pages sans erreur, bibliothèque Excel servie par le poste, registres vides, données hors du dossier de l'application, puis dossier de l'application supprimé et remplacé : données et comptes toujours là, copie « avant mise à jour » prise. 13/13 le 2026-09-25.
+3. `node test-paquet.js` : le paquet préparé, décompressé dans un dossier vide et lancé par son lanceur — contenu (ni documentation, ni démonstration, ni base), fins de ligne Windows du lanceur et du guide, **le `.bat` exécuté par `cmd.exe` sans aucun message d'erreur** (le 2026-09-27 : un `>nul` réécrit en `>/dev/null` à la création du fichier faisait afficher « Le chemin d'accès spécifié est introuvable » à chaque lancement, et rendait muette la détection de Node.js absent — ne jamais écrire le `.bat` par une commande shell), aucun avertissement technique au lancement, première connexion, 25 pages sans erreur, bibliothèque Excel servie par le poste, registres vides, données hors du dossier de l'application, puis dossier de l'application supprimé et remplacé : données et comptes toujours là, copie « avant mise à jour » prise. 15/15 le 2026-09-27.
 4. `node serveur/preparer-livraison.js` → `livraison/VIGIE-HSE-AAAA-MM-JJ.zip` (dossier hors dépôt).
 5. Remettre le zip, noter la version ci-dessous.
 

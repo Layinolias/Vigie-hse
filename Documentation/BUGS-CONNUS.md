@@ -94,6 +94,11 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Constaté** : ces quatre pages reconstruisaient `vigie_hse_referentials` avec leurs seules valeurs par défaut et en retiraient les listes qu'elles ne connaissent pas — dont « Types d'accueil au poste » : une modification faite dans Administration disparaissait dès qu'on ouvrait le Document Unique, et la page Accueil au poste remettait la liste par défaut. Même effet en mode navigateur.
 - **Corrigé** : 2026-09-24 — elles partent de ce qui est stocké, comme les quinze autres pages. Vérifié : plus aucune réécriture des référentiels au passage sur les 23 pages ; en mode navigateur, 8 listes conservées au lieu de 7.
 
+### Données de santé transmises à des comptes qui ne devaient pas les voir
+- **Où** : serveur (`serveur/serveur.js`, `anonymisation.js`, `perimetre.js`), `saisie-rh.html`. **Remonté** : 2026-09-27, en dressant la liste des données collectées.
+- **Constaté** : (1) le journal de saisie AT/MP, copie complète de chaque déclaration (nom, date de naissance, lésion, avis médicaux), n'était pas marqué « santé » : un compte anonymisé le recevait, et un manager y lisait les accidents des autres services ; (2) le journal d'audit, dont les lignes nomment les agents, allait aux comptes anonymisés ; (3) tout compte connecté recevait tous les registres — un agent avait dans sa page le registre AT/MP complet, les dossiers et les analyses, que son écran masquait. Au passage : le fil de la page de saisie insérait le siège de la lésion sans `esc()`.
+- **Corrigé** : 2026-09-27 — droits de lecture appliqués par le serveur (`serveur/lecture.js`, `PLAN-MISE-EN-PRODUCTION.md` §4 quinquies), journal de saisie marqué « santé » et retiré aux comptes anonymisés avec le journal d'audit, périmètre étendu aux lignes de journal, siège échappé. Vérifié : 130 affichages sur 150 identiques au caractère près pour six comptes, les 20 autres expliqués ; `test-lecture.js` 22/22. Reste ouvert, décision de métier : qui doit voir le suivi médical (question 17).
+
 ---
 
 ## Ouverts / reportés (pas des bugs à corriger maintenant)

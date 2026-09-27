@@ -46,6 +46,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 14 | Données de santé : lesquelles le logiciel doit-il vraiment garder ? | Registre AT/MP, dossiers AT/MP, visites médicales | ✅ répondue le 2026-09-23 : à voir avec le délégué à la protection des données, pas encore sollicité |
 | 15 | Pénibilité : le tableau des seuils est-il le bon, et pour quels agents ? | Module 5 Pénibilité (à construire) | ✅ répondue le 2026-09-24 : selon le statut, par poste, une fois par an |
 | 16 | Dialogue social : que doivent trouver les représentants du personnel ? | Module 13 Dialogue social (à construire) | ✅ répondue le 2026-09-24 : les deux, questions/réponses avec la direction en priorité, compte anonymisé |
+| 17 | Suivi médical : qui doit pouvoir le consulter ? | Santé & Visites (en service), droits de lecture du serveur | 🟠 posée le 2026-09-27, en attente |
 
 ---
 
@@ -468,6 +469,22 @@ Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, 
 > **Réponse du préventeur (Cahier, 2026-09-24) : option C, « les deux ».** « Tous les contenus sont gérés à travers la gestion de droits, avec anonymisation des contenus qui doivent l'être ; l'espace de communication avec la direction et la possibilité d'un échange question-réponse est important. Suivi et visite de site avec un suivi des actions. » Qui reçoit un compte, que ne doit-il jamais voir : « Je ne sais pas qui va recevoir le compte, mais le compte doit anonymiser toutes les données sensibles. »
 >
 > **Suite donnée** (module 13, `ROADMAP-MODULES-FUTURS.md`) : accès par permission de module, comme les huit modules existants (pas de rôle codé en dur) ; en priorité l'**échange questions / réponses avec la direction**, puis la consultation anonymisée (indicateurs, document unique et registre santé et sécurité en lecture) et l'espace de travail de la formation spécialisée (ordres du jour, comptes rendus, avis), avec les **visites de site** et le suivi de leurs actions dans le Plan d'actions. L'anonymisation vaut pour **le compte**, quel que soit son titulaire : noms des victimes et des déclarants, données de santé (nature et siège des lésions, avis médicaux, certificats), jamais transmis à ce compte — en mode serveur, retirés par le serveur lui-même, pas seulement masqués à l'écran.
+
+---
+
+## 🟠 Question 17 — Suivi médical : qui doit pouvoir le consulter ?
+
+**Contexte.** Le 2026-09-27, le serveur a été aligné sur ce que chaque écran montre (`serveur/lecture.js`) : un agent ou un manager ne reçoit plus le nom des victimes d'accident (le Registre AT/MP lui arrive réduit aux colonnes que son écran affiche), ni les dossiers AT/MP, ni les analyses d'accident (sauf leurs actions, que le Plan d'actions montre à tous), ni le journal de saisie AT/MP, ni le journal d'audit. **Le suivi médical est resté tel quel** : la page Santé & Visites l'affiche à tous les rôles, et restreindre qui le voit est une décision de métier, pas une correction technique.
+
+**Ce que l'application fait aujourd'hui (mesuré).** Tout compte ouvre Santé & Visites et y lit, pour chaque agent : nom, prénom, service, type de visite, date de la dernière et de la prochaine, surveillance renforcée et son motif, commentaire libre, et les rendez-vous (date, heure, lieu, médecin, notes). Agent : tous les agents ; manager : ses services ; RH et administrateur : tout, avec modification ; compte anonymisé : rien. Le motif d'une surveillance renforcée peut révéler une exposition ou un état de santé.
+
+**La question.** Qui doit pouvoir consulter le suivi médical, et faut-il réserver certaines informations (motif de surveillance renforcée, commentaire, rendez-vous) même à ceux qui le voient ? Un manager a-t-il besoin des dates de visite de ses agents pour organiser le travail ?
+
+**Options.** (A) comme aujourd'hui ; (B) l'encadrement seulement — manager pour ses services, RH pour tout, rien pour un agent ; (C) l'encadrement, et chaque agent sa propre fiche (il faut alors relier chaque compte à sa fiche d'agent, ce qui n'existe pas encore) ; (D) les RH seulement. Côté technique, (A), (B) et (D) se règlent dans `serveur/lecture.js` et la garde de la page ; (C) demande en plus le lien compte → agent.
+
+### Décision
+
+> *(posée sur le Cahier du préventeur le 2026-09-27 — en attente de réponse)*
 
 ---
 

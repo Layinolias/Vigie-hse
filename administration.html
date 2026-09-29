@@ -3,6 +3,7 @@
 <script src="assets/stockage.js"></script>
 <script src="assets/risques-ref.js"></script>
 <script src="assets/dates-locales.js"></script>
+<script src="assets/libelles-champs.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
 <link rel="stylesheet" href="assets/polices/polices.css">
@@ -835,13 +836,17 @@
     })(rec);
     return fiche ? "Fiche" : (mention ? "Mention" : null);
   }
-  function persAplatir(rec){
+  // champs en clair (assets/libelles-champs.js) : c'est ce que lira la personne à qui l'export est remis
+  function persAplatir(cle, rec){
     const o = {};
-    if (!rec || typeof rec !== "object"){ o.valeur = String(rec); return o; }
+    if (!rec || typeof rec !== "object"){ o.Valeur = String(rec); return o; }
     Object.keys(rec).forEach(c => {
       if (PERS_SECRETS.test(c)) return;
       const v = rec[c];
-      o[c] = v == null ? "" : (typeof v === "object" ? JSON.stringify(v, (k, x) => PERS_SECRETS.test(k) ? undefined : x) : String(v));
+      let lib = VigieLibelles.libelle(cle, c);
+      if (Object.prototype.hasOwnProperty.call(o, lib)) lib += " (" + c + ")";
+      const imbrique = v && typeof v === "object" && !(Array.isArray(v) && v.every(x => x == null || typeof x !== "object"));
+      o[lib] = imbrique ? JSON.stringify(v, (k, x) => PERS_SECRETS.test(k) ? undefined : x) : VigieLibelles.valeur(v);
     });
     return o;
   }
@@ -852,7 +857,7 @@
       let v; try { v = JSON.parse(VigieStore.getItem(cle) || "null"); } catch(e){ return; }
       if (v == null) return;
       const lignes = [];
-      (Array.isArray(v) ? v : [v]).forEach(rec => { const m = persCorrespondance(rec, nom, prenom); if (m) lignes.push({ correspondance: m, champs: persAplatir(rec) }); });
+      (Array.isArray(v) ? v : [v]).forEach(rec => { const m = persCorrespondance(rec, nom, prenom); if (m) lignes.push({ correspondance: m, champs: persAplatir(cle, rec) }); });
       if (lignes.length) groupes.push({ cle, module: VigieStore.CLES[cle].module, sensible: !!VigieStore.CLES[cle].sensible, nature: VigieStore.CLES[cle].nature, lignes });
     });
     return { nom: String(nomSaisi).trim(), prenom: String(prenomSaisi).trim(), groupes, quand: new Date() };

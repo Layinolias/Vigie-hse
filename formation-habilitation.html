@@ -626,7 +626,7 @@
   fType.innerHTML = `<option value="all">Tous les types</option>` + HAB_TYPES.map(t => `<option value="${t[0]}">${t[0]}</option>`).join("");
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -810,7 +810,7 @@
       $("fPrenom").value = a.prenom;
       $("fCollectiviteForm").value = VigieOrga.de(a);
       fillFormServiceOptions(VigieOrga.de(a));
-      $("fServiceForm").value = a.service || "";
+      VigieOrga.choisirService($("fServiceForm"), a.service);
     });
 
     $("fTypeForm").addEventListener("change", (e) => {
@@ -827,7 +827,7 @@
         $("fPrenom").value = rec.prenom;
         $("fCollectiviteForm").value = rec.collectivite;
         fillFormServiceOptions(rec.collectivite);
-        $("fServiceForm").value = rec.service;
+        VigieOrga.choisirService($("fServiceForm"), rec.service);
         $("fTypeForm").value = rec.typeHabilitation;
         $("fOrganisme").value = rec.organismeFormateur || "";
         $("fDateObtention").value = rec.dateObtention || "";

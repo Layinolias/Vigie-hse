@@ -797,7 +797,7 @@
         $("fSite").value = rec.site;
         $("fCollectiviteForm").value = rec.collectivite;
         fillFormServiceOptions(rec.collectivite);
-        $("fServiceForm").value = rec.service;
+        VigieOrga.choisirService($("fServiceForm"), rec.service);
         $("fOrganisme").value = rec.organisme || "";
         $("fPeriodicite").value = rec.periodiciteMois;
         $("fDateDerniere").value = rec.dateDerniere || "";

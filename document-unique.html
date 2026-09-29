@@ -680,9 +680,10 @@
   const REF = loadReferentials();
   const RISK_TAXONOMY = REF.risqueFamillesDUERP;
   // services de chaque entrée de l'organisation (assets/organisation.js) ; « all » : tous, triés
-  const SERVICES = VigieOrga.tousServices();
+  // filtres : les services archivés restent (leurs évaluations existent toujours)
+  const SERVICES = VigieOrga.tousServices(true);
   function servicesForCollectivite(col){
-    return col === "all" ? SERVICES : VigieOrga.services(col);
+    return col === "all" ? SERVICES : VigieOrga.services(col, true);
   }
 
   const SEED_DUERP = [];

@@ -645,7 +645,7 @@
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fPicto = $("fPicto");
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -827,7 +827,7 @@
         $("fFournisseur").value = rec.fournisseur || "";
         $("fCollectiviteForm").value = rec.collectivite;
         fillFormServiceOptions(rec.collectivite);
-        $("fServiceForm").value = rec.service;
+        VigieOrga.choisirService($("fServiceForm"), rec.service);
         $("fQuantite").value = rec.quantiteStockee != null ? rec.quantiteStockee : "";
         $("fUnite").value = rec.unite || "";
         $("fDateMajFDS").value = rec.dateMajFDS || "";

@@ -46,7 +46,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 14 | Données de santé : lesquelles le logiciel doit-il vraiment garder ? | Registre AT/MP, dossiers AT/MP, visites médicales | ✅ répondue le 2026-09-23 : à voir avec le délégué à la protection des données, pas encore sollicité |
 | 15 | Pénibilité : le tableau des seuils est-il le bon, et pour quels agents ? | Module 5 Pénibilité (à construire) | ✅ répondue le 2026-09-24 : selon le statut, par poste, une fois par an |
 | 16 | Dialogue social : que doivent trouver les représentants du personnel ? | Module 13 Dialogue social (à construire) | ✅ répondue le 2026-09-24 : les deux, questions/réponses avec la direction en priorité, compte anonymisé |
-| 17 | Suivi médical : qui doit pouvoir le consulter ? | Santé & Visites (en service), droits de lecture du serveur | 🟠 posée le 2026-09-27, en attente |
+| 17 | Suivi médical : qui doit pouvoir le consulter ? | Santé & Visites (en service), droits de lecture du serveur | ✅ répondue le 2026-09-29 — l'encadrement seulement, mis en œuvre |
 
 ---
 
@@ -472,7 +472,7 @@ Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, 
 
 ---
 
-## 🟠 Question 17 — Suivi médical : qui doit pouvoir le consulter ?
+## ✅ Question 17 — Suivi médical : qui doit pouvoir le consulter ?
 
 **Contexte.** Le 2026-09-27, le serveur a été aligné sur ce que chaque écran montre (`serveur/lecture.js`) : un agent ou un manager ne reçoit plus le nom des victimes d'accident (le Registre AT/MP lui arrive réduit aux colonnes que son écran affiche), ni les dossiers AT/MP, ni les analyses d'accident (sauf leurs actions, que le Plan d'actions montre à tous), ni le journal de saisie AT/MP, ni le journal d'audit. **Le suivi médical est resté tel quel** : la page Santé & Visites l'affiche à tous les rôles, et restreindre qui le voit est une décision de métier, pas une correction technique.
 
@@ -484,7 +484,11 @@ Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, 
 
 ### Décision
 
-> *(posée sur le Cahier du préventeur le 2026-09-27 — en attente de réponse)*
+> **Réponse du préventeur (Cahier, 2026-09-29) : option B, l'encadrement seulement** — le manager voit ses services, les RH voient tout, un agent ne voit rien. Sur les informations à réserver (motif de surveillance renforcée, commentaire, rendez-vous) : « Oui au RH et au manager » — ceux qui voient le suivi le voient en entier. Sur le besoin du manager de connaître les dates de visite de ses agents : « Oui ».
+>
+> **Mis en œuvre le 2026-09-29.** Le serveur ne transmet plus le suivi médical ni les rendez-vous qu'aux comptes manager (limités à leurs services par le périmètre), RH et administrateur (`serveur/lecture.js`) ; la page Santé & Visites renvoie les autres au tableau de bord, et son lien disparaît du menu pour eux sur les 23 pages qui l'affichent. Rien ne change pour l'encadrement : ses 25 pages restent identiques au caractère près (photo avant/après).
+>
+> **Conséquence à connaître** : le compte de démonstration `PREV1` (profil préventeur : rôle agent doté de permissions module par module) n'a plus accès au suivi médical, puisque son rôle de base est « agent ». Si un préventeur doit le consulter, deux voies : lui donner un compte RH ou manager, ou créer une permission « Santé & Visites » donnée compte par compte depuis Administration (comme « Dossiers AT/MP ») — à décider avec lui.
 
 ---
 

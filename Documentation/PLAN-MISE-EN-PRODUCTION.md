@@ -151,7 +151,7 @@ Sous Windows, la première écoute sur le réseau fait demander par le pare-feu 
 | Analyses d'accident | RH, administrateur, « Analyse d'accident » | Les seules actions (le Plan d'actions les affiche à tous) |
 | Journal de saisie AT/MP | Ceux qui reçoivent le registre complet | Rien |
 | Journal d'audit, comptes | Administrateur (Administration est la seule page qui les lit) | Rien |
-| Suivi médical, rendez-vous | Tous — la page Santé & Visites les affiche à tous les rôles | Question 17 posée au préventeur |
+| Suivi médical, rendez-vous | Manager (ses services), RH, administrateur — réponse du préventeur à la question 17 (2026-09-29) | Rien (la page Santé & Visites les renvoie au tableau de bord) |
 
 Un compte qui ne reçoit pas une valeur complète peut encore y **ajouter** — déclarer un AT/MP, laisser sa ligne au journal : ses seuls enregistrements nouveaux sont greffés sur le registre complet, et sa vue réduite ne remplace jamais le registre (renvoyer sa vue, ou « tout effacer », est sans effet). Une clé retirée lui arrive vide mais avec sa révision, pour qu'il puisse y ajouter sans conflit. Les règles se composent : droits de lecture, puis anonymisation (qui retire en plus le journal de saisie et le journal d'audit), puis périmètre (qui lit aussi le service d'une ligne de journal).
 

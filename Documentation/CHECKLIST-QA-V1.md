@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 150 points au 2026-09-25 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 151 points au 2026-09-29 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -91,13 +91,14 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Dans le Registre AT/MP, une ligne "réel : X" apparaît sous le TF/TG estimé une fois des heures saisies pour la période/le service affiché — sans heures saisies, cette ligne reste vide et le TF/TG estimé est inchangé (pas de régression visuelle).
 - [ ] Se déconnecter, se reconnecter en `AG2` (sans permission `gestion-rh`) : le lien "Gestion RH" est invisible, et taper l'URL `gestion-rh.html` directement redirige vers `dashboard.html`.
 
-### Santé & Visites — agenda, rendez-vous et convocations (`RH1`/`RH2` ou `admin` ; `manager`/`AG1` en lecture seule)
+### Santé & Visites — agenda, rendez-vous et convocations (`RH1`/`RH2` ou `admin` ; `manager` en lecture seule ; `AG1` sans accès)
 - [ ] `RH1` ouvre Santé & Visites : trois onglets (Suivi, Agenda & RDV, Modèles de convocation) ; l'onglet Suivi se comporte exactement comme avant. Depuis une ligne du suivi, « Planifier » ouvre l'agenda avec l'agent présélectionné.
 - [ ] Créer un rendez-vous (agent, date, heure, lieu, médecin) : il apparaît dans la **bonne case** du calendrier (mois affiché, jour, heure et nom sur la pastille) ; naviguer au mois précédent/suivant et « Aujourd'hui » ; cliquer la pastille pour le modifier, le supprimer.
 - [ ] Sur un RDV, « Convocation… » : le texte est rempli avec le nom, la date en clair, l'heure, le lieu ; un champ non renseigné (ex. médecin) affiche « (à préciser) » ; modifier le texte à la main, puis « Copier » (coller dans un mail pour vérifier) et « Imprimer / PDF » (l'aperçu ne contient que la lettre, pas le menu) ; un RDV « À convoquer » passe alors à « Convoqué ».
 - [ ] Onglet « Modèles de convocation » : modifier le modèle par défaut, en créer un second, le choisir dans une convocation, le supprimer (le modèle par défaut n'est pas supprimable, mais peut être rétabli à son texte d'origine).
 - [ ] Passer un RDV à « Réalisé » : une confirmation propose de mettre à jour la date de dernière visite de l'agent — « Annuler » ne change rien dans le suivi, « OK » met à jour la date et l'échéance du suivi ; supprimer une fiche du suivi supprime aussi ses rendez-vous (le message le précise).
-- [ ] Se connecter en `manager` puis `AG1` : l'agenda montre uniquement les RDV des services du compte, sans aucun bouton de création/modification, sans onglet « Modèles de convocation » ; le compteur « RDV à venir (30 j) » du bandeau du haut est cohérent avec l'agenda.
+- [ ] Se connecter en `manager` : l'agenda montre uniquement les RDV de ses services, sans aucun bouton de création/modification, sans onglet « Modèles de convocation » ; le compteur « RDV à venir (30 j) » du bandeau du haut est cohérent avec l'agenda.
+- [ ] **Suivi médical réservé à l'encadrement** (question 17) : connecté en `AG1`, puis en `PREV1`, le lien « Santé & Visites » n'apparaît pas dans le menu, et taper l'adresse `sante-visites.html` renvoie au tableau de bord. En `manager`, `RH1` et `admin`, le lien est là et la page s'ouvre.
 
 ### Entreprises extérieures (`RH1`/`RH2` ou `admin` — accès write d'office ; permission granulaire `entreprises-ext` pour les autres)
 - [ ] `RH1` voit "Entreprises extérieures" dans la sidebar (section "Administratif") ; créer une intervention complète (entreprise, nature, site, dates, heures estimées, inspection commune préalable avec date/participants/risques, plan de prévention en texte libre), la retrouver dans le registre, la modifier.

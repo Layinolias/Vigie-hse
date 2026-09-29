@@ -1,3 +1,4 @@
+<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Évaluation DUERP</title>
@@ -7,6 +8,8 @@
 <script src="assets/dates-locales.js"></script>
 <link rel="stylesheet" href="assets/polices/polices.css">
 <style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires avant l'ajout de <!doctype html> : gardée pour une mise en page identique. */
+  form{ margin-bottom:1em; }
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
     --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
@@ -212,6 +215,8 @@
   .feed-bottom{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; }
   .feed-clear{ margin-top:12px; font-size:11px; color:var(--text-faint); background:none; border:none; text-decoration:underline; cursor:pointer; padding:0; }
   .feed-clear:hover{ color:var(--danger); }
+  /* Rendu du mode « quirks » conservé depuis <!doctype html> : le bouton, seul sur sa ligne, en donne la hauteur. */
+  .feed-clear{ vertical-align:top; }
   .feed-open{ display:block; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); font-size:12px; font-weight:600; color:var(--accent); }
   .footnote{ margin-top:22px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.6; }
 </style>

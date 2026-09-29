@@ -1,3 +1,4 @@
+<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dossiers AT/MP &amp; CITIS</title>
@@ -10,6 +11,10 @@
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires avant l'ajout de <!doctype html> : gardée pour une mise en page identique. */
+  form{ margin-bottom:1em; }
+  /* Idem : une zone de texte seule sur sa ligne n'a pas de jour en dessous. */
+  textarea{ vertical-align:top; }
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
     --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;

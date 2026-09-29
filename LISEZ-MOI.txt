@@ -99,6 +99,9 @@ Pour arrêter : fermer la fenêtre noire. Pour relancer : double-cliquer à nouv
     que vous exportez vous-même (Excel, PDF) vont dans « Téléchargements » : les supprimer quand ils
     ne servent plus.
   - Après « Déconnexion », ou 8 heures sans activité, il faut se reconnecter.
+  - Si un agent demande à connaître les données que VIGIE HSE contient sur lui : Administration,
+    onglet « Données d'une personne ». Saisir son nom et son prénom, relire les « mentions »
+    (un homonyme est possible), puis « Exporter en Excel » : le fichier est la copie à lui remettre.
 
 
 11. EN CAS DE PROBLÈME

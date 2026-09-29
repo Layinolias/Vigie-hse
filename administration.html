@@ -359,6 +359,7 @@
         <button class="admin-tab" data-tab="news"><svg class="icon"><use href="#i-megaphone"/></svg> Flash Info</button>
         <button class="admin-tab" data-tab="veille"><svg class="icon"><use href="#i-search"/></svg> Veille réglementaire</button>
         <button class="admin-tab" data-tab="audit"><svg class="icon"><use href="#i-history"/></svg> Journal des modifications</button>
+        <button class="admin-tab" data-tab="personne"><svg class="icon"><use href="#i-key"/></svg> Données d'une personne</button>
       </div>
 
       <!-- ===================== A. UTILISATEURS ===================== -->
@@ -601,6 +602,7 @@
                 <option value="Création">Création</option>
                 <option value="Modification">Modification</option>
                 <option value="Suppression">Suppression</option>
+                <option value="Extraction">Extraction (données d'une personne)</option>
               </select>
             </div>
           </div>
@@ -610,6 +612,23 @@
               <tbody id="auditBody"></tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      <!-- ===================== E. DONNÉES D'UNE PERSONNE (droit d'accès) ===================== -->
+      <section class="tab-panel" id="tab-personne">
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Données d'une personne</h3>
+            <span class="panel-note" id="persNote"></span>
+          </div>
+          <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px; max-width:78ch;">Retrouve tout ce que VIGIE HSE contient sur une personne — agent, utilisateur, contact d'une entreprise extérieure — dans tous les registres et journaux, pour répondre à une demande d'accès à ses données (RGPD, article 15) ou préparer une rectification. Chaque résultat indique s'il s'agit de sa <b>fiche</b> (ses nom et prénom y sont inscrits) ou d'une <b>mention</b> de son nom dans un texte : ces dernières sont à relire, un homonyme ou un nom commun pouvant y correspondre. Les mots de passe ne sont jamais affichés ni exportés. L'export est inscrit au journal des modifications.</p>
+          <form id="persForm" class="field-grid" style="max-width:640px; grid-template-columns:1fr 1fr auto; align-items:end;" autocomplete="off">
+            <div class="f"><label for="persNom">Nom</label><input type="text" id="persNom" required></div>
+            <div class="f"><label for="persPrenom">Prénom <span style="color:var(--text-faint); font-weight:400;">(facultatif)</span></label><input type="text" id="persPrenom"></div>
+            <div class="f"><button type="submit" class="btn btn-primary"><svg class="icon"><use href="#i-search"/></svg> Rechercher</button></div>
+          </form>
+          <div id="persResultats" style="margin-top:16px;"></div>
         </div>
       </section>
 
@@ -756,6 +775,11 @@
       $("tab-" + btn.dataset.tab).classList.add("show");
     });
   });
+  $("persForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!persNorm($("persNom").value).trim()){ $("persNom").focus(); return; }
+    persAfficher(persRechercher($("persNom").value, $("persPrenom").value));
+  });
 
   function flashBanner(el, msg, cls, sticky){
     clearTimeout(el._t);
@@ -782,6 +806,97 @@
   function loadAudit(){
     try { const v = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]"); return Array.isArray(v) ? v : []; }
     catch(e){ return []; }
+  }
+
+  // ---------- Données d'une personne (droit d'accès, RGPD art. 15 — 2026-09-29) ----------
+  // Parcourt tous les registres et journaux du registre VigieStore.CLES (plus les comptes) : un enregistrement
+  // est la « fiche » de la personne si un objet y porte ses nom (et prénom, s'il est donné) ; une « mention »
+  // si son nom apparaît dans un texte (« Prénom Nom » ou « Nom Prénom », en mots entiers, sans tenir compte
+  // des accents ni de la casse). Rien n'est modifié ; les champs de mot de passe sont écartés.
+  const PERS_SECRETS = /^(password|motdepasse|mot_de_passe|mdp|empreinte)$/i;
+  const persNorm = (s) => " " + String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() + " ";
+  function persRegistres(){
+    return Object.keys(VigieStore.CLES).filter(k => ["donnees", "journal"].includes(VigieStore.CLES[k].nature) || k === "vigie_hse_users");
+  }
+  function persCorrespondance(rec, nom, prenom){
+    let fiche = false, mention = false;
+    const cible = prenom ? [" " + prenom + " " + nom + " ", " " + nom + " " + prenom + " "] : [" " + nom + " "];
+    (function parcourir(v){
+      if (fiche) return;
+      if (Array.isArray(v)){ v.forEach(parcourir); return; }
+      if (v && typeof v === "object"){
+        const cles = Object.keys(v), cle = n => cles.find(c => persNorm(c) === " " + n + " ");
+        const cNom = cle("nom"), cPre = cle("prenom");
+        if (cNom && persNorm(v[cNom]).trim() === nom && (!prenom || (cPre && persNorm(v[cPre]).trim() === prenom))) { fiche = true; return; }
+        cles.forEach(c => { if (!PERS_SECRETS.test(c)) parcourir(v[c]); });
+        return;
+      }
+      if (typeof v === "string" && !mention){ const t = persNorm(v); if (cible.some(x => t.includes(x))) mention = true; }
+    })(rec);
+    return fiche ? "Fiche" : (mention ? "Mention" : null);
+  }
+  function persAplatir(rec){
+    const o = {};
+    if (!rec || typeof rec !== "object"){ o.valeur = String(rec); return o; }
+    Object.keys(rec).forEach(c => {
+      if (PERS_SECRETS.test(c)) return;
+      const v = rec[c];
+      o[c] = v == null ? "" : (typeof v === "object" ? JSON.stringify(v, (k, x) => PERS_SECRETS.test(k) ? undefined : x) : String(v));
+    });
+    return o;
+  }
+  function persRechercher(nomSaisi, prenomSaisi){
+    const nom = persNorm(nomSaisi).trim(), prenom = persNorm(prenomSaisi).trim();
+    const groupes = [];
+    persRegistres().forEach(cle => {
+      let v; try { v = JSON.parse(VigieStore.getItem(cle) || "null"); } catch(e){ return; }
+      if (v == null) return;
+      const lignes = [];
+      (Array.isArray(v) ? v : [v]).forEach(rec => { const m = persCorrespondance(rec, nom, prenom); if (m) lignes.push({ correspondance: m, champs: persAplatir(rec) }); });
+      if (lignes.length) groupes.push({ cle, module: VigieStore.CLES[cle].module, sensible: !!VigieStore.CLES[cle].sensible, nature: VigieStore.CLES[cle].nature, lignes });
+    });
+    return { nom: String(nomSaisi).trim(), prenom: String(prenomSaisi).trim(), groupes, quand: new Date() };
+  }
+  function persAfficher(r){
+    const total = r.groupes.reduce((n, g) => n + g.lignes.length, 0);
+    const qui = (r.prenom ? r.prenom + " " : "") + r.nom;
+    $("persNote").textContent = total ? total + " enregistrement(s) dans " + r.groupes.length + " registre(s)" : "";
+    if (!total){ $("persResultats").innerHTML = `<p style="font-size:13px; color:var(--text-muted);">Aucun enregistrement ne mentionne « ${esc(qui)} ».</p>`; return; }
+    const fiches = r.groupes.reduce((n, g) => n + g.lignes.filter(l => l.correspondance === "Fiche").length, 0);
+    $("persResultats").innerHTML = `
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+        <span style="font-size:13px;"><b>${esc(qui)}</b> : ${fiches} fiche(s), ${total - fiches} mention(s) à relire.</span>
+        <button type="button" class="btn btn-ghost" id="persExport" style="margin-left:auto;"><svg class="icon"><use href="#i-package"/></svg> Exporter en Excel (.xlsx)</button>
+      </div>` + r.groupes.map(g => `
+      <div style="margin-top:14px;">
+        <div style="font-weight:600; font-size:13px; margin-bottom:6px;">${esc(g.module)} <span class="mono" style="color:var(--text-faint); font-weight:400;">${esc(g.cle)} · ${g.lignes.length}</span>${g.sensible ? ` <span class="chip" style="color:var(--danger); background:rgba(var(--danger-rgb),.1);">données de santé</span>` : ""}</div>
+        <div class="table-wrap"><table class="admin"><thead><tr><th style="width:110px;">Correspondance</th><th>Contenu</th></tr></thead><tbody>
+          ${g.lignes.map(l => `<tr><td>${esc(l.correspondance)}</td><td style="font-size:12px; line-height:1.55; white-space:normal;">${Object.keys(l.champs).filter(c => l.champs[c] !== "").map(c => `<b>${esc(c)}</b> : ${esc(l.champs[c].length > 400 ? l.champs[c].slice(0, 400) + "…" : l.champs[c])}`).join(" · ")}</td></tr>`).join("")}
+        </tbody></table></div>
+      </div>`).join("");
+    $("persExport").addEventListener("click", () => persExporter(r));
+  }
+  function persExporter(r){
+    const qui = (r.prenom ? r.prenom + " " : "") + r.nom, total = r.groupes.reduce((n, g) => n + g.lignes.length, 0);
+    const wb = XLSX.utils.book_new(), pris = new Set();
+    const nomFeuille = (s) => { let b = String(s).replace(/[\\\/?*\[\]:]/g, " ").slice(0, 28).trim() || "Registre", n = b, i = 2; while (pris.has(n.toLowerCase())) n = b.slice(0, 25) + " " + (i++); pris.add(n.toLowerCase()); return n; };
+    const synthese = [
+      { "Rubrique": "Personne", "Valeur": qui },
+      { "Rubrique": "Extraction faite le", "Valeur": VigieDates.iso(r.quand) + " " + String(r.quand.getHours()).padStart(2, "0") + ":" + String(r.quand.getMinutes()).padStart(2, "0") },
+      { "Rubrique": "Par", "Valeur": (session && session.user) || "—" },
+      { "Rubrique": "Enregistrements", "Valeur": total + " dans " + r.groupes.length + " registre(s)" },
+      { "Rubrique": "À savoir", "Valeur": "« Fiche » : ses nom et prénom y sont inscrits. « Mention » : son nom apparaît dans un texte — à relire avant remise (homonyme possible). Les mots de passe ne figurent jamais dans cet export." },
+    ].concat(r.groupes.map(g => ({ "Rubrique": g.module + (g.sensible ? " (données de santé)" : ""), "Valeur": g.lignes.length + " enregistrement(s) — feuille « " + nomFeuille(g.module) + " »" })));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(synthese, { header: ["Rubrique", "Valeur"] }), "Synthèse");
+    pris.clear(); pris.add("synthèse");
+    r.groupes.forEach(g => {
+      const lignes = g.lignes.map(l => Object.assign({ "Correspondance": l.correspondance }, l.champs));
+      const entetes = ["Correspondance"]; lignes.forEach(l => Object.keys(l).forEach(c => { if (!entetes.includes(c)) entetes.push(c); }));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: entetes }), nomFeuille(g.module));
+    });
+    const fichier = "donnees-personne_" + persNorm(qui).trim().replace(/ /g, "-") + "_" + VigieDates.aujourdhui() + ".xlsx";
+    XLSX.writeFile(wb, fichier);
+    logAudit("Administration", "Extraction", "Extraction des données d'une personne (droit d'accès) : « " + qui + " » — " + total + " enregistrement(s), " + r.groupes.length + " registre(s)");
   }
 
   // ---------- Référentiels partagés ----------

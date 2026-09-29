@@ -10,7 +10,7 @@ _Rien en cours. Dernières livraisons (2026-09-29) : Q17 (suivi médical réserv
 « Santé & Visites »), outil de restauration (`Restaurer une sauvegarde.bat`), polices embarquées, onglet
 « Données d'une personne » (droit d'accès), météo facultative, journal des consultations des données de santé,
 revue de code de la journée corrigée (`a9d5b66`), puis FDS et mesures de prévention visibles de tous dans les
-Produits chimiques. Paquet `livraison/VIGIE-HSE-2026-09-29.zip` remis à l'utilisateur (test de mise à jour
+Produits chimiques, et « Fiches utiles » sur les pages de suivi. Paquet `livraison/VIGIE-HSE-2026-09-29.zip` remis à l'utilisateur (test de mise à jour
 depuis `08a2585` passé) ; dossier pour l'avocat : `livraison/VIGIE-HSE-dossier-RGPD-HDS.pdf`._
 
 **Décidé le 2026-09-29 : pas de chiffrement des données au repos pour l'instant** (l'utilisateur, après
@@ -54,7 +54,7 @@ BitLocker : `PLAN-MISE-EN-PRODUCTION.md` §6 et §8. Ne pas le relancer sans nou
 - **Q11 et Q12 repondues et traitees le 2026-09-23** : les 9 risques du Registre AT/MP ouvrent une fiche ;
   l'impression generique suffit (mises en page dediees gardees en reserve dans la roadmap). Aucune question
   n'est plus en attente sur le Cahier.
-- Autres liens contextuels : module de suivi → article pertinent (produit chimique → sa FDS et la fiche « Produits chimiques » : fait le 2026-09-29).
+- ~~Autres liens contextuels~~ : faits le 2026-09-29 — FDS des produits chimiques, et « Fiches utiles » sur les pages de suivi, choisies par le rédacteur (`assets/fiches-utiles.js`). Reste au préventeur à proposer ses articles sur les pages.
 
 ## Où sont les tests
 

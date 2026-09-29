@@ -5,6 +5,7 @@
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/risques-ref.js"></script>
+<script src="assets/fiches-utiles.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -233,6 +234,11 @@
   .art-sect h4{ font-family:"Barlow Condensed",sans-serif; font-size:15px; font-weight:600; letter-spacing:.02em; text-transform:uppercase; color:var(--text-muted); margin:0 0 4px; }
   .art-sect p{ margin:0; white-space:pre-wrap; }
   .art-vide{ color:var(--text-faint); font-style:italic; }
+  /* « Proposer sur les pages » : l'article apparaît en « Fiches utiles » sous le titre des pages cochées */
+  .pages-check{ display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:4px 14px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--bg-2); }
+  .form-grid .pages-check label{ display:flex; align-items:center; gap:7px; margin:0; font-size:12px; color:var(--text); font-weight:400; cursor:pointer; }
+  .pages-aide{ font-size:11.5px; color:var(--text-faint); margin:6px 0 0; }
+  .art-pages{ margin-top:14px; font-size:12px; color:var(--text-muted); }
   .article-body{ white-space:pre-wrap; line-height:1.7; font-size:14px; max-width:78ch; margin:14px 0 0; }
   .article-meta{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:12px; color:var(--text-muted); }
   .kw{ display:inline-block; padding:2px 9px; border-radius:var(--r-pill); background:var(--bg-2); border:1px solid var(--border); font-size:11px; color:var(--text-muted); }
@@ -423,11 +429,12 @@
               <div class="span2"><label for="aTitre">Titre</label><input type="text" id="aTitre" required style="width:100%"></div>
               <div><label for="aTheme">Thème</label><input type="text" id="aTheme" list="themesList" required placeholder="ex. Consignes de sécurité"><datalist id="themesList"></datalist></div>
               <div class="span2"><label for="aMotsCles">Mots-clés (séparés par des virgules)</label><input type="text" id="aMotsCles" style="width:100%" placeholder="ex. échelle, travaux en hauteur"></div>
-              <div><label for="aStatut">Statut</label><select id="aStatut"><option value="Publié">Publié (visible de tous)</option><option value="Brouillon">Brouillon (rédacteurs seulement)</option></select></div>
+              <div style="min-width:0;"><label for="aStatut">Statut</label><select id="aStatut" style="max-width:100%;"><option value="Publié">Publié (visible de tous)</option><option value="Brouillon">Brouillon (rédacteurs seulement)</option></select></div>
               <div class="span3"><label for="aContenu">Définition</label><textarea id="aContenu" required style="min-height:170px" placeholder="Texte de l'article. Les retours à la ligne sont conservés à l'affichage."></textarea></div>
               <div class="span3"><label for="aExemples">Exemples de situation</label><textarea id="aExemples" placeholder="Situations concrètes rencontrées sur le terrain (facultatif)."></textarea></div>
               <div class="span3"><label for="aDanger">Le danger</label><textarea id="aDanger" placeholder="Ce à quoi l'agent s'expose (facultatif)."></textarea></div>
               <div class="span3"><label for="aPrevention">Mesures de prévention</label><textarea id="aPrevention" placeholder="Mesures habituelles et consignes à appliquer (facultatif)."></textarea></div>
+              <div class="span3"><label>Proposer cet article sur les pages</label><div class="pages-check" id="aPages"></div><p class="pages-aide">Un article publié apparaît en « Fiches utiles » sous le titre des pages cochées. Un brouillon n'apparaît nulle part.</p></div>
             </div>
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">Enregistrer</button>
@@ -668,6 +675,9 @@
   const slug = VigieRisques.slug;   // même calcul que les pages qui renvoient ici (assets/risques-ref.js)
   // Seule une adresse http(s) est cliquable : refuse javascript:, data:, etc. (à l'enregistrement ET à l'affichage).
   const safeUrl = (u) => { const t = String(u == null ? "" : u).trim(); return /^https?:\/\/[^\s]+$/i.test(t) ? t : ""; };
+  // Pages où un article peut être proposé en « Fiches utiles » : source unique dans assets/fiches-utiles.js
+  const PAGES_FICHES = (window.VigieFichesUtiles && VigieFichesUtiles.PAGES) || [];
+  const NOM_PAGE = new Map(PAGES_FICHES);
 
   // ----- Articles (always-merge : une fiche par famille de risque, le stockage prime) -----
   function buildSeeds(){
@@ -796,7 +806,10 @@
       if (!txt && !aRediger) return "";
       return `<section class="art-sect"><h4>${esc(s.titre)}</h4>` +
         (txt ? `<p>${esc(txt)}</p>` : `<p class="art-vide">À compléter par le préventeur.</p>`) + `</section>`;
-    }).join("");
+    }).join("") + (() => {
+      const noms = (Array.isArray(a.pages) ? a.pages : []).map(p => NOM_PAGE.get(p)).filter(Boolean);
+      return noms.length ? `<p class="art-pages">Proposé en « Fiches utiles » sur : ${noms.map(n => `<span class="kw">${esc(n)}</span>`).join(" ")}${a.statut === "Brouillon" ? " — pas tant que l'article est en brouillon." : ""}</p>` : "";
+    })();
     $("articleEdit").style.display = canDocWrite ? "" : "none";
     $("articleDelete").style.display = (canDocWrite && !isSeed(a)) ? "" : "none";
     panel.style.display = "";
@@ -807,6 +820,9 @@
 
   // ----- Rédaction d'un article (rédacteurs) -----
   const formPanel = $("articleForm"), aForm = $("articleFormEl");
+  // cases « Proposer sur les pages » (PAGES_FICHES : voir plus haut)
+  $("aPages").innerHTML = PAGES_FICHES.map(p => `<label><input type="checkbox" value="${esc(p[0])}"> ${esc(p[1])}</label>`).join("");
+  const casesPages = () => [...$("aPages").querySelectorAll("input[type=checkbox]")];
   function openArticleForm(a){
     aForm.reset();
     $("aId").value = a ? a.id : "";
@@ -815,6 +831,8 @@
       $("aTitre").value = a.titre; $("aTheme").value = a.theme || ""; $("aMotsCles").value = a.motsCles || "";
       $("aStatut").value = a.statut || "Publié"; $("aContenu").value = a.contenu || "";
       $("aExemples").value = a.exemples || ""; $("aDanger").value = a.danger || ""; $("aPrevention").value = a.prevention || "";
+      const choisies = Array.isArray(a.pages) ? a.pages : [];
+      casesPages().forEach(c => { c.checked = choisies.includes(c.value); });
     } else {
       $("aStatut").value = "Publié";
     }
@@ -834,6 +852,8 @@
     const rec = Object.assign({}, prev || { id: genId("wiki"), source: "", auteur: (session && session.user) || "—", dateCreation: todayLocal() }, {
       titre, theme, contenu, motsCles: $("aMotsCles").value.trim(), statut: $("aStatut").value,
       exemples: $("aExemples").value, danger: $("aDanger").value, prevention: $("aPrevention").value,
+      // pages inconnues de cette version (article venu d'une version plus récente) : gardées telles quelles
+      pages: casesPages().filter(c => c.checked).map(c => c.value).concat(((prev && Array.isArray(prev.pages)) ? prev.pages : []).filter(p => !NOM_PAGE.has(p))),
       dateMaj: todayLocal(), modifiePar: (session && session.user) || "—",
     });
     if (prev) ARTICLES[ARTICLES.findIndex(a => a.id === id)] = rec; else ARTICLES.push(rec);
@@ -1028,10 +1048,10 @@
     $("btnNewArticle").addEventListener("click", () => openArticleForm(null));
     $("btnNewDoc").addEventListener("click", () => openDocForm(null));
     $("btnExport").addEventListener("click", () => {
-      const articles = ARTICLES.map(a => ({ "ID": a.id, "Titre": a.titre, "Thème": a.theme, "Mots-clés": a.motsCles || "", "Statut": a.statut, "Définition": a.contenu || "", "Exemples de situation": a.exemples || "", "Le danger": a.danger || "", "Mesures de prévention": a.prevention || "", "Créé le": a.dateCreation || "", "Mis à jour le": a.dateMaj || "", "Auteur": a.auteur || "" }));
+      const articles = ARTICLES.map(a => ({ "ID": a.id, "Titre": a.titre, "Thème": a.theme, "Mots-clés": a.motsCles || "", "Statut": a.statut, "Définition": a.contenu || "", "Exemples de situation": a.exemples || "", "Le danger": a.danger || "", "Mesures de prévention": a.prevention || "", "Proposé sur les pages": (Array.isArray(a.pages) ? a.pages : []).map(p => NOM_PAGE.get(p) || p).join(", "), "Créé le": a.dateCreation || "", "Mis à jour le": a.dateMaj || "", "Auteur": a.auteur || "" }));
       const documents = DOCS.map(d => ({ "ID": d.id, "Titre": d.titre, "Type": d.categorie, "Référence": d.reference || "", "Version": d.version || "", "Date du document": d.dateDocument || "", "Statut": d.statut, "Visible des agents": d.masque ? "non" : "oui", "Lien": d.lien || "", "Description": d.description || "" }));
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(articles, { header: ["ID", "Titre", "Thème", "Mots-clés", "Statut", "Définition", "Exemples de situation", "Le danger", "Mesures de prévention", "Créé le", "Mis à jour le", "Auteur"] }), "Articles");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(articles, { header: ["ID", "Titre", "Thème", "Mots-clés", "Statut", "Définition", "Exemples de situation", "Le danger", "Mesures de prévention", "Proposé sur les pages", "Créé le", "Mis à jour le", "Auteur"] }), "Articles");
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(documents, { header: ["ID", "Titre", "Type", "Référence", "Version", "Date du document", "Statut", "Visible des agents", "Lien", "Description"] }), "Documents");
       XLSX.writeFile(wb, `base-documentaire_${todayLocal()}.xlsx`);
     });

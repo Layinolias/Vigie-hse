@@ -12,8 +12,9 @@
 //     Plan d'actions affiche à tous (generateAnalyseActionSeeds).
 //   - Journal de saisie AT/MP (copie complète des déclarations) : comptes qui reçoivent le registre complet.
 //   - Journal d'audit, comptes utilisateurs : administrateur (Administration est la seule page qui les lit).
-//   - Suivi médical et rendez-vous : inchangés — la page Santé & Visites les affiche à tous les rôles. Savoir
-//     qui doit les voir est une question posée au préventeur (question 17), pas tranchée ici.
+//   - Suivi médical et rendez-vous : l'encadrement seulement — manager (ses services, par le périmètre), RH et
+//     administrateur ; un agent n'en reçoit rien, et la page Santé & Visites le renvoie au tableau de bord.
+//     Réponse du préventeur à la question 17 (2026-09-29, option « l'encadrement seulement »).
 //
 // Un compte qui ne reçoit pas une valeur complète peut encore y AJOUTER (déclarer un AT/MP, laisser une ligne au
 // journal) : ses seuls enregistrements nouveaux sont greffés sur le registre complet (Anonymisation.grefferAjouts),
@@ -29,6 +30,7 @@ const ANALYSE_VUE_ACTIONS = ['id', 'atmpId', 'collectivite', 'service', 'dateAna
 const estRh = p => !!p && (p.role === 'rh' || p.role === 'admin');
 const perm = (p, m) => !!(p && p.modulePermissions && (p.modulePermissions[m] === 'read' || p.modulePermissions[m] === 'write'));
 const registreComplet = p => estRh(p) || perm(p, 'atmp-admin') || perm(p, 'accident-analyse');
+const encadrement = p => estRh(p) || (!!p && p.role === 'manager');
 
 // null : valeur complète ; RETIRE : rien ; tableau : les seuls champs transmis de chaque enregistrement
 function regle(page, cle){
@@ -38,6 +40,8 @@ function regle(page, cle){
     case 'vigie_hse_atmp_dossiers':
     case 'vigie_hse_atmp_arretes':      return estRh(page) || perm(page, 'atmp-admin') ? null : RETIRE;
     case 'vigie_hse_analyses_accident': return estRh(page) || perm(page, 'accident-analyse') ? null : ANALYSE_VUE_ACTIONS;
+    case 'vigie_hse_visites':
+    case 'vigie_hse_rdv_medicaux':      return encadrement(page) ? null : RETIRE;
     case 'vigie_hse_audit_log':
     case 'vigie_hse_users':             return page && page.role === 'admin' && !page.anonymise ? null : RETIRE;
     default:                            return null;

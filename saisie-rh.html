@@ -281,7 +281,7 @@
       <div class="nav-section">
         <div class="nav-label">Suivi</div>
         <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
-        <a class="nav-item" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item" id="navSanteVisites" href="sante-visites.html" style="display:none;"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
         <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
         <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
         <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
@@ -463,6 +463,7 @@
   $("userName").textContent = session.user;
   $("userRoleLabel").textContent = sessRole === "admin" ? "Administrateur" : (isRhAdmin ? "Compte RH" : "Accès déclaration AT/MP");
   if (isRhAdmin){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; $("navEvaluerDuerp").style.display = ""; }
+  if (sessRole === "rh" || sessRole === "admin" || sessRole === "manager"){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement seulement (question 17)
   if (sessRole === "admin"){ $("navAdminLink").style.display = ""; }
   const canAtmpAdmin = isRhAdmin || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
   const canAccidentAnalyse = isRhAdmin || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");

@@ -332,7 +332,7 @@
       <div class="nav-section">
         <div class="nav-label">Suivi</div>
         <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
-        <a class="nav-item active" href="sante-visites.html"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
+        <a class="nav-item active" id="navSanteVisites" href="sante-visites.html" style="display:none;"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
         <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
         <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
         <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
@@ -621,6 +621,9 @@
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const role = (session && session.role) || "ag";
   const canEdit = role === "rh" || role === "admin";
+  // Question 17 (réponse du préventeur, 2026-09-29) : le suivi médical est réservé à l'encadrement — le manager pour ses
+  // services, les RH et l'administrateur pour tout ; un agent n'y a pas accès (le serveur ne lui transmet plus ces registres).
+  if (!canEdit && role !== "manager"){ location.href = "dashboard.html"; }
   const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
@@ -645,6 +648,7 @@
   const canAccueilPoste = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accueil-poste"]) || "none") !== "none");
   if (canAccueilPoste){ $("navAdministratif").style.display = ""; $("navAccueilPoste").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
+  if (role === "rh" || role === "admin" || role === "manager"){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement seulement (question 17)
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
   // Pénibilité (module 5) : RH, administrateurs, ou la permission « penibilite »
   { const r = (session && session.role) || "ag", p = (session && session.modulePermissions && session.modulePermissions["penibilite"]) || "none";

@@ -108,6 +108,11 @@
       var cible = garde === "all" && opts.tous ? "all" : O.actuel(garde);
       select.value = cible || (opts.tous ? "all" : O.premier());
     },
+    // un nom d'entité et tous les anciens noms qui y mènent : ce que portent ses enregistrements
+    nomsDe: function(nom){
+      var c = config();
+      return [nom].concat(Object.keys(c.anciensNoms).filter(function(k){ return k !== nom && O.actuel(k) === nom; }));
+    },
     // Administration : clés d'enregistrements touchées par un renommage ou un déplacement
     clesDonnees: function(){
       var C = (window.VigieStore && VigieStore.CLES) || {};
@@ -162,10 +167,11 @@
       if (!n) return { ok:false, erreur:"Donnez un nom." };
       if (n === ancien) return { ok:true, n:0 };
       if (c.entites.some(function(x){ return x !== e && norm(x.nom) === norm(n); })) return { ok:false, erreur:"« " + n + " » existe déjà." };
+      var portes = O.nomsDe(ancien);   // avant la modification : le nom et ses anciens noms
       e.nom = n;
       Object.keys(c.anciensNoms).forEach(function(k){ if (c.anciensNoms[k] === ancien) c.anciensNoms[k] = n; });
       delete c.anciensNoms[n]; c.anciensNoms[ancien] = n;
-      O.sauver(c); return { ok:true, n: O.reecrire([ancien], n) };
+      O.sauver(c); return { ok:true, n: O.reecrire(portes, n) };
     },
     // supprimer une entité : ses enregistrements et ses services passent d'abord à `vers`
     supprimer: function(nom, vers){
@@ -174,11 +180,12 @@
       if (!e) return { ok:false, erreur:"« " + nom + " » n'existe plus." };
       if (c.entites.length < 2) return { ok:false, erreur:"Il faut garder au moins une entrée." };
       if (!cible || cible === e) return { ok:false, erreur:"Choisissez où déplacer ses enregistrements." };
+      var portes = O.nomsDe(nom);
       e.services.forEach(function(s){ if (cible.services.indexOf(s) < 0) cible.services.push(s); });
       c.entites = c.entites.filter(function(x){ return x !== e; });
       Object.keys(c.anciensNoms).forEach(function(k){ if (c.anciensNoms[k] === nom) c.anciensNoms[k] = vers; });
       c.anciensNoms[nom] = vers;
-      O.sauver(c); return { ok:true, n: O.reecrire([nom], vers) };
+      O.sauver(c); return { ok:true, n: O.reecrire(portes, vers) };
     },
     definirServices: function(nom, liste){
       var c = config(), e = c.entites.filter(function(x){ return x.nom === nom; })[0];

@@ -15,6 +15,8 @@
 //   empreinte(idCompte) / poserEmpreinte(idCompte, empreinte) / retirerEmpreintes(idsGardes)
 //   ouvrirSession(empreinteJeton, idCompte, expire) / lireSession(empreinteJeton) / prolongerSession(…, expire)
 //   fermerSession(empreinteJeton) / purgerSessions(maintenant)
+// Consultations des données de santé (serveur/consultations.js) — jamais transmises aux pages :
+//   noterConsultation(compte, page, registres) / consultations(depuisIso, limite) / purgerConsultations(avantIso)
 // La révision d'une clé jamais écrite vaut 0 ; une clé supprimée reste en base, vide, et sa révision
 // continue de croître — sans quoi une page restée ouverte sur une ancienne version pourrait écraser la
 // suivante. Chaque écriture garde l'ancienne valeur dans « historique » (les HISTORIQUE dernières par
@@ -35,7 +37,9 @@ function ouvrir(fichier){
       cle TEXT NOT NULL, valeur TEXT, revision INTEGER NOT NULL, maj TEXT NOT NULL, motif TEXT NOT NULL);
     CREATE INDEX IF NOT EXISTS historique_cle ON historique (cle, revision);
     CREATE TABLE IF NOT EXISTS empreintes (compte TEXT PRIMARY KEY, empreinte TEXT NOT NULL, maj TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS sessions (jeton TEXT PRIMARY KEY, compte TEXT NOT NULL, creee TEXT NOT NULL, expire INTEGER NOT NULL);`);
+    CREATE TABLE IF NOT EXISTS sessions (jeton TEXT PRIMARY KEY, compte TEXT NOT NULL, creee TEXT NOT NULL, expire INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS consultations (quand TEXT NOT NULL, compte TEXT NOT NULL, page TEXT NOT NULL, registres TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS consultations_quand ON consultations (quand);`);
 
   const q = {
     tout:      db.prepare('SELECT cle, valeur, revision FROM donnees'),
@@ -58,6 +62,9 @@ function ouvrir(fichier){
     fermerSessionsCompte: db.prepare('DELETE FROM sessions WHERE compte = ?'),
     purgerSessions: db.prepare('DELETE FROM sessions WHERE expire < ?'),
     purgerHistorique: db.prepare('DELETE FROM historique WHERE cle = ?'),
+    noterConsultation: db.prepare('INSERT INTO consultations (quand, compte, page, registres) VALUES (?, ?, ?, ?)'),
+    consultations: db.prepare('SELECT quand, compte, page, registres FROM consultations WHERE quand >= ? ORDER BY rowid DESC LIMIT ?'),
+    purgerConsultations: db.prepare('DELETE FROM consultations WHERE quand < ?'),
   };
   const maintenant = () => new Date().toISOString();
 
@@ -126,6 +133,10 @@ function ouvrir(fichier){
     fermerSession: jeton => { q.fermerSession.run(jeton); },
     fermerSessionsCompte: compte => { q.fermerSessionsCompte.run(compte); },
     purgerSessions: t => { q.purgerSessions.run(t); },
+    // journal des consultations des données de santé (serveur/consultations.js) : registres = JSON
+    noterConsultation: (compte, page, registres) => { q.noterConsultation.run(maintenant(), compte, page, JSON.stringify(registres)); },
+    consultations: (depuis, limite) => q.consultations.all(depuis || '', limite).map(l => Object.assign({}, l, { registres: JSON.parse(l.registres) })),
+    purgerConsultations: avant => q.purgerConsultations.run(avant).changes,
     fermer: () => db.close(),
   };
 }

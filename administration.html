@@ -361,6 +361,7 @@
         <button class="admin-tab" data-tab="veille"><svg class="icon"><use href="#i-search"/></svg> Veille réglementaire</button>
         <button class="admin-tab" data-tab="audit"><svg class="icon"><use href="#i-history"/></svg> Journal des modifications</button>
         <button class="admin-tab" data-tab="personne"><svg class="icon"><use href="#i-key"/></svg> Données d'une personne</button>
+        <button class="admin-tab" data-tab="consult"><svg class="icon"><use href="#i-shield-check"/></svg> Consultations</button>
       </div>
 
       <!-- ===================== A. UTILISATEURS ===================== -->
@@ -641,6 +642,32 @@
         </div>
       </section>
 
+      <!-- ===================== F. CONSULTATIONS DES DONNÉES DE SANTÉ ===================== -->
+      <section class="tab-panel" id="tab-consult">
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Consultations des données de santé</h3>
+            <span class="panel-note" id="consultNote"></span>
+          </div>
+          <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px; max-width:78ch;">Le journal des modifications ne dit pas qui a <b>regardé</b> un registre. Celui-ci le dit : chaque fois que le serveur VIGIE HSE transmet à un compte une page contenant un registre de santé (accidents, dossiers AT/MP, analyses d'accident, suivi médical, rendez-vous), il note la date, le compte, la page, les registres et le nombre d'enregistrements reçus — ce que le compte a réellement reçu, après ses droits. Le journal est tenu par le serveur : aucune page ne peut le modifier. <span id="consultDuree"></span></p>
+          <div id="consultHorsServeur" hidden style="font-size:13px; color:var(--text-muted); padding:12px 14px; border:1px dashed var(--border); border-radius:var(--r-sm);">Ce journal est tenu par le serveur VIGIE HSE : il existe sur un poste (« Lancer VIGIE HSE.bat ») ou un serveur partagé, pas dans cette démonstration où les données restent dans le navigateur.</div>
+          <div id="consultServeur" hidden>
+            <div class="field-grid" style="max-width:720px; grid-template-columns:1fr 1fr auto auto; align-items:end; margin-bottom:14px;">
+              <div class="f"><label for="consultCompte">Compte</label><input type="text" id="consultCompte" placeholder="Tous les comptes"></div>
+              <div class="f"><label for="consultDepuis">Depuis le</label><input type="date" id="consultDepuis"></div>
+              <div class="f"><button type="button" class="btn btn-ghost" id="consultActualiser"><svg class="icon"><use href="#i-history"/></svg> Actualiser</button></div>
+              <div class="f"><button type="button" class="btn btn-ghost" id="consultExport"><svg class="icon"><use href="#i-package"/></svg> Exporter en Excel (.xlsx)</button></div>
+            </div>
+            <div class="table-wrap">
+              <table class="admin">
+                <thead><tr><th>Date &amp; heure</th><th>Compte</th><th>Page</th><th>Registres de santé reçus</th></tr></thead>
+                <tbody id="consultBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div class="panel section-block" style="padding:20px; margin-top:18px;">
         <div class="panel-head">
           <h3 class="panel-title" id="stockTitre">Stockage de ce navigateur</h3>
@@ -784,6 +811,49 @@
       $("tab-" + btn.dataset.tab).classList.add("show");
     });
   });
+  // ---------- Consultations des données de santé (tenues par le serveur, serveur/consultations.js) ----------
+  let consultLignes = [];
+  const consultPage = (p) => p === "/api/donnees" ? "actualisation des données" : String(p || "").replace(/^\//, "");
+  const consultRegistres = (rs) => (rs || []).map(r => (VigieStore.CLES[r.cle] ? VigieStore.CLES[r.cle].module : r.cle) + " (" + r.n + ")").join(", ");
+  function consultFiltrees(){
+    const qui = persNorm($("consultCompte").value).trim();
+    return consultLignes.filter(l => !qui || persNorm(l.compte).includes(" " + qui) || persNorm(l.compte).trim() === qui);
+  }
+  function consultAfficher(){
+    const l = consultFiltrees();
+    $("consultNote").textContent = l.length + " consultation(s)" + (consultLignes.length >= 2000 ? " — les 2 000 plus récentes" : "");
+    $("consultBody").innerHTML = l.length ? l.map(c => `<tr><td class="mono">${esc(VigieLibelles.valeur(c.quand))}</td><td>${esc(c.compte)}</td><td>${esc(consultPage(c.page))}</td><td style="white-space:normal;">${esc(consultRegistres(c.registres))}</td></tr>`).join("")
+      : `<tr><td colspan="4" style="color:var(--text-faint); text-align:center; padding:18px;">Aucune consultation notée.</td></tr>`;
+  }
+  function consultCharger(){
+    const depuis = $("consultDepuis").value;
+    const api = (window.__VIGIE_SERVEUR__ && window.__VIGIE_SERVEUR__.api) || "/api/";
+    $("consultNote").textContent = "Chargement…";
+    fetch(api + "consultations" + (depuis ? "?depuis=" + encodeURIComponent(depuis) : ""), { credentials: "same-origin", cache: "no-store" })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error(r.status)))
+      .then(d => {
+        consultLignes = Array.isArray(d.lignes) ? d.lignes : [];
+        $("consultDuree").textContent = d.jours ? "Les lignes de plus de " + d.jours + " jours sont supprimées automatiquement." : "";
+        consultAfficher();
+      })
+      .catch(() => { consultLignes = []; $("consultNote").textContent = ""; $("consultBody").innerHTML = `<tr><td colspan="4" style="color:var(--danger); text-align:center; padding:18px;">Le journal n'a pas pu être lu.</td></tr>`; });
+  }
+  {
+    const serveur = VigieStore.mode && VigieStore.mode() === "serveur";
+    $("consultServeur").hidden = !serveur; $("consultHorsServeur").hidden = serveur;
+    if (serveur){
+      document.querySelector('[data-tab="consult"]').addEventListener("click", consultCharger);
+      $("consultActualiser").addEventListener("click", consultCharger);
+      $("consultCompte").addEventListener("input", consultAfficher);
+      $("consultExport").addEventListener("click", () => {
+        const l = consultFiltrees();
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(l.map(c => ({ "Date et heure": VigieLibelles.valeur(c.quand), "Compte": c.compte, "Page": consultPage(c.page), "Registres de santé reçus": consultRegistres(c.registres) })), { header: ["Date et heure", "Compte", "Page", "Registres de santé reçus"] }), "Consultations");
+        XLSX.writeFile(wb, "consultations-donnees-sante_" + VigieDates.aujourdhui() + ".xlsx");
+        logAudit("Administration", "Extraction", "Export du journal des consultations des données de santé : " + l.length + " ligne(s)");
+      });
+    }
+  }
   $("persForm").addEventListener("submit", (e) => {
     e.preventDefault();
     if (!persNorm($("persNom").value).trim()){ $("persNom").focus(); return; }

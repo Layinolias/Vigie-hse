@@ -159,6 +159,10 @@ Un compte qui ne reçoit pas une valeur complète peut encore y **ajouter** — 
 
 **Vérifié** : `test-lecture.js` 22/22 (ce que reçoit chaque compte ; déclaration depuis une vue réduite, complète dans le registre sans rien retirer aux autres ; ligne de journal ajoutée à un journal jamais reçu ; vue renvoyée ou effacement sans effet ; réponse 409 réduite ; registre et Plan d'actions affichés pour un agent), `test-anonymisation.js` 14/14 (nouveau point : ni journal de saisie ni journal d'audit), et les suites précédentes inchangées.
 
+## 4 sexies. Qui a consulté les données de santé (2026-09-29)
+
+Le journal d'audit ne trace que les **modifications**. Pour des données de santé, savoir qui les a **consultées** est la mesure attendue (question 8.10 du dossier remis à l'avocat). `serveur/consultations.js` note, chaque fois que le serveur transmet à un compte une page, une actualisation (`GET /api/donnees`) ou une réponse de conflit contenant un registre marqué « sensible » dans `VigieStore.CLES` : la date, le compte, la page, et pour chaque registre de santé **le nombre** d'enregistrements reçus — après les droits de lecture, l'anonymisation et le périmètre, donc ce que le compte a réellement reçu, jamais le contenu. Le journal vit dans sa propre table (`consultations`, `base-sqlite.js`) : aucune page ne le reçoit ni ne peut l'écrire, « Réinitialiser les données » ne l'efface pas ; seul l'administrateur non anonymisé le lit (`GET /api/consultations`, Administration → Consultations, 2 000 lignes les plus récentes, filtre « depuis »). Les lignes de plus de `VIGIE_CONSULTATIONS_JOURS` jours (365 par défaut) sont supprimées au démarrage puis chaque jour — **durée à confirmer avec l'avocat**. Vérifié : `test-consultations.js` 19/19.
+
 ## 5. Les étapes
 
 | Étape | Contenu | Condition pour passer à la suivante |

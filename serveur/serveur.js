@@ -35,6 +35,7 @@ const Anonymisation = require('./anonymisation.js');
 const Perimetre = require('./perimetre.js');
 const Lecture = require('./lecture.js');
 const Sauvegardes = require('./sauvegardes.js');
+const Consultations = require('./consultations.js');   // qui a reçu quels registres de santé, et quand
 
 const RACINE = path.resolve(__dirname, '..');
 const PORT = Number(process.env.PORT) || 8780;
@@ -101,10 +102,12 @@ function valeurPour(page, cle, valeur){
   return Perimetre.limite(page) ? Perimetre.vue(valeur, page.services) : valeur;
 }
 
-function injection(session){
+function injection(session, chemin){
   const etat = { api: '/api/', donnees: {}, session: session ? session.page : null };
   if (session){
-    for (const [cle, d] of Object.entries(donneesPour(session.page))) etat.donnees[cle] = { v: d.valeur, r: d.revision };
+    const d = donneesPour(session.page);
+    Consultations.noter(base, session.page, chemin, d);
+    for (const [cle, x] of Object.entries(d)) etat.donnees[cle] = { v: x.valeur, r: x.revision };
     etat.droits = droits.resume(session.page);
   }
   else etat.premierLancement = comptes.aucun();
@@ -161,7 +164,18 @@ async function api(req, res, chemin){
   const amorce = !session && cle === comptes.CLE_COMPTES && req.method === 'PUT' && comptes.aucun() && depuisCePoste(req);
   if (!session && !amorce) return repondre(res, 401, { erreur: 'non connecté' });
 
-  if (chemin === '/api/donnees' && req.method === 'GET') return repondre(res, 200, session ? donneesPour(session.page) : {});
+  if (chemin === '/api/donnees' && req.method === 'GET'){
+    if (!session) return repondre(res, 200, {});
+    const d = donneesPour(session.page);
+    Consultations.noter(base, session.page, chemin, d);
+    return repondre(res, 200, d);
+  }
+  // journal des consultations des données de santé : l'administrateur seul (Administration → Consultations)
+  if (chemin === '/api/consultations' && req.method === 'GET'){
+    if (!session || !Consultations.peutLire(session.page)) return repondre(res, 403, { erreur: "réservé à l'administrateur" });
+    const depuis = new URL(req.url, 'http://x').searchParams.get('depuis');
+    return repondre(res, 200, { jours: Consultations.JOURS, lignes: Consultations.lister(base, /^\d{4}-\d{2}-\d{2}$/.test(depuis || '') ? depuis : '') });
+  }
 
   if (chemin === '/api/effacer' && req.method === 'POST'){
     if (!droits.peutEffacer(session.page)) return repondre(res, 403, { erreur: 'réservé à un administrateur' });
@@ -193,7 +207,10 @@ async function api(req, res, chemin){
     const r = valeur === null ? base.supprimer(cle, revisionVue) : base.ecrire(cle, valeur, revisionVue);
     if (!r.ok){
       journal('conflit', cle, '(vue', revisionVue, '/ actuelle', r.revision + ')');
-      return repondre(res, 409, session ? Object.assign({}, r, { valeur: valeurPour(session.page, cle, r.valeur) }) : r);
+      if (!session) return repondre(res, 409, r);
+      const v = valeurPour(session.page, cle, r.valeur);
+      Consultations.noter(base, session.page, chemin + ' (conflit)', { [cle]: { valeur: v } });
+      return repondre(res, 409, Object.assign({}, r, { valeur: v }));
     }
     if (cle === comptes.CLE_COMPTES) comptes.apresEcriture(mots);
     journal(req.method === 'PUT' ? 'écrit' : 'supprimé', cle, '→ révision', r.revision, 'par', session ? session.page.user : '(premier lancement)');
@@ -232,7 +249,7 @@ function fichier(req, res, chemin){
     if (html){
       const page = data.toString('utf8'), balise = '<script src="assets/stockage.js"></script>';
       // lue à chaque page : on voit toujours la dernière version enregistrée par quiconque
-      return repondre(res, 200, page.includes(balise) ? page.replace(balise, injection(session) + balise) : page, type, entetes);
+      return repondre(res, 200, page.includes(balise) ? page.replace(balise, injection(session, chemin) + balise) : page, type, entetes);
     }
     repondre(res, 200, data, type);
   });
@@ -284,6 +301,7 @@ const arreterSauvegardes = Sauvegardes.planifier(base, {
   heures: process.env.VIGIE_SAUVEGARDE_HEURES === undefined ? 24 : Number(process.env.VIGIE_SAUVEGARDE_HEURES),
   garder: Number(process.env.VIGIE_SAUVEGARDES_GARDER) || 14,
   journal });
+const arreterPurge = Consultations.planifierPurge(base, journal);
 serveur.on('error', e => {
   console.error(e.code === 'EADDRINUSE' ? 'VIGIE HSE — le port ' + PORT + ' est déjà utilisé : le serveur tourne sans doute déjà (une autre fenêtre ?).' : 'VIGIE HSE — ' + e.message);
   base.fermer(); process.exit(1);
@@ -298,5 +316,5 @@ serveur.listen(PORT, ECOUTE, () => {
   if (comptes.aucun()) journal('Aucun compte : le premier passage sur l\'écran de connexion, depuis ce poste, crée les comptes de démonstration.');
   else if (comptes.demoActive()) journal('ATTENTION : les comptes de démonstration (mots de passe publiés dans le dépôt) sont actifs — à changer avant tout usage réel.');
 });
-const arreter = () => { arreterSauvegardes(); serveur.close(); base.fermer(); process.exit(0); };
+const arreter = () => { arreterSauvegardes(); arreterPurge(); serveur.close(); base.fermer(); process.exit(0); };
 process.on('SIGINT', arreter); process.on('SIGTERM', arreter);

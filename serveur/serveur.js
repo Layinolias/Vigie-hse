@@ -36,6 +36,7 @@ const Perimetre = require('./perimetre.js');
 const Lecture = require('./lecture.js');
 const Sauvegardes = require('./sauvegardes.js');
 const Consultations = require('./consultations.js');   // qui a reçu quels registres de santé, et quand
+const Poste = require('./poste-commun.js');   // repère « base en service », lu par l'outil de restauration
 
 const RACINE = path.resolve(__dirname, '..');
 const PORT = Number(process.env.PORT) || 8780;
@@ -174,7 +175,7 @@ async function api(req, res, chemin){
   if (chemin === '/api/consultations' && req.method === 'GET'){
     if (!session || !Consultations.peutLire(session.page)) return repondre(res, 403, { erreur: "réservé à l'administrateur" });
     const depuis = new URL(req.url, 'http://x').searchParams.get('depuis');
-    return repondre(res, 200, { jours: Consultations.JOURS, lignes: Consultations.lister(base, /^\d{4}-\d{2}-\d{2}$/.test(depuis || '') ? depuis : '') });
+    return repondre(res, 200, { jours: Consultations.JOURS, lignes: Consultations.lister(base, /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z)?$/.test(depuis || '') ? depuis : '') });
   }
 
   if (chemin === '/api/effacer' && req.method === 'POST'){
@@ -302,11 +303,15 @@ const arreterSauvegardes = Sauvegardes.planifier(base, {
   garder: Number(process.env.VIGIE_SAUVEGARDES_GARDER) || 14,
   journal });
 const arreterPurge = Consultations.planifierPurge(base, journal);
+// tant que ce serveur tourne, restaurer.js refuse de toucher à la base (quels que soient protocole, adresse, port) —
+// posé une fois l'écoute réussie : un second serveur refusé (port déjà pris) n'écrase pas celui du premier
+let retirerRepere = () => {};
 serveur.on('error', e => {
   console.error(e.code === 'EADDRINUSE' ? 'VIGIE HSE — le port ' + PORT + ' est déjà utilisé : le serveur tourne sans doute déjà (une autre fenêtre ?).' : 'VIGIE HSE — ' + e.message);
   base.fermer(); process.exit(1);
 });
 serveur.listen(PORT, ECOUTE, () => {
+  retirerRepere = Poste.poserRepere(BASE);
   // derrière un proxy, l'adresse à donner aux utilisateurs est celle du proxy (port HTTPS habituel)
   const adresse = HTTPS && !HTTPS_NATIF ? 'https://' + (NOMS[0] || 'nom-du-proxy') : (HTTPS_NATIF ? 'https' : 'http') + '://' + (NOMS[0] || 'localhost') + ':' + PORT;
   journal('VIGIE HSE — serveur ' + (RESEAU ? 'ouvert au réseau (écoute ' + ECOUTE + (HTTPS_NATIF ? ', HTTPS' : ', derrière un proxy HTTPS') + ')' : 'local') + ' : ' + adresse);
@@ -316,5 +321,5 @@ serveur.listen(PORT, ECOUTE, () => {
   if (comptes.aucun()) journal('Aucun compte : le premier passage sur l\'écran de connexion, depuis ce poste, crée les comptes de démonstration.');
   else if (comptes.demoActive()) journal('ATTENTION : les comptes de démonstration (mots de passe publiés dans le dépôt) sont actifs — à changer avant tout usage réel.');
 });
-const arreter = () => { arreterSauvegardes(); arreterPurge(); serveur.close(); base.fermer(); process.exit(0); };
+const arreter = () => { arreterSauvegardes(); arreterPurge(); retirerRepere(); serveur.close(); base.fermer(); process.exit(0); };
 process.on('SIGINT', arreter); process.on('SIGTERM', arreter);

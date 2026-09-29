@@ -15,25 +15,13 @@
 //
 // Mêmes variables que serveur/lancer-poste.js : VIGIE_DOSSIER, VIGIE_BASE, VIGIE_SAUVEGARDES, PORT.
 'use strict';
-const path = require('path'), os = require('os'), fs = require('fs'), http = require('http');
-
-const [maj, min] = process.versions.node.split('.').map(Number);
-if (maj < 22 || (maj === 22 && min < 5)){
-  console.error('\nVIGIE HSE a besoin de Node.js 22.5 ou plus récent (installé ici : ' + process.versions.node + ').\n');
-  process.exit(1);
-}
-const emettre = process.emitWarning;
-process.emitWarning = function(w, ...r){
-  const type = typeof r[0] === 'string' ? r[0] : (r[0] && r[0].type) || (w && w.name);
-  if (type === 'ExperimentalWarning') return;
-  return emettre.call(process, w, ...r);
-};
+const path = require('path'), fs = require('fs');
+const Poste = require('./poste-commun.js');   // mêmes dossiers, même contrôle de Node que le lanceur ; repère « base en service »
+Poste.verifierNode();
+Poste.tairesExperimental();
 const { ouvrir, examiner } = require('./base-sqlite.js');
 
-const PORT = Number(process.env.PORT) || 8780;
-const DOSSIER = process.env.VIGIE_DOSSIER || path.join(os.homedir(), 'VIGIE HSE');
-const BASE = process.env.VIGIE_BASE || path.join(DOSSIER, 'vigie.db');
-const SAUVEGARDES = process.env.VIGIE_SAUVEGARDES || path.join(DOSSIER, 'sauvegardes');
+const DOSSIER = Poste.DOSSIER(), BASE = Poste.BASE(), SAUVEGARDES = Poste.SAUVEGARDES();
 const GARDER_AVANT_RESTAURATION = 5;
 
 const SORTES = [
@@ -54,12 +42,9 @@ function contenu(e){
   return (e.maj ? 'dernière saisie le ' + date(new Date(e.maj)) : 'aucune saisie') + (n.length ? ' — ' + n.join(', ') : '');
 }
 
-function repond(){
-  return new Promise(ok => {
-    const q = http.get({ host: '127.0.0.1', port: PORT, path: '/login.html', headers: { Host: 'localhost:' + PORT } }, res => { res.resume(); ok(true); });
-    q.on('error', () => ok(false)); q.setTimeout(1500, () => { q.destroy(); ok(false); });
-  });
-}
+// base ouverte par un serveur VIGIE HSE : son repère (tout protocole, toute adresse, tout port), ou, pour un serveur
+// d'avant le repère, une réponse sur ce poste
+async function enService(){ return !!Poste.baseEnService(BASE) || await Poste.repond(); }
 
 // lecture ligne à ligne de l'entrée (clavier, ou texte envoyé par un test) ; fin de l'entrée : ''
 const lignes = [], attentes = [];
@@ -83,6 +68,31 @@ function copies(){
   return l.sort((a, b) => b.quand - a.quand);
 }
 
+// Ce qui ne revient pas en arrière avec les données : le journal des consultations et le journal d'audit gardent
+// leurs lignes postérieures à la sauvegarde (reprises depuis la copie mise de côté), et une ligne dit la restauration —
+// sans quoi restaurer une ancienne copie effacerait la trace de qui a consulté ou modifié quoi depuis.
+const CLE_AUDIT = 'vigie_hse_audit_log';
+function reporterJournaux(deCote, choisie){
+  let consultations = [], audit = [];
+  if (deCote){
+    const a = ouvrir(deCote);
+    try { consultations = a.consultations('', 1e9); try { audit = JSON.parse(a.lire(CLE_AUDIT) || '[]'); } catch(e){ audit = []; } } finally { a.fermer(); }
+  }
+  const b = ouvrir(BASE);
+  try {
+    const n = b.reprendreConsultations(consultations);
+    let l; try { l = JSON.parse(b.lire(CLE_AUDIT) || '[]'); } catch(e){ l = []; }
+    if (!Array.isArray(l)) l = [];
+    const connus = new Set(l.map(x => x && String(x.id)));
+    const reprises = (Array.isArray(audit) ? audit : []).filter(x => x && typeof x === 'object' && !connus.has(String(x.id)));
+    l = l.concat(reprises);
+    l.push({ id: 'a-restauration-' + Date.now().toString(36), timestamp: new Date().toISOString(), utilisateur: 'outil de restauration (poste)', module: 'Administration', type: 'Restauration',
+      description: 'Données remises à la sauvegarde du ' + date(choisie.quand) + ' (' + choisie.libelle + ') ; ' + reprises.length + ' ligne(s) du journal et ' + n + ' consultation(s) postérieures reprises' });
+    b.remplacer(CLE_AUDIT, JSON.stringify(l), 'restauration');
+    return { consultations: n, audit: reprises.length };
+  } finally { b.fermer(); }
+}
+
 // les données actuelles, mises de côté avant d'être remplacées
 function mettreDeCote(){
   if (!fs.existsSync(BASE)) return null;
@@ -102,7 +112,7 @@ function mettreDeCote(){
 
 (async () => {
   console.log('\n  VIGIE HSE — revenir à une sauvegarde\n  Vos données : ' + DOSSIER + '\n');
-  if (await repond()) fin(1, 'VIGIE HSE est en cours d\'utilisation : fermez d\'abord sa fenêtre noire, puis relancez cet outil.\nRien n\'a été modifié.');
+  if (await enService()) fin(1, 'VIGIE HSE est en cours d\'utilisation : fermez d\'abord sa fenêtre noire, puis relancez cet outil.\nRien n\'a été modifié.');
 
   const liste = copies();
   if (!liste.length) fin(1, 'Aucune sauvegarde trouvée dans ' + SAUVEGARDES + '.\nRien n\'a été modifié.');
@@ -128,6 +138,8 @@ function mettreDeCote(){
   const ok = await demander('\n  Pour confirmer, tapez OUI : ');
   if (ok.toLowerCase() !== 'oui') fin(0, 'Annulé. Rien n\'a été modifié.');
 
+  // VIGIE HSE a pu être lancé pendant que l'outil attendait la réponse
+  if (await enService()) fin(1, 'VIGIE HSE vient d\'être lancé : fermez sa fenêtre noire, puis relancez cet outil.\nRien n\'a été modifié.');
   const deCote = mettreDeCote();
   const temporaire = BASE + '.restauration-en-cours';
   fs.copyFileSync(choisie.chemin, temporaire);
@@ -135,8 +147,11 @@ function mettreDeCote(){
   fs.renameSync(temporaire, BASE);
   const apres = examiner(BASE);
   if (!apres.ok) fin(1, 'La base remise en place ne se lit pas (' + apres.raison + ').' + (deCote ? '\nVos données d\'avant sont dans : ' + deCote : ''));
+  let repris = null;
+  try { repris = reporterJournaux(deCote, choisie); } catch(e){ console.log('\n  Attention : les journaux postérieurs à la sauvegarde n\'ont pas pu être repris (' + e.message + ').'); }
 
   fin(0, '  C\'est fait : vos données sont revenues au ' + date(choisie.quand) + ' (' + contenu(apres) + ').' +
     (deCote ? '\n  Celles d\'avant sont gardées dans : ' + deCote : '') +
+    (repris ? '\n  Repris depuis la sauvegarde : ' + repris.audit + ' ligne(s) du journal des modifications, ' + repris.consultations + ' consultation(s) de données de santé — ces journaux ne reviennent pas en arrière.' : '') +
     '\n  Relancez VIGIE HSE (« Lancer VIGIE HSE.bat »).');
 })();

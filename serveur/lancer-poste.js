@@ -11,34 +11,17 @@
 // Variables facultatives : VIGIE_DOSSIER (dossier des données), PORT (8780), VIGIE_NAVIGATEUR=0 (ne pas
 // ouvrir le navigateur — tests).
 'use strict';
-const path = require('path'), os = require('os'), fs = require('fs'), http = require('http');
+const path = require('path'), fs = require('fs');
 const { spawn } = require('child_process');
+const Poste = require('./poste-commun.js');   // version de Node, avertissement tu, dossier des données, « répond ? »
 
-const [maj, min] = process.versions.node.split('.').map(Number);
-if (maj < 22 || (maj === 22 && min < 5)){
-  console.error('\nVIGIE HSE a besoin de Node.js 22.5 ou plus récent (installé ici : ' + process.versions.node + ').');
-  console.error('Installer la version « LTS » depuis https://nodejs.org, puis relancer.\n');
-  process.exit(1);
-}
+Poste.verifierNode();
+Poste.tairesExperimental();
 
-// SQLite est encore marqué « expérimental » par Node : l'avertissement n'apprendrait rien à l'utilisateur
-const emettre = process.emitWarning;
-process.emitWarning = function(w, ...r){
-  const type = typeof r[0] === 'string' ? r[0] : (r[0] && r[0].type) || (w && w.name);
-  if (type === 'ExperimentalWarning') return;
-  return emettre.call(process, w, ...r);
-};
-
-const PORT = Number(process.env.PORT) || 8780;
-const DOSSIER = process.env.VIGIE_DOSSIER || path.join(os.homedir(), 'VIGIE HSE');
+const PORT = Poste.PORT();
+const DOSSIER = Poste.DOSSIER();
 const ADRESSE = 'http://localhost:' + PORT + '/login.html';
-
-function repond(){
-  return new Promise(ok => {
-    const q = http.get({ host: '127.0.0.1', port: PORT, path: '/login.html', headers: { Host: 'localhost:' + PORT } }, res => { res.resume(); ok(res.statusCode === 200); });
-    q.on('error', () => ok(false)); q.setTimeout(1500, () => { q.destroy(); ok(false); });
-  });
-}
+const repond = Poste.repond;
 function ouvrirNavigateur(){
   if (process.env.VIGIE_NAVIGATEUR === '0') return;
   if (process.platform === 'win32') spawn('cmd', ['/c', 'start', '', ADRESSE], { detached: true, stdio: 'ignore' }).unref();

@@ -829,7 +829,9 @@
     const depuis = $("consultDepuis").value;
     const api = (window.__VIGIE_SERVEUR__ && window.__VIGIE_SERVEUR__.api) || "/api/";
     $("consultNote").textContent = "Chargement…";
-    fetch(api + "consultations" + (depuis ? "?depuis=" + encodeURIComponent(depuis) : ""), { credentials: "same-origin", cache: "no-store" })
+    // minuit à l'heure locale, en horodatage UTC : c'est ainsi que le serveur date chaque ligne (règle 13)
+    const depuisIso = depuis ? VigieDates.lire(depuis).toISOString() : "";
+    fetch(api + "consultations" + (depuisIso ? "?depuis=" + encodeURIComponent(depuisIso) : ""), { credentials: "same-origin", cache: "no-store" })
       .then(r => r.ok ? r.json() : Promise.reject(new Error(r.status)))
       .then(d => {
         consultLignes = Array.isArray(d.lignes) ? d.lignes : [];
@@ -961,21 +963,21 @@
   }
   function persExporter(r){
     const qui = (r.prenom ? r.prenom + " " : "") + r.nom, total = r.groupes.reduce((n, g) => n + g.lignes.length, 0);
-    const wb = XLSX.utils.book_new(), pris = new Set();
+    const wb = XLSX.utils.book_new(), pris = new Set(["synthèse"]);
     const nomFeuille = (s) => { let b = String(s).replace(/[\\\/?*\[\]:]/g, " ").slice(0, 28).trim() || "Registre", n = b, i = 2; while (pris.has(n.toLowerCase())) n = b.slice(0, 25) + " " + (i++); pris.add(n.toLowerCase()); return n; };
+    const feuilles = r.groupes.map(g => nomFeuille(g.module));   // une seule fois : la synthèse et les feuilles disent le même nom
     const synthese = [
       { "Rubrique": "Personne", "Valeur": qui },
       { "Rubrique": "Extraction faite le", "Valeur": VigieDates.iso(r.quand) + " " + String(r.quand.getHours()).padStart(2, "0") + ":" + String(r.quand.getMinutes()).padStart(2, "0") },
       { "Rubrique": "Par", "Valeur": (session && session.user) || "—" },
       { "Rubrique": "Enregistrements", "Valeur": total + " dans " + r.groupes.length + " registre(s)" },
       { "Rubrique": "À savoir", "Valeur": "« Fiche » : ses nom et prénom y sont inscrits. « Mention » : son nom apparaît dans un texte — à relire avant remise (homonyme possible). Les mots de passe ne figurent jamais dans cet export." },
-    ].concat(r.groupes.map(g => ({ "Rubrique": g.module + (g.sensible ? " (données de santé)" : ""), "Valeur": g.lignes.length + " enregistrement(s) — feuille « " + nomFeuille(g.module) + " »" })));
+    ].concat(r.groupes.map((g, i) => ({ "Rubrique": g.module + (g.sensible ? " (données de santé)" : ""), "Valeur": g.lignes.length + " enregistrement(s) — feuille « " + feuilles[i] + " »" })));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(synthese, { header: ["Rubrique", "Valeur"] }), "Synthèse");
-    pris.clear(); pris.add("synthèse");
-    r.groupes.forEach(g => {
+    r.groupes.forEach((g, i) => {
       const lignes = g.lignes.map(l => Object.assign({ "Correspondance": l.correspondance }, l.champs));
       const entetes = ["Correspondance"]; lignes.forEach(l => Object.keys(l).forEach(c => { if (!entetes.includes(c)) entetes.push(c); }));
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: entetes }), nomFeuille(g.module));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: entetes }), feuilles[i]);
     });
     const fichier = "donnees-personne_" + persNorm(qui).trim().replace(/ /g, "-") + "_" + VigieDates.aujourdhui() + ".xlsx";
     XLSX.writeFile(wb, fichier);

@@ -17,6 +17,7 @@
 //   fermerSession(empreinteJeton) / purgerSessions(maintenant)
 // Consultations des données de santé (serveur/consultations.js) — jamais transmises aux pages :
 //   noterConsultation(compte, page, registres) / consultations(depuisIso, limite) / purgerConsultations(avantIso)
+//   reprendreConsultations(lignes) — restauration : ajoute celles postérieures à la dernière ligne de la base
 // La révision d'une clé jamais écrite vaut 0 ; une clé supprimée reste en base, vide, et sa révision
 // continue de croître — sans quoi une page restée ouverte sur une ancienne version pourrait écraser la
 // suivante. Chaque écriture garde l'ancienne valeur dans « historique » (les HISTORIQUE dernières par
@@ -63,6 +64,7 @@ function ouvrir(fichier){
     purgerSessions: db.prepare('DELETE FROM sessions WHERE expire < ?'),
     purgerHistorique: db.prepare('DELETE FROM historique WHERE cle = ?'),
     noterConsultation: db.prepare('INSERT INTO consultations (quand, compte, page, registres) VALUES (?, ?, ?, ?)'),
+    derniereConsultation: db.prepare('SELECT MAX(quand) AS quand FROM consultations'),
     consultations: db.prepare('SELECT quand, compte, page, registres FROM consultations WHERE quand >= ? ORDER BY rowid DESC LIMIT ?'),
     purgerConsultations: db.prepare('DELETE FROM consultations WHERE quand < ?'),
   };
@@ -137,6 +139,13 @@ function ouvrir(fichier){
     noterConsultation: (compte, page, registres) => { q.noterConsultation.run(maintenant(), compte, page, JSON.stringify(registres)); },
     consultations: (depuis, limite) => q.consultations.all(depuis || '', limite).map(l => Object.assign({}, l, { registres: JSON.parse(l.registres) })),
     purgerConsultations: avant => q.purgerConsultations.run(avant).changes,
+    // restauration (serveur/restaurer.js) : les lignes notées après la sauvegarde remise en place, avec leur date
+    reprendreConsultations(lignes){
+      const apres = q.derniereConsultation.get().quand || '';
+      const nouvelles = lignes.filter(l => l.quand > apres).sort((a, b) => a.quand < b.quand ? -1 : 1);
+      transaction(() => { for (const l of nouvelles) q.noterConsultation.run(l.quand, l.compte, l.page, JSON.stringify(l.registres)); });
+      return nouvelles.length;
+    },
     fermer: () => db.close(),
   };
 }

@@ -87,7 +87,8 @@ Pour arrêter : fermer la fenêtre noire. Pour relancer : double-cliquer à nouv
   - Vos données actuelles sont d'abord mises de côté : en cas d'erreur, relancer le même outil et
     choisir « vos données juste avant une restauration ».
   - Attention : tout ce qui a été saisi après la date de la sauvegarde disparaît, et les comptes
-    et mots de passe reviennent eux aussi à cette date.
+    et mots de passe reviennent eux aussi à cette date. Seuls les journaux (modifications,
+    consultations des données de santé) gardent leurs lignes, avec une ligne qui dit la restauration.
   - Relancer VIGIE HSE.
 
 

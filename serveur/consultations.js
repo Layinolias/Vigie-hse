@@ -15,9 +15,18 @@ const SANTE = ['vigie_hse_dataset', 'vigie_hse_atmp_dossiers', 'vigie_hse_atmp_a
 const JOURS = Math.max(1, Number(process.env.VIGIE_CONSULTATIONS_JOURS) || 365);
 const LIMITE = 2000;
 
+// Compter les enregistrements d'un registre demande de le lire en entier : une valeur déjà comptée (même
+// registre, même révision, même vue de compte — donc même texte) ne l'est pas deux fois.
+const COMPTES = new Map(), COMPTES_MAX = 64;
 function nombre(valeur){
   if (valeur == null) return 0;
-  try { const v = JSON.parse(valeur); return Array.isArray(v) ? v.length : (v == null ? 0 : 1); } catch(e){ return 0; }
+  const connu = COMPTES.get(valeur);
+  if (connu !== undefined) return connu;
+  let n = 0;
+  try { const v = JSON.parse(valeur); n = Array.isArray(v) ? v.length : (v == null ? 0 : 1); } catch(e){}
+  if (COMPTES.size >= COMPTES_MAX) COMPTES.delete(COMPTES.keys().next().value);
+  COMPTES.set(valeur, n);
+  return n;
 }
 
 // donnees : { cle: { valeur, revision } } tel que transmis ; une ligne seulement si un registre de santé non vide y est

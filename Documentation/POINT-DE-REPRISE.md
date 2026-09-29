@@ -1,4 +1,4 @@
-# Point de reprise — 23 septembre 2026
+# Point de reprise — 29 septembre 2026
 
 Fichier de passage de relais entre sessions. **À relire en premier après une compaction ou en début de
 session**, avec `CLAUDE.md`. Le reste de l'état durable est dans `ETAT-DU-PROJET.md`,
@@ -6,21 +6,26 @@ session**, avec `CLAUDE.md`. Le reste de l'état durable est dans `ETAT-DU-PROJE
 
 ## Travail en cours, non terminé
 
-_Rien en cours. **Campagne d'echappement terminee le 2026-09-23** : les seize pages qui affichent
-des enregistrements inseraient leur texte tel quel dans du HTML ; toutes echappent desormais (commits
-`0fad9f7` et `445d67a`, detail dans `BUGS-CONNUS.md`). Outil de campagne : `sweep.js` dans le scratchpad
-(sonde / propose / applique / compare / detail) — a reecrire si une nouvelle session en a besoin.
-Auparavant : Les réponses Q8, Q9 et Q10 du préventeur (2026-09-21) sont consignées dans
-`QUESTIONS-METIER-EN-ATTENTE.md` et **toutes les trois mises en œuvre et déployées** : seuil « au moins
-400 h » (`50ec301`), accueil au poste — type, délai de 8 j, butoir, alerte (`852fbb5`), base documentaire —
-trame en 4 sections, types de document créés par le préventeur, afficher/masquer (`7c60848`). Plus aucune
-question métier en attente. Auparavant : la correction du bouton « Réinitialiser », testée, commitée et poussée
-(`638a09e`, 20 septembre 2026) — sur 10 pages, `fService.value = "all"` est désormais posé
-explicitement après `fillServiceOptions()`, qui conservait la valeur courante du filtre Service.
-`accueil-poste.html`, `document-unique.html` et `registre-at-mp.html` étaient déjà corrects ;
-`verifications-periodiques.html` n'a pas de filtre Service. Harnais `test-reset.js` : les 13 pages
-ayant `#btnReset` et `#fService` reviennent bien à « Tous ». Reste la vérification en direct, qui
-demande une session ouverte par l'utilisateur._
+_Rien en cours. Dernières livraisons (2026-09-29) : Q17 (suivi médical réservé à l'encadrement, permission
+« Santé & Visites »), outil de restauration (`Restaurer une sauvegarde.bat`), polices embarquées, onglet
+« Données d'une personne » (droit d'accès), météo facultative, journal des consultations des données de santé,
+revue de code de la journée corrigée (`a9d5b66`), puis FDS et mesures de prévention visibles de tous dans les
+Produits chimiques. Paquet `livraison/VIGIE-HSE-2026-09-29.zip` remis à l'utilisateur (test de mise à jour
+depuis `08a2585` passé) ; dossier pour l'avocat : `livraison/VIGIE-HSE-dossier-RGPD-HDS.pdf`._
+
+**Décidé le 2026-09-29 : pas de chiffrement des données au repos pour l'instant** (l'utilisateur, après
+explication du risque de perte sans code de secours). Modèle retenu si on le fait un jour, et alternative
+BitLocker : `PLAN-MISE-EN-PRODUCTION.md` §6 et §8. Ne pas le relancer sans nouvelle demande.
+
+**Installation existante de l'ami de l'utilisateur** : son compte PREV1 n'a pas la nouvelle permission
+« Santé & Visites » — à donner dans Administration (seuls les comptes créés depuis l'ont d'office).
+
+## En attente d'autres personnes
+
+- **Avocat** (dossier PDF) : durées de conservation, dont celle du journal des consultations (365 j par défaut,
+  `VIGIE_CONSULTATIONS_JOURS`), HDS, questions du §8 ; chiffrement au repos attendu ou non.
+- **Délégué à la protection des données** : avis avant toute vraie donnée de santé (question 14).
+- **Date de remise du paquet** à noter dans `LIVRAISON-POSTE.md` quand l'utilisateur la donne.
 
 ## Ce qui revient à l'utilisateur (je ne peux pas le faire)
 
@@ -49,7 +54,7 @@ demande une session ouverte par l'utilisateur._
 - **Q11 et Q12 repondues et traitees le 2026-09-23** : les 9 risques du Registre AT/MP ouvrent une fiche ;
   l'impression generique suffit (mises en page dediees gardees en reserve dans la roadmap). Aucune question
   n'est plus en attente sur le Cahier.
-- Autres liens contextuels : produit chimique → sa fiche, module de suivi → article pertinent.
+- Autres liens contextuels : module de suivi → article pertinent (produit chimique → sa FDS et la fiche « Produits chimiques » : fait le 2026-09-29).
 
 ## Où sont les tests
 

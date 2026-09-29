@@ -73,7 +73,7 @@ Chaque version est un dossier autonome et complet (pas de dépendance croisée).
 | `registre-sst.html` | Registre Santé & Sécurité (RSST réglementaire) — observations remontées par les agents, traitées par RH/admin. |
 | `verifications-periodiques.html` | Suivi des contrôles techniques réglementaires (électricité, extincteurs, ascenseurs, etc.). |
 | `inspection-audit.html` | Trames de contrôle réutilisables + inspections réalisées ; les non-conformités alimentent le Plan d'Actions. |
-| `produits-chimiques.html` | Inventaire des produits chimiques par service, pictogrammes CLP, suivi des FDS. |
+| `produits-chimiques.html` | Inventaire des produits chimiques par service, pictogrammes CLP, suivi des FDS. Depuis le 2026-09-29, **la FDS et les mesures de prévention s'affichent sous le nom du produit**, pour tout compte qui ouvre la page (auparavant visibles seulement dans le formulaire, donc des seuls RH/admin) : pastille « FDS ↗ » si le lien est une adresse http(s) (nouvel onglet, `noopener noreferrer`), la référence en texte sinon — un `javascript:` n'est jamais cliquable. Lien « fiche du risque » vers la fiche « Produits chimiques » de la Base documentaire (`assets/risques-ref.js`). Seuil « FDS à mettre à jour » (3 ans) lu à l'heure locale (`VigieDates.lire`). |
 | `formation-habilitation.html` | Suivi des habilitations par agent (CACES, habilitation électrique, SST...) et de leurs échéances de renouvellement. |
 | `epi-dotation.html` | EPI/vêtements de travail — catalogue, stock, dotation par agent, cycles de lavage/entretien. |
 | `reporting.html` | Indicateurs & reporting KPI (accès rh/admin). |

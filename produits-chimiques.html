@@ -7,6 +7,7 @@
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
+<script src="assets/risques-ref.js"></script>
 <style>
   :root{
     --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
@@ -209,6 +210,11 @@
   .ghs-badge.ghs-warn{ color:var(--warning); border-color:rgba(var(--warning-rgb),.4); background:var(--warning-bg); }
   .ghs-badge.ghs-danger{ color:var(--danger); border-color:rgba(var(--danger-rgb),.4); background:var(--danger-bg); }
   .fds-flag{ color:var(--warning); font-weight:600; }
+  /* FDS et mesures de prévention, visibles de tous les comptes qui ouvrent la page (pas seulement dans le formulaire) */
+  .fiche-lien{ display:inline-block; margin-left:8px; font-size:10.5px; font-weight:600; color:var(--accent); text-decoration:none; border:1px solid rgba(var(--accent-rgb),.45); border-radius:var(--r-pill); padding:1px 8px; white-space:nowrap; }
+  .fiche-lien:hover{ background:rgba(var(--accent-rgb),.10); }
+  .prod-sub{ margin-top:4px; font-size:11.5px; color:var(--text-dim); line-height:1.45; }
+  .prod-sub b{ font-weight:600; color:var(--text-faint); }
   .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
   .act-edit:hover{ text-decoration:underline; }
   .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; margin-left:10px; }
@@ -407,7 +413,7 @@
 
       <div class="panel" style="padding:20px 22px 22px;">
         <div class="panel-head">
-          <h3 class="panel-title">Inventaire</h3>
+          <h3 class="panel-title">Inventaire <a class="fiche-lien" id="ficheRisque" hidden>fiche du risque</a></h3>
           <div class="panel-actions" id="panelActionsBtns"></div>
         </div>
         <div class="table-panel">
@@ -604,9 +610,27 @@
   function isFdsOld(p){
     if (!p.dateMajFDS) return false;
     const threshold = new Date(); threshold.setFullYear(threshold.getFullYear() - 3);
-    return new Date(p.dateMajFDS) < threshold;
+    const d = VigieDates.lire(p.dateMajFDS);
+    return !!d && d < threshold;
   }
   function isDangereux(p){ return (p.pictogrammes || []).some(c => DANGEROUS_CODES.includes(c)); }
+
+  // La FDS d'un produit et ses mesures de prévention, sous son nom : jusqu'ici saisies mais visibles
+  // seulement dans le formulaire (RH/admin), donc introuvables pour un manager ou un agent.
+  // Seule une adresse http(s) devient un lien (javascript:, data:… restent du texte) ; une référence
+  // papier (« classeur FDS de l'atelier ») s'affiche telle quelle.
+  const safeUrl = (u) => { const t = String(u == null ? "" : u).trim(); return /^https?:\/\/[^\s]+$/i.test(t) ? t : ""; };
+  function fdsCellule(p){
+    const ref = String(p.lienFDS || "").trim(), url = safeUrl(ref);
+    const lien = url ? `<a class="fiche-lien" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Ouvrir la fiche de données de sécurité">FDS ↗</a>` : "";
+    const lignes = [];
+    if (ref && !url) lignes.push(`<b>FDS :</b> ${esc(ref)}`);
+    if (p.mesuresPrevention) lignes.push(`<b>Prévention :</b> ${esc(p.mesuresPrevention)}`);
+    return lien + (lignes.length ? `<div class="prod-sub">${lignes.join("<br>")}</div>` : "");
+  }
+  // fiche « Produits chimiques » de la Base documentaire (même source que le Document Unique)
+  { const url = window.VigieRisques ? VigieRisques.lienFiche("Produits chimiques") : "";
+    if (url){ const a = $("ficheRisque"); a.href = url; a.title = "Ouvrir la fiche « Produits chimiques » dans la Base documentaire"; a.hidden = false; } }
 
   // ---------- Filtres ----------
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fPicto = $("fPicto");
@@ -662,7 +686,7 @@
     }
     tbody.innerHTML = rows.map(p => `
       <tr class="${isFdsOld(p) ? 'fds-old' : ''}" data-id="${esc(p.id)}">
-        <td class="wrap">${esc(p.nom)}</td>
+        <td class="wrap">${esc(p.nom)}${fdsCellule(p)}</td>
         <td>${esc(p.fournisseur || '—')}</td>
         <td>${esc(p.service)}</td>
         <td>${p.quantiteStockee != null ? esc(p.quantiteStockee) + ' ' + esc(p.unite || '') : '—'}</td>

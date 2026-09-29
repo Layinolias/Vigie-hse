@@ -619,10 +619,13 @@
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const role = (session && session.role) || "ag";
-  const canEdit = role === "rh" || role === "admin";
+  // permission granulaire « sante-visites » (Administration) : lecture, ou lecture et écriture
+  const svPerm = (session && session.modulePermissions && session.modulePermissions["sante-visites"]) || "none";
+  const canEdit = role === "rh" || role === "admin" || svPerm === "write";
   // Question 17 (réponse du préventeur, 2026-09-29) : le suivi médical est réservé à l'encadrement — le manager pour ses
-  // services, les RH et l'administrateur pour tout ; un agent n'y a pas accès (le serveur ne lui transmet plus ces registres).
-  if (!canEdit && role !== "manager"){ location.href = "dashboard.html"; }
+  // services, les RH et l'administrateur pour tout — et aux comptes qui ont la permission « sante-visites » ; un agent
+  // n'y a pas accès (le serveur ne lui transmet plus ces registres).
+  if (!canEdit && role !== "manager" && svPerm === "none"){ location.href = "dashboard.html"; }
   const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
@@ -647,7 +650,7 @@
   const canAccueilPoste = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accueil-poste"]) || "none") !== "none");
   if (canAccueilPoste){ $("navAdministratif").style.display = ""; $("navAccueilPoste").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
-  if (role === "rh" || role === "admin" || role === "manager"){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement seulement (question 17)
+  if (role === "rh" || role === "admin" || role === "manager" || (((session && session.modulePermissions && session.modulePermissions["sante-visites"]) || "none") !== "none")){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement, ou permission « sante-visites » (question 17)
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
   // Pénibilité (module 5) : RH, administrateurs, ou la permission « penibilite »
   { const r = (session && session.role) || "ag", p = (session && session.modulePermissions && session.modulePermissions["penibilite"]) || "none";

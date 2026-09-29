@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 154 points au 2026-09-29 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 155 points au 2026-09-29 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -99,7 +99,8 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Onglet « Modèles de convocation » : modifier le modèle par défaut, en créer un second, le choisir dans une convocation, le supprimer (le modèle par défaut n'est pas supprimable, mais peut être rétabli à son texte d'origine).
 - [ ] Passer un RDV à « Réalisé » : une confirmation propose de mettre à jour la date de dernière visite de l'agent — « Annuler » ne change rien dans le suivi, « OK » met à jour la date et l'échéance du suivi ; supprimer une fiche du suivi supprime aussi ses rendez-vous (le message le précise).
 - [ ] Se connecter en `manager` : l'agenda montre uniquement les RDV de ses services, sans aucun bouton de création/modification, sans onglet « Modèles de convocation » ; le compteur « RDV à venir (30 j) » du bandeau du haut est cohérent avec l'agenda.
-- [ ] **Suivi médical réservé à l'encadrement** (question 17) : connecté en `AG1`, puis en `PREV1`, le lien « Santé & Visites » n'apparaît pas dans le menu, et taper l'adresse `sante-visites.html` renvoie au tableau de bord. En `manager`, `RH1` et `admin`, le lien est là et la page s'ouvre.
+- [ ] **Suivi médical réservé à l'encadrement** (question 17) : connecté en `AG1`, le lien « Santé & Visites » n'apparaît pas dans le menu, et taper l'adresse `sante-visites.html` renvoie au tableau de bord. En `manager`, `RH1` et `admin`, le lien est là et la page s'ouvre.
+- [ ] **Permission « Santé & Visites »** : connecté en `PREV1` (après « Réinitialiser la démonstration » si ce navigateur a déjà servi), le lien est là et la page s'ouvre en lecture seule (pas de « Nouveau RDV », pas d'onglet des modèles). En `admin` → Utilisateurs, PREV1 porte le badge « Santé · lecture » ; le passer en « Lecture / écriture », se reconnecter en `PREV1` : les boutons de création apparaissent.
 
 ### Entreprises extérieures (`RH1`/`RH2` ou `admin` — accès write d'office ; permission granulaire `entreprises-ext` pour les autres)
 - [ ] `RH1` voit "Entreprises extérieures" dans la sidebar (section "Administratif") ; créer une intervention complète (entreprise, nature, site, dates, heures estimées, inspection commune préalable avec date/participants/risques, plan de prévention en texte libre), la retrouver dans le registre, la modifier.

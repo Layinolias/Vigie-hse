@@ -488,7 +488,7 @@ Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, 
 >
 > **Mis en œuvre le 2026-09-29.** Le serveur ne transmet plus le suivi médical ni les rendez-vous qu'aux comptes manager (limités à leurs services par le périmètre), RH et administrateur (`serveur/lecture.js`) ; la page Santé & Visites renvoie les autres au tableau de bord, et son lien disparaît du menu pour eux sur les 23 pages qui l'affichent. Rien ne change pour l'encadrement : ses 25 pages restent identiques au caractère près (photo avant/après).
 >
-> **Conséquence à connaître** : le compte de démonstration `PREV1` (profil préventeur : rôle agent doté de permissions module par module) n'a plus accès au suivi médical, puisque son rôle de base est « agent ». Si un préventeur doit le consulter, deux voies : lui donner un compte RH ou manager, ou créer une permission « Santé & Visites » donnée compte par compte depuis Administration (comme « Dossiers AT/MP ») — à décider avec lui.
+> **Conséquence à connaître** : le compte de démonstration `PREV1` (profil préventeur : rôle agent doté de permissions module par module) n'a plus accès au suivi médical, puisque son rôle de base est « agent ». Si un préventeur doit le consulter, deux voies : lui donner un compte RH ou manager, ou créer une permission « Santé & Visites » donnée compte par compte depuis Administration (comme « Dossiers AT/MP »). **Tranché par l'utilisateur le 2026-09-29 : la permission** (`sante-visites`, lecture ou écriture), donnée en lecture à `PREV1`.
 
 ---
 

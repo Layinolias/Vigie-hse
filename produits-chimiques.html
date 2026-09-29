@@ -474,7 +474,7 @@
   const canAccueilPoste = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accueil-poste"]) || "none") !== "none");
   if (canAccueilPoste){ $("navAdministratif").style.display = ""; $("navAccueilPoste").style.display = ""; }
   if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
-  if (role === "rh" || role === "admin" || role === "manager"){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement seulement (question 17)
+  if (role === "rh" || role === "admin" || role === "manager" || (((session && session.modulePermissions && session.modulePermissions["sante-visites"]) || "none") !== "none")){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement, ou permission « sante-visites » (question 17)
   if (role === "admin"){ $("navAdminLink").style.display = ""; }
   // Pénibilité (module 5) : RH, administrateurs, ou la permission « penibilite »
   { const r = (session && session.role) || "ag", p = (session && session.modulePermissions && session.modulePermissions["penibilite"]) || "none";

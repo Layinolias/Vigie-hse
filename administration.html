@@ -466,6 +466,14 @@
                 </select>
               </div>
               <div class="f span2">
+                <label for="uSanteVisitesPerm">Santé &amp; Visites — suivi médical (hors encadrement, ex. préventeur)</label>
+                <select id="uSanteVisitesPerm">
+                  <option value="none">Aucun accès</option>
+                  <option value="read">Lecture seule</option>
+                  <option value="write">Lecture / écriture (fiches, rendez-vous, convocations)</option>
+                </select>
+              </div>
+              <div class="f span2">
                 <label for="uDialogueSocialPerm">Modules avancés — Dialogue social (représentants du personnel)</label>
                 <select id="uDialogueSocialPerm">
                   <option value="none">Aucun accès</option>
@@ -956,7 +964,7 @@
       { id:"u-rh2", nom:"", prenom:"", email:"RH2", username:"RH2", password:"1234", role:"rh", services:["*"], active:true },
       { id:"u-ag1", nom:"", prenom:"", email:"AG1", username:"AG1", password:"1234", role:"ag", services:["*"], active:true },
       { id:"u-ag2", nom:"", prenom:"", email:"AG2", username:"AG2", password:"1234", role:"ag", services:["*"], active:true },
-      { id:"u-prev1", nom:"", prenom:"", email:"PREV1", username:"PREV1", password:"1234", role:"ag", services:["*"], modulePermissions:{"atmp-admin":"write","atmp-declare":"write","accident-analyse":"write","urgences":"write"}, active:true },
+      { id:"u-prev1", nom:"", prenom:"", email:"PREV1", username:"PREV1", password:"1234", role:"ag", services:["*"], modulePermissions:{"atmp-admin":"write","atmp-declare":"write","accident-analyse":"write","urgences":"write","sante-visites":"read"}, active:true },
       { id:"u-admin", nom:"Verchamps", prenom:"Admin", email:"admin@verchamps.fr", username:"admin@verchamps.fr", password:"admin1234", role:"admin", services:["*"], active:true },
       { id:"u-manager", nom:"Verchamps", prenom:"Manager", email:"manager@verchamps.fr", username:"manager@verchamps.fr", password:"manager1234", role:"manager", services:["Voirie & Réseaux","Espaces Verts & Paysage"], active:true },
     ];
@@ -1006,6 +1014,8 @@
       const accueilBadge = (accueilPerm && accueilPerm !== "none") ? ` <span class="svc-tag" title="Accueil au poste">Accueil · ${accueilPerm === "write" ? "écriture" : "lecture"}</span>` : "";
       const penPerm = u.modulePermissions && u.modulePermissions["penibilite"];
       const penBadge = (penPerm && penPerm !== "none") ? ` <span class="svc-tag" title="Pénibilité">Pénibilité · ${penPerm === "write" ? "écriture" : "lecture"}</span>` : "";
+      const svPermU = u.modulePermissions && u.modulePermissions["sante-visites"];
+      const svBadge = (svPermU && svPermU !== "none") ? ` <span class="svc-tag" title="Santé &amp; Visites">Santé · ${svPermU === "write" ? "écriture" : "lecture"}</span>` : "";
       const dsPerm = u.modulePermissions && u.modulePermissions["dialogue-social"];
       const dsBadge = (dsPerm && dsPerm !== "none") ? ` <span class="svc-tag" title="Dialogue social">Dialogue · ${dsPerm === "write" ? "écriture" : "lecture"}</span>` : "";
       const anonBadge = u.anonymise === true ? ` <span class="svc-tag" title="Ne reçoit aucune donnée de santé">Anonymisé</span>` : "";
@@ -1015,7 +1025,7 @@
       <tr data-id="${esc(u.id)}">
         <td class="mono">${esc(u.username || u.email)}</td>
         <td>${(u.nom || u.prenom) ? `${esc(u.prenom)} ${esc(u.nom)}` : "—"}</td>
-        <td><span class="chip ${esc(u.role)}">${ROLE_CHIP_LABEL[u.role] || u.role}</span>${atmpBadge}${declareBadge}${analyseBadge}${urgencesBadge}${gestionRhBadge}${eeBadge}${accueilBadge}${penBadge}${dsBadge}${docBadge}${anonBadge}</td>
+        <td><span class="chip ${esc(u.role)}">${ROLE_CHIP_LABEL[u.role] || u.role}</span>${atmpBadge}${declareBadge}${analyseBadge}${urgencesBadge}${gestionRhBadge}${eeBadge}${accueilBadge}${penBadge}${svBadge}${dsBadge}${docBadge}${anonBadge}</td>
         <td>${svcHtml}</td>
         <td><span class="chip ${u.active !== false ? 'active-yes' : 'active-no'}">${u.active !== false ? "Actif" : "Désactivé"}</span></td>
         <td>
@@ -1050,6 +1060,7 @@
     $("uEntreprisesExtPerm").value = "none";
     $("uAccueilPostePerm").value = "none";
     $("uPenibilitePerm").value = "none";
+    $("uSanteVisitesPerm").value = "none";
     $("uDialogueSocialPerm").value = "none";
     $("uAnonymise").checked = false;
     $("uDocumentationPerm").checked = false;
@@ -1085,6 +1096,7 @@
       $("uEntreprisesExtPerm").value = (u.modulePermissions && u.modulePermissions["entreprises-ext"]) || "none";
       $("uAccueilPostePerm").value = (u.modulePermissions && u.modulePermissions["accueil-poste"]) || "none";
       $("uPenibilitePerm").value = (u.modulePermissions && u.modulePermissions["penibilite"]) || "none";
+      $("uSanteVisitesPerm").value = (u.modulePermissions && u.modulePermissions["sante-visites"]) || "none";
       $("uDialogueSocialPerm").value = (u.modulePermissions && u.modulePermissions["dialogue-social"]) || "none";
       $("uAnonymise").checked = u.anonymise === true;
       $("uDocumentationPerm").checked = !!(u.modulePermissions && u.modulePermissions["documentation"] === "write");
@@ -1161,6 +1173,8 @@
         "accueil-poste": $("uAccueilPostePerm").value,
         "penibilite": $("uPenibilitePerm").value,
         "dialogue-social": $("uDialogueSocialPerm").value,
+        "sante-visites": $("uSanteVisitesPerm").value,
+        "sante-visites": $("uSanteVisitesPerm").value,
         "documentation": $("uDocumentationPerm").checked ? "write" : "none",
       });
       u.anonymise = $("uAnonymise").checked;

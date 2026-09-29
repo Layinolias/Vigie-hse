@@ -444,7 +444,7 @@
   $("userName").textContent = session.user;
   $("userRoleLabel").textContent = sessRole === "admin" ? "Administrateur" : "Compte RH";
   $("navPilotage").style.display = "";
-  if (sessRole === "rh" || sessRole === "admin" || sessRole === "manager"){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement seulement (question 17)
+  if (sessRole === "rh" || sessRole === "admin" || sessRole === "manager" || (((session && session.modulePermissions && session.modulePermissions["sante-visites"]) || "none") !== "none")){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement, ou permission « sante-visites » (question 17)
   $("navReportingLink").style.display = "";
   if (sessRole === "admin"){ $("navAdminLink").style.display = ""; }
   // Pénibilité (module 5) : RH, administrateurs, ou la permission « penibilite »

@@ -31,13 +31,13 @@ Dashboard HSE prototype (Ville de Verchamps + Agglomération de Verchamps) : Reg
 
 - **Poste de pilotage** (regroupe tous les accès) : https://claude.ai/code/artifact/e3b695a5-af0c-4c05-ac92-dd2dd38fce88
 - **Cahier du préventeur** (questions/réponses métier + dépôt d'idées du collègue) : https://claude.ai/code/artifact/91200911-53e2-4f96-ae48-9f8b874fdc40 — procédure de lecture des réponses en tête de `Documentation/QUESTIONS-METIER-EN-ATTENTE.md`.
-- **Checklist QA V1** (154 points à cocher, version cliquable de `Documentation/CHECKLIST-QA-V1.md`) : https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf — génération du tableau `ITEMS` : parser les `- [ ]` du `.md`, un id stable `s{section}-{slug}-{n}`, si besoin de le régénérer sans historique.
+- **Checklist QA V1** (155 points à cocher, version cliquable de `Documentation/CHECKLIST-QA-V1.md`) : https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf — génération du tableau `ITEMS` : parser les `- [ ]` du `.md`, un id stable `s{section}-{slug}-{n}`, si besoin de le régénérer sans historique.
 
 Le poste de pilotage affiche des chiffres relevés dans le dépôt (modules faits, questions en attente, points de test) : les rafraîchir quand ils ont bougé.
 
 ## Comptes de test
 
-`admin@verchamps.fr` / `admin1234` · `manager@verchamps.fr` / `manager1234` · `RH1`/`RH2` / `1234` · `AG1`/`AG2` / `1234` · `PREV1` / `1234` (rôle de base `ag` + permissions granulaires `atmp-admin:write`, `atmp-declare:write`, `accident-analyse:write`, `urgences:write` — démontre le modèle de permissions par module, voir `ETAT-DU-PROJET.md` §7 ; `gestion-rh` n'y a volontairement pas été ajoutée, module RH plutôt que HSE)
+`admin@verchamps.fr` / `admin1234` · `manager@verchamps.fr` / `manager1234` · `RH1`/`RH2` / `1234` · `AG1`/`AG2` / `1234` · `PREV1` / `1234` (rôle de base `ag` + permissions granulaires `atmp-admin:write`, `atmp-declare:write`, `accident-analyse:write`, `urgences:write`, `sante-visites:read` — démontre le modèle de permissions par module, voir `ETAT-DU-PROJET.md` §7 ; `gestion-rh` n'y a volontairement pas été ajoutée, module RH plutôt que HSE)
 
 ## Fichiers de `V0.1.1.2`
 

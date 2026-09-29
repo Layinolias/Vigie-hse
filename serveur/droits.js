@@ -33,6 +33,7 @@ const REGLES = {
   atmp_dossiers: parModule('atmp-admin'), atmp_arretes: parModule('atmp-admin'),
   analyses_accident: parModule('accident-analyse'),
   exercices_urgence: parModule('urgences'),
+  visites: parModule('sante-visites'), rdv_medicaux: parModule('sante-visites'), modeles_convocation: parModule('sante-visites'),
   agents: parModule('gestion-rh'), heures_travaillees: parModule('gestion-rh'),
   interventions_ee: parModule('entreprises-ext'),
   accueils: parModule('accueil-poste'), modeles_accueil: parModule('accueil-poste'), accueil_delai: parModule('accueil-poste'),

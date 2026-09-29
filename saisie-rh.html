@@ -462,7 +462,7 @@
   $("userName").textContent = session.user;
   $("userRoleLabel").textContent = sessRole === "admin" ? "Administrateur" : (isRhAdmin ? "Compte RH" : "Accès déclaration AT/MP");
   if (isRhAdmin){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; $("navEvaluerDuerp").style.display = ""; }
-  if (sessRole === "rh" || sessRole === "admin" || sessRole === "manager"){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement seulement (question 17)
+  if (sessRole === "rh" || sessRole === "admin" || sessRole === "manager" || (((session && session.modulePermissions && session.modulePermissions["sante-visites"]) || "none") !== "none")){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement, ou permission « sante-visites » (question 17)
   if (sessRole === "admin"){ $("navAdminLink").style.display = ""; }
   const canAtmpAdmin = isRhAdmin || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
   const canAccidentAnalyse = isRhAdmin || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");

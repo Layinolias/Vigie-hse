@@ -14,7 +14,8 @@
 //   - Journal d'audit, comptes utilisateurs : administrateur (Administration est la seule page qui les lit).
 //   - Suivi médical et rendez-vous : l'encadrement seulement — manager (ses services, par le périmètre), RH et
 //     administrateur ; un agent n'en reçoit rien, et la page Santé & Visites le renvoie au tableau de bord.
-//     Réponse du préventeur à la question 17 (2026-09-29, option « l'encadrement seulement »).
+//     Réponse du préventeur à la question 17 (2026-09-29, option « l'encadrement seulement ») ; un autre compte y
+//     accède par la permission « sante-visites » (lecture ou écriture), donnée dans Administration (ex. PREV1).
 //
 // Un compte qui ne reçoit pas une valeur complète peut encore y AJOUTER (déclarer un AT/MP, laisser une ligne au
 // journal) : ses seuls enregistrements nouveaux sont greffés sur le registre complet (Anonymisation.grefferAjouts),
@@ -30,7 +31,7 @@ const ANALYSE_VUE_ACTIONS = ['id', 'atmpId', 'collectivite', 'service', 'dateAna
 const estRh = p => !!p && (p.role === 'rh' || p.role === 'admin');
 const perm = (p, m) => !!(p && p.modulePermissions && (p.modulePermissions[m] === 'read' || p.modulePermissions[m] === 'write'));
 const registreComplet = p => estRh(p) || perm(p, 'atmp-admin') || perm(p, 'accident-analyse');
-const encadrement = p => estRh(p) || (!!p && p.role === 'manager');
+const encadrement = p => estRh(p) || (!!p && p.role === 'manager') || perm(p, 'sante-visites');
 
 // null : valeur complète ; RETIRE : rien ; tableau : les seuls champs transmis de chaque enregistrement
 function regle(page, cle){

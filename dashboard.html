@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tableau de bord</title>
 <meta name="description" content="Centre de pilotage HSE de la collectivité — vue d'ensemble Santé au travail et Sécurité &amp; Risques.">
 <link rel="stylesheet" href="assets/polices/polices.css">
@@ -389,6 +391,12 @@
   .kpi-row-compact .kpi-trend{ font-size:10.5px; }
 
   @media (max-width:640px){ .dash-greeting{ padding:9px 16px 8px; } }
+  /* Téléphone : météo + score HSE occupent déjà toute la largeur ; le badge de rôle et l'horloge passaient
+     par-dessus. Masqués ici seulement : le téléphone affiche l'heure, le pied du menu le compte et son rôle. */
+  @media (max-width:640px){
+    .topbar{ grid-template-columns:1fr; grid-template-areas:"left" "center"; }
+    .topbar-right{ display:none; }
+  }
 
   /* ===== Vue mobile simplifiée : CTA terrain + masquage des panneaux denses ===== */
   .mobile-cta-row{ display:none; }
@@ -400,6 +408,7 @@
     .mobile-detail-note{ display:block; font-size:12px; color:var(--text-faint); text-align:center; margin:4px 0 22px; }
   }
 </style>
+<link rel="stylesheet" href="assets/mobile.css">
 
 <script src="assets/stockage.js"></script>
 <script>

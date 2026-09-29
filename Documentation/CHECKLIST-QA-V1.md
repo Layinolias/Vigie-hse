@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 159 points au 2026-09-29 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 160 points au 2026-09-29 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -217,6 +217,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] Largeur ~375px (téléphone) : le menu latéral se cache, le bouton hamburger l'ouvre en tiroir par-dessus le contenu.
 - [ ] Aucun tableau ne force la page entière à défiler horizontalement (seul le tableau lui-même doit défiler, dans son propre cadre).
 - [ ] La topbar (météo/score/sélecteur/horloge) reste utilisable sans élément coupé ou superposé.
+- [ ] **Sur un vrai téléphone** (pas seulement un navigateur rétréci) : la page s'affiche à la taille du téléphone, pas comme un écran d'ordinateur réduit ; le menu (bouton ☰) a des entrées grandes et faciles à toucher, les titres de page sont lisibles sans zoomer. Sur le tableau de bord, la barre du haut montre la météo, le score et Ville / Agglomération / Tous sans rien superposer (l'horloge et le badge de rôle y sont masqués : le pied du menu garde le compte).
 - [ ] Les formulaires de création (Déclarer un AT/MP, Évaluer un risque, etc.) restent utilisables en une colonne.
 
 ## 6. Multi-navigateur

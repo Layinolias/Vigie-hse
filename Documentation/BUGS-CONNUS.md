@@ -101,7 +101,12 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 
 ---
 
+### Sur téléphone, tout était minuscule : aucune page ne s'adaptait
+
+- **Remonté** : 2026-09-15 (checklist §5), comme une demande de confort — « augmenter la taille des titres et du menu côté mobile ».
+- **Cause** (trouvée le 2026-09-29) : aucune page n'avait de balise `<meta name="viewport">`. Un téléphone les affichait donc comme un écran d'ordinateur de 980 px réduit à sa largeur, et aucune des règles prévues pour les petits écrans ne s'appliquait — elles n'avaient jamais été vues sur un vrai téléphone.
+- **Corrigé** : balise ajoutée aux 26 pages ; `assets/mobile.css` agrandit le menu et les titres sur téléphone ; trois débordements révélés par la vraie largeur corrigés (liste « Type d'habilitation » des Formations, fil d'Ariane trop long sur deux pages, badge de rôle et horloge qui passaient sur la météo et le score dans la barre du tableau de bord — masqués sur téléphone, le pied du menu garde le compte et son rôle). Mesuré : 24 pages × 375 et 768 px, ni débordement ni chevauchement ; sur ordinateur, tailles et mode de rendu inchangés.
+
 ## Ouverts / reportés (pas des bugs à corriger maintenant)
 
-- **Taille des titres/menu sur mobile** — remonté le 2026-09-15 (checklist §5) : tout fonctionne, mais le porteur du projet veut augmenter la taille des titres et du menu côté mobile pour plus de confort. Amélioration reportée, pas urgente.
 - **Présentation à un professionnel HSE externe** — toujours en recherche (checklist §7, 2026-09-15). Ne dépend pas du code ; c'est le dernier point du gel `v1.0.0` dans `PLAN-VERSIONS-V1.md`.

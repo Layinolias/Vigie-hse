@@ -1,0 +1,20 @@
+/* Confort sur téléphone (demande du porteur du projet, checklist §5, 2026-09-15) : titres et menu plus grands.
+   Chargé APRÈS le <style> de chaque page, pour l'emporter à spécificité égale ; ne joue qu'à l'écran, en
+   largeur de téléphone — l'ordinateur et l'impression ne changent pas. */
+@media screen and (max-width:640px){
+  /* menu latéral : il s'ouvre par-dessus la page sur téléphone, on peut donc l'élargir sans rien pousser */
+  .sidebar{ width:min(300px, 86vw); }
+  .brand-name{ font-size:18.5px; }
+  .nav-label{ font-size:11.5px; }
+  .nav-item{ font-size:15.5px; padding:11px 14px; min-height:44px; }   /* 44 px : cible tactile confortable */
+  .nav-item .icon{ width:19px; height:19px; }
+  /* titres */
+  /* un fil d'Ariane long (« Administratif / Entreprises extérieures ») se coupe au lieu de pousser l'horloge hors de l'écran */
+  .breadcrumb{ font-size:14.5px; min-width:0; overflow:hidden; white-space:nowrap; }
+  .breadcrumb b{ overflow:hidden; text-overflow:ellipsis; }
+  .page-summary-text h1{ font-size:19.5px; white-space:normal; }
+  .dash-greeting h1{ font-size:23px; }
+  /* barre de filtres : une liste aux libellés longs (types d'habilitation) ne dépasse plus de l'écran */
+  .console .field{ max-width:100%; min-width:0; }
+  .console select{ max-width:100%; }
+}

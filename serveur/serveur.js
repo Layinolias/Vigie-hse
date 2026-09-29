@@ -51,7 +51,7 @@ const RESEAU = !BOUCLE.includes(ECOUTE) || process.env.VIGIE_HTTPS === '1' || NO
 const TAILLE_MAX = 50 * 1024 * 1024;          // une clé = un registre entier ; l'historique complet d'un client tient large
 const CLE_VALIDE = /^vigie_hse_[a-z0-9_]{1,80}$/;
 const TYPES = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
-  '.json':'application/json', '.svg':'image/svg+xml', '.png':'image/png', '.jpg':'image/jpeg', '.ico':'image/x-icon',
+  '.json':'application/json', '.svg':'image/svg+xml', '.png':'image/png', '.jpg':'image/jpeg', '.ico':'image/x-icon', '.woff2':'font/woff2',
   '.xlsx':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.md':'text/plain; charset=utf-8' };
 // Noms sous lesquels le serveur accepte d'être appelé : refuser les autres bloque qu'un site piégé,
 // ouvert dans le navigateur de ce poste, fasse passer son propre nom de domaine pour celui-ci.

@@ -21,7 +21,7 @@ Un dashboard HSE (Hygiène-Sécurité-Environnement) "VIGIE HSE" pour une collec
 - **HTML/CSS/JavaScript vanilla**, aucun framework (pas de React/Vue), aucune étape de build, aucun bundler. Chaque page est un fichier `.html` autonome (CSS et JS inline dans le même fichier).
 - **Persistance** : `localStorage` (données) + `sessionStorage` (session de connexion).
 - **Import/export Excel** : [SheetJS](https://sheetjs.com/) (`assets/xlsx.full.min.js`, version `0.18.5`, licence Apache-2.0 — copie à l'identique de celle de cdnjs, embarquée le 2026-09-25 pour que l'import et l'export marchent sans Internet ni accès au CDN, sur le poste d'un utilisateur).
-- **Polices** : Google Fonts — Barlow Condensed (titres), IBM Plex Sans (texte courant), IBM Plex Mono (chiffres/données).
+- **Polices** : Barlow Condensed (titres), IBM Plex Sans (texte courant), IBM Plex Mono (chiffres/données) — **embarquées** dans `assets/polices/` depuis le 2026-09-29 (jeu « latin », licence SIL OFL 1.1 dans `LICENCES-POLICES.txt`) : chaque page charge `<link rel="stylesheet" href="assets/polices/polices.css">`, **jamais Google Fonts** (qui recevait l'adresse IP du poste à chaque page). Une nouvelle page reprend cette balise ; une graisse nouvelle s'ajoute à `polices.css` avec son fichier.
 - **Icônes** : sprite SVG artisanal inline (`<symbol id="i-...">`) dans chaque page, pas de bibliothèque externe.
 - Navigation entre pages : simples liens `<a href="...">`, pas de routeur.
 

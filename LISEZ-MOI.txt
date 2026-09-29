@@ -2,9 +2,8 @@ VIGIE HSE — installation sur votre ordinateur
 =============================================
 
 VIGIE HSE fonctionne sur cet ordinateur : vos données ne le quittent pas, et personne d'autre sur
-le réseau ne peut s'y connecter. Avec Internet, les pages chargent seulement leurs polices de
-caractères et, sur le tableau de bord, la météo — sans aucune de vos données. Sans Internet, tout
-fonctionne quand même. Vos données sont rangées dans un dossier à part, que les nouvelles
+le réseau ne peut s'y connecter. Avec Internet, seul le tableau de bord va chercher la météo (la
+ville choisie), sans aucune de vos données. Sans Internet, tout fonctionne quand même. Vos données sont rangées dans un dossier à part, que les nouvelles
 versions de l'application ne touchent jamais.
 
 

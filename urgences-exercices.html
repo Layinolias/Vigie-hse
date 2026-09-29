@@ -5,6 +5,7 @@
 <meta name="description" content="Registre des exercices d'évacuation, d'intrusion et de risque environnemental — preuve datée que les exercices ont bien lieu.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -382,8 +383,8 @@
       </div>
 
       <div class="panel console">
-        <div class="field"><span class="flabel">Collectivité</span>
-          <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+        <div class="field"><span class="flabel" data-org-libelle>Collectivité</span>
+          <select id="fCollectivite" data-org="filtre"></select>
         </div>
         <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
         <div class="field"><span class="flabel">Type d'exercice</span>
@@ -399,8 +400,8 @@
           <input type="hidden" id="fId">
           <div class="form-grid">
             <div><label for="fSite">Site</label><input type="text" id="fSite" required placeholder="ex. Hôtel de Ville"></div>
-            <div><label for="fCollectiviteForm">Collectivité</label>
-              <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+            <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
+              <select id="fCollectiviteForm" required data-org="saisie"></select>
             </div>
             <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
             <div><label for="fType">Type d'exercice</label>
@@ -453,6 +454,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
@@ -555,8 +557,6 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -567,7 +567,7 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Dataset (always-merge) — registre chronologique, jamais réécrit en place ----------
   const STORAGE_KEY = "vigie_hse_exercices_urgence";
@@ -622,7 +622,7 @@
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fType = $("fType");
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -661,7 +661,7 @@
   function render(){
     const col = fCollectivite.value, svc = fService.value, ty = fType.value;
     let rows = DATASET.filter(r =>
-      (col === "all" || r.collectivite === col) &&
+      (col === "all" || VigieOrga.actuel(r.collectivite) === col) &&
       (svc === "all" || r.service === svc) &&
       (ty === "all" || r.type === ty)
     );
@@ -755,7 +755,7 @@
     if (isScoped) list = list.filter(s => myServices.includes(s));
     $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
   }
-  fillFormServiceOptions("Ville");
+  fillFormServiceOptions(VigieOrga.premier());
   $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
 
   function openForm(rec){
@@ -765,8 +765,8 @@
       $("formTitle").textContent = "Modifier l'exercice";
       $("fId").value = rec.id;
       $("fSite").value = rec.site || "";
-      $("fCollectiviteForm").value = rec.collectivite || "Ville";
-      fillFormServiceOptions(rec.collectivite || "Ville");
+      $("fCollectiviteForm").value = VigieOrga.de(rec);
+      fillFormServiceOptions(VigieOrga.de(rec));
       $("fServiceForm").value = rec.service || "";
       $("fTypeForm").value = rec.type || "Évacuation incendie";
       $("fDateExercice").value = rec.dateExercice || "";
@@ -778,7 +778,7 @@
       $("formTitle").textContent = "Nouvel exercice";
       $("fId").value = "";
       $("fDateExercice").value = VigieDates.aujourdhui();
-      fillFormServiceOptions("Ville");
+      fillFormServiceOptions(VigieOrga.premier());
     }
     renderActionsList();
     formPanel.style.display = "";
@@ -874,11 +874,11 @@
     const periodiciteMois = Number(rawPick(raw, ["periodicite mois","periodicite"]));
     if (!periodiciteMois || periodiciteMois <= 0) return null;
     const typeRaw = String(rawPick(raw, ["type"])).trim();
-    const collectiviteRaw = normKeyImp(rawPick(raw, ["collectivite"]));
+    const collectiviteRaw = normKeyImp(rawPick(raw, ["collectivite", VigieOrga.norm(VigieOrga.libelle())]));
     return {
       id: String(rawPick(raw, ["id"])).trim() || "",
       site, dateExercice,
-      collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+      collectivite: VigieOrga.reconnaitre(collectiviteRaw),
       service: String(rawPick(raw, ["service"])).trim(),
       type: TYPES_VALIDES.includes(typeRaw) ? typeRaw : "Évacuation incendie",
       dureeMinutes: Number(rawPick(raw, ["duree minutes","duree"])) || 0,
@@ -949,7 +949,7 @@
   VigieImpression.brancher("btnExport");
   $("btnExport").addEventListener("click", () => {
     const exRows = DATASET.map(r => ({
-      "ID": r.id, "Site": r.site, "Date exercice": r.dateExercice, "Collectivité": r.collectivite || "Ville", "Service": r.service,
+      "ID": r.id, "Site": r.site, "Date exercice": r.dateExercice, [VigieOrga.libelle()]: VigieOrga.de(r), "Service": r.service,
       "Type": r.type, "Durée minutes": r.dureeMinutes || 0, "Participation": r.participation || "",
       "Périodicité mois": r.periodiciteMois, "Constatations": r.constatations || "", "Auteur": r.auteur || "",
     }));
@@ -961,7 +961,7 @@
       });
     });
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exRows, { header: ["ID", "Site", "Date exercice", "Collectivité", "Service", "Type", "Durée minutes", "Participation", "Périodicité mois", "Constatations", "Auteur"] }), "Exercices");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exRows, { header: ["ID", "Site", "Date exercice", VigieOrga.libelle(), "Service", "Type", "Durée minutes", "Participation", "Périodicité mois", "Constatations", "Auteur"] }), "Exercices");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(actRows, { header: ["ID Exercice", "Site", "Action", "Responsable", "Échéance", "Statut"] }), "Actions");
     XLSX.writeFile(wb, `urgences-exercices_${VigieDates.aujourdhui()}.xlsx`);
   });

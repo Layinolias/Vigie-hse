@@ -4,6 +4,7 @@
 <title>Administration</title>
 <meta name="description" content="Panneau d'administration VIGIE HSE — utilisateurs, référentiels, flash info et journal des modifications.">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/risques-ref.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/libelles-champs.js"></script>
@@ -212,6 +213,9 @@
   .list-row .list-desc{ flex:2; }
   .add-row{ display:flex; gap:8px; padding-top:10px; border-top:1px dashed var(--border); }
   .add-row input{ flex:1; }
+  .org-compte{ font-size:11.5px; color:var(--text-faint); white-space:nowrap; min-width:150px; }
+  .org-suppr{ margin:0 0 14px; padding:12px 14px; border:1px solid rgba(var(--danger-rgb, 220,120,120),.45); border-radius:var(--r-sm); background:var(--bg-2); font-size:12.5px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  .org-suppr[hidden], #orgPanel [hidden]{ display:none !important; }   /* .f impose display:flex : hidden doit l'emporter */
 
   .news-admin-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; margin-bottom:20px; }
   .news-admin-card{ border:1px solid var(--border); border-radius:var(--r-md); padding:13px 14px; background:var(--bg-2); display:flex; flex-direction:column; gap:6px; }
@@ -513,6 +517,26 @@
       <!-- ===================== B. RÉFÉRENTIELS ===================== -->
       <section class="tab-panel" id="tab-ref">
         <div class="banner" id="refBanner"></div>
+        <!-- Organisation (J0, 2026-09-29) : entités de premier niveau et mot qui les désigne — assets/organisation.js -->
+        <div class="panel section-block" style="padding:20px;" id="orgPanel">
+          <div class="panel-head">
+            <h3 class="panel-title">Organisation</h3>
+            <span class="panel-note">Les grandes entrées de l'organisation (Ville, Agglomération… ou Usine 1, Équipe 2) et le mot qui les désigne sur tous les écrans. Leurs services se modifient dans l'éditeur de listes ci-dessous.</span>
+          </div>
+          <div class="field-grid" style="margin-bottom:16px; align-items:end;">
+            <div class="f"><label for="orgMot">Mot affiché</label><select id="orgMot"></select></div>
+            <div class="f" id="orgLibreWrap" hidden><label for="orgLibelle">Mot (singulier)</label><input type="text" id="orgLibelle" placeholder="ex. Direction"></div>
+            <div class="f" id="orgPlurielWrap" hidden><label for="orgPluriel">Pluriel</label><input type="text" id="orgPluriel" placeholder="ex. Directions"></div>
+            <div class="f" id="orgGenreWrap" hidden><label for="orgGenre">Pour « tous / toutes »</label><select id="orgGenre"><option value="f">féminin (« Toutes »)</option><option value="m">masculin (« Tous »)</option></select></div>
+            <div class="f"><button type="button" class="btn btn-primary btn-sm" id="orgMotSave">Enregistrer le mot</button></div>
+          </div>
+          <div class="list-editor" id="orgRows"></div>
+          <div class="org-suppr" id="orgSuppr" hidden></div>
+          <div class="add-row">
+            <input type="text" id="orgNew" placeholder="Nouvelle entrée (ex. Usine 3)…">
+            <button type="button" class="btn btn-primary btn-sm" id="orgAdd">Ajouter</button>
+          </div>
+        </div>
         <div class="panel section-block" style="padding:20px;">
           <div class="panel-head">
             <h3 class="panel-title">Éditeur de listes déroulantes</h3>
@@ -526,8 +550,6 @@
               <option value="sieges">Sièges de lésion</option>
               <option value="natures">Natures de lésion</option>
               <option value="statutsRH">Statuts RH</option>
-              <option value="servicesVille">Services — Ville</option>
-              <option value="servicesAgglo">Services — Agglomération</option>
               <option value="risqueFamillesDUERP">Familles de risque (Document Unique)</option>
               <option value="typesAccueil">Types d'accueil au poste</option>
             </select>
@@ -1006,8 +1028,7 @@
     sieges: ["Autres","Bras","Cervical","Cheville","Cuisse","Dos","Epaule","Genoux","Main","Mollet","Multiple","Oreilles","Pieds","Poignée","Rps","Thorax","Ventre","Visage","Yeux"],
     natures: ["Autres","Brulure","Contusion","Douleur","Entorse","Inflammation","Lombalgie","Malaise","Multiple","Plaie","Psy"],
     statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
+    // les services ne sont plus ici : une liste par entrée de l'organisation (assets/organisation.js)
     risqueFamillesDUERP: RISK_TAXONOMY_DEFAULT,
     // Types d'accueil au poste (réponse Q9 du préventeur, 2026-09-21) — liste ouverte, à compléter ici.
     typesAccueil: ["Nouvel embauché","Changement de poste","Reprise après accident du travail","Reprise après arrêt long","Autre"],
@@ -1021,15 +1042,30 @@
     try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
     return merged;
   }
-  function saveReferentials(ref){ try { VigieStore.setItem(REF_KEY, JSON.stringify(ref)); } catch(e){} }
+  // L'organisation (entrées et leurs services) est écrite par assets/organisation.js dans la même clé : on
+  // reprend toujours sa version enregistrée, jamais la copie chargée à l'ouverture de la page, qui écraserait
+  // un renommage fait depuis.
+  function saveReferentials(ref){
+    try {
+      const cur = JSON.parse(VigieStore.getItem(REF_KEY) || "{}");
+      if (cur && cur.organisation) ref.organisation = cur.organisation;
+      VigieStore.setItem(REF_KEY, JSON.stringify(ref));
+    } catch(e){}
+  }
   let REF = loadReferentials();
   const REF_LABELS = {
     risquesATMP:"Risques (Registre AT/MP)", sieges:"Sièges de lésion", natures:"Natures de lésion", statutsRH:"Statuts RH",
-    servicesVille:"Services — Ville", servicesAgglo:"Services — Agglomération", risqueFamillesDUERP:"Familles de risque (Document Unique)",
+    risqueFamillesDUERP:"Familles de risque (Document Unique)",
     typesAccueil:"Types d'accueil au poste",
   };
+  // Listes de services : une par entrée de l'organisation, désignée « svc:<nom> » dans l'éditeur de listes
+  const SVC = "svc:";
+  const estSvc = k => String(k).indexOf(SVC) === 0;
+  const lireListe = k => estSvc(k) ? VigieOrga.services(k.slice(SVC.length)) : (REF[k] || []);
+  function ecrireListe(k, liste){ if (estSvc(k)) VigieOrga.definirServices(k.slice(SVC.length), liste); else { REF[k] = liste; saveReferentials(REF); } }
+  const libelleListe = k => estSvc(k) ? "Services — " + k.slice(SVC.length) : REF_LABELS[k];
 
-  function allServices(){ return [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')); }
+  function allServices(){ return VigieOrga.tousServices(); }
 
   // ===================================================================
   // A. UTILISATEURS
@@ -1066,7 +1102,7 @@
   function renderServicesCheckboxes(){
     const grid = $("uServicesGrid");
     grid.innerHTML = allServices().map(s => `
-      <label class="checkbox-row"><input type="checkbox" value="${s}"> ${s}</label>
+      <label class="checkbox-row"><input type="checkbox" value="${esc(s)}"> ${esc(s)}</label>
     `).join("");
   }
   renderServicesCheckboxes();
@@ -1363,7 +1399,7 @@
       return;
     }
 
-    const list = REF[key];
+    const list = lireListe(key);
     host.innerHTML = `
       <div class="list-editor" id="refListRows"></div>
       <div class="add-row">
@@ -1383,21 +1419,18 @@
       if (e.target.closest(".ref-save")){
         const val = row.querySelector(".ref-label").value.trim();
         if (!val) return;
-        REF[key][i] = val;
-        saveReferentials(REF);
-        logAudit("Référentiels", "Modification", `Référentiel « ${REF_LABELS[key]} » — entrée modifiée : ${val}`);
+        const l = lireListe(key); l[i] = val; ecrireListe(key, l);
+        logAudit("Référentiels", "Modification", `Référentiel « ${libelleListe(key)} » — entrée modifiée : ${val}`);
         flashBanner($("refBanner"), "Modification enregistrée.");
-        if (key === "servicesVille" || key === "servicesAgglo"){ renderServicesCheckboxes(); }
+        if (estSvc(key)){ renderServicesCheckboxes(); renderOrg(); }
       }
       if (e.target.closest(".ref-del")){
         if (!confirm("Supprimer cette entrée du référentiel ?")) return;
-        const removed = REF[key][i];
-        REF[key].splice(i,1);
-        saveReferentials(REF);
-        logAudit("Référentiels", "Suppression", `Référentiel « ${REF_LABELS[key]} » — entrée supprimée : ${removed}`);
+        const l = lireListe(key); const removed = l.splice(i, 1)[0]; ecrireListe(key, l);
+        logAudit("Référentiels", "Suppression", `Référentiel « ${libelleListe(key)} » — entrée supprimée : ${removed}`);
         renderRefEditor();
         flashBanner($("refBanner"), "Entrée supprimée.");
-        if (key === "servicesVille" || key === "servicesAgglo"){ renderServicesCheckboxes(); }
+        if (estSvc(key)){ renderServicesCheckboxes(); renderOrg(); }
       }
     });
     $("refAddBtn").addEventListener("click", () => {
@@ -1406,12 +1439,11 @@
       if (list.some(v => String(v).toLowerCase() === val.toLowerCase())){
         flashBanner($("refBanner"), "Cette valeur existe déjà.", "info"); return;
       }
-      REF[key].push(val);
-      saveReferentials(REF);
-      logAudit("Référentiels", "Création", `Référentiel « ${REF_LABELS[key]} » — nouvelle entrée : ${val}`);
+      ecrireListe(key, lireListe(key).concat([val]));
+      logAudit("Référentiels", "Création", `Référentiel « ${libelleListe(key)} » — nouvelle entrée : ${val}`);
       renderRefEditor();
       flashBanner($("refBanner"), "Entrée ajoutée.");
-      if (key === "servicesVille" || key === "servicesAgglo"){ renderServicesCheckboxes(); }
+      if (estSvc(key)){ renderServicesCheckboxes(); renderOrg(); }
     });
   }
   $("refSelect").addEventListener("change", renderRefEditor);
@@ -1424,7 +1456,8 @@
   const refValeur = v => Array.isArray(v) ? v[0] : v;
   $("refExportBtn").addEventListener("click", () => {
     const rows = [];
-    Object.keys(REF_LABELS).forEach(cle => (REF[cle] || []).forEach(v => rows.push({ "Liste": REF_LABELS[cle], "Valeur": refValeur(v), "Définition": Array.isArray(v) ? (v[1] || "") : "" })));
+    const cles = Object.keys(REF_LABELS).concat(VigieOrga.noms().map(n => SVC + n));
+    cles.forEach(cle => lireListe(cle).forEach(v => rows.push({ "Liste": libelleListe(cle), "Valeur": refValeur(v), "Définition": Array.isArray(v) ? (v[1] || "") : "" })));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Liste", "Valeur", "Définition"] }), "Référentiels");
     XLSX.writeFile(wb, `referentiels_${VigieDates.aujourdhui()}.xlsx`);
@@ -1436,20 +1469,25 @@
     try {
       const wb = VigieImport.lireClasseur(await file.arrayBuffer());
       const lignes = XLSX.utils.sheet_to_json(wb.Sheets["Référentiels"] || wb.Sheets[wb.SheetNames[0]], { defval: "" });
-      // la liste se désigne par son libellé (« Services — Ville ») ou par son nom technique (« servicesVille »)
+      // la liste se désigne par son libellé (« Services — Usine 1 ») ou par son nom technique (« risquesATMP ») ;
+      // un fichier d'avant l'organisation configurable (« Services — Ville », « servicesAgglo ») va dans l'entrée
+      // que Ville ou Agglomération est devenue, si elle existe encore
       const parNom = {}; Object.entries(REF_LABELS).forEach(([cle, lib]) => { parNom[refNorm(lib)] = cle; parNom[refNorm(cle)] = cle; });
+      [["Ville", "servicesVille"], ["Agglomération", "servicesAgglo"]].forEach(([ancien, tech]) => { const a = VigieOrga.actuel(ancien); if (a){ parNom[refNorm("Services — " + ancien)] = SVC + a; parNom[refNorm(tech)] = SVC + a; } });
+      VigieOrga.noms().forEach(nom => { parNom[refNorm("Services — " + nom)] = SVC + nom; });
       let added = 0, deja = 0, skipped = 0;
-      const touchees = new Set();
+      const touchees = new Set(), aEcrire = {};
       lignes.forEach(raw => {
         const n = {}; Object.keys(raw).forEach(k => { n[refNorm(k)] = raw[k]; });
         const cle = parNom[refNorm(n["liste"])], valeur = String(n["valeur"] == null ? "" : n["valeur"]).trim();
         if (!cle || !valeur){ skipped++; return; }
-        const liste = REF[cle] = (REF[cle] || []).slice();
+        const liste = aEcrire[cle] = aEcrire[cle] || lireListe(cle).slice();
         if (liste.some(v => refNorm(refValeur(v)) === refNorm(valeur))){ deja++; return; }
         liste.push(cle === "risqueFamillesDUERP" ? [valeur, String(n["definition"] == null ? "" : n["definition"]).trim()] : valeur);
-        touchees.add(REF_LABELS[cle]); added++;
+        touchees.add(libelleListe(cle)); added++;
       });
-      if (added){ saveReferentials(REF); renderRefEditor(); afficherStockage();logAudit("Référentiels", "Import", `Import .xlsx — ${added} valeur(s) ajoutée(s) (${[...touchees].join(", ")})`); }
+      Object.keys(aEcrire).forEach(cle => { if (estSvc(cle)) ecrireListe(cle, aEcrire[cle]); else REF[cle] = aEcrire[cle]; });
+      if (added){ saveReferentials(REF); renderServicesCheckboxes(); renderOrg(); renderRefEditor(); afficherStockage();logAudit("Référentiels", "Import", `Import .xlsx — ${added} valeur(s) ajoutée(s) (${[...touchees].join(", ")})`); }
       alert(added + deja === 0
         ? `Aucune ligne n'a pu être importée (${skipped} ignorée(s)). Vérifiez les colonnes « Liste » et « Valeur », et que la liste porte un des noms de l'éditeur.`
         : `Import terminé — ${added} valeur(s) ajoutée(s), ${deja} déjà présente(s), ${skipped} ignorée(s).` + (touchees.size ? ` Listes complétées : ${[...touchees].join(", ")}.` : ""));
@@ -1458,6 +1496,102 @@
     }
     e.target.value = "";
   });
+
+  // ---------- Organisation (assets/organisation.js) : mot affiché, entrées, renommer, déplacer, supprimer ----------
+  // Renommer réécrit tous les enregistrements (décidé avec le porteur du projet, 2026-09-29) ; supprimer
+  // déplace d'abord enregistrements et services vers une autre entrée. Chaque geste est confirmé avec le
+  // nombre d'enregistrements concernés, et noté au journal d'audit.
+  const nbEnreg = nom => VigieOrga.compter(VigieOrga.nomsDe(nom)).total;
+  function remplirRefSelect(){
+    const sel = $("refSelect"), avant = sel.value;
+    [...sel.querySelectorAll("option")].filter(o => estSvc(o.value)).forEach(o => o.remove());
+    const apres = sel.querySelector('option[value="statutsRH"]');
+    VigieOrga.noms().slice().reverse().forEach(nom => {
+      const o = document.createElement("option"); o.value = SVC + nom; o.textContent = "Services — " + nom;
+      apres.after(o);
+    });
+    // la liste choisie suit un renommage ; une entrée supprimée ramène à la première liste
+    const cible = estSvc(avant) ? SVC + (VigieOrga.actuel(avant.slice(SVC.length)) || "") : avant;
+    sel.value = [...sel.options].some(o => o.value === cible) ? cible : sel.options[0].value;
+  }
+  function apresOrg(){ remplirRefSelect(); renderOrg(); renderRefEditor(); renderServicesCheckboxes(); afficherStockage(); }
+  function renderOrg(){
+    const c = VigieOrga.config();
+    const mot = $("orgMot"), preset = VigieOrga.MOTS.find(m => m.libelle === c.libelle);
+    mot.innerHTML = VigieOrga.MOTS.map(m => `<option value="${esc(m.libelle)}">${esc(m.libelle)}</option>`).join("") + `<option value="__autre">Autre…</option>`;
+    mot.value = preset ? preset.libelle : "__autre";
+    $("orgLibelle").value = c.libelle; $("orgPluriel").value = c.pluriel; $("orgGenre").value = c.genre;
+    ["orgLibreWrap", "orgPlurielWrap", "orgGenreWrap"].forEach(id => { $(id).hidden = !!preset; });
+    const noms = VigieOrga.noms();
+    $("orgRows").innerHTML = noms.map((nom, i) => `
+      <div class="list-row" data-nom="${esc(nom)}">
+        <input type="text" class="org-nom" value="${esc(nom)}" aria-label="Nom de l'entrée">
+        <span class="org-compte">${nbEnreg(nom)} enregistrement(s) · ${VigieOrga.services(nom).length} service(s)${i === 0 ? " · par défaut" : ""}</span>
+        <button type="button" class="btn btn-ghost btn-sm org-renommer">Renommer</button>
+        <button type="button" class="btn btn-ghost btn-sm org-haut" aria-label="Monter" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button type="button" class="btn btn-ghost btn-sm org-bas" aria-label="Descendre" ${i === noms.length - 1 ? "disabled" : ""}>↓</button>
+        <button type="button" class="btn btn-danger btn-sm org-suppr" aria-label="Supprimer" ${noms.length < 2 ? "disabled" : ""}><svg class="icon"><use href="#i-trash"/></svg></button>
+      </div>`).join("");
+  }
+  $("orgMot").addEventListener("change", () => {
+    const p = VigieOrga.MOTS.find(m => m.libelle === $("orgMot").value);
+    ["orgLibreWrap", "orgPlurielWrap", "orgGenreWrap"].forEach(id => { $(id).hidden = !!p; });
+    if (!p){ $("orgLibelle").focus(); }
+  });
+  $("orgMotSave").addEventListener("click", () => {
+    const p = VigieOrga.MOTS.find(m => m.libelle === $("orgMot").value);
+    const r = p ? VigieOrga.definirMot(p.libelle, p.pluriel, p.genre) : VigieOrga.definirMot($("orgLibelle").value, $("orgPluriel").value, $("orgGenre").value);
+    if (!r.ok){ flashBanner($("refBanner"), r.erreur, "info"); return; }
+    logAudit("Organisation", "Modification", `Mot affiché : « ${VigieOrga.libelle()} » (${VigieOrga.pluriel()})`);
+    apresOrg(); flashBanner($("refBanner"), `Les écrans afficheront désormais « ${VigieOrga.libelle()} ».`);
+  });
+  $("orgAdd").addEventListener("click", () => {
+    const nom = $("orgNew").value.trim();
+    const r = VigieOrga.ajouter(nom);
+    if (!r.ok){ flashBanner($("refBanner"), r.erreur, "info"); return; }
+    logAudit("Organisation", "Création", `Nouvelle entrée : ${nom}`);
+    $("orgNew").value = ""; apresOrg();
+    flashBanner($("refBanner"), `« ${nom} » ajoutée — ajoutez-lui des services dans l'éditeur de listes (« Services — ${nom} »).`);
+  });
+  $("orgRows").addEventListener("click", (e) => {
+    const row = e.target.closest(".list-row"); if (!row) return;
+    const nom = row.dataset.nom;
+    if (e.target.closest(".org-renommer")){
+      const nouveau = row.querySelector(".org-nom").value.trim();
+      if (nouveau === nom) return;
+      const n = nbEnreg(nom);
+      if (!confirm(`Renommer « ${nom} » en « ${nouveau} » ?\n\n${n} enregistrement(s) de tous les modules passeront à « ${nouveau} ».`)){ row.querySelector(".org-nom").value = nom; return; }
+      const r = VigieOrga.renommer(nom, nouveau);
+      if (!r.ok){ flashBanner($("refBanner"), r.erreur, "info"); row.querySelector(".org-nom").value = nom; return; }
+      logAudit("Organisation", "Modification", `Entrée renommée : « ${nom} » → « ${nouveau} » (${r.n} enregistrement(s) réécrit(s))`);
+      apresOrg(); flashBanner($("refBanner"), `« ${nom} » s'appelle désormais « ${nouveau} » — ${r.n} enregistrement(s) mis à jour.`);
+    }
+    if (e.target.closest(".org-haut") || e.target.closest(".org-bas")){
+      if (VigieOrga.deplacer(nom, e.target.closest(".org-haut") ? -1 : 1).ok){ logAudit("Organisation", "Modification", `Ordre des entrées : ${VigieOrga.noms().join(", ")}`); apresOrg(); }
+    }
+    if (e.target.closest(".org-suppr")){
+      const autres = VigieOrga.noms().filter(x => x !== nom);
+      const box = $("orgSuppr");
+      box.innerHTML = `<span>Supprimer <b>${esc(nom)}</b> : ses <b>${nbEnreg(nom)}</b> enregistrement(s) et ses ${VigieOrga.services(nom).length} service(s) iront vers</span>
+        <select id="orgVers">${autres.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join("")}</select>
+        <button type="button" class="btn btn-danger btn-sm" id="orgSupprOk">Déplacer et supprimer</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="orgSupprNon">Annuler</button>`;
+      box.dataset.nom = nom; box.hidden = false;
+    }
+  });
+  $("orgSuppr").addEventListener("click", (e) => {
+    const box = $("orgSuppr"), nom = box.dataset.nom;
+    if (e.target.closest("#orgSupprNon")){ box.hidden = true; return; }
+    if (!e.target.closest("#orgSupprOk")) return;
+    const vers = $("orgVers").value;
+    const r = VigieOrga.supprimer(nom, vers);
+    if (!r.ok){ flashBanner($("refBanner"), r.erreur, "info"); return; }
+    logAudit("Organisation", "Suppression", `Entrée supprimée : « ${nom} » — ${r.n} enregistrement(s) et ses services déplacés vers « ${vers} »`);
+    box.hidden = true; apresOrg();
+    flashBanner($("refBanner"), `« ${nom} » supprimée — ${r.n} enregistrement(s) déplacé(s) vers « ${vers} ».`);
+  });
+  remplirRefSelect();
+  renderOrg();
   renderRefEditor();
 
   // ===================================================================

@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 160 points au 2026-09-29 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 162 points au 2026-09-29 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -42,6 +42,8 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Dans **Administration** : créer un utilisateur test, modifier son rôle, le désactiver, le supprimer — sans erreur.
 - [ ] Dans **Administration** → Référentiels : ajouter un élément à une liste (ex. un service), vérifier qu'il apparaît dans un formulaire d'un autre module (ex. Déclarer un AT/MP).
 - [ ] Dans **Administration** → Référentiels : « Exporter .xlsx » donne une ligne par valeur ; ajouter au fichier un service « Police municipale » dans « Services — Ville » et une ligne « patrimoine bati » (déjà présente, écrite autrement), puis « Importer .xlsx » : le service apparaît, le doublon est annoncé « déjà présent », rien n'est retiré. Plus bas, le panneau « Stockage de ce navigateur » indique l'espace utilisé et les modules les plus lourds.
+- [ ] **Organisation — renommer et ajouter** (`admin`) : Administration → Référentiels → Organisation. Renommer « Ville » en « Usine 1 » : la confirmation annonce le nombre d'enregistrements concernés ; après, le Registre AT/MP, le Document Unique, les Produits chimiques… proposent « Usine 1 » dans leurs filtres et formulaires, et leurs anciens enregistrements « Ville » y sont. Ajouter « Équipe 3 », puis lui donner un service dans l'éditeur de listes (« Services — Équipe 3 ») : il apparaît quand on choisit Équipe 3 dans un formulaire.
+- [ ] **Organisation — mot, suppression, tableau de bord** : choisir le mot « Site » : les écrans disent « Site », les filtres « Tous », et un export Excel a une colonne « Site » (le réimporter fonctionne). Supprimer « Usine 2 » en choisissant « Usine 1 » comme destination : ses enregistrements et services y passent, la ligne d'audit le dit ; la dernière entrée ne peut pas être supprimée. Tableau de bord : un bouton par entrée puis « Tous » (une liste au-delà de trois), « Répartition » avec une ligne par entrée.
 - [ ] Dans **Administration** : publier une actualité Flash Info, vérifier qu'elle apparaît sur le cockpit.
 - [ ] Dans **Administration** → Veille réglementaire : ajouter une actualité, vérifier qu'elle apparaît sur le cockpit ; passer son statut à "Archivé", vérifier qu'elle disparaît du cockpit (mais reste visible/éditable dans Administration).
 - [ ] Dans **Administration** → Données d'une personne : chercher le nom et le prénom d'un agent du Registre AT/MP (ex. `Dubreuil` `Antoine`) : sa fiche apparaît dans le Registre AT/MP et dans Santé & Visites, marquées « données de santé » ; « Exporter en Excel » donne une feuille « Synthèse » et une feuille par registre, colonnes en clair (« Siège de la lésion », dates en JJ/MM/AAAA), sans aucun mot de passe ; l'extraction apparaît dans le Journal des modifications (type « Extraction »). Un nom absent affiche « Aucun enregistrement ».

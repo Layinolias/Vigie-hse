@@ -4,6 +4,7 @@
 <title>Évaluation DUERP</title>
 <meta name="description" content="Espace RH — création et modification d'une évaluation de risque professionnel dans le Document Unique.">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/risques-ref.js"></script>
 <script src="assets/dates-locales.js"></script>
 <link rel="stylesheet" href="assets/polices/polices.css">
@@ -348,11 +349,8 @@
               <div class="fieldset-head"><span class="idx">1</span><span class="flabel">Localisation</span></div>
               <div class="field-grid">
                 <div class="f">
-                  <label>Collectivité</label>
-                  <div class="segmented" id="segCollectivite">
-                    <input type="radio" name="collectivite" id="col-ville" value="Ville" checked required><label for="col-ville">Ville</label>
-                    <input type="radio" name="collectivite" id="col-agglo" value="Agglomération" required><label for="col-agglo">Agglomération</label>
-                  </div>
+                  <label data-org-libelle>Collectivité</label>
+                  <div class="segmented" id="segCollectivite" data-org="radios" data-org-nom="collectivite"></div>
                 </div>
                 <div class="f span2"><label for="fService">Service</label><select id="fService" name="service" required></select></div>
               </div>
@@ -443,6 +441,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
@@ -517,8 +516,6 @@
   // Copie défensive : l'éditeur de référentiels d'administration.html modifie ce tableau,
   // la liste du composant partagé ne doit pas bouger avec lui.
   const RISK_TAXONOMY_DEFAULT = VigieRisques.FAMILLES.map(f => [f[0], f[1]]);
-  const VILLE_SERVICES_DEFAULT = ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"];
-  const AGGLO_SERVICES_DEFAULT = ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"];
 
   // ---------- Référentiels partagés (éditables depuis l'Administration) ----------
   const REF_KEY = "vigie_hse_referentials";
@@ -527,8 +524,6 @@
     sieges: ["Autres","Bras","Cervical","Cheville","Cuisse","Dos","Epaule","Genoux","Main","Mollet","Multiple","Oreilles","Pieds","Poignée","Rps","Thorax","Ventre","Visage","Yeux"],
     natures: ["Autres","Brulure","Contusion","Douleur","Entorse","Inflammation","Lombalgie","Malaise","Multiple","Plaie","Psy"],
     statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
-    servicesVille: VILLE_SERVICES_DEFAULT,
-    servicesAgglo: AGGLO_SERVICES_DEFAULT,
     risqueFamillesDUERP: RISK_TAXONOMY_DEFAULT,
   };
   function loadReferentials(){
@@ -542,8 +537,7 @@
   }
   const REF = loadReferentials();
   const RISK_TAXONOMY = REF.risqueFamillesDUERP;
-  const VILLE_SERVICES = REF.servicesVille;
-  const AGGLO_SERVICES = REF.servicesAgglo;
+  // services de chaque entrée de l'organisation : VigieOrga.services() (assets/organisation.js)
 
   const SEED_DUERP = [];
 
@@ -590,10 +584,10 @@
   }
   const fServiceEl = $("fService");
   function populateServiceOptions(col){
-    const list = col === "Agglomération" ? AGGLO_SERVICES : VILLE_SERVICES;
+    const list = VigieOrga.services(col);
     fillOptions(fServiceEl, list.slice().sort((a,b)=>a.localeCompare(b,'fr')), "Sélectionner…");
   }
-  populateServiceOptions("Ville");
+  populateServiceOptions(VigieOrga.premier());
   document.querySelectorAll('input[name="collectivite"]').forEach(r => {
     r.addEventListener("change", () => { if (r.checked) populateServiceOptions(r.value); });
   });
@@ -635,9 +629,9 @@
   const editId = params.get("id");
 
   function prefillForm(rec){
-    const colInput = $(rec.collectivite === "Agglomération" ? "col-agglo" : "col-ville");
+    const colInput = [...document.querySelectorAll('input[name="collectivite"]')].find(r => r.value === VigieOrga.de(rec));
     if (colInput) colInput.checked = true;
-    populateServiceOptions(rec.collectivite || "Ville");
+    populateServiceOptions(VigieOrga.de(rec));
     $("fService").value = rec.service || "";
     $("fRisque").value = rec.risque || "";
     $("fRisque").dispatchEvent(new Event("change"));
@@ -744,14 +738,14 @@
     confirmTimer = setTimeout(() => confirmBanner.classList.remove("show"), 4000);
 
     form.reset();
-    populateServiceOptions("Ville");
+    populateServiceOptions(VigieOrga.premier());
     riskHint.textContent = "";
     updateScorePreview();
     $("fService").focus();
   });
 
   form.addEventListener("reset", () => {
-    setTimeout(() => populateServiceOptions("Ville"), 0);
+    setTimeout(() => populateServiceOptions(VigieOrga.premier()), 0);
   });
 
   $("btnClearFeed").addEventListener("click", () => {

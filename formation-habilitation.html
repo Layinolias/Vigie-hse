@@ -5,6 +5,7 @@
 <meta name="description" content="Suivi des habilitations et certifications obligatoires des agents (CACES, habilitation électrique, SST, permis…).">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -379,8 +380,8 @@
       </div>
 
       <div class="panel console">
-        <div class="field"><span class="flabel">Collectivité</span>
-          <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+        <div class="field"><span class="flabel" data-org-libelle>Collectivité</span>
+          <select id="fCollectivite" data-org="filtre"></select>
         </div>
         <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
         <div class="field"><span class="flabel">Type d'habilitation</span><select id="fType"></select></div>
@@ -399,8 +400,8 @@
             <div><label for="fAgentPicker">Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
             <div><label for="fNom">Nom</label><input type="text" id="fNom" required></div>
             <div><label for="fPrenom">Prénom</label><input type="text" id="fPrenom" required></div>
-            <div><label for="fCollectiviteForm">Collectivité</label>
-              <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+            <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
+              <select id="fCollectiviteForm" required data-org="saisie"></select>
             </div>
             <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
             <div><label for="fTypeForm">Type d'habilitation</label><select id="fTypeForm" required></select></div>
@@ -441,6 +442,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
@@ -536,8 +538,6 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -548,7 +548,7 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Types d'habilitation & durées de validité standard ----------
   // Table partagée avec sante-visites.html via assets/habilitations-ref.js (VigieHabilitations).
@@ -584,7 +584,7 @@
         d.setMonth(d.getMonth() - monthsAgo);
         out.push({
           id: "hab-" + h2.toString(36),
-          nom: r.nom, prenom: r.prenom, service: r.service, collectivite: r.collectivite || "Ville",
+          nom: r.nom, prenom: r.prenom, service: r.service, collectivite: VigieOrga.de(r),
           typeHabilitation: type,
           organismeFormateur: ORGANISMES_FORMATION[h2 % ORGANISMES_FORMATION.length],
           dateObtention: VigieDates.iso(d),
@@ -626,7 +626,7 @@
   fType.innerHTML = `<option value="all">Tous les types</option>` + HAB_TYPES.map(t => `<option value="${t[0]}">${t[0]}</option>`).join("");
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -656,7 +656,7 @@
     const col = fCollectivite.value, svc = fService.value, typ = fType.value, st = fStatut.value;
     const withStatus = DATASET.map(v => Object.assign({}, v, computeStatus(v)));
     let rows = withStatus.filter(v =>
-      (col === "all" || v.collectivite === col) &&
+      (col === "all" || VigieOrga.actuel(v.collectivite) === col) &&
       (svc === "all" || v.service === svc) &&
       (typ === "all" || v.typeHabilitation === typ) &&
       (st === "all" || v.statut === st)
@@ -725,8 +725,8 @@
       const nom = String(pick(["nom"])).trim();
       const typeHabilitation = String(pick(["type d habilitation","type"])).trim();
       if (!nom && !typeHabilitation) return null;
-      const collectiviteRaw = normKeyImp(pick(["collectivite","structure"]));
-      const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
+      const collectiviteRaw = normKeyImp(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
+      const collectivite = VigieOrga.reconnaitre(collectiviteRaw);
       const dateObtention = parseDateValueImp(pick(["date d obtention","date obtention"])) || VigieDates.aujourdhui();
       const dateExpirationRaw = parseDateValueImp(pick(["date d expiration","date expiration"]));
       let dureeValiditeMois = Number(pick(["duree de validite mois","duree"])) || 0;
@@ -783,11 +783,11 @@
     VigieImpression.brancher("btnExport");
     $("btnExport").addEventListener("click", () => {
       const rows = DATASET.map(v => Object.assign({}, v, computeStatus(v))).map(v => ({
-        "ID": v.id, "Nom": v.nom, "Prénom": v.prenom, "Collectivité": v.collectivite || "Ville", "Service": v.service,
+        "ID": v.id, "Nom": v.nom, "Prénom": v.prenom, [VigieOrga.libelle()]: VigieOrga.de(v), "Service": v.service,
         "Type d'habilitation": v.typeHabilitation, "Organisme formateur": v.organismeFormateur || "",
         "Date d'obtention": v.dateObtention, "Date d'expiration": v.dateExpiration, "Statut": v.statut,
       }));
-      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Nom", "Prénom", "Collectivité", "Service", "Type d'habilitation", "Organisme formateur", "Date d'obtention", "Date d'expiration", "Statut"] });
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Nom", "Prénom", VigieOrga.libelle(), "Service", "Type d'habilitation", "Organisme formateur", "Date d'obtention", "Date d'expiration", "Statut"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Habilitations");
       const today = VigieDates.aujourdhui();
@@ -800,7 +800,7 @@
       const list = servicesForCollectivite(col);
       $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
     }
-    fillFormServiceOptions("Ville");
+    fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
 
     // ---------- Sélecteur d'agent (roster canonique, module Gestion RH) ----------
@@ -808,8 +808,8 @@
     VigieRoster.bindAgentPicker($("fAgentPicker"), myServices, (a) => {
       $("fNom").value = a.nom;
       $("fPrenom").value = a.prenom;
-      $("fCollectiviteForm").value = a.collectivite || "Ville";
-      fillFormServiceOptions(a.collectivite || "Ville");
+      $("fCollectiviteForm").value = VigieOrga.de(a);
+      fillFormServiceOptions(VigieOrga.de(a));
       $("fServiceForm").value = a.service || "";
     });
 
@@ -836,7 +836,7 @@
       } else {
         $("formTitle").textContent = "Nouvelle habilitation";
         $("fId").value = "";
-        fillFormServiceOptions("Ville");
+        fillFormServiceOptions(VigieOrga.premier());
         $("fTypeForm").value = HAB_TYPES[0][0];
         $("fDuree").value = HAB_TYPES[0][1];
         $("fDateObtention").value = VigieDates.aujourdhui();
@@ -919,7 +919,7 @@
       const nom = String(pick(["nom"])).trim();
       const typeHabilitation = String(pick(["type d habilitation","type"])).trim();
       if (!nom && !typeHabilitation) return;
-      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
       const dateObtention = parseDateDtst(pick(["date d obtention","date obtention"])) || VigieDates.aujourdhui();
       const dateExpirationRaw = parseDateDtst(pick(["date d expiration","date expiration"]));
       let dureeValiditeMois = Number(pick(["duree de validite mois","duree"])) || 0;
@@ -929,7 +929,7 @@
       }
       const rec = {
         id: "dtst-hab-" + (i + 1), nom, prenom: String(pick(["prenom"])).trim(),
-        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        collectivite: VigieOrga.reconnaitre(collectiviteRaw),
         service: String(pick(["service"])).trim(),
         typeHabilitation,
         organismeFormateur: String(pick(["organisme formateur"])).trim(),

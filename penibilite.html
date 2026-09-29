@@ -5,6 +5,7 @@
 <meta name="description" content="Suivi des expositions aux facteurs de pénibilité par poste, campagne annuelle, seuils de l'article D4163-2 du Code du travail, suite à donner par agent selon son statut.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/impression.js"></script>
@@ -456,8 +457,8 @@
             <input type="hidden" id="pId">
             <div class="form-grid">
               <div><label for="pIntitule">Intitulé du poste</label><input type="text" id="pIntitule" required placeholder="ex. Agent de collecte des déchets"></div>
-              <div><label for="pCollectivite">Collectivité</label>
-                <select id="pCollectivite" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+              <div><label for="pCollectivite" data-org-libelle>Collectivité</label>
+                <select id="pCollectivite" required data-org="saisie"></select>
               </div>
               <div><label for="pService">Service</label><select id="pService" required></select></div>
               <div><label for="pActif" style="display:flex;align-items:center;gap:8px;margin-top:22px;"><input type="checkbox" id="pActif" checked style="width:16px;height:16px;"> Poste actif</label></div>
@@ -565,6 +566,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
@@ -666,8 +668,6 @@
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
     statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -678,7 +678,7 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Pénibilité (module 5, réponse Q15 du préventeur, 2026-09-24) ----------
   // Expositions saisies PAR POSTE, une campagne par an ; chaque agent (Gestion RH) hérite de celles de son
@@ -784,7 +784,7 @@
     $("pId").value = p ? p.id : "";
     $("posteFormTitle").textContent = p ? "Modifier le poste" : "Nouveau poste";
     $("pIntitule").value = p ? p.intitule || "" : "";
-    $("pCollectivite").value = p ? p.collectivite || "Ville" : "Ville";
+    $("pCollectivite").value = p ? VigieOrga.de(p) : VigieOrga.premier();
     servicesForm($("pCollectivite").value, p ? p.service : "");
     $("pDescription").value = p ? p.description || "" : "";
     $("pActif").checked = p ? p.actif !== false : true;
@@ -984,7 +984,7 @@
   function exporter(){
     const postes = postesVisibles();
     const nomPoste = id => { const p = POSTES.find(x => x.id === id); return p ? p.intitule : ""; };
-    const feuillePostes = postes.map(p => ({ "ID": p.id, "Intitulé": p.intitule, "Collectivité": p.collectivite || "", "Service": p.service, "Description": p.description || "", "Actif": p.actif === false ? "Non" : "Oui" }));
+    const feuillePostes = postes.map(p => ({ "ID": p.id, "Intitulé": p.intitule, [VigieOrga.libelle()]: p.collectivite || "", "Service": p.service, "Description": p.description || "", "Actif": p.actif === false ? "Non" : "Oui" }));
     const feuilleExpos = EXPOS.filter(e => postes.some(p => p.id === e.posteId)).sort((x, y) => y.annee - x.annee).map(e => {
       const ligne = { "ID Poste": e.posteId, "Poste": nomPoste(e.posteId), "Année": e.annee };
       PEN.CRITERES.forEach(c => { ligne[c.facteur + " — " + c.unite + (c.id === "bruitCrete" ? " (crête)" : "")] = (e.valeurs || {})[c.id] || ""; });
@@ -995,7 +995,7 @@
     });
     const feuilleAgents = agentsVisibles().map(a => { const s = situation(a); return { "Nom": a.nom, "Prénom": a.prenom, "Service": a.service, "Poste": s.poste ? s.poste.intitule : "", "Statut": a.statut || "", "Année": ANNEE, "Seuils atteints": s.ev.facteurs.join(", "), "Facteurs sans seuil": s.autres.join(", "), "Suite à donner": s.suite }; });
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuillePostes, { header: ["ID", "Intitulé", "Collectivité", "Service", "Description", "Actif"] }), "Postes");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuillePostes, { header: ["ID", "Intitulé", VigieOrga.libelle(), "Service", "Description", "Actif"] }), "Postes");
     const enTetesExpos = ["ID Poste", "Poste", "Année"].concat(PEN.CRITERES.map(c => c.facteur + " — " + c.unite + (c.id === "bruitCrete" ? " (crête)" : "")), PEN.SANS_SEUIL.map(f => f.facteur), ["Seuils atteints", "Commentaire", "Saisi le", "Par"]);
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuilleExpos, { header: enTetesExpos }), "Expositions");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuilleAgents, { header: ["Nom", "Prénom", "Service", "Poste", "Statut", "Année", "Seuils atteints", "Facteurs sans seuil", "Suite à donner"] }), "Agents " + ANNEE);

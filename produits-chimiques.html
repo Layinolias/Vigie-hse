@@ -5,6 +5,7 @@
 <meta name="description" content="Inventaire des produits chimiques par service, pictogrammes de danger CLP, et suivi des Fiches de Données de Sécurité (FDS).">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -383,8 +384,8 @@
       </div>
 
       <div class="panel console">
-        <div class="field"><span class="flabel">Collectivité</span>
-          <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+        <div class="field"><span class="flabel" data-org-libelle>Collectivité</span>
+          <select id="fCollectivite" data-org="filtre"></select>
         </div>
         <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
         <div class="field"><span class="flabel">Pictogramme</span><select id="fPicto"></select></div>
@@ -399,8 +400,8 @@
           <div class="form-grid">
             <div class="span2"><label for="fNom">Nom du produit</label><input type="text" id="fNom" required></div>
             <div><label for="fFournisseur">Fournisseur</label><input type="text" id="fFournisseur"></div>
-            <div><label for="fCollectiviteForm">Collectivité</label>
-              <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+            <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
+              <select id="fCollectiviteForm" required data-org="saisie"></select>
             </div>
             <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
             <div><label for="fQuantite">Quantité stockée</label><input type="number" id="fQuantite" min="0" step="0.1"></div>
@@ -445,6 +446,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
@@ -540,8 +542,6 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -552,7 +552,7 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Pictogrammes CLP ----------
   const PICTOGRAMMES = [
@@ -645,7 +645,7 @@
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fPicto = $("fPicto");
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -672,7 +672,7 @@
   function render(){
     const col = fCollectivite.value, svc = fService.value, pic = fPicto.value;
     let rows = DATASET.filter(p =>
-      (col === "all" || p.collectivite === col) &&
+      (col === "all" || VigieOrga.actuel(p.collectivite) === col) &&
       (svc === "all" || p.service === svc) &&
       (pic === "all" || (p.pictogrammes || []).includes(pic))
     );
@@ -737,8 +737,8 @@
       const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
       const nom = String(pick(["produit","nom"])).trim();
       if (!nom) return null;
-      const collectiviteRaw = normKeyImp(pick(["collectivite","structure"]));
-      const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
+      const collectiviteRaw = normKeyImp(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
+      const collectivite = VigieOrga.reconnaitre(collectiviteRaw);
       const validCodes = PICTOGRAMMES.map(p => p.code);
       const pictos = String(pick(["pictogrammes"])).split(/[,;]/).map(s => s.trim().toUpperCase()).filter(s => validCodes.includes(s));
       const qte = pick(["quantite"]);
@@ -794,12 +794,12 @@
     VigieImpression.brancher("btnExport");
     $("btnExport").addEventListener("click", () => {
       const rows = DATASET.map(p => ({
-        "ID": p.id, "Produit": p.nom, "Fournisseur": p.fournisseur || "", "Collectivité": p.collectivite || "Ville",
+        "ID": p.id, "Produit": p.nom, "Fournisseur": p.fournisseur || "", [VigieOrga.libelle()]: VigieOrga.de(p),
         "Service": p.service, "Quantité": p.quantiteStockee != null ? p.quantiteStockee : "", "Unité": p.unite || "",
         "Pictogrammes": (p.pictogrammes || []).join(", "), "Dernière MAJ FDS": p.dateMajFDS || "",
         "Lien FDS": p.lienFDS || "", "Mesures de prévention": p.mesuresPrevention || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Produit", "Fournisseur", "Collectivité", "Service", "Quantité", "Unité", "Pictogrammes", "Dernière MAJ FDS", "Lien FDS", "Mesures de prévention"] });
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Produit", "Fournisseur", VigieOrga.libelle(), "Service", "Quantité", "Unité", "Pictogrammes", "Dernière MAJ FDS", "Lien FDS", "Mesures de prévention"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Produits Chimiques");
       const today = VigieDates.aujourdhui();
@@ -814,7 +814,7 @@
       const list = servicesForCollectivite(col);
       $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
     }
-    fillFormServiceOptions("Ville");
+    fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
 
     function openForm(rec){
@@ -840,7 +840,7 @@
       } else {
         $("formTitle").textContent = "Nouveau produit";
         $("fId").value = "";
-        fillFormServiceOptions("Ville");
+        fillFormServiceOptions(VigieOrga.premier());
         $("fDateMajFDS").value = VigieDates.aujourdhui();
       }
       formPanel.style.display = "";
@@ -922,14 +922,14 @@
       const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
       const nom = String(pick(["produit","nom"])).trim();
       if (!nom) return;
-      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
       const validCodes = PICTOGRAMMES.map(p => p.code);
       const pictos = String(pick(["pictogrammes"])).split(/[,;]/).map(s => s.trim().toUpperCase()).filter(s => validCodes.includes(s));
       const qte = pick(["quantite"]);
       const rec = {
         id: "dtst-prod-" + (i + 1), nom,
         fournisseur: String(pick(["fournisseur"])).trim(),
-        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        collectivite: VigieOrga.reconnaitre(collectiviteRaw),
         service: String(pick(["service"])).trim(),
         quantiteStockee: qte !== "" ? Number(qte) || 0 : null,
         unite: String(pick(["unite"])).trim(),

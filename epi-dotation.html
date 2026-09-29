@@ -5,6 +5,7 @@
 <meta name="description" content="Catalogue des équipements de protection individuelle et vêtements de travail, stock, dotations par agent et suivi de l'entretien.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -474,7 +475,7 @@
           <div class="panel kpi"><div class="kpi-top"><div class="kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div></div><div class="kpi-label">Expirées</div><div class="kpi-value mono" id="dotLate">–</div></div>
         </div>
         <div class="panel console">
-          <div class="field"><span class="flabel">Collectivité</span><select id="dfCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select></div>
+          <div class="field"><span class="flabel" data-org-libelle>Collectivité</span><select id="dfCollectivite" data-org="filtre"></select></div>
           <div class="field"><span class="flabel">Service</span><select id="dfService"></select></div>
           <div class="field"><span class="flabel">Statut</span><select id="dfStatut"><option value="all">Tous</option><option value="À jour">À jour</option><option value="À renouveler">À renouveler</option><option value="Expiré">Expiré</option><option value="N/A">N/A (lavage)</option></select></div>
           <button type="button" class="btn btn-ghost" id="dfReset">Réinitialiser</button>
@@ -488,7 +489,7 @@
               <div><label for="dotAgentPicker">Choisir un agent (roster Gestion RH, optionnel)</label><select id="dotAgentPicker"><option value="">— Saisie libre —</option></select></div>
               <div><label for="dotNom">Nom</label><input type="text" id="dotNom" required></div>
               <div><label for="dotPrenom">Prénom</label><input type="text" id="dotPrenom" required></div>
-              <div><label for="dotCollectivite">Collectivité</label><select id="dotCollectivite" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select></div>
+              <div><label for="dotCollectivite" data-org-libelle>Collectivité</label><select id="dotCollectivite" required data-org="saisie"></select></div>
               <div><label for="dotService">Service</label><select id="dotService" required></select></div>
               <div><label for="dotArticle">Article</label><select id="dotArticle" required></select></div>
               <div><label for="dotTaille">Taille</label><input type="text" id="dotTaille" required></div>
@@ -549,6 +550,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
@@ -653,8 +655,6 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -665,7 +665,7 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Catalogue (seed fixe) ----------
   const CATALOGUE_SEED = [];
@@ -784,7 +784,7 @@
         const taille = tailleOptions.length ? tailleOptions[h2 % tailleOptions.length] : "Unique";
         out.push({
           id: "dot-" + h2.toString(36),
-          nom: r.nom, prenom: r.prenom, service: r.service, collectivite: r.collectivite || "Ville",
+          nom: r.nom, prenom: r.prenom, service: r.service, collectivite: VigieOrga.de(r),
           articleId, taille, dateRemise: VigieDates.iso(d),
         });
       });
@@ -1091,7 +1091,7 @@
   const dfCollectivite = $("dfCollectivite"), dfService = $("dfService"), dfStatut = $("dfStatut");
   function fillDotServiceOptions(){
     const col = dfCollectivite.value;
-    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
     const current = dfService.value;
     dfService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     dfService.value = list.includes(current) ? current : "all";
@@ -1110,7 +1110,7 @@
     $("dotLate").textContent = withStatus.filter(d => d.statut === "Expiré").length;
 
     const col = dfCollectivite.value, svc = dfService.value, st = dfStatut.value;
-    let rows = withStatus.filter(d => (col==="all"||d.collectivite===col) && (svc==="all"||d.service===svc) && (st==="all"||d.statut===st));
+    let rows = withStatus.filter(d => (col === "all" || VigieOrga.actuel(d.collectivite) === col) && (svc==="all"||d.service===svc) && (st==="all"||d.statut===st));
     triDot.decorate($("theadDot"));
     rows = triDot.apply(rows);
     $("dotResultCount").textContent = rows.length;
@@ -1156,8 +1156,8 @@
       if (!nom && !articleNom) return null;
       const article = catalogueByName(articleNom);
       if (!article) return null;
-      const collectiviteRaw = normKeyImpDot(pick(["collectivite","structure"]));
-      const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
+      const collectiviteRaw = normKeyImpDot(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
+      const collectivite = VigieOrga.reconnaitre(collectiviteRaw);
       return {
         id: String(pick(["id"])).trim() || "",
         nom, prenom: String(pick(["prenom"])).trim(), collectivite,
@@ -1207,19 +1207,19 @@
       const rows = DOTATIONS.map(d => Object.assign({}, d, computeDotationStatus(d))).map(d => {
         const c = catalogueById(d.articleId);
         return {
-          "ID": d.id, "Nom": d.nom, "Prénom": d.prenom, "Collectivité": d.collectivite || "Ville", "Service": d.service,
+          "ID": d.id, "Nom": d.nom, "Prénom": d.prenom, [VigieOrga.libelle()]: VigieOrga.de(d), "Service": d.service,
           "Article": c ? c.nom : "", "Taille": d.taille, "Date de remise": d.dateRemise,
           "Date de renouvellement": d.dateRenouvellement || "", "Statut": d.statut,
         };
       });
-      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Nom", "Prénom", "Collectivité", "Service", "Article", "Taille", "Date de remise", "Date de renouvellement", "Statut"] });
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Nom", "Prénom", VigieOrga.libelle(), "Service", "Article", "Taille", "Date de remise", "Date de renouvellement", "Statut"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Dotations");
       XLSX.writeFile(wb, `epi-dotations_${VigieDates.aujourdhui()}.xlsx`);
     });
     const dotFormPanel = $("dotFormPanel"), dotForm = $("dotForm");
     function fillDotFormServices(col){ $("dotService").innerHTML = servicesForCollectivite(col).map(s => `<option value="${s}">${s}</option>`).join(""); }
-    fillDotFormServices("Ville");
+    fillDotFormServices(VigieOrga.premier());
     $("dotCollectivite").addEventListener("change", (e) => fillDotFormServices(e.target.value));
 
     // ---------- Sélecteur d'agent (roster canonique, module Gestion RH) ----------
@@ -1227,8 +1227,8 @@
     VigieRoster.bindAgentPicker($("dotAgentPicker"), myServices, (a) => {
       $("dotNom").value = a.nom;
       $("dotPrenom").value = a.prenom;
-      $("dotCollectivite").value = a.collectivite || "Ville";
-      fillDotFormServices(a.collectivite || "Ville");
+      $("dotCollectivite").value = VigieOrga.de(a);
+      fillDotFormServices(VigieOrga.de(a));
       $("dotService").value = a.service || "";
     });
 
@@ -1241,7 +1241,7 @@
         $("dotArticle").value = rec.articleId; $("dotTaille").value = rec.taille; $("dotDateRemise").value = rec.dateRemise;
       } else {
         $("dotFormTitle").textContent = "Nouvelle dotation"; $("dotId").value = "";
-        fillDotFormServices("Ville"); $("dotDateRemise").value = VigieDates.aujourdhui();
+        fillDotFormServices(VigieOrga.premier()); $("dotDateRemise").value = VigieDates.aujourdhui();
       }
       dotFormPanel.style.display = ""; dotFormPanel.scrollIntoView({ behavior:"smooth", block:"start" });
     }
@@ -1424,10 +1424,10 @@
       if (!nom && !articleNom) return;
       const article = CATALOGUE.find(c => normKeyDtst(c.nom) === normKeyDtst(articleNom));
       if (!article) return;
-      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
       const rec = {
         id: "dtst-dot-" + (i + 1), nom, prenom: String(pick(["prenom"])).trim(),
-        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        collectivite: VigieOrga.reconnaitre(collectiviteRaw),
         service: String(pick(["service"])).trim(),
         articleId: article.id, taille: String(pick(["taille"])).trim(),
         dateRemise: parseDateDtst(pick(["date de remise"])),

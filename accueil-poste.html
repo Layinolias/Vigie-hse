@@ -5,6 +5,7 @@
 <meta name="description" content="Parcours d'accueil sécurité des nouveaux agents : points à voir à l'arrivée, suivi de complétion, fiche imprimable à signer.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/impression.js"></script>
@@ -438,8 +439,8 @@
         </div>
 
         <div class="panel console">
-          <div class="field"><span class="flabel">Collectivité</span>
-            <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+          <div class="field"><span class="flabel" data-org-libelle>Collectivité</span>
+            <select id="fCollectivite" data-org="filtre"></select>
           </div>
           <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
           <div class="field"><span class="flabel">Statut</span>
@@ -457,8 +458,8 @@
               <div id="fAgentPickerWrap"><label for="fAgentPicker">Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
               <div><label for="fNom">Nom</label><input type="text" id="fNom" required></div>
               <div><label for="fPrenom">Prénom</label><input type="text" id="fPrenom" required></div>
-              <div><label for="fCollectiviteForm">Collectivité</label>
-                <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+              <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
+                <select id="fCollectiviteForm" required data-org="saisie"></select>
               </div>
               <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
               <div><label for="fPoste">Poste</label><input type="text" id="fPoste" placeholder="ex. Agent d'entretien des espaces verts"></div>
@@ -560,6 +561,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
@@ -659,8 +661,6 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
     // Types d'accueil demandés par le préventeur (Q9, 2026-09-21). Liste ouverte : elle s'édite
     // dans Administration → Référentiels, la réponse citant ces cas « par exemple ».
     typesAccueil: ["Nouvel embauché","Changement de poste","Reprise après accident du travail","Reprise après arrêt long","Autre"],
@@ -674,7 +674,7 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Accueils (always-merge, CRUD classique) ----------
   // Un accueil = un agent + un poste + la liste des points vus avec lui. Les points sont COPIÉS depuis le
@@ -753,7 +753,7 @@
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatut = $("fStatut");
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -784,7 +784,7 @@
       agent: a.nom + " " + a.prenom, statut: statutOf(a), prog: progress(a),
       typeAccueil: a.typeAccueil || "—", butoir: butoirOf(a), al: al, alerte: al.libelle,
     }); });
-    let rows = all.filter(a => (col === "all" || a.collectivite === col) && (svc === "all" || a.service === svc) && (st === "all" || a.statut === st));
+    let rows = all.filter(a => (col === "all" || VigieOrga.actuel(a.collectivite) === col) && (svc === "all" || a.service === svc) && (st === "all" || a.statut === st));
     rows.sort((a,b) => (b.dateArrivee || "").localeCompare(a.dateArrivee || ""));
     rows = tri.apply(rows);
     $("kpiTotal").textContent = all.length;
@@ -926,7 +926,7 @@
   VigieImpression.brancher("btnExport");
   $("btnExport").addEventListener("click", () => {
     const accueils = DATASET.map(a => { const p = progress(a); return {
-      "ID": a.id, "Nom": a.nom, "Prénom": a.prenom, "Collectivité": a.collectivite || "", "Service": a.service, "Poste": a.poste || "",
+      "ID": a.id, "Nom": a.nom, "Prénom": a.prenom, [VigieOrga.libelle()]: a.collectivite || "", "Service": a.service, "Poste": a.poste || "",
       "Type d'accueil": a.typeAccueil || "", "Date d'arrivée": a.dateArrivee || "", "Délai (jours)": delaiOf(a),
       "Date butoir": butoirOf(a), "Référent": a.referent || "", "Modèle": a.modeleNom || "",
       "Points faits": p.done, "Points au total": p.total, "Statut": statutOf(a), "Échéance": alerteOf(a).libelle,
@@ -938,7 +938,7 @@
       "Fait": i.fait ? "oui" : "non", "Date": i.dateFait || "", "Par": i.faitPar || "", "Commentaire": i.commentaire || "",
     })));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(accueils, { header: ["ID", "Nom", "Prénom", "Collectivité", "Service", "Poste", "Type d'accueil", "Date d'arrivée", "Délai (jours)", "Date butoir", "Référent", "Modèle", "Points faits", "Points au total", "Statut", "Échéance", "Accueil réalisé le"] }), "Accueils");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(accueils, { header: ["ID", "Nom", "Prénom", VigieOrga.libelle(), "Service", "Poste", "Type d'accueil", "Date d'arrivée", "Délai (jours)", "Date butoir", "Référent", "Modèle", "Points faits", "Points au total", "Statut", "Échéance", "Accueil réalisé le"] }), "Accueils");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(points, { header: ["ID accueil", "Agent", "Point", "Spécifique au poste", "Fait", "Date", "Par", "Commentaire"] }), "Points");
     XLSX.writeFile(wb, `accueil-poste_${todayLocal()}.xlsx`);
   });
@@ -1080,14 +1080,14 @@
     function fillFormServiceOptions(col){
       $("fServiceForm").innerHTML = servicesForCollectivite(col).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     }
-    fillFormServiceOptions("Ville");
+    fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
     // Sélecteur d'agent (roster canonique, module Gestion RH) : pré-remplit l'identité, saisie libre possible.
     VigieRoster.bindAgentPicker($("fAgentPicker"), myServices, (a) => {
       $("fNom").value = a.nom;
       $("fPrenom").value = a.prenom;
-      $("fCollectiviteForm").value = a.collectivite || "Ville";
-      fillFormServiceOptions(a.collectivite || "Ville");
+      $("fCollectiviteForm").value = VigieOrga.de(a);
+      fillFormServiceOptions(VigieOrga.de(a));
       $("fServiceForm").value = a.service || "";
     });
     function openForm(rec){
@@ -1101,14 +1101,14 @@
       $("fModele").innerHTML = TPL.map(t => `<option value="${esc(t.id)}">${esc(t.nom)} (${t.points.length} points)</option>`).join("");
       if (rec){
         $("fNom").value = rec.nom; $("fPrenom").value = rec.prenom;
-        $("fCollectiviteForm").value = rec.collectivite || "Ville";
-        fillFormServiceOptions(rec.collectivite || "Ville");
+        $("fCollectiviteForm").value = VigieOrga.de(rec);
+        fillFormServiceOptions(VigieOrga.de(rec));
         $("fServiceForm").value = rec.service;
         $("fPoste").value = rec.poste || ""; $("fDateArrivee").value = rec.dateArrivee || ""; $("fReferent").value = rec.referent || "";
         fillTypeOptions(rec.typeAccueil || "");
         $("fDelai").value = delaiOf(rec);
       } else {
-        fillFormServiceOptions("Ville");
+        fillFormServiceOptions(VigieOrga.premier());
         $("fDateArrivee").value = todayLocal();
         fillTypeOptions("");
         $("fDelai").value = DELAI;

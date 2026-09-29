@@ -15,7 +15,7 @@ const git = (...a) => execFileSync(GIT, a, { cwd: RACINE, encoding: 'utf8' }).tr
 const GARDER = f =>
   (/^[^/]+\.html$/.test(f)) || f.startsWith('assets/') || f.startsWith('KIT-REPRISE/') ||
   (/^serveur\/[^/]+\.js$/.test(f) && f !== 'serveur/preparer-livraison.js') ||
-  f === 'Lancer VIGIE HSE.bat' || f === 'LISEZ-MOI.txt';
+  f === 'Lancer VIGIE HSE.bat' || f === 'Restaurer une sauvegarde.bat' || f === 'LISEZ-MOI.txt';
 
 const modifies = git('status', '--porcelain').split('\n').filter(Boolean);
 if (modifies.length && !process.argv.includes('--brouillon')){
@@ -24,7 +24,7 @@ if (modifies.length && !process.argv.includes('--brouillon')){
 }
 // suivis par git (plus, pour un brouillon, les nouveaux pas encore commités), noms séparés par NUL
 const fichiers = git('ls-files', '-z', '--cached', '--others', '--exclude-standard').split('\0').filter(Boolean).filter(GARDER);
-for (const f of ['Lancer VIGIE HSE.bat', 'LISEZ-MOI.txt', 'serveur/serveur.js', 'serveur/lancer-poste.js', 'login.html', 'assets/stockage.js'])
+for (const f of ['Lancer VIGIE HSE.bat', 'Restaurer une sauvegarde.bat', 'LISEZ-MOI.txt', 'serveur/serveur.js', 'serveur/lancer-poste.js', 'serveur/restaurer.js', 'login.html', 'assets/stockage.js'])
   if (!fichiers.includes(f)) throw new Error('fichier indispensable absent du dépôt : ' + f);
 
 const d = new Date(), deux = n => String(n).padStart(2, '0');

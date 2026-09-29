@@ -13,6 +13,8 @@ revue de code de la journée corrigée (`a9d5b66`), puis FDS et mesures de prév
 Produits chimiques, et « Fiches utiles » sur les pages de suivi. Paquet `livraison/VIGIE-HSE-2026-09-29.zip` remis à l'utilisateur (test de mise à jour
 depuis `08a2585` passé) ; dossier pour l'avocat : `livraison/VIGIE-HSE-dossier-RGPD-HDS.pdf`._
 
+**En cours le 2026-09-30 — organisation configurable (J0), branche `organisation-configurable`, PR à ouvrir par l'utilisateur** (`gh` absent de ce poste) : composant `assets/organisation.js`, panneau Administration → Référentiels → Organisation, 23 pages basculées, tests `test-organisation.js`, `test-org-admin.js`, `test-org-pages.js`, `test-org-serveur.js`, et photo-org.js (photos avant/après ; scratchpad, hors dépôt). À fusionner dans `main` une fois relu ; ensuite rebâtir le paquet et passer le test de mise à jour.
+
 **Décidé le 2026-09-29 : pas de chiffrement des données au repos pour l'instant** (l'utilisateur, après
 explication du risque de perte sans code de secours). Modèle retenu si on le fait un jour, et alternative
 BitLocker : `PLAN-MISE-EN-PRODUCTION.md` §6 et §8. Ne pas le relancer sans nouvelle demande.

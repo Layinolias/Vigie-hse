@@ -5,6 +5,7 @@
 <meta name="description" content="Espace RH — création et modification des cas d'accident du travail ou de maladie professionnelle du Registre AT/MP.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/roster.js"></script>
 <style>
   /* Marge basse que le mode « quirks » donnait aux formulaires avant l'ajout de <!doctype html> : gardée pour une mise en page identique. */
@@ -375,11 +376,8 @@
               <div class="fieldset-head"><span class="idx">2</span><span class="flabel">Localisation</span></div>
               <div class="field-grid">
                 <div class="f">
-                  <label>Collectivité</label>
-                  <div class="segmented" id="segCollectivite">
-                    <input type="radio" name="collectivite" id="col-ville" value="Ville" checked required><label for="col-ville">Ville</label>
-                    <input type="radio" name="collectivite" id="col-agglo" value="Agglomération" required><label for="col-agglo">Agglomération</label>
-                  </div>
+                  <label data-org-libelle>Collectivité</label>
+                  <div class="segmented" id="segCollectivite" data-org="radios" data-org-nom="collectivite"></div>
                 </div>
                 <div class="f"><label for="fService">Service</label><select id="fService" name="service" required></select></div>
                 <div class="f span2"><label for="fServiceDetail">Service (détail)</label><input type="text" id="fServiceDetail" name="serviceDetail" list="dlServiceDetail" required autocomplete="off" placeholder="Sélectionnez d'abord un service" disabled><datalist id="dlServiceDetail"></datalist></div>
@@ -460,6 +458,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
@@ -549,8 +548,6 @@
     sieges: ["Autres","Bras","Cervical","Cheville","Cuisse","Dos","Epaule","Genoux","Main","Mollet","Multiple","Oreilles","Pieds","Poignée","Rps","Thorax","Ventre","Visage","Yeux"],
     natures: ["Autres","Brulure","Contusion","Douleur","Entorse","Inflammation","Lombalgie","Malaise","Multiple","Plaie","Psy"],
     statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
     risqueFamillesDUERP: [],
   };
   function loadReferentials(){
@@ -575,8 +572,7 @@
   const SIEGES = REF.sieges;
   const NATURES = REF.natures;
   const ELEMENTS_MATERIELS = ["AUTRE OUTIL MECANIQUE GUIDE A LA MAIN","EMPLACEMENTS ET SURFACES POUR ACCIDENT DE PLAIN-PIED NON PRECISES","NON PRECISE EFFORT INTENSE","NON PRECISE, CHUTE OU GLISSADE DE PLAIN-PIED","NON PRECISE, CHUTE OU GLISSADE EN DENIVELE OU HAUTEUR (DESCENTE DE BUS, ESCALIER, ESCABEAU, MARCHES)","NON PRECISE, MANIPULATION D'OBJETS, D'OUTIL A MAIN / INSTRUMENTS PORTATIFS","NON PRECISE, NE RENTRANT PAS DANS UNE DE CES CATEGORIES. A PRECISER","OUTIL MECANIQUE TENU OU GUIDE A LA MAIN NON PRECISE","VEHICULE ROUTIER"];
-  const VILLE_SERVICES = REF.servicesVille;
-  const AGGLO_SERVICES = REF.servicesAgglo;
+  // services de chaque entrée de l'organisation : VigieOrga.services() (assets/organisation.js)
   const SERVICE_DETAIL = {
     "Accueil & Affaires Générales": ["Accueil du public"],
     "Patrimoine Bâti": ["Régie Bâtiments"],
@@ -655,10 +651,10 @@
 
   const fServiceEl = $("fService");
   function populateServiceOptions(col){
-    const list = col === "Agglomération" ? AGGLO_SERVICES : VILLE_SERVICES;
+    const list = VigieOrga.services(col);
     fillOptions(fServiceEl, list.slice().sort((a,b)=>a.localeCompare(b,'fr')), "Sélectionner…");
   }
-  populateServiceOptions("Ville");
+  populateServiceOptions(VigieOrga.premier());
   document.querySelectorAll('input[name="collectivite"]').forEach(r => {
     r.addEventListener("change", () => {
       if (!r.checked) return;
@@ -684,8 +680,8 @@
   VigieRoster.bindAgentPicker($("fAgentPicker"), (session && session.services) || ["*"], (a) => {
     $("fNom").value = a.nom;
     $("fPrenom").value = a.prenom;
-    const colInput = $(a.collectivite === "Agglomération" ? "col-agglo" : "col-ville");
-    if (colInput){ colInput.checked = true; populateServiceOptions(a.collectivite || "Ville"); }
+    const colInput = [...document.querySelectorAll('input[name="collectivite"]')].find(r => r.value === VigieOrga.de(a));
+    if (colInput){ colInput.checked = true; populateServiceOptions(VigieOrga.de(a)); }
     fServiceEl.value = a.service || "";
     // Le handler 'change' active « Service (détail) » (champ required, désactivé au départ) :
     // sans lui, ce champ reste désactivé, échappe à la validation et part en null dans le registre.
@@ -765,9 +761,9 @@
     $("fCadreEmploi").value = rec.cadreEmploi || "";
     $("fGrade").value = rec.grade || "";
 
-    const colInput = $(rec.collectivite === "Agglomération" ? "col-agglo" : "col-ville");
+    const colInput = [...document.querySelectorAll('input[name="collectivite"]')].find(r => r.value === VigieOrga.de(rec));
     if (colInput) colInput.checked = true;
-    populateServiceOptions(rec.collectivite || "Ville");
+    populateServiceOptions(VigieOrga.de(rec));
     $("fService").value = rec.service || "";
     fillDatalist($("dlServiceDetail"), SERVICE_DETAIL[rec.service] || []);
     fServiceDetail.disabled = false;
@@ -862,7 +858,7 @@
 
   form.addEventListener("reset", () => {
     setTimeout(() => {
-      populateServiceOptions("Ville");
+      populateServiceOptions(VigieOrga.premier());
       fServiceDetail.disabled = true;
       fServiceDetail.value = "";
       fServiceDetail.placeholder = "Sélectionnez d'abord un service";
@@ -949,7 +945,7 @@
     confirmTimer = setTimeout(() => confirmBanner.classList.remove("show"), 4000);
 
     form.reset();
-    populateServiceOptions("Ville");
+    populateServiceOptions(VigieOrga.premier());
     fServiceDetail.disabled = true;
     fServiceDetail.placeholder = "Sélectionnez d'abord un service";
     fDateDebutArret.disabled = true; fDateDebutArret.required = false;

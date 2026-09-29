@@ -5,6 +5,7 @@
 <meta name="description" content="Console de suivi des accidents du travail et maladies professionnelles d'une collectivité territoriale.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -441,12 +442,8 @@
       <section class="panel console">
         <div class="field-group" id="globalFiltersWrap" style="display:contents;">
         <div class="field">
-          <label class="flabel" for="fCollectivite">Collectivité</label>
-          <select id="fCollectivite">
-            <option value="all">Ville + Agglomération</option>
-            <option value="Ville">Ville</option>
-            <option value="Agglomération">Agglomération</option>
-          </select>
+          <label class="flabel" for="fCollectivite" data-org-libelle>Collectivité</label>
+          <select id="fCollectivite" data-org="filtre-somme"></select>
         </div>
         <div class="field"><label class="flabel" for="fService">Service</label><select id="fService"></select></div>
         <div class="field"><label class="flabel" for="fYear">Année</label><select id="fYear"></select></div>
@@ -502,6 +499,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -683,7 +681,7 @@
     { key:"filiere",        label:"Filière",          group:"Agent",        render:r => esc(r.filiere) },
     { key:"cadreEmploi",    label:"Cadre d'emploi",   group:"Agent",        cls:"wrap", render:r => esc(r.cadreEmploi) },
     { key:"grade",          label:"Grade",            group:"Agent",        render:r => esc(r.grade) },
-    { key:"collectivite",   label:"Collectivité",     group:"Localisation", render:r => `<span class="type-chip ${r.collectivite === 'Agglomération' ? 'trajet' : 'at'}">${esc(r.collectivite || 'Ville')}</span>` },
+    { key:"collectivite",   label:VigieOrga.libelle(),     group:"Localisation", render:r => `<span class="type-chip ${VigieOrga.de(r) === VigieOrga.premier() ? 'at' : 'trajet'}">${esc(VigieOrga.de(r))}</span>` },
     { key:"serviceDetail",  label:"Service (détail)", group:"Localisation", cls:"wrap", render:r => esc(r.serviceDetail) },
     { key:"service",        label:"Service",          group:"Localisation", render:r => esc(r.service) },
     { key:"dateAT",         label:"Date",             group:"Événement",    cls:"mono", render:r => fmtDate(r.dateAT) },
@@ -779,7 +777,7 @@
 
   function refreshFilterOptions(){
     const colFilter = fCollectivite.value;
-    const scoped = DATASET.filter(d => colFilter === "all" || (d.collectivite || "Ville") === colFilter);
+    const scoped = DATASET.filter(d => colFilter === "all" || (VigieOrga.de(d)) === colFilter);
     services = [...new Set(scoped.map(d => d.service).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
     years = [...new Set(DATASET.map(d => (d.dateAT || "").slice(0,4)).filter(Boolean))].sort((a,b)=>b-a);
     fillSelect(fService, services, "Tous les services");
@@ -790,7 +788,7 @@
   function render(){
     const col = fCollectivite.value, svc = fService.value, yr = fYear.value, ar = fArret.value;
     let rows = DATASET.filter(d =>
-      (col === "all" || (d.collectivite || "Ville") === col) &&
+      (col === "all" || (VigieOrga.de(d)) === col) &&
       (svc === "all" || d.service === svc) &&
       (yr === "all" || (d.dateAT || "").slice(0,4) === yr) &&
       (ar === "all" || (ar === "avec" ? d.arret : !d.arret))
@@ -841,7 +839,7 @@
     let heuresSaisies = [];
     try { const raw = VigieStore.getItem("vigie_hse_heures_travaillees"); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) heuresSaisies = p; } } catch(e){}
     const atPerimetre = DATASET.filter(d =>
-      (col === "all" || (d.collectivite || "Ville") === col) &&
+      (col === "all" || (VigieOrga.de(d)) === col) &&
       (svc === "all" || d.service === svc) &&
       (yr === "all" || (d.dateAT || "").slice(0,4) === yr)
     );
@@ -946,8 +944,8 @@
     const dateNaissance = parseDateValue(pick(["date de naissance"]));
     const dateMois = parseDateValue(pick(["date at mois"])) || dateAT;
 
-    const collectiviteRaw = normKey(pick(["collectivite","structure"]));
-    const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
+    const collectiviteRaw = normKey(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
+    const collectivite = VigieOrga.reconnaitre(collectiviteRaw);
 
     return {
       id: idRaw || "",
@@ -1025,7 +1023,7 @@
     $("btnExport").addEventListener("click", () => {
       const rows = DATASET.map(r => ({
         "ID": r.id,
-        "Collectivité": r.collectivite || "Ville",
+        [VigieOrga.libelle()]: VigieOrga.de(r),
         "date AT": r.dateAT,
         "Date AT Mois": r.dateMois,
         "Jour": r.jour,
@@ -1057,7 +1055,7 @@
         "Avis conseil médical": r.mpAvisConseilMedical || "",
         "Décision de la collectivité": r.mpDecisionCollectivite || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Collectivité", "date AT", "Date AT Mois", "Jour", "Libellé statut", "Libellé civilité", "Nom", "Prénom", "Date de naissance", "Age", "Libellé service ATMP", "SERVICE", "Libellé catégorie (actuel)", "Libellé filière (actuel)", "Libellé cadre emploi (actuel)", "Type at/mp", "Avec ou sans arret", "Nb jours arrêt total", "Circonstances", "Libellé grade (actuel)", "Etat", "Risque", "Siege", "Nature", "Elément matériel", "N° tableau MP", "Date première constatation médicale", "Date déclaration", "Avis médecin du travail", "Avis conseil médical", "Décision de la collectivité"] });
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", VigieOrga.libelle(), "date AT", "Date AT Mois", "Jour", "Libellé statut", "Libellé civilité", "Nom", "Prénom", "Date de naissance", "Age", "Libellé service ATMP", "SERVICE", "Libellé catégorie (actuel)", "Libellé filière (actuel)", "Libellé cadre emploi (actuel)", "Type at/mp", "Avec ou sans arret", "Nb jours arrêt total", "Circonstances", "Libellé grade (actuel)", "Etat", "Risque", "Siege", "Nature", "Elément matériel", "N° tableau MP", "Date première constatation médicale", "Date déclaration", "Avis médecin du travail", "Avis conseil médical", "Décision de la collectivité"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Registre AT-MP");
       const today = VigieDates.aujourdhui();

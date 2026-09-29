@@ -5,6 +5,7 @@
 <meta name="description" content="Dialogue social : questions des représentants du personnel à la direction, réunions de la formation spécialisée, visites de site et suivi de leurs actions, indicateurs anonymisés.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/impression.js"></script>
@@ -547,7 +548,7 @@
             <div class="form-grid">
               <div><label for="vDate">Date</label><input type="date" id="vDate" required></div>
               <div><label for="vSite">Site visité</label><input type="text" id="vSite" required placeholder="ex. Centre technique municipal"></div>
-              <div><label for="vCollectivite">Collectivité</label><select id="vCollectivite"><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select></div>
+              <div><label for="vCollectivite" data-org-libelle>Collectivité</label><select id="vCollectivite" data-org="saisie"></select></div>
               <div><label for="vService">Service</label><select id="vService"></select></div>
             </div>
             <div style="margin-top:10px;"><label for="vParticipants">Participants</label><input type="text" id="vParticipants" placeholder="Représentants, encadrement, préventeur…"></div>
@@ -601,6 +602,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
@@ -708,8 +710,6 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -720,7 +720,7 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Dialogue social (module 13, réponse Q16 du préventeur, 2026-09-24) ----------
   // « Les deux » : l'espace de travail de la formation spécialisée ET la consultation. En priorité, l'échange
@@ -890,7 +890,7 @@
     $("vFormTitle").textContent = v ? "Visite du " + fmtFr(v.date) + " — " + v.site : "Nouvelle visite de site";
     $("vDate").value = v ? v.date || "" : VigieDates.aujourdhui();
     $("vSite").value = v ? v.site || "" : "";
-    $("vCollectivite").value = v ? v.collectivite || "Ville" : "Ville";
+    $("vCollectivite").value = v ? VigieOrga.de(v) : VigieOrga.premier();
     servicesVisite($("vCollectivite").value, v ? v.service : "");
     $("vParticipants").value = v ? v.participants || "" : ""; $("vConstats").value = v ? v.constats || "" : "";
     $("vActionsForm").innerHTML = (v ? v.actions || [] : []).map(ligneAction).join("");

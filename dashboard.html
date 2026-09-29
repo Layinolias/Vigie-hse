@@ -379,6 +379,8 @@
   .zone-btn:hover{ border-color:rgba(var(--accent-rgb),.5); color:var(--text); transform:translateY(-1px); }
   .zone-btn.active{ background:linear-gradient(135deg, var(--accent), var(--accent-violet)); color:#fff; border-color:transparent; box-shadow:0 8px 18px -9px rgba(var(--accent-rgb),.6); }
   .zone-sep{ display:inline-block; width:2px; height:16px; background:var(--border); transform:rotate(20deg); border-radius:2px; }
+  /* plus de trois entrées dans l'organisation : une liste à la place des boutons */
+  .zone-select{ padding:6px 30px 6px 14px; border-radius:var(--r-pill); border:1px solid var(--border); background-color:var(--surface-el); color:var(--text); font:600 11.5px "IBM Plex Sans",sans-serif; max-width:100%; cursor:pointer; }
   @media (max-width:900px){ .zone-btn{ padding:6px 12px; } }
   @media (max-width:620px){ .zone-sep{ display:none; } .zone-switch{ gap:6px; } .zone-btn{ padding:6px 9px; font-size:10.5px; } }
 
@@ -412,6 +414,7 @@
 <link rel="stylesheet" href="assets/mobile.css">
 
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script>
   (function(){
     try {
@@ -584,13 +587,8 @@
       </div>
 
       <div class="topbar-center">
-        <div class="zone-switch" id="zoneSwitch">
-          <button type="button" class="zone-btn" id="zoneVille" data-zone="Ville">Ville</button>
-          <span class="zone-sep" aria-hidden="true">/</span>
-          <button type="button" class="zone-btn" id="zoneAgglo" data-zone="Agglomération">Agglomération</button>
-          <span class="zone-sep" aria-hidden="true">/</span>
-          <button type="button" class="zone-btn active" id="zoneAll" data-zone="all">Tous</button>
-        </div>
+        <!-- un bouton par entrée de l'organisation (assets/organisation.js), puis « Tous » ; au-delà de trois, une liste -->
+        <div class="zone-switch" id="zoneSwitch"></div>
       </div>
 
       <div class="topbar-right">
@@ -658,7 +656,7 @@
           <div class="panel score-note" id="scoreDetail">
             <svg class="icon" style="color:var(--accent);width:20px;height:20px;flex-shrink:0;"><use href="#i-shield-check"/></svg>
             <div class="score-desc">
-              <b>Score HSE</b> (visible dans l'en-tête) — part des risques évalués dont le niveau reste <b>faible ou modéré</b>. Basé sur les <b id="scoreOnCount">–</b> évaluations du Document Unique (Ville + Agglomération).
+              <b>Score HSE</b> (visible dans l'en-tête) — part des risques évalués dont le niveau reste <b>faible ou modéré</b>. Basé sur les <b id="scoreOnCount">–</b> évaluations du Document Unique (<span id="scoreZones">Ville + Agglomération</span>).
             </div>
           </div>
 
@@ -686,7 +684,7 @@
           </div>
 
           <div class="panel" style="padding:20px;">
-            <div class="section-head"><h3 class="section-title">Répartition Ville / Agglomération</h3></div>
+            <div class="section-head"><h3 class="section-title" id="repartitionTitre">Répartition Ville / Agglomération</h3></div>
             <div class="risk-list" id="collectiviteList"></div>
           </div>
         </div>
@@ -718,7 +716,7 @@
         <div class="module-grid">
           <a class="module-card panel active" href="registre-at-mp.html">
             <div class="module-top"><div class="module-icon"><svg class="icon"><use href="#i-activity"/></svg></div></div>
-            <div><div class="module-name">Registre AT / MP</div><div class="module-desc">Accidents du travail et maladies professionnelles, Ville et Agglomération.</div></div>
+            <div><div class="module-name">Registre AT / MP</div><div class="module-desc" id="modAtDesc">Accidents du travail et maladies professionnelles, Ville et Agglomération.</div></div>
             <div class="module-foot"><span><b id="modAtCount">–</b> événements</span><span class="module-open">Ouvrir <svg class="icon" style="width:13px;height:13px"><use href="#i-arrow-right"/></svg></span></div>
           </a>
           <a class="module-card panel active" href="document-unique.html">
@@ -739,13 +737,14 @@
         </div>
       </section>
 
-      <p class="footnote">VIGIE HSE — données Ville (<span class="mono" id="fnVille">–</span>) et Agglomération (<span class="mono" id="fnAgglo">–</span>). Structure de champs validée avec l'équipe architecture. Stockage local au navigateur, en attente du raccordement à la base HSE.</p>
+      <p class="footnote">VIGIE HSE — données <span id="fnZones">–</span>. Structure de champs validée avec l'équipe architecture. Stockage local au navigateur, en attente du raccordement à la base HSE.</p>
     </div>
   </div>
 </div>
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
@@ -864,9 +863,24 @@
   const LEVEL_LABEL = { faible:"Faible", modere:"Modéré", eleve:"Élevé", critique:"Critique" };
   const MOIS = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
 
-  // ---------- Tout le dashboard se recalcule selon la zone sélectionnée (Ville / Agglomération / Tous) ----------
+  // ---------- Tout le dashboard se recalcule selon la zone sélectionnée (une entrée de l'organisation, ou Tous) ----------
+  // Les entrées viennent d'assets/organisation.js : Ville et Agglomération par défaut, ou celles de l'Administration.
   let dashboardZone = "all";
-  function zoneFilter(arr){ return dashboardZone === "all" ? arr : arr.filter(r => (r.collectivite || "Ville") === dashboardZone); }
+  const ZONES = VigieOrga.noms();
+  function zoneFilter(arr){ return dashboardZone === "all" ? arr : arr.filter(r => (VigieOrga.de(r)) === dashboardZone); }
+  // « A et B », « A, B et C »
+  const enumerer = l => l.length < 2 ? l.join("") : l.slice(0, -1).join(", ") + " et " + l[l.length - 1];
+  $("modAtDesc").textContent = "Accidents du travail et maladies professionnelles, " + (ZONES.length <= 3 ? enumerer(ZONES) : VigieOrga.tousLes()) + ".";
+  $("scoreZones").textContent = ZONES.length <= 3 ? ZONES.join(" + ") : VigieOrga.tousLes();
+  $("repartitionTitre").textContent =ZONES.length <= 3 ? "Répartition " + ZONES.join(" / ") : "Répartition par " + VigieOrga.libelle().toLowerCase();
+  // sélecteur de zone : des boutons jusqu'à trois entrées (comme Ville / Agglomération / Tous), une liste au-delà
+  if (ZONES.length <= 3){
+    $("zoneSwitch").innerHTML = ZONES.map((z, i) => `<button type="button" class="zone-btn" data-zone="${esc(z)}">${esc(z)}</button><span class="zone-sep" aria-hidden="true">/</span>`).join("") +
+      `<button type="button" class="zone-btn active" data-zone="all">Tous</button>`;
+  } else {
+    $("zoneSwitch").innerHTML = `<select class="zone-select" aria-label="${esc(VigieOrga.libelle())}"><option value="all">${esc(VigieOrga.tousLes().charAt(0).toUpperCase() + VigieOrga.tousLes().slice(1))}</option>` +
+      ZONES.map(z => `<option value="${esc(z)}">${esc(z)}</option>`).join("") + `</select>`;
+  }
 
   function renderDashboardData(){
     const atZ = zoneFilter(ATMP);
@@ -876,8 +890,8 @@
     const atZTotal = atZ.length;
     const atZAvec = atZ.filter(r => r.arret).length;
     const atZJours = atZ.reduce((s,r) => s + (Number(r.joursArret)||0), 0);
-    const atZVilleN = atZ.filter(r => (r.collectivite||"Ville") === "Ville").length;
-    const atZAggloN = atZTotal - atZVilleN;
+    const atZParZone = ZONES.map(z => atZ.filter(r => VigieOrga.de(r) === z).length);
+    const duZParZone = ZONES.map(z => duZ.filter(r => VigieOrga.de(r) === z).length);
     const atZYears = [...new Set(atZ.map(r => (r.dateAT||"").slice(0,4)).filter(Boolean))];
     const heuresZ = EFFECTIF * HEURES_AN * Math.max(atZYears.length, 1);
     const tfZ = heuresZ ? (atZAvec * 1000000 / heuresZ) : 0;
@@ -886,8 +900,7 @@
     $("kpiJours").innerHTML = `${atZJours}<span class="unit">j</span>`;
     $("kpiJoursSub").innerHTML = `moyenne <b>${atZAvec ? (atZJours/atZAvec).toFixed(1) : "0.0"} j</b> / AT avec arrêt`;
     $("modAtCount").textContent = atZTotal;
-    $("fnVille").textContent = atZVilleN + " AT/MP";
-    $("fnAgglo").textContent = atZAggloN + " AT/MP";
+    $("fnZones").innerHTML = enumerer(ZONES.map((z, i) => `${esc(z)} (<span class="mono">${atZParZone[i]} AT/MP</span>)`));
 
     // -- KPI DUERP + jauge Score HSE --
     const duZTotal = duZ.length;
@@ -949,13 +962,9 @@
       </div>`;
     }).join("") || `<div class="empty-hint">Aucune évaluation enregistrée.</div>`;
 
-    // -- Répartition Ville / Agglomération (reflète la zone sélectionnée) --
-    $("collectiviteList").innerHTML = `
-      <div class="risk-row"><span class="badge info">AT/MP</span><span class="risk-name">Ville</span><span class="risk-count mono">${atZVilleN}</span></div>
-      <div class="risk-row"><span class="badge warning">AT/MP</span><span class="risk-name">Agglomération</span><span class="risk-count mono">${atZAggloN}</span></div>
-      <div class="risk-row"><span class="badge info">DUERP</span><span class="risk-name">Ville</span><span class="risk-count mono">${duZ.filter(r=>(r.collectivite||"Ville")==="Ville").length}</span></div>
-      <div class="risk-row"><span class="badge warning">DUERP</span><span class="risk-name">Agglomération</span><span class="risk-count mono">${duZ.filter(r=>r.collectivite==="Agglomération").length}</span></div>
-    `;
+    // -- Répartition par entrée de l'organisation (reflète la zone sélectionnée) : AT/MP puis DUERP --
+    const ligneZone = (type, z, i, n) => `<div class="risk-row"><span class="badge ${i === 0 ? "info" : "warning"}">${type}</span><span class="risk-name">${esc(z)}</span><span class="risk-count mono">${n}</span></div>`;
+    $("collectiviteList").innerHTML = ZONES.map((z, i) => ligneZone("AT/MP", z, i, atZParZone[i])).join("") + ZONES.map((z, i) => ligneZone("DUERP", z, i, duZParZone[i])).join("");
 
     // -- Tendance AT/MP (6 derniers mois observés) --
     const monthCounts = {};
@@ -971,17 +980,16 @@
 
   function setZone(z){
     dashboardZone = z;
-    $("zoneVille").classList.toggle("active", dashboardZone === "Ville");
-    $("zoneAgglo").classList.toggle("active", dashboardZone === "Agglomération");
-    $("zoneAll").classList.toggle("active", dashboardZone === "all");
-    document.body.classList.toggle("zone-ville", dashboardZone === "Ville");
-    document.body.classList.toggle("zone-agglo", dashboardZone === "Agglomération");
+    $("zoneSwitch").querySelectorAll(".zone-btn").forEach(b => b.classList.toggle("active", b.dataset.zone === dashboardZone));
+    // teinte de fond : la première entrée comme « Ville », les suivantes comme « Agglomération »
+    const rang = ZONES.indexOf(dashboardZone);
+    document.body.classList.toggle("zone-ville", rang === 0);
+    document.body.classList.toggle("zone-agglo", rang > 0);
     renderDashboardData();
     if (typeof renderMini === "function") renderMini();
   }
-  $("zoneVille").addEventListener("click", () => setZone("Ville"));
-  $("zoneAgglo").addEventListener("click", () => setZone("Agglomération"));
-  $("zoneAll").addEventListener("click", () => setZone("all"));
+  $("zoneSwitch").addEventListener("click", (e) => { const b = e.target.closest(".zone-btn"); if (b) setZone(b.dataset.zone); });
+  $("zoneSwitch").addEventListener("change", (e) => { if (e.target.matches(".zone-select")) setZone(e.target.value); });
   renderDashboardData();
 
   $("moduleNote").textContent = "4 modules actifs";

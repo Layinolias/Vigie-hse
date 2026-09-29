@@ -215,7 +215,7 @@
   .add-row input{ flex:1; }
   .org-compte{ font-size:11.5px; color:var(--text-faint); white-space:nowrap; min-width:150px; }
   .org-suppr{ margin:0 0 14px; padding:12px 14px; border:1px solid rgba(var(--danger-rgb, 220,120,120),.45); border-radius:var(--r-sm); background:var(--bg-2); font-size:12.5px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
-  .org-suppr[hidden]{ display:none; }
+  .org-suppr[hidden], #orgPanel [hidden]{ display:none !important; }   /* .f impose display:flex : hidden doit l'emporter */
 
   .news-admin-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; margin-bottom:20px; }
   .news-admin-card{ border:1px solid var(--border); border-radius:var(--r-md); padding:13px 14px; background:var(--bg-2); display:flex; flex-direction:column; gap:6px; }

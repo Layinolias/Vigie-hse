@@ -5,6 +5,7 @@
 <meta name="description" content="Roster canonique des agents, organigramme, heures travaillées et taux de fréquence/gravité réels.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -386,8 +387,8 @@
       <!-- ============ ONGLET AGENTS ============ -->
       <div class="tab-panel show" id="tab-agents">
         <div class="panel console">
-          <div class="field"><span class="flabel">Collectivité</span>
-            <select id="aFCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+          <div class="field"><span class="flabel" data-org-libelle>Collectivité</span>
+            <select id="aFCollectivite" data-org="filtre"></select>
           </div>
           <div class="field"><span class="flabel">Service</span><select id="aFService"></select></div>
           <div class="field"><span class="flabel">Statut</span>
@@ -404,8 +405,8 @@
             <div class="form-grid">
               <div><label for="agFNom">Nom</label><input type="text" id="agFNom" required placeholder="ex. DURAND"></div>
               <div><label for="agFPrenom">Prénom</label><input type="text" id="agFPrenom" required placeholder="ex. Marie"></div>
-              <div><label for="agFCollectivite">Collectivité</label>
-                <select id="agFCollectivite" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+              <div><label for="agFCollectivite" data-org-libelle>Collectivité</label>
+                <select id="agFCollectivite" required data-org="saisie"></select>
               </div>
               <div><label for="agFService">Service</label><select id="agFService" required></select></div>
               <div><label for="agFManager">Responsable (organigramme)</label><select id="agFManager"><option value="">— Aucun (sommet)</option></select></div>
@@ -430,7 +431,7 @@
             <table class="reg">
               <thead>
                 <tr id="agentTheadFields">
-                  <th>Nom</th><th>Prénom</th><th>Service</th><th>Collectivité</th><th>Responsable</th><th>Statut</th>
+                  <th>Nom</th><th>Prénom</th><th>Service</th><th data-org-libelle>Collectivité</th><th>Responsable</th><th>Statut</th>
                   <th id="thAgentActions"></th>
                 </tr>
               </thead>
@@ -458,8 +459,8 @@
           <form id="heuresForm">
             <div class="form-grid">
               <div><label for="hFPeriode">Période (mois)</label><input type="month" id="hFPeriode" required></div>
-              <div><label for="hFCollectivite">Collectivité</label>
-                <select id="hFCollectivite" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+              <div><label for="hFCollectivite" data-org-libelle>Collectivité</label>
+                <select id="hFCollectivite" required data-org="saisie"></select>
               </div>
               <div><label for="hFService">Service</label><select id="hFService" required></select></div>
               <div><label for="hFHeures">Heures travaillées</label><input type="number" id="hFHeures" min="0" step="1" required placeholder="ex. 1250"></div>
@@ -473,7 +474,7 @@
           <div class="panel-head"><h3 class="panel-title">Historique des saisies</h3><div class="panel-actions" id="heuresPanelActions"></div></div>
           <div class="table-panel">
             <table class="reg">
-              <thead><tr><th>Période</th><th>Collectivité</th><th>Service</th><th>Heures</th><th>Auteur</th><th id="thHeuresActions"></th></tr></thead>
+              <thead><tr><th>Période</th><th data-org-libelle>Collectivité</th><th>Service</th><th>Heures</th><th>Auteur</th><th id="thHeuresActions"></th></tr></thead>
               <tbody id="heuresTbody"></tbody>
             </table>
           </div>
@@ -515,6 +516,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
@@ -626,8 +628,6 @@
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
     statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -638,8 +638,8 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
-  function allServicesSorted(){ return [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b) => a.localeCompare(b,'fr')); }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
+  function allServicesSorted(){ return VigieOrga.tousServices(); }
 
   // ---------- Postes (définis dans penibilite.html, lus ici pour rattacher un agent) ----------
   const POSTES_KEY = "vigie_hse_postes";
@@ -713,7 +713,7 @@
   const triAgents = VigieTri.create({
     columns: [
       { key:"nom", label:"Nom" }, { key:"prenom", label:"Prénom" }, { key:"service", label:"Service" },
-      { key:"collectivite", label:"Collectivité" }, { key:"manager", label:"Responsable" }, { key:"actif", label:"Statut" },
+      { key:"collectivite", label:VigieOrga.libelle() }, { key:"manager", label:"Responsable" }, { key:"actif", label:"Statut" },
       { key:"actions", label:"", noFilter:true },
     ],
     onChange: () => renderAgents(),
@@ -723,7 +723,7 @@
   function renderAgents(){
     const col = aFCollectivite.value, svc = aFService.value, st = aFStatut.value;
     let rows = AGENTS.filter(a =>
-      (col === "all" || a.collectivite === col) &&
+      (col === "all" || VigieOrga.actuel(a.collectivite) === col) &&
       (svc === "all" || a.service === svc) &&
       (st === "tous" || (st === "actifs" ? a.actif !== false : a.actif === false))
     );
@@ -763,7 +763,7 @@
     if (isScoped) list = list.filter(s => myServices.includes(s));
     $("agFService").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
   }
-  fillAgentFormServices("Ville");
+  fillAgentFormServices(VigieOrga.premier());
   $("agFCollectivite").addEventListener("change", (e) => fillAgentFormServices(e.target.value));
 
   function fillManagerOptions(excludeId, selectedId){
@@ -785,8 +785,8 @@
       $("agFId").value = rec.id;
       $("agFNom").value = rec.nom || "";
       $("agFPrenom").value = rec.prenom || "";
-      $("agFCollectivite").value = rec.collectivite || "Ville";
-      fillAgentFormServices(rec.collectivite || "Ville");
+      $("agFCollectivite").value = VigieOrga.de(rec);
+      fillAgentFormServices(VigieOrga.de(rec));
       $("agFService").value = rec.service || "";
       $("agFManager").value = rec.managerId || "";
       $("agFDateEntree").value = rec.dateEntree || "";
@@ -794,7 +794,7 @@
     } else {
       $("agentFormTitle").textContent = "Nouvel agent";
       $("agFId").value = "";
-      fillAgentFormServices("Ville");
+      fillAgentFormServices(VigieOrga.premier());
       $("agFActif").checked = true;
     }
     agentFormPanel.style.display = "";
@@ -849,9 +849,9 @@
   if (canGestionRhWrite){ $("btnNewAgent").addEventListener("click", () => openAgentForm(null)); }
   VigieImpression.brancher("btnExportAgents");
   $("btnExportAgents").addEventListener("click", () => {
-    const rows = AGENTS.map(a => ({ "Nom":a.nom, "Prénom":a.prenom, "Collectivité":a.collectivite, "Service":a.service, "Responsable":a.managerId ? agentName(a.managerId) : "", "Date d'entrée":a.dateEntree||"", "Poste":intitulePoste(a.posteId), "Statut":a.statut||"", "Actif":a.actif !== false ? "Oui" : "Non" }));
+    const rows = AGENTS.map(a => ({ "Nom":a.nom, "Prénom":a.prenom, [VigieOrga.libelle()]:VigieOrga.de(a), "Service":a.service, "Responsable":a.managerId ? agentName(a.managerId) : "", "Date d'entrée":a.dateEntree||"", "Poste":intitulePoste(a.posteId), "Statut":a.statut||"", "Actif":a.actif !== false ? "Oui" : "Non" }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Nom", "Prénom", "Collectivité", "Service", "Responsable", "Date d'entrée", "Poste", "Statut", "Actif"] }), "Agents");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Nom", "Prénom", VigieOrga.libelle(), "Service", "Responsable", "Date d'entrée", "Poste", "Statut", "Actif"] }), "Agents");
     XLSX.writeFile(wb, `gestion-rh-agents_${VigieDates.aujourdhui()}.xlsx`);
   });
 
@@ -863,7 +863,9 @@
   function normImp(s){ return String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
   function champsImp(raw){ const n = {}; Object.keys(raw).forEach(k => { n[normImp(k)] = raw[k]; }); return n; }
   const dateImp = v => (v instanceof Date && !isNaN(v)) ? VigieDates.iso(v) : String(v == null ? "" : v).trim();
-  const collectiviteImp = v => /agglo/i.test(String(v)) ? "Agglomération" : "Ville";
+  const collectiviteImp = v => VigieOrga.reconnaitre(v);
+  // colonne « Collectivité », ou celle qui porte le mot choisi dans Administration (« Site », « Usine »…)
+  const colonneCollectivite = n => n["collectivite"] !== undefined ? n["collectivite"] : n[normImp(VigieOrga.libelle())];
   if (canGestionRhWrite){
     $("btnImportAgents").addEventListener("click", () => $("importAgentsFile").click());
     $("importAgentsFile").addEventListener("change", async (e) => {
@@ -883,10 +885,10 @@
           const trouve = AGENTS.find(a => normImp(a.nom) === normImp(nom) && normImp(a.prenom) === normImp(prenom) && (!service || a.service === service));
           const svcFinal = service !== undefined && service !== "" ? service : (trouve ? trouve.service : "");
           if (isScoped && !myServices.includes(svcFinal)){ horsPerimetre++; return; }
-          const rec = trouve ? Object.assign({}, trouve) : { id: genId(), nom, prenom, collectivite: "Ville", service: "", managerId: "", dateEntree: "", actif: true,
+          const rec = trouve ? Object.assign({}, trouve) : { id: genId(), nom, prenom, collectivite: VigieOrga.premier(), service: "", managerId: "", dateEntree: "", actif: true,
             auteur: (session && session.user) || "—", dateCreation: VigieDates.aujourdhui() };
           rec.nom = nom; rec.prenom = prenom; rec.service = svcFinal;
-          if (n["collectivite"] !== undefined) rec.collectivite = collectiviteImp(n["collectivite"]);
+          if (colonneCollectivite(n) !== undefined) rec.collectivite = collectiviteImp(colonneCollectivite(n));
           if (n["date d entree"] !== undefined) rec.dateEntree = dateImp(n["date d entree"]);
           if (n["poste"] !== undefined){
             const intitule = String(n["poste"]).trim();
@@ -985,7 +987,7 @@
     if (isScoped) list = list.filter(s => myServices.includes(s));
     $("hFService").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
   }
-  fillHeuresFormServices("Ville");
+  fillHeuresFormServices(VigieOrga.premier());
   $("hFCollectivite").addEventListener("change", (e) => fillHeuresFormServices(e.target.value));
   if (!canGestionRhWrite){ $("heuresFormPanel").style.display = "none"; }
 
@@ -1032,9 +1034,9 @@
   VigieImpression.brancher("btnExportHeures");
   $("btnExportHeures").addEventListener("click", () => {
     const rows = HEURES.slice().sort((a, b) => String(a.periode).localeCompare(String(b.periode)))
-      .map(h => ({ "Période": h.periode, "Collectivité": h.collectivite, "Service": h.service, "Heures": h.heures }));
+      .map(h => ({ "Période": h.periode, [VigieOrga.libelle()]: h.collectivite, "Service": h.service, "Heures": h.heures }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Période", "Collectivité", "Service", "Heures"] }), "Heures");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Période", VigieOrga.libelle(), "Service", "Heures"] }), "Heures");
     XLSX.writeFile(wb, `gestion-rh-heures_${VigieDates.aujourdhui()}.xlsx`);
   });
   if (canGestionRhWrite){
@@ -1061,8 +1063,8 @@
           const heures = Number(String(n["heures"]).replace(/\s/g, "").replace(",", "."));
           if (!periode || !service || !(heures > 0)){ skipped++; return; }
           if (isScoped && !myServices.includes(service)){ horsPerimetre++; return; }
-          const collectivite = collectiviteImp(n["collectivite"]);
-          if (HEURES.some(h => h.periode === periode && h.service === service && h.collectivite === collectivite)){ doublons++; return; }
+          const collectivite = collectiviteImp(colonneCollectivite(n));
+          if (HEURES.some(h => h.periode === periode && h.service === service && VigieOrga.actuel(h.collectivite) === collectivite)){ doublons++; return; }
           HEURES.push({ id: genId("heu"), periode, collectivite, service, heures, auteur: (session && session.user) || "—", dateCreation: VigieDates.aujourdhui() });
           added++;
         });
@@ -1070,7 +1072,7 @@
         logAudit("Gestion RH", "Import heures", `Import .xlsx — ${added} saisie(s) ajoutée(s)`);
         renderHeures();
         alert(added === 0 && doublons === 0
-          ? `Aucune ligne n'a pu être importée (${skipped + horsPerimetre} ignorée(s)). Vérifiez les colonnes attendues (Période, Collectivité, Service, Heures).`
+          ? `Aucune ligne n'a pu être importée (${skipped + horsPerimetre} ignorée(s)). Vérifiez les colonnes attendues (Période, ${VigieOrga.libelle()}, Service, Heures).`
           : `Import terminé — ${added} saisie(s) ajoutée(s), ${doublons} déjà présente(s) (même mois, collectivité et service) donc ignorée(s), ${skipped} incomplète(s)` + (horsPerimetre ? `, ${horsPerimetre} hors de vos services` : "") + ".");
       } catch (err){
         alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");

@@ -5,6 +5,7 @@
 <meta name="description" content="Évaluation des risques professionnels (DUERP) de la collectivité — cotation, méthodologie et registre des risques par service.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -415,7 +416,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
           <div class="page-summary-text">
             <h1>Document Unique</h1>
-            <p title="Le Document Unique d'Évaluation des Risques Professionnels (DUERP) recense et cote chaque risque identifié par unité de travail (fréquence × gravité), avec les moyens de prévention existants et les mesures proposées — obligation réglementaire réévaluée au moins une fois par an.">Évaluation des risques professionnels (DUERP) — cotation par unité de travail, Ville et Agglomération.</p>
+            <p title="Le Document Unique d'Évaluation des Risques Professionnels (DUERP) recense et cote chaque risque identifié par unité de travail (fréquence × gravité), avec les moyens de prévention existants et les mesures proposées — obligation réglementaire réévaluée au moins une fois par an.">Évaluation des risques professionnels (DUERP) — cotation par unité de travail.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
@@ -482,12 +483,8 @@
       <section class="panel console">
         <div class="field-group" id="globalFiltersWrap" style="display:contents;">
         <div class="field">
-          <label class="flabel" for="fCollectivite">Collectivité</label>
-          <select id="fCollectivite">
-            <option value="all">Ville + Agglomération</option>
-            <option value="Ville">Ville</option>
-            <option value="Agglomération">Agglomération</option>
-          </select>
+          <label class="flabel" for="fCollectivite" data-org-libelle>Collectivité</label>
+          <select id="fCollectivite" data-org="filtre-somme"></select>
         </div>
         <div class="field"><label class="flabel" for="fService">Service</label><select id="fService"></select></div>
         </div>
@@ -521,7 +518,7 @@
           <table class="reg">
             <thead>
               <tr id="theadFields">
-                <th>Collectivité</th><th>Service</th><th>Risque</th><th>Tâches</th><th>Danger</th>
+                <th data-org-libelle>Collectivité</th><th>Service</th><th>Risque</th><th>Tâches</th><th>Danger</th>
                 <th>Fq</th><th>Grav.</th><th>Score</th><th>Niveau</th>
                 <th>Moyens de prévention</th><th>Priorité</th><th>Mesures proposées</th><th>Maîtrise</th>
                 <th id="thActions">Actions</th>
@@ -546,6 +543,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   (function(){
     try {
       if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
@@ -661,9 +659,6 @@
   // la liste du composant partagé ne doit pas bouger avec lui.
   const RISK_TAXONOMY_DEFAULT = VigieRisques.FAMILLES.map(f => [f[0], f[1]]);
 
-  const VILLE_SERVICES_DEFAULT = ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"];
-  const AGGLO_SERVICES_DEFAULT = ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"];
-
   // ---------- Référentiels partagés (éditables depuis l'Administration) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
@@ -671,8 +666,6 @@
     sieges: ["Autres","Bras","Cervical","Cheville","Cuisse","Dos","Epaule","Genoux","Main","Mollet","Multiple","Oreilles","Pieds","Poignée","Rps","Thorax","Ventre","Visage","Yeux"],
     natures: ["Autres","Brulure","Contusion","Douleur","Entorse","Inflammation","Lombalgie","Malaise","Multiple","Plaie","Psy"],
     statutsRH: ["Assistante maternelle-CDI","CONT - Catégorie A","CONT - Emploi Vacant","CONT - Remplaçant","CONT - Saisonnier","Détaché FPT","Stagiaire","Titulaire (FPT)"],
-    servicesVille: VILLE_SERVICES_DEFAULT,
-    servicesAgglo: AGGLO_SERVICES_DEFAULT,
     risqueFamillesDUERP: RISK_TAXONOMY_DEFAULT,
   };
   function loadReferentials(){
@@ -686,13 +679,10 @@
   }
   const REF = loadReferentials();
   const RISK_TAXONOMY = REF.risqueFamillesDUERP;
-  const VILLE_SERVICES = REF.servicesVille;
-  const AGGLO_SERVICES = REF.servicesAgglo;
-  const SERVICES = [...new Set([...VILLE_SERVICES, ...AGGLO_SERVICES])].sort((a,b)=>a.localeCompare(b,'fr'));
+  // services de chaque entrée de l'organisation (assets/organisation.js) ; « all » : tous, triés
+  const SERVICES = VigieOrga.tousServices();
   function servicesForCollectivite(col){
-    if (col === "Ville") return VILLE_SERVICES;
-    if (col === "Agglomération") return AGGLO_SERVICES;
-    return SERVICES;
+    return col === "all" ? SERVICES : VigieOrga.services(col);
   }
 
   const SEED_DUERP = [];
@@ -773,7 +763,7 @@
   // calculées (score, niveau, priorité) trient sur leur valeur métier.
   const tri = VigieTri.create({
     columns: [
-      { key:"collectivite",     label:"Collectivité", value:r => r.collectivite || "Ville" },
+      { key:"collectivite",     label:VigieOrga.libelle(), value:r => VigieOrga.de(r) },
       { key:"service",          label:"Service" },
       { key:"risque",           label:"Risque" },
       { key:"taches",           label:"Tâches" },
@@ -796,7 +786,7 @@
     const col = fCollectivite.value, svc = fService.value, rq = fRisque.value, nv = fNiveau.value;
     let rows = DATASET.filter(d => {
       const lvl = riskLevel(d.frequence * d.gravite);
-      return (col === "all" || (d.collectivite || "Ville") === col) &&
+      return (col === "all" || (VigieOrga.de(d)) === col) &&
              (svc === "all" || d.service === svc) &&
              (rq === "all" || d.risque === rq) &&
              (nv === "all" || lvl.cls === nv);
@@ -832,7 +822,7 @@
       const lvl = riskLevel(score);
       return `
       <tr class="${lvl.cls}" data-id="${esc(r.id)}">
-        <td><span class="collectivite-chip ${r.collectivite === 'Agglomération' ? 'agglo' : 'ville'}">${esc(r.collectivite || 'Ville')}</span></td>
+        <td><span class="collectivite-chip ${VigieOrga.de(r) === VigieOrga.premier() ? 'ville' : 'agglo'}">${esc(VigieOrga.de(r))}</span></td>
         <td>${esc(r.service)}</td>
         <td class="wrap">${esc(r.risque)}${ficheLien(r.risque)}</td>
         <td class="wrap">${esc(r.taches)}</td>
@@ -903,8 +893,8 @@
       const fq = Number(pick(["fq","frequence"])) || 1;
       const gr = Number(pick(["gravite","gravité"])) || 1;
       const idRaw = String(pick(["id"])).trim();
-      const collectiviteRaw = normKey(pick(["collectivite","structure"]));
-      const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
+      const collectiviteRaw = normKey(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
+      const collectivite = VigieOrga.reconnaitre(collectiviteRaw);
       return {
         id: idRaw || "",
         collectivite,
@@ -954,7 +944,7 @@
     });
     $("btnExport").addEventListener("click", () => {
       const rows = DATASET.map(r => ({
-        "ID": r.id, "Collectivite": r.collectivite || "Ville", "Service": r.service, "Risques": r.risque, "Taches": r.taches, "Danger": r.danger,
+        "ID": r.id, "Collectivite": VigieOrga.de(r), "Service": r.service, "Risques": r.risque, "Taches": r.taches, "Danger": r.danger,
         "Fq": r.frequence, "Gravite": r.gravite, "Niv R": r.frequence*r.gravite,
         "Moyens de prevention existants": r.moyensPrevention,
         "Priorite des actions": priorityFor(riskLevel(r.frequence*r.gravite).cls),
@@ -993,10 +983,10 @@
       if (!risque && !taches) return;
       const fq = Number(pick(["fq","frequence"])) || 1;
       const gr = Number(pick(["gravite","gravité"])) || 1;
-      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
       const rec = {
         id: "dtst-duerp-" + (i + 1),
-        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        collectivite: VigieOrga.reconnaitre(collectiviteRaw),
         service: String(pick(["service"])).trim(),
         risque, taches,
         danger: String(pick(["danger"])).trim(),

@@ -5,6 +5,7 @@
 <meta name="description" content="Suivi des vérifications techniques périodiques des équipements et installations par organismes agréés.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -388,8 +389,8 @@
       </div>
 
       <div class="panel console">
-        <div class="field"><span class="flabel">Collectivité</span>
-          <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+        <div class="field"><span class="flabel" data-org-libelle>Collectivité</span>
+          <select id="fCollectivite" data-org="filtre"></select>
         </div>
         <div class="field"><span class="flabel">Catégorie</span><select id="fCategorie"></select></div>
         <div class="field"><span class="flabel">Statut planning</span>
@@ -410,8 +411,8 @@
             <div class="span2"><label for="fEquipement">Équipement</label><input type="text" id="fEquipement" required placeholder="ex. Extincteurs — Hôtel de Ville"></div>
             <div><label for="fCategorieForm">Catégorie</label><select id="fCategorieForm" required></select></div>
             <div><label for="fSite">Site</label><input type="text" id="fSite" required placeholder="ex. Hôtel de Ville"></div>
-            <div><label for="fCollectiviteForm">Collectivité</label>
-              <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+            <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
+              <select id="fCollectiviteForm" required data-org="saisie"></select>
             </div>
             <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
             <div><label for="fOrganisme">Organisme agréé</label><input type="text" id="fOrganisme" placeholder="ex. APAVE"></div>
@@ -454,6 +455,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
@@ -549,8 +551,6 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -561,7 +561,7 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Catégories & périodicités standard ----------
   const CATEGORIES = [
@@ -637,7 +637,7 @@
     const col = fCollectivite.value, cat = fCategorie.value, st = fStatut.value, cf = fConformite.value;
     const withStatus = DATASET.map(v => Object.assign({}, v, computeStatus(v)));
     let rows = withStatus.filter(v =>
-      (col === "all" || v.collectivite === col) &&
+      (col === "all" || VigieOrga.actuel(v.collectivite) === col) &&
       (cat === "all" || v.categorie === cat) &&
       (st === "all" || v.statut === st) &&
       (cf === "all" || v.conformite === cf)
@@ -695,8 +695,8 @@
       const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
       const equipement = String(pick(["equipement"])).trim();
       if (!equipement) return null;
-      const collectiviteRaw = normKeyImp(pick(["collectivite","structure"]));
-      const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
+      const collectiviteRaw = normKeyImp(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
+      const collectivite = VigieOrga.reconnaitre(collectiviteRaw);
       const categorie = String(pick(["categorie"])).trim();
       const conformite = String(pick(["conformite"])).trim();
       const catNames = CATEGORIES.map(c => c[0]);
@@ -763,11 +763,11 @@
     VigieImpression.brancher("btnExport");
     $("btnExport").addEventListener("click", () => {
       const rows = DATASET.map(v => Object.assign({}, v, computeStatus(v))).map(v => ({
-        "ID": v.id, "Équipement": v.equipement, "Catégorie": v.categorie, "Collectivité": v.collectivite || "Ville",
+        "ID": v.id, "Équipement": v.equipement, "Catégorie": v.categorie, [VigieOrga.libelle()]: VigieOrga.de(v),
         "Site": v.site, "Service": v.service, "Organisme": v.organisme || "", "Dernière vérification": v.dateDerniere,
         "Prochaine échéance": v.prochaine, "Statut": v.statut, "Conformité": v.conformite, "Commentaire": v.commentaire || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Équipement", "Catégorie", "Collectivité", "Site", "Service", "Organisme", "Dernière vérification", "Prochaine échéance", "Statut", "Conformité", "Commentaire"] });
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Équipement", "Catégorie", VigieOrga.libelle(), "Site", "Service", "Organisme", "Dernière vérification", "Prochaine échéance", "Statut", "Conformité", "Commentaire"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Vérifications");
       const today = VigieDates.aujourdhui();
@@ -780,7 +780,7 @@
       const list = servicesForCollectivite(col);
       $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
     }
-    fillFormServiceOptions("Ville");
+    fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
     $("fCategorieForm").addEventListener("change", (e) => {
       const p = PERIODICITE_BY_CAT[e.target.value];
@@ -806,7 +806,7 @@
       } else {
         $("formTitle").textContent = "Nouvel équipement";
         $("fId").value = "";
-        fillFormServiceOptions("Ville");
+        fillFormServiceOptions(VigieOrga.premier());
         $("fCategorieForm").value = CATEGORIES[0][0];
         $("fPeriodicite").value = CATEGORIES[0][1];
         $("fDateDerniere").value = VigieDates.aujourdhui();
@@ -889,13 +889,13 @@
       const pick = (aliases) => { for (const a of aliases){ if (n[a] !== undefined && n[a] !== "") return n[a]; } return ""; };
       const equipement = String(pick(["equipement"])).trim();
       if (!equipement) return;
-      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure"]));
+      const collectiviteRaw = normKeyDtst(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
       const categorie = String(pick(["categorie"])).trim();
       const conformite = String(pick(["conformite"])).trim();
       const catNames = CATEGORIES.map(c => c[0]);
       const rec = {
         id: "dtst-verif-" + (i + 1), equipement,
-        collectivite: collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville",
+        collectivite: VigieOrga.reconnaitre(collectiviteRaw),
         categorie: catNames.includes(categorie) ? categorie : (catNames[0] || categorie),
         site: String(pick(["site"])).trim(),
         service: String(pick(["service"])).trim(),

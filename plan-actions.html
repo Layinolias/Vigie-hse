@@ -5,6 +5,7 @@
 <meta name="description" content="Suivi des actions correctives issues du Document Unique et du Registre AT/MP.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -386,8 +387,8 @@
       </div>
 
       <div class="panel console">
-        <div class="field"><span class="flabel">Collectivité</span>
-          <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+        <div class="field"><span class="flabel" data-org-libelle>Collectivité</span>
+          <select id="fCollectivite" data-org="filtre"></select>
         </div>
         <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
         <div class="field"><span class="flabel">Statut</span>
@@ -406,8 +407,8 @@
           <input type="hidden" id="fId">
           <div class="form-grid">
             <div class="span2"><label for="fTitre">Titre</label><input type="text" id="fTitre" required></div>
-            <div><label for="fCollectiviteForm">Collectivité</label>
-              <select id="fCollectiviteForm" required><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+            <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
+              <select id="fCollectiviteForm" required data-org="saisie"></select>
             </div>
             <div><label for="fServiceForm">Service</label><select id="fServiceForm" required></select></div>
             <div><label for="fRisqueLie">Risque lié</label><input type="text" id="fRisqueLie" placeholder="ex. Chute de plain-pied"></div>
@@ -453,6 +454,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
     try {
@@ -547,8 +549,6 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -559,7 +559,7 @@
     return merged;
   }
   const REF = loadReferentials();
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Dataset DUERP (lecture pour générer les actions) ----------
   const SEED_DUERP = [];
@@ -596,7 +596,7 @@
           titre: r.risque + " — " + r.service,
           description: r.mesuresProposees,
           service: r.service,
-          collectivite: r.collectivite || "Ville",
+          collectivite: VigieOrga.de(r),
           risqueLie: r.risque,
           origine: "DUERP",
           responsable: "",
@@ -627,7 +627,7 @@
             titre: (insp.trameNom || "Inspection") + " — " + rep.libelle,
             description: rep.commentaire && rep.commentaire.trim() ? rep.commentaire : "Non-conformité relevée lors de l'inspection.",
             service: insp.service,
-            collectivite: insp.collectivite || "Ville",
+            collectivite: VigieOrga.de(insp),
             risqueLie: rep.libelle,
             origine: "Inspection",
             responsable: "",
@@ -661,7 +661,7 @@
           titre: "Analyse d'accident — " + (evt.risque || an.atmpId),
           description: act.description,
           service: evt.service || "",
-          collectivite: evt.collectivite || "Ville",
+          collectivite: VigieOrga.de(evt),
           risqueLie: evt.risque || "",
           origine: "Analyse",
           responsable: act.responsable || "",
@@ -690,7 +690,7 @@
           titre: "Exercice " + (ex.type || "d'urgence") + " — " + (ex.site || ""),
           description: act.description,
           service: ex.service || "",
-          collectivite: ex.collectivite || "Ville",
+          collectivite: VigieOrga.de(ex),
           risqueLie: ex.type || "",
           origine: "Urgence",
           responsable: act.responsable || "",
@@ -719,7 +719,7 @@
           titre: "Prévention EE — " + (ee.entrepriseNom || "") + " (" + (ee.site || "") + ")",
           description: act.description,
           service: ee.service || "",
-          collectivite: ee.collectivite || "Ville",
+          collectivite: VigieOrga.de(ee),
           risqueLie: "Coactivité",
           origine: "Prévention EE",
           responsable: act.responsable || "",
@@ -749,7 +749,7 @@
           titre: "Visite de site — " + (v.site || ""),
           description: act.description,
           service: v.service || "",
-          collectivite: v.collectivite || "Ville",
+          collectivite: VigieOrga.de(v),
           risqueLie: "",
           origine: "Dialogue social",
           responsable: act.responsable || "",
@@ -788,7 +788,7 @@
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatut = $("fStatut"), fPriorite = $("fPriorite");
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -815,7 +815,7 @@
   function render(){
     const col = fCollectivite.value, svc = fService.value, st = fStatut.value, pr = fPriorite.value;
     let rows = DATASET.filter(a =>
-      (col === "all" || a.collectivite === col) &&
+      (col === "all" || VigieOrga.actuel(a.collectivite) === col) &&
       (svc === "all" || a.service === svc) &&
       (st === "all" || a.statut === st) &&
       (pr === "all" || a.priorite === pr)
@@ -889,8 +889,8 @@
       const titre = String(pick(["titre"])).trim();
       const description = String(pick(["description"])).trim();
       if (!titre && !description) return null;
-      const collectiviteRaw = normKeyImp(pick(["collectivite","structure"]));
-      const collectivite = collectiviteRaw.includes("agglo") ? "Agglomération" : "Ville";
+      const collectiviteRaw = normKeyImp(pick(["collectivite","structure", VigieOrga.norm(VigieOrga.libelle())]));
+      const collectivite = VigieOrga.reconnaitre(collectiviteRaw);
       const priorite = String(pick(["priorite"])).trim() || "Moyenne";
       const statut = String(pick(["statut"])).trim() || "À faire";
       return {
@@ -944,11 +944,11 @@
     VigieImpression.brancher("btnExport");
     $("btnExport").addEventListener("click", () => {
       const rows = DATASET.map(r => ({
-        "ID": r.id, "Titre": r.titre, "Description": r.description, "Collectivité": r.collectivite || "Ville", "Service": r.service,
+        "ID": r.id, "Titre": r.titre, "Description": r.description, [VigieOrga.libelle()]: VigieOrga.de(r), "Service": r.service,
         "Risque lié": r.risqueLie || "", "Origine": r.origine, "Responsable": r.responsable || "", "Échéance": r.echeance,
         "Priorité": r.priorite, "Statut": r.statut, "Date de création": r.dateCreation || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Titre", "Description", "Collectivité", "Service", "Risque lié", "Origine", "Responsable", "Échéance", "Priorité", "Statut", "Date de création"] });
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Titre", "Description", VigieOrga.libelle(), "Service", "Risque lié", "Origine", "Responsable", "Échéance", "Priorité", "Statut", "Date de création"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Plan d'Actions");
       const today = VigieDates.aujourdhui();
@@ -960,7 +960,7 @@
       const list = servicesForCollectivite(col);
       $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
     }
-    fillFormServiceOptions("Ville");
+    fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
 
     function openForm(rec){
@@ -981,7 +981,7 @@
       } else {
         $("formTitle").textContent = "Nouvelle action";
         $("fId").value = "";
-        fillFormServiceOptions("Ville");
+        fillFormServiceOptions(VigieOrga.premier());
         $("fEcheance").value = VigieDates.aujourdhui();
       }
       formPanel.style.display = "";

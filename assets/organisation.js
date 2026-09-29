@@ -113,6 +113,27 @@
       var c = config();
       return [nom].concat(Object.keys(c.anciensNoms).filter(function(k){ return k !== nom && O.actuel(k) === nom; }));
     },
+    // Une page marque ce qui dépend de l'organisation, puis appelle VigieOrga.preparer() en tête de son script
+    // (avant de lire ces listes) : <select data-org="filtre"> (avec « Toutes »), <select data-org="saisie">,
+    // tout élément [data-org-libelle] reçoit le mot affiché (« Collectivité », « Site »…).
+    preparer: function(racine){
+      racine = racine || document;
+      Array.prototype.forEach.call(racine.querySelectorAll("select[data-org]"), function(s){
+        var genre = s.getAttribute("data-org");
+        // « filtre-somme » : l'option « all » nomme les entrées quand elles sont deux (« Ville + Agglomération »)
+        var noms = O.noms(), somme = genre === "filtre-somme" ? (noms.length <= 2 ? noms.join(" + ") : O.tousLes().charAt(0).toUpperCase() + O.tousLes().slice(1)) : undefined;
+        O.remplir(s, { tous: genre === "filtre" || genre === "filtre-somme", texteTous: somme });
+      });
+      // boutons radio (<div data-org="radios" data-org-nom="collectivite">) : un par entrée, la première cochée
+      Array.prototype.forEach.call(racine.querySelectorAll("[data-org='radios']"), function(d){
+        var nom = d.getAttribute("data-org-nom") || "collectivite";
+        var esc = function(s){ return String(s).replace(/[&<>"']/g, function(ch){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]; }); };
+        d.innerHTML = O.noms().map(function(n, i){
+          return '<input type="radio" name="' + esc(nom) + '" id="col-' + i + '" value="' + esc(n) + '"' + (i === 0 ? " checked" : "") + ' required><label for="col-' + i + '">' + esc(n) + "</label>";
+        }).join("");
+      });
+      Array.prototype.forEach.call(racine.querySelectorAll("[data-org-libelle]"), function(e){ e.textContent = O.libelle(); });
+    },
     // Administration : clés d'enregistrements touchées par un renommage ou un déplacement
     clesDonnees: function(){
       var C = (window.VigieStore && VigieStore.CLES) || {};

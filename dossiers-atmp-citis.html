@@ -5,6 +5,7 @@
 <meta name="description" content="Suivi administratif des dossiers AT/MP et maladies professionnelles : checklist documentaire, arrêtés d'imputabilité et de CITIS, workflow de signature.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -392,8 +393,8 @@
       </div>
 
       <div class="panel console">
-        <div class="field"><span class="flabel">Collectivité</span>
-          <select id="fCollectivite"><option value="all">Toutes</option><option value="Ville">Ville</option><option value="Agglomération">Agglomération</option></select>
+        <div class="field"><span class="flabel" data-org-libelle>Collectivité</span>
+          <select id="fCollectivite" data-org="filtre"></select>
         </div>
         <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
         <div class="field"><span class="flabel">Statut dossier</span>
@@ -513,6 +514,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   (function(){
@@ -615,8 +617,6 @@
   // ---------- Référentiels partagés (services) ----------
   const REF_KEY = "vigie_hse_referentials";
   const REF_DEFAULTS = {
-    servicesVille: ["Accueil & Affaires Générales","Patrimoine Bâti","Communication Institutionnelle","Restauration Collective","Ressources Humaines & Vie au Travail","Enfance & Jeunesse","Espaces Verts & Paysage","Vie Événementielle","Atelier Mécanique","Propreté de la Ville","Affaires Financières","Police Municipale & Tranquillité","Sports & Vie Associative","Voirie & Réseaux"],
-    servicesAgglo: ["Direction Générale des Services","Ressources Humaines & Vie au Travail","Conservatoire de Musique","Enfance & Jeunesse","Réseau des Médiathèques","Petite Enfance & Familles","Collecte & Propreté","Sports & Vie Associative","Urbanisme & Aménagement"],
   };
   function loadReferentials(){
     let stored = {};
@@ -677,10 +677,10 @@
 
   // ---------- Filtres ----------
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatutDossier = $("fStatutDossier");
-  function servicesForCollectivite(col){ return col === "Agglomération" ? REF.servicesAgglo : REF.servicesVille; }
+  function servicesForCollectivite(col){ return VigieOrga.services(col); }
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? [...new Set([...REF.servicesVille, ...REF.servicesAgglo])].sort((a,b)=>a.localeCompare(b,'fr')) : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -690,7 +690,7 @@
   function render(){
     const col = fCollectivite.value, svc = fService.value, statutF = fStatutDossier.value;
     let rows = ATMP_EVENTS.filter(a =>
-      (col === "all" || a.collectivite === col) &&
+      (col === "all" || VigieOrga.actuel(a.collectivite) === col) &&
       (svc === "all" || a.service === svc)
     ).map(a => {
       const d = dossierFor(a.id);
@@ -782,7 +782,7 @@
       <div><b>Date AT</b><br>${esc(evt.dateAT || '—')}</div>
       <div><b>Type</b><br>${esc(evt.typeAtMp || '—')}</div>
       <div><b>Service</b><br>${esc(evt.service || '—')}</div>
-      <div><b>Collectivité</b><br>${esc(evt.collectivite || 'Ville')}</div>`;
+      <div><b>${esc(VigieOrga.libelle())}</b><br>${esc(VigieOrga.de(evt))}</div>`;
 
     $("pCmiRecu").checked = !!d.cmi.recu; $("pCmiDate").value = d.cmi.date || ""; $("pCmiRef").value = d.cmi.ref || "";
     $("pFinalType").value = d.certificatFinal.type || "Guérison";

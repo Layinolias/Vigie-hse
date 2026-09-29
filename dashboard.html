@@ -169,6 +169,8 @@
   .weather-popover-link{ font-size:11px; color:var(--accent-blue); text-decoration:none; align-self:flex-start; }
   .weather-popover-link:hover{ text-decoration:underline; }
   .weather-current{ font-size:11px; color:var(--text-muted); }
+  .weather-privacy{ margin:0; font-size:10.5px; line-height:1.45; color:var(--text-faint); }
+  .weather-off{ background:none; border:none; padding:0; cursor:pointer; font-family:inherit; }
   .tb-score{
     background:linear-gradient(135deg, rgba(var(--accent-rgb),.16), rgba(var(--accent-violet-rgb),.06));
     border-color:rgba(var(--accent-rgb),.28);
@@ -550,6 +552,8 @@
             <div class="weather-popover-head">Choisir une localisation</div>
             <input type="text" id="weatherSearchInput" placeholder="Ville, région, pays…" autocomplete="off">
             <div class="weather-results" id="weatherResults"></div>
+            <p class="weather-privacy">La météo est facultative et fournie par le service Open-Meteo : la recherche lui envoie le texte tapé, puis la position de la ville choisie et l'adresse IP de ce poste. Aucune donnée de VIGIE HSE.</p>
+            <button type="button" class="weather-popover-link weather-off" id="weatherOff" hidden>Ne plus afficher la météo</button>
             <a href="https://meteofrance.com/" target="_blank" rel="noopener" class="weather-popover-link">Voir sur Météo France ↗</a>
           </div>
         </div>
@@ -973,6 +977,8 @@
   $("moduleNote").textContent = "4 modules actifs";
 
   // ---------- Météo en direct (localisation choisie manuellement) ----------
+  // Facultative (2026-09-29) : aucune requête vers Open-Meteo tant qu'aucune ville n'a été choisie — rien n'en
+  // est choisi d'office —, le panneau dit ce qui est envoyé, et « Ne plus afficher la météo » oublie la ville.
   // Plus de demande de permission de géolocalisation : l'utilisateur choisit lui-même sa ville
   // via une recherche (API de géocodage Open-Meteo, gratuite, sans clé). Le choix est mémorisé
   // dans le navigateur (localStorage) et réutilisé aux visites suivantes.
@@ -1034,8 +1040,14 @@
     weatherPopover.hidden = false;
     weatherSearchInput.value = "";
     weatherResults.innerHTML = "";
+    $("weatherOff").hidden = !loadWeatherLocation();
     weatherSearchInput.focus();
   }
+  $("weatherOff").addEventListener("click", () => {
+    try { VigieStore.removeItem(WEATHER_LOC_KEY); } catch(e){}
+    renderWeatherNoLocation();
+    closeWeatherPopover();
+  });
   $("tbWeather").addEventListener("click", (e) => {
     e.stopPropagation();
     if (weatherPopover.hidden) openWeatherPopover(); else closeWeatherPopover();

@@ -632,7 +632,7 @@
     const colInput = [...document.querySelectorAll('input[name="collectivite"]')].find(r => r.value === VigieOrga.de(rec));
     if (colInput) colInput.checked = true;
     populateServiceOptions(VigieOrga.de(rec));
-    $("fService").value = rec.service || "";
+    VigieOrga.choisirService($("fService"), rec.service);
     $("fRisque").value = rec.risque || "";
     $("fRisque").dispatchEvent(new Event("change"));
     $("fTaches").value = rec.taches || "";

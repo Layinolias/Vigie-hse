@@ -35,8 +35,8 @@
   }
   function parDefaut(ref){
     return { libelle:"Collectivité", pluriel:"Collectivités", genre:"f", anciensNoms:{}, entites:[
-      { nom:"Ville", services: listeTexte(ref.servicesVille).length ? listeTexte(ref.servicesVille) : SERVICES_VILLE.slice() },
-      { nom:"Agglomération", services: listeTexte(ref.servicesAgglo).length ? listeTexte(ref.servicesAgglo) : SERVICES_AGGLO.slice() }
+      { nom:"Ville", services: listeTexte(ref.servicesVille).length ? listeTexte(ref.servicesVille) : SERVICES_VILLE.slice(), archives: [] },
+      { nom:"Agglomération", services: listeTexte(ref.servicesAgglo).length ? listeTexte(ref.servicesAgglo) : SERVICES_AGGLO.slice(), archives: [] }
     ] };
   }
   // configuration lue et assainie (jamais vide : au moins une entité)
@@ -46,7 +46,9 @@
     var vus = {}, entites = [];
     o.entites.forEach(function(e){
       var nom = String((e && e.nom) || "").trim(); if (!nom || vus[norm(nom)]) return; vus[norm(nom)] = 1;
-      entites.push({ nom: nom, services: listeTexte(e.services) });
+      var actifs = listeTexte(e.services);
+      // services archivés (2026-09-30) : retirés des formulaires, gardés pour les filtres et les enregistrements anciens
+      entites.push({ nom: nom, services: actifs, archives: listeTexte(e.archives).filter(function(s){ return actifs.indexOf(s) < 0; }) });
     });
     var anciens = {};
     if (o.anciensNoms && typeof o.anciensNoms === "object") Object.keys(o.anciensNoms).forEach(function(k){ anciens[k] = String(o.anciensNoms[k]); });
@@ -74,8 +76,21 @@
     // l'entité d'un enregistrement : son champ ramené à l'entité actuelle ; sans champ (anciens
     // enregistrements), la première — comme « Ville » l'était jusqu'ici
     de: function(rec){ var v = rec && rec.collectivite; return (v && O.actuel(v)) || (v ? String(v) : O.premier()); },
-    services: function(nom){ var a = O.actuel(nom), e = config().entites.filter(function(x){ return x.nom === a; })[0]; return e ? e.services.slice() : []; },
-    tousServices: function(){ var s = {}; config().entites.forEach(function(e){ e.services.forEach(function(x){ s[x] = 1; }); }); return Object.keys(s).sort(function(a, b){ return a.localeCompare(b, "fr"); }); },
+    // services d'une entrée : ceux des formulaires ; avecArchives (filtres, périmètre des comptes) : les archivés en plus
+    services: function(nom, avecArchives){ var a = O.actuel(nom), e = config().entites.filter(function(x){ return x.nom === a; })[0]; return e ? e.services.concat(avecArchives ? e.archives : []) : []; },
+    tousServices: function(avecArchives){ var s = {}; config().entites.forEach(function(e){ e.services.concat(avecArchives ? e.archives : []).forEach(function(x){ s[x] = 1; }); }); return Object.keys(s).sort(function(a, b){ return a.localeCompare(b, "fr"); }); },
+    archives: function(nom){ var a = O.actuel(nom), e = config().entites.filter(function(x){ return x.nom === a; })[0]; return e ? e.archives.slice() : []; },
+    // formulaire rouvert sur un enregistrement dont le service est archivé (ou inconnu de la liste) : le service
+    // est rajouté pour cet enregistrement seulement, sinon l'enregistrer effacerait son service
+    choisirService: function(select, service){
+      if (!select) return;
+      var v = String(service == null ? "" : service);
+      if (v && ![].some.call(select.options, function(o){ return o.value === v; })){
+        var archive = config().entites.some(function(e){ return e.archives.indexOf(v) >= 0 && e.services.indexOf(v) < 0; });
+        var o = select.ownerDocument.createElement("option"); o.value = v; o.textContent = v + (archive ? " (archivé)" : ""); o.setAttribute("data-org-garde", ""); select.appendChild(o);
+      }
+      select.value = v;
+    },
     // valeur lue dans un fichier importé → entité : nom exact (sans casse ni accents), ancien nom, puis début
     // de nom (« Agglo » → « Agglomération ») ; sinon la première entité, comme avant
     reconnaitre: function(texte){
@@ -177,7 +192,7 @@
       var c = config(), n = String(nom == null ? "" : nom).trim();
       if (!n) return { ok:false, erreur:"Donnez un nom." };
       if (c.entites.some(function(e){ return norm(e.nom) === norm(n); })) return { ok:false, erreur:"« " + n + " » existe déjà." };
-      c.entites.push({ nom: n, services: [] });
+      c.entites.push({ nom: n, services: [], archives: [] });
       delete c.anciensNoms[n];   // un nom repris redevient une entité à part entière
       O.sauver(c); return { ok:true, n:0 };
     },
@@ -203,6 +218,7 @@
       if (!cible || cible === e) return { ok:false, erreur:"Choisissez où déplacer ses enregistrements." };
       var portes = O.nomsDe(nom);
       e.services.forEach(function(s){ if (cible.services.indexOf(s) < 0) cible.services.push(s); });
+      e.archives.forEach(function(s){ if (cible.services.indexOf(s) < 0 && cible.archives.indexOf(s) < 0) cible.archives.push(s); });
       c.entites = c.entites.filter(function(x){ return x !== e; });
       Object.keys(c.anciensNoms).forEach(function(k){ if (c.anciensNoms[k] === nom) c.anciensNoms[k] = vers; });
       c.anciensNoms[nom] = vers;
@@ -212,6 +228,75 @@
       var c = config(), e = c.entites.filter(function(x){ return x.nom === nom; })[0];
       if (!e) return { ok:false, erreur:"« " + nom + " » n'existe plus." };
       var vus = {}; e.services = listeTexte(liste).filter(function(s){ var k = norm(s); if (vus[k]) return false; vus[k] = 1; return true; });
+      e.archives = e.archives.filter(function(s){ return e.services.indexOf(s) < 0; });   // un service rajouté n'est plus archivé
+      O.sauver(c); return { ok:true, n:0 };
+    },
+
+    // ----- Services (2026-09-30) : renommer fait suivre enregistrements et comptes ; supprimer un service encore
+    // utilisé l'ARCHIVE (décidé avec le porteur du projet) : hors des formulaires, gardé dans les filtres et sur ses
+    // enregistrements, restaurable. Un service sans aucun enregistrement est simplement retiré.
+    // enregistrements d'une entrée (anciens noms compris) portant ce service
+    compterService: function(entite, service){
+      var total = 0, noms = O.nomsDe(entite), cibles = {}; noms.forEach(function(n){ cibles[n] = 1; });
+      var premier = O.premier();
+      O.clesDonnees().forEach(function(k){
+        var l; try { l = JSON.parse(VigieStore.getItem(k) || "[]"); } catch(e){ return; }
+        if (!Array.isArray(l)) return;
+        total += l.filter(function(r){ return r && typeof r === "object" && r.service === service && (cibles[r.collectivite] || (!r.collectivite && entite === premier)); }).length;
+      });
+      return total;
+    },
+    renommerService: function(entite, ancien, nouveau){
+      var c = config(), e = c.entites.filter(function(x){ return x.nom === entite; })[0], n = String(nouveau == null ? "" : nouveau).trim();
+      if (!e) return { ok:false, erreur:"« " + entite + " » n'existe plus." };
+      var liste = e.services.indexOf(ancien) >= 0 ? e.services : (e.archives.indexOf(ancien) >= 0 ? e.archives : null);
+      if (!liste) return { ok:false, erreur:"« " + ancien + " » n'est pas un service de " + entite + "." };
+      if (!n) return { ok:false, erreur:"Donnez un nom." };
+      if (n === ancien) return { ok:true, n:0, comptes:0 };
+      if (e.services.concat(e.archives).some(function(s){ return s !== ancien && norm(s) === norm(n); })) return { ok:false, erreur:"« " + n + " » existe déjà dans " + entite + "." };
+      liste[liste.indexOf(ancien)] = n;
+      O.sauver(c);
+      // enregistrements de cette entrée
+      var noms = O.nomsDe(entite), cibles = {}; noms.forEach(function(x){ cibles[x] = 1; });
+      var premier = O.premier(), total = 0;
+      O.clesDonnees().forEach(function(k){
+        var l; try { l = JSON.parse(VigieStore.getItem(k) || "[]"); } catch(err){ return; }
+        if (!Array.isArray(l)) return;
+        var m = 0;
+        l.forEach(function(r){ if (r && typeof r === "object" && r.service === ancien && (cibles[r.collectivite] || (!r.collectivite && entite === premier))){ r.service = n; m++; } });
+        if (m){ VigieStore.setItem(k, JSON.stringify(l)); total += m; }
+      });
+      // comptes limités à ce service : ils reçoivent le nouveau nom ; l'ancien reste si une autre entrée l'a encore
+      var encoreAilleurs = config().entites.some(function(x){ return x.services.indexOf(ancien) >= 0 || x.archives.indexOf(ancien) >= 0; });
+      var comptes = 0;
+      try {
+        var u = JSON.parse(VigieStore.getItem("vigie_hse_users") || "[]");
+        if (Array.isArray(u)){
+          u.forEach(function(x){
+            if (!x || !Array.isArray(x.services) || x.services.indexOf(ancien) < 0) return;
+            if (x.services.indexOf(n) < 0) x.services.push(n);
+            if (!encoreAilleurs) x.services = x.services.filter(function(s){ return s !== ancien; });
+            comptes++;
+          });
+          if (comptes) VigieStore.setItem("vigie_hse_users", JSON.stringify(u));
+        }
+      } catch(err){}
+      return { ok:true, n: total, comptes: comptes };
+    },
+    // retirer un service d'une entrée : archivé s'il a des enregistrements, retiré sinon
+    retirerService: function(entite, service){
+      var c = config(), e = c.entites.filter(function(x){ return x.nom === entite; })[0];
+      if (!e || e.services.indexOf(service) < 0) return { ok:false, erreur:"« " + service + " » n'est pas un service actif de " + entite + "." };
+      var n = O.compterService(entite, service);
+      e.services = e.services.filter(function(s){ return s !== service; });
+      if (n && e.archives.indexOf(service) < 0) e.archives.push(service);
+      O.sauver(c); return { ok:true, archive: n > 0, n: n };
+    },
+    restaurerService: function(entite, service){
+      var c = config(), e = c.entites.filter(function(x){ return x.nom === entite; })[0];
+      if (!e || e.archives.indexOf(service) < 0) return { ok:false, erreur:"« " + service + " » n'est pas archivé dans " + entite + "." };
+      e.archives = e.archives.filter(function(s){ return s !== service; });
+      if (e.services.indexOf(service) < 0) e.services.push(service);
       O.sauver(c); return { ok:true, n:0 };
     },
     definirMot: function(libelle, pluriel, genre){

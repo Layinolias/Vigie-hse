@@ -764,7 +764,7 @@
     const colInput = [...document.querySelectorAll('input[name="collectivite"]')].find(r => r.value === VigieOrga.de(rec));
     if (colInput) colInput.checked = true;
     populateServiceOptions(VigieOrga.de(rec));
-    $("fService").value = rec.service || "";
+    VigieOrga.choisirService($("fService"), rec.service);
     fillDatalist($("dlServiceDetail"), SERVICE_DETAIL[rec.service] || []);
     fServiceDetail.disabled = false;
     fServiceDetail.value = rec.serviceDetail || "";

@@ -1091,7 +1091,7 @@
   const dfCollectivite = $("dfCollectivite"), dfService = $("dfService"), dfStatut = $("dfStatut");
   function fillDotServiceOptions(){
     const col = dfCollectivite.value;
-    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = dfService.value;
     dfService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     dfService.value = list.includes(current) ? current : "all";
@@ -1218,7 +1218,7 @@
       XLSX.writeFile(wb, `epi-dotations_${VigieDates.aujourdhui()}.xlsx`);
     });
     const dotFormPanel = $("dotFormPanel"), dotForm = $("dotForm");
-    function fillDotFormServices(col){ $("dotService").innerHTML = servicesForCollectivite(col).map(s => `<option value="${s}">${s}</option>`).join(""); }
+    function fillDotFormServices(col){ $("dotService").innerHTML = servicesForCollectivite(col).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join(""); }
     fillDotFormServices(VigieOrga.premier());
     $("dotCollectivite").addEventListener("change", (e) => fillDotFormServices(e.target.value));
 
@@ -1229,7 +1229,7 @@
       $("dotPrenom").value = a.prenom;
       $("dotCollectivite").value = VigieOrga.de(a);
       fillDotFormServices(VigieOrga.de(a));
-      $("dotService").value = a.service || "";
+      VigieOrga.choisirService($("dotService"), a.service);
     });
 
     function openDotForm(rec){
@@ -1237,7 +1237,7 @@
       if (rec){
         $("dotFormTitle").textContent = "Modifier la dotation";
         $("dotId").value = rec.id; $("dotNom").value = rec.nom; $("dotPrenom").value = rec.prenom;
-        $("dotCollectivite").value = rec.collectivite; fillDotFormServices(rec.collectivite); $("dotService").value = rec.service;
+        $("dotCollectivite").value = rec.collectivite; fillDotFormServices(rec.collectivite); VigieOrga.choisirService($("dotService"), rec.service);
         $("dotArticle").value = rec.articleId; $("dotTaille").value = rec.taille; $("dotDateRemise").value = rec.dateRemise;
       } else {
         $("dotFormTitle").textContent = "Nouvelle dotation"; $("dotId").value = "";

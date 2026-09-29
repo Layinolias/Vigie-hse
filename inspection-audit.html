@@ -681,7 +681,7 @@
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fTrame = $("fTrame"), fStatut = $("fStatut");
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -944,7 +944,7 @@
         $("fTrameForm").value = rec.trameId;
         $("fCollectiviteForm").value = rec.collectivite;
         fillFormServiceOptions(rec.collectivite);
-        $("fServiceForm").value = rec.service;
+        VigieOrga.choisirService($("fServiceForm"), rec.service);
         $("fDateForm").value = rec.dateInspection || "";
         $("fInspecteur").value = rec.inspecteur || "";
         renderPoints(rec.trameId, rec.reponses);

@@ -632,7 +632,7 @@
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fEntreprise = $("fEntreprise");
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -790,7 +790,7 @@
       $("fSite").value = rec.site || "";
       $("fCollectiviteForm").value = VigieOrga.de(rec);
       fillFormServiceOptions(VigieOrga.de(rec));
-      $("fServiceForm").value = rec.service || "";
+      VigieOrga.choisirService($("fServiceForm"), rec.service);
       $("fDateDebut").value = rec.dateDebut || "";
       $("fDateFin").value = rec.dateFin || "";
       $("fHeures").value = rec.heuresEstimees || "";

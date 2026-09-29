@@ -639,7 +639,8 @@
   }
   const REF = loadReferentials();
   function servicesForCollectivite(col){ return VigieOrga.services(col); }
-  function allServicesSorted(){ return VigieOrga.tousServices(); }
+  // filtres et indicateurs : services archivés compris (leurs agents et leurs heures existent toujours)
+  function allServicesSorted(){ return VigieOrga.tousServices(true); }
 
   // ---------- Postes (définis dans penibilite.html, lus ici pour rattacher un agent) ----------
   const POSTES_KEY = "vigie_hse_postes";
@@ -703,7 +704,7 @@
   const aFCollectivite = $("aFCollectivite"), aFService = $("aFService"), aFStatut = $("aFStatut");
   function fillAgentFilterServices(){
     const col = aFCollectivite.value;
-    const list = col === "all" ? allServicesSorted() : servicesForCollectivite(col);
+    const list = col === "all" ? allServicesSorted() : VigieOrga.services(col, true);
     const current = aFService.value;
     aFService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     aFService.value = list.includes(current) ? current : "all";
@@ -787,7 +788,7 @@
       $("agFPrenom").value = rec.prenom || "";
       $("agFCollectivite").value = VigieOrga.de(rec);
       fillAgentFormServices(VigieOrga.de(rec));
-      $("agFService").value = rec.service || "";
+      VigieOrga.choisirService($("agFService"), rec.service);
       $("agFManager").value = rec.managerId || "";
       $("agFDateEntree").value = rec.dateEntree || "";
       $("agFActif").checked = rec.actif !== false;

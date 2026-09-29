@@ -820,7 +820,7 @@
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatut = $("fStatut");
   function fillServiceOptions(){
     const col = fCollectivite.value;
-    const list = col === "all" ? VigieOrga.tousServices() : servicesForCollectivite(col);
+    const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = fService.value;
     fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
@@ -995,7 +995,7 @@
       $("fPrenom").value = a.prenom;
       $("fCollectiviteForm").value = VigieOrga.de(a);
       fillFormServiceOptions(VigieOrga.de(a));
-      $("fServiceForm").value = a.service || "";
+      VigieOrga.choisirService($("fServiceForm"), a.service);
     });
 
     function openForm(rec){
@@ -1007,7 +1007,7 @@
         $("fPrenom").value = rec.prenom;
         $("fCollectiviteForm").value = rec.collectivite;
         fillFormServiceOptions(rec.collectivite);
-        $("fServiceForm").value = rec.service;
+        VigieOrga.choisirService($("fServiceForm"), rec.service);
         $("fType").value = rec.typeVisite || "Périodique";
         $("fDateDerniere").value = rec.dateDerniere || "";
         $("fPeriodicite").value = rec.periodiciteMois || 24;

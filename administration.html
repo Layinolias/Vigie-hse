@@ -1065,7 +1065,8 @@
   function ecrireListe(k, liste){ if (estSvc(k)) VigieOrga.definirServices(k.slice(SVC.length), liste); else { REF[k] = liste; saveReferentials(REF); } }
   const libelleListe = k => estSvc(k) ? "Services — " + k.slice(SVC.length) : REF_LABELS[k];
 
-  function allServices(){ return VigieOrga.tousServices(); }
+  // périmètre d'un compte : les services archivés restent proposés (leurs enregistrements existent toujours)
+  function allServices(){ return VigieOrga.tousServices(true); }
 
   // ===================================================================
   // A. UTILISATEURS
@@ -1400,12 +1401,30 @@
     }
 
     const list = lireListe(key);
+    // services d'une entrée : renommer fait suivre ses enregistrements et les comptes ; retirer un service
+    // encore utilisé l'archive (restaurable, liste ci-dessous) — assets/organisation.js
+    const entiteSvc = estSvc(key) ? key.slice(SVC.length) : "";
+    const archivesSvc = entiteSvc ? VigieOrga.archives(entiteSvc) : [];
     host.innerHTML = `
       <div class="list-editor" id="refListRows"></div>
       <div class="add-row">
         <input type="text" id="refNewLabel" placeholder="Nouvelle valeur…">
         <button type="button" class="btn btn-primary btn-sm" id="refAddBtn">Ajouter</button>
-      </div>`;
+      </div>` + (archivesSvc.length ? `
+      <div class="svc-archives">
+        <div class="panel-note" style="margin:14px 0 8px;">Services archivés — retirés des formulaires, gardés sur leurs enregistrements et dans les filtres :</div>
+        <div class="list-editor" id="refArchives">${archivesSvc.map(s => `
+          <div class="list-row" data-svc="${esc(s)}"><span style="flex:1; font-size:12.5px;">${esc(s)} <span class="org-compte">· ${VigieOrga.compterService(entiteSvc, s)} enregistrement(s)</span></span>
+            <button type="button" class="btn btn-ghost btn-sm ref-restaurer">Restaurer</button></div>`).join("")}</div>
+      </div>` : "");
+    if ($("refArchives")) $("refArchives").addEventListener("click", (e) => {
+      const b = e.target.closest(".ref-restaurer"); if (!b) return;
+      const s = b.closest(".list-row").dataset.svc;
+      if (!VigieOrga.restaurerService(entiteSvc, s).ok) return;
+      logAudit("Référentiels", "Modification", `Service restauré dans « ${entiteSvc} » : ${s}`);
+      renderRefEditor(); renderServicesCheckboxes(); renderOrg();
+      flashBanner($("refBanner"), `« ${s} » est de nouveau proposé dans les formulaires.`);
+    });
     const rows = $("refListRows");
     rows.innerHTML = list.length ? list.map((val, i) => `
       <div class="list-row" data-i="${i}">
@@ -1419,18 +1438,38 @@
       if (e.target.closest(".ref-save")){
         const val = row.querySelector(".ref-label").value.trim();
         if (!val) return;
+        if (entiteSvc){
+          const ancien = lireListe(key)[i];
+          if (val === ancien) return;
+          const n = VigieOrga.compterService(entiteSvc, ancien);
+          if (!confirm(`Renommer le service « ${ancien} » en « ${val} » ?\n\n${n} enregistrement(s) de ${entiteSvc} et les comptes limités à ce service suivront.`)){ row.querySelector(".ref-label").value = ancien; return; }
+          const r = VigieOrga.renommerService(entiteSvc, ancien, val);
+          if (!r.ok){ flashBanner($("refBanner"), r.erreur, "info"); row.querySelector(".ref-label").value = ancien; return; }
+          logAudit("Référentiels", "Modification", `Service renommé dans « ${entiteSvc} » : « ${ancien} » → « ${val} » (${r.n} enregistrement(s), ${r.comptes} compte(s))`);
+          flashBanner($("refBanner"), `« ${ancien} » s'appelle désormais « ${val} » — ${r.n} enregistrement(s) et ${r.comptes} compte(s) mis à jour.`);
+          renderRefEditor(); renderServicesCheckboxes(); renderOrg();
+          return;
+        }
         const l = lireListe(key); l[i] = val; ecrireListe(key, l);
         logAudit("Référentiels", "Modification", `Référentiel « ${libelleListe(key)} » — entrée modifiée : ${val}`);
         flashBanner($("refBanner"), "Modification enregistrée.");
-        if (estSvc(key)){ renderServicesCheckboxes(); renderOrg(); }
       }
       if (e.target.closest(".ref-del")){
+        if (entiteSvc){
+          const s = lireListe(key)[i], n = VigieOrga.compterService(entiteSvc, s);
+          if (!confirm(n ? `« ${s} » a ${n} enregistrement(s) : il sera archivé — retiré des formulaires, gardé sur ses enregistrements et dans les filtres, restaurable à tout moment.` : `Retirer le service « ${s} » de ${entiteSvc} ? (aucun enregistrement ne le porte)`)) return;
+          const r = VigieOrga.retirerService(entiteSvc, s);
+          if (!r.ok){ flashBanner($("refBanner"), r.erreur, "info"); return; }
+          logAudit("Référentiels", r.archive ? "Modification" : "Suppression", r.archive ? `Service archivé dans « ${entiteSvc} » : ${s} (${r.n} enregistrement(s) conservé(s))` : `Service retiré de « ${entiteSvc} » : ${s}`);
+          renderRefEditor(); renderServicesCheckboxes(); renderOrg();
+          flashBanner($("refBanner"), r.archive ? `« ${s} » est archivé : ses ${r.n} enregistrement(s) le gardent.` : `« ${s} » retiré.`);
+          return;
+        }
         if (!confirm("Supprimer cette entrée du référentiel ?")) return;
         const l = lireListe(key); const removed = l.splice(i, 1)[0]; ecrireListe(key, l);
         logAudit("Référentiels", "Suppression", `Référentiel « ${libelleListe(key)} » — entrée supprimée : ${removed}`);
         renderRefEditor();
         flashBanner($("refBanner"), "Entrée supprimée.");
-        if (estSvc(key)){ renderServicesCheckboxes(); renderOrg(); }
       }
     });
     $("refAddBtn").addEventListener("click", () => {

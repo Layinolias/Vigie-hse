@@ -79,10 +79,15 @@ Pour arrêter : fermer la fenêtre noire. Pour relancer : double-cliquer à nouv
 
 9. REVENIR À UNE SAUVEGARDE
 ---------------------------
-  - Fermer la fenêtre noire.
-  - Dans C:\Users\<votre nom>\VIGIE HSE\ : renommer vigie.db en vigie-ancienne.db, et supprimer
-    vigie.db-wal et vigie.db-shm s'ils existent.
-  - Copier la sauvegarde choisie (dans « sauvegardes ») dans ce dossier, et la renommer vigie.db.
+  - Fermer la fenêtre noire (VIGIE HSE s'arrête).
+  - Double-cliquer sur « Restaurer une sauvegarde.bat ».
+  - La liste des sauvegardes s'affiche, de la plus récente à la plus ancienne, avec pour chacune sa
+    date et ce qu'elle contient (nombre d'accidents, de suivis médicaux…). Taper le numéro choisi,
+    puis OUI pour confirmer. Une sauvegarde abîmée est signalée et refusée.
+  - Vos données actuelles sont d'abord mises de côté : en cas d'erreur, relancer le même outil et
+    choisir « vos données juste avant une restauration ».
+  - Attention : tout ce qui a été saisi après la date de la sauvegarde disparaît, et les comptes
+    et mots de passe reviennent eux aussi à cette date.
   - Relancer VIGIE HSE.
 
 

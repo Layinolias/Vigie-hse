@@ -10,6 +10,7 @@
 //   supprimer(cle, revisionVue)        → idem
 //   effacerTout()                      → chemin de la copie de sauvegarde prise juste avant
 //   copier(chemin)                     → copie complète et cohérente de la base, prise sans l'arrêter
+//   examiner(fichier)  (hors instance) → une copie est-elle saine, et que contient-elle (restauration)
 // Comptes (étape P1b) — les mots de passe ne sont jamais dans les données, seulement leur empreinte ici :
 //   empreinte(idCompte) / poserEmpreinte(idCompte, empreinte) / retirerEmpreintes(idsGardes)
 //   ouvrirSession(empreinteJeton, idCompte, expire) / lireSession(empreinteJeton) / prolongerSession(…, expire)
@@ -129,4 +130,29 @@ function ouvrir(fichier){
   };
 }
 
-module.exports = { ouvrir };
+// Examiner une copie de la base sans la modifier (outil de restauration, serveur/restaurer.js) :
+// { ok:true, maj, nombres:{ cle: nombre d'enregistrements } } ou { ok:false, raison }.
+function examiner(fichier){
+  let db;
+  try {
+    db = new DatabaseSync(fichier, { readOnly: true });
+    const verif = db.prepare('PRAGMA integrity_check').all().map(l => Object.values(l)[0]);
+    if (verif.length !== 1 || verif[0] !== 'ok') return { ok: false, raison: 'fichier abîmé (' + verif.slice(0, 2).join(' ; ') + ')' };
+    const tables = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map(l => l.name));
+    if (!tables.has('donnees')) return { ok: false, raison: "ce n'est pas une base VIGIE HSE" };
+    const nombres = {};
+    let maj = null;
+    for (const l of db.prepare('SELECT cle, valeur, maj FROM donnees').all()){
+      if (l.valeur === null) continue;
+      if (!maj || l.maj > maj) maj = l.maj;
+      try { const v = JSON.parse(l.valeur); if (Array.isArray(v)) nombres[l.cle] = v.length; } catch(e){}
+    }
+    return { ok: true, maj, nombres };
+  } catch(e){
+    return { ok: false, raison: 'illisible (' + e.message + ')' };
+  } finally {
+    try { if (db) db.close(); } catch(e){}
+  }
+}
+
+module.exports = { ouvrir, examiner };

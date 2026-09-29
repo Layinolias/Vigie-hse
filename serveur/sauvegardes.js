@@ -2,8 +2,8 @@
 // Une copie complète au démarrage si la dernière date de plus d'un intervalle, puis à chaque intervalle ;
 // seules les GARDER plus récentes restent. Une copie se prend sans arrêter le serveur (base.copier).
 //
-// Restaurer : arrêter le serveur, remplacer serveur/donnees/vigie.db par la copie choisie (et supprimer
-// vigie.db-wal et vigie.db-shm s'ils existent), relancer.
+// Restaurer : serveur arrêté, node serveur/restaurer.js (« Restaurer une sauvegarde.bat » sur un poste) —
+// ou à la main : remplacer vigie.db par la copie choisie, supprimer vigie.db-wal et vigie.db-shm, relancer.
 //
 // Une sauvegarde sur le même disque protège d'une erreur de saisie ou d'une base abîmée, pas d'une panne
 // du disque : le dossier (VIGIE_SAUVEGARDES) doit être recopié ailleurs, ou pointer vers un autre disque.

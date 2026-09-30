@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 167 points au 2026-09-30 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 168 points au 2026-09-30 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -191,6 +191,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] **Score HSE** (topbar) : cliquer dessus fait défiler la page jusqu'au détail, sans que la barre du haut ne le cache.
 - [ ] **Sélecteur Ville/Agglomération/Tous** (topbar, cockpit) : change bien les chiffres affichés sur le tableau de bord.
 - [ ] **Menu latéral** : se réduit/étend correctement au survol sur grand écran ; devient un tiroir accessible via le bouton menu sur petit écran (voir §5).
+- [ ] **Styles et icônes communs** : sur Gestion RH, Inspection / Audit, le tableau de bord et Analyse d'accident, le menu, la barre du haut, les boutons et leurs icônes s'affichent comme avant, en clair comme en sombre et sur téléphone ; le bouton « Importer » d'Analyse d'accident a désormais son icône. Pareil en ouvrant une page directement depuis le dossier, sans serveur.
 - [ ] **Texte affiché tel quel, jamais interprété** : dans n'importe quel module, enregistrer une fiche dont un champ texte contient des chevrons — par exemple un risque nommé `<b>essai</b>` ou une circonstance `1 < 2`. Le tableau doit afficher ces caractères **tels quels**, sans mise en gras ni disparition de texte. Même contrôle après un import Excel contenant de tels libellés.
 - [ ] **Import Excel** (disponible sur tous les modules désormais, pas seulement AT/MP et Document Unique) : importer un fichier volontairement invalide (mauvais format, colonnes manquantes) → message d'erreur clair, pas de plantage silencieux.
 - [ ] **Imprimer / PDF sur chaque registre** : dans un registre qui n'en avait pas (par exemple Vérifications périodiques), filtrer sur « En retard » puis cliquer « Imprimer / PDF » → l'aperçu ne contient que le tableau, avec exactement les lignes filtrées, sans menu ni boutons, sous un en-tête (titre, date et heure, compte, nombre de lignes, « Filtres : Statut planning : En retard ») ; « Enregistrer au format PDF » fonctionne. Avec `AG1`, là où il n'y a pas d'export, il n'y a pas non plus d'impression.

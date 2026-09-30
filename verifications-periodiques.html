@@ -311,7 +311,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-check-circle"/></svg></div>
           <div class="page-summary-text">
             <h1>Vérifications Périodiques</h1>
-            <p title="Suivi des contrôles techniques réglementaires réalisés par des organismes agréés (APAVE, Bureau Veritas, SOCOTEC, DEKRA, Qualiconsult…) sur les équipements et installations. Cet inventaire est un point de départ illustratif à compléter et corriger par les équipes RH/HSE avec le patrimoine réel de la collectivité.">Suivi des contrôles techniques réglementaires réalisés par des organismes agréés (APAVE, Bureau Veritas, SOCOTEC, DEKRA, Qualiconsult…) sur les équipements et installations. Cet inventaire est un point de départ illustratif à compléter et corriger par les équipes RH/HSE avec le patrimoine réel de la collectivité.</p>
+            <p data-mots title="Suivi des contrôles techniques réglementaires réalisés par des organismes agréés (APAVE, Bureau Veritas, SOCOTEC, DEKRA, Qualiconsult…) sur les équipements et installations. Cet inventaire est un point de départ illustratif à compléter et corriger par les équipes RH/HSE avec le patrimoine réel de la collectivité.">Suivi des contrôles techniques réglementaires réalisés par des organismes agréés (APAVE, Bureau Veritas, SOCOTEC, DEKRA, Qualiconsult…) sur les équipements et installations. Cet inventaire est un point de départ illustratif à compléter et corriger par les équipes RH/HSE avec le patrimoine réel de la collectivité.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
@@ -436,7 +436,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (!canEdit){ $("roleChip").classList.add("ag"); }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });

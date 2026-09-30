@@ -353,13 +353,13 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-heart-pulse"/></svg></div>
           <div class="page-summary-text">
             <h1>Santé &amp; Visites</h1>
-            <p title="Suivi de la surveillance médicale des agents. Roster de départ dérivé des agents déjà présents dans le Registre AT/MP (aucun fichier source dédié aux visites médicales n'existe à ce stade) — complétez et corrigez librement chaque fiche depuis cette page.">Suivi de la surveillance médicale des agents. <b>Roster de départ dérivé des agents déjà présents dans le Registre AT/MP</b> (aucun fichier source dédié aux visites médicales n'existe à ce stade) — complétez et corrigez librement chaque fiche depuis cette page.</p>
+            <p data-mots title="Suivi de la surveillance médicale des agents. Roster de départ dérivé des agents déjà présents dans le Registre AT/MP (aucun fichier source dédié aux visites médicales n'existe à ce stade) — complétez et corrigez librement chaque fiche depuis cette page.">Suivi de la surveillance médicale des agents. <b>Roster de départ dérivé des agents déjà présents dans le Registre AT/MP</b> (aucun fichier source dédié aux visites médicales n'existe à ce stade) — complétez et corrigez librement chaque fiche depuis cette page.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
           <div class="ps-kpi">
             <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-heart-pulse"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Agents suivis</span></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label" data-mots>Agents suivis</span></div>
           </div>
           <div class="ps-kpi">
             <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-shield-check"/></svg></div>
@@ -406,7 +406,7 @@
           <select id="fStatut"><option value="all">Tous</option><option value="À jour">À jour</option><option value="À programmer">À programmer</option><option value="En retard">En retard</option></select>
         </div>
         <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
-        <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> agents</span>
+        <span class="result-count" data-mots><b id="resultCount">–</b> / <span id="totalCount">–</span> agents</span>
       </div>
 
       <div class="panel form-panel" id="formPanel" style="display:none;">
@@ -414,7 +414,7 @@
         <form id="visiteForm">
           <input type="hidden" id="fId">
           <div class="form-grid">
-            <div><label for="fAgentPicker">Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
+            <div><label for="fAgentPicker" data-mots>Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
             <div><label for="fNom">Nom</label><input type="text" id="fNom" required></div>
             <div><label for="fPrenom">Prénom</label><input type="text" id="fPrenom" required></div>
             <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
@@ -462,7 +462,7 @@
           <form id="rdvForm">
             <input type="hidden" id="rdvId">
             <div class="form-grid">
-              <div class="span2"><label for="rdvVisite">Agent (fiche de suivi)</label><select id="rdvVisite" required style="width:100%"></select></div>
+              <div class="span2"><label for="rdvVisite" data-mots>Agent (fiche de suivi)</label><select id="rdvVisite" required style="width:100%"></select></div>
               <div><label for="rdvDate">Date</label><input type="date" id="rdvDate" required></div>
               <div><label for="rdvHeure">Heure</label><input type="time" id="rdvHeure"></div>
               <div><label for="rdvLieu">Lieu</label><input type="text" id="rdvLieu" placeholder="Centre de santé au travail…"></div>
@@ -525,7 +525,7 @@
             <table class="reg" style="min-width:900px;">
               <thead>
                 <tr id="theadRdv">
-                  <th>Date</th><th>Heure</th><th>Agent</th><th>Service</th><th>Lieu</th><th>Médecin</th><th>Statut</th>
+                  <th>Date</th><th>Heure</th><th data-mots>Agent</th><th>Service</th><th>Lieu</th><th>Médecin</th><th>Statut</th>
                   <th id="thActionsRdv"></th>
                 </tr>
               </thead>
@@ -597,7 +597,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (!canEdit){ $("roleChip").classList.add("ag"); }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
@@ -738,7 +738,7 @@
         <td>${esc(v.nom)}</td>
         <td>${esc(v.prenom)}</td>
         <td>${esc(v.service)}</td>
-        <td>${esc(v.typeVisite)}${v.renforcee ? `<br><span class="badge-renforcee" title="Périodicité ramenée à ${v.periodiciteEffective} mois du fait de l'habilitation « ${esc(v.renforceePar)} » détenue par l'agent">⚠ Renforcée — ${esc(v.renforceePar)} (${v.periodiciteEffective} mois)</span>` : ''}</td>
+        <td>${esc(v.typeVisite)}${v.renforcee ? `<br><span class="badge-renforcee" title="Périodicité ramenée à ${v.periodiciteEffective} mois du fait de l'habilitation « ${esc(v.renforceePar)} » ${VigieOrga.mots("détenue par l'agent")}">⚠ Renforcée — ${esc(v.renforceePar)} (${v.periodiciteEffective} mois)</span>` : ''}</td>
         <td>${esc(v.dateDerniere)}</td>
         <td>${esc(v.prochaine)}</td>
         <td><span class="status-chip ${v.cls}">${v.statut}</span></td>
@@ -1058,7 +1058,7 @@
     columns: [
       { key:"date",              label:"Date" },
       { key:"heure",             label:"Heure" },
-      { key:"agent",             label:"Agent" },
+      { key:"agent",             label:VigieOrga.mots("Agent") },
       { key:"service",           label:"Service" },
       { key:"lieu",              label:"Lieu" },
       { key:"medecin",           label:"Médecin" },
@@ -1130,7 +1130,7 @@
     const rdvForm = $("rdvForm"), rdvPanel = $("rdvFormPanel");
     function fillVisiteOptions(selectedId, rdv){
       const list = DATASET.slice().sort((a, b) => (a.nom + a.prenom).localeCompare(b.nom + b.prenom, "fr"));
-      let html = `<option value="">— Choisir un agent —</option>` + list.map(v => `<option value="${esc(v.id)}">${esc(v.nom + " " + v.prenom + " — " + v.service)}</option>`).join("");
+      let html = `<option value="">— ${VigieOrga.mots("Choisir un agent")} —</option>` + list.map(v => `<option value="${esc(v.id)}">${esc(v.nom + " " + v.prenom + " — " + v.service)}</option>`).join("");
       if (rdv && !list.some(v => v.id === rdv.visiteId)) html += `<option value="${esc(rdv.visiteId)}">${esc(rdv.nom + " " + rdv.prenom + " (fiche de suivi introuvable)")}</option>`;
       $("rdvVisite").innerHTML = html;
       $("rdvVisite").value = selectedId || "";
@@ -1176,7 +1176,7 @@
       const prev = id ? RDV.find(r => r.id === id) : null;
       const visite = DATASET.find(v => v.id === $("rdvVisite").value);
       const src = visite || prev;
-      if (!src){ alert("Choisissez l'agent concerné par ce rendez-vous."); return; }
+      if (!src){ alert(VigieOrga.mots("Choisissez l'agent concerné par ce rendez-vous.")); return; }
       const rec = {
         id: id || rdvGenId(),
         visiteId: $("rdvVisite").value,

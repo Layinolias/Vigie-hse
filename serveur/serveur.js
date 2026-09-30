@@ -22,7 +22,8 @@
 // d'elles-mêmes quand elles les trouvent, restent vides (poste d'un utilisateur avec ses propres données).
 //
 // P1b : connexion vérifiée ici (serveur/comptes.js — mots de passe hachés, jamais conservés en clair),
-// aucune page de l'application ni aucune donnée sans session, droits d'écriture appliqués par le serveur
+// aucune page de l'application ni aucune donnée sans session (seul le secteur, collectivité ou entreprise,
+// accompagne l'accueil et la connexion), droits d'écriture appliqués par le serveur
 // (serveur/droits.js).
 // P1c : lectures filtrées au périmètre d'un compte limité à certains services (serveur/perimetre.js), et à ce
 // que les écrans de son rôle affichent (serveur/lecture.js).
@@ -117,7 +118,11 @@ function injection(session, chemin){
     for (const [cle, x] of Object.entries(d)) etat.donnees[cle] = { v: x.valeur, r: x.revision };
     etat.droits = droits.resume(session.page);
   }
-  else etat.premierLancement = comptes.aucun();
+  else {
+    etat.premierLancement = comptes.aucun();
+    // seul réglage transmis sans session : le secteur (mots des pages d'accueil et de connexion, assets/organisation.js)
+    try { const o = JSON.parse(base.lire('vigie_hse_referentials') || '{}').organisation; if (o && o.secteur === 'entreprise') etat.secteur = 'entreprise'; } catch(e){}
+  }
   const json = JSON.stringify(etat).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
   return '<script>window.__VIGIE_SERVEUR__ = ' + json + ';</script>\n';
 }

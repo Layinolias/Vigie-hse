@@ -364,7 +364,7 @@
                 <select id="uRole">
                   <option value="rh">RH — création/édition complète</option>
                   <option value="manager">Manager — lecture, services rattachés</option>
-                  <option value="ag">Agent — lecture, tous services</option>
+                  <option value="ag" data-mots>Agent — lecture, tous services</option>
                   <option value="admin">Administrateur — accès total</option>
                 </select>
               </div>
@@ -479,7 +479,11 @@
         <div class="panel section-block" style="padding:20px;" id="orgPanel">
           <div class="panel-head">
             <h3 class="panel-title">Organisation</h3>
-            <span class="panel-note">Les grandes entrées de l'organisation (Ville, Agglomération… ou Usine 1, Équipe 2) et le mot qui les désigne sur tous les écrans. Leurs services se modifient dans l'éditeur de listes ci-dessous.</span>
+            <span class="panel-note">Le secteur donne les mots des écrans (agent ou salarié, collectivité ou entreprise, F3SCT ou CSSCT). Les grandes entrées de l'organisation (Ville, Agglomération… ou Usine 1, Équipe 2) et le mot qui les désigne sur tous les écrans. Leurs services se modifient dans l'éditeur de listes ci-dessous.</span>
+          </div>
+          <div class="field-grid" style="margin-bottom:16px; align-items:end;">
+            <div class="f span2"><label for="orgSecteur">Secteur — les mots de tous les écrans</label><select id="orgSecteur"></select></div>
+            <div class="f"><button type="button" class="btn btn-primary btn-sm" id="orgSecteurSave">Enregistrer le secteur</button></div>
           </div>
           <div class="field-grid" style="margin-bottom:16px; align-items:end;">
             <div class="f"><label for="orgMot">Mot affiché</label><select id="orgMot"></select></div>
@@ -488,6 +492,7 @@
             <div class="f" id="orgGenreWrap" hidden><label for="orgGenre">Pour « tous / toutes »</label><select id="orgGenre"><option value="f">féminin (« Toutes »)</option><option value="m">masculin (« Tous »)</option></select></div>
             <div class="f"><button type="button" class="btn btn-primary btn-sm" id="orgMotSave">Enregistrer le mot</button></div>
           </div>
+          <p id="orgMotConseil" style="font-size:12.5px; color:var(--text-muted); margin:-6px 0 14px;" hidden>Secteur entreprise : les entrées ci-dessous s'appellent encore « Collectivité » sur les écrans. Choisissez un autre mot (Site, Établissement…).</p>
           <div class="list-editor" id="orgRows"></div>
           <div class="org-suppr" id="orgSuppr" hidden></div>
           <div class="add-row">
@@ -520,7 +525,7 @@
       <section class="tab-panel" id="tab-news">
         <div class="banner" id="newsBanner"></div>
         <div class="panel section-block" style="padding:20px;">
-          <div class="panel-head"><h3 class="panel-title">Actualités publiées</h3><span class="panel-note">Visibles sur le Cockpit de tous les agents</span></div>
+          <div class="panel-head"><h3 class="panel-title">Actualités publiées</h3><span class="panel-note" data-mots>Visibles sur le Cockpit de tous les agents</span></div>
           <div class="news-admin-grid" id="newsAdminGrid"></div>
         </div>
         <div class="panel section-block" style="padding:20px;">
@@ -558,7 +563,7 @@
           <form id="veilleForm">
             <input type="hidden" id="vId" value="">
             <div class="field-grid">
-              <div class="f span2"><label for="vTitre">Titre</label><input type="text" id="vTitre" required autocomplete="off" placeholder="ex. DUERP en collectivité territoriale : ce qui change en 2026"></div>
+              <div class="f span2"><label for="vTitre">Titre</label><input type="text" id="vTitre" required autocomplete="off" placeholder="ex. DUERP en collectivité territoriale : ce qui change en 2026" data-mots></div>
               <div class="f"><label for="vSource">Source</label><input type="text" id="vSource" required autocomplete="off" placeholder="ex. INRS, Weka, Inforisque…"></div>
               <div class="f"><label for="vDate">Date</label><input type="date" id="vDate" required></div>
               <div class="f"><label for="vCategorie">Catégorie</label>
@@ -623,7 +628,7 @@
             <h3 class="panel-title">Données d'une personne</h3>
             <span class="panel-note" id="persNote"></span>
           </div>
-          <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px; max-width:78ch;">Retrouve tout ce que VIGIE HSE contient sur une personne — agent, utilisateur, contact d'une entreprise extérieure — dans tous les registres et journaux, pour répondre à une demande d'accès à ses données (RGPD, article 15) ou préparer une rectification. Chaque résultat indique s'il s'agit de sa <b>fiche</b> (ses nom et prénom y sont inscrits) ou d'une <b>mention</b> de son nom dans un texte : ces dernières sont à relire, un homonyme ou un nom commun pouvant y correspondre. Les mots de passe ne sont jamais affichés ni exportés. L'export est inscrit au journal des modifications.</p>
+          <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px; max-width:78ch;" data-mots>Retrouve tout ce que VIGIE HSE contient sur une personne — agent, utilisateur, contact d'une entreprise extérieure — dans tous les registres et journaux, pour répondre à une demande d'accès à ses données (RGPD, article 15) ou préparer une rectification. Chaque résultat indique s'il s'agit de sa <b>fiche</b> (ses nom et prénom y sont inscrits) ou d'une <b>mention</b> de son nom dans un texte : ces dernières sont à relire, un homonyme ou un nom commun pouvant y correspondre. Les mots de passe ne sont jamais affichés ni exportés. L'export est inscrit au journal des modifications.</p>
           <form id="persForm" class="field-grid" style="max-width:640px; grid-template-columns:1fr 1fr auto; align-items:end;" autocomplete="off">
             <div class="f"><label for="persNom">Nom</label><input type="text" id="persNom" required></div>
             <div class="f"><label for="persPrenom">Prénom <span style="color:var(--text-faint); font-weight:400;">(facultatif)</span></label><input type="text" id="persPrenom"></div>
@@ -700,6 +705,7 @@
     });
   })();
 
+  VigieOrga.preparer();   // textes fixes [data-mots] dits avec les mots du secteur (assets/organisation.js)
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
@@ -1011,7 +1017,7 @@
   function saveUsers(u){ try { VigieStore.setItem(USERS_KEY, JSON.stringify(u)); } catch(e){} }
   let USERS = loadUsers();
 
-  const ROLE_CHIP_LABEL = { admin:"Administrateur", rh:"RH", manager:"Manager", ag:"Agent" };
+  const ROLE_CHIP_LABEL = { admin:"Administrateur", rh:"RH", manager:"Manager", ag:VigieOrga.mots("Agent") };
 
   function renderServicesCheckboxes(){
     const grid = $("uServicesGrid");
@@ -1148,7 +1154,7 @@
       u.password = newPass;
       saveUsers(USERS);
       logAudit("Utilisateurs", "Modification", `Mot de passe réinitialisé pour ${u.username || u.email}`);
-      flashBanner($("userBanner"), `Nouveau mot de passe pour ${u.username || u.email} : ${newPass} (à communiquer à l'agent)`, "info", true);
+      flashBanner($("userBanner"), `Nouveau mot de passe pour ${u.username || u.email} : ${newPass} (${VigieOrga.mots("à communiquer à l'agent")})`, "info", true);
     }
     if (toggleBtn){
       const u = USERS.find(x => x.id === toggleBtn.dataset.id);
@@ -1469,6 +1475,9 @@
   function apresOrg(){ remplirRefSelect(); renderOrg(); renderRefEditor(); renderServicesCheckboxes(); afficherStockage(); }
   function renderOrg(){
     const c = VigieOrga.config();
+    $("orgSecteur").innerHTML = Object.keys(VigieOrga.SECTEURS).map(s => `<option value="${esc(s)}">${esc(VigieOrga.SECTEURS[s].nom)} (${esc(VigieOrga.SECTEURS[s].exemples)})</option>`).join("");
+    $("orgSecteur").value = c.secteur;
+    $("orgMotConseil").hidden = !(c.secteur === "entreprise" && c.libelle === "Collectivité");
     const mot = $("orgMot"), preset = VigieOrga.MOTS.find(m => m.libelle === c.libelle);
     mot.innerHTML = VigieOrga.MOTS.map(m => `<option value="${esc(m.libelle)}">${esc(m.libelle)}</option>`).join("") + `<option value="__autre">Autre…</option>`;
     mot.value = preset ? preset.libelle : "__autre";
@@ -1485,6 +1494,17 @@
         <button type="button" class="btn btn-danger btn-sm org-suppr" aria-label="Supprimer" ${noms.length < 2 ? "disabled" : ""}><svg class="icon"><use href="#i-trash"/></svg></button>
       </div>`).join("");
   }
+  // Secteur (J0) : les textes fixes de toutes les pages suivent (assets/organisation.js) ; la page se recharge
+  // pour afficher les siens avec les nouveaux mots
+  $("orgSecteurSave").addEventListener("click", () => {
+    const s = $("orgSecteur").value, sect = VigieOrga.SECTEURS[s];
+    if (!sect || s === VigieOrga.secteur()) return;
+    if (!confirm(`Passer tous les écrans au secteur « ${sect.nom} » (${sect.exemples}) ?\n\nSeuls les textes des pages changent : aucun enregistrement n'est modifié. La page va se recharger.`)) return;
+    const r = VigieOrga.definirSecteur(s);
+    if (!r.ok){ flashBanner($("refBanner"), r.erreur, "info"); return; }
+    logAudit("Organisation", "Modification", `Secteur : ${sect.nom}`);
+    location.reload();
+  });
   $("orgMot").addEventListener("change", () => {
     const p = VigieOrga.MOTS.find(m => m.libelle === $("orgMot").value);
     ["orgLibreWrap", "orgPlurielWrap", "orgGenreWrap"].forEach(id => { $(id).hidden = !!p; });

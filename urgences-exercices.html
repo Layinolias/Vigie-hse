@@ -368,7 +368,7 @@
             </div>
             <div><label for="fDateExercice">Date de l'exercice</label><input type="date" id="fDateExercice" required></div>
             <div><label for="fDuree">Durée (minutes)</label><input type="number" id="fDuree" min="1"></div>
-            <div><label for="fParticipation">Participation</label><input type="text" id="fParticipation" placeholder="ex. 42 agents ou 85%"></div>
+            <div><label for="fParticipation">Participation</label><input type="text" id="fParticipation" placeholder="ex. 42 agents ou 85%" data-mots></div>
             <div><label for="fPeriodicite">Périodicité retenue (mois)</label><input type="number" id="fPeriodicite" min="1" required placeholder="saisie au cas par cas"></div>
             <div class="span3"><label for="fConstatations">Constatations / anomalies</label><textarea id="fConstatations" placeholder="Ce qui a été observé pendant l'exercice…"></textarea></div>
           </div>
@@ -434,7 +434,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
 

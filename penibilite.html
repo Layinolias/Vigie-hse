@@ -364,7 +364,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-gauge"/></svg></div>
           <div class="page-summary-text">
             <h1>Pénibilité</h1>
-            <p title="Expositions aux facteurs de pénibilité saisies par poste, une fois par an ; chaque agent hérite de celles de son poste ; déclaration C2P ou fiche de suivi individuel selon son statut.">Expositions par poste, campagne annuelle, suite à donner par agent selon son statut.</p>
+            <p data-mots title="Expositions aux facteurs de pénibilité saisies par poste, une fois par an ; chaque agent hérite de celles de son poste ; déclaration C2P ou fiche de suivi individuel selon son statut.">Expositions par poste, campagne annuelle, suite à donner par agent selon son statut.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
@@ -394,7 +394,7 @@
 
       <div class="ap-tabs">
         <button type="button" class="ap-tab active" data-tab="postes"><svg class="icon"><use href="#i-gauge"/></svg> Postes &amp; expositions</button>
-        <button type="button" class="ap-tab" data-tab="agents"><svg class="icon"><use href="#i-users"/></svg> Agents exposés</button>
+        <button type="button" class="ap-tab" data-tab="agents" data-mots><svg class="icon"><use href="#i-users"/></svg> Agents exposés</button>
         <button type="button" class="ap-tab" data-tab="parametres"><svg class="icon"><use href="#i-settings"/></svg> Seuils &amp; statuts</button>
       </div>
 
@@ -431,7 +431,7 @@
             <h3 class="panel-title" id="campagneTitle">Expositions du poste</h3>
             <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnReprendre" style="display:none;">Reprendre l'année précédente</button></div>
           </div>
-          <p class="form-sub-intro">Pour chaque facteur, la <b>durée d'exposition au-delà de l'intensité minimale</b>, sur l'année, pour ce poste. Chaque agent du poste (Gestion RH) hérite de ces expositions. Un seuil est atteint dès que la durée l'égale.</p>
+          <p class="form-sub-intro" data-mots>Pour chaque facteur, la <b>durée d'exposition au-delà de l'intensité minimale</b>, sur l'année, pour ce poste. Chaque agent du poste (Gestion RH) hérite de ces expositions. Un seuil est atteint dès que la durée l'égale.</p>
           <form id="campagneForm">
             <div class="table-panel">
               <table class="reg">
@@ -462,7 +462,7 @@
           </div>
           <div class="table-panel">
             <table class="reg" id="postesTable">
-              <thead><tr><th>Poste</th><th>Service</th><th>Agents</th><th>Campagne</th><th>Seuils atteints</th><th>Autres facteurs</th><th id="thPosteActions"></th></tr></thead>
+              <thead><tr><th>Poste</th><th>Service</th><th data-mots>Agents</th><th>Campagne</th><th>Seuils atteints</th><th>Autres facteurs</th><th id="thPosteActions"></th></tr></thead>
               <tbody id="postesTbody"></tbody>
             </table>
           </div>
@@ -476,17 +476,17 @@
             <select id="fSuite"><option value="all">Toutes</option><option value="c2p">Déclaration C2P</option><option value="fiche">Fiche de suivi individuel</option><option value="statut">Statut à renseigner</option><option value="sous">Sous les seuils</option><option value="incomplet">Poste ou campagne manquant</option></select>
           </div>
           <button type="button" class="btn btn-ghost" id="btnResetAgents">Réinitialiser</button>
-          <span class="result-count"><b id="agentCount">–</b> / <span id="agentTotal">–</span> agents actifs</span>
+          <span class="result-count" data-mots><b id="agentCount">–</b> / <span id="agentTotal">–</span> agents actifs</span>
         </div>
         <div class="panel" style="padding:20px 22px 22px;">
           <div class="panel-head">
-            <h3 class="panel-title" id="agentsTitle">Agents et suite à donner</h3>
+            <h3 class="panel-title" id="agentsTitle" data-mots>Agents et suite à donner</h3>
             <div class="panel-actions" id="agentsActions"></div>
           </div>
-          <p class="form-sub-intro" style="margin-top:0;">Chaque agent actif de <b>Gestion RH</b> hérite des expositions de son poste pour l'année choisie. La suite dépend de son statut : <b>déclaration C2P</b> pour les statuts cochés dans « Seuils &amp; statuts », <b>fiche de suivi individuel</b> pour les autres agents exposés au-delà d'un seuil.</p>
+          <p class="form-sub-intro" style="margin-top:0;" data-mots>Chaque agent actif de <b>Gestion RH</b> hérite des expositions de son poste pour l'année choisie. La suite dépend de son statut : <b>déclaration C2P</b> pour les statuts cochés dans « Seuils &amp; statuts », <b>fiche de suivi individuel</b> pour les autres agents exposés au-delà d'un seuil.</p>
           <div class="table-panel">
             <table class="reg" id="agentsTable">
-              <thead><tr><th>Agent</th><th>Service</th><th>Poste</th><th>Statut</th><th>Seuils atteints</th><th>Suite à donner</th><th></th></tr></thead>
+              <thead><tr><th data-mots>Agent</th><th>Service</th><th>Poste</th><th>Statut</th><th>Seuils atteints</th><th>Suite à donner</th><th></th></tr></thead>
               <tbody id="agentsTbody"></tbody>
             </table>
           </div>
@@ -496,7 +496,7 @@
       <section class="tab-panel" id="tab-parametres">
         <div class="panel" style="padding:20px 22px 22px;">
           <div class="panel-head"><h3 class="panel-title">Statuts ouvrant droit au compte professionnel de prévention (C2P)</h3></div>
-          <p class="form-sub-intro" style="margin-top:0;">Le compte professionnel de prévention est ouvert aux salariés de droit privé et aux personnels des personnes publiques employés dans les conditions du droit privé (article L4163-4 du Code du travail). <b>Savoir quels statuts de la collectivité sont concernés est une question juridique : le logiciel ne la tranche pas.</b> Cochez les statuts concernés ; tant qu'aucun ne l'est, chaque agent exposé relève de la fiche de suivi individuel. La liste des statuts se modifie dans Administration → Référentiels.</p>
+          <p class="form-sub-intro" style="margin-top:0;" data-mots>Le compte professionnel de prévention est ouvert aux salariés de droit privé et aux personnels des personnes publiques employés dans les conditions du droit privé (article L4163-4 du Code du travail). <b>Savoir quels statuts de la collectivité sont concernés est une question juridique : le logiciel ne la tranche pas.</b> Cochez les statuts concernés ; tant qu'aucun ne l'est, chaque agent exposé relève de la fiche de suivi individuel. La liste des statuts se modifie dans Administration → Référentiels.</p>
           <div id="statutsListe" class="statuts-c2p"></div>
           <p id="statutsMsg" style="font-size:12px; color:var(--text-muted); margin:8px 0 0;"></p>
         </div>
@@ -545,7 +545,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
 
@@ -652,7 +652,7 @@
     $("posteCount").textContent = rows.length; $("posteTotal").textContent = tous.length;
     const tbody = $("postesTbody");
     if (!rows.length){
-      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">${tous.length ? "Aucun poste ne correspond au filtre." : "Aucun poste pour le moment." + (canPenWrite ? " Créez-en un avec « Nouveau poste », puis rattachez-y les agents dans Gestion RH." : "")}</td></tr>`;
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">${tous.length ? "Aucun poste ne correspond au filtre." : "Aucun poste pour le moment." + (canPenWrite ? VigieOrga.mots(" Créez-en un avec « Nouveau poste », puis rattachez-y les agents dans Gestion RH.") : "")}</td></tr>`;
     } else {
       tbody.innerHTML = rows.map(p => {
         const camp = campagne(p.id, ANNEE);
@@ -791,7 +791,7 @@
       const p = POSTES.find(x => x.id === bDel.dataset.del); if (!p) return;
       const nb = lireListe(AGENTS_KEY).filter(a => a.posteId === p.id).length;
       const nbC = EXPOS.filter(x => x.posteId === p.id).length;
-      if (!confirm(`Supprimer le poste « ${p.intitule} » et ses ${nbC} campagne(s) d'exposition ?` + (nb ? `\n\n${nb} agent(s) y sont rattachés dans Gestion RH : leur poste deviendra « non renseigné ». Pour garder l'historique, décochez plutôt « Poste actif ».` : ""))) return;
+      if (!confirm(`Supprimer le poste « ${p.intitule} » et ses ${nbC} campagne(s) d'exposition ?` + (nb ? VigieOrga.mots(`\n\n${nb} agent(s) y sont rattachés dans Gestion RH : leur poste deviendra « non renseigné ». Pour garder l'historique, décochez plutôt « Poste actif ».`) : ""))) return;
       POSTES = POSTES.filter(x => x.id !== p.id);
       EXPOS = EXPOS.filter(x => x.posteId !== p.id);
       savePostes(); saveExpos();
@@ -809,11 +809,11 @@
     const lignes = agents.map(a => ({ a, s: situation(a) }))
       .filter(x => (svc === "all" || x.a.service === svc) && (suite === "all" || x.s.code === suite))
       .sort((x, y) => nomAgent(x.a).localeCompare(nomAgent(y.a), 'fr'));
-    $("agentsTitle").textContent = `Agents et suite à donner — ${ANNEE}`;
+    $("agentsTitle").textContent = `${VigieOrga.mots("Agents et suite à donner")} — ${ANNEE}`;
     $("agentCount").textContent = lignes.length; $("agentTotal").textContent = agents.length;
     const tbody = $("agentsTbody");
     if (!lignes.length){
-      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">${agents.length ? "Aucun agent ne correspond aux filtres." : "Aucun agent actif dans Gestion RH (ou dans vos services)."}</td></tr>`;
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">${VigieOrga.mots(agents.length ? "Aucun agent ne correspond aux filtres." : "Aucun agent actif dans Gestion RH (ou dans vos services).")}</td></tr>`;
       return;
     }
     tbody.innerHTML = lignes.map(({ a, s }) => `<tr>
@@ -834,14 +834,14 @@
     const autres = PEN.SANS_SEUIL.map(f => { const x = ss[f.id] || {}; return `<tr><td>${esc(f.facteur)}</td><td colspan="2">${x.expose ? "Exposé" : "Non"}</td><td>${esc(x.precision || "")}</td></tr>`; }).join("");
     $("penibilitePrint").innerHTML = `
       <h1>Fiche individuelle d'exposition aux facteurs de pénibilité — ${ANNEE}</h1>
-      <p><b>Agent :</b> ${esc(nomAgent(a))} — ${esc(a.service)} (${esc(a.collectivite || "")}) &nbsp; <b>Statut :</b> ${esc(a.statut || "non renseigné")}</p>
+      <p><b>${VigieOrga.mots("Agent")} :</b> ${esc(nomAgent(a))} — ${esc(a.service)} (${esc(a.collectivite || "")}) &nbsp; <b>Statut :</b> ${esc(a.statut || "non renseigné")}</p>
       <p><b>Poste :</b> ${esc(s.poste.intitule)}${s.poste.description ? " — " + esc(s.poste.description) : ""}</p>
       <p><b>Suite à donner :</b> ${esc(s.suite)} &nbsp; <b>Expositions saisies le :</b> ${esc(s.camp.dateSaisie || "—")} par ${esc(s.camp.auteur || "—")}</p>
       <table><thead><tr><th>Facteur (article D4163-2)</th><th>Seuil annuel</th><th>Exposition du poste</th><th>État</th></tr></thead><tbody>${lignes}</tbody></table>
       <table><thead><tr><th>Facteur sans seuil (article L4161-1)</th><th colspan="2">Exposition</th><th>Précision</th></tr></thead><tbody>${autres}</tbody></table>
       ${s.camp.commentaire ? `<p style="margin-top:10px;"><b>Commentaire :</b> ${esc(s.camp.commentaire)}</p>` : ""}
-      <p class="pc" style="margin-top:10px;">Expositions du poste occupé, saisies par la collectivité pour l'année ${ANNEE} ; seuils : ${esc(PEN.SOURCE.texte)}.</p>
-      <div class="sign"><div>Pour l'employeur — nom, signature<br>Date :</div><div>Remis à l'agent — signature<br>Date :</div></div>`;
+      <p class="pc" style="margin-top:10px;">${VigieOrga.mots("Expositions du poste occupé, saisies par la collectivité")} pour l'année ${ANNEE} ; seuils : ${esc(PEN.SOURCE.texte)}.</p>
+      <div class="sign"><div>Pour l'employeur — nom, signature<br>Date :</div><div>${VigieOrga.mots("Remis à l'agent — signature")}<br>Date :</div></div>`;
     window.print();
   }
   $("agentsTbody").addEventListener("click", (e) => {
@@ -902,7 +902,7 @@
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuillePostes, { header: ["ID", "Intitulé", VigieOrga.libelle(), "Service", "Description", "Actif"] }), "Postes");
     const enTetesExpos = ["ID Poste", "Poste", "Année"].concat(PEN.CRITERES.map(c => c.facteur + " — " + c.unite + (c.id === "bruitCrete" ? " (crête)" : "")), PEN.SANS_SEUIL.map(f => f.facteur), ["Seuils atteints", "Commentaire", "Saisi le", "Par"]);
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuilleExpos, { header: enTetesExpos }), "Expositions");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuilleAgents, { header: ["Nom", "Prénom", "Service", "Poste", "Statut", "Année", "Seuils atteints", "Facteurs sans seuil", "Suite à donner"] }), "Agents " + ANNEE);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(feuilleAgents, { header: ["Nom", "Prénom", "Service", "Poste", "Statut", "Année", "Seuils atteints", "Facteurs sans seuil", "Suite à donner"] }), VigieOrga.mots("Agents ") + ANNEE);
     XLSX.writeFile(wb, `penibilite_${ANNEE}_${VigieDates.aujourdhui()}.xlsx`);
   }
   $("btnExport").addEventListener("click", exporter);

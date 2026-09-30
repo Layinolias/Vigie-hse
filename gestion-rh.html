@@ -304,13 +304,13 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-users"/></svg></div>
           <div class="page-summary-text">
             <h1>Gestion RH</h1>
-            <p title="Roster canonique des agents, organigramme, heures travaillées et taux de fréquence/gravité réels — coexiste avec le TF/TG estimé du Registre AT/MP.">Roster canonique des agents, organigramme, heures travaillées et TF/TG réel.</p>
+            <p data-mots title="Roster canonique des agents, organigramme, heures travaillées et taux de fréquence/gravité réels — coexiste avec le TF/TG estimé du Registre AT/MP.">Roster canonique des agents, organigramme, heures travaillées et TF/TG réel.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
           <div class="ps-kpi">
             <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-users"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEffectif">–</span><span class="ps-kpi-label">Agents actifs</span></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEffectif">–</span><span class="ps-kpi-label" data-mots>Agents actifs</span></div>
           </div>
           <div class="ps-kpi">
             <div class="ps-kpi-icon violet"><svg class="icon"><use href="#i-git-branch"/></svg></div>
@@ -333,7 +333,7 @@
       </div>
 
       <div class="rh-tabs">
-        <button class="rh-tab active" data-tab="agents"><svg class="icon"><use href="#i-users"/></svg> Agents</button>
+        <button class="rh-tab active" data-tab="agents" data-mots><svg class="icon"><use href="#i-users"/></svg> Agents</button>
         <button class="rh-tab" data-tab="organigramme"><svg class="icon"><use href="#i-git-branch"/></svg> Organigramme</button>
         <button class="rh-tab" data-tab="heures"><svg class="icon"><use href="#i-clock"/></svg> Heures travaillées</button>
         <button class="rh-tab" data-tab="indicateurs"><svg class="icon"><use href="#i-bar-chart"/></svg> Indicateurs</button>
@@ -350,11 +350,11 @@
             <select id="aFStatut"><option value="actifs">Actifs</option><option value="tous">Tous</option><option value="inactifs">Inactifs</option></select>
           </div>
           <button type="button" class="btn btn-ghost" id="aBtnReset">Réinitialiser</button>
-          <span class="result-count"><b id="aResultCount">–</b> / <span id="aTotalCount">–</span> agents</span>
+          <span class="result-count" data-mots><b id="aResultCount">–</b> / <span id="aTotalCount">–</span> agents</span>
         </div>
 
         <div class="panel form-panel" id="agentFormPanel" style="display:none;">
-          <div class="panel-head"><h3 class="panel-title" id="agentFormTitle">Nouvel agent</h3></div>
+          <div class="panel-head"><h3 class="panel-title" id="agentFormTitle" data-mots>Nouvel agent</h3></div>
           <form id="agentForm">
             <input type="hidden" id="agFId">
             <div class="form-grid">
@@ -368,10 +368,10 @@
               <div><label for="agFDateEntree">Date d'entrée</label><input type="date" id="agFDateEntree"></div>
               <div><label for="agFPoste">Poste (pénibilité)</label><select id="agFPoste"></select></div>
               <div><label for="agFStatut">Statut</label><select id="agFStatut"></select></div>
-              <div><label for="agFActif" style="display:flex;align-items:center;gap:8px;margin-top:22px;"><input type="checkbox" id="agFActif" checked style="width:16px;height:16px;"> Agent actif</label></div>
+              <div><label for="agFActif" style="display:flex;align-items:center;gap:8px;margin-top:22px;" data-mots><input type="checkbox" id="agFActif" checked style="width:16px;height:16px;"> Agent actif</label></div>
             </div>
             <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Enregistrer l'agent</button>
+              <button type="submit" class="btn btn-primary" data-mots>Enregistrer l'agent</button>
               <button type="button" class="btn btn-ghost" id="agBtnCancelForm">Annuler</button>
             </div>
           </form>
@@ -379,7 +379,7 @@
 
         <div class="panel" style="padding:20px 22px 22px;">
           <div class="panel-head">
-            <h3 class="panel-title">Roster des agents</h3>
+            <h3 class="panel-title" data-mots>Roster des agents</h3>
             <div class="panel-actions" id="agentPanelActions"></div>
           </div>
           <div class="table-panel">
@@ -394,14 +394,14 @@
             </table>
           </div>
         </div>
-        <p class="footnote">Ce roster devient la source canonique des agents pour le reste de l'application : un sélecteur « Choisir un agent » apparaît désormais dans les formulaires de <a href="saisie-rh.html" style="color:var(--accent);">déclaration AT/MP</a>, <a href="sante-visites.html" style="color:var(--accent);">Santé &amp; Visites</a>, <a href="formation-habilitation.html" style="color:var(--accent);">Formation/Habilitation</a> et <a href="epi-dotation.html" style="color:var(--accent);">EPI &amp; Dotation</a> — la saisie libre y reste possible pour un agent pas encore répertorié.</p>
+        <p class="footnote" data-mots>Ce roster devient la source canonique des agents pour le reste de l'application : un sélecteur « Choisir un agent » apparaît désormais dans les formulaires de <a href="saisie-rh.html" style="color:var(--accent);">déclaration AT/MP</a>, <a href="sante-visites.html" style="color:var(--accent);">Santé &amp; Visites</a>, <a href="formation-habilitation.html" style="color:var(--accent);">Formation/Habilitation</a> et <a href="epi-dotation.html" style="color:var(--accent);">EPI &amp; Dotation</a> — la saisie libre y reste possible pour un agent pas encore répertorié.</p>
       </div>
 
       <!-- ============ ONGLET ORGANIGRAMME ============ -->
       <div class="tab-panel" id="tab-organigramme">
         <div class="panel" style="padding:20px 22px 22px;">
           <div class="panel-head"><h3 class="panel-title">Organigramme</h3></div>
-          <p style="margin:0 0 14px; font-size:11.5px; color:var(--text-faint);">Un agent sans responsable est au sommet de son arborescence. Réaffecter un responsable via le sélecteur ; une réaffectation qui créerait une boucle est automatiquement refusée.</p>
+          <p style="margin:0 0 14px; font-size:11.5px; color:var(--text-faint);" data-mots>Un agent sans responsable est au sommet de son arborescence. Réaffecter un responsable via le sélecteur ; une réaffectation qui créerait une boucle est automatiquement refusée.</p>
           <ul class="org-tree" id="orgTree"></ul>
         </div>
       </div>
@@ -452,7 +452,7 @@
             <div class="ind-card"><div class="l">Taux de fréquence réel</div><div class="v mono" id="indTf">—</div></div>
             <div class="ind-card"><div class="l">Taux de gravité réel</div><div class="v mono" id="indTg">—</div></div>
           </div>
-          <p class="footnote" style="margin-top:18px;">Le TF/TG « réel » ci-dessus <b>coexiste</b> avec le TF/TG « estimé » (850 agents × 1607h/an) déjà affiché dans le Registre AT/MP et le Reporting — il ne le remplace pas. « — » signifie qu'aucune heure n'a été saisie pour ce périmètre.</p>
+          <p class="footnote" style="margin-top:18px;" data-mots>Le TF/TG « réel » ci-dessus <b>coexiste</b> avec le TF/TG « estimé » (850 agents × 1607h/an) déjà affiché dans le Registre AT/MP et le Reporting — il ne le remplace pas. « — » signifie qu'aucune heure n'a été saisie pour ce périmètre.</p>
         </div>
         <div class="panel" style="padding:20px 22px 22px;">
           <div class="panel-head"><h3 class="panel-title">Détail par service</h3></div>
@@ -495,7 +495,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
 
@@ -644,7 +644,7 @@
     const tbody = $("agentTbody");
     const colspan = canGestionRhWrite ? 7 : 6;
     if (rows.length === 0){
-      tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">${AGENTS.length === 0 ? "Aucun agent enregistré pour le moment." : "Aucun agent ne correspond aux filtres sélectionnés."}</td></tr>`;
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">${VigieOrga.mots(AGENTS.length === 0 ? "Aucun agent enregistré pour le moment." : "Aucun agent ne correspond aux filtres sélectionnés.")}</td></tr>`;
       return;
     }
     tbody.innerHTML = rows.map(a => `
@@ -687,7 +687,7 @@
     $("agFPoste").innerHTML = optionsPoste(rec ? rec.posteId || "" : "");
     $("agFStatut").innerHTML = optionsStatut(rec ? rec.statut || "" : "");
     if (rec){
-      $("agentFormTitle").textContent = "Modifier l'agent";
+      $("agentFormTitle").textContent = VigieOrga.mots("Modifier l'agent");
       $("agFId").value = rec.id;
       $("agFNom").value = rec.nom || "";
       $("agFPrenom").value = rec.prenom || "";
@@ -698,7 +698,7 @@
       $("agFDateEntree").value = rec.dateEntree || "";
       $("agFActif").checked = rec.actif !== false;
     } else {
-      $("agentFormTitle").textContent = "Nouvel agent";
+      $("agentFormTitle").textContent = VigieOrga.mots("Nouvel agent");
       $("agFId").value = "";
       fillAgentFormServices(VigieOrga.premier());
       $("agFActif").checked = true;
@@ -726,8 +726,8 @@
       dateCreation: id ? (AGENTS.find(a => a.id === id) || {}).dateCreation || VigieDates.aujourdhui() : VigieDates.aujourdhui(),
     };
     const idx = AGENTS.findIndex(a => a.id === rec.id);
-    if (idx >= 0){ AGENTS[idx] = rec; logAudit("Gestion RH", "Modification", `Agent ${rec.nom} ${rec.prenom}`); }
-    else { AGENTS.push(rec); logAudit("Gestion RH", "Création", `Agent ${rec.nom} ${rec.prenom}`); }
+    if (idx >= 0){ AGENTS[idx] = rec; logAudit("Gestion RH", "Modification", `${VigieOrga.mots("Agent")} ${rec.nom} ${rec.prenom}`); }
+    else { AGENTS.push(rec); logAudit("Gestion RH", "Création", `${VigieOrga.mots("Agent")} ${rec.nom} ${rec.prenom}`); }
     saveAgents(AGENTS);
     agentFormPanel.style.display = "none";
     agentForm.reset();
@@ -741,23 +741,23 @@
     if (delBtn){
       const rec = AGENTS.find(a => a.id === delBtn.dataset.id);
       if (!rec) return;
-      if (confirm(`Supprimer l'agent « ${rec.nom} ${rec.prenom} » du roster ?`)){
+      if (confirm(`${VigieOrga.mots("Supprimer l'agent")} « ${rec.nom} ${rec.prenom} » du roster ?`)){
         AGENTS = AGENTS.filter(a => a.id !== rec.id);
         AGENTS.forEach(a => { if (a.managerId === rec.id) a.managerId = ""; });
         saveAgents(AGENTS);
-        logAudit("Gestion RH", "Suppression", `Agent ${rec.nom} ${rec.prenom}`);
+        logAudit("Gestion RH", "Suppression", `${VigieOrga.mots("Agent")} ${rec.nom} ${rec.prenom}`);
         renderAgents();
       }
     }
   });
 
-  $("agentPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnImportAgents"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importAgentsFile" accept=".xlsx,.xls,.ods,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNewAgent"><svg class="icon"><use href="#i-plus"/></svg> Nouvel agent</button>` : `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`);
+  $("agentPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnImportAgents"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importAgentsFile" accept=".xlsx,.xls,.ods,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNewAgent"><svg class="icon"><use href="#i-plus"/></svg> ${VigieOrga.mots("Nouvel agent")}</button>` : `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`);
   if (canGestionRhWrite){ $("btnNewAgent").addEventListener("click", () => openAgentForm(null)); }
   VigieImpression.brancher("btnExportAgents");
   $("btnExportAgents").addEventListener("click", () => {
     const rows = AGENTS.map(a => ({ "Nom":a.nom, "Prénom":a.prenom, [VigieOrga.libelle()]:VigieOrga.de(a), "Service":a.service, "Responsable":a.managerId ? agentName(a.managerId) : "", "Date d'entrée":a.dateEntree||"", "Poste":intitulePoste(a.posteId), "Statut":a.statut||"", "Actif":a.actif !== false ? "Oui" : "Non" }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Nom", "Prénom", VigieOrga.libelle(), "Service", "Responsable", "Date d'entrée", "Poste", "Statut", "Actif"] }), "Agents");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Nom", "Prénom", VigieOrga.libelle(), "Service", "Responsable", "Date d'entrée", "Poste", "Statut", "Actif"] }), VigieOrga.mots("Agents"));
     XLSX.writeFile(wb, `gestion-rh-agents_${VigieDates.aujourdhui()}.xlsx`);
   });
 
@@ -780,7 +780,7 @@
       try {
         const buf = await file.arrayBuffer();
         const wb = VigieImport.lireClasseur(buf);
-        const lignes = XLSX.utils.sheet_to_json(wb.Sheets["Agents"] || wb.Sheets[wb.SheetNames[0]], { defval: "" }).map(champsImp);
+        const lignes = XLSX.utils.sheet_to_json(wb.Sheets["Agents"] || wb.Sheets["Salariés"] || wb.Sheets[wb.SheetNames[0]], { defval: "" }).map(champsImp);
         if (!lignes.length){ alert("Le fichier semble vide — aucune ligne n'a été trouvée dans la première feuille."); e.target.value = ""; return; }
         let added = 0, updated = 0, skipped = 0, horsPerimetre = 0, sansResponsable = 0, postesInconnus = 0;
         const aRattacher = [];
@@ -815,12 +815,12 @@
           agent.managerId = resp.id;
         });
         saveAgents(AGENTS);
-        logAudit("Gestion RH", "Import", `Import .xlsx — ${added} agent(s) ajouté(s), ${updated} mis à jour`);
+        logAudit("Gestion RH", "Import", VigieOrga.mots(`Import .xlsx — ${added} agent(s) ajouté(s), ${updated} mis à jour`));
         renderAgents();
         if (added + updated === 0){
           alert(`Aucune ligne n'a pu être importée (${skipped + horsPerimetre} ignorée(s)). Vérifiez que le fichier contient bien les colonnes attendues (Nom, Prénom, Service…).`);
         } else {
-          alert(`Import terminé — ${added} agent(s) ajouté(s), ${updated} mis à jour, ${skipped} ignoré(s)` +
+          alert(VigieOrga.mots(`Import terminé — ${added} agent(s) ajouté(s), ${updated} mis à jour, ${skipped} ignoré(s)`) +
             (horsPerimetre ? `, ${horsPerimetre} hors de vos services` : "") +
             (sansResponsable ? `. ${sansResponsable} responsable(s) introuvable(s) ou créant une boucle : à rattacher dans l'organigramme` : "") +
             (postesInconnus ? `. ${postesInconnus} poste(s) inconnu(s), laissé(s) vide(s) : créez d'abord les postes dans le module Pénibilité` : "") + ".");
@@ -855,7 +855,7 @@
       </li>`;
     }
     const roots = (byManager.get("") || []).sort((x,y) => (x.nom||"").localeCompare(y.nom||"", 'fr'));
-    $("orgTree").innerHTML = roots.length ? roots.map(renderNode).join("") : `<li style="color:var(--text-faint);font-size:13px;padding:12px 0;">Aucun agent actif enregistré pour le moment.</li>`;
+    $("orgTree").innerHTML = roots.length ? roots.map(renderNode).join("") : `<li style="color:var(--text-faint);font-size:13px;padding:12px 0;">${VigieOrga.mots("Aucun agent actif enregistré pour le moment.")}</li>`;
   }
   // La liste complète des responsables possibles n'est construite qu'à l'ouverture d'un select
   // (un <select> plein par agent coûterait n² <option> à chaque rendu de l'arbre).
@@ -979,7 +979,7 @@
         renderHeures();
         alert(added === 0 && doublons === 0
           ? `Aucune ligne n'a pu être importée (${skipped + horsPerimetre} ignorée(s)). Vérifiez les colonnes attendues (Période, ${VigieOrga.libelle()}, Service, Heures).`
-          : `Import terminé — ${added} saisie(s) ajoutée(s), ${doublons} déjà présente(s) (même mois, collectivité et service) donc ignorée(s), ${skipped} incomplète(s)` + (horsPerimetre ? `, ${horsPerimetre} hors de vos services` : "") + ".");
+          : `Import terminé — ${added} saisie(s) ajoutée(s), ${doublons} déjà présente(s) (même mois, ${VigieOrga.libelle().toLowerCase()} et service) donc ignorée(s), ${skipped} incomplète(s)` + (horsPerimetre ? `, ${horsPerimetre} hors de vos services` : "") + ".");
       } catch (err){
         alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
       }

@@ -403,7 +403,7 @@
       <section class="panel ref-panel">
         <div class="ref-head">
           <div class="ref-title">Méthodologie de cotation</div>
-          <div class="ref-note">Score = Fréquence × Gravité — référentiel de la collectivité</div>
+          <div class="ref-note" data-mots>Score = Fréquence × Gravité — référentiel de la collectivité</div>
         </div>
         <div class="ref-grid">
           <div>
@@ -489,7 +489,7 @@
         Nomenclature des risques et méthodologie de cotation reprises de <span class="mono">Document Unique 2026.xlsx</span>. ·
         <button id="btnResetData" type="button">Réinitialiser avec les données source (DUERP)</button>
       </p>
-      <p class="footnote" id="footnoteAg" style="display:none;">
+      <p class="footnote" id="footnoteAg" style="display:none;" data-mots>
         Accès agent — lecture seule. Aucune donnée personnelle n'est associée à ce registre.
       </p>
     </div>
@@ -523,7 +523,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (!canEdit){ $("roleChip").classList.add("ag"); }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });

@@ -438,13 +438,13 @@
         </div>
       </section>
 
-      <p class="footnote" id="footnoteRh">
+      <p class="footnote" id="footnoteRh" data-mots>
         Registre modifiable — créez, modifiez et supprimez des déclarations depuis l'Espace RH ou par import Excel.
         Les données sont conservées dans ce navigateur en attendant le raccordement à la base HSE.<br>
         Effectif de référence pour Tf/Tg&nbsp;: 850 agents · 1&nbsp;607&nbsp;h/an. ·
         <button id="btnResetData" type="button">Réinitialiser avec les données source (DB.xlsx)</button>
       </p>
-      <p class="footnote" id="footnoteAg" style="display:none;">
+      <p class="footnote" id="footnoteAg" style="display:none;" data-mots>
         Accès agent — vue restreinte aux colonnes autorisées pour ce profil (identité et données personnelles masquées).
         Effectif de référence pour Tf/Tg&nbsp;: 850 agents · 1&nbsp;607&nbsp;h/an.
       </p>
@@ -479,7 +479,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (!canEdit){ $("roleChip").classList.add("ag"); }
   const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
@@ -635,7 +635,7 @@
       const g = VISIBLE_COLUMNS[i].group;
       let span = 1;
       while (i + span < VISIBLE_COLUMNS.length && VISIBLE_COLUMNS[i + span].group === g) span++;
-      groupsRow.push(`<th colspan="${span}">${g}</th>`);
+      groupsRow.push(`<th colspan="${span}">${VigieOrga.mots(g)}</th>`);   // « Agent » → « Salarié » en secteur entreprise
       i += span;
     }
     $("theadGroups").innerHTML = groupsRow.join("");

@@ -128,6 +128,11 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Constaté** : avec le mot « Site » choisi dans Administration, ces deux textes disaient encore « collectivité » — restes de la bascule d'organisation du matin, que la photo avant/après ne pouvait pas voir (configuration par défaut, où le mot est justement « Collectivité »).
 - **Corrigé** : 2026-09-30, branche `vocabulaire-secteur` : les deux suivent `VigieOrga.libelle()`. Leçon consignée dans `ETAT-DU-PROJET.md` §11 (« collectivité » a deux sens : l'employeur et l'entrée de l'organisation).
 
+### Le bouton « Importer » d'Analyse d'accident n'avait pas d'icône
+- **Où** : `accident-analyse.html`, bouton « Importer .xlsx ». **Remonté** : 2026-09-30, en rassemblant les icônes des pages (chaque page recopiait son propre sprite).
+- **Constaté** : le bouton désignait l'icône `i-upload`, absente du sprite de cette page — un carré vide à la place du dessin. Même famille de défaut que les liens manquants du menu : une copie par page finit par diverger.
+- **Corrigé** : 2026-09-30, branche `css-icones-communs` : toutes les icônes viennent d'`assets/icones.js`, et la vérification des pages refuse désormais un sprite recopié (check-script-tags.js, scratchpad). Seul autre effet visible : la corbeille d'Inspection / Audit prend le dessin des autres pages.
+
 ## Ouverts / reportés (pas des bugs à corriger maintenant)
 
 - **Présentation à un professionnel HSE externe** — toujours en recherche (checklist §7, 2026-09-15). Ne dépend pas du code ; c'est le dernier point du gel `v1.0.0` dans `PLAN-VERSIONS-V1.md`.

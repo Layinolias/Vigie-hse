@@ -747,6 +747,8 @@
   VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
   // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  // lien saisi dans Administration : http(s) seulement (un « javascript: » ne devient jamais un lien)
+  const safeUrl = (u) => { const t = String(u == null ? "" : u).trim(); return /^https?:\/\/[^\s]+$/i.test(t) ? t : ""; };
 
   // ---------- Session ----------
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
@@ -1141,7 +1143,7 @@
     ? `<div class="empty-hint">Aucune actualité publiée pour le moment.</div>`
     : NEWS.slice(0,6).map(n => `
       <div class="news-card">
-        <div class="news-card-head" style="${newsHeadBg(n.titre, n.image)}">
+        <div class="news-card-head" style="${esc(newsHeadBg(n.titre, n.image))}">
           <div class="news-title">${esc(n.titre)}</div>
         </div>
         <div class="news-body">
@@ -1174,13 +1176,13 @@
     ? `<p style="color:var(--text-faint); padding:8px 0;">Aucune actualité pour le moment.</p>`
     : SECTOR_NEWS.map(n => `
     <div class="news-card external">
-      <div class="news-card-head" style="${newsHeadBg(n.titre + n.source)}">
+      <div class="news-card-head" style="${esc(newsHeadBg(n.titre + n.source))}">
         <div class="news-source">${esc(n.source)} · ${fmtDateFr(n.date)}</div>
         <div class="news-title">${esc(n.titre)}</div>
       </div>
       <div class="news-body">
         <div class="news-text">${esc(n.resume)}</div>
-        <a class="news-link" href="${esc(n.url)}" target="_blank" rel="noopener">Lire l'article <svg class="icon"><use href="#i-external-link"/></svg></a>
+        ${safeUrl(n.url) ? `<a class="news-link" href="${esc(safeUrl(n.url))}" target="_blank" rel="noopener noreferrer">Lire l'article <svg class="icon"><use href="#i-external-link"/></svg></a>` : ""}
       </div>
     </div>`).join("");
 
@@ -1205,7 +1207,7 @@
 
   const miniServices = [...new Set(ATMP.map(r => r.service).filter(Boolean))].sort((a,b) => a.localeCompare(b,'fr'));
   const miniServiceSel = $("miniService");
-  miniServiceSel.innerHTML = `<option value="all">Tous les services</option>` + miniServices.map(s => `<option value="${s}">${s}</option>`).join("");
+  miniServiceSel.innerHTML = `<option value="all">Tous les services</option>` + miniServices.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
 
   function renderMini(){
     const svc = miniServiceSel.value, st = $("miniStatut").value;

@@ -635,7 +635,7 @@
     });
   }
   function fillDatalist(dl, values){
-    dl.innerHTML = values.map(v => `<option value="${v.replace(/"/g,'&quot;')}">`).join("");
+    dl.innerHTML = values.map(v => `<option value="${esc(v)}">`).join("");
   }
 
   fillOptions($("fStatut"), STATUTS, "Sélectionner…");

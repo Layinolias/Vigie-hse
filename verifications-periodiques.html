@@ -778,7 +778,7 @@
     $("fCategorieForm").innerHTML = CATEGORIES.map(c => `<option value="${c[0]}">${c[0]}</option>`).join("");
     function fillFormServiceOptions(col){
       const list = servicesForCollectivite(col);
-      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+      $("fServiceForm").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     }
     fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));

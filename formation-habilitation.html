@@ -628,7 +628,7 @@
     const col = fCollectivite.value;
     const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = fService.value;
-    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
   }
   fillServiceOptions();
@@ -798,7 +798,7 @@
     $("fTypeForm").innerHTML = HAB_TYPES.map(t => `<option value="${t[0]}">${t[0]}</option>`).join("");
     function fillFormServiceOptions(col){
       const list = servicesForCollectivite(col);
-      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+      $("fServiceForm").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     }
     fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));

@@ -1358,8 +1358,8 @@
       const rows = $("refListRows");
       rows.innerHTML = items.length ? items.map((item, i) => `
         <div class="list-row" data-i="${i}">
-          <input type="text" class="ref-label" value="${(item[0]||"").replace(/"/g,'&quot;')}">
-          <input type="text" class="ref-desc list-desc" value="${(item[1]||"").replace(/"/g,'&quot;')}">
+          <input type="text" class="ref-label" value="${esc(item[0])}">
+          <input type="text" class="ref-desc list-desc" value="${esc(item[1])}">
           <button type="button" class="btn btn-ghost btn-sm ref-save" aria-label="Enregistrer"><svg class="icon"><use href="#i-shield-check"/></svg></button>
           <button type="button" class="btn btn-danger btn-sm ref-del" aria-label="Supprimer"><svg class="icon"><use href="#i-trash"/></svg></button>
         </div>`).join("") : `<div class="empty-hint">Ce référentiel est vide — ajoutez une première entrée ci-dessous.</div>`;
@@ -1428,7 +1428,7 @@
     const rows = $("refListRows");
     rows.innerHTML = list.length ? list.map((val, i) => `
       <div class="list-row" data-i="${i}">
-        <input type="text" class="ref-label" value="${String(val).replace(/"/g,'&quot;')}">
+        <input type="text" class="ref-label" value="${esc(val)}">
         <button type="button" class="btn btn-ghost btn-sm ref-save" aria-label="Enregistrer"><svg class="icon"><use href="#i-shield-check"/></svg></button>
         <button type="button" class="btn btn-danger btn-sm ref-del" aria-label="Supprimer"><svg class="icon"><use href="#i-trash"/></svg></button>
       </div>`).join("") : `<div class="empty-hint">Ce référentiel est vide — ajoutez une première entrée ci-dessous.</div>`;

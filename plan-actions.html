@@ -790,7 +790,7 @@
     const col = fCollectivite.value;
     const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = fService.value;
-    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
   }
   fillServiceOptions();
@@ -839,20 +839,21 @@
       return;
     }
     const prioCls = { "Critique":"p-critique", "Haute":"p-haute", "Moyenne":"p-moyenne", "Basse":"p-basse" };
+    const origineCls = { "DUERP":"duerp", "Inspection":"inspection", "Analyse":"analyse", "Urgence":"urgence", "Prévention EE":"ee", "Dialogue social":"ds" };
     tbody.innerHTML = rows.map(a => `
-      <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${a.id}">
+      <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${esc(a.id)}">
         <td class="wrap">${esc(a.titre)}</td>
-        <td>${a.service}</td>
-        <td><span class="origine-chip ${a.origine === 'DUERP' ? 'duerp' : (a.origine === 'Inspection' ? 'inspection' : (a.origine === 'Analyse' ? 'analyse' : (a.origine === 'Urgence' ? 'urgence' : (a.origine === 'Prévention EE' ? 'ee' : (a.origine === 'Dialogue social' ? 'ds' : 'manuel')))))}">${a.origine}</span></td>
-        <td>${a.responsable || '<span style="color:var(--text-faint)">—</span>'}</td>
-        <td class="${isOverdue(a) ? 'echeance-overdue' : ''}">${a.echeance || '—'}</td>
-        <td><span class="chip ${prioCls[a.priorite] || 'p-basse'}">${a.priorite}</span></td>
+        <td>${esc(a.service)}</td>
+        <td><span class="origine-chip ${origineCls[a.origine] || 'manuel'}">${esc(a.origine)}</span></td>
+        <td>${a.responsable ? esc(a.responsable) : '<span style="color:var(--text-faint)">—</span>'}</td>
+        <td class="${isOverdue(a) ? 'echeance-overdue' : ''}">${esc(a.echeance || '—')}</td>
+        <td><span class="chip ${prioCls[a.priorite] || 'p-basse'}">${esc(a.priorite)}</span></td>
         <td>${canEdit
-          ? `<select class="statut-select" data-id="${a.id}"><option ${a.statut==='À faire'?'selected':''}>À faire</option><option ${a.statut==='En cours'?'selected':''}>En cours</option><option ${a.statut==='Fait'?'selected':''}>Fait</option></select>`
-          : a.statut}</td>
+          ? `<select class="statut-select" data-id="${esc(a.id)}"><option ${a.statut==='À faire'?'selected':''}>À faire</option><option ${a.statut==='En cours'?'selected':''}>En cours</option><option ${a.statut==='Fait'?'selected':''}>Fait</option></select>`
+          : esc(a.statut)}</td>
         ${canEdit ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${a.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${a.id}">Suppr.</button>
+          <button type="button" class="act-edit" data-edit="${esc(a.id)}">Modifier</button>
+          <button type="button" class="act-del" data-id="${esc(a.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`).join("");
   }
@@ -958,7 +959,7 @@
     const formPanel = $("formPanel"), form = $("actionForm");
     function fillFormServiceOptions(col){
       const list = servicesForCollectivite(col);
-      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+      $("fServiceForm").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     }
     fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));

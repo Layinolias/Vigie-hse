@@ -683,7 +683,7 @@
     const col = fCollectivite.value;
     const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = fService.value;
-    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
   }
   fillServiceOptions();
@@ -911,7 +911,7 @@
     $("fTrameForm").innerHTML = TRAMES.map(t => `<option value="${esc(t.id)}">${esc(t.nom)}</option>`).join("");
     function fillFormServiceOptions(col){
       const list = servicesForCollectivite(col);
-      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+      $("fServiceForm").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     }
     fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
@@ -923,7 +923,7 @@
       pointsContainer.innerHTML = trame.points.map(p => {
         const existing = byId.get(p.id) || { statut:"Conforme", commentaire:"" };
         return `
-        <div class="point-row" data-point-id="${esc(p.id)}" data-point-label="${p.libelle.replace(/"/g,'&quot;')}">
+        <div class="point-row" data-point-id="${esc(p.id)}" data-point-label="${esc(p.libelle)}">
           <div class="point-label">${esc(p.libelle)} <span style="color:var(--text-faint); font-weight:500;">· ${esc(p.categorie)}</span></div>
           <div class="point-radios">
             <label><input type="radio" name="pt-${esc(p.id)}" value="Conforme" ${existing.statut === 'Conforme' ? 'checked' : ''}> Conforme</label>
@@ -1039,8 +1039,8 @@
       const row = document.createElement("div");
       row.className = "point-input-row";
       row.innerHTML = `
-        <input type="text" class="tp-libelle" placeholder="Libellé du point de contrôle" value="${(libelle||'').replace(/"/g,'&quot;')}">
-        <input type="text" class="tp-categorie" placeholder="Catégorie" value="${(categorie||'').replace(/"/g,'&quot;')}" style="max-width:150px;">
+        <input type="text" class="tp-libelle" placeholder="Libellé du point de contrôle" value="${esc(libelle)}">
+        <input type="text" class="tp-categorie" placeholder="Catégorie" value="${esc(categorie)}" style="max-width:150px;">
         <button type="button" class="icon-btn" aria-label="Supprimer ce point"><svg class="icon" style="width:15px;height:15px"><use href="#i-trash"/></svg></button>
       `;
       row.querySelector("button").addEventListener("click", () => row.remove());

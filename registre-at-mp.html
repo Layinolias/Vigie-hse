@@ -862,7 +862,7 @@
     }
 
     tbody.innerHTML = rows.map(r => `
-      <tr class="${r.arret ? 'avec' : 'sans'}" data-id="${r.id}">
+      <tr class="${r.arret ? 'avec' : 'sans'}" data-id="${esc(r.id)}">
         ${VISIBLE_COLUMNS.map(c => `<td class="${c.cls || ''}">${c.render(r)}</td>`).join("")}
       </tr>
     `).join("");

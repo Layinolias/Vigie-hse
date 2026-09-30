@@ -1021,7 +1021,7 @@
       const low = s.quantiteStock <= s.seuilAlerte;
       return `
       <tr class="${low?'lowstock':''}" data-id="${esc(s.id)}">
-        <td>${c ? c.nom : '—'}</td>
+        <td>${c ? esc(c.nom) : '—'}</td>
         <td>${esc(s.taille)}</td>
         <td class="mono">${esc(s.quantiteStock)}</td>
         <td class="mono">${esc(s.seuilAlerte)}</td>
@@ -1093,7 +1093,7 @@
     const col = dfCollectivite.value;
     const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = dfService.value;
-    dfService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    dfService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     dfService.value = list.includes(current) ? current : "all";
   }
   fillDotServiceOptions();
@@ -1124,7 +1124,7 @@
       <tr class="${d.cls==='late'?'late':''}" data-id="${esc(d.id)}">
         <td>${esc(d.nom)}</td><td>${esc(d.prenom)}</td>
         <td>${esc(d.service)} <span style="color:var(--text-faint)">· ${esc(d.collectivite)}</span></td>
-        <td>${c ? c.nom : '—'}</td><td>${esc(d.taille)}</td><td>${esc(d.dateRemise)}</td>
+        <td>${c ? esc(c.nom) : '—'}</td><td>${esc(d.taille)}</td><td>${esc(d.dateRemise)}</td>
         <td class="${d.cls==='late'?'echeance-overdue':''}">${esc(d.dateRenouvellement || '—')}</td>
         <td><span class="status-chip ${esc(d.cls)}">${esc(d.statut)}</span></td>
         ${canEdit ? `<td class="actions-float"><button type="button" class="act-edit" data-edit="${esc(d.id)}">Modifier</button><button type="button" class="act-del" data-id="${esc(d.id)}">Suppr.</button></td>` : ''}
@@ -1301,10 +1301,10 @@
       const c = dot ? catalogueById(dot.articleId) : null;
       return `
       <tr class="${l.statut==='À réformer'?'late':''}" data-id="${esc(l.id)}">
-        <td>${dot ? dot.nom + " " + dot.prenom : '—'}</td>
-        <td>${c ? c.nom : '—'}</td>
+        <td>${dot ? esc(dot.nom + " " + dot.prenom) : '—'}</td>
+        <td>${c ? esc(c.nom) : '—'}</td>
         <td>${esc(l.dateLavage)}</td>
-        <td class="mono">${esc(l.nombreLavagesCumules)}${c && c.nombreLavagesMax ? ' / ' + c.nombreLavagesMax : ''}</td>
+        <td class="mono">${esc(l.nombreLavagesCumules)}${c && c.nombreLavagesMax ? ' / ' + esc(c.nombreLavagesMax) : ''}</td>
         <td><span class="status-chip ${l.statut==='À réformer'?'late':'ok'}">${esc(l.statut)}</span></td>
         ${canEdit ? `<td class="actions-float"><button type="button" class="act-del" data-id="${esc(l.id)}">Suppr.</button></td>` : ''}
       </tr>`;

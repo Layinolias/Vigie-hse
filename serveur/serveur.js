@@ -39,6 +39,7 @@ const Consultations = require('./consultations.js');   // qui a reçu quels regi
 const Poste = require('./poste-commun.js');   // repère « base en service », lu par l'outil de restauration
 
 const RACINE = path.resolve(__dirname, '..');
+const RACINE_REELLE = fs.realpathSync.native(RACINE);
 const PORT = Number(process.env.PORT) || 8780;
 const BASE = process.env.VIGIE_BASE || path.join(__dirname, 'donnees', 'vigie.db');
 const CERT = process.env.VIGIE_CERT, CLE_TLS = process.env.VIGIE_CLE;
@@ -51,6 +52,7 @@ const BOUCLE = ['127.0.0.1', '::1', 'localhost'];
 // joignable depuis un autre poste : adresse d'écoute du réseau, proxy devant le serveur, ou nom de réseau
 const RESEAU = !BOUCLE.includes(ECOUTE) || process.env.VIGIE_HTTPS === '1' || NOMS.length > 0;
 const TAILLE_MAX = 50 * 1024 * 1024;          // une clé = un registre entier ; l'historique complet d'un client tient large
+const TAILLE_CONNEXION = 16 * 1024;           // identifiant + mot de passe : lu avant toute session, donc borné court
 const CLE_VALIDE = /^vigie_hse_[a-z0-9_]{1,80}$/;
 const TYPES = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
   '.json':'application/json', '.svg':'image/svg+xml', '.png':'image/png', '.jpg':'image/jpeg', '.ico':'image/x-icon', '.woff2':'font/woff2',
@@ -69,8 +71,12 @@ const comptes = Comptes.creer(base);
 const journal = (...m) => console.log(new Date().toLocaleString('fr-FR') + ' ' + m.join(' '));
 const droits = require('./droits.js');   // droits d'écriture par registre, appliqués ici
 
+// Aucune page ne s'affiche dans le cadre d'un autre site (clic détourné) ; aucun lien sortant ne révèle
+// l'adresse du serveur. La politique reste courte : les pages ont leurs scripts dans le HTML même.
+const ENTETES = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
+  'Content-Security-Policy': "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'", 'Referrer-Policy': 'same-origin' };
 function repondre(res, statut, corps, type, entetes){
-  res.writeHead(statut, Object.assign({ 'Content-Type': type || 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
+  res.writeHead(statut, Object.assign({ 'Content-Type': type || 'application/json; charset=utf-8' }, ENTETES,
     HTTPS ? { 'Strict-Transport-Security': 'max-age=31536000' } : {}, entetes || {}));
   res.end(type ? corps : JSON.stringify(corps));
 }
@@ -128,10 +134,10 @@ function signerJournal(avant, valeur, utilisateur){
   return change ? JSON.stringify(l) : valeur;
 }
 
-function lireCorps(req){
+function lireCorps(req, max = TAILLE_MAX){
   return new Promise((ok, echec) => {
     const morceaux = []; let taille = 0;
-    req.on('data', m => { taille += m.length; if (taille > TAILLE_MAX){ echec(Object.assign(new Error('trop gros'), { statut: 413 })); req.destroy(); } else morceaux.push(m); });
+    req.on('data', m => { taille += m.length; if (taille > max){ echec(Object.assign(new Error('trop gros'), { statut: 413 })); req.destroy(); } else morceaux.push(m); });
     req.on('end', () => ok(Buffer.concat(morceaux).toString('utf8')));
     req.on('error', echec);
   });
@@ -143,7 +149,8 @@ async function api(req, res, chemin){
   if (req.method !== 'GET' && req.headers['x-vigie'] !== '1') return repondre(res, 403, { erreur: 'en-tête X-Vigie manquant' });
 
   if (chemin === '/api/connexion' && req.method === 'POST'){
-    let d = {}; try { d = JSON.parse(await lireCorps(req)) || {}; } catch(e){}
+    const corps = await lireCorps(req, TAILLE_CONNEXION);
+    let d = {}; try { d = JSON.parse(corps) || {}; } catch(e){}
     const r = comptes.connecter(d.identifiant, d.motDePasse);
     if (!r.ok){
       journal('connexion refusée :', String(d.identifiant || '').slice(0, 60), '(' + r.erreur + ')');
@@ -192,8 +199,8 @@ async function api(req, res, chemin){
     if (req.method !== 'PUT' && req.method !== 'DELETE') return repondre(res, 405, { erreur: 'méthode' });
     let valeur = req.method === 'PUT' ? await lireCorps(req) : null;
     const anonyme = session && Anonymisation.estAnonyme(session.page);
-    // compte anonymisé sur un registre réduit : ses seuls ajouts, greffés sur le registre complet
-    // compte qui ne reçoit qu'une vue réduite (ou rien) de ce registre : ses seuls ajouts, greffés sur le registre complet
+    // compte qui ne reçoit qu'une vue réduite (ou rien) de ce registre, ou anonymisé sur un registre réduit :
+    // ses seuls ajouts, greffés sur le registre complet
     if (session) valeur = Lecture.ecriture(session.page, cle, base.lire(cle), valeur);
     if (anonyme && Anonymisation.PROJETEES[cle] && valeur !== null) valeur = Anonymisation.grefferAjouts(base.lire(cle), valeur);
     // compte limité à certains services : sa part, greffée sur le registre complet
@@ -223,11 +230,13 @@ async function api(req, res, chemin){
 function fichier(req, res, chemin){
   if (req.method !== 'GET' && req.method !== 'HEAD') return texte(res, 405, 'méthode');
   if (chemin === '/') chemin = '/index.html';
-  const relatif = path.normalize(chemin).replace(/^[\\/]+/, '');
-  const f = path.join(RACINE, relatif);
+  // Le contrôle porte sur le vrai chemin du fichier, pas sur l'adresse demandée : sous Windows, « SERVEUR »,
+  // « serveur. » ou le nom court « CLAUDE~1 » désignent le même dossier que « serveur » ou « .claude ».
+  let f;
+  try { f = fs.realpathSync.native(path.join(RACINE, path.normalize(chemin))); } catch(e){ return texte(res, 404, '404'); }
   // ni hors du dépôt, ni ses fichiers cachés (.git), ni ce dossier (la base)
-  const segments = relatif.split(/[\\/]/);
-  if (!f.startsWith(RACINE + path.sep) || segments.some(s => s.startsWith('.')) || segments[0] === 'serveur' || (!DEMO && segments[0] === 'DATATEST'))
+  const relatif = path.relative(RACINE_REELLE, f), segments = relatif.split(path.sep);
+  if (!relatif || path.isAbsolute(relatif) || segments.some(s => s.startsWith('.')) || segments[0] === 'serveur' || (!DEMO && segments[0] === 'DATATEST'))
     return texte(res, 404, '404');
   // seuls les types de l'application : une clé de certificat, une copie de base… posées dans le dossier ne sortent pas
   const type = TYPES[path.extname(f).toLowerCase()];
@@ -259,7 +268,8 @@ function fichier(req, res, chemin){
 const traiter = async (req, res) => {
   try {
     if (!HOTES.has(String(req.headers.host))) return texte(res, 421, 'hôte refusé');
-    const chemin = decodeURIComponent(req.url.split('?')[0]);
+    let chemin;
+    try { chemin = decodeURIComponent(req.url.split('?')[0]); } catch(e){ return texte(res, 400, 'adresse invalide'); }
     if (chemin.startsWith('/api/')) return await api(req, res, chemin);
     return fichier(req, res, chemin);
   } catch(e){

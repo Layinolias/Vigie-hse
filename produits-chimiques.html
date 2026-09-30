@@ -647,7 +647,7 @@
     const col = fCollectivite.value;
     const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = fService.value;
-    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
   }
   fillServiceOptions();
@@ -699,7 +699,7 @@
         <td>${esc(p.fournisseur || '—')}</td>
         <td>${esc(p.service)}</td>
         <td>${p.quantiteStockee != null ? esc(p.quantiteStockee) + ' ' + esc(p.unite || '') : '—'}</td>
-        <td class="pictos">${(p.pictogrammes || []).map(c => `<span class="ghs-badge ${badgeCls(c)}">${c}</span>`).join("") || '<span style="color:var(--text-faint)">—</span>'}</td>
+        <td class="pictos">${(p.pictogrammes || []).map(c => `<span class="ghs-badge ${badgeCls(c)}">${esc(c)}</span>`).join("") || '<span style="color:var(--text-faint)">—</span>'}</td>
         <td class="${isFdsOld(p) ? 'fds-flag' : ''}">${esc(p.dateMajFDS || '—')}${isFdsOld(p) ? ' ⚠' : ''}</td>
         ${canEdit ? `<td class="actions-float">
           <button type="button" class="act-edit" data-edit="${esc(p.id)}">Modifier</button>
@@ -812,7 +812,7 @@
     `).join("");
     function fillFormServiceOptions(col){
       const list = servicesForCollectivite(col);
-      $("fServiceForm").innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join("");
+      $("fServiceForm").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     }
     fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
@@ -833,10 +833,8 @@
         $("fDateMajFDS").value = rec.dateMajFDS || "";
         $("fLienFDS").value = rec.lienFDS || "";
         $("fMesures").value = rec.mesuresPrevention || "";
-        (rec.pictogrammes || []).forEach(code => {
-          const cb = document.querySelector(`.picto-cb[value="${code}"]`);
-          if (cb) cb.checked = true;
-        });
+        const codes = rec.pictogrammes || [];
+        document.querySelectorAll(".picto-cb").forEach(cb => { if (codes.includes(cb.value)) cb.checked = true; });
       } else {
         $("formTitle").textContent = "Nouveau produit";
         $("fId").value = "";

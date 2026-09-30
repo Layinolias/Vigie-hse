@@ -702,19 +702,19 @@
     tbody.innerHTML = rows.map(r => {
       const obligatoire = isPlanObligatoire(r);
       return `
-      <tr data-id="${r.id}">
+      <tr data-id="${esc(r.id)}">
         <td>${esc(r.entrepriseNom)}</td>
         <td>${esc(r.natureIntervention)}</td>
         <td>${esc(r.site)}</td>
         <td>${esc(r.service)}</td>
-        <td>${r.dateDebut || '—'}</td>
-        <td>${r.dateFin || '—'}</td>
+        <td>${esc(r.dateDebut || '—')}</td>
+        <td>${esc(r.dateFin || '—')}</td>
         <td>${Number(r.heuresEstimees).toFixed(1)} h</td>
         <td><span class="chip ${(r.inspection && r.inspection.faite) ? 'ok' : 'late'}">${(r.inspection && r.inspection.faite) ? 'Réalisée' : 'À faire'}</span></td>
         <td><span class="chip ${obligatoire ? 'late' : 'ok'}">${obligatoire ? 'Obligatoire' : 'Non requis'}</span></td>
         ${canEeWrite ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${r.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${r.id}">Suppr.</button>
+          <button type="button" class="act-edit" data-edit="${esc(r.id)}">Modifier</button>
+          <button type="button" class="act-del" data-id="${esc(r.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`;
     }).join("");
@@ -734,7 +734,7 @@
       <div class="dyn-row" data-idx="${i}">
         <input type="text" class="act-description" placeholder="Action corrective…" value="${esc(a.description)}" style="flex:2 1 220px;" ${canEeWrite ? '' : 'disabled'}>
         <input type="text" class="act-responsable" placeholder="Responsable" value="${esc(a.responsable)}" ${canEeWrite ? '' : 'disabled'}>
-        <input type="date" class="act-echeance" value="${a.echeance || ''}" ${canEeWrite ? '' : 'disabled'}>
+        <input type="date" class="act-echeance" value="${esc(a.echeance)}" ${canEeWrite ? '' : 'disabled'}>
         <select class="act-statut" ${canEeWrite ? '' : 'disabled'}>
           <option value="À faire" ${(a.statut||"À faire") === "À faire" ? "selected" : ""}>À faire</option>
           <option value="En cours" ${a.statut === "En cours" ? "selected" : ""}>En cours</option>

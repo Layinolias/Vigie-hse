@@ -611,7 +611,7 @@
     const col = fCollectivite.value;
     const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = fService.value;
-    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    fService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     fService.value = list.includes(current) ? current : "all";
   }
   fillServiceOptions();
@@ -668,12 +668,12 @@
     $("faitsList").innerHTML = currentFaits.map((f, i) => `
       <div class="dyn-row" data-idx="${i}">
         <input type="date" class="fait-date" value="${esc(f.date || '')}" ${canAnalyseWrite ? '' : 'disabled'}>
-        <input type="text" class="fait-texte" placeholder="Fait constaté…" value="${(f.texte||'').replace(/"/g,'&quot;')}" style="flex:2 1 220px;" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="text" class="fait-texte" placeholder="Fait constaté…" value="${esc(f.texte)}" style="flex:2 1 220px;" ${canAnalyseWrite ? '' : 'disabled'}>
         <select class="fait-type" ${canAnalyseWrite ? '' : 'disabled'}>
           <option value="Fait" ${f.type !== "Opinion" ? "selected" : ""}>Fait</option>
           <option value="Opinion" ${f.type === "Opinion" ? "selected" : ""}>Opinion</option>
         </select>
-        <input type="text" class="fait-causede" placeholder="Cause de (réf. fait)" value="${(f.causeDe||'').replace(/"/g,'&quot;')}" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="text" class="fait-causede" placeholder="Cause de (réf. fait)" value="${esc(f.causeDe)}" ${canAnalyseWrite ? '' : 'disabled'}>
         ${canAnalyseWrite ? `<button type="button" class="act-del" data-remove-fait="${i}">Suppr.</button>` : ''}
       </div>`).join("") || `<div style="font-size:12px;color:var(--text-faint)">Aucun fait enregistré.</div>`;
   }
@@ -690,8 +690,8 @@
   function renderPourquoiList(){
     $("pourquoiList").innerHTML = currentPourquoi.map((p, i) => `
       <div class="dyn-row" data-idx="${i}">
-        <input type="text" class="pq-question" placeholder="Pourquoi… ?" value="${(p.question||'').replace(/"/g,'&quot;')}" ${canAnalyseWrite ? '' : 'disabled'}>
-        <input type="text" class="pq-reponse" placeholder="Parce que…" value="${(p.reponse||'').replace(/"/g,'&quot;')}" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="text" class="pq-question" placeholder="Pourquoi… ?" value="${esc(p.question)}" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="text" class="pq-reponse" placeholder="Parce que…" value="${esc(p.reponse)}" ${canAnalyseWrite ? '' : 'disabled'}>
         ${canAnalyseWrite ? `<button type="button" class="act-del" data-remove-pq="${i}">Suppr.</button>` : ''}
       </div>`).join("") || `<div style="font-size:12px;color:var(--text-faint)">Aucun « Pourquoi » enregistré.</div>`;
   }
@@ -708,8 +708,8 @@
   function renderActionsList(){
     $("actionsList").innerHTML = currentActions.map((a, i) => `
       <div class="dyn-row" data-idx="${i}">
-        <input type="text" class="act-description" placeholder="Action corrective…" value="${(a.description||'').replace(/"/g,'&quot;')}" style="flex:2 1 220px;" ${canAnalyseWrite ? '' : 'disabled'}>
-        <input type="text" class="act-responsable" placeholder="Responsable" value="${(a.responsable||'').replace(/"/g,'&quot;')}" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="text" class="act-description" placeholder="Action corrective…" value="${esc(a.description)}" style="flex:2 1 220px;" ${canAnalyseWrite ? '' : 'disabled'}>
+        <input type="text" class="act-responsable" placeholder="Responsable" value="${esc(a.responsable)}" ${canAnalyseWrite ? '' : 'disabled'}>
         <input type="date" class="act-echeance" value="${esc(a.echeance || '')}" ${canAnalyseWrite ? '' : 'disabled'}>
         <select class="act-statut" ${canAnalyseWrite ? '' : 'disabled'}>
           <option value="À faire" ${(a.statut||"À faire") === "À faire" ? "selected" : ""}>À faire</option>

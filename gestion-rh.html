@@ -743,13 +743,13 @@
       return;
     }
     tbody.innerHTML = rows.map(a => `
-      <tr data-id="${a.id}">
+      <tr data-id="${esc(a.id)}">
         <td>${esc(a.nom)}</td><td>${esc(a.prenom)}</td><td>${esc(a.service)}</td><td>${esc(a.collectivite)}</td>
         <td>${a.managerId ? esc(agentName(a.managerId)) : '—'}</td>
         <td><span class="chip ${a.actif !== false ? 'ok' : 'off'}">${a.actif !== false ? 'Actif' : 'Inactif'}</span></td>
         ${canGestionRhWrite ? `<td class="actions-float">
-          <button type="button" class="act-edit" data-edit="${a.id}">Modifier</button>
-          <button type="button" class="act-del" data-id="${a.id}">Suppr.</button>
+          <button type="button" class="act-edit" data-edit="${esc(a.id)}">Modifier</button>
+          <button type="button" class="act-del" data-id="${esc(a.id)}">Suppr.</button>
         </td>` : ''}
       </tr>`).join("");
   }
@@ -944,7 +944,7 @@
         <div class="org-node">
           <span class="org-node-name">${esc(a.nom)} ${esc(a.prenom)}</span>
           <span class="org-node-svc">${esc(a.service)}</span>
-          ${canGestionRhWrite ? `<select data-reassign="${a.id}" data-current="${a.managerId || ''}"><option value="${a.managerId || ''}" selected>${a.managerId ? esc(nameById.get(a.managerId) || '—') : '— Aucun (sommet)'}</option></select>` : ''}
+          ${canGestionRhWrite ? `<select data-reassign="${esc(a.id)}" data-current="${esc(a.managerId)}"><option value="${esc(a.managerId)}" selected>${a.managerId ? esc(nameById.get(a.managerId) || '—') : '— Aucun (sommet)'}</option></select>` : ''}
         </div>
         ${children.length ? `<ul>${children.map(renderNode).join("")}</ul>` : ''}
       </li>`;
@@ -1001,10 +1001,10 @@
       return;
     }
     tbody.innerHTML = rows.map(h => `
-      <tr data-id="${h.id}">
+      <tr data-id="${esc(h.id)}">
         <td>${esc(h.periode)}</td><td>${esc(h.collectivite)}</td><td>${esc(h.service)}</td>
         <td>${Number(h.heures).toLocaleString('fr-FR')}</td><td>${esc(h.auteur || '—')}</td>
-        ${canGestionRhWrite ? `<td class="actions-float"><button type="button" class="act-del" data-id="${h.id}">Suppr.</button></td>` : '<td></td>'}
+        ${canGestionRhWrite ? `<td class="actions-float"><button type="button" class="act-del" data-id="${esc(h.id)}">Suppr.</button></td>` : '<td></td>'}
       </tr>`).join("");
   }
   $("heuresForm").addEventListener("submit", (e) => {

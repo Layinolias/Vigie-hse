@@ -12,8 +12,8 @@
 //                 ne peut les effacer), et la déclaration d'un AT/MP avec la permission « atmp-declare » ;
 //   « aucun ».
 // Un registre absent de la table suit la règle générale : complet pour RH et administrateurs, aucun
-// pour les autres. Les lectures ne sont pas filtrées ici (le périmètre d'un manager reste appliqué par
-// les écrans) — voir PLAN-MISE-EN-PRODUCTION.md §4 ter.
+// pour les autres. Les lectures sont filtrées ailleurs : serveur/lecture.js (ce que les écrans d'un rôle
+// affichent), serveur/perimetre.js (les services d'un compte), serveur/anonymisation.js.
 'use strict';
 const Anonymisation = require('./anonymisation.js');
 const PREFIXE = 'vigie_hse_';
@@ -56,23 +56,27 @@ function niveau(session, cle){
   return n;
 }
 
-// « ajout » : chaque élément déjà enregistré doit se retrouver, identique, dans la nouvelle valeur
+const liste = v => { if (v === null) return null; try { const l = JSON.parse(v); return Array.isArray(l) ? l : null; } catch(e){ return null; } };
+const idDe = x => x && typeof x === 'object' && x.id != null ? String(x.id) : null;
+const compter = (l, cle) => { const m = new Map(); for (const x of l){ const k = cle(x); if (k !== null) m.set(k, (m.get(k) || 0) + 1); } return m; };
+
+// « ajout » : chaque élément déjà enregistré se retrouve, identique, dans la nouvelle valeur — et un identifiant
+// déjà enregistré n'y revient pas une fois de plus : une copie modifiée placée avant l'original passerait sinon
+// pour lui (les pages retiennent le premier trouvé, le journal d'audit ne la signerait pas).
 function queDesAjouts(ancienne, nouvelle){
-  if (nouvelle === null) return false;
-  let n; try { n = JSON.parse(nouvelle); } catch(e){ return false; }
-  if (!Array.isArray(n)) return false;
+  const n = liste(nouvelle);
+  if (!n) return false;
   if (ancienne === null) return true;
-  let a; try { a = JSON.parse(ancienne); } catch(e){ return false; }
-  if (!Array.isArray(a)) return false;
-  const parId = new Map(), sansId = new Map();
-  for (const x of n){
-    if (x && typeof x === 'object' && x.id != null) parId.set(String(x.id), JSON.stringify(x));
-    else { const k = JSON.stringify(x); sansId.set(k, (sansId.get(k) || 0) + 1); }
-  }
+  const a = liste(ancienne);
+  if (!a) return false;
+  const restants = compter(n, x => JSON.stringify(x));
   for (const x of a){
-    if (x && typeof x === 'object' && x.id != null){ if (parId.get(String(x.id)) !== JSON.stringify(x)) return false; }
-    else { const k = JSON.stringify(x), c = sansId.get(k) || 0; if (!c) return false; sansId.set(k, c - 1); }
+    const k = JSON.stringify(x), c = restants.get(k) || 0;
+    if (!c) return false;
+    restants.set(k, c - 1);
   }
+  const idsNouveaux = compter(n, idDe);
+  for (const [id, c] of compter(a, idDe)) if (idsNouveaux.get(id) !== c) return false;
   return true;
 }
 

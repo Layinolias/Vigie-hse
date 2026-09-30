@@ -5,6 +5,7 @@
 <meta name="description" content="Catalogue des équipements de protection individuelle et vêtements de travail, stock, dotations par agent et suivi de l'entretien.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/menu-lateral.js"></script>
 <script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
@@ -291,53 +292,7 @@
       <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
       <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
     </div>
-    <nav>
-      <div class="nav-section"><a class="nav-item" href="dashboard.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
-      <div class="nav-section">
-        <div class="nav-label">Santé au travail</div>
-        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
-        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre SST</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">Sécurité &amp; Risques</div>
-        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
-        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">Suivi</div>
-        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
-        <a class="nav-item" id="navSanteVisites" href="sante-visites.html" style="display:none;"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
-        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
-        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
-        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
-        <a class="nav-item active" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
-        <a class="nav-item" id="navPenibilite" href="penibilite.html" style="display:none;"><svg class="icon"><use href="#i-gauge"/></svg> Pénibilité</a>
-      </div>
-      <div class="nav-section" id="navRh" style="display:none;">
-        <div class="nav-label">Espace RH</div>
-        <a class="nav-item" id="navDeclarerAtmp" href="saisie-rh.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
-        <a class="nav-item" id="navEvaluerDuerp" href="saisie-duerp.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
-      </div>
-      <div class="nav-section" id="navAdministratif" style="display:none;">
-        <div class="nav-label">Administratif</div>
-        <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
-        <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
-        <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
-        <a class="nav-item" id="navGestionRh" href="gestion-rh.html" style="display:none;"><svg class="icon"><use href="#i-users"/></svg> Gestion RH</a>
-        <a class="nav-item" id="navEntreprisesExt" href="entreprises-exterieures.html" style="display:none;"><svg class="icon"><use href="#i-briefcase"/></svg> Entreprises extérieures</a>
-        <a class="nav-item" id="navAccueilPoste" href="accueil-poste.html" style="display:none;"><svg class="icon"><use href="#i-user-plus"/></svg> Accueil au poste</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">Ressources</div>
-        <a class="nav-item" id="navBaseDoc" href="base-documentaire.html"><svg class="icon"><use href="#i-book"/></svg> Base documentaire</a>
-        <a class="nav-item" id="navDialogueSocial" href="dialogue-social.html" style="display:none;"><svg class="icon"><use href="#i-messages"/></svg> Dialogue social</a>
-      </div>
-      <div class="nav-section" id="navPilotage" style="display:none;">
-        <div class="nav-label">Pilotage</div>
-        <a class="nav-item" id="navReportingLink" href="reporting.html" style="display:none;"><svg class="icon"><use href="#i-bar-chart"/></svg> Indicateurs &amp; Reporting</a>
-        <a class="nav-item" id="navAdminLink" href="administration.html" style="display:none;"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
-      </div>
-    </nav>
+    <nav></nav>
     <div class="sidebar-foot">
       <div class="user-row">
         <div class="user-avatar" id="userAvatar">--</div>
@@ -579,30 +534,6 @@
   $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
   $("roleChip").textContent = role.toUpperCase();
   if (!canEdit){ $("roleChip").classList.add("ag"); }
-  const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
-  if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
-  if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
-  const canAtmpAdmin = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
-  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
-  if (canAtmpAdmin){ $("navAdministratif").style.display = ""; $("navAtmpAdmin").style.display = ""; }
-  if (canAccidentAnalyse){ $("navAdministratif").style.display = ""; $("navAccidentAnalyse").style.display = ""; }
-  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
-  if (canUrgences){ $("navAdministratif").style.display = ""; $("navUrgences").style.display = ""; }
-  const canGestionRh = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
-  if (canGestionRh){ $("navAdministratif").style.display = ""; $("navGestionRh").style.display = ""; }
-  const canEntreprisesExt = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
-  if (canEntreprisesExt){ $("navAdministratif").style.display = ""; $("navEntreprisesExt").style.display = ""; }
-  const canAccueilPoste = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accueil-poste"]) || "none") !== "none");
-  if (canAccueilPoste){ $("navAdministratif").style.display = ""; $("navAccueilPoste").style.display = ""; }
-  if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
-  if (role === "rh" || role === "admin" || role === "manager" || (((session && session.modulePermissions && session.modulePermissions["sante-visites"]) || "none") !== "none")){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement, ou permission « sante-visites » (question 17)
-  if (role === "admin"){ $("navAdminLink").style.display = ""; }
-  // Pénibilité (module 5) : RH, administrateurs, ou la permission « penibilite »
-  { const r = (session && session.role) || "ag", p = (session && session.modulePermissions && session.modulePermissions["penibilite"]) || "none";
-    if (r === "admin" || r === "rh" || p !== "none") document.getElementById("navPenibilite").style.display = ""; }
-  // Dialogue social (module 13) : RH, administrateurs, ou la permission « dialogue-social »
-  { const r = (session && session.role) || "ag", p = (session && session.modulePermissions && session.modulePermissions["dialogue-social"]) || "none";
-    if (r === "admin" || r === "rh" || p !== "none") document.getElementById("navDialogueSocial").style.display = ""; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   const AUDIT_KEY = "vigie_hse_audit_log";
@@ -614,34 +545,7 @@
     } catch(e){}
   }
 
-  const sidebar = $("sidebar"), scrim = $("scrim");
-  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
-  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
-  const appShell = document.querySelector(".app-shell");
-  let collapseTimer = null;
-  const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
-  const pinBtn = document.getElementById("sidebarPin");
-  function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
-  function isDesktopWidth(){ return window.innerWidth > 980; }
-  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
-  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth() || sidebarLocked) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
-  sidebar.addEventListener("mouseenter", sidebarExpand);
-  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
-  sidebar.addEventListener("focusin", sidebarExpand);
-  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
-  const mainEl = document.querySelector(".main");
-  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
-  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
-  if (sidebarLocked) sidebarExpand();
-  applyPinVisual();
-  if (pinBtn) pinBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    sidebarLocked = !sidebarLocked;
-    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
-    applyPinVisual();
-    if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
-  });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
 
   document.querySelectorAll(".epi-tab").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -652,20 +556,6 @@
     });
   });
 
-  // ---------- Référentiels partagés (services) ----------
-  const REF_KEY = "vigie_hse_referentials";
-  const REF_DEFAULTS = {
-  };
-  function loadReferentials(){
-    let stored = {};
-    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
-    const merged = Object.assign({}, stored);
-    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
-    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
-    return merged;
-  }
-  const REF = loadReferentials();
-  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Catalogue (seed fixe) ----------
   const CATALOGUE_SEED = [];
@@ -754,48 +644,11 @@
   function saveStock(ds){ try { VigieStore.setItem(STOCK_KEY, JSON.stringify(ds)); } catch(e){} }
   let STOCK = loadStock();
 
-  // ---------- Roster (dérivé du Registre AT/MP) ----------
-  // Hash + dédoublonnage factorisés dans assets/roster.js (VigieRoster) : partagés
-  // avec sante-visites.html et formation-habilitation.html, seule la logique
-  // ci-dessous (que seeder pour un agent donné) reste propre à cette page.
-  const SEED_ATMP = [];
-  const TECH_SERVICES = ["Voirie & Réseaux","Espaces Verts & Paysage","Collecte & Propreté","Propreté de la Ville","Atelier Mécanique","Patrimoine Bâti"];
-
-  function buildDotationSeeds(){
-    const seen = VigieRoster.dedupeByAgent(SEED_ATMP);
-    const out = [];
-    seen.forEach((r, key) => {
-      const h = VigieRoster.hashStr(key);
-      const isTech = TECH_SERVICES.includes(r.service);
-      let items = [];
-      if (isTech){
-        items = ["cat-2","cat-3","cat-9"];
-        if (h % 2 === 0) items.push("cat-1");
-        if (h % 3 === 0) items.push("cat-6");
-      } else {
-        if (h % 2 === 0) items.push("cat-8");
-        if (h % 4 === 0) items.push("cat-9");
-      }
-      items.forEach(articleId => {
-        const h2 = VigieRoster.hashStr(key + "|" + articleId);
-        const monthsAgo = 1 + (h2 % 48);
-        const d = new Date(); d.setMonth(d.getMonth() - monthsAgo);
-        const tailleOptions = STOCK_SEED_DEF.filter(s => s[0] === articleId).map(s => s[1]);
-        const taille = tailleOptions.length ? tailleOptions[h2 % tailleOptions.length] : "Unique";
-        out.push({
-          id: "dot-" + h2.toString(36),
-          nom: r.nom, prenom: r.prenom, service: r.service, collectivite: VigieOrga.de(r),
-          articleId, taille, dateRemise: VigieDates.iso(d),
-        });
-      });
-    });
-    return out;
-  }
   const DOT_KEY = "vigie_hse_epi_dotations";
   function loadDotations(){
     let stored = [];
     try { const raw = VigieStore.getItem(DOT_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    const seedList = buildDotationSeeds();
+    const seedList = [];   // pas de graine : la démonstration vient des imports DATATEST/
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
@@ -1021,7 +874,7 @@
       const low = s.quantiteStock <= s.seuilAlerte;
       return `
       <tr class="${low?'lowstock':''}" data-id="${esc(s.id)}">
-        <td>${c ? c.nom : '—'}</td>
+        <td>${c ? esc(c.nom) : '—'}</td>
         <td>${esc(s.taille)}</td>
         <td class="mono">${esc(s.quantiteStock)}</td>
         <td class="mono">${esc(s.seuilAlerte)}</td>
@@ -1093,7 +946,7 @@
     const col = dfCollectivite.value;
     const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
     const current = dfService.value;
-    dfService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${s}">${s}</option>`).join("");
+    dfService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     dfService.value = list.includes(current) ? current : "all";
   }
   fillDotServiceOptions();
@@ -1124,7 +977,7 @@
       <tr class="${d.cls==='late'?'late':''}" data-id="${esc(d.id)}">
         <td>${esc(d.nom)}</td><td>${esc(d.prenom)}</td>
         <td>${esc(d.service)} <span style="color:var(--text-faint)">· ${esc(d.collectivite)}</span></td>
-        <td>${c ? c.nom : '—'}</td><td>${esc(d.taille)}</td><td>${esc(d.dateRemise)}</td>
+        <td>${c ? esc(c.nom) : '—'}</td><td>${esc(d.taille)}</td><td>${esc(d.dateRemise)}</td>
         <td class="${d.cls==='late'?'echeance-overdue':''}">${esc(d.dateRenouvellement || '—')}</td>
         <td><span class="status-chip ${esc(d.cls)}">${esc(d.statut)}</span></td>
         ${canEdit ? `<td class="actions-float"><button type="button" class="act-edit" data-edit="${esc(d.id)}">Modifier</button><button type="button" class="act-del" data-id="${esc(d.id)}">Suppr.</button></td>` : ''}
@@ -1218,7 +1071,7 @@
       XLSX.writeFile(wb, `epi-dotations_${VigieDates.aujourdhui()}.xlsx`);
     });
     const dotFormPanel = $("dotFormPanel"), dotForm = $("dotForm");
-    function fillDotFormServices(col){ $("dotService").innerHTML = servicesForCollectivite(col).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join(""); }
+    function fillDotFormServices(col){ $("dotService").innerHTML = VigieOrga.services(col).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join(""); }
     fillDotFormServices(VigieOrga.premier());
     $("dotCollectivite").addEventListener("change", (e) => fillDotFormServices(e.target.value));
 
@@ -1301,10 +1154,10 @@
       const c = dot ? catalogueById(dot.articleId) : null;
       return `
       <tr class="${l.statut==='À réformer'?'late':''}" data-id="${esc(l.id)}">
-        <td>${dot ? dot.nom + " " + dot.prenom : '—'}</td>
-        <td>${c ? c.nom : '—'}</td>
+        <td>${dot ? esc(dot.nom + " " + dot.prenom) : '—'}</td>
+        <td>${c ? esc(c.nom) : '—'}</td>
         <td>${esc(l.dateLavage)}</td>
-        <td class="mono">${esc(l.nombreLavagesCumules)}${c && c.nombreLavagesMax ? ' / ' + c.nombreLavagesMax : ''}</td>
+        <td class="mono">${esc(l.nombreLavagesCumules)}${c && c.nombreLavagesMax ? ' / ' + esc(c.nombreLavagesMax) : ''}</td>
         <td><span class="status-chip ${l.statut==='À réformer'?'late':'ok'}">${esc(l.statut)}</span></td>
         ${canEdit ? `<td class="actions-float"><button type="button" class="act-del" data-id="${esc(l.id)}">Suppr.</button></td>` : ''}
       </tr>`;

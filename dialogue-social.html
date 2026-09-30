@@ -5,6 +5,7 @@
 <meta name="description" content="Dialogue social : questions des représentants du personnel à la direction, réunions de la formation spécialisée, visites de site et suivi de leurs actions, indicateurs anonymisés.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/menu-lateral.js"></script>
 <script src="assets/organisation.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
@@ -343,53 +344,7 @@
       <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
       <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
     </div>
-    <nav>
-      <div class="nav-section"><a class="nav-item" href="dashboard.html"><svg class="icon"><use href="#i-grid"/></svg> Accueil</a></div>
-      <div class="nav-section">
-        <div class="nav-label">Santé au travail</div>
-        <a class="nav-item" href="registre-at-mp.html"><svg class="icon"><use href="#i-activity"/></svg> Registre AT/MP</a>
-        <a class="nav-item" href="registre-sst.html"><svg class="icon"><use href="#i-message-square"/></svg> Registre SST</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">Sécurité &amp; Risques</div>
-        <a class="nav-item" href="document-unique.html"><svg class="icon"><use href="#i-alert-triangle"/></svg> Document Unique</a>
-        <a class="nav-item" href="produits-chimiques.html"><svg class="icon"><use href="#i-flask"/></svg> Produits chimiques</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">Suivi</div>
-        <a class="nav-item" href="plan-actions.html"><svg class="icon"><use href="#i-clipboard"/></svg> Plan d'Actions</a>
-        <a class="nav-item" id="navSanteVisites" href="sante-visites.html" style="display:none;"><svg class="icon"><use href="#i-shield-check"/></svg> Santé &amp; Visites</a>
-        <a class="nav-item" href="verifications-periodiques.html"><svg class="icon"><use href="#i-check-circle"/></svg> Vérifications Périodiques</a>
-        <a class="nav-item" href="inspection-audit.html"><svg class="icon"><use href="#i-search"/></svg> Inspection / Audit</a>
-        <a class="nav-item" href="formation-habilitation.html"><svg class="icon"><use href="#i-award"/></svg> Formation / Habilitation</a>
-        <a class="nav-item" href="epi-dotation.html"><svg class="icon"><use href="#i-package"/></svg> EPI &amp; Dotation</a>
-        <a class="nav-item" id="navPenibilite" href="penibilite.html" style="display:none;"><svg class="icon"><use href="#i-gauge"/></svg> Pénibilité</a>
-      </div>
-      <div class="nav-section" id="navRh" style="display:none;">
-        <div class="nav-label">Espace RH</div>
-        <a class="nav-item" id="navDeclarerAtmp" href="saisie-rh.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Déclarer un AT/MP</a>
-        <a class="nav-item" id="navEvaluerDuerp" href="saisie-duerp.html" style="display:none;"><svg class="icon"><use href="#i-plus"/></svg> Évaluer un risque</a>
-      </div>
-      <div class="nav-section" id="navAdministratif" style="display:none;">
-        <div class="nav-label">Administratif</div>
-        <a class="nav-item" id="navAtmpAdmin" href="dossiers-atmp-citis.html" style="display:none;"><svg class="icon"><use href="#i-shield"/></svg> Dossiers AT/MP &amp; CITIS</a>
-        <a class="nav-item" id="navAccidentAnalyse" href="accident-analyse.html" style="display:none;"><svg class="icon"><use href="#i-git-branch"/></svg> Analyse d'accident</a>
-        <a class="nav-item" id="navUrgences" href="urgences-exercices.html" style="display:none;"><svg class="icon"><use href="#i-life-buoy"/></svg> Situations d'urgence</a>
-        <a class="nav-item" id="navGestionRh" href="gestion-rh.html" style="display:none;"><svg class="icon"><use href="#i-users"/></svg> Gestion RH</a>
-        <a class="nav-item" id="navEntreprisesExt" href="entreprises-exterieures.html" style="display:none;"><svg class="icon"><use href="#i-briefcase"/></svg> Entreprises extérieures</a>
-        <a class="nav-item" id="navAccueilPoste" href="accueil-poste.html" style="display:none;"><svg class="icon"><use href="#i-user-plus"/></svg> Accueil au poste</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">Ressources</div>
-        <a class="nav-item" id="navBaseDoc" href="base-documentaire.html"><svg class="icon"><use href="#i-book"/></svg> Base documentaire</a>
-        <a class="nav-item active" id="navDialogueSocial" href="dialogue-social.html"><svg class="icon"><use href="#i-messages"/></svg> Dialogue social</a>
-      </div>
-      <div class="nav-section" id="navPilotage" style="display:none;">
-        <div class="nav-label">Pilotage</div>
-        <a class="nav-item" id="navReportingLink" href="reporting.html" style="display:none;"><svg class="icon"><use href="#i-bar-chart"/></svg> Indicateurs &amp; Reporting</a>
-        <a class="nav-item" id="navAdminLink" href="administration.html" style="display:none;"><svg class="icon"><use href="#i-settings"/></svg> Administration</a>
-      </div>
-    </nav>
+    <nav></nav>
     <div class="sidebar-foot">
       <div class="user-row">
         <div class="user-avatar" id="userAvatar">--</div>
@@ -644,29 +599,6 @@
   if (!canDs){ location.href = "dashboard.html"; }
 
   const canEdit = role === "rh" || role === "admin";
-  const canDeclareAtmp = canEdit || !!(session && session.modulePermissions && session.modulePermissions["atmp-declare"] === "write");
-  if (canDeclareAtmp){ $("navDeclarerAtmp").style.display = ""; $("navRh").style.display = ""; }
-  if (canEdit){ $("navEvaluerDuerp").style.display = ""; $("navRh").style.display = ""; }
-  const canAtmpAdmin = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["atmp-admin"]) || "none") !== "none");
-  const canAccidentAnalyse = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none") !== "none");
-  const canUrgences = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["urgences"]) || "none") !== "none");
-  const canGestionRh = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["gestion-rh"]) || "none") !== "none");
-  const canEntreprisesExt = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["entreprises-ext"]) || "none") !== "none");
-  if (canAtmpAdmin){ $("navAtmpAdmin").style.display = ""; }
-  if (canAccidentAnalyse){ $("navAccidentAnalyse").style.display = ""; }
-  if (canUrgences){ $("navUrgences").style.display = ""; }
-  if (canGestionRh){ $("navGestionRh").style.display = ""; }
-  if (canEntreprisesExt){ $("navEntreprisesExt").style.display = ""; }
-  const canAccueilPoste = role === "admin" || role === "rh" || (((session && session.modulePermissions && session.modulePermissions["accueil-poste"]) || "none") !== "none");
-  if (canAccueilPoste){ $("navAccueilPoste").style.display = ""; }
-  // la section « Administratif » n'apparaît que si l'un de ses liens est permis
-  if ([...document.querySelectorAll("#navAdministratif .nav-item")].some(a => a.style.display !== "none")){ $("navAdministratif").style.display = ""; }
-  if (canEdit){ $("navPilotage").style.display = ""; $("navReportingLink").style.display = ""; }
-  if (role === "rh" || role === "admin" || role === "manager" || (((session && session.modulePermissions && session.modulePermissions["sante-visites"]) || "none") !== "none")){ $("navSanteVisites").style.display = ""; } // suivi médical : encadrement, ou permission « sante-visites » (question 17)
-  if (role === "admin"){ $("navAdminLink").style.display = ""; }
-  // Pénibilité (module 5) : RH, administrateurs, ou la permission « penibilite »
-  { const r = (session && session.role) || "ag", p = (session && session.modulePermissions && session.modulePermissions["penibilite"]) || "none";
-    if (r === "admin" || r === "rh" || p !== "none") document.getElementById("navPenibilite").style.display = ""; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   const AUDIT_KEY = "vigie_hse_audit_log";
@@ -678,49 +610,8 @@
     } catch(e){}
   }
 
-  const sidebar = $("sidebar"), scrim = $("scrim");
-  $("menuToggle").addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
-  scrim.addEventListener("click", () => { sidebar.classList.remove("open"); scrim.classList.remove("show"); });
-  const appShell = document.querySelector(".app-shell");
-  let collapseTimer = null;
-  const SIDEBAR_PIN_KEY = "vigie_hse_sidebar_locked";
-  let sidebarLocked = VigieStore.getItem(SIDEBAR_PIN_KEY) === "true";
-  const pinBtn = document.getElementById("sidebarPin");
-  function applyPinVisual(){ if (pinBtn) pinBtn.classList.toggle("active", sidebarLocked); }
-  function isDesktopWidth(){ return window.innerWidth > 980; }
-  function sidebarExpand(){ clearTimeout(collapseTimer); if (appShell) appShell.classList.remove("sidebar-collapsed"); }
-  function sidebarCollapse(delay){ clearTimeout(collapseTimer); if (!isDesktopWidth() || sidebarLocked) return; collapseTimer = setTimeout(() => { if (appShell) appShell.classList.add("sidebar-collapsed"); }, delay || 0); }
-  sidebar.addEventListener("mouseenter", sidebarExpand);
-  sidebar.addEventListener("mouseleave", () => sidebarCollapse(150));
-  sidebar.addEventListener("focusin", sidebarExpand);
-  sidebar.addEventListener("focusout", (e) => { if (!sidebar.contains(e.relatedTarget)) sidebarCollapse(150); });
-  const mainEl = document.querySelector(".main");
-  if (mainEl){ mainEl.addEventListener("mouseenter", () => sidebarCollapse(200)); mainEl.addEventListener("scroll", () => sidebarCollapse(0), { passive:true }); }
-  window.addEventListener("scroll", () => sidebarCollapse(0), { passive:true });
-  if (sidebarLocked) sidebarExpand();
-  applyPinVisual();
-  if (pinBtn) pinBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    sidebarLocked = !sidebarLocked;
-    VigieStore.setItem(SIDEBAR_PIN_KEY, sidebarLocked ? "true" : "false");
-    applyPinVisual();
-    if (sidebarLocked) sidebarExpand(); else sidebarCollapse(150);
-  });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
 
-  // ---------- Référentiels partagés (services) ----------
-  const REF_KEY = "vigie_hse_referentials";
-  const REF_DEFAULTS = {
-  };
-  function loadReferentials(){
-    let stored = {};
-    try { const raw = VigieStore.getItem(REF_KEY); if (raw) stored = JSON.parse(raw) || {}; } catch(e){}
-    const merged = Object.assign({}, stored);
-    Object.keys(REF_DEFAULTS).forEach(k => { merged[k] = Array.isArray(stored[k]) && stored[k].length ? stored[k] : REF_DEFAULTS[k]; });
-    try { VigieStore.setItem(REF_KEY, JSON.stringify(merged)); } catch(e){}
-    return merged;
-  }
-  const REF = loadReferentials();
-  function servicesForCollectivite(col){ return VigieOrga.services(col); }
 
   // ---------- Dialogue social (module 13, réponse Q16 du préventeur, 2026-09-24) ----------
   // « Les deux » : l'espace de travail de la formation spécialisée ET la consultation. En priorité, l'échange
@@ -871,7 +762,7 @@
 
   // ---------- Visites de site ----------
   function servicesVisite(col, sel){
-    const liste = servicesForCollectivite(col);
+    const liste = VigieOrga.services(col);
     $("vService").innerHTML = `<option value="">—</option>` + liste.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
     if (sel && !liste.includes(sel)) $("vService").insertAdjacentHTML("beforeend", `<option value="${esc(sel)}">${esc(sel)}</option>`);
     $("vService").value = sel || "";

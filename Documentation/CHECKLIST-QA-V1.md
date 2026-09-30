@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 163 points au 2026-09-29 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 165 points au 2026-09-30 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -45,13 +45,15 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] **Organisation — renommer et ajouter** (`admin`) : Administration → Référentiels → Organisation. Renommer « Ville » en « Usine 1 » : la confirmation annonce le nombre d'enregistrements concernés ; après, le Registre AT/MP, le Document Unique, les Produits chimiques… proposent « Usine 1 » dans leurs filtres et formulaires, et leurs anciens enregistrements « Ville » y sont. Ajouter « Équipe 3 », puis lui donner un service dans l'éditeur de listes (« Services — Équipe 3 ») : il apparaît quand on choisit Équipe 3 dans un formulaire.
 - [ ] **Organisation — mot, suppression, tableau de bord** : choisir le mot « Site » : les écrans disent « Site », les filtres « Tous », et un export Excel a une colonne « Site » (le réimporter fonctionne). Supprimer « Usine 2 » en choisissant « Usine 1 » comme destination : ses enregistrements et services y passent, la ligne d'audit le dit ; la dernière entrée ne peut pas être supprimée. Tableau de bord : un bouton par entrée puis « Tous » (une liste au-delà de trois), « Répartition » avec une ligne par entrée.
 - [ ] **Services — renommer, archiver, restaurer** (`admin`) : dans l'éditeur de listes, « Services — Ville » : renommer « Espaces Verts & Paysage » en « Espaces verts » — la confirmation annonce le nombre d'enregistrements ; les produits, accidents… de ce service et le compte `manager` (limité à ce service) suivent. Supprimer « Voirie & Réseaux » (utilisé) : il est **archivé** — il n'est plus proposé en créant un produit, mais reste dans le filtre « Service » et dans le périmètre des comptes ; rouvrir un produit de ce service le montre « (archivé) », et l'enregistrer le garde. « Restaurer » le remet dans les formulaires.
+- [ ] **Nom avec guillemets** (`admin`) : dans l'éditeur de listes, ajouter à « Services — Ville » le service `Atelier "Nord"` : il s'affiche tel quel dans le formulaire et dans le filtre « Service » d'un module (ex. Produits chimiques), et filtrer dessus retrouve l'enregistrement qu'on lui a attribué.
 - [ ] Dans **Administration** : publier une actualité Flash Info, vérifier qu'elle apparaît sur le cockpit.
 - [ ] Dans **Administration** → Veille réglementaire : ajouter une actualité, vérifier qu'elle apparaît sur le cockpit ; passer son statut à "Archivé", vérifier qu'elle disparaît du cockpit (mais reste visible/éditable dans Administration).
 - [ ] Dans **Administration** → Données d'une personne : chercher le nom et le prénom d'un agent du Registre AT/MP (ex. `Dubreuil` `Antoine`) : sa fiche apparaît dans le Registre AT/MP et dans Santé & Visites, marquées « données de santé » ; « Exporter en Excel » donne une feuille « Synthèse » et une feuille par registre, colonnes en clair (« Siège de la lésion », dates en JJ/MM/AAAA), sans aucun mot de passe ; l'extraction apparaît dans le Journal des modifications (type « Extraction »). Un nom absent affiche « Aucun enregistrement ».
 - [ ] Tester le bouton "Réinitialiser la démonstration" dans Administration (⚠️ à faire en dernier, ça remet tout à zéro).
 
 ### `rh` (RH1)
-- [ ] Voit tous les modules métier, **pas** Administration ni Indicateurs & Reporting (lien absent du menu).
+- [ ] Voit tous les modules métier et **Indicateurs & Reporting**, mais **pas** Administration (lien absent du menu).
+- [ ] Le menu latéral est le même sur toutes les pages : depuis **Indicateurs & Reporting** ou **Évaluer un risque**, les liens Situations d'urgence, Gestion RH, Entreprises extérieures et Accueil au poste sont bien là, et l'épingle garde le menu ouvert sur Reporting aussi.
 - [ ] Créer une déclaration AT/MP complète, la retrouver dans le registre, la modifier, la supprimer.
 - [ ] Créer une évaluation DUERP, vérifier qu'elle apparaît dans le Document Unique avec le bon niveau de risque calculé.
 - [ ] Créer une inspection dans Inspection/Audit avec au moins un point "Non conforme", vérifier qu'une action apparaît automatiquement dans Plan d'Actions.

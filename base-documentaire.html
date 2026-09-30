@@ -396,7 +396,7 @@
               <div style="min-width:0;"><label for="aStatut">Statut</label><select id="aStatut" style="max-width:100%;"><option value="Publié">Publié (visible de tous)</option><option value="Brouillon">Brouillon (rédacteurs seulement)</option></select></div>
               <div class="span3"><label for="aContenu">Définition</label><textarea id="aContenu" required style="min-height:170px" placeholder="Texte de l'article. Les retours à la ligne sont conservés à l'affichage."></textarea></div>
               <div class="span3"><label for="aExemples">Exemples de situation</label><textarea id="aExemples" placeholder="Situations concrètes rencontrées sur le terrain (facultatif)."></textarea></div>
-              <div class="span3"><label for="aDanger">Le danger</label><textarea id="aDanger" placeholder="Ce à quoi l'agent s'expose (facultatif)."></textarea></div>
+              <div class="span3"><label for="aDanger">Le danger</label><textarea id="aDanger" placeholder="Ce à quoi l'agent s'expose (facultatif)." data-mots></textarea></div>
               <div class="span3"><label for="aPrevention">Mesures de prévention</label><textarea id="aPrevention" placeholder="Mesures habituelles et consignes à appliquer (facultatif)."></textarea></div>
               <div class="span3"><label>Proposer cet article sur les pages</label><div class="pages-check" id="aPages"></div><p class="pages-aide">Un article publié apparaît en « Fiches utiles » sous le titre des pages cochées. Un brouillon n'apparaît nulle part.</p></div>
             </div>
@@ -519,7 +519,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
 
@@ -946,10 +946,10 @@
     $("btnNewDoc").addEventListener("click", () => openDocForm(null));
     $("btnExport").addEventListener("click", () => {
       const articles = ARTICLES.map(a => ({ "ID": a.id, "Titre": a.titre, "Thème": a.theme, "Mots-clés": a.motsCles || "", "Statut": a.statut, "Définition": a.contenu || "", "Exemples de situation": a.exemples || "", "Le danger": a.danger || "", "Mesures de prévention": a.prevention || "", "Proposé sur les pages": (Array.isArray(a.pages) ? a.pages : []).map(p => NOM_PAGE.get(p) || p).join(", "), "Créé le": a.dateCreation || "", "Mis à jour le": a.dateMaj || "", "Auteur": a.auteur || "" }));
-      const documents = DOCS.map(d => ({ "ID": d.id, "Titre": d.titre, "Type": d.categorie, "Référence": d.reference || "", "Version": d.version || "", "Date du document": d.dateDocument || "", "Statut": d.statut, "Visible des agents": d.masque ? "non" : "oui", "Lien": d.lien || "", "Description": d.description || "" }));
+      const documents = DOCS.map(d => ({ "ID": d.id, "Titre": d.titre, "Type": d.categorie, "Référence": d.reference || "", "Version": d.version || "", "Date du document": d.dateDocument || "", "Statut": d.statut, [VigieOrga.mots("Visible des agents")]: d.masque ? "non" : "oui", "Lien": d.lien || "", "Description": d.description || "" }));
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(articles, { header: ["ID", "Titre", "Thème", "Mots-clés", "Statut", "Définition", "Exemples de situation", "Le danger", "Mesures de prévention", "Proposé sur les pages", "Créé le", "Mis à jour le", "Auteur"] }), "Articles");
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(documents, { header: ["ID", "Titre", "Type", "Référence", "Version", "Date du document", "Statut", "Visible des agents", "Lien", "Description"] }), "Documents");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(documents, { header: ["ID", "Titre", "Type", "Référence", "Version", "Date du document", "Statut", VigieOrga.mots("Visible des agents"), "Lien", "Description"] }), "Documents");
       XLSX.writeFile(wb, `base-documentaire_${todayLocal()}.xlsx`);
     });
   }

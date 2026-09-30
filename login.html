@@ -92,7 +92,7 @@
     <div class="brand-mark">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>
     </div>
-    <div class="eyebrow">Collectivité territoriale</div>
+    <div class="eyebrow" data-mots>Collectivité territoriale</div>
     <div class="brand-title">VIGIE HSE</div>
     <div class="brand-sub">Centre de pilotage hygiène, sécurité et environnement au travail</div>
   </div>
@@ -112,12 +112,14 @@
     </form>
   </div>
 
-  <p class="footnote">Authentification de démonstration côté navigateur — à remplacer par le dispositif d'identification sécurisé de la collectivité lors du raccordement à l'architecture back-end.</p>
+  <p class="footnote" data-mots>Authentification de démonstration côté navigateur — à remplacer par le dispositif d'identification sécurisé de la collectivité lors du raccordement à l'architecture back-end.</p>
   <p class="footnote">Démonstration à données fictives : tout ce que vous saisissez reste dans ce navigateur (<span class="mono">localStorage</span>), n'est partagé avec personne et peut être réinitialisé à tout moment. <a href="index.html" style="color:var(--accent);">En savoir plus</a>.</p>
 </div>
 
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script>
+  VigieOrga.preparer();   // textes [data-mots] dits avec les mots du secteur (assets/organisation.js)
   const SESSION_KEY = "vigie_hse_session";
   const USERS_KEY = "vigie_hse_users";
 

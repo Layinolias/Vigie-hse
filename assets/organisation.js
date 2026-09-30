@@ -12,6 +12,12 @@
 // Les enregistrements gardent leur champ `collectivite` (un nom). Un nom qui n'est plus celui d'une entité
 // (données de démonstration régénérées, ancien fichier Excel, enregistrement écrit par une autre page
 // pendant le renommage) est ramené par `anciensNoms` à l'entité actuelle : rien ne devient orphelin.
+//
+// Secteur (2026-09-30, jalon J0) : `secteur` = "collectivite" (défaut) ou "entreprise", choisi dans Administration.
+// Il donne les mots des textes fixes des pages : « agent », « la collectivité », « F3SCT » deviennent « salarié »,
+// « l'entreprise », « CSSCT ». VigieOrga.mots(texte) pour un texte écrit dans le code, [data-mots] sur un élément
+// de la page (préparé par preparer()). En secteur collectivité, les textes restent exactement ceux des pages.
+// Jamais sur une donnée saisie ou importée : seulement sur les textes des pages.
 // À charger après assets/stockage.js.
 (function(){
   var CLE = "vigie_hse_referentials";
@@ -27,14 +33,44 @@
     { libelle:"Agence", pluriel:"Agences", genre:"f" },
     { libelle:"Entité", pluriel:"Entités", genre:"f" }
   ];
+  // Mots de chaque secteur : un texte des pages → son équivalent. Le plus long l'emporte (« de l'agent » avant
+  // « l'agent » avant « agent ») ; une majuscule initiale est gardée (« Agents » → « Salariés »).
+  var SECTEURS = {
+    collectivite: { nom:"Collectivité territoriale", exemples:"agent, collectivité, F3SCT, CST", mots:{} },
+    entreprise: { nom:"Entreprise privée", exemples:"salarié, entreprise, CSSCT, CSE", mots:{
+      "de l'agent":"du salarié", "à l'agent":"au salarié", "l'agent":"le salarié", "cet agent":"ce salarié",
+      "nouvel agent":"nouveau salarié", "d'agents":"de salariés", "d'agent":"de salarié", "agents":"salariés", "agent":"salarié",
+      "la collectivité territoriale":"l'entreprise", "collectivités territoriales":"entreprises", "collectivité territoriale":"entreprise",
+      "la collectivité":"l'entreprise", "collectivités":"entreprises", "collectivité":"entreprise",
+      "F3SCT/CSSCT":"CSSCT", "F3SCT":"CSSCT", "CST":"CSE"
+    } }
+  };
+  // « agent chimique », « agents biologiques »… : un produit, pas une personne — jamais remplacé
+  var PAS_UNE_PERSONNE = /^\s+(chimiques?|biologiques?|physiques?|cmr|cancérogènes?|pathogènes?|extincteurs?)(?![A-Za-zÀ-ÖØ-öø-ÿ])/i;
+  var LETTRE = "0-9A-Za-zÀ-ÖØ-öø-ÿŒœ";
+  // par secteur : l'expression qui trouve ses mots, et chaque mot en minuscules → sa graphie dans la table
+  var motifs = {};
+  function motif(secteur){
+    if (motifs[secteur]) return motifs[secteur];
+    var cles = Object.keys(SECTEURS[secteur].mots).sort(function(a, b){ return b.length - a.length; }), bas = {};
+    cles.forEach(function(k){ bas[k.toLowerCase()] = k; });
+    var alt = cles.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&").replace(/'/g, "['’]"); }).join("|");
+    return (motifs[secteur] = { re: alt ? new RegExp("(^|[^" + LETTRE + "])(" + alt + ")(?![" + LETTRE + "])", "gi") : null, bas: bas });
+  }
 
   function norm(s){ return String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
   function listeTexte(l){ return Array.isArray(l) ? l.map(function(x){ return String(x == null ? "" : x).trim(); }).filter(Boolean) : []; }
   function referentiels(){
     try { var raw = window.VigieStore && VigieStore.getItem(CLE); var r = raw ? JSON.parse(raw) : null; return r && typeof r === "object" ? r : {}; } catch(e){ return {}; }
   }
+  // secteur enregistré ; avant la connexion, le serveur ne transmet que lui (aucune donnée sans session)
+  function lireSecteur(o){
+    var s = o && o.secteur;
+    if (!s){ var v = window.__VIGIE_SERVEUR__; s = v && !v.session ? v.secteur : ""; }
+    return SECTEURS.hasOwnProperty(s) ? s : "collectivite";
+  }
   function parDefaut(ref){
-    return { libelle:"Collectivité", pluriel:"Collectivités", genre:"f", anciensNoms:{}, entites:[
+    return { libelle:"Collectivité", pluriel:"Collectivités", genre:"f", secteur: lireSecteur(ref.organisation), anciensNoms:{}, entites:[
       { nom:"Ville", services: listeTexte(ref.servicesVille).length ? listeTexte(ref.servicesVille) : SERVICES_VILLE.slice(), archives: [] },
       { nom:"Agglomération", services: listeTexte(ref.servicesAgglo).length ? listeTexte(ref.servicesAgglo) : SERVICES_AGGLO.slice(), archives: [] }
     ] };
@@ -53,11 +89,50 @@
     var anciens = {};
     if (o.anciensNoms && typeof o.anciensNoms === "object") Object.keys(o.anciensNoms).forEach(function(k){ anciens[k] = String(o.anciensNoms[k]); });
     var libelle = String(o.libelle || "").trim() || "Collectivité";
-    return { libelle: libelle, pluriel: String(o.pluriel || "").trim() || libelle + "s", genre: o.genre === "m" ? "m" : "f", entites: entites, anciensNoms: anciens };
+    return { libelle: libelle, pluriel: String(o.pluriel || "").trim() || libelle + "s", genre: o.genre === "m" ? "m" : "f", secteur: lireSecteur(o), entites: entites, anciensNoms: anciens };
+  }
+  // secteur de la page, relu seulement quand les référentiels ont changé (mots() est appelé souvent)
+  var dernier = { raw: undefined, secteur: "collectivite" };
+  function secteurActuel(){
+    var raw = null; try { raw = window.VigieStore ? VigieStore.getItem(CLE) : null; } catch(e){}
+    if (raw !== dernier.raw){ dernier.raw = raw; dernier.secteur = config().secteur; }
+    return dernier.secteur;
+  }
+  function mots(texte){
+    var t = String(texte == null ? "" : texte), s = secteurActuel(), mf = motif(s);
+    if (!mf.re) return t;
+    return t.replace(mf.re, function(tout, avant, m, pos){
+      var cle = mf.bas[m.toLowerCase().replace(/’/g, "'")];
+      if (!cle) return tout;
+      if (cle === cle.toUpperCase()) return m === cle ? avant + SECTEURS[s].mots[cle] : tout;   // un sigle : graphie exacte
+      if (cle.indexOf("agent") >= 0 && PAS_UNE_PERSONNE.test(t.slice(pos + tout.length))) return tout;
+      var r = SECTEURS[s].mots[cle];
+      if (m.length > 1 && m === m.toUpperCase()) r = r.toUpperCase();
+      else if (m.charAt(0) !== m.charAt(0).toLowerCase()) r = r.charAt(0).toUpperCase() + r.slice(1);
+      return avant + r;
+    });
+  }
+  // textes et attributs lisibles d'un élément de la page (pas ses scripts, ni une option dont le texte est la valeur)
+  function traduire(el){
+    if (secteurActuel() === "collectivite" || !el) return;
+    var doc = el.ownerDocument || el, w = doc.createTreeWalker(el, 4, null), textes = [], n;
+    while ((n = w.nextNode())) textes.push(n);
+    textes.forEach(function(t){
+      var p = t.parentNode, nom = p ? p.nodeName : "";
+      if (nom === "SCRIPT" || nom === "STYLE" || nom === "TEXTAREA" || (nom === "OPTION" && !p.hasAttribute("value"))) return;
+      var v = mots(t.nodeValue); if (v !== t.nodeValue) t.nodeValue = v;
+    });
+    [el].concat([].slice.call(el.querySelectorAll("[title],[placeholder],[aria-label]"))).forEach(function(e){
+      ["title", "placeholder", "aria-label"].forEach(function(a){
+        if (!e.hasAttribute(a)) return;
+        var v = e.getAttribute(a), m = mots(v); if (m !== v) e.setAttribute(a, m);
+      });
+    });
   }
 
   var O = {
-    CLE: CLE, MOTS: MOTS, norm: norm, config: config, parDefaut: function(){ return parDefaut(referentiels()); },
+    CLE: CLE, MOTS: MOTS, SECTEURS: SECTEURS, norm: norm, config: config, parDefaut: function(){ return parDefaut(referentiels()); },
+    secteur: secteurActuel, mots: mots, traduire: traduire,
     noms: function(){ return config().entites.map(function(e){ return e.nom; }); },
     premier: function(){ return config().entites[0].nom; },
     libelle: function(){ return config().libelle; },
@@ -148,6 +223,8 @@
         }).join("");
       });
       Array.prototype.forEach.call(racine.querySelectorAll("[data-org-libelle]"), function(e){ e.textContent = O.libelle(); });
+      // textes fixes marqués [data-mots] : dits avec les mots du secteur
+      Array.prototype.forEach.call(racine.querySelectorAll("[data-mots]"), traduire);
     },
     // Administration : clés d'enregistrements touchées par un renommage ou un déplacement
     clesDonnees: function(){
@@ -185,7 +262,7 @@
     // `anciensNoms` ramène déjà les noms restants à la bonne entité.
     sauver: function(cfg){
       var ref = referentiels();
-      ref.organisation = { libelle: cfg.libelle, pluriel: cfg.pluriel, genre: cfg.genre, entites: cfg.entites, anciensNoms: cfg.anciensNoms };
+      ref.organisation = { libelle: cfg.libelle, pluriel: cfg.pluriel, genre: cfg.genre, secteur: cfg.secteur, entites: cfg.entites, anciensNoms: cfg.anciensNoms };
       VigieStore.setItem(CLE, JSON.stringify(ref));
     },
     ajouter: function(nom){
@@ -303,6 +380,11 @@
       var c = config(), l = String(libelle == null ? "" : libelle).trim();
       if (!l) return { ok:false, erreur:"Donnez le mot à afficher." };
       c.libelle = l; c.pluriel = String(pluriel == null ? "" : pluriel).trim() || l + "s"; c.genre = genre === "m" ? "m" : "f";
+      O.sauver(c); return { ok:true, n:0 };
+    },
+    definirSecteur: function(secteur){
+      if (!SECTEURS.hasOwnProperty(secteur)) return { ok:false, erreur:"Choisissez un secteur." };
+      var c = config(); c.secteur = secteur;
       O.sauver(c); return { ok:true, n:0 };
     },
     // ordre d'affichage ; la première entrée reçoit aussi les enregistrements sans entité

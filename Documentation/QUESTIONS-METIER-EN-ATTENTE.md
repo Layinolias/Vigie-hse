@@ -47,6 +47,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 15 | Pénibilité : le tableau des seuils est-il le bon, et pour quels agents ? | Module 5 Pénibilité (à construire) | ✅ répondue le 2026-09-24 : selon le statut, par poste, une fois par an |
 | 16 | Dialogue social : que doivent trouver les représentants du personnel ? | Module 13 Dialogue social (à construire) | ✅ répondue le 2026-09-24 : les deux, questions/réponses avec la direction en priorité, compte anonymisé |
 | 17 | Suivi médical : qui doit pouvoir le consulter ? | Santé & Visites (en service), droits de lecture du serveur | ✅ répondue le 2026-09-29 — l'encadrement seulement, mis en œuvre |
+| 18 | Entreprise privée : que deviennent les notions propres à la fonction publique ? | Secteur « Entreprise privée » (Administration → Organisation, en service) | 🟠 En attente de réponse |
 
 ---
 
@@ -489,6 +490,28 @@ Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, 
 > **Mis en œuvre le 2026-09-29.** Le serveur ne transmet plus le suivi médical ni les rendez-vous qu'aux comptes manager (limités à leurs services par le périmètre), RH et administrateur (`serveur/lecture.js`) ; la page Santé & Visites renvoie les autres au tableau de bord, et son lien disparaît du menu pour eux sur les 23 pages qui l'affichent. Rien ne change pour l'encadrement : ses 25 pages restent identiques au caractère près (photo avant/après).
 >
 > **Conséquence à connaître** : le compte de démonstration `PREV1` (profil préventeur : rôle agent doté de permissions module par module) n'a plus accès au suivi médical, puisque son rôle de base est « agent ». Si un préventeur doit le consulter, deux voies : lui donner un compte RH ou manager, ou créer une permission « Santé & Visites » donnée compte par compte depuis Administration (comme « Dossiers AT/MP »). **Tranché par l'utilisateur le 2026-09-29 : la permission** (`sante-visites`, lecture ou écriture), donnée en lecture à `PREV1`.
+
+---
+
+## 🟠 Question 18 — Entreprise privée : que deviennent les notions propres à la fonction publique ?
+
+**Contexte.** Depuis le 2026-09-30, Administration → Référentiels → Organisation propose un **secteur** : « Collectivité territoriale » (les écrans tels qu'ils étaient) ou « Entreprise privée ». En secteur entreprise, les écrans disent « salarié » au lieu d'« agent », « l'entreprise » au lieu de « la collectivité », « CSSCT » au lieu de « F3SCT » et « CSE » au lieu de « CST ». Ce n'est que du vocabulaire. Certaines parties du logiciel reposent en revanche sur des notions **propres à la fonction publique** : les renommer ne suffirait pas, il faut savoir ce qui les remplace. En attendant la réponse, elles restent **telles quelles** en secteur entreprise.
+
+**Ce que le logiciel fait aujourd'hui avec ces notions.**
+1. **CITIS** — le module « Dossiers AT/MP & CITIS » suit les arrêtés d'imputabilité, de placement et de fin de CITIS, avec leur circuit de signature (préparé, transmis, signé).
+2. **Fiche de la victime dans la déclaration AT/MP** — statut (liste de la fonction publique : « Titulaire (FPT) », « Stagiaire », « CONT - Remplaçant »…), catégorie (A, B, C), filière, cadre d'emploi (liste de 17 cadres d'emploi territoriaux, ex. « Adjoints techniques territoriaux ») et grade (ex. « Adjt tech Pal 1Cl »).
+3. **Maladie professionnelle** — deux champs : « Avis du conseil médical » et « Décision de la collectivité ».
+4. **Pénibilité** — la suite à donner dépend du statut (réponse à la question 15) : déclaration C2P pour les statuts cochés, fiche de suivi individuel pour les autres.
+5. **Actualités** livrées avec le logiciel sur le tableau de bord — 7 actualités orientées fonction publique (plan santé au travail dans la fonction publique, arrêts maladie des agents territoriaux…).
+6. **Registre de santé et de sécurité au travail** — présenté comme ouvert à tout agent, qui y signale une observation.
+
+**La question.** Pour une entreprise privée, que faut-il faire de chacune de ces six notions : la garder, la masquer, ou la remplacer par l'équivalent du privé (lequel) ? Et les quatre équivalences de vocabulaire retenues (agent → salarié, collectivité → entreprise, F3SCT → CSSCT, CST → CSE) sont-elles les bonnes ?
+
+**Options.** (A) tout garder tel quel en secteur entreprise pour l'instant ; (B) masquer en secteur entreprise ce qui n'a pas d'équivalent, et dire lesquelles ; (C) répondre point par point (garder / masquer / remplacer par…). Côté technique, masquer ou remplacer se règle écran par écran selon le secteur (`VigieOrga.secteur()`, `assets/organisation.js`) ; les enregistrements existants ne changent pas.
+
+### Décision
+
+> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-09-30)._
 
 ---
 

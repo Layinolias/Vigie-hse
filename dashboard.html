@@ -679,7 +679,7 @@
           </a>
           <a class="module-card panel active" href="registre-sst.html">
             <div class="module-top"><div class="module-icon"><svg class="icon"><use href="#i-shield-check"/></svg></div></div>
-            <div><div class="module-name">Registre Santé &amp; Sécurité</div><div class="module-desc">Signalements agents, remontées F3SCT, actions correctives.</div></div>
+            <div><div class="module-name">Registre Santé &amp; Sécurité</div><div class="module-desc" data-mots>Signalements agents, remontées F3SCT, actions correctives.</div></div>
             <div class="module-foot"><span><b id="modRsstCount">–</b> observations</span><span class="module-open">Ouvrir <svg class="icon" style="width:13px;height:13px"><use href="#i-arrow-right"/></svg></span></div>
           </a>
           <a class="module-card panel active" href="verifications-periodiques.html">
@@ -712,7 +712,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (!canEdit){ $("roleChip").classList.add("ag"); }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });

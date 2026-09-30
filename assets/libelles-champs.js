@@ -81,6 +81,8 @@
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
   function libelle(cle, champ){
+    // l'entrée de l'organisation : le mot choisi dans Administration (« Collectivité », « Site »…)
+    if (champ === "collectivite" && window.VigieOrga) return VigieOrga.libelle();
     var p = PAR_REGISTRE[cle];
     if (p && Object.prototype.hasOwnProperty.call(p, champ)) return p[champ];
     if (Object.prototype.hasOwnProperty.call(COMMUNS, champ)) return COMMUNS[champ];

@@ -123,6 +123,11 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Constaté** : Administration, Reporting et Évaluer un risque n'avaient pas les liens Gestion RH, Entreprises extérieures, Accueil au poste (ni Situations d'urgence pour les deux derniers) ; Santé & Visites montrait « Évaluer un risque », « Déclarer un AT/MP » et « Reporting » à un agent titulaire de la seule permission « sante-visites » ; sur Reporting, l'épingle ne gardait pas le menu ouvert ; Analyse d'accident plaçait son lien à part. Au passage, la checklist affirmait que RH ne voit pas Reporting, alors que la page lui est ouverte et que toutes les pages lui en montrent le lien.
 - **Corrigé** : 2026-09-30 — commit `53978c3` : `assets/menu-lateral.js` construit le menu de toutes les pages (liste unique, règles de visibilité uniques). Vérifié : pour chaque profil, chaque page montre la visibilité majoritaire d'avant ; hors du menu, rendu identique ; comportement identique à avant sur 23 pages (épingle réparée sur Reporting).
 
+### « Collectivité » restait écrit en dur à deux endroits, quel que soit le mot choisi pour l'organisation
+- **Où** : Gestion RH (message de fin d'import des heures : « même mois, collectivité et service ») et Administration → Données d'une personne (libellé du champ `collectivite`, `assets/libelles-champs.js`). **Remonté** : 2026-09-30, en passant les textes des pages au vocabulaire du secteur (J0).
+- **Constaté** : avec le mot « Site » choisi dans Administration, ces deux textes disaient encore « collectivité » — restes de la bascule d'organisation du matin, que la photo avant/après ne pouvait pas voir (configuration par défaut, où le mot est justement « Collectivité »).
+- **Corrigé** : 2026-09-30, branche `vocabulaire-secteur` : les deux suivent `VigieOrga.libelle()`. Leçon consignée dans `ETAT-DU-PROJET.md` §11 (« collectivité » a deux sens : l'employeur et l'entrée de l'organisation).
+
 ## Ouverts / reportés (pas des bugs à corriger maintenant)
 
 - **Présentation à un professionnel HSE externe** — toujours en recherche (checklist §7, 2026-09-15). Ne dépend pas du code ; c'est le dernier point du gel `v1.0.0` dans `PLAN-VERSIONS-V1.md`.

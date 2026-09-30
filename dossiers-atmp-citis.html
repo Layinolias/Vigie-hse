@@ -501,7 +501,7 @@
 
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
   const canEdit = role === "rh" || role === "admin";
@@ -669,7 +669,7 @@
 
     $("detailTitle").textContent = `Dossier — ${evt.nom || ''} ${evt.prenom || ''}`;
     $("dossierHeader").innerHTML = `
-      <div><b>Agent</b><br>${esc(evt.nom || '—')} ${esc(evt.prenom || '')}</div>
+      <div><b>${VigieOrga.mots("Agent")}</b><br>${esc(evt.nom || '—')} ${esc(evt.prenom || '')}</div>
       <div><b>Date AT</b><br>${esc(evt.dateAT || '—')}</div>
       <div><b>Type</b><br>${esc(evt.typeAtMp || '—')}</div>
       <div><b>Service</b><br>${esc(evt.service || '—')}</div>
@@ -837,7 +837,7 @@
         if (pSheet){
           const parDossier = {};
           XLSX.utils.sheet_to_json(pSheet, { defval: "" }).forEach(raw => {
-            const atmpId = resolveAtmpId(raw, ["agent"]);
+            const atmpId = resolveAtmpId(raw, ["agent", "salarie"]);
             const date = dateCell(rawPick(raw, ["date"])), ref = dateCell(rawPick(raw, ["ref"]));
             if (!atmpId || !(date || ref)){ pSkipped++; return; }
             (parDossier[atmpId] = parDossier[atmpId] || []).push({ date, ref });
@@ -854,7 +854,7 @@
         const aSheet = wb.Sheets["Arretes"];
         if (aSheet){
           XLSX.utils.sheet_to_json(aSheet, { defval: "" }).forEach(raw => {
-            const atmpId = resolveAtmpId(raw, ["agent"]);
+            const atmpId = resolveAtmpId(raw, ["agent", "salarie"]);
             const type = String(rawPick(raw,["type"])).trim();
             if (!atmpId || !type){ aSkipped++; return; }
             ARRETES.push({
@@ -906,19 +906,19 @@
         "Coût détail": d.coutDetail || "",
       };
     });
-    const prolongationRows = [];
+    const prolongationRows = [], COL_AGENT = VigieOrga.mots("Agent");   // « Salarié » en secteur entreprise ; l'import lit les deux
     ATMP_EVENTS.forEach(evt => {
       const d = dossierFor(evt.id);
-      (d && d.prolongations || []).forEach(p => prolongationRows.push({ "ID AT/MP": evt.id, "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Date": p.date || "", "Réf": p.ref || "" }));
+      (d && d.prolongations || []).forEach(p => prolongationRows.push({ "ID AT/MP": evt.id, [COL_AGENT]: `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Date": p.date || "", "Réf": p.ref || "" }));
     });
     const arreteRows = ARRETES.map(a => {
       const evt = ATMP_EVENTS.find(e => e.id === a.atmpId) || {};
-      return { "ID AT/MP": a.atmpId, "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Type": a.type, "Statut": a.statut, "Créé le": a.dateCreation, "Transmis le": a.dateTransmission, "Signé le": a.dateSignature, "Autorité": a.autorite };
+      return { "ID AT/MP": a.atmpId, [COL_AGENT]: `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Type": a.type, "Statut": a.statut, "Créé le": a.dateCreation, "Transmis le": a.dateTransmission, "Signé le": a.dateSignature, "Autorité": a.autorite };
     });
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dossierRows, { header: ["ID AT/MP", "Nom", "Prénom", "Date AT", "Service", "CMI reçu", "CMI date", "Nb prolongations", "Certificat final", "Certificat final reçu", "IPP applicable", "Taux IPP", "Enquête réalisée", "Coût total", "Statut dossier", "CMI réf", "Certificat final date", "Certificat final réf", "IPP date", "IPP réf", "Enquête date", "Enquête conclusions", "Coût détail"] }), "Dossiers");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(prolongationRows, { header: ["ID AT/MP", "Agent", "Date", "Réf"] }), "Prolongations");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(arreteRows, { header: ["ID AT/MP", "Agent", "Type", "Statut", "Créé le", "Transmis le", "Signé le", "Autorité"] }), "Arretes");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(prolongationRows, { header: ["ID AT/MP", COL_AGENT, "Date", "Réf"] }), "Prolongations");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(arreteRows, { header: ["ID AT/MP", COL_AGENT, "Type", "Statut", "Créé le", "Transmis le", "Signé le", "Autorité"] }), "Arretes");
     XLSX.writeFile(wb, `dossiers-atmp-citis_${VigieDates.aujourdhui()}.xlsx`);
   });
 

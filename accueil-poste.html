@@ -353,7 +353,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-user-plus"/></svg></div>
           <div class="page-summary-text">
             <h1>Accueil au poste</h1>
-            <p title="Parcours d'accueil sécurité d'un nouvel agent : points à voir avec lui à son arrivée, suivi de complétion et fiche imprimable à signer.">Parcours d'accueil sécurité des nouveaux agents : points à voir à l'arrivée, suivi de complétion, fiche imprimable à signer.</p>
+            <p data-mots title="Parcours d'accueil sécurité d'un nouvel agent : points à voir avec lui à son arrivée, suivi de complétion et fiche imprimable à signer.">Parcours d'accueil sécurité des nouveaux agents : points à voir à l'arrivée, suivi de complétion, fiche imprimable à signer.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
@@ -410,7 +410,7 @@
           <form id="accueilForm">
             <input type="hidden" id="fId">
             <div class="form-grid">
-              <div id="fAgentPickerWrap"><label for="fAgentPicker">Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
+              <div id="fAgentPickerWrap"><label for="fAgentPicker" data-mots>Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
               <div><label for="fNom">Nom</label><input type="text" id="fNom" required></div>
               <div><label for="fPrenom">Prénom</label><input type="text" id="fPrenom" required></div>
               <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
@@ -423,7 +423,7 @@
               <div><label for="fDelai">Délai pour réaliser l'accueil (jours)</label><input type="number" id="fDelai" min="1" max="365" step="1">
                 <div class="form-hint" id="fButoirHint"></div>
               </div>
-              <div><label for="fReferent">Référent / tuteur</label><input type="text" id="fReferent" placeholder="Personne chargée d'accompagner l'agent"></div>
+              <div><label for="fReferent">Référent / tuteur</label><input type="text" id="fReferent" placeholder="Personne chargée d'accompagner l'agent" data-mots></div>
               <div id="fModeleWrap"><label for="fModele">Modèle de parcours</label><select id="fModele"></select></div>
             </div>
             <p class="form-sub-intro" id="fModeleHint" style="margin-top:10px;">Les points du modèle choisi sont copiés dans l'accueil : modifier le modèle plus tard ne change pas les accueils déjà créés.</p>
@@ -455,14 +455,14 @@
 
         <div class="panel" style="padding:20px 22px 22px;">
           <div class="panel-head">
-            <h3 class="panel-title">Accueils des nouveaux agents</h3>
+            <h3 class="panel-title" data-mots>Accueils des nouveaux agents</h3>
             <div class="panel-actions" id="panelActionsBtns"></div>
           </div>
           <div class="table-panel">
             <table class="reg">
               <thead>
                 <tr id="theadFields">
-                  <th>Agent</th><th>Type</th><th>Service</th><th>Poste</th><th>Arrivée</th><th>Échéance</th><th>Avancement</th><th>Statut</th>
+                  <th data-mots>Agent</th><th>Type</th><th>Service</th><th>Poste</th><th>Arrivée</th><th>Échéance</th><th>Avancement</th><th>Statut</th>
                   <th id="thActions"></th>
                 </tr>
               </thead>
@@ -497,7 +497,7 @@
             <div class="form-sub">Points du parcours</div>
             <div id="tplPoints"></div>
             <button type="button" class="btn btn-ghost" id="tplAddPoint"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un point</button>
-            <p class="footnote" style="text-align:left; margin:12px 0 0;">Chaque point est une chose à voir avec le nouvel agent. Le texte est libre : rien n'est imposé par l'application. Modifier un modèle ne change pas les accueils déjà créés (leurs points sont copiés à la création).</p>
+            <p class="footnote" style="text-align:left; margin:12px 0 0;" data-mots>Chaque point est une chose à voir avec le nouvel agent. Le texte est libre : rien n'est imposé par l'application. Modifier un modèle ne change pas les accueils déjà créés (leurs points sont copiés à la création).</p>
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">Enregistrer le modèle</button>
               <button type="button" class="btn btn-ghost" id="tplReset" style="display:none;">Rétablir le texte d'origine</button>
@@ -508,7 +508,7 @@
         </div>
       </section>
 
-      <p class="footnote">Cette page trace un accueil <b>organisé</b> (points vus avec l'agent, qui et quand) — elle ne remplace pas la formation ni la remise de documents officiels. Aucun contenu réglementaire n'est imposé : les modèles de parcours sont entièrement modifiables. La signature de l'agent se fait sur la fiche imprimée (« Enregistrer au format PDF » possible depuis la fenêtre d'impression).</p>
+      <p class="footnote" data-mots>Cette page trace un accueil <b>organisé</b> (points vus avec l'agent, qui et quand) — elle ne remplace pas la formation ni la remise de documents officiels. Aucun contenu réglementaire n'est imposé : les modèles de parcours sont entièrement modifiables. La signature de l'agent se fait sur la fiche imprimée (« Enregistrer au format PDF » possible depuis la fenêtre d'impression).</p>
     </div>
   </div>
 </div>
@@ -540,7 +540,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
 
@@ -668,7 +668,7 @@
   // Tri & filtres par colonne (composant partagé assets/tri-filtres.js).
   const tri = VigieTri.create({
     columns: [
-      { key:"agent",       label:"Agent" },
+      { key:"agent",       label:VigieOrga.mots("Agent") },
       { key:"typeAccueil", label:"Type" },
       { key:"service",     label:"Service" },
       { key:"poste",       label:"Poste" },
@@ -815,11 +815,11 @@
     const lines = (a.items || []).map(i => `<tr><td class="c">${i.fait ? "&#9745;" : "&#9744;"}</td><td>${esc(i.libelle)}${i.commentaire ? `<div class="pc">${esc(i.commentaire)}</div>` : ""}</td><td>${i.fait ? esc(fmtFr(i.dateFait)) + (i.faitPar ? " — " + esc(i.faitPar) : "") : ""}</td></tr>`).join("");
     $("accueilPrint").innerHTML = `
       <h1>Fiche d'accueil au poste</h1>
-      <p><b>Agent :</b> ${esc(a.prenom)} ${esc(a.nom)} — ${esc(a.service)} (${esc(a.collectivite || "")})</p>
+      <p><b>${VigieOrga.mots("Agent")} :</b> ${esc(a.prenom)} ${esc(a.nom)} — ${esc(a.service)} (${esc(a.collectivite || "")})</p>
       <p><b>Poste :</b> ${esc(a.poste || "—")} &nbsp; <b>Type d'accueil :</b> ${esc(a.typeAccueil || "—")} &nbsp; <b>Référent :</b> ${esc(a.referent || "—")}</p>
       <p><b>Arrivée au poste le :</b> ${esc(fmtFr(a.dateArrivee) || "—")} &nbsp; <b>À réaliser avant le :</b> ${esc(fmtFr(butoirOf(a)) || "—")} &nbsp; <b>Accueil réalisé le :</b> ${esc(fmtFr(a.dateCloture) || "—")}</p>
-      <table><thead><tr><th></th><th>Point vu avec l'agent</th><th>Fait le / par</th></tr></thead><tbody>${lines}</tbody></table>
-      <div class="sign"><div>Lu et pris connaissance — signature de l'agent<br>Date :</div><div>Signature du référent / de l'encadrant<br>Date :</div></div>`;
+      <table><thead><tr><th></th><th>${VigieOrga.mots("Point vu avec l'agent")}</th><th>Fait le / par</th></tr></thead><tbody>${lines}</tbody></table>
+      <div class="sign"><div>${VigieOrga.mots("Lu et pris connaissance — signature de l'agent")}<br>Date :</div><div>Signature du référent / de l'encadrant<br>Date :</div></div>`;
     window.print();
   }
   $("btnPrint").addEventListener("click", () => { const a = DATASET.find(x => x.id === openId); if (a) printAccueil(a); });
@@ -837,14 +837,14 @@
       "Points faits": p.done, "Points au total": p.total, "Statut": statutOf(a), "Échéance": alerteOf(a).libelle,
       "Accueil réalisé le": a.dateCloture || "",
     }; });
-    const points = [];
+    const points = [], COL_AGENT = VigieOrga.mots("Agent");   // « Salarié » en secteur entreprise
     DATASET.forEach(a => (a.items || []).forEach(i => points.push({
-      "ID accueil": a.id, "Agent": a.nom + " " + a.prenom, "Point": i.libelle, "Spécifique au poste": i.specifique ? "oui" : "non",
+      "ID accueil": a.id, [COL_AGENT]: a.nom + " " + a.prenom, "Point": i.libelle, "Spécifique au poste": i.specifique ? "oui" : "non",
       "Fait": i.fait ? "oui" : "non", "Date": i.dateFait || "", "Par": i.faitPar || "", "Commentaire": i.commentaire || "",
     })));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(accueils, { header: ["ID", "Nom", "Prénom", VigieOrga.libelle(), "Service", "Poste", "Type d'accueil", "Date d'arrivée", "Délai (jours)", "Date butoir", "Référent", "Modèle", "Points faits", "Points au total", "Statut", "Échéance", "Accueil réalisé le"] }), "Accueils");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(points, { header: ["ID accueil", "Agent", "Point", "Spécifique au poste", "Fait", "Date", "Par", "Commentaire"] }), "Points");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(points, { header: ["ID accueil", COL_AGENT, "Point", "Spécifique au poste", "Fait", "Date", "Par", "Commentaire"] }), "Points");
     XLSX.writeFile(wb, `accueil-poste_${todayLocal()}.xlsx`);
   });
 
@@ -892,7 +892,7 @@
     let tplDraft = [];   // points en cours d'édition (copie de travail)
     function renderTplPoints(){
       $("tplPoints").innerHTML = tplDraft.map((p, i) => `<div class="tpl-row">
-        <input type="text" data-tpl-point="${i}" value="${esc(p.libelle)}" placeholder="Point à voir avec l'agent…" aria-label="Point ${i + 1}">
+        <input type="text" data-tpl-point="${i}" value="${esc(p.libelle)}" placeholder="${VigieOrga.mots("Point à voir avec l'agent…")}" aria-label="Point ${i + 1}">
         <button type="button" class="btn btn-ghost" data-up="${i}" title="Monter" ${i === 0 ? "disabled" : ""}>↑</button>
         <button type="button" class="btn btn-ghost" data-down="${i}" title="Descendre" ${i === tplDraft.length - 1 ? "disabled" : ""}>↓</button>
         <button type="button" class="btn btn-ghost" data-rm="${i}" title="Retirer ce point" style="color:var(--danger);">✕</button>

@@ -5,6 +5,7 @@
 <meta name="description" content="Rapport consolidé des indicateurs HSE de tous les modules — vue de pilotage pour la direction et les instances (F3SCT/CSSCT).">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/organisation.js"></script>
 <script src="assets/menu-lateral.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
@@ -288,7 +289,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-bar-chart"/></svg></div>
           <div class="page-summary-text">
             <h1>Indicateurs &amp; Reporting</h1>
-            <p title="Vue consolidée des indicateurs de tous les modules — pour une présentation en instance (F3SCT/CSSCT) ou un rapport annuel HSE.">Vue consolidée des indicateurs de tous les modules — pour une présentation en instance (F3SCT/CSSCT) ou un rapport annuel HSE.</p>
+            <p data-mots title="Vue consolidée des indicateurs de tous les modules — pour une présentation en instance (F3SCT/CSSCT) ou un rapport annuel HSE.">Vue consolidée des indicateurs de tous les modules — pour une présentation en instance (F3SCT/CSSCT) ou un rapport annuel HSE.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
@@ -383,6 +384,7 @@
     });
   })();
 
+  VigieOrga.preparer();   // textes [data-mots] dits avec les mots du secteur (assets/organisation.js)
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
   const role = (session && session.role) || "ag";
   const canEdit = role === "rh" || role === "admin";
@@ -396,7 +398,7 @@
   }
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
@@ -703,7 +705,7 @@
       { Indicateur:"Total", Valeur:d.paTotal }, { Indicateur:"Taux de complétion (%)", Valeur:d.paTaux },
       { Indicateur:"En cours", Valeur:d.paEnCours }, { Indicateur:"En retard", Valeur:d.paRetard } ]);
     addSheet("Santé & Visites", [
-      { Indicateur:"Agents suivis", Valeur:d.svTotal }, { Indicateur:"À jour", Valeur:d.svOk },
+      { Indicateur:VigieOrga.mots("Agents suivis"), Valeur:d.svTotal }, { Indicateur:"À jour", Valeur:d.svOk },
       { Indicateur:"À programmer", Valeur:d.svSoon }, { Indicateur:"En retard", Valeur:d.svLate },
       { Indicateur:"En retard hors période", Valeur:d.svLateHorsPeriode||0 } ]);
     addSheet("RSST", [

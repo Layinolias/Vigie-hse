@@ -63,7 +63,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 
 | Jalon | Statut |
 |---|---|
-| **J0 — Généralisation commerciale (collectivités + secteur privé)** | ❌ Non démarré — prérequis à toute commercialisation |
+| **J0 — Généralisation commerciale (collectivités + secteur privé)** | 🟡 En cours — organisation configurable et secteur (vocabulaire) faits le 2026-09-30 ; restent la question 18, le système de permissions, la marque blanche et le serveur multi-client |
 | **J1 — Accompagnement certification sécurité (ISO 45001, MASE...)** | ❌ Non démarré — version ultérieure, tour d'horizon des référentiels à faire |
 | **J2 — Culture sécurité, remontée presque-accident/incident/accident** | ❌ Non démarré — piste posée, à approfondir plus tard ; premier pas fait dans le Registre AT/MP |
 
@@ -92,7 +92,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 
 ---
 
-## J0 — Jalon stratégique : généraliser le produit à un usage commercial (collectivités + secteur privé) — ❌ Non démarré
+## J0 — Jalon stratégique : généraliser le produit à un usage commercial (collectivités + secteur privé) — 🟡 En cours (2026-09-30)
 
 **Objectif exprimé par l'utilisateur :** faire de VIGIE HSE, au-delà du prototype pour une collectivité (Ville de Verchamps + Agglomération, collectivité fictive de démonstration), un produit **vendable**, générique, adaptable à "une multitude de projets" — aussi bien des collectivités territoriales que des entreprises privées. C'est un jalon *transverse* : il ne s'agit pas d'un module métier de plus, mais d'une étape de normalisation qui conditionne la commercialisation, à traiter avant (ou en parallèle réfléchi de) l'ajout de nouveaux modules métier.
 
@@ -111,6 +111,8 @@ Recherche effectuée sur les équivalences terminologiques entre secteur privé 
 | Instance représentative globale | CST (Comité Social Territorial) | CSE (Comité Social et Économique) |
 | Formation santé-sécurité de cette instance | F3SCT (≥ 200 agents) | CSSCT (≥ 300 salariés) |
 | Cadre réglementaire de référence | Décret n° 85-603 (renvoie au Code du travail) | Code du travail directement |
+
+> **✅ Vocabulaire fait le 2026-09-30** (branche `vocabulaire-secteur`) : Administration → Référentiels → Organisation → **Secteur** « Collectivité territoriale » ou « Entreprise privée » (décidé avec le porteur du projet : **un seul choix qui bascule tous les mots**, pour que les combinaisons restent cohérentes). En secteur entreprise, les textes des pages disent salarié, l'entreprise, CSSCT, CSE (`VigieOrga.mots`, `[data-mots]`, `assets/organisation.js`) ; en secteur collectivité, les 26 pages restent identiques au caractère près. Les exports disent « Salarié » et les imports relisent les deux. **Restent telles quelles** les notions propres à la fonction publique — CITIS, statut / catégorie / filière / cadre d'emploi / grade, « décision de la collectivité » et « avis du conseil médical », pénibilité selon le statut, actualités livrées, RSST — en attendant la **question 18** posée au préventeur (`QUESTIONS-METIER-EN-ATTENTE.md`). Hors vocabulaire aussi : les actualités (contenu éditorial, ci-dessous).
 
 **Implication pour le code :** tous les textes actuellement codés en dur qui supposent une collectivité ("agent", "Ville"/"Agglomération", "F3SCT" dans la description du RSST, "collectivité" comme libellé de champ) devront devenir des **libellés configurables par organisation cliente**, pas des constantes. Le pattern existe déjà partiellement : `vigie_hse_referentials` permet déjà de reconfigurer des listes (services, risques) sans toucher au code — il faudra l'étendre à la terminologie elle-même (noms des champs, des instances, des statuts RH) et pas seulement aux valeurs des listes déroulantes.
 

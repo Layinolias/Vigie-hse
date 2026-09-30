@@ -318,7 +318,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-package"/></svg></div>
           <div class="page-summary-text">
             <h1>EPI &amp; Dotation</h1>
-            <p title="Catalogue des équipements de protection individuelle et vêtements de travail, stock, dotations par agent et suivi de l'entretien/lavage. Roster de départ dérivé du Registre AT/MP, inventaire de départ illustratif à compléter par les équipes RH.">Catalogue des équipements de protection individuelle et vêtements de travail, stock, dotations par agent et suivi de l'entretien/lavage. Roster de départ dérivé du Registre AT/MP, inventaire de départ illustratif à compléter par les équipes RH.</p>
+            <p data-mots title="Catalogue des équipements de protection individuelle et vêtements de travail, stock, dotations par agent et suivi de l'entretien/lavage. Roster de départ dérivé du Registre AT/MP, inventaire de départ illustratif à compléter par les équipes RH.">Catalogue des équipements de protection individuelle et vêtements de travail, stock, dotations par agent et suivi de l'entretien/lavage. Roster de départ dérivé du Registre AT/MP, inventaire de départ illustratif à compléter par les équipes RH.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
@@ -441,7 +441,7 @@
           <form id="dotForm">
             <input type="hidden" id="dotId">
             <div class="form-grid">
-              <div><label for="dotAgentPicker">Choisir un agent (roster Gestion RH, optionnel)</label><select id="dotAgentPicker"><option value="">— Saisie libre —</option></select></div>
+              <div><label for="dotAgentPicker" data-mots>Choisir un agent (roster Gestion RH, optionnel)</label><select id="dotAgentPicker"><option value="">— Saisie libre —</option></select></div>
               <div><label for="dotNom">Nom</label><input type="text" id="dotNom" required></div>
               <div><label for="dotPrenom">Prénom</label><input type="text" id="dotPrenom" required></div>
               <div><label for="dotCollectivite" data-org-libelle>Collectivité</label><select id="dotCollectivite" required data-org="saisie"></select></div>
@@ -491,14 +491,14 @@
           <div class="panel-head"><h3 class="panel-title">Journal d'entretien</h3><div class="panel-actions" id="lavActionsBtns"></div></div>
           <div class="table-panel">
             <table class="reg">
-              <thead><tr id="theadLav"><th>Agent</th><th>Article</th><th>Date lavage</th><th>Lavages cumulés</th><th>Statut</th><th id="thActionsLav"></th></tr></thead>
+              <thead><tr id="theadLav"><th data-mots>Agent</th><th>Article</th><th>Date lavage</th><th>Lavages cumulés</th><th>Statut</th><th id="thActionsLav"></th></tr></thead>
               <tbody id="lavBody"></tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <p class="footnote">Catalogue et stock illustratifs — à compléter avec le parc réel de la collectivité. Les vêtements de travail sont soumis à un nombre de lavages maximal (norme applicable) plutôt qu'à une durée de vie calendaire.</p>
+      <p class="footnote" data-mots>Catalogue et stock illustratifs — à compléter avec le parc réel de la collectivité. Les vêtements de travail sont soumis à un nombre de lavages maximal (norme applicable) plutôt qu'à une durée de vie calendaire.</p>
     </div>
   </div>
 </div>
@@ -531,7 +531,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (!canEdit){ $("roleChip").classList.add("ag"); }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
@@ -616,7 +616,7 @@
   });
   const triLav = VigieTri.create({
     columns: [
-      { key:"agent",                label:"Agent", value:l => { const d = DOTATIONS_ALL.find(x => x.id === l.dotationId); return d ? (d.nom + " " + d.prenom) : ""; } },
+      { key:"agent",                label:VigieOrga.mots("Agent"), value:l => { const d = DOTATIONS_ALL.find(x => x.id === l.dotationId); return d ? (d.nom + " " + d.prenom) : ""; } },
       { key:"article",              label:"Article", value:l => { const d = DOTATIONS_ALL.find(x => x.id === l.dotationId); const c = d ? catalogueById(d.articleId) : null; return c ? c.nom : ""; } },
       { key:"dateLavage",           label:"Date lavage" },
       { key:"nombreLavagesCumules", label:"Lavages cumulés" },
@@ -1171,12 +1171,12 @@
         const dot = DOTATIONS_ALL.find(d => d.id === l.dotationId);
         const c = dot ? catalogueById(dot.articleId) : null;
         return {
-          "ID": l.id, "Agent": dot ? dot.nom + " " + dot.prenom : "", "Article": c ? c.nom : "",
+          "ID": l.id, [VigieOrga.mots("Agent")]: dot ? dot.nom + " " + dot.prenom : "", "Article": c ? c.nom : "",
           "Date de lavage": l.dateLavage, "Lavages cumulés": l.nombreLavagesCumules,
           "Max autorisé": c && c.nombreLavagesMax ? c.nombreLavagesMax : "", "Statut": l.statut,
         };
       });
-      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Agent", "Article", "Date de lavage", "Lavages cumulés", "Max autorisé", "Statut"] });
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", VigieOrga.mots("Agent"), "Article", "Date de lavage", "Lavages cumulés", "Max autorisé", "Statut"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Entretien & Lavage");
       XLSX.writeFile(wb, `epi-lavages_${VigieDates.aujourdhui()}.xlsx`);

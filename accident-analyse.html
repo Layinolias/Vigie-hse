@@ -447,7 +447,7 @@
 
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
   const canEdit = role === "rh" || role === "admin";
@@ -655,7 +655,7 @@
 
     $("detailTitle").textContent = `Analyse — ${evt.nom || ''} ${evt.prenom || ''}`;
     $("analyseHeader").innerHTML = `
-      <div><b>Agent</b><br>${esc(evt.nom || '—')} ${esc(evt.prenom || '')}</div>
+      <div><b>${VigieOrga.mots("Agent")}</b><br>${esc(evt.nom || '—')} ${esc(evt.prenom || '')}</div>
       <div><b>Date AT</b><br>${esc(evt.dateAT || '—')}</div>
       <div><b>Type</b><br>${esc(evt.typeAtMp || '—')}</div>
       <div><b>Service</b><br>${esc(evt.service || '—')}</div>
@@ -807,7 +807,7 @@
         const actSheet = wb.Sheets["Actions"];
         if (actSheet){
           XLSX.utils.sheet_to_json(actSheet, { defval: "" }).forEach(raw => {
-            const atmpId = resolveAtmpId(raw, ["agent"]);
+            const atmpId = resolveAtmpId(raw, ["agent", "salarie"]);
             const description = String(rawPick(raw, ["action","description"])).trim();
             if (!atmpId || !description){ actSkipped++; return; }
             let a = ANALYSES.find(x => x.atmpId === atmpId);
@@ -833,7 +833,7 @@
           if (!f) return null;
           const groupes = {};
           XLSX.utils.sheet_to_json(f, { defval: "" }).forEach(raw => {
-            const atmpId = resolveAtmpId(raw, ["agent"]);
+            const atmpId = resolveAtmpId(raw, ["agent", "salarie"]);
             const el = atmpId ? lire(raw) : null;
             if (!el){ arbreSkipped++; return; }
             (groupes[atmpId] = groupes[atmpId] || []).push(el);
@@ -902,12 +902,12 @@
         "Conclusion": (a && a.conclusion) || "", "Date analyse": (a && a.dateAnalyse) || "", "Auteur": (a && a.auteur) || "",
       };
     });
-    const actionRows = [];
+    const actionRows = [], COL_AGENT = VigieOrga.mots("Agent");   // « Salarié » en secteur entreprise ; l'import lit les deux
     ANALYSES.forEach(a => {
       const evt = ATMP_EVENTS.find(e => e.id === a.atmpId) || {};
       (a.actions || []).forEach(act => {
         if (!act.description) return;
-        actionRows.push({ "ID AT/MP": a.atmpId, "Agent": `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Action": act.description, "Responsable": act.responsable, "Échéance": act.echeance, "Statut": act.statut });
+        actionRows.push({ "ID AT/MP": a.atmpId, [COL_AGENT]: `${evt.nom || ''} ${evt.prenom || ''}`.trim(), "Action": act.description, "Responsable": act.responsable, "Échéance": act.echeance, "Statut": act.statut });
       });
     });
     // l'arbre causal (2026-09-23) : une ligne par fait, par « pourquoi », par cause d'Ishikawa — le lien
@@ -919,17 +919,17 @@
       const faits = (a.faits || []).filter(f => f.texte);
       faits.forEach((f, i) => {
         const n = f.causeDe ? faits.findIndex(x => x.id === f.causeDe) : -1;
-        faitRows.push({ "ID AT/MP": a.atmpId, "Agent": agent, "N°": i + 1, "Date": f.date || "", "Fait": f.texte, "Type": f.type === "Opinion" ? "Opinion" : "Fait", "Découle du fait n°": n >= 0 ? n + 1 : "" });
+        faitRows.push({ "ID AT/MP": a.atmpId, [COL_AGENT]: agent, "N°": i + 1, "Date": f.date || "", "Fait": f.texte, "Type": f.type === "Opinion" ? "Opinion" : "Fait", "Découle du fait n°": n >= 0 ? n + 1 : "" });
       });
-      (a.pourquoi || []).filter(p => p.question || p.reponse).forEach((p, i) => pourquoiRows.push({ "ID AT/MP": a.atmpId, "Agent": agent, "N°": i + 1, "Question": p.question || "", "Réponse": p.reponse || "" }));
-      ISHIKAWA_CATEGORIES.forEach(([cle, libelle]) => ((a.ishikawa || {})[cle] || []).filter(Boolean).forEach(c => ishikawaRows.push({ "ID AT/MP": a.atmpId, "Agent": agent, "Catégorie": libelle, "Cause": c })));
+      (a.pourquoi || []).filter(p => p.question || p.reponse).forEach((p, i) => pourquoiRows.push({ "ID AT/MP": a.atmpId, [COL_AGENT]: agent, "N°": i + 1, "Question": p.question || "", "Réponse": p.reponse || "" }));
+      ISHIKAWA_CATEGORIES.forEach(([cle, libelle]) => ((a.ishikawa || {})[cle] || []).filter(Boolean).forEach(c => ishikawaRows.push({ "ID AT/MP": a.atmpId, [COL_AGENT]: agent, "Catégorie": libelle, "Cause": c })));
     });
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(analyseRows, { header: ["ID AT/MP", "Nom", "Prénom", "Date AT", "Service", "Méthode", "Statut", "Conclusion", "Date analyse", "Auteur"] }), "Analyses");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(actionRows, { header: ["ID AT/MP", "Agent", "Action", "Responsable", "Échéance", "Statut"] }), "Actions");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(faitRows, { header: ["ID AT/MP", "Agent", "N°", "Date", "Fait", "Type", "Découle du fait n°"] }), "Faits");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pourquoiRows, { header: ["ID AT/MP", "Agent", "N°", "Question", "Réponse"] }), "Pourquoi");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ishikawaRows, { header: ["ID AT/MP", "Agent", "Catégorie", "Cause"] }), "Ishikawa");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(actionRows, { header: ["ID AT/MP", COL_AGENT, "Action", "Responsable", "Échéance", "Statut"] }), "Actions");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(faitRows, { header: ["ID AT/MP", COL_AGENT, "N°", "Date", "Fait", "Type", "Découle du fait n°"] }), "Faits");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pourquoiRows, { header: ["ID AT/MP", COL_AGENT, "N°", "Question", "Réponse"] }), "Pourquoi");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ishikawaRows, { header: ["ID AT/MP", COL_AGENT, "Catégorie", "Cause"] }), "Ishikawa");
     XLSX.writeFile(wb, `analyses-accident_${VigieDates.aujourdhui()}.xlsx`);
   });
 

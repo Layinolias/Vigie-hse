@@ -306,7 +306,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-award"/></svg></div>
           <div class="page-summary-text">
             <h1>Formation / Habilitation</h1>
-            <p title="Suivi des habilitations et certifications obligatoires des agents (CACES, habilitation électrique, SST, permis…). Roster de départ dérivé des agents déjà présents dans le Registre AT/MP (aucun fichier source dédié aux habilitations n'existe à ce stade) — complétez et corrigez librement chaque fiche depuis cette page.">Suivi des habilitations et certifications obligatoires des agents (CACES, habilitation électrique, SST, permis…). Roster de départ dérivé des agents déjà présents dans le Registre AT/MP (aucun fichier source dédié aux habilitations n'existe à ce stade) — complétez et corrigez librement chaque fiche depuis cette page.</p>
+            <p data-mots title="Suivi des habilitations et certifications obligatoires des agents (CACES, habilitation électrique, SST, permis…). Roster de départ dérivé des agents déjà présents dans le Registre AT/MP (aucun fichier source dédié aux habilitations n'existe à ce stade) — complétez et corrigez librement chaque fiche depuis cette page.">Suivi des habilitations et certifications obligatoires des agents (CACES, habilitation électrique, SST, permis…). Roster de départ dérivé des agents déjà présents dans le Registre AT/MP (aucun fichier source dédié aux habilitations n'existe à ce stade) — complétez et corrigez librement chaque fiche depuis cette page.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
@@ -352,7 +352,7 @@
         <form id="habForm">
           <input type="hidden" id="fId">
           <div class="form-grid">
-            <div><label for="fAgentPicker">Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
+            <div><label for="fAgentPicker" data-mots>Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
             <div><label for="fNom">Nom</label><input type="text" id="fNom" required></div>
             <div><label for="fPrenom">Prénom</label><input type="text" id="fPrenom" required></div>
             <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
@@ -374,7 +374,7 @@
 
       <div class="panel" style="padding:20px 22px 22px;">
         <div class="panel-head">
-          <h3 class="panel-title">Habilitations des agents</h3>
+          <h3 class="panel-title" data-mots>Habilitations des agents</h3>
           <div class="panel-actions" id="panelActionsBtns"></div>
         </div>
         <div class="table-panel">
@@ -423,7 +423,7 @@
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = ROLE_LABELS[role] || "Compte Agent";
+  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
   $("roleChip").textContent = role.toUpperCase();
   if (!canEdit){ $("roleChip").classList.add("ag"); }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });

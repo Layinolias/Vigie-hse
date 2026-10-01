@@ -140,7 +140,7 @@ tri.reset();                      // à câbler sur le bouton "Réinitialiser" d
 
 **Un compte reçoit un ou plusieurs profils ; ses droits sont le niveau le plus haut de chacun, module par module.** Fini les quatre rôles codés en dur (`admin` / `rh` / `manager` / `ag`) et les permissions ajoutées module par module : tout vit dans `assets/droits.js` (`VigieDroits`, le même fichier pour les pages et pour le serveur) et s'édite dans Administration → **Profils**. Les droits ne s'éditent que sur les profils ; la fiche d'un compte porte ses profils (`u.profils`, liste d'identifiants), ses services (`u.services` : `["*"]` ou une liste — **tout compte** peut maintenant être limité à certains services, plus seulement le manager), `u.anonymise` et `u.active`.
 
-**Niveaux.** Chaque module a une liste ORDONNÉE de niveaux ; un niveau inclut les précédents (`aucun` < … ). Catalogue (`VigieDroits.MODULES`, dans l'ordre du menu) :
+**Niveaux.** Chaque module a une liste ORDONNÉE de niveaux ; un niveau inclut les précédents, et « aucun » est toujours le plus bas (il n'est pas rappelé dans le tableau). Catalogue (`VigieDroits.MODULES`, dans l'ordre du menu) :
 
 | Module (identifiant) | Niveaux (du plus bas au plus haut) | Pages / registres |
 |---|---|---|

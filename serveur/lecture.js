@@ -2,6 +2,10 @@
 // du serveur que ce que ses écrans affichent. Jusque-là, tout compte connecté recevait tous les registres dans
 // sa page — y compris les données de santé — et c'était l'écran qui masquait ce que son rôle ne devait pas voir.
 //
+// Depuis les profils de droits (2026-10-01), « RH/admin », « manager » et « permission de module » ci-dessous se
+// lisent en niveaux de module (assets/droits.js, via serveur/droits.js) : « RH/admin » = le niveau de gestion du
+// module, « permission » = son niveau de consultation, « l'encadrement » = le niveau de consultation de Santé & Visites.
+//
 // Relevé page par page (garde d'accès de chaque page, colonnes affichées selon le rôle, clés lues) :
 //   - Registre AT/MP : complet pour RH/admin et les permissions « atmp-admin » / « accident-analyse » (leurs pages
 //     affichent l'identité des victimes) ; pour les autres, les seules colonnes que registre-at-mp.html leur montre

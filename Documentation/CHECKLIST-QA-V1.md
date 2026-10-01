@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 168 points au 2026-09-30 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 175 points au 2026-10-01 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 

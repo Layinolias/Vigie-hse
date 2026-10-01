@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 176 points au 2026-10-01 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 182 points au 2026-10-01 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -57,6 +57,12 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Dans **Administration** : publier une actualité Flash Info, vérifier qu'elle apparaît sur le cockpit.
 - [ ] Dans **Administration** → Veille réglementaire : ajouter une actualité, vérifier qu'elle apparaît sur le cockpit ; passer son statut à "Archivé", vérifier qu'elle disparaît du cockpit (mais reste visible/éditable dans Administration).
 - [ ] Dans **Administration** → Données d'une personne : chercher le nom et le prénom d'un agent du Registre AT/MP (ex. `Dubreuil` `Antoine`) : sa fiche apparaît dans le Registre AT/MP et dans Santé & Visites, marquées « données de santé » ; « Exporter en Excel » donne une feuille « Synthèse » et une feuille par registre, colonnes en clair (« Siège de la lésion », dates en JJ/MM/AAAA), sans aucun mot de passe, et les profils d'un compte y sont écrits par leur nom (« Agent, Préventeur »), pas par leur identifiant ; l'extraction apparaît dans le Journal des modifications (type « Extraction »). Un nom absent affiche « Aucun enregistrement ».
+- [ ] Dans **Administration** → Référentiels → **Marque** : le panneau montre le nom « VIGIE HSE », la signature « Soft Tech » et les deux couleurs d'origine, avec un aperçu en thème clair et en thème sombre.
+- [ ] Changer le nom (ex. `Acme Sécurité`), la signature et les deux couleurs, puis « Enregistrer la marque » : la page se recharge ; le menu latéral, l'en-tête du tableau de bord, le titre de l'onglet du navigateur et les boutons principaux montrent le nouveau nom et les nouvelles couleurs. Ouvrir deux autres pages (ex. Registre AT/MP, Plan d'actions) : même marque. Le Journal des modifications garde une ligne « Marque modifiée : … ».
+- [ ] Choisir un logo (PNG, JPEG, WebP ou SVG) : il apparaît dans l'aperçu, puis dans le menu latéral et sur la page de connexion, en thème clair comme en thème sombre. Un fichier d'un autre type (ex. GIF) ou de plus de 100 Ko est refusé avec un message, sans rien changer.
+- [ ] Saisir une couleur très claire (ex. `#FFEE88`) : un avertissement sur la lisibilité du texte blanc des boutons s'affiche ; une couleur mal écrite (ex. `rouge`) ou un nom vide est refusé à l'enregistrement.
+- [ ] Se déconnecter : la **page de connexion** et la page d'accueil montrent déjà le nom, le logo et les couleurs réglés (avant toute session) ; « Imprimer / PDF » d'un registre porte le nom réglé en en-tête.
+- [ ] « Rétablir la marque d'origine » : tous les écrans reprennent « VIGIE HSE », « Soft Tech », l'icône bouclier et les couleurs d'origine ; les données et les autres réglages (organisation, listes) sont intacts.
 - [ ] Tester le bouton "Réinitialiser la démonstration" dans Administration (⚠️ à faire en dernier, ça remet tout à zéro).
 
 ### `rh` (RH1)

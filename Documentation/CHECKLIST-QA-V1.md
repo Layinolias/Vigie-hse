@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 175 points au 2026-10-01 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 176 points au 2026-10-01 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -56,7 +56,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] **Anciens comptes convertis** (`admin`, base conservée d'avant les profils, ou paquet mis à jour) : à la première ouverture d'Administration, une ligne du journal dit « Comptes convertis au modèle de profils » ; `PREV1` porte Agent + Préventeur, un compte aux permissions particulières un profil « Droits particuliers — … » ; les menus et pages de chaque compte sont les mêmes qu'avant.
 - [ ] Dans **Administration** : publier une actualité Flash Info, vérifier qu'elle apparaît sur le cockpit.
 - [ ] Dans **Administration** → Veille réglementaire : ajouter une actualité, vérifier qu'elle apparaît sur le cockpit ; passer son statut à "Archivé", vérifier qu'elle disparaît du cockpit (mais reste visible/éditable dans Administration).
-- [ ] Dans **Administration** → Données d'une personne : chercher le nom et le prénom d'un agent du Registre AT/MP (ex. `Dubreuil` `Antoine`) : sa fiche apparaît dans le Registre AT/MP et dans Santé & Visites, marquées « données de santé » ; « Exporter en Excel » donne une feuille « Synthèse » et une feuille par registre, colonnes en clair (« Siège de la lésion », dates en JJ/MM/AAAA), sans aucun mot de passe ; l'extraction apparaît dans le Journal des modifications (type « Extraction »). Un nom absent affiche « Aucun enregistrement ».
+- [ ] Dans **Administration** → Données d'une personne : chercher le nom et le prénom d'un agent du Registre AT/MP (ex. `Dubreuil` `Antoine`) : sa fiche apparaît dans le Registre AT/MP et dans Santé & Visites, marquées « données de santé » ; « Exporter en Excel » donne une feuille « Synthèse » et une feuille par registre, colonnes en clair (« Siège de la lésion », dates en JJ/MM/AAAA), sans aucun mot de passe, et les profils d'un compte y sont écrits par leur nom (« Agent, Préventeur »), pas par leur identifiant ; l'extraction apparaît dans le Journal des modifications (type « Extraction »). Un nom absent affiche « Aucun enregistrement ».
 - [ ] Tester le bouton "Réinitialiser la démonstration" dans Administration (⚠️ à faire en dernier, ça remet tout à zéro).
 
 ### `rh` (RH1)
@@ -87,6 +87,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Exporter les dossiers AT/MP & CITIS après avoir daté un certificat final et ajouté deux prolongations : le fichier contient une feuille « Prolongations » et les colonnes de dates en fin de feuille « Dossiers ». Réimporter ce fichier ne change rien au dossier (dates et prolongations intactes).
 - [ ] Peut ajouter un arrêté (type + statut + dates), le voir apparaître dans le tableau des arrêtés du dossier.
 - [ ] Peut déclarer un AT/MP complet depuis `saisie-rh.html`, le retrouver dans le Registre AT/MP.
+- [ ] Dans le **Registre AT/MP**, le bouton « Nouvelle déclaration » est visible (sans « Importer », « Exporter » ni colonnes d'identité) ; dans `saisie-rh.html`, le bouton « Vider le journal » n'apparaît **pas** (réservé à ceux qui gèrent le registre : le serveur le refuserait).
 - [ ] Peut ouvrir "Analyse d'accident" sur un événement existant, choisir une méthode (tester les 3 : Arbre des causes, 5 Pourquoi, Ishikawa sur des événements différents), ajouter une action corrective, enregistrer, rouvrir et retrouver les données.
 - [ ] Exporter les analyses d'accident : le fichier contient les feuilles « Faits », « Pourquoi » et « Ishikawa ». Le réimporter deux fois : l'arbre causal revient à l'identique et l'action corrective n'est pas dupliquée (ni ici, ni dans le Plan d'actions).
 - [ ] L'action corrective créée apparaît bien dans **Plan d'Actions** avec l'origine "Analyse".

@@ -394,7 +394,7 @@
             <button class="btn btn-ghost" id="btnExport" type="button"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>
             <button class="btn btn-ghost no-print" id="btnExportPdf" type="button" title="Utilise l'impression du navigateur — choisissez « Enregistrer au format PDF » comme imprimante."><svg class="icon"><use href="#i-download"/></svg> Exporter en PDF</button>
             <input type="file" id="importFile" accept=".xlsx,.xls,.ods,.csv" style="display:none">
-            <a class="btn btn-primary" href="saisie-rh.html"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle déclaration</a>
+            <a class="btn btn-primary" id="btnNouvelle" href="saisie-rh.html"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle déclaration</a>
           </div>
         </div>
         <div class="table-panel">
@@ -468,7 +468,9 @@
   VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
 
   if (!canEdit){
-    $("rhToolbar").style.display = "none";
+    // un compte qui peut seulement déclarer (niveau « Déclarer ») garde le lien « Nouvelle déclaration », sans import ni export
+    if (D.peut("atmp", "declarer")) Array.from($("rhToolbar").children).forEach(el => { if (el.id !== "btnNouvelle") el.style.display = "none"; });
+    else $("rhToolbar").style.display = "none";
     $("footnoteRh").style.display = "none";
     $("footnoteAg").style.display = "block";
   }

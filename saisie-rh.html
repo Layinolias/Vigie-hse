@@ -396,6 +396,9 @@
   $("userRoleLabel").textContent = D.peut("administration", "gerer") ? "Administrateur" : (D.peut("atmp", "gerer") ? "Compte RH" : "Accès déclaration AT/MP");
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
+  // vider le journal est refusé par le serveur sous le niveau « Gérer » : le bouton n'est montré qu'à ceux qui le peuvent
+  if (!D.peut("atmp", "gerer")) $("btnClearFeed").style.display = "none";
+
   VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
 
   const AUDIT_KEY = "vigie_hse_audit_log";

@@ -793,7 +793,9 @@
     if (!rec || typeof rec !== "object"){ o.Valeur = String(rec); return o; }
     Object.keys(rec).forEach(c => {
       if (PERS_SECRETS.test(c)) return;
-      const v = rec[c];
+      let v = rec[c];
+      // les profils d'un compte sont rangés par identifiant : la personne doit y lire leurs noms
+      if (cle === "vigie_hse_users" && c === "profils" && Array.isArray(v)) v = v.map(id => { const p = PROFILS.find(x => x.id === id); return p ? p.nom : id; });
       let lib = VigieLibelles.libelle(cle, c);
       if (Object.prototype.hasOwnProperty.call(o, lib)) lib += " (" + c + ")";
       const imbrique = v && typeof v === "object" && !(Array.isArray(v) && v.every(x => x == null || typeof x !== "object"));

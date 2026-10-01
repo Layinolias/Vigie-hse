@@ -117,6 +117,7 @@
 </div>
 
 <script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
 <script src="assets/organisation.js"></script>
 <script src="assets/droits.js"></script>
 <script>
@@ -172,7 +173,7 @@
       if (r.ok){ location.href = "dashboard.html"; return; }
       errorBox.textContent = r.erreur === "desactive" ? "Ce compte a été désactivé. Contactez un administrateur."
         : r.erreur === "attente" ? "Trop d'essais infructueux : réessayez dans " + Math.ceil((r.secondes || 300) / 60) + " minute(s)."
-        : r.erreur === "injoignable" ? "Le serveur VIGIE HSE ne répond pas. Vérifiez qu'il est lancé."
+        : r.erreur === "injoignable" ? "Le serveur " + VigieMarque.nom() + " ne répond pas. Vérifiez qu'il est lancé."
         : "Identifiant ou mot de passe incorrect.";
       errorBox.classList.add("show");
       document.getElementById("password").value = "";

@@ -4,6 +4,7 @@
 <title>Administration</title>
 <meta name="description" content="Panneau d'administration VIGIE HSE — utilisateurs, référentiels, flash info et journal des modifications.">
 <script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
 <script src="assets/droits.js"></script>
 <script src="assets/icones.js"></script>
 <script src="assets/menu-lateral.js"></script>
@@ -419,6 +420,29 @@
             <button type="button" class="btn btn-primary btn-sm" id="orgAdd">Ajouter</button>
           </div>
         </div>
+        <!-- Marque blanche (J0, 2026-10-01) : nom, signature, logo et couleurs de tous les écrans — assets/marque.js -->
+        <div class="panel section-block" style="padding:20px;" id="marquePanel">
+          <div class="panel-head">
+            <h3 class="panel-title">Marque</h3>
+            <span class="panel-note">Le nom, la signature, le logo et les couleurs que montrent tous les écrans, la page de connexion et les impressions. Aucune donnée n'est modifiée ; les couleurs d'alerte (succès, attention, danger) restent celles d'origine.</span>
+          </div>
+          <div class="field-grid" style="margin-bottom:12px; align-items:end;">
+            <div class="f"><label for="mqNom">Nom du produit</label><input type="text" id="mqNom" maxlength="40" placeholder="VIGIE HSE"></div>
+            <div class="f"><label for="mqSignature">Signature (sous le nom, vide pour la masquer)</label><input type="text" id="mqSignature" maxlength="40" placeholder="Soft Tech"></div>
+            <div class="f"><label for="mqCouleurHex">Couleur principale</label>
+              <div style="display:flex; gap:8px; align-items:center;"><input type="color" id="mqCouleur" aria-label="Choisir la couleur principale" style="width:46px; height:36px; padding:2px; flex-shrink:0;"><input type="text" id="mqCouleurHex" maxlength="7" spellcheck="false" placeholder="#7D8FE8" style="max-width:120px;"></div></div>
+            <div class="f"><label for="mqCouleur2Hex">Couleur d'accompagnement (dégradé des boutons)</label>
+              <div style="display:flex; gap:8px; align-items:center;"><input type="color" id="mqCouleur2" aria-label="Choisir la couleur d'accompagnement" style="width:46px; height:36px; padding:2px; flex-shrink:0;"><input type="text" id="mqCouleur2Hex" maxlength="7" spellcheck="false" placeholder="#A991E8" style="max-width:120px;"></div></div>
+            <div class="f span2"><label for="mqLogoFichier">Logo (PNG, JPEG, WebP ou SVG — réduit à 128 px, 100 Ko au plus)</label>
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><input type="file" id="mqLogoFichier" accept="image/png,image/jpeg,image/webp,image/svg+xml"><button type="button" class="btn btn-ghost btn-sm" id="mqLogoRetirer">Retirer le logo</button><span id="mqLogoInfo" style="font-size:12.5px; color:var(--text-muted);"></span></div></div>
+          </div>
+          <p id="mqContraste" hidden style="font-size:12.5px; color:var(--warning); margin:0 0 12px;"></p>
+          <div id="mqApercu" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px;" aria-label="Aperçu de la marque en thème clair et en thème sombre"></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary btn-sm" id="mqSave">Enregistrer la marque</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="mqReset">Rétablir la marque d'origine</button>
+          </div>
+        </div>
         <div class="panel section-block" style="padding:20px;">
           <div class="panel-head">
             <h3 class="panel-title">Éditeur de listes déroulantes</h3>
@@ -547,7 +571,7 @@
             <h3 class="panel-title">Données d'une personne</h3>
             <span class="panel-note" id="persNote"></span>
           </div>
-          <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px; max-width:78ch;" data-mots>Retrouve tout ce que VIGIE HSE contient sur une personne — agent, utilisateur, contact d'une entreprise extérieure — dans tous les registres et journaux, pour répondre à une demande d'accès à ses données (RGPD, article 15) ou préparer une rectification. Chaque résultat indique s'il s'agit de sa <b>fiche</b> (ses nom et prénom y sont inscrits) ou d'une <b>mention</b> de son nom dans un texte : ces dernières sont à relire, un homonyme ou un nom commun pouvant y correspondre. Les mots de passe ne sont jamais affichés ni exportés. L'export est inscrit au journal des modifications.</p>
+          <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px; max-width:78ch;" data-mots>Retrouve tout ce que <span data-marque="nom">VIGIE HSE</span> contient sur une personne — agent, utilisateur, contact d'une entreprise extérieure — dans tous les registres et journaux, pour répondre à une demande d'accès à ses données (RGPD, article 15) ou préparer une rectification. Chaque résultat indique s'il s'agit de sa <b>fiche</b> (ses nom et prénom y sont inscrits) ou d'une <b>mention</b> de son nom dans un texte : ces dernières sont à relire, un homonyme ou un nom commun pouvant y correspondre. Les mots de passe ne sont jamais affichés ni exportés. L'export est inscrit au journal des modifications.</p>
           <form id="persForm" class="field-grid" style="max-width:640px; grid-template-columns:1fr 1fr auto; align-items:end;" autocomplete="off">
             <div class="f"><label for="persNom">Nom</label><input type="text" id="persNom" required></div>
             <div class="f"><label for="persPrenom">Prénom <span style="color:var(--text-faint); font-weight:400;">(facultatif)</span></label><input type="text" id="persPrenom"></div>
@@ -564,8 +588,8 @@
             <h3 class="panel-title">Consultations des données de santé</h3>
             <span class="panel-note" id="consultNote"></span>
           </div>
-          <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px; max-width:78ch;">Le journal des modifications ne dit pas qui a <b>regardé</b> un registre. Celui-ci le dit : chaque fois que le serveur VIGIE HSE transmet à un compte une page contenant un registre de santé (accidents, dossiers AT/MP, analyses d'accident, suivi médical, rendez-vous), il note la date, le compte, la page, les registres et le nombre d'enregistrements reçus — ce que le compte a réellement reçu, après ses droits. Le journal est tenu par le serveur : aucune page ne peut le modifier. <span id="consultDuree"></span></p>
-          <div id="consultHorsServeur" hidden style="font-size:13px; color:var(--text-muted); padding:12px 14px; border:1px dashed var(--border); border-radius:var(--r-sm);">Ce journal est tenu par le serveur VIGIE HSE : il existe sur un poste (« Lancer VIGIE HSE.bat ») ou un serveur partagé, pas dans cette démonstration où les données restent dans le navigateur.</div>
+          <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px; max-width:78ch;">Le journal des modifications ne dit pas qui a <b>regardé</b> un registre. Celui-ci le dit : chaque fois que le serveur <span data-marque="nom">VIGIE HSE</span> transmet à un compte une page contenant un registre de santé (accidents, dossiers AT/MP, analyses d'accident, suivi médical, rendez-vous), il note la date, le compte, la page, les registres et le nombre d'enregistrements reçus — ce que le compte a réellement reçu, après ses droits. Le journal est tenu par le serveur : aucune page ne peut le modifier. <span id="consultDuree"></span></p>
+          <div id="consultHorsServeur" hidden style="font-size:13px; color:var(--text-muted); padding:12px 14px; border:1px dashed var(--border); border-radius:var(--r-sm);">Ce journal est tenu par le serveur <span data-marque="nom">VIGIE HSE</span> : il existe sur un poste (« Lancer VIGIE HSE.bat ») ou un serveur partagé, pas dans cette démonstration où les données restent dans le navigateur.</div>
           <div id="consultServeur" hidden>
             <div class="field-grid" style="max-width:720px; grid-template-columns:1fr 1fr auto auto; align-items:end; margin-bottom:14px;">
               <div class="f"><label for="consultCompte">Compte</label><input type="text" id="consultCompte" placeholder="Tous les comptes"></div>
@@ -642,7 +666,7 @@
       $("stockTitre").textContent = "Stockage sur le serveur";
       $("stockBarre").parentNode.style.display = "none";
       $("stockNote").textContent = fmt(utilise) + " million(s) de caractères";
-      $("stockDetail").textContent = "Les données sont enregistrées dans la base du serveur VIGIE HSE, partagée par tous les utilisateurs ; la limite d'environ 5 millions de caractères d'un navigateur ne s'applique pas.";
+      $("stockDetail").textContent = "Les données sont enregistrées dans la base du serveur " + VigieMarque.nom() + ", partagée par tous les utilisateurs ; la limite d'environ 5 millions de caractères d'un navigateur ne s'applique pas.";
       return;
     }
     const part = Math.min(100, Math.round(utilise / LIMITE * 100));
@@ -889,6 +913,8 @@
     try {
       const cur = JSON.parse(VigieStore.getItem(REF_KEY) || "{}");
       if (cur && cur.organisation) ref.organisation = cur.organisation;
+      // la marque (Administration → Référentiels → Marque) est écrite par son panneau : on garde sa version enregistrée
+      if (cur && cur.marque) ref.marque = cur.marque; else delete ref.marque;
       VigieStore.setItem(REF_KEY, JSON.stringify(ref));
     } catch(e){}
   }
@@ -1527,6 +1553,108 @@
         <button type="button" class="btn btn-danger btn-sm org-suppr" aria-label="Supprimer" ${noms.length < 2 ? "disabled" : ""}><svg class="icon"><use href="#i-trash"/></svg></button>
       </div>`).join("");
   }
+  // ---------- Marque (J0, 2026-10-01) : nom, signature, logo et couleurs de tous les écrans — assets/marque.js ----------
+  // Rangée dans les référentiels (clé « marque ») ; vide = la marque d'origine. La page se recharge après un
+  // enregistrement pour que tous les textes et couleurs suivent.
+  let mqLogo = "";   // logo en cours d'édition (data URI validée), vide = l'icône d'origine
+  const mqHexOk = h => /^#[0-9a-fA-F]{6}$/.test(h);
+  function mqEtat(){
+    return { nom: $("mqNom").value.trim(), signature: $("mqSignature").value.trim(), logo: mqLogo,
+      couleur: $("mqCouleurHex").value.trim(), couleur2: $("mqCouleur2Hex").value.trim() };
+  }
+  // une tuile d'aperçu : l'en-tête du menu et un bouton, dans l'un des deux thèmes
+  function mqTuile(theme, c){
+    const clair = theme === "clair", v1 = VigieMarque.variantes(c.couleur)[theme], v2 = VigieMarque.variantes(c.couleur2)[theme];
+    const fond = clair ? "#F5F7FA" : "#171E23", texte = clair ? "#26343D" : "#E7EDF0", discret = clair ? "#9AA7AF" : "#6B7C85",
+      bord = clair ? "#E4E9EE" : "#263038", pastille = clair ? "#FFFFFF" : "#1C242A";
+    const marque = c.logo
+      ? `<span style="width:34px;height:34px;border-radius:10px;background:${pastille};padding:3px;box-sizing:border-box;display:inline-flex;overflow:hidden;flex-shrink:0;"><img alt="" src="${c.logo}" style="width:100%;height:100%;object-fit:contain;"></span>`
+      : `<span style="width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;color:${v1.hex};background:linear-gradient(150deg,rgba(${v1.rgb},.22),rgba(${v2.rgb},.12));"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></span>`;
+    return `<div style="flex:1;min-width:220px;background:${fond};color:${texte};border:1px solid ${bord};border-radius:12px;padding:14px;">` +
+      `<div style="display:flex;align-items:center;gap:10px;">${marque}<div><div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16.5px;">${esc(c.nom)}</div>` +
+      (c.signature ? `<div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:${discret};">${esc(c.signature)}</div>` : "") +
+      `</div></div><div style="margin-top:12px;"><span style="display:inline-block;color:#fff;padding:6px 14px;border-radius:10px;font-size:12.5px;font-weight:600;background:linear-gradient(135deg,${v1.hex},${v2.hex});">Bouton principal</span>` +
+      `<span style="margin-left:8px;font-size:11px;color:${discret};">${clair ? "thème clair" : "thème sombre"}</span></div></div>`;
+  }
+  function mqApercu(){
+    const e = mqEtat(), c = VigieMarque.nettoyer({ nom: e.nom, signature: e.signature, logo: e.logo,
+      couleur: mqHexOk(e.couleur) ? e.couleur : VigieMarque.PAR_DEFAUT.couleur, couleur2: mqHexOk(e.couleur2) ? e.couleur2 : VigieMarque.PAR_DEFAUT.couleur2 });
+    $("mqApercu").innerHTML = mqTuile("clair", c) + mqTuile("sombre", c);
+    $("mqLogoInfo").textContent = mqLogo ? "Logo choisi." : "Aucun logo : l'icône d'origine est utilisée.";
+    // le texte des boutons est blanc : une couleur trop claire le rendrait illisible
+    const faibles = [["principale", c.couleur], ["d'accompagnement", c.couleur2]].filter(x => VigieMarque.contraste(x[1]) < VigieMarque.CONTRASTE_MIN);
+    $("mqContraste").hidden = !faibles.length;
+    $("mqContraste").textContent = faibles.length ? "Attention : la couleur " + faibles.map(x => x[0] + " (" + VigieMarque.contraste(x[1]).toFixed(1).replace(".", ",") + ":1)").join(" et la couleur ") +
+      " est très claire — le texte blanc des boutons sera difficile à lire (contraste conseillé : " + String(VigieMarque.CONTRASTE_MIN).replace(".", ",") + ":1 au moins)." : "";
+  }
+  function mqLire(){
+    const c = VigieMarque.actuelle();
+    $("mqNom").value = c.nom; $("mqSignature").value = c.signature; mqLogo = c.logo;
+    $("mqCouleur").value = c.couleur; $("mqCouleurHex").value = c.couleur;
+    $("mqCouleur2").value = c.couleur2; $("mqCouleur2Hex").value = c.couleur2;
+    mqApercu();
+  }
+  function mqEcrire(m){
+    let ref = {}; try { ref = JSON.parse(VigieStore.getItem(REF_KEY) || "{}") || {}; } catch(e){}
+    if (m) ref.marque = m; else delete ref.marque;
+    VigieStore.setItem(REF_KEY, JSON.stringify(ref));
+  }
+  function mqChargerLogo(f){
+    if (!f) return;
+    const refuser = t => { flashBanner($("refBanner"), t, "info"); $("mqLogoFichier").value = ""; };
+    if (["image/png", "image/jpeg", "image/webp", "image/svg+xml"].indexOf(f.type) < 0){ refuser("Format non pris en charge : choisissez un PNG, un JPEG, un WebP ou un SVG."); return; }
+    if (f.size > 5 * 1024 * 1024){ refuser("Ce fichier est trop lourd (5 Mo au plus avant réduction)."); return; }
+    const lecteur = new FileReader();
+    lecteur.onload = () => {
+      const uri = String(lecteur.result);
+      const finir = u => {
+        if (VigieMarque.nettoyer({ logo: u }).logo !== u){ refuser("Ce logo dépasse 100 Ko ou n'est pas lisible : choisissez une image plus petite."); return; }
+        mqLogo = u; mqApercu();
+      };
+      if (f.type === "image/svg+xml"){ finir(uri); return; }
+      const img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, 128 / Math.max(img.width, img.height, 1)), cv = document.createElement("canvas");
+        cv.width = Math.max(1, Math.round(img.width * k)); cv.height = Math.max(1, Math.round(img.height * k));
+        try { cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); finir(cv.toDataURL("image/png")); }
+        catch(e){ refuser("Cette image n'a pas pu être réduite."); }
+      };
+      img.onerror = () => refuser("Cette image n'a pas pu être lue.");
+      img.src = uri;
+    };
+    lecteur.onerror = () => refuser("Ce fichier n'a pas pu être lu.");
+    lecteur.readAsDataURL(f);
+  }
+  [["mqCouleur", "mqCouleurHex"], ["mqCouleur2", "mqCouleur2Hex"]].forEach(([sel, hex]) => {
+    $(sel).addEventListener("input", () => { $(hex).value = $(sel).value; mqApercu(); });
+    $(hex).addEventListener("input", () => { if (mqHexOk($(hex).value.trim())) $(sel).value = $(hex).value.trim(); mqApercu(); });
+  });
+  ["mqNom", "mqSignature"].forEach(id => $(id).addEventListener("input", mqApercu));
+  $("mqLogoFichier").addEventListener("change", () => mqChargerLogo($("mqLogoFichier").files[0]));
+  $("mqLogoRetirer").addEventListener("click", () => { mqLogo = ""; $("mqLogoFichier").value = ""; mqApercu(); });
+  $("mqSave").addEventListener("click", () => {
+    const e = mqEtat();
+    if (!e.nom){ flashBanner($("refBanner"), "Le nom ne peut pas être vide.", "info"); return; }
+    if (!mqHexOk(e.couleur) || !mqHexOk(e.couleur2)){ flashBanner($("refBanner"), "Une couleur s'écrit #RRGGBB (par exemple #1A2B3C).", "info"); return; }
+    const m = VigieMarque.nettoyer(e), avant = VigieMarque.actuelle();
+    if (JSON.stringify(m) === JSON.stringify(avant)){ flashBanner($("refBanner"), "Rien n'a changé.", "info"); return; }
+    try { mqEcrire(VigieMarque.personnalisee(m) ? m : null); }
+    catch(err){ flashBanner($("refBanner"), "Enregistrement impossible : la marque n'a pas été modifiée.", "info"); return; }
+    // le journal dit ce qui a changé, jamais le contenu du logo
+    const quoi = [m.nom !== avant.nom && `nom « ${m.nom} »`, m.signature !== avant.signature && (m.signature ? `signature « ${m.signature} »` : "signature retirée"),
+      m.logo !== avant.logo && (m.logo ? "logo changé" : "logo retiré"), (m.couleur !== avant.couleur || m.couleur2 !== avant.couleur2) && "couleurs"].filter(Boolean);
+    logAudit("Marque", "Modification", "Marque modifiée : " + quoi.join(", "));
+    location.reload();
+  });
+  $("mqReset").addEventListener("click", () => {
+    if (!VigieMarque.personnalisee(VigieMarque.actuelle())){ flashBanner($("refBanner"), "La marque d'origine est déjà celle des écrans.", "info"); mqLire(); return; }
+    if (!confirm("Rétablir le nom, la signature, le logo et les couleurs d'origine sur tous les écrans ?\n\nAucune donnée n'est modifiée. La page va se recharger.")) return;
+    try { mqEcrire(null); } catch(err){ flashBanner($("refBanner"), "Enregistrement impossible : la marque n'a pas été modifiée.", "info"); return; }
+    logAudit("Marque", "Modification", "Marque d'origine rétablie");
+    location.reload();
+  });
+  mqLire();
+
   // Secteur (J0) : les textes fixes de toutes les pages suivent (assets/organisation.js) ; la page se recharge
   // pour afficher les siens avec les nouveaux mots
   $("orgSecteurSave").addEventListener("click", () => {

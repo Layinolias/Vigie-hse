@@ -122,7 +122,7 @@
   <div class="hero">
     <div class="brand-mark"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg></div>
     <div class="eyebrow">Démonstration</div>
-    <h1>VIGIE HSE</h1>
+    <h1 data-marque="nom">VIGIE HSE</h1>
     <p data-mots>Plateforme de prévention Hygiène-Sécurité-Environnement pour collectivités territoriales — registre AT/MP, Document Unique, plans d'actions et suivi réglementaire, réunis dans un seul outil.</p>
     <div class="cta-row">
       <a class="btn-primary" href="login.html">Accéder à la démonstration <svg class="icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow-right"/></svg></a>
@@ -173,7 +173,7 @@
 
   <section>
     <div class="disclaimer">
-      <div><b>À propos de cette démonstration.</b> VIGIE HSE est un prototype fonctionnel : il n'y a pas de serveur ni de base de données réelle derrière cette page.</div>
+      <div><b>À propos de cette démonstration.</b> <span data-marque="nom">VIGIE HSE</span> est un prototype fonctionnel : il n'y a pas de serveur ni de base de données réelle derrière cette page.</div>
       <ul>
         <li>Toutes les données que vous saisirez restent dans le navigateur (<code>localStorage</code>) de votre propre appareil — elles ne sont ni partagées avec les autres visiteurs, ni envoyées à un serveur.</li>
         <li>Le jeu de données affiché est fictif et entièrement anonymisé : la collectivité "Ville de Verchamps" et toutes les personnes qui y apparaissent sont inventées à des fins de démonstration.</li>
@@ -183,10 +183,11 @@
     </div>
   </section>
 
-  <footer>VIGIE HSE — démonstration. Code source et documentation sur <a href="https://github.com/Layinolias/Vigie-hse" style="text-decoration:underline;">GitHub</a>.</footer>
+  <footer><span data-marque="nom">VIGIE HSE</span> — démonstration. Code source et documentation sur <a href="https://github.com/Layinolias/Vigie-hse" style="text-decoration:underline;">GitHub</a>.</footer>
 </div>
 
 <script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
 <script src="assets/organisation.js"></script>
 <script>
   VigieOrga.preparer();   // textes [data-mots] dits avec les mots du secteur (assets/organisation.js)
@@ -200,7 +201,7 @@
   document.getElementById("btnResetDemo").addEventListener("click", () => {
     // Serveur VIGIE : effacer la base commune depuis la vitrine, sans être connecté, n'a pas de sens
     if (VigieStore.mode() === "serveur"){
-      alert("Sur le serveur VIGIE HSE, les données sont communes à tous les utilisateurs : leur réinitialisation se fait depuis Administration, avec un compte administrateur.");
+      alert("Sur le serveur " + VigieMarque.nom() + ", les données sont communes à tous les utilisateurs : leur réinitialisation se fait depuis Administration, avec un compte administrateur.");
       return;
     }
     if (confirm("Réinitialiser toutes les données de démonstration stockées dans ce navigateur ? Cette action est irréversible.")) {

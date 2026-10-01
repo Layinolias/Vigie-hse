@@ -22,8 +22,8 @@
 // d'elles-mêmes quand elles les trouvent, restent vides (poste d'un utilisateur avec ses propres données).
 //
 // P1b : connexion vérifiée ici (serveur/comptes.js — mots de passe hachés, jamais conservés en clair),
-// aucune page de l'application ni aucune donnée sans session (seul le secteur, collectivité ou entreprise,
-// accompagne l'accueil et la connexion), droits d'écriture appliqués par le serveur
+// aucune page de l'application ni aucune donnée sans session (seuls le secteur, collectivité ou entreprise,
+// et la marque — nom, logo, couleurs — accompagnent l'accueil et la connexion), droits d'écriture appliqués par le serveur
 // (serveur/droits.js).
 // P1c : lectures filtrées au périmètre d'un compte limité à certains services (serveur/perimetre.js), et à ce
 // que les écrans de son rôle affichent (serveur/lecture.js).
@@ -37,6 +37,7 @@ const Perimetre = require('./perimetre.js');
 const Lecture = require('./lecture.js');
 const Sauvegardes = require('./sauvegardes.js');
 const Consultations = require('./consultations.js');   // qui a reçu quels registres de santé, et quand
+const Marque = require('../assets/marque.js');   // marque blanche : seul réglage (avec le secteur) transmis avant la connexion
 const Poste = require('./poste-commun.js');   // repère « base en service », lu par l'outil de restauration
 
 const RACINE = path.resolve(__dirname, '..');
@@ -120,8 +121,10 @@ function injection(session, chemin){
   }
   else {
     etat.premierLancement = comptes.aucun();
-    // seul réglage transmis sans session : le secteur (mots des pages d'accueil et de connexion, assets/organisation.js)
+    // seuls réglages transmis sans session : le secteur (mots des pages d'accueil et de connexion, assets/organisation.js) et la marque
     try { const o = JSON.parse(base.lire('vigie_hse_referentials') || '{}').organisation; if (o && o.secteur === 'entreprise') etat.secteur = 'entreprise'; } catch(e){}
+    // la marque (nom, signature, logo, couleurs) : nettoyée champ par champ par assets/marque.js, transmise seulement si elle est personnalisée
+    try { const m = Marque.publique(base.lire('vigie_hse_referentials')); if (m) etat.marque = m; } catch(e){}
   }
   const json = JSON.stringify(etat).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
   return '<script>window.__VIGIE_SERVEUR__ = ' + json + ';</script>\n';

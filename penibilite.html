@@ -5,6 +5,7 @@
 <meta name="description" content="Suivi des expositions aux facteurs de pénibilité par poste, campagne annuelle, seuils de l'article D4163-2 du Code du travail, suite à donner par agent selon son statut.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/droits.js"></script>
 <script src="assets/icones.js"></script>
 <script src="assets/menu-lateral.js"></script>
 <script src="assets/organisation.js"></script>
@@ -422,23 +423,21 @@
   })();
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
-  const role = (session && session.role) || "ag";
-  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
-  $("roleChip").textContent = role.toUpperCase();
-  if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
 
   // ---------- Contrôle d'accès (permission granulaire "penibilite") ----------
-  const penPermLevel = (role === "admin" || role === "rh") ? "write" : ((session && session.modulePermissions && session.modulePermissions["penibilite"]) || "none");
-  const canPen = penPermLevel !== "none";
-  const canPenWrite = penPermLevel === "write";
+  const canPen = D.peut("penibilite", "consulter");
+  const canPenWrite = D.peut("penibilite", "gerer");
   if (!canPen){ location.href = "dashboard.html"; }
 
-  const canEdit = role === "rh" || role === "admin";
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   const AUDIT_KEY = "vigie_hse_audit_log";

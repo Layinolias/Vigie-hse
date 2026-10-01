@@ -20,8 +20,8 @@
     risque:"Risque", risqueLie:"Risque lié", periodiciteMois:"Périodicité (mois)", dateDerniere:"Dernière réalisation",
     actions:"Actions", points:"Points", reference:"Référence", ref:"Référence", source:"Source", url:"Lien", lien:"Lien",
     // comptes et journaux
-    email:"Adresse électronique ou identifiant", username:"Identifiant", role:"Rôle", services:"Services",
-    active:"Compte actif", modulePermissions:"Permissions par module", anonymise:"Compte anonymisé",
+    email:"Adresse électronique ou identifiant", username:"Identifiant", role:"Rôle", profils:"Profils de droits", services:"Services",
+    active:"Compte actif", modulePermissions:"Permissions par module (ancien format)", anonymise:"Compte anonymisé",
     timestamp:"Date et heure", utilisateur:"Utilisateur", module:"Module", action:"Opération", record:"Enregistrement",
     // Registre AT/MP
     dateAT:"Date de l'accident", dateMois:"Mois de l'accident", jour:"Jour", typeAtMp:"Type (accident de travail, de trajet, maladie professionnelle)",

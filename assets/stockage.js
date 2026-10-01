@@ -55,6 +55,7 @@
     vigie_hse_news:               { nature:"donnees",    sensible:false, module:"Administration (Flash Info)" },
     vigie_hse_veille:             { nature:"donnees",    sensible:false, module:"Administration (veille)" },
     vigie_hse_users:              { nature:"parametres", sensible:false, module:"Administration (comptes) — relèvera de l'authentification" },
+    vigie_hse_profils:            { nature:"parametres", sensible:false, module:"Administration (profils de droits)" },
     vigie_hse_referentials:       { nature:"parametres", sensible:false, module:"Administration (référentiels)" },
     vigie_hse_doc_types:          { nature:"parametres", sensible:false, module:"Base documentaire" },
     vigie_hse_epi_catalogue:      { nature:"parametres", sensible:false, module:"EPI & Dotation" },

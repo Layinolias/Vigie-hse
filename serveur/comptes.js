@@ -11,8 +11,10 @@
 // l'empreinte : une copie volée de la base ne permet pas d'ouvrir une session.
 'use strict';
 const crypto = require('crypto');
+const VigieDroits = require('../assets/droits.js');   // profils et catalogue des modules : le même fichier que les pages
 
 const CLE_COMPTES = 'vigie_hse_users';
+const CLE_PROFILS = 'vigie_hse_profils';
 const DUREE_SESSION = 8 * 3600 * 1000;       // sans activité pendant 8 h, il faut se reconnecter
 const ESSAIS_MAX = 5, PAUSE = 5 * 60 * 1000; // 5 échecs de suite sur un identifiant : 5 min de pause
 const SCRYPT = { N: 16384, r: 8, p: 1 };
@@ -32,9 +34,14 @@ function verifier(motDePasse, empreinte){
 const EMPREINTE_LEURRE = hacher(crypto.randomBytes(12).toString('hex'));   // même durée de calcul pour un identifiant inconnu
 const empreinteJeton = jeton => crypto.createHash('sha256').update(String(jeton)).digest('hex');
 
-// la session telle que les pages la lisent aujourd'hui dans sessionStorage (login.html)
-function sessionDePage(u){
-  return { user: u.username || u.email, role: u.role, email: u.email, services: u.services || ['*'], modulePermissions: u.modulePermissions || {}, anonymise: u.anonymise === true };
+// la session telle que les pages la lisent dans sessionStorage (login.html) : les droits du compte sont résolus ici,
+// à partir de ses profils (assets/droits.js) — « role » et « modulePermissions » ne servent plus qu'aux comptes qui n'ont pas
+// encore de profils (ancien format, converti à la prochaine ouverture d'Administration)
+function sessionDePage(u, profils){
+  const r = VigieDroits.resoudre(u, profils);
+  return { user: u.username || u.email, role: u.role || VigieDroits.roleDepuis(r.droits), email: u.email, services: u.services || ['*'],
+    modulePermissions: u.modulePermissions || {}, anonymise: u.anonymise === true,
+    profils: r.profils, droits: r.droits, compte: { libelle: r.libelle, pastille: r.pastille } };
 }
 
 function creer(base){
@@ -43,6 +50,29 @@ function creer(base){
   function comptes(){
     try { const l = JSON.parse(base.lire(CLE_COMPTES) || '[]'); return Array.isArray(l) ? l : []; }
     catch(e){ return []; }
+  }
+  // les profils enregistrés (vigie_hse_profils) ; VigieDroits.fusionnerProfils y ajoute les préréglages
+  function profils(){
+    try { const l = JSON.parse(base.lire(CLE_PROFILS) || '[]'); return Array.isArray(l) ? l : []; }
+    catch(e){ return []; }
+  }
+
+  // Garde anti-verrouillage : une écriture des comptes ou des profils ne doit pas laisser l'application sans compte
+  // actif, non anonymisé, qui puisse administrer (sauf si elle n'en avait déjà aucun : on ne bloque pas une réparation).
+  function gardeAdmin(cle, valeur){
+    if (cle !== CLE_COMPTES && cle !== CLE_PROFILS) return true;
+    const avant = VigieDroits.administrateurs(comptes(), profils());
+    let apres;
+    if (cle === CLE_COMPTES){
+      if (valeur === null) return avant === 0;
+      let l; try { l = JSON.parse(valeur); } catch(e){ return true; }
+      if (!Array.isArray(l)) return true;
+      apres = VigieDroits.administrateurs(l, profils());
+    } else {
+      let l = []; if (valeur !== null){ try { l = JSON.parse(valeur); } catch(e){ return true; } }
+      apres = VigieDroits.administrateurs(comptes(), Array.isArray(l) ? l : []);
+    }
+    return apres > 0 || avant === 0;
   }
 
   // Liste de comptes écrite par une page → { valeur à stocker (sans mot de passe), mots : [[id, mdp]] }.
@@ -98,7 +128,7 @@ function creer(base){
     const jeton = crypto.randomBytes(32).toString('base64url');
     base.purgerSessions(maintenant);
     base.ouvrirSession(empreinteJeton(jeton), String(u.id), maintenant + DUREE_SESSION);
-    return { ok: true, jeton, session: sessionDePage(u) };
+    return { ok: true, jeton, session: sessionDePage(u, profils()) };
   }
 
   // session valide du jeton (prolongée à chaque usage), ou null
@@ -110,7 +140,7 @@ function creer(base){
     const u = comptes().find(x => x && String(x.id) === l.compte);
     if (!u || u.active === false){ base.fermerSession(e); return null; }   // compte supprimé ou désactivé entre-temps
     if (l.expire - maintenant < DUREE_SESSION - 60000) base.prolongerSession(e, maintenant + DUREE_SESSION);
-    return { compte: u, page: sessionDePage(u) };
+    return { compte: u, page: sessionDePage(u, profils()) };
   }
 
   function deconnecter(jeton){ if (jeton) base.fermerSession(empreinteJeton(jeton)); }
@@ -126,7 +156,7 @@ function creer(base){
   }
   const demoActive = () => demoActifs().length > 0;
 
-  return { CLE_COMPTES, aucun: () => comptes().length === 0, epurer, apresEcriture, reprendreAncienneBase, connecter, session, deconnecter, demoActive, demoActifs };
+  return { CLE_COMPTES, CLE_PROFILS, gardeAdmin, aucun: () => comptes().length === 0, epurer, apresEcriture, reprendreAncienneBase, connecter, session, deconnecter, demoActive, demoActifs };
 }
 
 module.exports = { creer, hacher, verifier };

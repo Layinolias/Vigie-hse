@@ -210,6 +210,11 @@ async function api(req, res, chemin){
     if (anonyme && Anonymisation.PROJETEES[cle] && valeur !== null) valeur = Anonymisation.grefferAjouts(base.lire(cle), valeur);
     // compte limité à certains services : sa part, greffée sur le registre complet
     if (session && Perimetre.limite(session.page)) valeur = Perimetre.greffer(base.lire(cle), valeur, session.page.services);
+    // ni les comptes ni les profils ne peuvent laisser l'application sans administrateur actif (comptes.gardeAdmin)
+    if (!comptes.gardeAdmin(cle, valeur)){
+      journal('écriture refusée (plus aucun administrateur) :', cle, 'par', session ? session.page.user : '(premier lancement)');
+      return repondre(res, 403, { erreur: "il doit rester au moins un compte actif, non anonymisé, qui puisse administrer" });
+    }
     if (session && !droits.peutEcrire(session.page, cle, valeur, base.lire(cle))){
       journal('écriture refusée :', cle, 'par', session.page.user);
       return repondre(res, 403, { erreur: 'droits insuffisants' });

@@ -5,6 +5,7 @@
 <meta name="description" content="Évaluation des risques professionnels (DUERP) de la collectivité — cotation, méthodologie et registre des risques par service.">
 <link rel="stylesheet" href="assets/polices/polices.css">
 <script src="assets/stockage.js"></script>
+<script src="assets/droits.js"></script>
 <script src="assets/icones.js"></script>
 <script src="assets/menu-lateral.js"></script>
 <script src="assets/organisation.js"></script>
@@ -481,16 +482,16 @@
   })();
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
-  const role = (session && session.role) || "ag";
-  const canEdit = role === "rh" || role === "admin";
-  if (role === "ag"){ $("globalFiltersWrap").style.display = "none"; }
-  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const canEdit = D.peut("duerp", "gerer");
+  if (!D.peut("duerp", "consulter")){ location.href = "dashboard.html"; }
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
-  $("roleChip").textContent = role.toUpperCase();
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
   if (!canEdit){ $("roleChip").classList.add("ag"); }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 

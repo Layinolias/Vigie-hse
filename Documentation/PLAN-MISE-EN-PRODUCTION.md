@@ -96,6 +96,8 @@ puis ouvrir http://localhost:8780. Plusieurs onglets, plusieurs navigateurs ou p
 **Les droits d'écriture** (`serveur/droits.js`), relevés page par page sur les écrans (`ETAT-DU-PROJET.md` §7) :
 - Administration (comptes, référentiels, Flash Info, veille) et la réinitialisation générale : administrateur seul.
 - Modules à permission granulaire : RH et administrateurs, ou la permission accordée en écriture.
+
+> **Depuis le 2026-10-01, ces règles s'expriment en profils** (`assets/droits.js`, `ETAT-DU-PROJET.md` §7) : chaque registre dépend d'un module et d'un niveau (table `REGLES` de `serveur/droits.js` ; « complet » à partir du niveau de gestion du module, « ajout » à partir du niveau de dépôt ou de déclaration, ou pour tous sur les journaux), et la session que le serveur reconstruit à chaque requête porte les droits cumulés des profils du compte — modifier un profil s'applique à la requête suivante. Mesuré : l'ancien et le nouveau serveur donnent les mêmes droits d'écriture et de lecture sur 148 comptes × 42 registres (24 948 contrôles, plus 106 cas où le journal d'audit d'un compte RH passe de « complet » à « ajout », sans effet puisque ce journal lui est retiré à la lecture). Le serveur refuse aussi d'écrire des comptes ou des profils qui ne laisseraient aucun administrateur actif et non anonymisé (403).
 - **Ajout seul** — ajouter sans modifier ni retirer ce qui existe : le Registre SST pour tous (chacun peut y déposer une observation, seuls RH et administrateurs y répondent), les journaux pour tous (chacun y laisse la trace de ses actions, personne d'autre que RH/admin ne peut les effacer), la déclaration d'AT/MP avec la permission « Déclarer ».
 - Tout le reste : RH et administrateurs.
 

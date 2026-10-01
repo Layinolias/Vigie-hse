@@ -1,9 +1,11 @@
 /* ============================================================================
    VIGIE HSE — Menu latéral (toutes les pages à menu) : contenu et comportement
    ----------------------------------------------------------------------------
-   Composant autonome : dépend de VigieStore (assets/stockage.js) et de VigieIcones
-   (assets/icones.js), chargés avant ; aucune étape de build, aucun framework.
+   Composant autonome : dépend de VigieStore (assets/stockage.js), de VigieDroits
+   (assets/droits.js) et de VigieIcones (assets/icones.js), chargés avant ; aucune
+   étape de build, aucun framework.
 
+       <script src="assets/droits.js"></script>
        <script src="assets/icones.js"></script>
        <script src="assets/menu-lateral.js"></script>
 
@@ -68,27 +70,35 @@
   ];
 
   // Qui voit quel lien (un lien absent d'ici est pour tous) — mêmes règles que les gardes d'accès des pages
-  // (Documentation/ETAT-DU-PROJET.md §7) : RH et administrateurs voient tout le métier ; les autres, les
-  // modules dont ils ont la permission (lecture ou écriture).
+  // (Documentation/ETAT-DU-PROJET.md §7) : un module est visible à partir du niveau « consulter » de ses droits
+  // (assets/droits.js, donnés par les profils du compte) ; les pages de saisie demandent un niveau de plus.
   function voir(session){
-    var role = (session && session.role) || "ag";
-    var rhAdmin = role === "rh" || role === "admin";
-    var niveau = function (m) { return (session && session.modulePermissions && session.modulePermissions[m]) || "none"; };
-    var module = function (m) { return rhAdmin || niveau(m) !== "none"; };
+    var D = VigieDroits.pour(session);
+    var lire = function (m) { return D.peut(m, "consulter"); };
     return {
-      "sante-visites.html": rhAdmin || role === "manager" || niveau("sante-visites") !== "none",   // encadrement (question 17)
-      "penibilite.html": module("penibilite"),
-      "saisie-rh.html": rhAdmin || niveau("atmp-declare") === "write",
-      "saisie-duerp.html": rhAdmin,
-      "dossiers-atmp-citis.html": module("atmp-admin"),
-      "accident-analyse.html": module("accident-analyse"),
-      "urgences-exercices.html": module("urgences"),
-      "gestion-rh.html": module("gestion-rh"),
-      "entreprises-exterieures.html": module("entreprises-ext"),
-      "accueil-poste.html": module("accueil-poste"),
-      "dialogue-social.html": module("dialogue-social"),
-      "reporting.html": rhAdmin,
-      "administration.html": role === "admin"
+      "registre-at-mp.html": lire("atmp"),
+      "registre-sst.html": D.peut("rsst", "deposer"),
+      "document-unique.html": lire("duerp"),
+      "produits-chimiques.html": lire("produits"),
+      "plan-actions.html": lire("actions"),
+      "sante-visites.html": lire("sante-visites"),   // encadrement (question 17)
+      "verifications-periodiques.html": lire("verifications"),
+      "inspection-audit.html": lire("inspections"),
+      "formation-habilitation.html": lire("formations"),
+      "epi-dotation.html": lire("epi"),
+      "penibilite.html": lire("penibilite"),
+      "saisie-rh.html": D.peut("atmp", "declarer"),
+      "saisie-duerp.html": D.peut("duerp", "gerer"),
+      "dossiers-atmp-citis.html": lire("atmp-admin"),
+      "accident-analyse.html": lire("accident-analyse"),
+      "urgences-exercices.html": lire("urgences"),
+      "gestion-rh.html": lire("gestion-rh"),
+      "entreprises-exterieures.html": lire("entreprises-ext"),
+      "accueil-poste.html": lire("accueil-poste"),
+      "base-documentaire.html": lire("documentation"),
+      "dialogue-social.html": lire("dialogue-social"),
+      "reporting.html": lire("reporting"),
+      "administration.html": D.peut("administration", "gerer")
     };
   }
 

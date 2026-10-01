@@ -7,6 +7,7 @@
 // de VIGIE_CONSULTATIONS_JOURS jours (365 par défaut, durée à confirmer avec l'avocat) sont supprimées au
 // démarrage puis chaque jour.
 'use strict';
+const { atteint } = require('./droits.js');
 
 // Les registres marqués « sensible » dans VigieStore.CLES (assets/stockage.js) — test-consultations.js vérifie
 // que les deux listes restent identiques.
@@ -39,7 +40,7 @@ function noter(base, page, chemin, donnees){
   return true;
 }
 
-const peutLire = page => !!page && page.role === 'admin' && !page.anonymise;
+const peutLire = page => !!page && atteint(page, 'administration', 'gerer') && !page.anonymise;
 const lister = (base, depuis) => base.consultations(depuis || '', LIMITE);
 
 function purger(base){

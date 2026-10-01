@@ -414,6 +414,7 @@
 <link rel="stylesheet" href="assets/mobile.css">
 
 <script src="assets/stockage.js"></script>
+<script src="assets/droits.js"></script>
 <script src="assets/icones.js"></script>
 <script src="assets/menu-lateral.js"></script>
 <script src="assets/organisation.js"></script>
@@ -658,15 +659,15 @@
 
   // ---------- Session ----------
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
-  const role = (session && session.role) || "ag";
-  const canEdit = role === "rh" || role === "admin";
-  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const canEdit = D.peut("atmp", "gerer");
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
-  $("roleChip").textContent = role.toUpperCase();
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
   if (!canEdit){ $("roleChip").classList.add("ag"); }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
   $("greeting").textContent = `Bonjour, ${session.user}.`;

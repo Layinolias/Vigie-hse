@@ -39,6 +39,20 @@ const registreComplet = p => peut(p, 'atmp', 'gerer') || peut(p, 'atmp-admin', '
 const encadrement = p => peut(p, 'sante-visites', 'consulter');
 const administrateur = p => peut(p, 'administration', 'gerer') && !p.anonymise;
 
+// Registres lus par UNE seule page (relevé du 2026-10-01 : aucune autre page ne les nomme) → le module dont elle dépend.
+// Un compte qui n'a pas le niveau « consulter » de ce module (profil sans accès) ne reçoit plus ces registres : sa page
+// est de toute façon fermée. Les registres que d'autres pages lisent aussi (tableau de bord, Reporting, Plan d'actions,
+// sélecteur d'agents, fiches utiles…) restent transmis : les retirer vide leur affichage.
+const PAGE_UNIQUE = {
+  vigie_hse_epi_stock: 'epi', vigie_hse_epi_lavages: 'epi',
+  vigie_hse_accueils: 'accueil-poste', vigie_hse_modeles_accueil: 'accueil-poste', vigie_hse_accueil_delai: 'accueil-poste',
+  vigie_hse_expositions: 'penibilite', vigie_hse_penibilite_parametres: 'penibilite',
+  vigie_hse_ds_questions: 'dialogue-social', vigie_hse_ds_reunions: 'dialogue-social',
+  vigie_hse_documents: 'documentation', vigie_hse_doc_types: 'documentation',
+  vigie_hse_inspection_trames: 'inspections',
+  vigie_hse_modeles_convocation: 'sante-visites',
+};
+
 // null : valeur complète ; RETIRE : rien ; tableau : les seuls champs transmis de chaque enregistrement
 function regle(page, cle){
   switch (cle){
@@ -52,7 +66,7 @@ function regle(page, cle){
     case 'vigie_hse_audit_log':
     case 'vigie_hse_users':
     case 'vigie_hse_profils':           return administrateur(page) ? null : RETIRE;
-    default:                            return null;
+    default:                            return PAGE_UNIQUE[cle] && !peut(page, PAGE_UNIQUE[cle], 'consulter') ? RETIRE : null;
   }
 }
 
@@ -89,4 +103,4 @@ function ecriture(page, cle, complet, soumis){
   return grefferAjouts(complet, soumis);
 }
 
-module.exports = { regle, vue, filtrer, ecriture, RETIRE, ATMP_VUE_AGENT };
+module.exports = { regle, vue, filtrer, ecriture, RETIRE, ATMP_VUE_AGENT, PAGE_UNIQUE };

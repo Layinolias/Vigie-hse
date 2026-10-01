@@ -97,7 +97,7 @@
     if (!style){ style = el("style"); style.id = "vigie-impression-style"; style.textContent = CSS; document.head.appendChild(style); }
 
     var bloc = el("div"); bloc.id = "vigie-impression";
-    bloc.appendChild(el("div", "vi-marque", "VIGIE HSE"));
+    bloc.appendChild(el("div", "vi-marque", window.VigieMarque ? VigieMarque.nom() : "VIGIE HSE"));
     bloc.appendChild(el("h1", null, opts.titre || document.title));
     var n = table.querySelectorAll("tbody tr:not(.empty-row)").length;
     var maintenant = new Date();

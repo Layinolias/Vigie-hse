@@ -414,6 +414,7 @@
 <link rel="stylesheet" href="assets/mobile.css">
 
 <script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
 <script src="assets/droits.js"></script>
 <script src="assets/icones.js"></script>
 <script src="assets/menu-lateral.js"></script>
@@ -472,7 +473,7 @@
             <div class="weather-popover-head">Choisir une localisation</div>
             <input type="text" id="weatherSearchInput" placeholder="Ville, région, pays…" autocomplete="off">
             <div class="weather-results" id="weatherResults"></div>
-            <p class="weather-privacy">La météo est facultative et fournie par le service Open-Meteo : la recherche lui envoie le texte tapé, puis la position de la ville choisie et l'adresse IP de ce poste. Aucune donnée de VIGIE HSE.</p>
+            <p class="weather-privacy">La météo est facultative et fournie par le service Open-Meteo : la recherche lui envoie le texte tapé, puis la position de la ville choisie et l'adresse IP de ce poste. Aucune donnée de <span data-marque="nom">VIGIE HSE</span>.</p>
             <button type="button" class="weather-popover-link weather-off" id="weatherOff" hidden>Ne plus afficher la météo</button>
             <a href="https://meteofrance.com/" target="_blank" rel="noopener" class="weather-popover-link">Voir sur Météo France ↗</a>
           </div>
@@ -644,7 +645,7 @@
         </div>
       </section>
 
-      <p class="footnote">VIGIE HSE — données <span id="fnZones">–</span>. Structure de champs validée avec l'équipe architecture. Stockage local au navigateur, en attente du raccordement à la base HSE.</p>
+      <p class="footnote"><span data-marque="nom">VIGIE HSE</span> — données <span id="fnZones">–</span>. Structure de champs validée avec l'équipe architecture. Stockage local au navigateur, en attente du raccordement à la base HSE.</p>
     </div>
   </div>
 </div>

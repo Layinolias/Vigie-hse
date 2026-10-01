@@ -247,7 +247,7 @@
   }
   function echec(nom, message){ var e = new Error(message); e.name = nom; return e; }
   function injoignable(){
-    bandeau("vigie-serveur-injoignable", "#8a1c1c", "Le serveur VIGIE HSE ne répond pas : la dernière modification n'a PAS été enregistrée. Vérifiez qu'il est lancé, puis rechargez la page.");
+    bandeau("vigie-serveur-injoignable", "#8a1c1c", "Le serveur " + (window.VigieMarque ? VigieMarque.nom() : "VIGIE HSE") + " ne répond pas : la dernière modification n'a PAS été enregistrée. Vérifiez qu'il est lancé, puis rechargez la page.");
     return echec("VigieServeurInjoignable", "serveur injoignable");
   }
   function sessionFinie(){

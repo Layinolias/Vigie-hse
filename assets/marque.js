@@ -30,6 +30,7 @@
   var CLE = "vigie_hse_referentials";
   var PAR_DEFAUT = { nom: "VIGIE HSE", signature: "Soft Tech", logo: "", couleur: "#7d8fe8", couleur2: "#a991e8" };
   var LONGUEUR_MAX = 40;
+  var CONTRASTE_MIN = 2.5;
   // logo : data URI d'une image de 100 Ko au plus (une fois décodée) ; un SVG s'affiche dans <img>, où ses scripts ne tournent pas
   var LOGO_VALIDE = /^data:image\/(png|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+\/]+=*$/;
   var LOGO_MAX = 137000;
@@ -64,7 +65,8 @@
     var s = melange(h, 0.15);
     return { clair: { hex: h, rgb: rvb(h).join(",") }, sombre: { hex: s, rgb: rvb(s).join(",") } };
   }
-  // rapport de contraste du blanc sur cette couleur (les boutons ont un texte blanc ; l'original est à ~3,1 : seuil d'avertissement 3)
+  // rapport de contraste du blanc sur cette couleur (les boutons ont un texte blanc ; l'original est à 3,0 et 2,7 :
+  // on n'avertit qu'en dessous de CONTRASTE_MIN, plus clair que ce que l'écran d'origine accepte déjà)
   function contraste(h){
     var l = rvb(h).map(function(x){ x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
     return 1.05 / (0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2] + 0.05);
@@ -152,7 +154,7 @@
   }
 
   var M = {
-    PAR_DEFAUT: PAR_DEFAUT, LONGUEUR_MAX: LONGUEUR_MAX, LOGO_MAX: LOGO_MAX,
+    PAR_DEFAUT: PAR_DEFAUT, LONGUEUR_MAX: LONGUEUR_MAX, LOGO_MAX: LOGO_MAX, CONTRASTE_MIN: CONTRASTE_MIN,
     nettoyer: nettoyer, personnalisee: personnalisee, actuelle: actuelle, nom: nom, publique: publique,
     variantes: variantes, contraste: contraste, feuille: feuille, appliquer: appliquer
   };

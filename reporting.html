@@ -217,7 +217,7 @@
     try {
       const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
       if (!s || !s.user){ location.href = "login.html"; return; }
-      if (s.role !== "admin" && s.role !== "rh"){ location.href = "dashboard.html"; }
+      if (!VigieDroits.pour(s).peut("reporting", "consulter")){ location.href = "dashboard.html"; }
     } catch(e){ location.href = "login.html"; }
   })();
 </script>
@@ -361,9 +361,8 @@
 
   VigieOrga.preparer();   // textes [data-mots] dits avec les mots du secteur (assets/organisation.js)
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
-  const role = (session && session.role) || "ag";
-  const canEdit = role === "rh" || role === "admin";
-  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  if (!D.peut("reporting", "consulter")){ location.href = "dashboard.html"; }
   // P1c : sur le serveur, un compte limité à certains services ne reçoit que leurs données. Le dire, pour
   // qu'un chiffre de ce périmètre ne soit pas présenté comme celui de toute la collectivité.
   const perimetreServices = (session && session.services) || ["*"];
@@ -373,8 +372,9 @@
   }
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
-  $("roleChip").textContent = role.toUpperCase();
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js

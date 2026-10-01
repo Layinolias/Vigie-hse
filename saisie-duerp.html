@@ -231,7 +231,7 @@
     try {
       const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
       if (!s || !s.user){ location.href = "login.html"; return; }
-      if (s.role !== "rh" && s.role !== "admin"){ location.href = "document-unique.html"; }
+      if (!VigieDroits.pour(s).peut("duerp", "gerer")){ location.href = "document-unique.html"; }
     } catch(e){ location.href = "login.html"; }
   })();
 </script>
@@ -381,10 +381,10 @@
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
-  const sessRole = (session && session.role) || "rh";
+  const D = VigieDroits.pour(session);
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = sessRole === "admin" ? "Administrateur" : "Compte RH";
+  $("userRoleLabel").textContent = D.peut("administration", "gerer") ? "Administrateur" : "Compte RH";
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   const AUDIT_KEY = "vigie_hse_audit_log";

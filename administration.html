@@ -247,7 +247,7 @@
     try {
       const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
       if (!s || !s.user){ location.href = "login.html"; return; }
-      if (s.role !== "admin"){ location.href = "dashboard.html"; }
+      if (!VigieDroits.pour(s).peut("administration", "gerer")){ location.href = "dashboard.html"; }
     } catch(e){ location.href = "login.html"; }
   })();
 </script>
@@ -298,6 +298,7 @@
 
       <div class="admin-tabs">
         <button class="admin-tab active" data-tab="users"><svg class="icon"><use href="#i-users"/></svg> Utilisateurs</button>
+        <button class="admin-tab" data-tab="profils"><svg class="icon"><use href="#i-key"/></svg> Profils</button>
         <button class="admin-tab" data-tab="ref"><svg class="icon"><use href="#i-list"/></svg> Référentiels</button>
         <button class="admin-tab" data-tab="news"><svg class="icon"><use href="#i-megaphone"/></svg> Flash Info</button>
         <button class="admin-tab" data-tab="veille"><svg class="icon"><use href="#i-search"/></svg> Veille réglementaire</button>
@@ -314,7 +315,7 @@
           <div class="panel-head"><h3 class="panel-title">Comptes existants</h3><span class="panel-note"><b id="userCount" class="mono">0</b> compte(s)</span></div>
           <div class="table-wrap">
             <table class="admin">
-              <thead><tr><th>Identifiant</th><th>Nom</th><th>Rôle</th><th>Services</th><th>Statut</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Identifiant</th><th>Nom</th><th>Profils</th><th>Services</th><th>Statut</th><th>Actions</th></tr></thead>
               <tbody id="usersBody"></tbody>
             </table>
           </div>
@@ -328,15 +329,6 @@
               <div class="f"><label for="uNom">Nom</label><input type="text" id="uNom" required autocomplete="off"></div>
               <div class="f"><label for="uPrenom">Prénom</label><input type="text" id="uPrenom" required autocomplete="off"></div>
               <div class="f"><label for="uEmail">Email</label><input type="email" id="uEmail" required autocomplete="off" placeholder="prenom.nom@verchamps.fr"></div>
-              <div class="f">
-                <label for="uRole">Rôle</label>
-                <select id="uRole">
-                  <option value="rh">RH — création/édition complète</option>
-                  <option value="manager">Manager — lecture, services rattachés</option>
-                  <option value="ag" data-mots>Agent — lecture, tous services</option>
-                  <option value="admin">Administrateur — accès total</option>
-                </select>
-              </div>
               <div class="f span2">
                 <label for="uPassword">Mot de passe</label>
                 <div style="display:flex; gap:8px;">
@@ -344,98 +336,56 @@
                   <button type="button" class="btn btn-secondary btn-sm" id="uGenPassBtn" style="flex-shrink:0;">Générer</button>
                 </div>
               </div>
+              <div class="f span3" id="uProfilsWrap">
+                <label>Profils — les droits de plusieurs profils s'additionnent</label>
+                <div class="checkbox-grid" id="uProfilsGrid"></div>
+                <div class="panel-note" id="uDroitsApercu" style="margin-top:6px;"></div>
+              </div>
               <div class="f span3" id="uServicesWrap">
-                <label>Rattachement aux services (pour un profil Manager)</label>
-                <div class="checkbox-grid" id="uServicesGrid"></div>
-              </div>
-              <div class="f span3">
-                <label for="uAtmpAdminPerm">Modules avancés — Dossiers AT/MP &amp; CITIS</label>
-                <select id="uAtmpAdminPerm">
-                  <option value="none">Aucun accès</option>
-                  <option value="read">Lecture seule</option>
-                  <option value="write">Lecture / écriture</option>
-                </select>
-              </div>
-              <div class="f">
-                <label>Déclaration AT/MP</label>
-                <label class="checkbox-row"><input type="checkbox" id="uAtmpDeclarePerm"> Peut déclarer un AT/MP (même sans être RH/admin)</label>
-              </div>
-              <div class="f span2">
-                <label for="uAccidentAnalysePerm">Modules avancés — Analyse d'accident</label>
-                <select id="uAccidentAnalysePerm">
-                  <option value="none">Aucun accès</option>
-                  <option value="read">Lecture seule</option>
-                  <option value="write">Lecture / écriture</option>
-                </select>
-              </div>
-              <div class="f span2">
-                <label for="uUrgencesPerm">Modules avancés — Situations d'urgence</label>
-                <select id="uUrgencesPerm">
-                  <option value="none">Aucun accès</option>
-                  <option value="read">Lecture seule</option>
-                  <option value="write">Lecture / écriture</option>
-                </select>
-              </div>
-              <div class="f span2">
-                <label for="uGestionRhPerm">Modules avancés — Gestion RH</label>
-                <select id="uGestionRhPerm">
-                  <option value="none">Aucun accès</option>
-                  <option value="read">Lecture seule</option>
-                  <option value="write">Lecture / écriture</option>
-                </select>
-              </div>
-              <div class="f span2">
-                <label for="uEntreprisesExtPerm">Modules avancés — Entreprises extérieures</label>
-                <select id="uEntreprisesExtPerm">
-                  <option value="none">Aucun accès</option>
-                  <option value="read">Lecture seule</option>
-                  <option value="write">Lecture / écriture</option>
-                </select>
-              </div>
-              <div class="f span2">
-                <label for="uAccueilPostePerm">Modules avancés — Accueil au poste</label>
-                <select id="uAccueilPostePerm">
-                  <option value="none">Aucun accès</option>
-                  <option value="read">Lecture seule</option>
-                  <option value="write">Lecture / écriture</option>
-                </select>
-              </div>
-              <div class="f span2">
-                <label for="uPenibilitePerm">Modules avancés — Pénibilité (postes, expositions, statuts C2P)</label>
-                <select id="uPenibilitePerm">
-                  <option value="none">Aucun accès</option>
-                  <option value="read">Lecture seule</option>
-                  <option value="write">Lecture / écriture</option>
-                </select>
-              </div>
-              <div class="f span2">
-                <label for="uSanteVisitesPerm">Santé &amp; Visites — suivi médical (hors encadrement, ex. préventeur)</label>
-                <select id="uSanteVisitesPerm">
-                  <option value="none">Aucun accès</option>
-                  <option value="read">Lecture seule</option>
-                  <option value="write">Lecture / écriture (fiches, rendez-vous, convocations)</option>
-                </select>
-              </div>
-              <div class="f span2">
-                <label for="uDialogueSocialPerm">Modules avancés — Dialogue social (représentants du personnel)</label>
-                <select id="uDialogueSocialPerm">
-                  <option value="none">Aucun accès</option>
-                  <option value="read">Lecture seule</option>
-                  <option value="write">Lecture / écriture (poser des questions, rédiger réunions et visites)</option>
-                </select>
+                <label>Services accessibles (tous les modules)</label>
+                <label class="checkbox-row"><input type="checkbox" id="uTousServices" checked> Tous les services</label>
+                <div class="checkbox-grid" id="uServicesGrid" style="margin-top:6px;"></div>
               </div>
               <div class="f span2">
                 <label>Compte anonymisé</label>
                 <label class="checkbox-row"><input type="checkbox" id="uAnonymise"> Ne reçoit aucune donnée de santé : registre des accidents réduit (sans nom ni lésion), dossiers AT/MP, analyses et visites médicales non transmis — appliqué par le serveur VIGIE (réponse du préventeur, question 16)</label>
               </div>
-              <div class="f span2">
-                <label>Base documentaire</label>
-                <label class="checkbox-row"><input type="checkbox" id="uDocumentationPerm"> Peut rédiger (la lecture est ouverte à tous les comptes)</label>
-              </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:16px;">
               <button type="submit" class="btn btn-primary" id="userSubmitBtn">Créer l'utilisateur</button>
               <button type="button" class="btn btn-ghost" id="userCancelBtn" style="display:none;">Annuler la modification</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ===================== A bis. PROFILS ===================== -->
+      <section class="tab-panel" id="tab-profils">
+        <div class="banner" id="profilBanner"></div>
+
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head"><h3 class="panel-title">Profils de droits</h3><span class="panel-note">Un compte reçoit un ou plusieurs profils ; ses droits sont le niveau le plus haut de chacun, module par module.</span></div>
+          <div class="table-wrap">
+            <table class="admin">
+              <thead><tr><th>Profil</th><th>Type</th><th>Comptes</th><th>Actions</th></tr></thead>
+              <tbody id="profilsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head"><h3 class="panel-title" id="profilFormTitle">Créer un profil</h3></div>
+          <form id="profilForm">
+            <div class="field-grid">
+              <div class="f"><label for="pNom">Nom du profil</label><input type="text" id="pNom" required autocomplete="off" maxlength="60"></div>
+              <div class="f"><label for="pLibelle">Libellé affiché en haut des pages</label><input type="text" id="pLibelle" autocomplete="off" maxlength="40" placeholder="Par défaut : le nom"></div>
+              <div class="f"><label for="pPastille">Pastille</label><input type="text" id="pPastille" autocomplete="off" maxlength="14" placeholder="Par défaut : le nom en capitales"></div>
+              <div class="f span3" id="pCopieWrap"><label for="pCopie">Partir des droits d'un autre profil</label><select id="pCopie"></select></div>
+            </div>
+            <div id="pGrille" style="margin-top:6px;"></div>
+            <div style="display:flex; gap:10px; margin-top:16px;">
+              <button type="submit" class="btn btn-primary" id="profilSubmitBtn">Créer le profil</button>
+              <button type="button" class="btn btn-ghost" id="profilCancelBtn" style="display:none;">Annuler la modification</button>
             </div>
           </form>
         </div>
@@ -968,13 +918,13 @@
   function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
   function defaultUsers(){
     return [
-      { id:"u-rh1", nom:"", prenom:"", email:"RH1", username:"RH1", password:"1234", role:"rh", services:["*"], active:true },
-      { id:"u-rh2", nom:"", prenom:"", email:"RH2", username:"RH2", password:"1234", role:"rh", services:["*"], active:true },
-      { id:"u-ag1", nom:"", prenom:"", email:"AG1", username:"AG1", password:"1234", role:"ag", services:["*"], active:true },
-      { id:"u-ag2", nom:"", prenom:"", email:"AG2", username:"AG2", password:"1234", role:"ag", services:["*"], active:true },
-      { id:"u-prev1", nom:"", prenom:"", email:"PREV1", username:"PREV1", password:"1234", role:"ag", services:["*"], modulePermissions:{"atmp-admin":"write","atmp-declare":"write","accident-analyse":"write","urgences":"write","sante-visites":"read"}, active:true },
-      { id:"u-admin", nom:"Verchamps", prenom:"Admin", email:"admin@verchamps.fr", username:"admin@verchamps.fr", password:"admin1234", role:"admin", services:["*"], active:true },
-      { id:"u-manager", nom:"Verchamps", prenom:"Manager", email:"manager@verchamps.fr", username:"manager@verchamps.fr", password:"manager1234", role:"manager", services:["Voirie & Réseaux","Espaces Verts & Paysage"], active:true },
+      { id:"u-rh1", nom:"", prenom:"", email:"RH1", username:"RH1", password:"1234", role:"rh", profils:["p-rh"], services:["*"], active:true },
+      { id:"u-rh2", nom:"", prenom:"", email:"RH2", username:"RH2", password:"1234", role:"rh", profils:["p-rh"], services:["*"], active:true },
+      { id:"u-ag1", nom:"", prenom:"", email:"AG1", username:"AG1", password:"1234", role:"ag", profils:["p-agent"], services:["*"], active:true },
+      { id:"u-ag2", nom:"", prenom:"", email:"AG2", username:"AG2", password:"1234", role:"ag", profils:["p-agent"], services:["*"], active:true },
+      { id:"u-prev1", nom:"", prenom:"", email:"PREV1", username:"PREV1", password:"1234", role:"ag", profils:["p-agent","p-preventeur"], services:["*"], modulePermissions:{"atmp-admin":"write","atmp-declare":"write","accident-analyse":"write","urgences":"write","sante-visites":"read"}, active:true },
+      { id:"u-admin", nom:"Verchamps", prenom:"Admin", email:"admin@verchamps.fr", username:"admin@verchamps.fr", password:"admin1234", role:"admin", profils:["p-admin"], services:["*"], active:true },
+      { id:"u-manager", nom:"Verchamps", prenom:"Manager", email:"manager@verchamps.fr", username:"manager@verchamps.fr", password:"manager1234", role:"manager", profils:["p-manager"], services:["Voirie & Réseaux","Espaces Verts & Paysage"], active:true },
     ];
   }
   function loadUsers(){
@@ -986,7 +936,37 @@
   function saveUsers(u){ try { VigieStore.setItem(USERS_KEY, JSON.stringify(u)); } catch(e){} }
   let USERS = loadUsers();
 
-  const ROLE_CHIP_LABEL = { admin:"Administrateur", rh:"RH", manager:"Manager", ag:VigieOrga.mots("Agent") };
+  // ===================================================================
+  // Profils de droits (assets/droits.js) : un compte reçoit un ou plusieurs profils ; ses droits sont le niveau le plus
+  // haut de chacun, module par module. Les droits ne s'éditent que sur les profils (onglet « Profils »).
+  // ===================================================================
+  const PROFILS_KEY = "vigie_hse_profils";
+  function lireProfilsStockes(){
+    try { const p = JSON.parse(VigieStore.getItem(PROFILS_KEY) || "[]"); return Array.isArray(p) ? p : []; } catch(e){ return []; }
+  }
+  function saveProfils(liste){ try { VigieStore.setItem(PROFILS_KEY, JSON.stringify(liste)); } catch(e){} }
+  let PROFILS = VigieDroits.fusionnerProfils(lireProfilsStockes());
+
+  // Comptes à l'ancien format (rôle + permissions de module) : convertis une fois, droits identiques. Les profils sont
+  // enregistrés d'abord, pour qu'un compte ne cite jamais un profil absent ; rôle et permissions restent sur la fiche.
+  (function convertirAnciensComptes(){
+    const r = VigieDroits.convertirComptes(USERS, PROFILS);
+    if (!r.convertis) return;
+    PROFILS = r.profils; saveProfils(PROFILS);
+    USERS = r.users; saveUsers(USERS);
+    logAudit("Utilisateurs", "Modification", `Comptes convertis au modèle de profils : ${r.convertis} compte(s), ${r.crees} profil(s) « Droits particuliers » créé(s) — droits inchangés`);
+  })();
+
+  const nomAffiche = p => p.prereglage ? VigieOrga.mots(p.nom) : p.nom;
+  const profilParId = id => PROFILS.find(p => p.id === id);
+  const compterComptes = id => USERS.filter(u => Array.isArray(u.profils) && u.profils.includes(id)).length;
+  const chipClasse = p => ({ "p-admin": "admin", "p-rh": "rh", "p-manager": "manager" })[p.id] || "ag";
+  const monCompte = () => USERS.find(u => session && (u.username === session.user || u.email === session.user));
+  // Garde anti-verrouillage : au moins un compte actif, non anonymisé, qui puisse administrer (le serveur la refait).
+  const resteAdmin = (users, profils) => VigieDroits.administrateurs(users, profils) > 0;
+  const peutAdministrer = (u, profils) => !!u && u.active !== false && u.anonymise !== true && VigieDroits.atteint(VigieDroits.resoudre(u, profils).droits, "administration", "gerer");
+  const MSG_PLUS_ADMIN = "Impossible : il doit rester au moins un compte actif, non anonymisé, qui puisse administrer.";
+  const MSG_MON_DROIT = "Impossible : vous perdriez votre propre droit d'administrer.";
 
   function renderServicesCheckboxes(){
     const grid = $("uServicesGrid");
@@ -995,10 +975,23 @@
     `).join("");
   }
   renderServicesCheckboxes();
-  $("uRole").addEventListener("change", () => {
-    $("uServicesWrap").style.display = $("uRole").value === "manager" ? "" : "none";
-  });
-  $("uServicesWrap").style.display = "none";
+  function majServicesVisibles(){ $("uServicesGrid").style.display = $("uTousServices").checked ? "none" : ""; }
+  $("uTousServices").addEventListener("change", majServicesVisibles);
+
+  function profilsCoches(){ return Array.from($("uProfilsGrid").querySelectorAll("input:checked")).map(i => i.value); }
+  function majApercuDroits(){
+    const ids = profilsCoches();
+    const r = VigieDroits.resoudre({ profils: ids }, PROFILS);
+    const lignes = VigieDroits.MODULES.filter(m => r.droits[m.id] !== "aucun").map(m => VigieOrga.mots(m.nom) + " : " + m.libelles[r.droits[m.id]]);
+    $("uDroitsApercu").textContent = ids.length ? "Droits obtenus — " + (lignes.join(" · ") || "aucun accès") : "Choisissez au moins un profil.";
+  }
+  function renderProfilsCheckboxes(selection){
+    $("uProfilsGrid").innerHTML = PROFILS.map(p => `
+      <label class="checkbox-row"><input type="checkbox" value="${esc(p.id)}"${selection && selection.includes(p.id) ? " checked" : ""}> ${esc(nomAffiche(p))}</label>
+    `).join("");
+    majApercuDroits();
+  }
+  $("uProfilsGrid").addEventListener("change", majApercuDroits);
 
   function renderUsers(){
     $("userCount").textContent = USERS.length;
@@ -1006,34 +999,14 @@
       const svcHtml = (u.services && u.services.includes("*"))
         ? `<span class="svc-tag">Tous services</span>`
         : `<div class="svc-tags">${(u.services||[]).map(s => `<span class="svc-tag">${esc(s)}</span>`).join("") || '<span class="svc-tag">Aucun</span>'}</div>`;
-      const atmpPerm = u.modulePermissions && u.modulePermissions["atmp-admin"];
-      const atmpBadge = (atmpPerm && atmpPerm !== "none") ? ` <span class="svc-tag" title="Dossiers AT/MP &amp; CITIS">AT/MP-CITIS · ${atmpPerm === "write" ? "écriture" : "lecture"}</span>` : "";
-      const declarePerm = u.modulePermissions && u.modulePermissions["atmp-declare"];
-      const declareBadge = declarePerm === "write" ? ` <span class="svc-tag" title="Peut déclarer un AT/MP">Déclaration AT/MP</span>` : "";
-      const analysePerm = u.modulePermissions && u.modulePermissions["accident-analyse"];
-      const analyseBadge = (analysePerm && analysePerm !== "none") ? ` <span class="svc-tag" title="Analyse d'accident">Analyse · ${analysePerm === "write" ? "écriture" : "lecture"}</span>` : "";
-      const urgencesPerm = u.modulePermissions && u.modulePermissions["urgences"];
-      const urgencesBadge = (urgencesPerm && urgencesPerm !== "none") ? ` <span class="svc-tag" title="Situations d'urgence">Urgence · ${urgencesPerm === "write" ? "écriture" : "lecture"}</span>` : "";
-      const gestionRhPerm = u.modulePermissions && u.modulePermissions["gestion-rh"];
-      const gestionRhBadge = (gestionRhPerm && gestionRhPerm !== "none") ? ` <span class="svc-tag" title="Gestion RH">RH · ${gestionRhPerm === "write" ? "écriture" : "lecture"}</span>` : "";
-      const eePerm = u.modulePermissions && u.modulePermissions["entreprises-ext"];
-      const eeBadge = (eePerm && eePerm !== "none") ? ` <span class="svc-tag" title="Entreprises extérieures">EE · ${eePerm === "write" ? "écriture" : "lecture"}</span>` : "";
-      const accueilPerm = u.modulePermissions && u.modulePermissions["accueil-poste"];
-      const accueilBadge = (accueilPerm && accueilPerm !== "none") ? ` <span class="svc-tag" title="Accueil au poste">Accueil · ${accueilPerm === "write" ? "écriture" : "lecture"}</span>` : "";
-      const penPerm = u.modulePermissions && u.modulePermissions["penibilite"];
-      const penBadge = (penPerm && penPerm !== "none") ? ` <span class="svc-tag" title="Pénibilité">Pénibilité · ${penPerm === "write" ? "écriture" : "lecture"}</span>` : "";
-      const svPermU = u.modulePermissions && u.modulePermissions["sante-visites"];
-      const svBadge = (svPermU && svPermU !== "none") ? ` <span class="svc-tag" title="Santé &amp; Visites">Santé · ${svPermU === "write" ? "écriture" : "lecture"}</span>` : "";
-      const dsPerm = u.modulePermissions && u.modulePermissions["dialogue-social"];
-      const dsBadge = (dsPerm && dsPerm !== "none") ? ` <span class="svc-tag" title="Dialogue social">Dialogue · ${dsPerm === "write" ? "écriture" : "lecture"}</span>` : "";
+      const profils = (Array.isArray(u.profils) ? u.profils : []).map(profilParId).filter(Boolean);
+      const profilsHtml = profils.map((p, i) => i === 0 ? `<span class="chip ${chipClasse(p)}">${esc(nomAffiche(p))}</span>` : ` <span class="svc-tag">${esc(nomAffiche(p))}</span>`).join("") || '<span class="svc-tag">Aucun profil</span>';
       const anonBadge = u.anonymise === true ? ` <span class="svc-tag" title="Ne reçoit aucune donnée de santé">Anonymisé</span>` : "";
-      const docPerm = u.modulePermissions && u.modulePermissions["documentation"];
-      const docBadge = docPerm === "write" ? ` <span class="svc-tag" title="Peut rédiger dans la Base documentaire">Doc · rédacteur</span>` : "";
       return `
       <tr data-id="${esc(u.id)}">
         <td class="mono">${esc(u.username || u.email)}</td>
         <td>${(u.nom || u.prenom) ? `${esc(u.prenom)} ${esc(u.nom)}` : "—"}</td>
-        <td><span class="chip ${esc(u.role)}">${ROLE_CHIP_LABEL[u.role] || u.role}</span>${atmpBadge}${declareBadge}${analyseBadge}${urgencesBadge}${gestionRhBadge}${eeBadge}${accueilBadge}${penBadge}${svBadge}${dsBadge}${docBadge}${anonBadge}</td>
+        <td>${profilsHtml}${anonBadge}</td>
         <td>${svcHtml}</td>
         <td><span class="chip ${u.active !== false ? 'active-yes' : 'active-no'}">${u.active !== false ? "Actif" : "Désactivé"}</span></td>
         <td>
@@ -1058,20 +1031,11 @@
     $("uPassword").placeholder = "Cliquer sur « Générer » ou saisir un mot de passe";
     $("uPassword").required = true;
     $("uPassword").value = genPassword();
-    $("uServicesWrap").style.display = "none";
     renderServicesCheckboxes();
-    $("uAtmpAdminPerm").value = "none";
-    $("uAtmpDeclarePerm").checked = false;
-    $("uAccidentAnalysePerm").value = "none";
-    $("uUrgencesPerm").value = "none";
-    $("uGestionRhPerm").value = "none";
-    $("uEntreprisesExtPerm").value = "none";
-    $("uAccueilPostePerm").value = "none";
-    $("uPenibilitePerm").value = "none";
-    $("uSanteVisitesPerm").value = "none";
-    $("uDialogueSocialPerm").value = "none";
+    $("uTousServices").checked = true;
+    majServicesVisibles();
+    renderProfilsCheckboxes(["p-agent"]);   // par défaut : le moins de droits (lecture des registres, dépôt au registre SST)
     $("uAnonymise").checked = false;
-    $("uDocumentationPerm").checked = false;
   }
   resetUserForm();
 
@@ -1090,24 +1054,13 @@
       $("uNom").value = u.nom || "";
       $("uPrenom").value = u.prenom || "";
       $("uEmail").value = u.email || "";
-      $("uRole").value = u.role || "rh";
-      $("uServicesWrap").style.display = u.role === "manager" ? "" : "none";
+      renderProfilsCheckboxes(u.profils || []);
+      const tous = !u.services || u.services.includes("*");
       renderServicesCheckboxes();
-      if (u.role === "manager" && u.services){
-        $("uServicesGrid").querySelectorAll("input").forEach(cb => { cb.checked = u.services.includes(cb.value); });
-      }
-      $("uAtmpAdminPerm").value = (u.modulePermissions && u.modulePermissions["atmp-admin"]) || "none";
-      $("uAtmpDeclarePerm").checked = !!(u.modulePermissions && u.modulePermissions["atmp-declare"] === "write");
-      $("uAccidentAnalysePerm").value = (u.modulePermissions && u.modulePermissions["accident-analyse"]) || "none";
-      $("uUrgencesPerm").value = (u.modulePermissions && u.modulePermissions["urgences"]) || "none";
-      $("uGestionRhPerm").value = (u.modulePermissions && u.modulePermissions["gestion-rh"]) || "none";
-      $("uEntreprisesExtPerm").value = (u.modulePermissions && u.modulePermissions["entreprises-ext"]) || "none";
-      $("uAccueilPostePerm").value = (u.modulePermissions && u.modulePermissions["accueil-poste"]) || "none";
-      $("uPenibilitePerm").value = (u.modulePermissions && u.modulePermissions["penibilite"]) || "none";
-      $("uSanteVisitesPerm").value = (u.modulePermissions && u.modulePermissions["sante-visites"]) || "none";
-      $("uDialogueSocialPerm").value = (u.modulePermissions && u.modulePermissions["dialogue-social"]) || "none";
+      $("uTousServices").checked = tous;
+      majServicesVisibles();
+      if (!tous) $("uServicesGrid").querySelectorAll("input").forEach(cb => { cb.checked = u.services.includes(cb.value); });
       $("uAnonymise").checked = u.anonymise === true;
-      $("uDocumentationPerm").checked = !!(u.modulePermissions && u.modulePermissions["documentation"] === "write");
       $("uPassword").value = "";
       $("uPassword").placeholder = "Laisser vide pour conserver le mot de passe actuel";
       $("uPassword").required = false;
@@ -1128,6 +1081,8 @@
     if (toggleBtn){
       const u = USERS.find(x => x.id === toggleBtn.dataset.id);
       if (!u) return;
+      const apres = USERS.map(x => x.id === u.id ? Object.assign({}, x, { active: x.active === false }) : x);
+      if (!resteAdmin(apres, PROFILS)){ flashBanner($("userBanner"), MSG_PLUS_ADMIN, "info"); return; }
       u.active = u.active === false ? true : false;
       saveUsers(USERS);
       logAudit("Utilisateurs", "Modification", `Compte ${u.username || u.email} ${u.active ? "réactivé" : "désactivé"}`);
@@ -1141,12 +1096,14 @@
         flashBanner($("userBanner"), "Impossible de supprimer le compte actuellement connecté.", "info");
         return;
       }
+      if (!resteAdmin(USERS.filter(x => x.id !== u.id), PROFILS)){ flashBanner($("userBanner"), MSG_PLUS_ADMIN, "info"); return; }
       if (confirm(`Supprimer le compte ${u.username || u.email} ? Cette action est définitive.`)){
         USERS = USERS.filter(x => x.id !== u.id);
         saveUsers(USERS);
         logAudit("Utilisateurs", "Suppression", `Compte supprimé : ${u.username || u.email}`);
         if (editingUserId === u.id) resetUserForm();
         renderUsers();
+        renderProfils();
         flashBanner($("userBanner"), `Compte ${u.username || u.email} supprimé.`);
       }
     }
@@ -1157,8 +1114,13 @@
   $("userForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const nom = $("uNom").value.trim(), prenom = $("uPrenom").value.trim(), email = $("uEmail").value.trim();
-    const role = $("uRole").value;
     const passwordInput = $("uPassword").value.trim();
+    const profils = profilsCoches();
+    if (!profils.length){ flashBanner($("userBanner"), "Choisissez au moins un profil.", "info"); return; }
+    const services = $("uTousServices").checked ? ["*"] : Array.from($("uServicesGrid").querySelectorAll("input:checked")).map(i => i.value);
+    if (!services.length){ flashBanner($("userBanner"), "Choisissez au moins un service, ou cochez « Tous les services ».", "info"); return; }
+    const anonymise = $("uAnonymise").checked;
+    const noms = profils.map(id => nomAffiche(profilParId(id))).join(" + ");
 
     if (editingUserId){
       const u = USERS.find(x => x.id === editingUserId);
@@ -1167,29 +1129,17 @@
         flashBanner($("userBanner"), "Un autre compte existe déjà avec cet email.", "info");
         return;
       }
-      u.nom = nom; u.prenom = prenom; u.email = email; u.username = email; u.role = role;
-      u.services = role === "manager"
-        ? Array.from($("uServicesGrid").querySelectorAll("input:checked")).map(i => i.value)
-        : ["*"];
-      u.modulePermissions = Object.assign({}, u.modulePermissions, {
-        "atmp-admin": $("uAtmpAdminPerm").value,
-        "atmp-declare": $("uAtmpDeclarePerm").checked ? "write" : "none",
-        "accident-analyse": $("uAccidentAnalysePerm").value,
-        "urgences": $("uUrgencesPerm").value,
-        "gestion-rh": $("uGestionRhPerm").value,
-        "entreprises-ext": $("uEntreprisesExtPerm").value,
-        "accueil-poste": $("uAccueilPostePerm").value,
-        "penibilite": $("uPenibilitePerm").value,
-        "dialogue-social": $("uDialogueSocialPerm").value,
-        "sante-visites": $("uSanteVisitesPerm").value,
-        "sante-visites": $("uSanteVisitesPerm").value,
-        "documentation": $("uDocumentationPerm").checked ? "write" : "none",
-      });
-      u.anonymise = $("uAnonymise").checked;
+      const modif = Object.assign({}, u, { nom, prenom, email, username: email, profils, services, anonymise });
+      if (!resteAdmin(USERS.map(x => x.id === u.id ? modif : x), PROFILS)){ flashBanner($("userBanner"), MSG_PLUS_ADMIN, "info"); return; }
+      if (peutAdministrer(u, PROFILS) && monCompte() && monCompte().id === u.id && !peutAdministrer(modif, PROFILS)){ flashBanner($("userBanner"), MSG_MON_DROIT, "info"); return; }
+      u.nom = nom; u.prenom = prenom; u.email = email; u.username = email;
+      u.profils = profils; u.services = services; u.anonymise = anonymise;   // role et modulePermissions restent figés (ancien format)
+      if (!u.role) u.role = VigieDroits.roleDepuis(VigieDroits.resoudre(u, PROFILS).droits);
       if (passwordInput) u.password = passwordInput;
       saveUsers(USERS);
-      logAudit("Utilisateurs", "Modification", `Compte modifié : ${email} (rôle ${ROLE_CHIP_LABEL[role]})`);
+      logAudit("Utilisateurs", "Modification", `Compte modifié : ${email} (profils : ${noms})`);
       renderUsers();
+      renderProfils();
       resetUserForm();
       flashBanner($("userBanner"), `Compte ${email} mis à jour${passwordInput ? " — mot de passe changé : " + passwordInput : ""}.`, "info", !!passwordInput);
       return;
@@ -1203,29 +1153,141 @@
       flashBanner($("userBanner"), "Indiquez un mot de passe ou cliquez sur « Générer ».", "info");
       return;
     }
-    const services = role === "manager"
-      ? Array.from($("uServicesGrid").querySelectorAll("input:checked")).map(i => i.value)
-      : ["*"];
-    const modulePermissions = {
-      "atmp-admin": $("uAtmpAdminPerm").value,
-      "atmp-declare": $("uAtmpDeclarePerm").checked ? "write" : "none",
-      "accident-analyse": $("uAccidentAnalysePerm").value,
-      "urgences": $("uUrgencesPerm").value,
-      "gestion-rh": $("uGestionRhPerm").value,
-      "entreprises-ext": $("uEntreprisesExtPerm").value,
-      "accueil-poste": $("uAccueilPostePerm").value,
-        "penibilite": $("uPenibilitePerm").value,
-        "dialogue-social": $("uDialogueSocialPerm").value,
-      "documentation": $("uDocumentationPerm").checked ? "write" : "none",
-    };
-    const user = { id: genId("u"), nom, prenom, email, username: email, password: passwordInput, role, services, modulePermissions, active: true, anonymise: $("uAnonymise").checked };
+    const user = { id: genId("u"), nom, prenom, email, username: email, password: passwordInput, profils, services, modulePermissions: {}, active: true, anonymise };
+    user.role = VigieDroits.roleDepuis(VigieDroits.resoudre(user, PROFILS).droits);   // indicatif : les pages lisent les profils
     USERS.push(user);
     saveUsers(USERS);
-    logAudit("Utilisateurs", "Création", `Compte créé : ${email} (rôle ${ROLE_CHIP_LABEL[role]})`);
+    logAudit("Utilisateurs", "Création", `Compte créé : ${email} (profils : ${noms})`);
     renderUsers();
+    renderProfils();
     renderAuditModuleOptions();
     flashBanner($("userBanner"), `Compte créé pour ${email} — identifiant : ${email} — mot de passe : ${passwordInput}`, "info", true);
     resetUserForm();
+  });
+
+  // ===================================================================
+  // A bis. PROFILS
+  // ===================================================================
+  let editingProfilId = null;
+  function renderProfils(){
+    $("profilsBody").innerHTML = PROFILS.map(p => {
+      const n = compterComptes(p.id);
+      return `
+      <tr data-id="${esc(p.id)}">
+        <td><b>${esc(nomAffiche(p))}</b><div class="panel-note">Affiché « ${esc(p.libelle)} » · pastille ${esc(p.pastille)}</div></td>
+        <td>${p.prereglage ? "Préréglé" : "Personnalisé"}</td>
+        <td class="mono">${n}</td>
+        <td>
+          <button type="button" class="btn btn-ghost btn-sm act-edit-profil" data-id="${esc(p.id)}"><svg class="icon"><use href="#i-settings"/></svg> Modifier</button>
+          ${p.prereglage
+            ? `<button type="button" class="btn btn-ghost btn-sm act-retablir-profil" data-id="${esc(p.id)}">Rétablir les droits d'origine</button>`
+            : `<button type="button" class="btn btn-danger btn-sm act-delete-profil" data-id="${esc(p.id)}"><svg class="icon"><use href="#i-trash"/></svg> Supprimer</button>`}
+        </td>
+      </tr>`;
+    }).join("");
+  }
+  function renderGrilleProfil(droits){
+    const sections = [];
+    VigieDroits.MODULES.forEach(m => {
+      let s = sections.find(x => x.nom === m.section);
+      if (!s){ s = { nom: m.section, mods: [] }; sections.push(s); }
+      s.mods.push(m);
+    });
+    $("pGrille").innerHTML = sections.map(s => `
+      <div class="panel-note" style="margin:12px 0 6px; font-weight:600;">${esc(VigieOrga.mots(s.nom))}</div>
+      <div class="field-grid">${s.mods.map(m => `
+        <div class="f"><label>${esc(VigieOrga.mots(m.nom))}</label>
+          <select data-mod="${esc(m.id)}">${m.niveaux.map(n => `<option value="${esc(n)}"${droits && droits[m.id] === n ? " selected" : ""}>${esc(m.libelles[n])}</option>`).join("")}</select>
+        </div>`).join("")}
+      </div>`).join("");
+  }
+  const droitsDeLaGrille = () => { const d = {}; $("pGrille").querySelectorAll("select[data-mod]").forEach(s => { d[s.dataset.mod] = s.value; }); return d; };
+  function renderCopieProfil(){
+    $("pCopie").innerHTML = '<option value="">— aucun droit au départ —</option>' + PROFILS.map(p => `<option value="${esc(p.id)}">${esc(nomAffiche(p))}</option>`).join("");
+  }
+  function resetProfilForm(){
+    editingProfilId = null;
+    $("profilForm").reset();
+    $("profilFormTitle").textContent = "Créer un profil";
+    $("profilSubmitBtn").textContent = "Créer le profil";
+    $("profilCancelBtn").style.display = "none";
+    $("pCopieWrap").style.display = "";
+    renderCopieProfil();
+    renderGrilleProfil({});
+  }
+  resetProfilForm();
+  renderProfils();
+  $("pCopie").addEventListener("change", () => { const p = profilParId($("pCopie").value); renderGrilleProfil(p ? p.droits : {}); });
+
+  // Enregistre la nouvelle liste de profils si le droit d'administrer survit (au moins un compte, et le vôtre).
+  function appliquerProfils(apres, message){
+    if (!resteAdmin(USERS, apres)){ flashBanner($("profilBanner"), MSG_PLUS_ADMIN, "info"); return false; }
+    const moi = monCompte();
+    if (peutAdministrer(moi, PROFILS) && !peutAdministrer(moi, apres)){ flashBanner($("profilBanner"), MSG_MON_DROIT, "info"); return false; }
+    PROFILS = VigieDroits.fusionnerProfils(apres);
+    saveProfils(PROFILS);
+    renderProfils();
+    renderUsers();
+    renderProfilsCheckboxes(profilsCoches());
+    renderCopieProfil();
+    return true;
+  }
+
+  $("profilsBody").addEventListener("click", (e) => {
+    const edit = e.target.closest(".act-edit-profil"), retablir = e.target.closest(".act-retablir-profil"), suppr = e.target.closest(".act-delete-profil");
+    if (edit){
+      const p = profilParId(edit.dataset.id);
+      if (!p) return;
+      editingProfilId = p.id;
+      $("pNom").value = p.nom; $("pLibelle").value = p.libelle; $("pPastille").value = p.pastille;
+      renderGrilleProfil(p.droits);
+      $("pCopieWrap").style.display = "none";
+      $("profilFormTitle").textContent = `Modifier — ${p.nom}`;
+      $("profilSubmitBtn").textContent = "Enregistrer les modifications";
+      $("profilCancelBtn").style.display = "";
+      $("profilForm").scrollIntoView({ behavior:"smooth" });
+    }
+    if (retablir){
+      const p = profilParId(retablir.dataset.id), g = VigieDroits.PREREGLES.find(x => x.id === retablir.dataset.id);
+      if (!p || !g || !confirm(`Rétablir les droits d'origine du profil « ${p.nom} » ? Ses droits actuels seront remplacés.`)) return;
+      const apres = PROFILS.map(x => x.id === p.id ? { id: g.id, nom: g.nom, libelle: g.libelle, pastille: g.pastille, droits: Object.assign({}, g.droits), prereglage: true } : x);
+      if (appliquerProfils(apres)){
+        logAudit("Profils", "Modification", `Profil rétabli à ses droits d'origine : ${g.nom}`);
+        flashBanner($("profilBanner"), `Profil « ${g.nom} » rétabli.`);
+        if (editingProfilId === p.id) resetProfilForm();
+      }
+    }
+    if (suppr){
+      const p = profilParId(suppr.dataset.id);
+      if (!p) return;
+      const n = compterComptes(p.id);
+      if (n){ flashBanner($("profilBanner"), `Ce profil est donné à ${n} compte(s) : retirez-le d'abord de leurs fiches.`, "info"); return; }
+      if (!confirm(`Supprimer le profil « ${p.nom} » ? Cette action est définitive.`)) return;
+      if (appliquerProfils(PROFILS.filter(x => x.id !== p.id))){
+        logAudit("Profils", "Suppression", `Profil supprimé : ${p.nom}`);
+        flashBanner($("profilBanner"), `Profil « ${p.nom} » supprimé.`);
+        if (editingProfilId === p.id) resetProfilForm();
+      }
+    }
+  });
+  $("profilCancelBtn").addEventListener("click", resetProfilForm);
+
+  $("profilForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const nom = $("pNom").value.trim();
+    if (!nom) return;
+    if (PROFILS.some(p => p.id !== editingProfilId && p.nom.toLowerCase() === nom.toLowerCase())){
+      flashBanner($("profilBanner"), "Un autre profil porte déjà ce nom.", "info");
+      return;
+    }
+    const existant = editingProfilId ? profilParId(editingProfilId) : null;
+    const profil = { id: existant ? existant.id : genId("p"), nom, libelle: $("pLibelle").value.trim() || nom, pastille: $("pPastille").value.trim() || nom.toUpperCase(),
+      droits: droitsDeLaGrille(), prereglage: !!(existant && existant.prereglage) };
+    const apres = existant ? PROFILS.map(p => p.id === existant.id ? profil : p) : PROFILS.concat([profil]);
+    if (!appliquerProfils(apres)) return;
+    logAudit("Profils", existant ? "Modification" : "Création", `${existant ? "Profil modifié" : "Profil créé"} : ${nom}`);
+    flashBanner($("profilBanner"), `Profil « ${nom} » ${existant ? "mis à jour" : "créé"}. Les comptes qui l'ont le voient au prochain chargement de page.`);
+    resetProfilForm();
   });
 
   // ===================================================================

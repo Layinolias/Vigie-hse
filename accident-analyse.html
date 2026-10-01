@@ -320,23 +320,21 @@
   })();
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
-  const role = (session && session.role) || "ag";
-  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
 
   // ---------- Contrôle d'accès (permissions granulaires par module) ----------
-  const analysePermLevel = (role === "admin" || role === "rh") ? "write" : ((session && session.modulePermissions && session.modulePermissions["accident-analyse"]) || "none");
-  const canAnalyse = analysePermLevel !== "none";
-  const canAnalyseWrite = analysePermLevel === "write";
+  const canAnalyse = D.peut("accident-analyse", "consulter");
+  const canAnalyseWrite = D.peut("accident-analyse", "gerer");
   if (!canAnalyse){ location.href = "dashboard.html"; }
 
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
-  $("roleChip").textContent = role.toUpperCase();
-  if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
-  const canEdit = role === "rh" || role === "admin";
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
   if (!canAnalyseWrite){ $("readonlyBanner").style.display = "flex"; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 

@@ -233,7 +233,7 @@
     try {
       const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
       if (!s || !s.user){ location.href = "login.html"; return; }
-      if (s.role !== "rh" && s.role !== "admin" && !(s.modulePermissions && s.modulePermissions["atmp-declare"] === "write")){ location.href = "registre-at-mp.html"; }
+      if (!VigieDroits.pour(s).peut("atmp", "declarer")){ location.href = "registre-at-mp.html"; }
     } catch(e){ location.href = "login.html"; }
   })();
 </script>
@@ -390,11 +390,10 @@
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
-  const sessRole = (session && session.role) || "ag";
-  const isRhAdmin = sessRole === "rh" || sessRole === "admin";
+  const D = VigieDroits.pour(session);
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = sessRole === "admin" ? "Administrateur" : (isRhAdmin ? "Compte RH" : "Accès déclaration AT/MP");
+  $("userRoleLabel").textContent = D.peut("administration", "gerer") ? "Administrateur" : (D.peut("atmp", "gerer") ? "Compte RH" : "Accès déclaration AT/MP");
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js

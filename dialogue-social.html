@@ -459,8 +459,7 @@
   })();
 
   const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
-  const role = (session && session.role) || "ag";
-  const ROLE_LABELS = { admin:"Administrateur", rh:"Compte RH", manager:"Manager", ag:"Compte Agent" };
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
   const myServices = (session && session.services) || ["*"];
   const isScoped = !myServices.includes("*");
   // P1c : sur le serveur, un compte limité à certains services ne reçoit que leurs données. Le dire, pour
@@ -472,17 +471,16 @@
   }
   $("userAvatar").textContent = (session.user || "?").slice(0,2);
   $("userName").textContent = session.user;
-  $("userRoleLabel").textContent = VigieOrga.mots(ROLE_LABELS[role] || "Compte Agent");
-  $("roleChip").textContent = role.toUpperCase();
-  if (role === "ag" || role === "manager"){ $("roleChip").classList.add("ag"); }
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
 
   // ---------- Contrôle d'accès (permission granulaire "dialogue-social") ----------
-  const dsPermLevel = (role === "admin" || role === "rh") ? "write" : ((session && session.modulePermissions && session.modulePermissions["dialogue-social"]) || "none");
-  const canDs = dsPermLevel !== "none";
-  const canDsWrite = dsPermLevel === "write";
+  const canDs = D.peut("dialogue-social", "consulter");
+  const canDsWrite = D.peut("dialogue-social", "participer");
   if (!canDs){ location.href = "dashboard.html"; }
 
-  const canEdit = role === "rh" || role === "admin";
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
 
   const AUDIT_KEY = "vigie_hse_audit_log";
@@ -503,7 +501,7 @@
   // site dont les actions rejoignent le Plan d'actions, indicateurs sans nom ni donnée de santé.
   // Direction = comptes RH et administrateurs ; représentants = permission « dialogue-social ».
   const Q_KEY = "vigie_hse_ds_questions", R_KEY = "vigie_hse_ds_reunions", V_KEY = "vigie_hse_ds_visites";
-  const estDirection = role === "admin" || role === "rh";
+  const estDirection = D.peut("dialogue-social", "direction");
   const moi = (session && session.user) || "—";
   const lireListe = k => { try { const l = JSON.parse(VigieStore.getItem(k) || "[]"); return Array.isArray(l) ? l : []; } catch(e){ return []; } };
   const ecrireListe = (k, l) => { try { VigieStore.setItem(k, JSON.stringify(l)); } catch(e){} };

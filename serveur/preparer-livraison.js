@@ -24,7 +24,7 @@ if (modifies.length && !process.argv.includes('--brouillon')){
 }
 // suivis par git (plus, pour un brouillon, les nouveaux pas encore commités), noms séparés par NUL
 const fichiers = git('ls-files', '-z', '--cached', '--others', '--exclude-standard').split('\0').filter(Boolean).filter(GARDER);
-for (const f of ['Lancer VIGIE HSE.bat', 'Restaurer une sauvegarde.bat', 'LISEZ-MOI.txt', 'serveur/serveur.js', 'serveur/lancer-poste.js', 'serveur/restaurer.js', 'serveur/poste-commun.js', 'login.html', 'assets/stockage.js'])
+for (const f of ['Lancer VIGIE HSE.bat', 'Restaurer une sauvegarde.bat', 'LISEZ-MOI.txt', 'serveur/serveur.js', 'serveur/lancer-poste.js', 'serveur/restaurer.js', 'serveur/poste-commun.js', 'login.html', 'assets/stockage.js', 'assets/droits.js'])
   if (!fichiers.includes(f)) throw new Error('fichier indispensable absent du dépôt : ' + f);
 
 const d = new Date(), deux = n => String(n).padStart(2, '0');

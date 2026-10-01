@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 182 points au 2026-10-01 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 183 points au 2026-10-01 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -241,6 +241,7 @@ Ajouté le 2026-09-15 : le point "les données affichées changent bien selon le
 - [ ] La topbar (météo/score/sélecteur/horloge) reste utilisable sans élément coupé ou superposé.
 - [ ] **Sur un vrai téléphone** (pas seulement un navigateur rétréci) : la page s'affiche à la taille du téléphone, pas comme un écran d'ordinateur réduit ; le menu (bouton ☰) a des entrées grandes et faciles à toucher, les titres de page sont lisibles sans zoomer. Sur le tableau de bord, la barre du haut montre la météo, le score et Ville / Agglomération / Tous sans rien superposer (l'horloge et le badge de rôle y sont masqués : le pied du menu garde le compte).
 - [ ] Les formulaires de création (Déclarer un AT/MP, Évaluer un risque, etc.) restent utilisables en une colonne.
+- [ ] **Styles partagés** (feuilles `jetons.css` et `commun.css`) : Administration, Document Unique, Registre AT/MP, Reporting, Déclaration AT/MP et Évaluation DUERP s'affichent comme avant — menu latéral, bandeau de page, boutons, champs, tableaux et pastilles — en thème clair, en thème sombre et sur téléphone ; le tableau de bord, la connexion et la page d'accueil aussi.
 
 ## 6. Multi-navigateur
 

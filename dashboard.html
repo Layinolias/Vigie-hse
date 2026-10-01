@@ -4,51 +4,23 @@
 <title>Tableau de bord</title>
 <meta name="description" content="Centre de pilotage HSE de la collectivité — vue d'ensemble Santé au travail et Sécurité &amp; Risques.">
 <link rel="stylesheet" href="assets/polices/polices.css">
+<link rel="stylesheet" href="assets/jetons.css">
 <style>
   /* ===== HSE Soft Tech — Design tokens ===== */
   :root{
-    --bg:#F5F7FA; --bg-2:#EEF2F6; --surface:#FAFBFD; --surface-el:#FFFFFF;
-    --text:#26343D; --text-muted:#687782; --text-faint:#9AA7AF; --border:#E4E9EE; --border-rgb:228,233,238;
-    --accent:#7D8FE8; --accent-rgb:125,143,232; --accent-blue:#78B8D0; --accent-blue-rgb:120,184,208;
-    --accent-violet:#A991E8; --accent-violet-rgb:169,145,232;
-    --success:#72B89A; --success-rgb:114,184,154; --warning:#E5B66A; --warning-rgb:229,182,106;
-    --danger:#DD7A7A; --danger-rgb:221,122,122; --critical:#C95E6B; --critical-rgb:201,94,107;
-    --info:#78AFC8; --info-rgb:120,175,200; --ai:#A18BE5; --ai-rgb:161,139,229;
-    --danger-bg:#FFF4F4; --warning-bg:#FFF8ED; --success-bg:#F1FAF6; --info-bg:#F1F8FB;
-    --r-sm:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
-    --shadow-sm:0 4px 20px rgba(38,52,61,.04); --shadow-md:0 10px 34px rgba(38,52,61,.06);
-    --sp-xs:4px; --sp-sm:8px; --sp-md:16px; --sp-lg:24px; --sp-xl:32px;
-    --sidebar-w:250px;
-    --sidebar-w-collapsed:68px;
-    --zone-ville-bg:#F0F7FF; --zone-agglo-bg:#F0FDF4;
+    --info:#78AFC8; --info-rgb:120,175,200; --ai:#A18BE5; --ai-rgb:161,139,229; --info-bg:#F1F8FB;
+    --sp-xs:4px; --sp-sm:8px; --sp-md:16px; --sp-lg:24px; --sp-xl:32px; --zone-ville-bg:#F0F7FF;
+    --zone-agglo-bg:#F0FDF4;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
-      --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
-      --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
-      --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
-      --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
-      --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
       --info:#8AC0D6; --info-rgb:138,192,214; --ai:#B39EEE; --ai-rgb:179,158,238;
-      --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12);
-      --success-bg:rgba(134,199,172,.12); --info-bg:rgba(138,192,214,.12);
-      --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
-      --zone-ville-bg:#121B24; --zone-agglo-bg:#0F1A15;
+      --info-bg:rgba(138,192,214,.12); --zone-ville-bg:#121B24; --zone-agglo-bg:#0F1A15;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#0F1417; --bg-2:#141A1F; --surface:#171E23; --surface-el:#1C242A;
-    --text:#E7EDF0; --text-muted:#9AACB5; --text-faint:#6B7C85; --border:#263038; --border-rgb:38,48,56;
-    --accent:#8FA0F2; --accent-rgb:143,160,242; --accent-blue:#8FC7DC; --accent-blue-rgb:143,199,220;
-    --accent-violet:#BBA5EF; --accent-violet-rgb:187,165,239;
-    --success:#86C7AC; --success-rgb:134,199,172; --warning:#EDC786; --warning-rgb:237,199,134;
-    --danger:#E8938F; --danger-rgb:232,147,143; --critical:#D97985; --critical-rgb:217,121,133;
     --info:#8AC0D6; --info-rgb:138,192,214; --ai:#B39EEE; --ai-rgb:179,158,238;
-    --danger-bg:rgba(232,147,143,.12); --warning-bg:rgba(237,199,134,.12);
-    --success-bg:rgba(134,199,172,.12); --info-bg:rgba(138,192,214,.12);
-    --shadow-sm:0 4px 20px rgba(0,0,0,.26); --shadow-md:0 12px 36px rgba(0,0,0,.32);
-    --zone-ville-bg:#121B24; --zone-agglo-bg:#0F1A15;
+    --info-bg:rgba(138,192,214,.12); --zone-ville-bg:#121B24; --zone-agglo-bg:#0F1A15;
   }
 
   *{box-sizing:border-box}

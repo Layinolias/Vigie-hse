@@ -103,6 +103,8 @@ function queDesAjouts(ancienne, nouvelle){
 
 module.exports = {
   niveau, droitsDe, atteint,
+  // les registres qui ont une règle explicite (un test vérifie que chaque clé synchronisée de VigieStore.CLES y est)
+  cles: Object.keys(REGLES).map(k => PREFIXE + k),
   // ancienne / nouvelle : chaînes stockées (null = absente, ou suppression demandée)
   peutEcrire(session, cle, nouvelle, ancienne){
     const n = niveau(session, cle);

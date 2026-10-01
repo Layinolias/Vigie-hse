@@ -1,49 +1,70 @@
 // Droits d'écriture appliqués par le serveur VIGIE HSE (étape P1b, 2e partie).
 //
-// Mêmes règles que les écrans (Documentation/ETAT-DU-PROJET.md §7) — relevées page par page le
-// 2026-09-24 : jusqu'ici un agent en lecture seule l'était parce que les boutons étaient cachés ; un
-// appel direct à l'API pouvait tout écrire. Désormais le serveur refuse ce que l'écran n'autorise pas.
+// Mêmes règles que les écrans (Documentation/ETAT-DU-PROJET.md §7). Un compte a un niveau d'accès par module,
+// donné par ses profils (assets/droits.js) ; chaque registre dépend d'un module et d'un niveau (table REGLES).
 //
 // Trois niveaux par registre et par personne :
 //   « complet » : écrire, modifier, supprimer ;
 //   « ajout »   : ajouter des éléments, sans modifier ni retirer ceux qui existent — le Registre SST
-//                 (tout agent peut y déposer une observation, seuls RH et administrateurs y répondent),
-//                 les journaux (chacun y laisse la trace de ses actions, personne d'autre que RH/admin
-//                 ne peut les effacer), et la déclaration d'un AT/MP avec la permission « atmp-declare » ;
+//                 (déposer une observation), les journaux (chacun y laisse la trace de ses actions, seuls les
+//                 gestionnaires du module peuvent les vider), et la déclaration d'un AT/MP (niveau « déclarer ») ;
 //   « aucun ».
-// Un registre absent de la table suit la règle générale : complet pour RH et administrateurs, aucun
-// pour les autres. Les lectures sont filtrées ailleurs : serveur/lecture.js (ce que les écrans d'un rôle
-// affichent), serveur/perimetre.js (les services d'un compte), serveur/anonymisation.js.
+// Un registre absent de la table suit la règle générale : réservé à l'administration. Les lectures sont
+// filtrées ailleurs : serveur/lecture.js (ce que les écrans d'un compte affichent), serveur/perimetre.js (les
+// services d'un compte), serveur/anonymisation.js.
 'use strict';
 const Anonymisation = require('./anonymisation.js');
+const VigieDroits = require('../assets/droits.js');   // catalogue des modules et profils : le même fichier que les pages
 const PREFIXE = 'vigie_hse_';
-const estAdmin = s => s.role === 'admin';
-const estRh = s => s.role === 'admin' || s.role === 'rh';
-const permission = (s, p) => (s.modulePermissions || {})[p];
-// RH et administrateurs, ou la permission de module accordée en écriture
-const parModule = p => s => (estRh(s) || permission(s, p) === 'write') ? 'complet' : 'aucun';
-const adminSeul = s => estAdmin(s) ? 'complet' : 'aucun';
-const ajoutPourTous = s => estRh(s) ? 'complet' : 'ajout';
 
+// Les droits d'un compte : ceux de sa session (posés par serveur/comptes.js à partir de ses profils), ou — session
+// construite à la main par un test, ancien format role + modulePermissions — résolus à la volée.
+const memo = new WeakMap();
+function droitsDe(s){
+  if (s && s.droits && typeof s.droits === 'object') return s.droits;
+  if (!s || typeof s !== 'object') return VigieDroits.resoudre({}, null).droits;
+  if (!memo.has(s)) memo.set(s, VigieDroits.resoudre(s, null).droits);
+  return memo.get(s);
+}
+const atteint = (s, module, niveau) => VigieDroits.atteint(droitsDe(s), module, niveau);
+
+// Une règle : « complet » à partir d'un niveau du module ; « ajout » à partir d'un autre niveau, ou pour tous
+// (journaux, registre SST) ; sinon « aucun ».
+const regle = (module, complet, ajout) => s =>
+  atteint(s, module, complet) ? 'complet'
+  : ajout === 'tous' ? 'ajout'
+  : (ajout && atteint(s, module, ajout)) ? 'ajout' : 'aucun';
+const GERER = module => regle(module, 'gerer');
+
+// Chaque registre synchronisé (VigieStore.CLES) a sa règle ici : un registre absent suivrait la règle générale,
+// réservée à l'administration (test-droits-differentiel.js vérifie qu'aucun n'est oublié).
 const REGLES = {
-  // Administration (réservée aux administrateurs)
-  users: adminSeul, referentials: adminSeul, news: adminSeul, veille: adminSeul,
-  // modules à permission granulaire (administration.html → Utilisateurs)
-  dataset: s => estRh(s) ? 'complet' : (permission(s, 'atmp-declare') === 'write' ? 'ajout' : 'aucun'),
-  atmp_dossiers: parModule('atmp-admin'), atmp_arretes: parModule('atmp-admin'),
-  analyses_accident: parModule('accident-analyse'),
-  exercices_urgence: parModule('urgences'),
-  visites: parModule('sante-visites'), rdv_medicaux: parModule('sante-visites'), modeles_convocation: parModule('sante-visites'),
-  agents: parModule('gestion-rh'), heures_travaillees: parModule('gestion-rh'),
-  interventions_ee: parModule('entreprises-ext'),
-  accueils: parModule('accueil-poste'), modeles_accueil: parModule('accueil-poste'), accueil_delai: parModule('accueil-poste'),
-  wiki: parModule('documentation'), documents: parModule('documentation'), doc_types: parModule('documentation'),
-  postes: parModule('penibilite'), expositions: parModule('penibilite'), penibilite_parametres: parModule('penibilite'),
-  ds_questions: parModule('dialogue-social'), ds_reunions: parModule('dialogue-social'), ds_visites: parModule('dialogue-social'),
-  // ouverts à tous, en ajout seulement
-  rsst: ajoutPourTous, audit_log: ajoutPourTous, duerp_log: ajoutPourTous, rh_log: ajoutPourTous,
+  // Administration
+  users: GERER('administration'), referentials: GERER('administration'), news: GERER('administration'),
+  veille: GERER('administration'), profils: GERER('administration'),
+  audit_log: regle('administration', 'gerer', 'tous'),
+  // Registre AT/MP : l'ajout (déclarer) ne modifie ni ne retire rien
+  dataset: regle('atmp', 'gerer', 'declarer'), rh_log: regle('atmp', 'gerer', 'tous'),
+  duerp_dataset: GERER('duerp'), duerp_log: regle('duerp', 'gerer', 'tous'),
+  rsst: regle('rsst', 'repondre', 'deposer'),
+  produits_chimiques: GERER('produits'),
+  actions: GERER('actions'),
+  verifications: GERER('verifications'),
+  inspections: GERER('inspections'), inspection_trames: GERER('inspections'),
+  habilitations: GERER('formations'),
+  epi_stock: GERER('epi'), epi_dotations: GERER('epi'), epi_lavages: GERER('epi'), epi_catalogue: GERER('epi'),
+  atmp_dossiers: GERER('atmp-admin'), atmp_arretes: GERER('atmp-admin'),
+  analyses_accident: GERER('accident-analyse'),
+  exercices_urgence: GERER('urgences'),
+  visites: GERER('sante-visites'), rdv_medicaux: GERER('sante-visites'), modeles_convocation: GERER('sante-visites'),
+  agents: GERER('gestion-rh'), heures_travaillees: GERER('gestion-rh'),
+  interventions_ee: GERER('entreprises-ext'),
+  accueils: GERER('accueil-poste'), modeles_accueil: GERER('accueil-poste'), accueil_delai: GERER('accueil-poste'),
+  wiki: regle('documentation', 'rediger'), documents: regle('documentation', 'rediger'), doc_types: regle('documentation', 'rediger'),
+  postes: GERER('penibilite'), expositions: GERER('penibilite'), penibilite_parametres: GERER('penibilite'),
+  ds_questions: regle('dialogue-social', 'participer'), ds_reunions: regle('dialogue-social', 'participer'), ds_visites: regle('dialogue-social', 'participer'),
 };
-const regleGenerale = s => estRh(s) ? 'complet' : 'aucun';
+const regleGenerale = GERER('administration');
 const nomCourt = cle => cle.startsWith(PREFIXE) ? cle.slice(PREFIXE.length) : cle;
 
 function niveau(session, cle){
@@ -81,13 +102,13 @@ function queDesAjouts(ancienne, nouvelle){
 }
 
 module.exports = {
-  niveau,
+  niveau, droitsDe, atteint,
   // ancienne / nouvelle : chaînes stockées (null = absente, ou suppression demandée)
   peutEcrire(session, cle, nouvelle, ancienne){
     const n = niveau(session, cle);
     return n === 'complet' || (n === 'ajout' && queDesAjouts(ancienne, nouvelle));
   },
-  peutEffacer: session => estAdmin(session),
+  peutEffacer: session => atteint(session, 'administration', 'gerer'),
   // ce que la page reçoit pour ne pas tenter d'écritures vouées au refus (assets/stockage.js)
   resume(session){
     const cles = {};

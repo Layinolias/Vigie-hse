@@ -22,16 +22,18 @@
 // jamais sa vue réduite à la place du registre.
 'use strict';
 const { grefferAjouts } = require('./anonymisation.js');
+const { atteint } = require('./droits.js');
 
 const RETIRE = 'retire';
 const ATMP_VUE_AGENT = ['id', 'collectivite', 'service', 'dateAT', 'dateMois', 'typeAtMp', 'arret', 'statutArret', 'joursArret',
   'circonstances', 'etat', 'risque', 'siege', 'nature', 'elementMateriel'];
 const ANALYSE_VUE_ACTIONS = ['id', 'atmpId', 'collectivite', 'service', 'dateAnalyse', 'actions'];
 
-const estRh = p => !!p && (p.role === 'rh' || p.role === 'admin');
-const perm = (p, m) => !!(p && p.modulePermissions && (p.modulePermissions[m] === 'read' || p.modulePermissions[m] === 'write'));
-const registreComplet = p => estRh(p) || perm(p, 'atmp-admin') || perm(p, 'accident-analyse');
-const encadrement = p => estRh(p) || (!!p && p.role === 'manager') || perm(p, 'sante-visites');
+// ce que les profils du compte lui donnent (assets/droits.js, via serveur/droits.js)
+const peut = (p, module, niveau) => !!p && atteint(p, module, niveau);
+const registreComplet = p => peut(p, 'atmp', 'gerer') || peut(p, 'atmp-admin', 'consulter') || peut(p, 'accident-analyse', 'consulter');
+const encadrement = p => peut(p, 'sante-visites', 'consulter');
+const administrateur = p => peut(p, 'administration', 'gerer') && !p.anonymise;
 
 // null : valeur complète ; RETIRE : rien ; tableau : les seuls champs transmis de chaque enregistrement
 function regle(page, cle){
@@ -39,12 +41,13 @@ function regle(page, cle){
     case 'vigie_hse_dataset':           return registreComplet(page) ? null : ATMP_VUE_AGENT;
     case 'vigie_hse_rh_log':            return registreComplet(page) ? null : RETIRE;
     case 'vigie_hse_atmp_dossiers':
-    case 'vigie_hse_atmp_arretes':      return estRh(page) || perm(page, 'atmp-admin') ? null : RETIRE;
-    case 'vigie_hse_analyses_accident': return estRh(page) || perm(page, 'accident-analyse') ? null : ANALYSE_VUE_ACTIONS;
+    case 'vigie_hse_atmp_arretes':      return peut(page, 'atmp-admin', 'consulter') ? null : RETIRE;
+    case 'vigie_hse_analyses_accident': return peut(page, 'accident-analyse', 'consulter') ? null : ANALYSE_VUE_ACTIONS;
     case 'vigie_hse_visites':
     case 'vigie_hse_rdv_medicaux':      return encadrement(page) ? null : RETIRE;
     case 'vigie_hse_audit_log':
-    case 'vigie_hse_users':             return page && page.role === 'admin' && !page.anonymise ? null : RETIRE;
+    case 'vigie_hse_users':
+    case 'vigie_hse_profils':           return administrateur(page) ? null : RETIRE;
     default:                            return null;
   }
 }

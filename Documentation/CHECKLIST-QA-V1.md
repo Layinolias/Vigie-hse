@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 188 points au 2026-10-06 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 189 points au 2026-10-06 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -73,6 +73,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Créer une inspection dans Inspection/Audit avec au moins un point "Non conforme", vérifier qu'une action apparaît automatiquement dans Plan d'Actions.
 - [ ] Exporter un module en Excel (le fichier se télécharge et s'ouvre).
 - [ ] Exporter le Document Unique ou le Registre AT/MP en PDF (le dialogue d'impression s'ouvre, aperçu correct).
+- [ ] **Remontée des événements par type** (Indicateurs & Reporting, après avoir ouvert le Registre AT/MP) : période « Depuis le début », le panneau liste dans cet ordre Presque accident 7, Incident bénin 10, Accident de travail sans arrêt 0, Accident de travail avec arrêt 6, Accident de trajet 2, Maladie professionnelle 0 (données de démonstration) ; leur somme est le chiffre « AT/MP » de l'en-tête. Déclarer un presque-accident le fait passer à 8 ; l'export Excel du rapport a une feuille « AT-MP par type ».
 
 ### `manager` (manager@verchamps.fr — scopé Voirie + Espace Vert)
 - [ ] Ne voit que les données des services Voirie/Espace Vert dans les modules concernés (Registre AT/MP, Document Unique, Plan d'Actions, etc.) — pas les autres services.

@@ -45,7 +45,7 @@ Prérequis chez lui : **Node.js 22.5 ou plus récent** (version « LTS » de nod
 
 | Date | Commit | Remis à | Remarque |
 |---|---|---|---|
-| — | — | — | Aucun paquet remis pour l'instant |
+| 2026-10-06 | `3dad53a` | à remettre (`livraison/VIGIE-HSE-2026-10-06.zip`) | Plans d'urgence par site, dates importées lues à la française, kit de reprise à 19 modèles. Mise à jour depuis `fa013e2` (paquet du 2026-10-01) et depuis `a9d5b66` (paquet remis le 2026-09-29) : 8/8 chacun ; test-paquet 17/17 (93 fichiers) ; restauration 22/22. |
 
 ## Avant qu'il y mette de vraies données
 

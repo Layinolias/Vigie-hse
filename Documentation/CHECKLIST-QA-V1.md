@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 183 points au 2026-10-01 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 187 points au 2026-10-06 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -101,6 +101,10 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Peut créer un exercice d'urgence (site, type, date, périodicité) dans "Situations d'urgence", ajouter une action corrective, enregistrer, modifier l'exercice et retrouver les données.
 - [ ] L'action corrective créée apparaît bien dans **Plan d'Actions** avec l'origine "Urgence".
 - [ ] Le panneau "Prochaine échéance par site & type" affiche correctement le statut (À jour/À programmer/En retard) calculé sur le dernier exercice de chaque site+type — créer un second exercice plus récent pour le même site/type et vérifier que l'échéance se recalcule sur ce dernier, pas sur le premier.
+- [ ] Onglet « Plans d'urgence par site » (Situations d'urgence) : le plan de démonstration de l'Hôtel de Ville s'affiche (numéros d'urgence, alerte, consignes, points de rassemblement, personnes désignées, moyens de secours), avec en dessous les exercices de ce site et, pour un compte qui a accès aux Vérifications périodiques, ses équipements suivis ; en tête, la liste des sites qui ont des exercices mais pas de plan.
+- [ ] Cliquer un site de cette liste ouvre un nouveau plan pré-rempli (site, rattachement repris de l'exercice, les cinq numéros d'urgence publics) ; ajouter un point de rassemblement et un moyen de secours, enregistrer : le plan apparaît et reste après rechargement. Créer un second plan pour le même site (même écrit avec d'autres majuscules ou sans accents) est refusé.
+- [ ] « Imprimer la consigne » donne une seule page A4 « Consignes de sécurité » lisible, numéros d'urgence en grand ; l'export `.xlsx` des plans se réimporte sans doublon ni perte.
+- [ ] Un compte qui n'a que « consulter » sur Situations d'urgence voit les plans et peut imprimer la consigne, sans les boutons Nouveau plan / Importer / Modifier / Supprimer.
 - [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : les quatre modules/liens doivent être invisibles, et taper les URLs `dossiers-atmp-citis.html` / `accident-analyse.html` / `saisie-rh.html` / `urgences-exercices.html` directement doit rediriger (dashboard ou registre AT/MP selon la page).
 
 ### Gestion RH (`RH1`/`RH2` ou `admin` — accès write d'office, pas une permission granulaire pour ces deux rôles)

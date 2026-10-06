@@ -51,6 +51,7 @@ const PAGE_UNIQUE = {
   vigie_hse_documents: 'documentation', vigie_hse_doc_types: 'documentation',
   vigie_hse_inspection_trames: 'inspections',
   vigie_hse_modeles_convocation: 'sante-visites',
+  vigie_hse_plans_urgence: 'urgences',
 };
 
 // null : valeur complète ; RETIRE : rien ; tableau : les seuls champs transmis de chaque enregistrement

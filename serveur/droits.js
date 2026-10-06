@@ -55,7 +55,7 @@ const REGLES = {
   epi_stock: GERER('epi'), epi_dotations: GERER('epi'), epi_lavages: GERER('epi'), epi_catalogue: GERER('epi'),
   atmp_dossiers: GERER('atmp-admin'), atmp_arretes: GERER('atmp-admin'),
   analyses_accident: GERER('accident-analyse'),
-  exercices_urgence: GERER('urgences'),
+  exercices_urgence: GERER('urgences'), plans_urgence: GERER('urgences'),
   visites: GERER('sante-visites'), rdv_medicaux: GERER('sante-visites'), modeles_convocation: GERER('sante-visites'),
   agents: GERER('gestion-rh'), heures_travaillees: GERER('gestion-rh'),
   interventions_ee: GERER('entreprises-ext'),

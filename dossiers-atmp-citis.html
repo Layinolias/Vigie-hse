@@ -624,7 +624,7 @@
     const idRaw = String(rawPick(raw, ["id at mp","atmpid"])).trim();
     if (idRaw && ATMP_EVENTS.some(e => e.id === idRaw)) return idRaw;
     const nom = normKey(rawPick(raw, ["nom"]) || (rawPick(raw, agentAliases).split(" ")[0] || ""));
-    const dateAT = String(rawPick(raw, ["date at"])).trim();
+    const dateAT = VigieDates.depuisImport(rawPick(raw, ["date at"]));
     // nom vide : ne jamais matcher un événement dont le nom serait lui aussi vide/mal formé
     // (les deux tentatives ci-dessous doivent être gardées, pas seulement la première —
     // trouvé en testant le correctif du 2026-09-18 : la seconde matchait "" === "").
@@ -646,7 +646,7 @@
 
         // une date saisie comme vraie date Excel arrive en objet Date (cellDates) : on la ramène à
         // « AAAA-MM-JJ » local, comme les autres modules — sinon elle s'enregistrait en texte illisible
-        const dateCell = v => (v instanceof Date && !isNaN(v)) ? VigieDates.iso(v) : String(v == null ? "" : v).trim();
+        const dateCell = v => VigieDates.depuisImport(v) || String(v == null ? "" : v).trim();   // texte JJ/MM/AAAA lu à la française ; autre texte gardé tel quel
         const oui = v => normKey(v).includes("oui");
         let pAdded = 0, pSkipped = 0;
 

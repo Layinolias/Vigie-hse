@@ -692,16 +692,7 @@
 
   function normKeyImp(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
   function parseDateImp(v){
-    if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;
-    const s = String(v || "").trim();
-    if (!s) return "";
-    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-    if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
-    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if (m) return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
-    const d = new Date(s);
-    if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    return "";
+    return VigieDates.depuisImport(v);   // vraie date, ou texte JJ/MM/AAAA lu à la française (assets/dates-locales.js)
   }
   function rawPick(raw, aliases){
     const n = {};
@@ -769,7 +760,7 @@
             rec.actions.push({
               id: genId("act"), description,
               responsable: String(rawPick(raw, ["responsable"])).trim(),
-              echeance: String(rawPick(raw, ["echeance"])).trim(),
+              echeance: parseDateImp(rawPick(raw, ["echeance"])),
               statut: String(rawPick(raw, ["statut"])).trim() || "À faire",
             });
             actAdded++;

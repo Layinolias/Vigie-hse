@@ -667,19 +667,9 @@
   function normKey(s){
     return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
   }
-  function pad2(n){ return String(n).padStart(2,"0"); }
 
   function parseDateValue(v){
-    if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${pad2(v.getMonth()+1)}-${pad2(v.getDate())}`;
-    const s = String(v || "").trim();
-    if (!s) return "";
-    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-    if (m) return `${m[1]}-${pad2(m[2])}-${pad2(m[3])}`;
-    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if (m) return `${m[3]}-${pad2(m[1])}-${pad2(m[2])}`;
-    const d = new Date(s);
-    if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-    return "";
+    return VigieDates.depuisImport(v);   // vraie date, ou texte JJ/MM/AAAA lu à la française (assets/dates-locales.js)
   }
 
   function mapImportedRow(raw){

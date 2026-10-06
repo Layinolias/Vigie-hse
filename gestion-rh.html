@@ -618,7 +618,7 @@
   // fichier), avec le même garde-fou anti-boucle que l'organigramme.
   function normImp(s){ return String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
   function champsImp(raw){ const n = {}; Object.keys(raw).forEach(k => { n[normImp(k)] = raw[k]; }); return n; }
-  const dateImp = v => (v instanceof Date && !isNaN(v)) ? VigieDates.iso(v) : String(v == null ? "" : v).trim();
+  const dateImp = v => VigieDates.depuisImport(v) || String(v == null ? "" : v).trim();   // texte JJ/MM/AAAA lu à la française ; autre texte gardé tel quel
   const collectiviteImp = v => VigieOrga.reconnaitre(v);
   // colonne « Collectivité », ou celle qui porte le mot choisi dans Administration (« Site », « Usine »…)
   const colonneCollectivite = n => n["collectivite"] !== undefined ? n["collectivite"] : n[normImp(VigieOrga.libelle())];

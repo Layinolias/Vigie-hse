@@ -133,6 +133,9 @@
   var O = {
     CLE: CLE, MOTS: MOTS, SECTEURS: SECTEURS, norm: norm, config: config, parDefaut: function(){ return parDefaut(referentiels()); },
     secteur: secteurActuel, mots: mots, traduire: traduire,
+    // un contenu marqué pour un secteur ("collectivite", "entreprise") ne s'affiche que dans ce secteur ;
+    // "tous" ou rien : partout (ex. les actualités du tableau de bord, 2026-10-06)
+    concerne: function(s){ return !s || s === "tous" || s === secteurActuel(); },
     noms: function(){ return config().entites.map(function(e){ return e.nom; }); },
     premier: function(){ return config().entites[0].nom; },
     libelle: function(){ return config().libelle; },

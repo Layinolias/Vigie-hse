@@ -388,10 +388,10 @@
       <section class="tab-panel" id="tab-veille">
         <div class="banner" id="veilleBanner"></div>
         <div class="panel section-block" style="padding:20px;">
-          <div class="panel-head"><h3 class="panel-title">Actualités du secteur HSE</h3><span class="panel-note">Visibles sur le Cockpit (statut "Archivé" masqué)</span></div>
+          <div class="panel-head"><h3 class="panel-title">Actualités du secteur HSE</h3><span class="panel-note">Visibles sur le Cockpit, sauf statut "Archivé" et sauf celles d'un autre secteur que celui choisi dans Organisation</span></div>
           <div class="table-wrap">
             <table class="admin">
-              <thead><tr><th>Titre</th><th>Source</th><th>Date</th><th>Catégorie</th><th>Statut</th><th></th></tr></thead>
+              <thead><tr><th>Titre</th><th>Source</th><th>Date</th><th>Catégorie</th><th>Secteur</th><th>Statut</th><th></th></tr></thead>
               <tbody id="veilleBody"></tbody>
             </table>
           </div>
@@ -419,6 +419,7 @@
                   <option value="Archivé">Archivé</option>
                 </select>
               </div>
+              <div class="f"><label for="vSecteur">Secteur concerné</label><select id="vSecteur"></select></div>
               <div class="f span3"><label for="vResume">Résumé</label><textarea id="vResume" required placeholder="Résumé court de l'actualité…"></textarea></div>
               <div class="f span3"><label for="vUrl">Lien vers l'article</label><input type="text" id="vUrl" placeholder="https://…"></div>
             </div>
@@ -1750,15 +1751,18 @@
   const VEILLE_KEY = "vigie_hse_veille";
   function defaultVeille(){
     return [
-      { id:"v-1", titre:"DUERP en collectivité territoriale : ce qui change vraiment en 2026", source:"Inforisque", date:"2026-05-04", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sanctions renforcées depuis le 27 juin 2026 (loi de lutte contre les fraudes sociales et fiscales) ; le DUERP doit désormais intégrer plus explicitement les risques psychosociaux, le télétravail et les conditions de travail extrêmes.", url:"https://inforisque.fr/actualite-du-risque/article-13007-2026-05-04-DUERP-collectivite-territoriale-change-vraiment-2026.html" },
-      { id:"v-2", titre:"Nouveau plan santé au travail dans la fonction publique : cap sur 2026", source:"Weka", date:"2026-06-01", categorie:"Actu métier", statut:"À lire", resume:"Élaboration d'ici l'été 2026 d'un nouveau plan santé au travail, qui succède au plan 2022-2025 et se recentre sur les TMS, les RPS, l'usure professionnelle et le maintien en emploi.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/nouveau-plan-sante-au-travail-dans-la-fonction-publique-cap-sur-2026-210605/" },
-      { id:"v-3", titre:"Arrêts maladie : la réforme s'applique-t-elle aux agents territoriaux ?", source:"Weka", date:"2026-09-01", categorie:"Loi / Réglementation", statut:"À lire", resume:"Le décret n° 2026-498 du 12 juin 2026 plafonne la durée des arrêts de travail : 31 jours maximum en première prescription, 62 jours en prolongation.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/arrets-maladie-la-reforme-des-arrets-de-travail-au-1er-septembre-2026-s-applique-t-elle-aux-agents-territoriaux-215658/" },
-      { id:"v-4", titre:"La DGAFP prépare le Plan Santé au Travail dans la fonction publique 2026-2030", source:"Préventica", date:"2026-02-13", categorie:"Actu métier", statut:"À lire", resume:"Prise de parole institutionnelle sur les priorités du futur plan pluriannuel de santé au travail pour l'ensemble des agents publics.", url:"https://www.preventica.com/magazine/actualites/la-dgafp-prepare-le-plan-sante-au-travail-dans-la-fonction-publique-2026-2030-13022026" },
-      { id:"v-5", titre:"Bulletin d'actualité juridique — janvier 2026", source:"INRS", date:"2026-01-15", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sélection mensuelle des textes officiels parus en prévention des risques professionnels, en France et en Europe.", url:"https://www.inrs.fr/actualites/bulletin-juridique-janvier-2026.html" },
-      { id:"v-6", titre:"Travail & Sécurité n°879 — mars 2026", source:"INRS", date:"2026-03-01", categorie:"Actu métier", statut:"À lire", resume:"Nouveau numéro de la revue technique de référence de l'INRS sur la santé et la sécurité au travail.", url:"https://www.inrs.fr/actualites/TS-879-mars-2026.html" },
-      { id:"v-7", titre:"Santé et sécurité au travail — ressources officielles", source:"Portail de la Fonction publique", date:"2026-01-01", categorie:"Norme / Référentiel", statut:"À lire", resume:"Page de référence du portail officiel de la fonction publique sur les obligations et ressources en santé-sécurité au travail des agents publics.", url:"https://www.fonction-publique.gouv.fr/etre-agent-public/mon-quotidien-au-travail/sante-et-securite-au-travail" },
+      { id:"v-1", secteur:"collectivite", titre:"DUERP en collectivité territoriale : ce qui change vraiment en 2026", source:"Inforisque", date:"2026-05-04", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sanctions renforcées depuis le 27 juin 2026 (loi de lutte contre les fraudes sociales et fiscales) ; le DUERP doit désormais intégrer plus explicitement les risques psychosociaux, le télétravail et les conditions de travail extrêmes.", url:"https://inforisque.fr/actualite-du-risque/article-13007-2026-05-04-DUERP-collectivite-territoriale-change-vraiment-2026.html" },
+      { id:"v-2", secteur:"collectivite", titre:"Nouveau plan santé au travail dans la fonction publique : cap sur 2026", source:"Weka", date:"2026-06-01", categorie:"Actu métier", statut:"À lire", resume:"Élaboration d'ici l'été 2026 d'un nouveau plan santé au travail, qui succède au plan 2022-2025 et se recentre sur les TMS, les RPS, l'usure professionnelle et le maintien en emploi.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/nouveau-plan-sante-au-travail-dans-la-fonction-publique-cap-sur-2026-210605/" },
+      { id:"v-3", secteur:"collectivite", titre:"Arrêts maladie : la réforme s'applique-t-elle aux agents territoriaux ?", source:"Weka", date:"2026-09-01", categorie:"Loi / Réglementation", statut:"À lire", resume:"Le décret n° 2026-498 du 12 juin 2026 plafonne la durée des arrêts de travail : 31 jours maximum en première prescription, 62 jours en prolongation.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/arrets-maladie-la-reforme-des-arrets-de-travail-au-1er-septembre-2026-s-applique-t-elle-aux-agents-territoriaux-215658/" },
+      { id:"v-4", secteur:"collectivite", titre:"La DGAFP prépare le Plan Santé au Travail dans la fonction publique 2026-2030", source:"Préventica", date:"2026-02-13", categorie:"Actu métier", statut:"À lire", resume:"Prise de parole institutionnelle sur les priorités du futur plan pluriannuel de santé au travail pour l'ensemble des agents publics.", url:"https://www.preventica.com/magazine/actualites/la-dgafp-prepare-le-plan-sante-au-travail-dans-la-fonction-publique-2026-2030-13022026" },
+      { id:"v-5", secteur:"tous", titre:"Bulletin d'actualité juridique — janvier 2026", source:"INRS", date:"2026-01-15", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sélection mensuelle des textes officiels parus en prévention des risques professionnels, en France et en Europe.", url:"https://www.inrs.fr/actualites/bulletin-juridique-janvier-2026.html" },
+      { id:"v-6", secteur:"tous", titre:"Travail & Sécurité n°879 — mars 2026", source:"INRS", date:"2026-03-01", categorie:"Actu métier", statut:"À lire", resume:"Nouveau numéro de la revue technique de référence de l'INRS sur la santé et la sécurité au travail.", url:"https://www.inrs.fr/actualites/TS-879-mars-2026.html" },
+      { id:"v-7", secteur:"collectivite", titre:"Santé et sécurité au travail — ressources officielles", source:"Portail de la Fonction publique", date:"2026-01-01", categorie:"Norme / Référentiel", statut:"À lire", resume:"Page de référence du portail officiel de la fonction publique sur les obligations et ressources en santé-sécurité au travail des agents publics.", url:"https://www.fonction-publique.gouv.fr/etre-agent-public/mon-quotidien-au-travail/sante-et-securite-au-travail" },
     ];
   }
+  // secteur d'une actualité : celui qu'elle porte ; à défaut (enregistrée avant le 2026-10-06), celui de
+  // l'actualité d'origine du même identifiant, sinon « tous »
+  function secteurDe(v){ return v.secteur || (defaultVeille().find(d => d.id === v.id) || {}).secteur || "tous"; }
   function loadVeille(){
     let stored = null;
     try { const raw = VigieStore.getItem(VEILLE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
@@ -1768,18 +1772,22 @@
   function saveVeille(v){ try { VigieStore.setItem(VEILLE_KEY, JSON.stringify(v)); } catch(e){} }
   let VEILLE = loadVeille();
   const veilleStatutCls = { "À lire":"ag", "Lu":"active-yes", "Archivé":"active-no" };
+  const libelleSecteur = (s) => s === "tous" ? "Tous les secteurs" : ((VigieOrga.SECTEURS[s] || {}).nom || s);
+  $("vSecteur").innerHTML = ["tous"].concat(Object.keys(VigieOrga.SECTEURS))
+    .map(s => `<option value="${esc(s)}">${esc(libelleSecteur(s))}</option>`).join("");
 
   function renderVeille(){
     const tbody = $("veilleBody");
     const sorted = VEILLE.slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
     tbody.innerHTML = sorted.length === 0
-      ? `<tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:20px;">Aucune actualité.</td></tr>`
+      ? `<tr><td colspan="7" style="text-align:center;color:var(--text-faint);padding:20px;">Aucune actualité.</td></tr>`
       : sorted.map(v => `
         <tr data-id="${esc(v.id)}">
           <td class="wrap">${esc(v.titre)}</td>
           <td>${esc(v.source)}</td>
           <td class="mono">${fmtDateFr(v.date)}</td>
           <td>${esc(v.categorie)}</td>
+          <td>${esc(libelleSecteur(secteurDe(v)))}</td>
           <td><span class="chip ${veilleStatutCls[v.statut] || ''}">${esc(v.statut)}</span></td>
           <td>
             <button type="button" class="btn btn-ghost btn-sm act-edit-veille" data-id="${esc(v.id)}">Modifier</button>
@@ -1804,6 +1812,7 @@
       $("vDate").value = v.date;
       $("vCategorie").value = v.categorie;
       $("vStatut").value = v.statut;
+      $("vSecteur").value = secteurDe(v);
       $("vResume").value = v.resume;
       $("vUrl").value = v.url || "";
       $("veilleFormTitle").textContent = "Modifier l'actualité";
@@ -1839,6 +1848,7 @@
     const date = $("vDate").value;
     const categorie = $("vCategorie").value;
     const statut = $("vStatut").value;
+    const secteur = $("vSecteur").value;
     const resume = $("vResume").value.trim();
     const url = $("vUrl").value.trim();
 
@@ -1846,7 +1856,7 @@
       const v = VEILLE.find(x => x.id === editingVeilleId);
       if (v){
         v.titre = titre; v.source = source; v.date = date; v.categorie = categorie;
-        v.statut = statut; v.resume = resume; v.url = url;
+        v.statut = statut; v.secteur = secteur; v.resume = resume; v.url = url;
         saveVeille(VEILLE);
         logAudit("Veille réglementaire", "Modification", `Actualité modifiée : ${titre}`);
         flashBanner($("veilleBanner"), "Actualité mise à jour.");
@@ -1857,7 +1867,7 @@
       $("veilleSubmitBtn").textContent = "Ajouter";
       $("veilleCancelBtn").style.display = "none";
     } else {
-      const item = { id: genId("v"), titre, source, date, categorie, statut, resume, url };
+      const item = { id: genId("v"), titre, source, date, categorie, statut, secteur, resume, url };
       VEILLE.push(item);
       saveVeille(VEILLE);
       logAudit("Veille réglementaire", "Création", `Actualité ajoutée : ${titre}`);

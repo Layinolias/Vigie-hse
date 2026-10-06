@@ -57,6 +57,10 @@
     dateDebut:"Date de début", dateFin:"Date de fin", heuresEstimees:"Heures estimées", travauxDangereux:"Travaux dangereux",
     inspection:"Inspection commune préalable", planPrevention:"Plan de prévention", constatations:"Constatations",
     dateExercice:"Date de l'exercice", dureeMinutes:"Durée (minutes)", participation:"Participation",
+    consignes:"Consignes de sécurité", alerte:"Donner l'alerte", contacts:"Numéros d'urgence",
+    rassemblement:"Points de rassemblement", designes:"Personnes désignées", moyens:"Moyens de secours",
+    dateRevue:"Dernière revue du plan", numero:"Numéro", personne:"Personne", telephone:"Téléphone",
+    emplacement:"Emplacement", quantite:"Quantité",
     dateInspection:"Date de l'inspection", inspecteur:"Inspecteur", trameId:"Grille (identifiant)", trameNom:"Grille",
     reponses:"Réponses", statutGlobal:"Statut global",
     // Document unique, produits, vérifications, documentation

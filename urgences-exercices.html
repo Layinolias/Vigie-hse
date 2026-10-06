@@ -107,6 +107,39 @@
   .echeance-table th{ text-align:left; color:var(--text-muted); font-weight:600; font-size:11px; padding:6px 10px; border-bottom:1px solid var(--border); }
   .echeance-table td{ padding:7px 10px; border-bottom:1px solid var(--border); }
   .echeance-table tr:last-child td{ border-bottom:none; }
+
+  /* Onglets : exercices / plans d'urgence par site (2026-10-06) */
+  .ue-tabs{ display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .ue-tab{ display:flex; align-items:center; gap:7px; padding:10px 15px; font:600 13px "IBM Plex Sans",sans-serif; color:var(--text-muted); background:none; border:none; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  .ue-tab:hover{ color:var(--text); }
+  .ue-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .ue-tab .icon{ width:15px; height:15px; }
+  .tab-panel{ display:none; }
+  .tab-panel.show{ display:block; }
+
+  /* Plans d'urgence par site */
+  .console input[type="search"]{ appearance:none; -webkit-appearance:none; background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif; padding:9px 12px; border-radius:var(--r-sm); min-width:190px; }
+  .sans-plan{ font-size:12.5px; color:var(--text-muted); background:var(--warning-bg); border-radius:var(--r-sm); padding:10px 14px; margin-bottom:14px; line-height:1.7; }
+  .sans-plan b{ color:var(--text); }
+  .sans-plan button{ background:none; border:none; padding:0; color:var(--accent); font:600 12.5px "IBM Plex Sans",sans-serif; cursor:pointer; text-decoration:underline; }
+  .plan-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(420px,1fr)); gap:16px; }
+  @media (max-width:640px){ .plan-grid{ grid-template-columns:1fr; } }
+  .plan-card{ border:1px solid var(--border); border-radius:var(--r-md, 12px); background:var(--surface-el); padding:16px 18px; display:flex; flex-direction:column; gap:10px; }
+  .plan-card h4{ margin:0; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .plan-meta{ font-size:12px; color:var(--text-faint); }
+  .plan-sec{ font-size:12.5px; line-height:1.55; }
+  .plan-sec-titre{ font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:3px; }
+  .plan-sec ul{ margin:0; padding-left:18px; }
+  .plan-sec .texte{ white-space:pre-line; }
+  .plan-vide{ color:var(--text-faint); font-style:italic; }
+  .plan-numeros{ display:flex; flex-wrap:wrap; gap:6px; }
+  .plan-numeros span{ display:inline-flex; gap:6px; align-items:baseline; padding:3px 9px; border-radius:var(--r-sm); background:var(--danger-bg); color:var(--text); font-size:12px; }
+  .plan-numeros b{ color:var(--danger); font-family:"IBM Plex Mono",monospace; font-size:13px; }
+  .plan-liens{ font-size:12px; border-top:1px dashed var(--border); padding-top:9px; display:flex; flex-direction:column; gap:5px; }
+  .plan-liens .chip{ margin-left:4px; }
+  .plan-actions{ display:flex; gap:14px; align-items:center; border-top:1px solid var(--border); padding-top:10px; margin-top:auto; }
+  .plan-actions .act-del{ margin-left:0; }
+  .plan-empty{ padding:30px 10px; text-align:center; color:var(--text-faint); font-size:13px; }
 </style>
 <link rel="stylesheet" href="assets/mobile.css">
 
@@ -153,8 +186,8 @@
         <div class="page-summary-id">
           <div class="page-summary-icon"><svg class="icon"><use href="#i-life-buoy"/></svg></div>
           <div class="page-summary-text">
-            <h1>Situations d'urgence — exercices</h1>
-            <p title="Registre chronologique des exercices d'évacuation, d'intrusion et de risque environnemental réalisés par site : preuve datée que les exercices ont bien lieu, pas seulement qu'un plan existe sur le papier.">Registre chronologique des exercices réalisés par site : preuve datée que les exercices ont bien lieu. Les anomalies constatées alimentent le Plan d'Actions.</p>
+            <h1>Situations d'urgence — plans et exercices</h1>
+            <p title="Plan d'urgence de chaque site (consignes, numéros d'urgence, points de rassemblement, personnes désignées, moyens de secours), et registre chronologique des exercices d'évacuation, d'intrusion et de risque environnemental : preuve datée que les exercices ont bien lieu, pas seulement qu'un plan existe sur le papier.">Plan d'urgence de chaque site, et registre chronologique des exercices réalisés : preuve datée que les exercices ont bien lieu. Les anomalies constatées alimentent le Plan d'Actions.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
@@ -182,6 +215,12 @@
         <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
       </div>
 
+      <div class="ue-tabs">
+        <button type="button" class="ue-tab active" data-tab="exercices"><svg class="icon"><use href="#i-life-buoy"/></svg> Exercices</button>
+        <button type="button" class="ue-tab" data-tab="plans"><svg class="icon"><use href="#i-clipboard"/></svg> Plans d'urgence par site</button>
+      </div>
+
+      <section class="tab-panel show" id="tab-exercices">
       <div class="panel" style="padding:16px 20px; margin-bottom:18px;">
         <div class="panel-head" style="margin-bottom:8px;"><h3 class="panel-title" style="font-size:14px;">Prochaine échéance par site &amp; type d'exercice</h3></div>
         <p style="margin:0 0 10px; font-size:11.5px; color:var(--text-faint);">Calculée sur le dernier exercice de chaque site/type, avec la périodicité saisie ce jour-là (aucune valeur réglementaire n'est imposée par l'application — voir la note en bas de page).</p>
@@ -256,6 +295,70 @@
       </div>
 
       <p class="footnote">La périodicité entre deux exercices n'est pas imposée par l'application — elle varie selon le type d'établissement et se saisit à chaque exercice (réponse du préventeur, Cahier de liaison, 2026-09-16). Les anomalies avec une action corrective apparaissent automatiquement dans le Plan d'Actions.</p>
+      </section>
+
+      <section class="tab-panel" id="tab-plans">
+        <div class="panel console">
+          <div class="field"><span class="flabel" data-org-libelle>Collectivité</span>
+            <select id="pCollectivite" data-org="filtre"></select>
+          </div>
+          <div class="field"><span class="flabel">Service</span><select id="pService"></select></div>
+          <div class="field"><span class="flabel">Site</span><input type="search" id="pRecherche" placeholder="Rechercher un site…"></div>
+          <button type="button" class="btn btn-ghost" id="pReset">Réinitialiser</button>
+          <span class="result-count"><b id="pCount">–</b> / <span id="pTotal">–</span> plans</span>
+        </div>
+
+        <div class="panel form-panel" id="planFormPanel" style="display:none;">
+          <div class="panel-head"><h3 class="panel-title" id="planFormTitle">Nouveau plan d'urgence</h3></div>
+          <form id="planForm">
+            <input type="hidden" id="pId">
+            <div class="form-grid">
+              <div><label for="pSite">Site</label><input type="text" id="pSite" required list="pSitesConnus" placeholder="ex. Hôtel de Ville"><datalist id="pSitesConnus"></datalist></div>
+              <div><label for="pCollectiviteForm" data-org-libelle>Collectivité</label>
+                <select id="pCollectiviteForm" required data-org="saisie"></select>
+              </div>
+              <div><label for="pServiceForm">Service</label><select id="pServiceForm" required></select></div>
+              <div><label for="pDateRevue">Dernière revue du plan</label><input type="date" id="pDateRevue"></div>
+              <div class="span3"><label for="pConsignes">Consignes de sécurité (incendie, évacuation, confinement…)</label><textarea id="pConsignes" rows="5" placeholder="Ce que chacun doit faire en cas d'alarme : arrêter son poste, fermer les portes, ne pas utiliser l'ascenseur, rejoindre le point de rassemblement…"></textarea></div>
+              <div class="span3"><label for="pAlerte">Donner l'alerte</label><textarea id="pAlerte" placeholder="Comment déclencher l'alarme, qui prévenir et dans quel ordre, quoi dire aux secours (adresse exacte, accès)…"></textarea></div>
+            </div>
+
+            <div class="form-sub">Numéros d'urgence</div>
+            <div id="pContacts"></div>
+            <button type="button" class="btn btn-ghost" data-ajout="contacts"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un numéro</button>
+
+            <div class="form-sub">Points de rassemblement</div>
+            <div id="pRassemblement"></div>
+            <button type="button" class="btn btn-ghost" data-ajout="rassemblement"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un point de rassemblement</button>
+
+            <div class="form-sub">Personnes désignées</div>
+            <div id="pDesignes"></div>
+            <button type="button" class="btn btn-ghost" data-ajout="designes"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une personne</button>
+            <datalist id="pRoles"><option value="Chargé d'évacuation"><option value="Guide-file"><option value="Serre-file"><option value="Sauveteur secouriste du travail (SST)"><option value="Équipier de première intervention"><option value="Responsable du site"></datalist>
+
+            <div class="form-sub">Moyens de secours</div>
+            <div id="pMoyens"></div>
+            <button type="button" class="btn btn-ghost" data-ajout="moyens"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un moyen de secours</button>
+            <datalist id="pTypesMoyens"><option value="Extincteur"><option value="Robinet d'incendie armé (RIA)"><option value="Défibrillateur (DAE)"><option value="Trousse de secours"><option value="Déclencheur d'alarme"><option value="Couverture anti-feu"><option value="Douche de sécurité / rince-œil"></datalist>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Enregistrer le plan</button>
+              <button type="button" class="btn btn-ghost" id="btnCancelPlan">Annuler</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel" style="padding:20px 22px 22px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Plans d'urgence par site</h3>
+            <div class="panel-actions" id="planActionsBtns"></div>
+          </div>
+          <div id="sansPlan"></div>
+          <div class="plan-grid" id="planList"></div>
+        </div>
+
+        <p class="footnote">Un plan par site : ce qu'il faut faire, qui appeler, où se rassembler, qui fait quoi et où sont les moyens de secours. « Imprimer la consigne » en tire une page A4 à afficher. Les exercices et les équipements suivis en Vérifications périodiques s'affichent sous le plan quand leur site porte le même nom. Le contenu attendu d'un plan et la fréquence de sa revue sont en attente de l'avis du préventeur (question 19) : l'application n'impose rien pour l'instant.</p>
+      </section>
     </div>
   </div>
 </div>
@@ -418,6 +521,7 @@
     $("resultCount").textContent = rows.length;
     $("totalCount").textContent = DATASET.length;
     renderEcheanceTable(echeances);
+    if (plansPrets) renderPlans();   // l'onglet des plans montre les exercices de chaque site
 
     const tbody = $("tbody");
     const colspan = canUrgencesWrite ? 9 : 8;
@@ -708,6 +812,431 @@
     XLSX.writeFile(wb, `urgences-exercices_${VigieDates.aujourdhui()}.xlsx`);
   });
 
+  // ---------- Onglets ----------
+  function showTab(name){
+    document.querySelectorAll(".ue-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("show", p.id === "tab-" + name));
+  }
+  document.querySelectorAll(".ue-tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+
+  // ---------- Plans d'urgence par site (2026-10-06) ----------
+  // Un plan par site : consignes, alerte, numéros d'urgence, points de rassemblement, personnes désignées,
+  // moyens de secours, date de dernière revue. Le site se rapproche des exercices et des équipements des
+  // Vérifications périodiques par son nom (accents, casse et ponctuation ignorés). Contenu attendu d'un plan
+  // et fréquence de sa revue : question 19 au préventeur — rien n'est imposé ni signalé en retard d'ici là.
+  var plansPrets = false;   // vrai une fois cette section chargée : render() peut alors redessiner les plans
+  const PLANS_KEY = "vigie_hse_plans_urgence";
+  const VERIF_KEY = "vigie_hse_verifications";
+  const canVerif = D.peut("verifications", "consulter");
+  const NUMEROS_PUBLICS = [
+    { libelle:"Sapeurs-pompiers", numero:"18" }, { libelle:"SAMU", numero:"15" },
+    { libelle:"Police / gendarmerie", numero:"17" }, { libelle:"Numéro d'urgence européen", numero:"112" },
+    { libelle:"Urgences par SMS (personnes sourdes ou malentendantes)", numero:"114" },
+  ];
+  // Listes d'un plan : champ de l'enregistrement → conteneur du formulaire, champs d'une ligne, feuille Excel
+  const LISTES = {
+    contacts:      { el:"pContacts", vide:"Aucun numéro.", feuille:"Numéros d'urgence",
+                     champs:[{ k:"libelle", t:"Qui", ph:"Qui (ex. Sapeurs-pompiers)" }, { k:"numero", t:"Numéro", ph:"Numéro", w:"0 0 150px" }] },
+    rassemblement: { el:"pRassemblement", vide:"Aucun point de rassemblement.", feuille:"Points de rassemblement",
+                     champs:[{ k:"libelle", t:"Point de rassemblement", ph:"Point de rassemblement (ex. Parking nord)" }, { k:"emplacement", t:"Emplacement", ph:"Où exactement, comment y aller" }] },
+    designes:      { el:"pDesignes", vide:"Aucune personne désignée.", feuille:"Personnes désignées",
+                     champs:[{ k:"role", t:"Rôle", ph:"Rôle", list:"pRoles" }, { k:"personne", t:"Personne", ph:"Prénom Nom" }, { k:"telephone", t:"Téléphone", ph:"Téléphone", w:"0 0 150px" }] },
+    moyens:        { el:"pMoyens", vide:"Aucun moyen de secours.", feuille:"Moyens de secours",
+                     champs:[{ k:"type", t:"Type", ph:"Type", list:"pTypesMoyens" }, { k:"emplacement", t:"Emplacement", ph:"Emplacement" }, { k:"quantite", t:"Quantité", ph:"Qté", w:"0 0 90px", nombre:true }] },
+  };
+  const normSite = (s) => String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+
+  function savePlans(l){ try { VigieStore.setItem(PLANS_KEY, JSON.stringify(l)); } catch(e){} }
+  function tousLesPlans(){
+    try { const p = JSON.parse(VigieStore.getItem(PLANS_KEY) || "[]"); return Array.isArray(p) ? p : []; } catch(e){ return []; }
+  }
+  const SEED_PLANS = [];
+  function loadPlans(){
+    const stored = tousLesPlans();
+    const byId = new Map(stored.map(r => [r.id, r]));
+    const seeded = SEED_PLANS.map(r => byId.has(r.id) ? byId.get(r.id) : r);
+    const ids = new Set(seeded.map(r => r.id));
+    const merged = seeded.concat(stored.filter(r => !ids.has(r.id)));
+    savePlans(merged);
+    return merged;
+  }
+  const visibles = (l) => isScoped ? l.filter(p => myServices.includes(p.service)) : l;
+  let PLANS = visibles(loadPlans());
+  // Écriture par fusion dans la liste enregistrée complète : un compte limité à des services ne voit que les
+  // siens, et ne doit pas effacer les plans des autres en réenregistrant sa vue.
+  function modifierPlans(modif){
+    const tous = tousLesPlans();
+    modif(tous);
+    savePlans(tous);
+    PLANS = visibles(tous);
+  }
+
+  function lireVerifications(){
+    if (!canVerif) return [];
+    try {
+      const l = JSON.parse(VigieStore.getItem(VERIF_KEY) || "[]");
+      return Array.isArray(l) ? l.filter(v => !isScoped || myServices.includes(v.service)) : [];
+    } catch(e){ return []; }
+  }
+  function exercicesDuSite(site){
+    const n = normSite(site);
+    return computeEcheances().filter(e => normSite(e.site) === n).sort((a,b) => String(a.type).localeCompare(String(b.type)));
+  }
+  function equipementsDuSite(site){
+    const n = normSite(site);
+    return lireVerifications().filter(v => normSite(v.site) === n).map(v => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(v.dateDerniere || "")) return { equipement: v.equipement, statut:"Jamais vérifié", cls:"soon" };
+      const { cls } = VigieEcheance.classify(v.dateDerniere, Number(v.periodiciteMois) || 12);
+      return { equipement: v.equipement, statut: cls === "late" ? "En retard" : cls === "soon" ? "À programmer" : "À jour", cls };
+    });
+  }
+
+  // Filtres de l'onglet
+  const pCollectivite = $("pCollectivite"), pService = $("pService"), pRecherche = $("pRecherche");
+  function fillPlanServiceOptions(){
+    const col = pCollectivite.value;
+    const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
+    const current = pService.value;
+    pService.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+    pService.value = list.includes(current) ? current : "all";
+  }
+  fillPlanServiceOptions();
+  pCollectivite.addEventListener("change", () => { fillPlanServiceOptions(); renderPlans(); });
+  pService.addEventListener("change", renderPlans);
+  pRecherche.addEventListener("input", renderPlans);
+  $("pReset").addEventListener("click", () => { pCollectivite.value = "all"; fillPlanServiceOptions(); pService.value = "all"; pRecherche.value = ""; renderPlans(); });
+
+  function listeHtml(items, fmt){
+    const l = (items || []).filter(Boolean);
+    return l.length ? `<ul>${l.map(i => `<li>${fmt(i)}</li>`).join("")}</ul>` : `<span class="plan-vide">Non renseigné</span>`;
+  }
+  const texteHtml = (t) => t ? `<div class="texte">${esc(t)}</div>` : `<span class="plan-vide">Non renseigné</span>`;
+
+  function renderPlans(){
+    const col = pCollectivite.value, svc = pService.value, q = normSite(pRecherche.value);
+    const rows = PLANS.filter(p =>
+      (col === "all" || VigieOrga.actuel(p.collectivite) === col) &&
+      (svc === "all" || p.service === svc) &&
+      (!q || normSite(p.site).includes(q))
+    ).sort((a,b) => String(a.site).localeCompare(String(b.site), "fr"));
+    $("pCount").textContent = rows.length;
+    $("pTotal").textContent = PLANS.length;
+
+    // Sites où des exercices ont eu lieu, sans plan d'urgence
+    const avecPlan = new Set(PLANS.map(p => normSite(p.site)));
+    const sansPlan = [];
+    DATASET.forEach(r => { if (r.site && !avecPlan.has(normSite(r.site)) && !sansPlan.some(s => normSite(s) === normSite(r.site))) sansPlan.push(r.site); });
+    sansPlan.sort((a,b) => a.localeCompare(b, "fr"));
+    $("sansPlan").innerHTML = sansPlan.length ? `<div class="sans-plan"><b>${sansPlan.length} site${sansPlan.length > 1 ? "s" : ""} avec des exercices mais sans plan d'urgence :</b> ` +
+      sansPlan.map(s => canUrgencesWrite ? `<button type="button" data-creer-plan="${esc(s)}">${esc(s)}</button>` : esc(s)).join(" · ") + `</div>` : "";
+
+    if (rows.length === 0){
+      $("planList").innerHTML = `<div class="plan-empty">${PLANS.length === 0 ? "Aucun plan d'urgence enregistré pour le moment." : "Aucun plan ne correspond aux filtres sélectionnés."}</div>`;
+      return;
+    }
+    $("planList").innerHTML = rows.map(p => {
+      const ex = exercicesDuSite(p.site);
+      const eq = equipementsDuSite(p.site);
+      const numeros = (p.contacts || []).filter(c => c.numero || c.libelle);
+      return `
+      <article class="plan-card" data-plan="${esc(p.id)}">
+        <div>
+          <h4>${esc(p.site)}</h4>
+          <div class="plan-meta">${esc(VigieOrga.de(p))} · ${esc(p.service)} · ${p.dateRevue ? "revu le " + esc(dateFr(p.dateRevue)) : "date de revue non renseignée"}</div>
+        </div>
+        <div class="plan-sec"><div class="plan-sec-titre">Numéros d'urgence</div>
+          ${numeros.length ? `<div class="plan-numeros">${numeros.map(c => `<span><b>${esc(c.numero)}</b>${esc(c.libelle)}</span>`).join("")}</div>` : `<span class="plan-vide">Non renseigné</span>`}</div>
+        <div class="plan-sec"><div class="plan-sec-titre">Donner l'alerte</div>${texteHtml(p.alerte)}</div>
+        <div class="plan-sec"><div class="plan-sec-titre">Consignes</div>${texteHtml(p.consignes)}</div>
+        <div class="plan-sec"><div class="plan-sec-titre">Points de rassemblement</div>${listeHtml(p.rassemblement, r => `<b>${esc(r.libelle)}</b>${r.emplacement ? " — " + esc(r.emplacement) : ""}`)}</div>
+        <div class="plan-sec"><div class="plan-sec-titre">Personnes désignées</div>${listeHtml(p.designes, d => `${d.role ? esc(d.role) + " : " : ""}<b>${esc(d.personne)}</b>${d.telephone ? " · " + esc(d.telephone) : ""}`)}</div>
+        <div class="plan-sec"><div class="plan-sec-titre">Moyens de secours</div>${listeHtml(p.moyens, m => `${m.quantite ? esc(m.quantite) + " × " : ""}${esc(m.type)}${m.emplacement ? " — " + esc(m.emplacement) : ""}`)}</div>
+        <div class="plan-liens">
+          <div><b>Exercices :</b> ${ex.length ? ex.map(e => `${esc(e.type)}, dernier le ${esc(dateFr(e.dateExercice))}<span class="chip ${esc(e.cls)}">${esc(e.statut)}</span>`).join(" · ") : `<span class="plan-vide">aucun exercice enregistré pour ce site</span>`}</div>
+          ${canVerif ? `<div><b>Équipements suivis (Vérifications périodiques) :</b> ${eq.length ? eq.map(v => `${esc(v.equipement)}<span class="chip ${esc(v.cls)}">${esc(v.statut)}</span>`).join(" · ") : `<span class="plan-vide">aucun équipement suivi sous ce nom de site</span>`}</div>` : ""}
+        </div>
+        <div class="plan-actions">
+          <button type="button" class="act-edit" data-imprimer-plan="${esc(p.id)}">Imprimer la consigne</button>
+          ${canUrgencesWrite ? `<button type="button" class="act-edit" data-modifier-plan="${esc(p.id)}">Modifier</button>
+          <button type="button" class="act-del" data-supprimer-plan="${esc(p.id)}">Supprimer</button>` : ""}
+        </div>
+      </article>`;
+    }).join("");
+  }
+
+  // Formulaire du plan : listes dynamiques
+  let courant = { contacts:[], rassemblement:[], designes:[], moyens:[] };
+  function rendreListe(nom){
+    const L = LISTES[nom];
+    $(L.el).innerHTML = courant[nom].map((it, i) => `
+      <div class="dyn-row" data-i="${i}">
+        ${L.champs.map(c => `<input type="${c.nombre ? "number" : "text"}" data-k="${c.k}" placeholder="${esc(c.ph)}" aria-label="${esc(c.t)}" value="${esc(it[c.k] == null ? "" : it[c.k])}"${c.list ? ` list="${c.list}"` : ""}${c.w ? ` style="flex:${c.w}"` : ""}${c.nombre ? ' min="0"' : ""}>`).join("")}
+        <button type="button" class="act-del" data-retirer="${nom}" data-i="${i}">Suppr.</button>
+      </div>`).join("") || `<div style="font-size:12px;color:var(--text-faint);margin-bottom:8px;">${esc(L.vide)}</div>`;
+  }
+  // Relit les lignes saisies avant de reconstruire une liste (sinon un ajout efface ce qui vient d'être tapé)
+  function lireListe(nom){
+    const lignes = $(LISTES[nom].el).querySelectorAll(".dyn-row");
+    courant[nom] = Array.prototype.map.call(lignes, (row, i) => {
+      const o = { id: (courant[nom][i] && courant[nom][i].id) || genId("pl") };
+      row.querySelectorAll("[data-k]").forEach(inp => { o[inp.dataset.k] = inp.type === "number" ? (inp.value === "" ? "" : Number(inp.value)) : inp.value.trim(); });
+      return o;
+    });
+  }
+  const planForm = $("planForm");
+  planForm.addEventListener("click", (e) => {
+    const ajout = e.target.closest("[data-ajout]");
+    if (ajout){ const nom = ajout.dataset.ajout; lireListe(nom); courant[nom].push({ id: genId("pl") }); rendreListe(nom); return; }
+    const retrait = e.target.closest("[data-retirer]");
+    if (retrait){ const nom = retrait.dataset.retirer; lireListe(nom); courant[nom].splice(Number(retrait.dataset.i), 1); rendreListe(nom); }
+  });
+
+  function fillPlanFormServiceOptions(col){
+    let list = VigieOrga.services(col);
+    if (isScoped) list = list.filter(s => myServices.includes(s));
+    $("pServiceForm").innerHTML = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+  }
+  $("pCollectiviteForm").addEventListener("change", (e) => fillPlanFormServiceOptions(e.target.value));
+  function remplirSitesConnus(){
+    const vus = new Map();
+    DATASET.concat(PLANS, lireVerifications()).forEach(r => { if (r && r.site && !vus.has(normSite(r.site))) vus.set(normSite(r.site), r.site); });
+    $("pSitesConnus").innerHTML = [...vus.values()].sort((a,b) => a.localeCompare(b, "fr")).map(s => `<option value="${esc(s)}">`).join("");
+  }
+
+  function ouvrirPlan(p, siteNouveau){
+    planForm.reset();
+    remplirSitesConnus();
+    if (p){
+      $("planFormTitle").textContent = "Modifier le plan d'urgence";
+      $("pId").value = p.id;
+      $("pSite").value = p.site || "";
+      $("pCollectiviteForm").value = VigieOrga.de(p);
+      fillPlanFormServiceOptions(VigieOrga.de(p));
+      VigieOrga.choisirService($("pServiceForm"), p.service);
+      $("pDateRevue").value = p.dateRevue || "";
+      $("pConsignes").value = p.consignes || "";
+      $("pAlerte").value = p.alerte || "";
+      Object.keys(LISTES).forEach(k => { courant[k] = (p[k] || []).map(x => Object.assign({}, x)); });
+    } else {
+      $("planFormTitle").textContent = "Nouveau plan d'urgence";
+      $("pId").value = "";
+      $("pSite").value = siteNouveau || "";
+      // site déjà connu par un exercice : on reprend son rattachement
+      const ex = siteNouveau ? DATASET.find(r => normSite(r.site) === normSite(siteNouveau)) : null;
+      const col = ex ? VigieOrga.de(ex) : VigieOrga.premier();
+      $("pCollectiviteForm").value = col;
+      fillPlanFormServiceOptions(col);
+      if (ex) VigieOrga.choisirService($("pServiceForm"), ex.service);
+      courant = { contacts: NUMEROS_PUBLICS.map(n => Object.assign({ id: genId("pl") }, n)), rassemblement:[], designes:[], moyens:[] };
+    }
+    Object.keys(LISTES).forEach(rendreListe);
+    $("planFormPanel").style.display = "";
+    $("planFormPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  $("btnCancelPlan").addEventListener("click", () => { $("planFormPanel").style.display = "none"; planForm.reset(); });
+
+  planForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!canUrgencesWrite) return;
+    Object.keys(LISTES).forEach(lireListe);
+    const id = $("pId").value, site = $("pSite").value.trim();
+    if (!site) return;
+    const doublon = PLANS.find(p => p.id !== id && normSite(p.site) === normSite(site));
+    if (doublon){ alert(`Le site « ${doublon.site} » a déjà un plan d'urgence : modifiez-le plutôt que d'en créer un second.`); return; }
+    const ancien = id ? PLANS.find(p => p.id === id) : null;
+    const garde = (l, cles) => l.filter(it => cles.some(k => String(it[k] == null ? "" : it[k]).trim() !== ""));
+    const rec = {
+      id: id || genId("plu"),
+      site,
+      collectivite: $("pCollectiviteForm").value,
+      service: $("pServiceForm").value,
+      dateRevue: $("pDateRevue").value,
+      consignes: $("pConsignes").value.trim(),
+      alerte: $("pAlerte").value.trim(),
+      contacts: garde(courant.contacts, ["libelle", "numero"]),
+      rassemblement: garde(courant.rassemblement, ["libelle", "emplacement"]),
+      designes: garde(courant.designes, ["role", "personne", "telephone"]),
+      moyens: garde(courant.moyens, ["type", "emplacement"]),
+      auteur: ancien ? ancien.auteur : ((session && session.user) || "—"),
+      dateCreation: ancien ? ancien.dateCreation : VigieDates.aujourdhui(),
+      modifiePar: (session && session.user) || "—",
+      dateMaj: new Date().toISOString(),
+    };
+    modifierPlans(tous => { const i = tous.findIndex(p => p.id === rec.id); if (i >= 0) tous[i] = rec; else tous.push(rec); });
+    logAudit("Situations d'urgence", ancien ? "Modification" : "Création", `Plan d'urgence — ${rec.site}`);
+    $("planFormPanel").style.display = "none";
+    planForm.reset();
+    renderPlans();
+  });
+
+  $("tab-plans").addEventListener("click", (e) => {
+    const creer = e.target.closest("[data-creer-plan]");
+    if (creer){ if (canUrgencesWrite) ouvrirPlan(null, creer.dataset.creerPlan); return; }
+    const imp = e.target.closest("[data-imprimer-plan]");
+    if (imp){ const p = PLANS.find(x => x.id === imp.dataset.imprimerPlan); if (p) imprimerPlan(p); return; }
+    const mod = e.target.closest("[data-modifier-plan]");
+    if (mod){ const p = PLANS.find(x => x.id === mod.dataset.modifierPlan); if (p && canUrgencesWrite) ouvrirPlan(p); return; }
+    const sup = e.target.closest("[data-supprimer-plan]");
+    if (sup){
+      const p = PLANS.find(x => x.id === sup.dataset.supprimerPlan);
+      if (!p || !canUrgencesWrite) return;
+      if (confirm(`Supprimer le plan d'urgence du site « ${p.site} » ?`)){
+        modifierPlans(tous => { const i = tous.findIndex(x => x.id === p.id); if (i >= 0) tous.splice(i, 1); });
+        logAudit("Situations d'urgence", "Suppression", `Plan d'urgence — ${p.site}`);
+        renderPlans();
+      }
+    }
+  });
+
+  // « Imprimer la consigne » : une page A4 à afficher sur le site (seul ce bloc est imprimé, puis retiré)
+  function imprimerPlan(p){
+    const ancien = document.getElementById("plan-impression");
+    if (ancien) ancien.remove();
+    let style = document.getElementById("plan-impression-style");
+    if (!style){
+      style = document.createElement("style"); style.id = "plan-impression-style";
+      style.textContent = [
+        "@page{ size:A4 portrait; margin:12mm; }",
+        "@media screen{ #plan-impression{ display:none; } }",
+        "@media print{",
+        "  body{ background:#fff !important; }",
+        "  body > *:not(#plan-impression){ display:none !important; }",
+        "  #plan-impression{ display:block !important; color:#000; font:12px/1.5 'IBM Plex Sans',Arial,sans-serif; }",
+        "  #plan-impression .pi-marque{ font:700 11px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#555; }",
+        "  #plan-impression h1{ font:700 26px 'Barlow Condensed',Arial,sans-serif; margin:2px 0; }",
+        "  #plan-impression .pi-meta{ font-size:11px; color:#333; margin:0 0 10px; }",
+        "  #plan-impression h2{ font:700 15px 'Barlow Condensed',Arial,sans-serif; text-transform:uppercase; letter-spacing:.06em; border-bottom:2px solid #000; margin:14px 0 6px; padding-bottom:2px; }",
+        "  #plan-impression .pi-numeros{ display:flex; flex-wrap:wrap; gap:8px; }",
+        "  #plan-impression .pi-numeros div{ border:2px solid #b00; border-radius:6px; padding:4px 10px; }",
+        "  #plan-impression .pi-numeros b{ font-size:22px; color:#b00; margin-right:6px; }",
+        "  #plan-impression .pi-texte{ white-space:pre-line; }",
+        "  #plan-impression ul{ margin:0; padding-left:18px; }",
+        "  #plan-impression section{ break-inside:avoid; page-break-inside:avoid; }",
+        "  #plan-impression .pi-pied{ margin-top:18px; font-size:10px; color:#444; border-top:1px solid #999; padding-top:4px; }",
+        "}",
+      ].join("\n");
+      document.head.appendChild(style);
+    }
+    const liste = (items, fmt) => { const l = (items || []).filter(Boolean); return l.length ? `<ul>${l.map(i => `<li>${fmt(i)}</li>`).join("")}</ul>` : "<p>—</p>"; };
+    const texte = (t) => t ? `<div class="pi-texte">${esc(t)}</div>` : "<p>—</p>";
+    const maintenant = new Date();
+    const bloc = document.createElement("div");
+    bloc.id = "plan-impression";
+    bloc.innerHTML = `
+      <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "VIGIE HSE")}</div>
+      <h1>Consignes de sécurité — ${esc(p.site)}</h1>
+      <p class="pi-meta">${esc(VigieOrga.de(p))} · ${esc(p.service)}${p.dateRevue ? " · plan revu le " + esc(dateFr(p.dateRevue)) : ""}</p>
+      <section><h2>En cas d'urgence, appeler</h2>
+        <div class="pi-numeros">${(p.contacts || []).filter(c => c.numero || c.libelle).map(c => `<div><b>${esc(c.numero)}</b>${esc(c.libelle)}</div>`).join("") || "—"}</div></section>
+      <section><h2>Donner l'alerte</h2>${texte(p.alerte)}</section>
+      <section><h2>Consignes</h2>${texte(p.consignes)}</section>
+      <section><h2>Points de rassemblement</h2>${liste(p.rassemblement, r => `<b>${esc(r.libelle)}</b>${r.emplacement ? " — " + esc(r.emplacement) : ""}`)}</section>
+      <section><h2>Personnes désignées</h2>${liste(p.designes, d => `${d.role ? esc(d.role) + " : " : ""}<b>${esc(d.personne)}</b>${d.telephone ? " — " + esc(d.telephone) : ""}`)}</section>
+      <section><h2>Moyens de secours</h2>${liste(p.moyens, m => `${m.quantite ? esc(m.quantite) + " × " : ""}${esc(m.type)}${m.emplacement ? " — " + esc(m.emplacement) : ""}`)}</section>
+      <p class="pi-pied">Édité le ${esc(maintenant.toLocaleDateString("fr-FR"))}${session && session.user ? " par " + esc(session.user) : ""}.</p>`;
+    document.body.appendChild(bloc);
+    const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
+    window.addEventListener("afterprint", nettoyer);
+    window.print();
+  }
+
+  // ---------- Import / Export .xlsx des plans ----------
+  // Feuille « Plans » (une ligne par plan) + une feuille par liste, rattachée par « ID Plan » (ou, à défaut, par le site).
+  $("planActionsBtns").innerHTML = (canUrgencesWrite ? `<button type="button" class="btn btn-ghost" id="btnImportPlans"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importPlansFile" accept=".xlsx,.xls,.ods,.csv" style="display:none">` : "") +
+    `<button type="button" class="btn btn-ghost" id="btnExportPlans"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>` +
+    (canUrgencesWrite ? `<button type="button" class="btn btn-primary" id="btnNewPlan"><svg class="icon"><use href="#i-plus"/></svg> Nouveau plan</button>` : "");
+  if (canUrgencesWrite){ $("btnNewPlan").addEventListener("click", () => ouvrirPlan(null)); }
+
+  const ENTETES_PLANS = () => ["ID", "Site", VigieOrga.libelle(), "Service", "Dernière revue", "Consignes", "Donner l'alerte", "Auteur"];
+  $("btnExportPlans").addEventListener("click", () => {
+    const wb = XLSX.utils.book_new();
+    const lignes = PLANS.map(p => ({ "ID": p.id, "Site": p.site, [VigieOrga.libelle()]: VigieOrga.de(p), "Service": p.service,
+      "Dernière revue": p.dateRevue || "", "Consignes": p.consignes || "", "Donner l'alerte": p.alerte || "", "Auteur": p.auteur || "" }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: ENTETES_PLANS() }), "Plans");
+    Object.keys(LISTES).forEach(nom => {
+      const L = LISTES[nom], rows = [];
+      PLANS.forEach(p => (p[nom] || []).forEach(it => {
+        const o = { "ID Plan": p.id, "Site": p.site };
+        L.champs.forEach(c => { o[c.t] = it[c.k] == null ? "" : it[c.k]; });
+        rows.push(o);
+      }));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["ID Plan", "Site"].concat(L.champs.map(c => c.t)) }), L.feuille);
+    });
+    XLSX.writeFile(wb, `plans-urgence_${VigieDates.aujourdhui()}.xlsx`);
+  });
+
+  // Fusionne un classeur dans la liste « tous » ; renvoie les compteurs. Une feuille de liste présente
+  // remplace la liste des plans qu'elle cite (un plan absent de la feuille garde la sienne).
+  function fusionnerPlans(wb, tous, auteur){
+    const feuille = (n) => wb.Sheets[n] ? XLSX.utils.sheet_to_json(wb.Sheets[n], { defval:"" }) : null;
+    const lignes = feuille("Plans") || feuille(wb.SheetNames[0]) || [];
+    let ajoutes = 0, maj = 0, ignores = 0;
+    const touches = new Map();   // id d'origine du fichier (ou site normalisé) → plan
+    lignes.forEach(raw => {
+      const site = String(rawPick(raw, ["site"])).trim();
+      if (!site){ ignores++; return; }
+      const idFichier = String(rawPick(raw, ["id"])).trim();
+      const champs = {
+        site,
+        collectivite: VigieOrga.reconnaitre(normKeyImp(rawPick(raw, ["collectivite", VigieOrga.norm(VigieOrga.libelle())]))),
+        service: String(rawPick(raw, ["service"])).trim(),
+        dateRevue: parseDateImp(rawPick(raw, ["derniere revue", "date revue"])),
+        consignes: String(rawPick(raw, ["consignes"])).trim(),
+        alerte: String(rawPick(raw, ["donner l alerte", "alerte"])).trim(),
+      };
+      if (isScoped && !myServices.includes(champs.service)){ ignores++; return; }
+      let p = (idFichier && tous.find(x => x.id === idFichier)) || tous.find(x => normSite(x.site) === normSite(site));
+      if (p){ Object.assign(p, champs, { modifiePar: auteur, dateMaj: new Date().toISOString() }); maj++; }
+      else {
+        p = Object.assign({ id: idFichier || genId("plu"), contacts:[], rassemblement:[], designes:[], moyens:[], auteur, dateCreation: VigieDates.aujourdhui() }, champs);
+        tous.push(p); ajoutes++;
+      }
+      if (idFichier) touches.set(idFichier, p);
+      touches.set("site:" + normSite(site), p);
+    });
+    Object.keys(LISTES).forEach(nom => {
+      const L = LISTES[nom], rows = feuille(L.feuille);
+      if (!rows) return;
+      const nouvelles = new Map();
+      rows.forEach(raw => {
+        const p = touches.get(String(rawPick(raw, ["id plan"])).trim()) || touches.get("site:" + normSite(rawPick(raw, ["site"])));
+        if (!p) return;
+        const it = { id: genId("pl") };
+        L.champs.forEach(c => { const v = rawPick(raw, [normKeyImp(c.t)]); it[c.k] = c.nombre ? (v === "" ? "" : (Number(v) || "")) : String(v).trim(); });
+        if (!L.champs.some(c => String(it[c.k]).trim() !== "")) return;
+        if (!nouvelles.has(p)) nouvelles.set(p, []);
+        nouvelles.get(p).push(it);
+      });
+      nouvelles.forEach((l, p) => { p[nom] = l; });
+    });
+    return { ajoutes, maj, ignores };
+  }
+
+  if (canUrgencesWrite){
+    $("btnImportPlans").addEventListener("click", () => $("importPlansFile").click());
+    $("importPlansFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const wb = VigieImport.lireClasseur(await file.arrayBuffer());
+        let bilan = null;
+        modifierPlans(tous => { bilan = fusionnerPlans(wb, tous, (session && session.user) || "—"); });
+        renderPlans();
+        if (bilan.ajoutes + bilan.maj === 0){
+          alert(`Aucun plan n'a pu être importé (${bilan.ignores} ligne(s) ignorée(s)). Le fichier doit contenir une feuille « Plans » avec au moins une colonne « Site », et éventuellement les feuilles « Numéros d'urgence », « Points de rassemblement », « Personnes désignées » et « Moyens de secours » (colonne « ID Plan » ou « Site »).`);
+        } else {
+          alert(`Import terminé — plans : ${bilan.ajoutes} ajouté(s), ${bilan.maj} mis à jour, ${bilan.ignores} ignoré(s).`);
+        }
+        logAudit("Situations d'urgence", "Import", `Import .xlsx — ${bilan.ajoutes + bilan.maj} plan(s) d'urgence`);
+      } catch (err){
+        alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
+      }
+      e.target.value = "";
+    });
+  }
+
+  plansPrets = true;
   render();
 
   // ---------- Auto-chargement des données de test depuis DATATEST/ (si servi en http/https) ----------
@@ -728,6 +1257,18 @@
       saveDataset(full);
       DATASET = isScoped ? full.filter(d => myServices.includes(d.service)) : full;
       render();
+    }
+  }).catch(() => {});
+  // Plan de démonstration : ajouté une fois, seulement si son site n'a pas déjà un plan
+  fetch("DATATEST/12-REF-plans-urgence.xlsx").then(res => res.ok ? res.arrayBuffer() : null).then(buf => {
+    if (!buf || typeof XLSX === "undefined") return;
+    const demo = [];
+    fusionnerPlans(VigieImport.lireClasseur(buf), demo, "Données de démonstration");
+    const tous = tousLesPlans();
+    const nouveaux = demo.filter(p => !tous.some(x => x.id === p.id || normSite(x.site) === normSite(p.site)));
+    if (nouveaux.length){
+      modifierPlans(l => { nouveaux.forEach(p => l.push(p)); });
+      renderPlans();
     }
   }).catch(() => {});
 

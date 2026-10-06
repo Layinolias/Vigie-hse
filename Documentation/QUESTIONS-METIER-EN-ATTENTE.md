@@ -48,6 +48,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 16 | Dialogue social : que doivent trouver les représentants du personnel ? | Module 13 Dialogue social (à construire) | ✅ répondue le 2026-09-24 : les deux, questions/réponses avec la direction en priorité, compte anonymisé |
 | 17 | Suivi médical : qui doit pouvoir le consulter ? | Santé & Visites (en service), droits de lecture du serveur | ✅ répondue le 2026-09-29 — l'encadrement seulement, mis en œuvre |
 | 18 | Entreprise privée : que deviennent les notions propres à la fonction publique ? | Secteur « Entreprise privée » (Administration → Organisation, en service) | 🟠 En attente de réponse |
+| 19 | Plans d'urgence par site : que doit contenir un plan, à quelle fréquence le revoir, qui doit pouvoir le lire ? | Situations d'urgence → Plans d'urgence par site (en service) | 🟠 En attente de réponse |
 
 ---
 
@@ -512,6 +513,28 @@ Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, 
 ### Décision
 
 > _En attente de la réponse du préventeur (posée sur le Cahier le 2026-09-30)._
+
+---
+
+## 🟠 Question 19 — Plans d'urgence par site : que doit contenir un plan, à quelle fréquence le revoir, qui doit pouvoir le lire ?
+
+**Contexte.** Depuis le 2026-10-06, la page « Situations d'urgence » a un second onglet, **« Plans d'urgence par site »** (le volet laissé de côté le 2026-09-18). Pour chaque site, on y saisit : des **consignes** en texte libre, la façon de **donner l'alerte**, des **numéros d'urgence** (18, 15, 17, 112 et 114 proposés d'office, modifiables), des **points de rassemblement**, des **personnes désignées** avec leur rôle (rôles proposés, liste libre : chargé d'évacuation, guide-file, serre-file, sauveteur secouriste du travail, équipier de première intervention, responsable du site), des **moyens de secours** (types proposés : extincteur, robinet d'incendie armé, défibrillateur, trousse de secours, déclencheur d'alarme, couverture anti-feu, douche de sécurité) et la **date de dernière revue** du plan. Le plan s'imprime sur une page A4 « Consignes de sécurité », à afficher. Sous chaque plan, la page rappelle les exercices de ce site et les équipements suivis en Vérifications périodiques sous le même nom de site.
+
+**Ce que le logiciel fait aujourd'hui.** Aucune rubrique n'est obligatoire ; aucun plan n'est signalé comme incomplet ni comme « à revoir » (la date de revue est affichée, rien de plus) ; seuls les comptes qui ont accès au module « Situations d'urgence » voient les plans — aujourd'hui l'administrateur, le RH et le profil Préventeur. Un agent ou un manager ne les voit pas dans le logiciel.
+
+**Les questions.**
+1. **Contenu** — quelles rubriques un plan (ou la consigne affichée) doit-il contenir au minimum ? Faut-il en ajouter (par exemple : plan des lieux, coupures d'énergie gaz et électricité, consignes propres au confinement ou à l'intrusion, accueil des secours, évacuation des personnes à mobilité réduite) ou en retirer ? Le logiciel doit-il signaler un plan auquel manque une rubrique obligatoire ?
+2. **Revue** — à quelle fréquence un plan doit-il être revu ? Comme pour les exercices (question 6), est-ce propre à chaque établissement ? Le logiciel doit-il signaler un plan « à revoir » au-delà d'une certaine durée ?
+3. **Lecture** — les consignes doivent être connues du personnel. Faut-il que tout compte (agent, manager) puisse consulter les plans dans le logiciel, en lecture seule, ou l'affichage papier suffit-il ?
+
+**Options.**
+- Contenu : (A) les rubriques actuelles suffisent ; (B) en ajouter ou en retirer — lesquelles ; et dire s'il faut signaler une rubrique manquante.
+- Revue : (A) pas de fréquence imposée, la date reste indicative ; (B) une fréquence fixe (laquelle), avec un signalement « à revoir » ; (C) une fréquence saisie plan par plan, comme pour les exercices.
+- Lecture : (A) inchangé ; (B) tout compte voit les plans en lecture seule. Côté technique, (B) se fait soit en donnant le niveau « consulter » du module aux profils Agent et Manager (ils verraient alors aussi le registre des exercices), soit par un niveau propre aux plans.
+
+### Décision
+
+> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-06)._
 
 ---
 

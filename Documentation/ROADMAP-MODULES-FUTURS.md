@@ -86,7 +86,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 13 | Dialogue social | ✅ Fait (2026-09-25) — `dialogue-social.html`, comptes anonymisés côté serveur |
 | 14 | Gestion administrative RH | ✅ Fait (2026-09-19) — `gestion-rh.html`, les deux volets (données RH + organigramme) |
 | 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
-| 16 | Situations d'urgence & exercices d'évacuation | ✅ Fait (2026-09-18) — volet "exercices réalisés" ; plans d'urgence par site reportés |
+| 16 | Situations d'urgence & exercices d'évacuation | ✅ Fait — volet "exercices réalisés" (2026-09-18), puis plans d'urgence par site (2026-10-06 ; contenu, revue et lecture par tous : question 19) |
 | 17 | Entreprises extérieures & Plan de Prévention | ✅ Fait (2026-09-19) — `entreprises-exterieures.html` ; seuil précisé « au moins 400 h » le 2026-09-21 (réponse Q8) |
 | 18 | Gestion administrative des dossiers AT/MP & CITIS | ✅ Fait (2026-09-13) — `dossiers-atmp-citis.html`, premier cas d'usage du modèle de permissions granulaires (voir J0) |
 
@@ -456,6 +456,13 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - Import/export `.xlsx` dès la V1 (2 feuilles, avec colonne "ID Exercice" dans la feuille Actions pour un ré-import fidèle).
 
 **Cadrage :** le volet "plans d'urgence par site" reste posé pour une itération future — pas de conception engagée dessus.
+
+**Livré le 2026-10-06 — plans d'urgence par site** (choisi par l'utilisateur comme chantier suivant), second onglet de `urgences-exercices.html`, même module de droits `urgences` :
+- Un plan par site, clé `vigie_hse_plans_urgence` : consignes et « donner l'alerte » en texte libre, numéros d'urgence (18, 15, 17, 112, 114 proposés d'office, modifiables), points de rassemblement, personnes désignées (rôles proposés, liste libre), moyens de secours (types proposés, emplacement, quantité), date de dernière revue. Rien n'est obligatoire ni signalé « à revoir » : c'est l'objet de la **question 19** (contenu minimal, fréquence de revue, lecture par tous les comptes).
+- Sous chaque plan : les exercices du site (dernier par type, avec son échéance) et les équipements suivis en Vérifications périodiques sous le même nom de site ; en tête, les sites qui ont des exercices mais pas encore de plan, un clic pour le créer (rattachement repris de l'exercice).
+- « Imprimer la consigne » : une page A4 « Consignes de sécurité » à afficher (numéros en grand, puis alerte, consignes, rassemblement, personnes, moyens).
+- Import/export `.xlsx` (feuille « Plans » + quatre feuilles de listes rattachées par « ID Plan »), aller-retour sans perte ; plan de démonstration pour l'Hôtel de Ville (`DATATEST/12-REF-plans-urgence.xlsx`).
+- Hors périmètre, à voir après la question 19 : plan des lieux (pièce jointe — pas de stockage de fichiers), alerte de revue, lecture par les agents.
 
 ## 17. Entreprises extérieures & Plan de Prévention — ✅ Fait (2026-09-19)
 

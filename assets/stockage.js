@@ -41,6 +41,7 @@
     vigie_hse_epi_dotations:      { nature:"donnees",    sensible:false, module:"EPI & Dotation" },
     vigie_hse_epi_lavages:        { nature:"donnees",    sensible:false, module:"EPI & Dotation" },
     vigie_hse_exercices_urgence:  { nature:"donnees",    sensible:false, module:"Situations d'urgence" },
+    vigie_hse_plans_urgence:      { nature:"donnees",    sensible:false, module:"Situations d'urgence" },
     vigie_hse_interventions_ee:   { nature:"donnees",    sensible:false, module:"Entreprises extérieures" },
     vigie_hse_accueils:           { nature:"donnees",    sensible:false, module:"Accueil au poste" },
     vigie_hse_agents:             { nature:"donnees",    sensible:false, module:"Gestion RH" },

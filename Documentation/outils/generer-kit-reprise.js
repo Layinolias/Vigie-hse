@@ -153,6 +153,10 @@ const MODULES = [
     note:"À charger avant les dotations : une dotation désigne un article du catalogue par son nom." },
   { fichier:'17-epi-dotations', nom:'Dotations d\'EPI', page:'epi-dotation.html', onglet:'dotations', exp:'dotExport', imp:'dotImportFile', ou:'EPI & Dotation → onglet Dotations → Importer .xlsx',
     prerequis:['vigie_hse_epi_catalogue'], source:{ datatest:true }, compter:{ Dotations: w => lireStock(w, 'vigie_hse_epi_dotations').length } },
+  { fichier:'18-plans-urgence', nom:'Plans d\'urgence par site', page:'urgences-exercices.html', onglet:'plans', exp:'btnExportPlans', imp:'importPlansFile', ou:'Situations d\'urgence → onglet Plans d\'urgence par site → Importer .xlsx',
+    source:{ datatest:true }, compter:{ Plans: w => lireStock(w, 'vigie_hse_plans_urgence').length, Numeros: w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'contacts'),
+      Rassemblement: w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'rassemblement'), Designes: w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'designes'), Moyens: w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'moyens') },
+    note:"Un plan par site. Les quatre feuilles de listes se rattachent à leur plan par « ID Plan » (ou, à défaut, par le site) ; une feuille présente remplace la liste du plan qu'elle cite." },
 ];
 const SAISIE_ECRAN = [
   ['Comptes utilisateurs', 'Administration → Utilisateurs', "Créés un par un (ils relèveront de la future authentification)."],

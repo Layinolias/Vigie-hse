@@ -1,6 +1,6 @@
 # Kit de reprise des données
 
-> Fichier **généré** par `Documentation/outils/generer-kit-reprise.js` — ne pas l'éditer à la main, relancer le générateur. Dernière génération : 2026-09-25.
+> Fichier **généré** par `Documentation/outils/generer-kit-reprise.js` — ne pas l'éditer à la main, relancer le générateur. Dernière génération : 2026-10-06.
 
 Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes (registres Excel, historique des accidents, suivi des visites…) se chargent par les imports de chaque module. Le dossier `KIT-REPRISE/` contient un modèle Excel par module importable et un mode d'emploi (`00-mode-d-emploi.xlsx`).
 
@@ -10,7 +10,7 @@ Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes
 
 | Étape | Fichier | Contenu | Où l'importer | Remarques |
 |---|---|---|---|---|
-| Avant | *saisie à l'écran* | Comptes utilisateurs | Administration → Utilisateurs | Créés un par un (ils relèveront de la future authentification). |
+| Avant | *saisie à l'écran* | Comptes utilisateurs | Administration → Utilisateurs | Créés un par un, avec leur mot de passe et leurs profils de droits. |
 | 00 | `00-referentiels.xlsx` | Référentiels (services, familles de risque, listes) | Administration → Référentiels → Importer .xlsx | À charger en tout premier : les colonnes « Service » des autres fichiers doivent reprendre exactement ces libellés. L'import ajoute les valeurs manquantes et n'en retire jamais ; la colonne « Définition » ne sert qu'aux familles de risque. |
 | 01 | `01-agents.xlsx` | Agents (Gestion RH) | Gestion RH → onglet Agents → Importer .xlsx | À charger juste après les référentiels : les autres modules peuvent ensuite proposer ces agents dans leurs formulaires. Le responsable se désigne par son « Nom Prénom » ; il peut figurer plus bas dans le fichier. |
 | 02 | `02-heures-travaillees.xlsx` | Heures travaillées (Gestion RH) | Gestion RH → onglet Heures travaillées → Importer .xlsx | Un total par mois, collectivité et service (pas un pointage individuel). Alimente le taux de fréquence et de gravité « réels ». Une ligne déjà présente pour le même mois, la même collectivité et le même service est ignorée. |
@@ -29,6 +29,7 @@ Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes
 | 15 | `15-urgences-exercices.xlsx` | Exercices d'urgence | Situations d'urgence → Importer .xlsx | La périodicité est obligatoire : l'application ne la devine jamais (réponse du préventeur à la question 6). |
 | 16 | `16-epi-catalogue.xlsx` | Catalogue des EPI | EPI & Dotation → onglet Catalogue → Importer .xlsx | À charger avant les dotations : une dotation désigne un article du catalogue par son nom. |
 | 17 | `17-epi-dotations.xlsx` | Dotations d'EPI | EPI & Dotation → onglet Dotations → Importer .xlsx |  |
+| 18 | `18-plans-urgence.xlsx` | Plans d'urgence par site | Situations d'urgence → onglet Plans d'urgence par site → Importer .xlsx | Un plan par site. Les quatre feuilles de listes se rattachent à leur plan par « ID Plan » (ou, à défaut, par le site) ; une feuille présente remplace la liste du plan qu'elle cite. |
 | — | *saisie à l'écran* | Accueil au poste | Accueil au poste | Pas d'import : les parcours se créent à l'arrivée de chaque agent. |
 | — | *saisie à l'écran* | Entreprises extérieures | Entreprises extérieures | Pas d'import : une fiche par intervention. |
 | — | *saisie à l'écran* | Base documentaire | Base documentaire | Pas d'import : fiches et documents se saisissent à l'écran. |
@@ -57,10 +58,11 @@ Le détail complet (format, valeurs acceptées, remarques) est dans la feuille �
 - **`15-urgences-exercices.xlsx`** — Exercices d'urgence : obligatoires Exercices › « Périodicité mois », Actions › « ID Exercice », Actions › « Action » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »), « Type » (une valeur inconnue est remplacée par « Évacuation incendie »).
 - **`16-epi-catalogue.xlsx`** — Catalogue des EPI : obligatoires « Nom ».
 - **`17-epi-dotations.xlsx`** — Dotations d'EPI : obligatoires « Article » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »), « Article » (une valeur inconnue fait refuser la ligne).
+- **`18-plans-urgence.xlsx`** — Plans d'urgence par site : obligatoires Plans › « Site » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »).
 
 ## Limites connues
 
 - **Formats** : Excel (`.xlsx`, `.xls`), LibreOffice (`.ods`) et CSV (point-virgule ou virgule, UTF-8 avec ou sans BOM, Windows-1252 — `assets/import-fichier.js`). Un document Word, PDF ou papier se recopie d'abord dans le modèle : le préventeur prévient que « tout type de fichier est à prévoir » (question 13) — la reprise d'un client devra donc souvent passer par une transcription accompagnée.
-- **Comptes utilisateurs** : pas d'import (ils relèveront de la future authentification). Les **référentiels** s'importent (fichier `00-referentiels.xlsx`) et se chargent en premier : les colonnes « Service » des autres fichiers doivent reprendre exactement leurs libellés.
+- **Comptes utilisateurs** : pas d'import, ils se créent un par un (mot de passe, profils de droits). Les **référentiels** s'importent (fichier `00-referentiels.xlsx`) et se chargent en premier : les colonnes « Service » des autres fichiers doivent reprendre exactement leurs libellés.
 - **Accueil au poste, entreprises extérieures, base documentaire, stock et lavages d'EPI, rendez-vous médicaux** : pas d'import, saisie à l'écran.
-- **Données dans le navigateur** : tant que l'application n'a pas de serveur, la reprise se fait sur le poste qui servira (voir `PLAN-MISE-EN-PRODUCTION.md`).
+- **Où vont les données importées** : là où l'application garde les siennes — dans la base du serveur quand les pages sont servies par `serveur/serveur.js` ou par `Lancer VIGIE HSE.bat` ; dans le navigateur quand les pages sont ouvertes seules, et la reprise se fait alors sur le poste qui servira (voir `PLAN-MISE-EN-PRODUCTION.md`, `LIVRAISON-POSTE.md`).

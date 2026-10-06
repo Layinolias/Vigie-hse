@@ -25,7 +25,19 @@
     lireClasseur: function(buf){
       var o = new Uint8Array(buf);
       if (estTableur(o) || typeof TextDecoder === "undefined") return XLSX.read(buf, { type: "array", cellDates: true });
-      return XLSX.read(decoder(o), { type: "string", cellDates: true });
+      var texte = decoder(o);
+      var wb = XLSX.read(texte, { type: "string", cellDates: true });
+      // Dans un CSV, SheetJS devine les dates dans l'ordre AMÉRICAIN (« 01/09/2026 » → 9 janvier ; un jour
+      // au-delà de 12 reste du texte) : chaque cellule qu'il a convertie en date reprend son texte d'origine,
+      // que la page lit à la française (VigieDates.depuisImport). Les autres cellules ne changent pas.
+      var brut = XLSX.read(texte, { type: "string", raw: true });
+      wb.SheetNames.forEach(function(n){
+        var f = wb.Sheets[n], g = brut.Sheets[n];
+        if (g) Object.keys(f).forEach(function(a){
+          if (a.charAt(0) !== "!" && f[a].t === "d" && g[a]) f[a] = { t: "s", v: String(g[a].v) };
+        });
+      });
+      return wb;
     },
   };
 })();

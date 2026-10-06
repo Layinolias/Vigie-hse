@@ -16,4 +16,31 @@ window.VigieDates = {
     return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
   },
   aujourdhui(){ return this.iso(new Date()); },
+  // Date d'une cellule importée (Excel, LibreOffice, CSV) → "AAAA-MM-JJ", ou "" si ce n'est pas une date
+  // valide. Une vraie date de tableur arrive en objet Date ; un texte se lit à la FRANÇAISE : JJ/MM/AAAA
+  // (séparateur « / », « . » ou « - » ; année sur deux chiffres : 00-29 → 20xx, 30-99 → 19xx, comme Excel),
+  // ou AAAA-MM-JJ (« / » accepté). Jamais dans l'ordre américain : « 01/09/2026 » lu mois/jour devenait le
+  // 9 janvier, et « 25/09/2026 » s'enregistrait « 2026-25-09 » (BUGS-CONNUS, 2026-10-06). Une date
+  // impossible (31/02, 13e mois) donne "" plutôt qu'une date décalée.
+  depuisImport(v){
+    // objet Date reconnu par son type, pas par instanceof : une date venue d'un autre contexte (cadre,
+    // fenêtre) n'est pas une « instance » du Date de cette page
+    if (Object.prototype.toString.call(v) === "[object Date]") return isNaN(v) ? "" : this.iso(v);
+    const s = String(v == null ? "" : v).trim();
+    let a, mo, j, m;
+    if ((m = /^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?!\d)/.exec(s))){ a = +m[1]; mo = +m[2]; j = +m[3]; }
+    else if ((m = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4}|\d{2})(?!\d)/.exec(s))){
+      j = +m[1]; mo = +m[2]; a = +m[3];
+      if (m[3].length === 2) a += a < 30 ? 2000 : 1900;
+    }
+    // texte d'un objet Date (« Fri Sep 25 2026 00:00:00 GMT+0200… ») : ce qu'enregistraient certains imports
+    // avant le 2026-10-06 ; sans ambiguïté, donc relu tel quel
+    else if (/^[A-Za-z]{3} [A-Za-z]{3} \d{1,2} \d{4}\b/.test(s)){
+      const d = new Date(s);
+      return isNaN(d) ? "" : this.iso(d);
+    }
+    else return "";
+    const d = new Date(a, mo - 1, j);
+    return (d.getFullYear() === a && d.getMonth() === mo - 1 && d.getDate() === j) ? this.iso(d) : "";
+  },
 };

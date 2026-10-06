@@ -615,7 +615,7 @@
     const idRaw = String(rawPick(raw, ["id at mp","atmpid"])).trim();
     if (idRaw && ATMP_EVENTS.some(e => e.id === idRaw)) return idRaw;
     const nom = normKey(rawPick(raw, ["nom"]));
-    const dateAT = String(rawPick(raw, ["date at"])).trim();
+    const dateAT = VigieDates.depuisImport(rawPick(raw, ["date at"]));
     // Les deux tentatives doivent être gardées contre une clé vide, pas seulement la première
     // (trouvé en testant le correctif du 2026-09-18 sur dossiers-atmp-citis.html : "" === ""
     // matchait silencieusement le premier événement à nom/prénom vides).
@@ -635,7 +635,7 @@
         const wb = VigieImport.lireClasseur(buf);
         let anAdded = 0, anUpdated = 0, anSkipped = 0, actAdded = 0, actUpdated = 0, actSkipped = 0, arbreAdded = 0, arbreSkipped = 0;
         // une vraie date Excel arrive en objet Date : « AAAA-MM-JJ » local, comme dans les autres modules
-        const dateCell = v => (v instanceof Date && !isNaN(v)) ? VigieDates.iso(v) : String(v == null ? "" : v).trim();
+        const dateCell = v => VigieDates.depuisImport(v) || String(v == null ? "" : v).trim();   // texte JJ/MM/AAAA lu à la française ; autre texte gardé tel quel
 
         const anSheet = wb.Sheets["Analyses"] || wb.Sheets[wb.SheetNames[0]];
         if (anSheet){

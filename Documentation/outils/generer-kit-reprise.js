@@ -57,7 +57,9 @@ async function charger(page, { datatest = true, stockage = null, attente = 700, 
   w.claude = { use: () => Promise.resolve(null) };
   w.alert = m => w.messages.push(String(m)); w.confirm = () => true; w.print = () => {};
   w.HTMLElement.prototype.scrollIntoView = () => {}; w.scrollTo = () => {}; w.setInterval = () => 0;
-  for (const m of html.matchAll(/<script src="(assets\/[^"]+)"><\/script>/g)) w.eval(fs.readFileSync(ROOT + m[1], 'utf8'));
+  // la copie de SheetJS embarquée par la page (assets/xlsx.full.min.js) n'est pas chargée : elle remplacerait
+  // w.XLSX ci-dessus, dont writeFile capture le classeur exporté au lieu de l'enregistrer
+  for (const m of html.matchAll(/<script src="(assets\/[^"]+)"><\/script>/g)) if (!/\/xlsx[^\/]*\.js$/.test(m[1])) w.eval(fs.readFileSync(ROOT + m[1], 'utf8'));
   for (const s of [...w.document.querySelectorAll('script')].filter(s => !s.src)){ try { w.eval(s.textContent); } catch(e){ errs.push('sync : ' + e.message); } }
   await sleep(attente);
   return { w, errs };
@@ -154,12 +156,12 @@ const MODULES = [
   { fichier:'17-epi-dotations', nom:'Dotations d\'EPI', page:'epi-dotation.html', onglet:'dotations', exp:'dotExport', imp:'dotImportFile', ou:'EPI & Dotation → onglet Dotations → Importer .xlsx',
     prerequis:['vigie_hse_epi_catalogue'], source:{ datatest:true }, compter:{ Dotations: w => lireStock(w, 'vigie_hse_epi_dotations').length } },
   { fichier:'18-plans-urgence', nom:'Plans d\'urgence par site', page:'urgences-exercices.html', onglet:'plans', exp:'btnExportPlans', imp:'importPlansFile', ou:'Situations d\'urgence → onglet Plans d\'urgence par site → Importer .xlsx',
-    source:{ datatest:true }, compter:{ Plans: w => lireStock(w, 'vigie_hse_plans_urgence').length, Numeros: w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'contacts'),
-      Rassemblement: w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'rassemblement'), Designes: w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'designes'), Moyens: w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'moyens') },
+    source:{ datatest:true }, compter:{ 'Plans': w => lireStock(w, 'vigie_hse_plans_urgence').length, "Numéros d'urgence": w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'contacts'),
+      'Points de rassemblement': w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'rassemblement'), 'Personnes désignées': w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'designes'), 'Moyens de secours': w => somme(lireStock(w, 'vigie_hse_plans_urgence'), 'moyens') },
     note:"Un plan par site. Les quatre feuilles de listes se rattachent à leur plan par « ID Plan » (ou, à défaut, par le site) ; une feuille présente remplace la liste du plan qu'elle cite." },
 ];
 const SAISIE_ECRAN = [
-  ['Comptes utilisateurs', 'Administration → Utilisateurs', "Créés un par un (ils relèveront de la future authentification)."],
+  ['Comptes utilisateurs', 'Administration → Utilisateurs', "Créés un par un, avec leur mot de passe et leurs profils de droits."],
   ['Accueil au poste', 'Accueil au poste', "Pas d'import : les parcours se créent à l'arrivée de chaque agent."],
   ['Entreprises extérieures', 'Entreprises extérieures', "Pas d'import : une fiche par intervention."],
   ['Base documentaire', 'Base documentaire', "Pas d'import : fiches et documents se saisissent à l'écran."],
@@ -243,7 +245,10 @@ function formatDe(valeurs){
       wbSource = A.w.captures[0];
     }
     A.w.close();
+    if (!wbSource) throw new Error(m.fichier + ' : le bouton « ' + m.exp + ' » n\'a produit aucun classeur' + (A.errs.length ? ' (' + A.errs[0] + ')' : ''));
     const ordre = wbSource.SheetNames.slice();
+    const absentes = Object.keys(m.compter).filter(sn => !ordre.includes(sn));
+    if (absentes.length) throw new Error(m.fichier + ' : « compter » cite des feuilles absentes de l\'export (' + absentes.join(', ') + ') — feuilles exportées : ' + ordre.join(', '));
     const toutes = lignesDe(wbSource);
     const feuilles = {};
     for (const sn of ordre){
@@ -401,13 +406,18 @@ function formatDe(valeurs){
     '## Limites connues',
     '',
     "- **Formats** : Excel (`.xlsx`, `.xls`), LibreOffice (`.ods`) et CSV (point-virgule ou virgule, UTF-8 avec ou sans BOM, Windows-1252 — `assets/import-fichier.js`). Un document Word, PDF ou papier se recopie d'abord dans le modèle : le préventeur prévient que « tout type de fichier est à prévoir » (question 13) — la reprise d'un client devra donc souvent passer par une transcription accompagnée.",
-    "- **Comptes utilisateurs** : pas d'import (ils relèveront de la future authentification). Les **référentiels** s'importent (fichier `00-referentiels.xlsx`) et se chargent en premier : les colonnes « Service » des autres fichiers doivent reprendre exactement leurs libellés.",
+    "- **Comptes utilisateurs** : pas d'import, ils se créent un par un (mot de passe, profils de droits). Les **référentiels** s'importent (fichier `00-referentiels.xlsx`) et se chargent en premier : les colonnes « Service » des autres fichiers doivent reprendre exactement leurs libellés.",
     "- **Accueil au poste, entreprises extérieures, base documentaire, stock et lavages d'EPI, rendez-vous médicaux** : pas d'import, saisie à l'écran.",
-    "- **Données dans le navigateur** : tant que l'application n'a pas de serveur, la reprise se fait sur le poste qui servira (voir `PLAN-MISE-EN-PRODUCTION.md`).",
+    "- **Où vont les données importées** : là où l'application garde les siennes — dans la base du serveur quand les pages sont servies par `serveur/serveur.js` ou par `Lancer VIGIE HSE.bat` ; dans le navigateur quand les pages sont ouvertes seules, et la reprise se fait alors sur le poste qui servira (voir `PLAN-MISE-EN-PRODUCTION.md`, `LIVRAISON-POSTE.md`).",
     '',
   ].join('\n');
   fs.writeFileSync(path.join(ROOT, 'Documentation', 'KIT-REPRISE-DONNEES.md'), md, 'utf8');
   const ko = bilan.filter(b => !(b.refOk && b.rienCree));
   console.log('\n' + bilan.length + ' modèles + mode d\'emploi écrits dans KIT-REPRISE/ · ' + (ko.length ? ko.length + ' À REVOIR : ' + ko.map(b => b.m.fichier).join(', ') : 'tous importables'));
   process.exit(ko.length ? 1 : 0);
-})();
+})().catch(e => {
+  // sans ce relais, l'erreur finit dans le capteur « unhandledRejection » ci-dessus (prévu pour les erreurs
+  // des pages) et le générateur s'arrête en silence avec le code 0, kit à moitié écrit
+  console.error('\nÉCHEC du générateur : ' + (e && e.stack || e));
+  process.exit(2);
+});

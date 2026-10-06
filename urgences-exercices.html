@@ -1180,7 +1180,8 @@
       let p = (idFichier && tous.find(x => x.id === idFichier)) || tous.find(x => normSite(x.site) === normSite(site));
       if (p){ Object.assign(p, champs, { modifiePar: auteur, dateMaj: new Date().toISOString() }); maj++; }
       else {
-        p = Object.assign({ id: idFichier || genId("plu"), contacts:[], rassemblement:[], designes:[], moyens:[], auteur, dateCreation: VigieDates.aujourdhui() }, champs);
+        // l'auteur du fichier est gardé, comme à l'import des exercices (reprise de données) ; à défaut, le compte qui importe
+        p = Object.assign({ id: idFichier || genId("plu"), contacts:[], rassemblement:[], designes:[], moyens:[], auteur: String(rawPick(raw, ["auteur"])).trim() || auteur, dateCreation: VigieDates.aujourdhui() }, champs);
         tous.push(p); ajoutes++;
       }
       if (idFichier) touches.set(idFichier, p);

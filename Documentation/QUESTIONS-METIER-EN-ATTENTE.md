@@ -49,6 +49,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 17 | Suivi médical : qui doit pouvoir le consulter ? | Santé & Visites (en service), droits de lecture du serveur | ✅ répondue le 2026-09-29 — l'encadrement seulement, mis en œuvre |
 | 18 | Entreprise privée : que deviennent les notions propres à la fonction publique ? | Secteur « Entreprise privée » (Administration → Organisation, en service) | 🟠 En attente de réponse |
 | 19 | Plans d'urgence par site : que doit contenir un plan, à quelle fréquence le revoir, qui doit pouvoir le lire ? | Situations d'urgence → Plans d'urgence par site (en service) | 🟠 En attente de réponse |
+| 20 | Presque-accidents : par où les agents les signalent-ils, et qu'en fait-on ? | Jalon J2 (culture sécurité) — Registre AT/MP, RSST, Indicateurs & Reporting | 🟠 En attente de réponse |
 
 ---
 
@@ -531,6 +532,34 @@ Les quatre autres facteurs de l'article **L4161-1** — manutentions manuelles, 
 - Contenu : (A) les rubriques actuelles suffisent ; (B) en ajouter ou en retirer — lesquelles ; et dire s'il faut signaler une rubrique manquante.
 - Revue : (A) pas de fréquence imposée, la date reste indicative ; (B) une fréquence fixe (laquelle), avec un signalement « à revoir » ; (C) une fréquence saisie plan par plan, comme pour les exercices.
 - Lecture : (A) inchangé ; (B) tout compte voit les plans en lecture seule. Côté technique, (B) se fait soit en donnant le niveau « consulter » du module aux profils Agent et Manager (ils verraient alors aussi le registre des exercices), soit par un niveau propre aux plans.
+
+### Décision
+
+> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-06)._
+
+---
+
+## 🟠 Question 20 — Presque-accidents : par où les agents les signalent-ils, et qu'en fait-on ?
+
+**Contexte.** Le porteur du projet veut développer la **culture sécurité** par la remontée des signaux faibles (jalon J2) : une organisation qui recueille et traite bien ses presque-accidents réduit ses accidents. Le logiciel connaît déjà les presque-accidents, mais ne les reçoit que par une seule porte.
+
+**Ce que le logiciel fait aujourd'hui** (mesuré le 2026-10-06) :
+- Le **Registre AT/MP** distingue cinq types d'événement : accident de travail, accident de trajet, incident bénin, presque accident, maladie professionnelle. Un presque-accident s'y enregistre par le **formulaire de déclaration AT/MP** — le même que pour un accident, avec l'identité de l'agent concerné —, réservé aux comptes qui ont le droit « Déclarer un AT/MP » (RH, préventeur). **Un agent ou un manager ne peut pas en déclarer un.** Données de démonstration : 25 événements, dont 7 presque-accidents, 10 incidents bénins, 6 accidents de travail (tous avec arrêt) et 2 accidents de trajet.
+- Le **Registre santé et sécurité au travail (RSST)**, lui, est ouvert aux agents et aux managers : une observation (nature « Risque constaté », « Dysfonctionnement matériel », « Suggestion d'amélioration » ou « Autre » ; gravité estimée ; description), envoyable anonymement, à laquelle le RH ou le préventeur répond. Il n'a pas de nature « presque-accident ».
+- **Indicateurs & Reporting** compte désormais les événements de la période **par type**, dans l'ordre presque-accident → incident bénin → accident de travail sans arrêt → avec arrêt, puis trajet et maladie professionnelle : des nombres bruts, sans proportion de référence. En revanche, le chiffre « AT/MP » en tête de page compte **tous** les événements — 25 en démonstration, dont 17 sans conséquence (presque-accidents et incidents bénins).
+
+**Les questions.**
+1. **Canal** — par où un agent doit-il signaler un presque-accident ?
+2. **Contenu** — que faut-il demander au minimum (date, lieu, ce qui s'est passé, ce qui aurait pu arriver, mesure prise sur le moment, photo…) ? L'anonymat doit-il être possible ?
+3. **Traitement** — qui doit être prévenu, dans quel délai répondre, et que peut devenir un signalement : classé, action au Plan d'actions, analyse d'accident, inscription au Registre AT/MP ?
+4. **Lecture des chiffres** — le chiffre « AT/MP » doit-il compter les presque-accidents et les incidents bénins ? Faut-il afficher un repère de proportion (pyramide de Bird ou autre) ou un objectif de remontée ? Les accidents de trajet ont-ils leur place dans cette lecture ?
+
+**Options (canal).**
+- (A) **Inchangé** : l'agent signale hors du logiciel (oralement, par écrit) ; le RH ou le préventeur l'inscrit au Registre AT/MP.
+- (B) **Une nature « Presque-accident » dans le RSST** : tout agent la signale, anonymement s'il le souhaite ; le RH ou le préventeur y répond et peut l'inscrire au Registre AT/MP.
+- (C) **Un formulaire « Signaler » à part**, ouvert à tous, distinct du RSST, avec son propre suivi.
+
+Côté technique, (B) réutilise un écran existant et son anonymat ; (C) donne un écran dédié, plus court, que le registre réglementaire n'a pas à porter.
 
 ### Décision
 

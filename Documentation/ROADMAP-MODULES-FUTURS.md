@@ -65,7 +65,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 |---|---|
 | **J0 — Généralisation commerciale (collectivités + secteur privé)** | 🟡 En cours — organisation configurable et secteur (vocabulaire) faits le 2026-09-30, **profils de droits et marque blanche faits le 2026-10-01** ; restent la question 18, le paquet de marque et le serveur multi-client |
 | **J1 — Accompagnement certification sécurité (ISO 45001, MASE...)** | ❌ Non démarré — version ultérieure, tour d'horizon des référentiels à faire |
-| **J2 — Culture sécurité, remontée presque-accident/incident/accident** | ❌ Non démarré — piste posée, à approfondir plus tard ; premier pas fait dans le Registre AT/MP |
+| **J2 — Culture sécurité, remontée presque-accident/incident/accident** | 🟡 Cadrage engagé (2026-10-06) — question 20 posée au préventeur (canal, contenu, traitement, lecture des chiffres) ; comptage par type livré dans Indicateurs & Reporting |
 
 **Modules fonctionnels** :
 
@@ -209,11 +209,16 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 ---
 
-## J2 — Jalon complémentaire : culture sécurité en entreprise, via la remontée d'information — ❌ Non démarré (piste à approfondir plus tard)
+## J2 — Jalon complémentaire : culture sécurité en entreprise, via la remontée d'information — 🟡 Cadrage engagé (2026-10-06)
+
+**Cadrage engagé le 2026-10-06** (choisi par l'utilisateur, avec la consigne de poser d'abord les questions au préventeur) :
+- **Question 20 posée** (`QUESTIONS-METIER-EN-ATTENTE.md` et Cahier) : par où un agent signale un presque-accident — inchangé, une nature du RSST, ou un formulaire « Signaler » à part — ; ce qu'on demande au minimum, et si l'anonymat est possible ; qui traite, dans quel délai, avec quelles suites ; comment lire les chiffres. Constat mesuré : un agent ou un manager ne peut aujourd'hui signaler aucun presque-accident dans le logiciel (seuls RH et préventeur déclarent au Registre AT/MP), et le chiffre « AT/MP » du reporting compte tous les types — 25 en démonstration, dont 17 sans conséquence.
+- **Livré sans attendre** : Indicateurs & Reporting compte les événements par type, dans l'ordre de gravité ci-dessous (presque accident → incident bénin → accident sans puis avec arrêt, puis trajet et maladie professionnelle), en nombres bruts sans repère de proportion, avec une feuille dans l'export Excel.
+- **Suite** : le canal de signalement et son traitement se construisent après la réponse.
 
 **Intention exprimée par l'utilisateur (2026-09-12) :** au-delà du strict enregistrement réglementaire des AT/MP, développer un axe produit autour de la **culture de la sécurité** dans une organisation, portée par un vrai processus de remontée d'information à plusieurs étages : **presque-accident** (near-miss, aucune conséquence) → **incident bénin** (conséquence mineure, sans arrêt) → **accident** (avec ou sans arrêt). L'idée directrice — classique en prévention des risques (pyramide de Bird/Heinrich) — est qu'une organisation qui recueille et traite bien les signaux faibles (presque-accidents) réduit mécaniquement sa sinistralité réelle ; encourager et faciliter cette remontée est donc un levier de sécurité à part entière, pas seulement un exercice de conformité. **Premier pas déjà posé (2026-09-12) :** le Registre AT/MP distingue désormais 4 types d'événement — `Accident de travail`, `Accident de trajet`, `Incident bénin` (renommé depuis `Bénin`), et `Presque accident` (nouveau) — saisissables depuis `saisie-rh.html` et affichés avec leur propre code couleur dans `registre-at-mp.html`. Le jeu de données de démonstration reflète volontairement une pyramide où les presque-accidents/incidents bénins sont plus nombreux que les accidents avérés.
 
-**Explicitement non cadré pour l'instant** — l'utilisateur a indiqué que ce sujet sera creusé plus en profondeur dans une session ultérieure. Pistes déjà entrevues à réévaluer à ce moment-là plutôt qu'à développer maintenant : un canal de signalement simplifié/anonymisable pour le presque-accident (à l'image de l'option d'anonymat déjà présente dans le RSST) ; un indicateur dédié au taux de remontée (ratio presque-accidents/incidents/accidents, à comparer aux repères de la littérature prévention) ; une articulation avec le futur module Dialogue social (13), avec le futur module Analyse d'accident (15, ajouté le 2026-09-12 — l'analyse des causes est le prolongement naturel d'une bonne remontée), et avec le jalon J1 (la remontée structurée des incidents est aussi une exigence de certification, clause 10.2).
+**Explicitement non cadré jusqu'au 2026-10-06** — l'utilisateur avait indiqué que ce sujet sera creusé plus en profondeur dans une session ultérieure. Pistes déjà entrevues à réévaluer à ce moment-là plutôt qu'à développer maintenant : un canal de signalement simplifié/anonymisable pour le presque-accident (à l'image de l'option d'anonymat déjà présente dans le RSST) ; un indicateur dédié au taux de remontée (ratio presque-accidents/incidents/accidents, à comparer aux repères de la littérature prévention) ; une articulation avec le futur module Dialogue social (13), avec le futur module Analyse d'accident (15, ajouté le 2026-09-12 — l'analyse des causes est le prolongement naturel d'une bonne remontée), et avec le jalon J1 (la remontée structurée des incidents est aussi une exigence de certification, clause 10.2).
 
 ---
 

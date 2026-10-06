@@ -70,6 +70,8 @@
   .risk-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px; }
   @media (max-width:820px){ .risk-grid{ grid-template-columns:1fr; } }
   .risk-card{ padding:20px; }
+  .type-card{ margin-bottom:22px; }
+  .type-note{ margin:4px 0 0; font-size:11px; color:var(--text-faint); }
   .risk-bars{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
   .risk-row{ display:grid; grid-template-columns:1fr auto; grid-template-areas:"label label" "track value"; gap:4px 10px; align-items:center; }
   .risk-row-label{ grid-area:label; font-size:11.5px; color:var(--text-muted); }
@@ -217,6 +219,12 @@
           <div class="trend-label">Jours d'arrêt par type de risque</div>
           <div class="risk-bars" id="riskJoursBars"></div>
         </div>
+      </div>
+
+      <div class="panel risk-card type-card">
+        <div class="trend-label">Remontée des événements par type</div>
+        <p class="type-note">Du signal faible à l'accident : nombre d'événements de chaque type sur la période.</p>
+        <div class="risk-bars" id="typeBars"></div>
       </div>
 
       <div class="module-grid" id="moduleGrid"></div>
@@ -507,8 +515,9 @@
     $("trendLabels").innerHTML = months.map(m => `<span>${MOIS[parseInt(m.slice(5,7),10)-1]} ${m.slice(2,4)}</span>`).join("");
 
     // ---- Accidents / jours d'arrêt par type de risque ----
+    // data : objet { libellé: valeur } trié par valeur décroissante, ou liste de paires gardée dans son ordre
     function renderRiskBars(elId, data, unit){
-      const entries = Object.entries(data).sort((a,b) => b[1]-a[1]);
+      const entries = Array.isArray(data) ? data : Object.entries(data).sort((a,b) => b[1]-a[1]);
       const max = Math.max(1, ...entries.map(e => e[1]));
       $(elId).innerHTML = entries.length === 0
         ? `<div class="module-empty">Aucun événement AT/MP sur la période.</div>`
@@ -528,13 +537,30 @@
     renderRiskBars("riskCountBars", riskCounts, "");
     renderRiskBars("riskJoursBars", riskJours, "j");
 
+    // ---- Remontée des événements par type (jalon J2) ----
+    // Comptes bruts, dans l'ordre de gravité posé par l'utilisateur pour J2 (presque-accident → incident
+    // bénin → accident sans puis avec arrêt), trajet et maladie professionnelle ensuite. Aucune proportion
+    // de référence : la lecture de ces chiffres revient au préventeur (question 20).
+    const TYPES_REMONTEE = [
+      ["Presque accident", r => r.typeAtMp === "Presque accident"],
+      ["Incident bénin", r => r.typeAtMp === "Incident bénin" || r.typeAtMp === "Bénin"],
+      ["Accident de travail sans arrêt", r => r.typeAtMp === "Accident de travail" && !r.arret],
+      ["Accident de travail avec arrêt", r => r.typeAtMp === "Accident de travail" && !!r.arret],
+      ["Accident de trajet", r => r.typeAtMp === "Accident de trajet"],
+      ["Maladie professionnelle", r => r.typeAtMp === "Maladie professionnelle"],
+    ];
+    const typeCounts = TYPES_REMONTEE.map(([libelle, f]) => [libelle, ATMP.filter(f).length]);
+    const typeAutres = ATMP.filter(r => !TYPES_REMONTEE.some(([, f]) => f(r))).length;
+    if (typeAutres) typeCounts.push(["Autre ou non renseigné", typeAutres]);
+    renderRiskBars("typeBars", ATMP.length ? typeCounts : [], "");
+
     // stash for export
     window.__reportData = { atTotal, atJours, atAvec, tf, duTotal, hseScorePct, duPrioCount:duPrio.length,
       paTotal, paTaux, paEnCours, paRetard, svTotal, svOk, svSoon, svLate, svLateHorsPeriode,
       rsstTotal, rsstTaux, rsstNouvelle,
       vpTotal, vpOk, vpNonConforme, vpLateHorsPeriode, iaTotal, iaTaux, iaNonConforme, pcTotal, pcCmr,
       fhTotal, fhOk, fhExpiree, fhExpireeHorsPeriode,
-      epiTotal, epiOk, epiRenew, epiLateHorsPeriode, riskCounts, riskJours };
+      epiTotal, epiOk, epiRenew, epiLateHorsPeriode, riskCounts, riskJours, typeCounts };
   }
 
   $("fPeriodePreset").addEventListener("change", () => { applyPreset(); renderReport(); });
@@ -592,6 +618,7 @@
     const riskRows = Object.keys(d.riskCounts || {}).sort((a,b) => (d.riskCounts[b]||0)-(d.riskCounts[a]||0))
       .map(r => ({ "Type de risque":r, "Accidents":d.riskCounts[r]||0, "Jours d'arrêt":d.riskJours[r]||0 }));
     if (riskRows.length) addSheet("AT-MP par risque", riskRows);
+    if (d.atTotal) addSheet("AT-MP par type", (d.typeCounts || []).map(([t, n]) => ({ "Type d'événement":t, "Événements":n })));
     const todayIso = VigieDates.aujourdhui();
     XLSX.writeFile(wb, `rapport-indicateurs-hse_${todayIso}.xlsx`);
   });

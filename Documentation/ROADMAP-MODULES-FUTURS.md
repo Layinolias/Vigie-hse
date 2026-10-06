@@ -64,7 +64,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | Jalon | Statut |
 |---|---|
 | **J0 — Généralisation commerciale (collectivités + secteur privé)** | 🟡 En cours — organisation configurable et secteur (vocabulaire) faits le 2026-09-30, **profils de droits et marque blanche faits le 2026-10-01** ; restent la question 18, le paquet de marque et le serveur multi-client |
-| **J1 — Accompagnement certification sécurité (ISO 45001, MASE...)** | ❌ Non démarré — version ultérieure, tour d'horizon des référentiels à faire |
+| **J1 — Accompagnement certification sécurité (ISO 45001, MASE...)** | 🟡 Étude ISO 45001 faite (2026-10-06, `CARTE-ISO-45001.md` : 8 exigences couvertes, 13 partielles, 6 écarts) — MASE à étudier, aucun chantier ouvert |
 | **J2 — Culture sécurité, remontée presque-accident/incident/accident** | 🟡 Cadrage engagé (2026-10-06) — question 20 posée au préventeur (canal, contenu, traitement, lecture des chiffres) ; comptage par type livré dans Indicateurs & Reporting |
 
 **Modules fonctionnels** :
@@ -170,7 +170,9 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 ---
 
-## J1 — Jalon complémentaire : accompagnement à la certification sécurité (ISO 45001 et autres) — ❌ Non démarré (version ultérieure)
+## J1 — Jalon complémentaire : accompagnement à la certification sécurité (ISO 45001 et autres) — 🟡 Étude ISO 45001 faite (2026-10-06)
+
+**Carte de couverture ISO 45001 (2026-10-06) : `CARTE-ISO-45001.md`** — les 30 exigences des clauses 4 à 10, chacune avec ce que l'application produit comme preuve et ce qui manque : 8 couvertes, 13 partielles, 6 écarts, 3 hors outil. Le cœur opérationnel est couvert ; manque la couche « pilotage du système » (revue de direction, objectifs, évaluation de la conformité, programme d'audit interne), dont les données d'entrée existent déjà. Écarts classés par valeur probable dans ce document. Elle **remplace le tableau du 2026-09-12 ci-dessous**, resté pour l'historique (7.5, 8.2 et 5.4 y figurent encore en écart : la Base documentaire, les Situations d'urgence et le Dialogue social les couvrent depuis). MASE reste à étudier.
 
 **Objectif exprimé par l'utilisateur (2026-09-12) :** étudier, pour une version ultérieure (explicitement pas un chantier immédiat), la possibilité d'aider une collectivité/entreprise cliente à obtenir ou conserver une certification de système de management de la santé-sécurité au travail. Confronter ce que VIGIE HSE produit déjà aux exigences de ces référentiels, identifier les modules qui manquent, et ne retenir que ceux qui apportent une vraie valeur ajoutée par rapport à une certification "à la main" (audit papier, tableurs).
 
@@ -180,7 +182,7 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 **Recherche effectuée — informations documentées exigées :** contrairement à l'ancien référentiel OHSAS 18001, ISO 45001 ne fixe pas de format imposé (pas de "manuel qualité" obligatoire), mais exige que certaines informations soient *tenues à jour* (politique, procédures) et d'autres *conservées comme preuve* (enregistrements). Documents/enregistrements mandatés cités par les sources : périmètre du système de management, politique HSE, preuves de compétence du personnel, enregistrements d'incidents/investigations, enregistrements de surveillance/mesure (inspections, audits, évaluations). [List of mandatory documents (Advisera)](https://advisera.com/45001academy/blog/2018/03/28/list-of-mandatory-documents-according-to-iso-45001/) · [Mandatory documents (IT Governance)](https://www.itgovernance.co.uk/blog/list-of-mandatory-documents-required-by-iso-45001)
 
-**Confrontation clause par clause — ce qui est déjà couvert, ce qui manque :**
+**Confrontation clause par clause (2026-09-12, dépassée — voir `CARTE-ISO-45001.md`) :**
 
 | Exigence ISO 45001 | Déjà couvert par VIGIE HSE | Statut |
 |---|---|---|

@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 190 points au 2026-10-06 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 193 points au 2026-10-07 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -72,6 +72,8 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Créer une déclaration AT/MP complète, la retrouver dans le registre, la modifier, la supprimer.
 - [ ] Créer une évaluation DUERP, vérifier qu'elle apparaît dans le Document Unique avec le bon niveau de risque calculé.
 - [ ] Créer une inspection dans Inspection/Audit avec au moins un point "Non conforme", vérifier qu'une action apparaît automatiquement dans Plan d'Actions.
+- [ ] **Efficacité d'une action** (Plan d'Actions) : modifier une action, la passer à « Fait » — le cadre « Vérification de l'efficacité » apparaît ; choisir « Efficace » : la date du jour et `RH1` se remplissent ; enregistrer : « Efficace » s'affiche en vert sous le statut, et le compteur « Terminées » indique combien restent « à vérifier ». Repasser l'action à « En cours » : la vérification disparaît.
+- [ ] **Action non efficace** : sur une action « Fait », choisir « Non efficace » et enregistrer — l'application propose une nouvelle action ; accepter : le formulaire s'ouvre pré-rempli (« Suite : … », même service, même risque). Le filtre Statut « Fait — non efficace » ne montre que celles-là. L'export Excel contient les colonnes Efficacité, Efficacité vérifiée le, Vérifiée par, Constat d'efficacité.
 - [ ] Exporter un module en Excel (le fichier se télécharge et s'ouvre).
 - [ ] Exporter le Document Unique ou le Registre AT/MP en PDF (le dialogue d'impression s'ouvre, aperçu correct).
 - [ ] **Remontée des événements par type** (Indicateurs & Reporting, après avoir ouvert le Registre AT/MP) : période « Depuis le début », le panneau liste dans cet ordre Presque accident 7, Incident bénin 10, Accident de travail sans arrêt 0, Accident de travail avec arrêt 6, Accident de trajet 2, Maladie professionnelle 0 (données de démonstration) ; leur somme est le chiffre « AT/MP » de l'en-tête. Déclarer un presque-accident le fait passer à 8 ; l'export Excel du rapport a une feuille « AT-MP par type ».

@@ -18,6 +18,7 @@
     commentaire:"Commentaire", notes:"Notes", description:"Description", titre:"Titre", type:"Type", nature:"Nature",
     site:"Site", responsable:"Responsable", echeance:"Échéance", priorite:"Priorité", origine:"Origine",
     risque:"Risque", risqueLie:"Risque lié", periodiciteMois:"Périodicité (mois)", dateDerniere:"Dernière réalisation",
+    efficacite:"Efficacité", efficaciteDate:"Efficacité vérifiée le", efficacitePar:"Efficacité vérifiée par", efficaciteNote:"Constat d'efficacité",
     actions:"Actions", points:"Points", reference:"Référence", ref:"Référence", source:"Source", url:"Lien", lien:"Lien",
     // comptes et journaux
     email:"Adresse électronique ou identifiant", username:"Identifiant", role:"Rôle", profils:"Profils de droits", services:"Services",

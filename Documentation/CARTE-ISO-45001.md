@@ -85,7 +85,7 @@ Le cœur opérationnel est solide : évaluation des risques, actions, compétenc
 | Exigence | Repère | Ce que fait VIGIE HSE — preuve produite | Ce qui manque |
 |---|---|---|---|
 | 10.1 Généralités | ➖ | — | — |
-| 10.2 Événement indésirable, non-conformité, action corrective | 🔶 | **Registre AT/MP** (cinq types, dont presque-accident et incident bénin), **Analyse d'accident** (arbre des causes, 5 pourquoi, Ishikawa), **Dossiers AT/MP & CITIS**, non-conformités d'inspection, actions correctives au **Plan d'actions** | le signalement des presque-accidents par les agents eux-mêmes (question 20, jalon J2) et la **vérification de l'efficacité** d'une action soldée (aucun champ ne la porte) |
+| 10.2 Événement indésirable, non-conformité, action corrective | 🔶 | **Registre AT/MP** (cinq types, dont presque-accident et incident bénin), **Analyse d'accident** (arbre des causes, 5 pourquoi, Ishikawa), **Dossiers AT/MP & CITIS**, non-conformités d'inspection, actions correctives au **Plan d'actions**, avec la **vérification de leur efficacité** (résultat, date, par qui, constat ; une action jugée non efficace propose une action de suite — 2026-10-07) | le signalement des presque-accidents par les agents eux-mêmes (question 20, jalon J2) |
 | 10.3 Amélioration continue | 🔶 | Plan d'actions et tendances du reporting | sans objectifs (6.2), pas de mesure du progrès |
 
 ## Écarts à combler, par ordre de valeur probable
@@ -95,7 +95,7 @@ Classement technique, à revoir avec le préventeur et l'utilisateur avant tout 
 1. **Revue de direction (9.3)** — l'exigence la plus systématiquement demandée en audit, et la moins chère ici : toutes ses données d'entrée sont déjà dans l'application. Un écran qui les assemble pour une période, recueille les décisions et envoie les actions au Plan d'actions.
 2. **Objectifs (6.2)** — un objectif chiffré par indicateur du reporting, avec l'écart affiché. Alimente la revue de direction (1) et l'amélioration continue (10.3).
 3. **Évaluation de la conformité (9.1.2, avec 6.1.3)** — prolonger la veille réglementaire : à quoi s'applique le texte, l'obligation qu'il crée, conforme ou non, preuve, date, action.
-4. **Efficacité des actions correctives (10.2)** — un champ « efficacité vérifiée » (date, par qui, résultat) sur une action soldée. Petit chantier.
+4. ~~**Efficacité des actions correctives (10.2)**~~ — ✅ fait le 2026-10-07 : Plan d'actions → une action « Fait » porte sa vérification d'efficacité (Efficace / Non efficace, date, par qui, constat), filtre « efficacité à vérifier », colonnes à l'export et à l'import ; « Non efficace » propose une action de suite. Aucun délai de vérification imposé (à décider avec le préventeur si besoin).
 5. **Programme d'audit interne (9.2)** — un type « audit du système » dans Inspection / Audit : calendrier, clauses auditées, auditeur, constats vers le Plan d'actions.
 6. **Politique (5.2)** — la politique dans la Base documentaire, avec date de revue et prise de connaissance (l'Accueil au poste sait déjà faire signer).
 7. **Management du changement (8.1.3)**, **contexte et parties intéressées (4.1, 4.2)**, **risques et opportunités du système (6.1.1)** — registres simples, de moindre valeur ajoutée par rapport à un tableur.

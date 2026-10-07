@@ -45,6 +45,7 @@ Prérequis chez lui : **Node.js 22.5 ou plus récent** (version « LTS » de nod
 
 | Date | Commit | Remis à | Remarque |
 |---|---|---|---|
+| 2026-10-07 | `ebcde7e` | à remettre (`livraison/VIGIE-HSE-2026-10-07.zip`) | Remplace celui du 2026-10-06 (jamais remis). Périmètre greffé en mode navigateur (un compte limité n'efface plus les autres services), vérification de l'efficacité des actions, kit de reprise régénéré. Mise à jour depuis `3dad53a` (paquet du 2026-10-06) et depuis `a9d5b66` (paquet remis le 2026-09-29) : 8/8 chacun ; test-paquet 17/17 (93 fichiers) ; restauration 22/22. |
 | 2026-10-06 | `3dad53a` | à remettre (`livraison/VIGIE-HSE-2026-10-06.zip`) | Plans d'urgence par site, dates importées lues à la française, kit de reprise à 19 modèles. Mise à jour depuis `fa013e2` (paquet du 2026-10-01) et depuis `a9d5b66` (paquet remis le 2026-09-29) : 8/8 chacun ; test-paquet 17/17 (93 fichiers) ; restauration 22/22. |
 
 ## Avant qu'il y mette de vraies données

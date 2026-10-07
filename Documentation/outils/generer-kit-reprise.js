@@ -126,9 +126,11 @@ const MODULES = [
   { fichier:'07-plan-actions', nom:'Plan d\'actions', page:'plan-actions.html', exp:'btnExport', imp:'importFile', ou:'Plan d\'actions → Importer .xlsx',
     source:{ stock:{ vigie_hse_actions: [
       { id:'pa-1', titre:'Remplacer l\'éclairage du parking', description:'Deux lampadaires hors service', collectivite:'Ville', service:'Voirie & Réseaux', risqueLie:'Chute de plain-pied', origine:'Manuel', responsable:'Chef de service', echeance:'2026-11-30', priorite:'Haute', statut:'En cours', dateCreation:'2026-09-01' },
-      { id:'pa-2', titre:'Former deux sauveteurs secouristes', description:'', collectivite:'Agglomération', service:'Collecte & Propreté', risqueLie:'', origine:'Manuel', responsable:'RH', echeance:'2027-01-31', priorite:'Moyenne', statut:'À faire', dateCreation:'2026-09-01' } ] } },
+      { id:'pa-2', titre:'Former deux sauveteurs secouristes', description:'', collectivite:'Agglomération', service:'Collecte & Propreté', risqueLie:'', origine:'Manuel', responsable:'RH', echeance:'2027-01-31', priorite:'Moyenne', statut:'À faire', dateCreation:'2026-09-01' },
+      { id:'pa-3', titre:'Poser une main courante dans l\'escalier B', description:'Main courante des deux côtés', collectivite:'Ville', service:'Patrimoine Bâti', risqueLie:'Chute de hauteur', origine:'Manuel', responsable:'Régie bâtiment', echeance:'2026-06-30', priorite:'Haute', statut:'Fait', dateCreation:'2026-03-02', efficacite:'Efficace', efficaciteDate:'2026-09-15', efficacitePar:'Préventeur', efficaciteNote:'Aucune chute ni glissade signalée depuis la pose' } ] } },
     compter:{ "Plan d'Actions": w => lireStock(w, 'vigie_hse_actions').length },
-    note:"Les actions saisies à la main. Celles qui découlent du Document Unique, des inspections, des analyses d'accident ou des exercices se créent toutes seules depuis ces modules : inutile de les importer ici." },
+    listes:{ 'Efficacité': ['Efficace', 'Non efficace'] },
+    note:"Les actions saisies à la main. Celles qui découlent du Document Unique, des inspections, des analyses d'accident ou des exercices se créent toutes seules depuis ces modules : inutile de les importer ici. Les quatre colonnes d'efficacité (Efficacité, vérifiée le, par, constat) ne valent que pour une action « Fait » ; « Efficace » ou « Non efficace », sinon laisser vide." },
   { fichier:'08-registre-sst', nom:'Registre santé et sécurité au travail', page:'registre-sst.html', exp:'btnExport', imp:'importFile', ou:'Registre SST → Importer .xlsx',
     source:{ datatest:true }, compter:{ RSST: w => lireStock(w, 'vigie_hse_rsst').length } },
   { fichier:'09-sante-visites', nom:'Santé & visites médicales', page:'sante-visites.html', exp:'btnExport', imp:'importFile', ou:'Santé & Visites → onglet Suivi → Importer .xlsx',
@@ -304,7 +306,11 @@ function formatDe(valeurs){
               : !apres.length ? 'référence : une valeur inconnue est laissée vide (elle doit désigner un enregistrement existant)'
               : 'liste : une valeur inconnue est remplacée' + (apres.length === 1 ? ' par « ' + apres[0] + ' »' : '');
           }
-          if (/^liste/.test(nature) || (/service|collectivit/i.test(c) && distinctes.length <= 40)) vals = distinctes.slice(0, 25).join(' · ') + (distinctes.length > 25 ? ' …' : '');
+          // une liste dont une valeur inconnue est laissée vide se mesure comme une référence : le module la déclare (m.listes)
+          const declaree = m.listes && m.listes[c];
+          if (declaree && /^référence/.test(nature)) nature = 'liste : une valeur inconnue est laissée vide';
+          if (declaree) vals = declaree.join(' · ');
+          else if (/^liste/.test(nature) || (/service|collectivit/i.test(c) && distinctes.length <= 40)) vals = distinctes.slice(0, 25).join(' · ') + (distinctes.length > 25 ? ' …' : '');
         }
         let remarque = nature;
         if (/^ID\b/i.test(c)) remarque = obligatoire === 'OUI' ? 'identifiant exigé' : 'facultatif : laissez vide pour une nouvelle ligne' + (m.prerequis && m.prerequis.includes(EVT) ? ' (rattachement par « Nom » + « Date AT »)' : '');

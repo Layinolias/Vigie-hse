@@ -110,6 +110,14 @@
   .origine-chip.ds{ color:var(--success); border-color:rgba(var(--success-rgb),.4); background:rgba(var(--success-rgb),.1); }
   .origine-chip.ee{ color:var(--critical); border-color:rgba(var(--critical-rgb),.4); background:rgba(var(--critical-rgb),.1); }
   .statut-select{ min-width:118px; padding:6px 28px 6px 10px; font-size:12px; }
+  .eff{ display:block; margin-top:5px; font-size:10.5px; font-weight:600; white-space:nowrap; }
+  .eff.eff-ok{ color:var(--success); } .eff.eff-ko{ color:var(--danger); } .eff.eff-attente{ color:var(--text-faint); font-weight:500; }
+  .form-grid .efficacite-bloc{ grid-column:1 / -1; }
+  .efficacite-bloc{ border:1px solid var(--border); border-radius:var(--r-sm); padding:12px 14px 14px; margin:0; min-width:0; }
+  .efficacite-bloc[hidden]{ display:none; }
+  .efficacite-bloc .form-grid{ grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr)); }
+  .efficacite-bloc legend{ font-size:12px; font-weight:600; color:var(--text); padding:0 6px; }
+  .efficacite-aide{ font-size:11.5px; color:var(--text-muted); margin:0 0 10px; }
   .echeance-overdue{ color:var(--danger); font-weight:600; }
   .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
   .act-edit:hover{ text-decoration:underline; }
@@ -183,7 +191,7 @@
           </div>
           <div class="ps-kpi">
             <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-shield-check"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiFait">–</span><span class="ps-kpi-label">Terminées</span></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiFait">–</span><span class="ps-kpi-label">Terminées</span><span class="ps-kpi-label" id="kpiFaitSub"></span></div>
           </div>
         </div>
       </header>
@@ -199,7 +207,7 @@
         </div>
         <div class="field"><span class="flabel">Service</span><select id="fService"></select></div>
         <div class="field"><span class="flabel">Statut</span>
-          <select id="fStatut"><option value="all">Tous</option><option value="À faire">À faire</option><option value="En cours">En cours</option><option value="Fait">Fait</option></select>
+          <select id="fStatut"><option value="all">Tous</option><option value="À faire">À faire</option><option value="En cours">En cours</option><option value="Fait">Fait</option><option value="Fait:averifier">Fait — efficacité à vérifier</option><option value="Fait:non">Fait — non efficace</option></select>
         </div>
         <div class="field"><span class="flabel">Priorité</span>
           <select id="fPriorite"><option value="all">Toutes</option><option value="Critique">Critique</option><option value="Haute">Haute</option><option value="Moyenne">Moyenne</option><option value="Basse">Basse</option></select>
@@ -228,6 +236,18 @@
               <select id="fStatutForm"><option value="À faire">À faire</option><option value="En cours">En cours</option><option value="Fait">Fait</option></select>
             </div>
             <div class="span3"><label for="fDescription">Description / mesures</label><textarea id="fDescription" placeholder="Détail de l'action corrective à mener…"></textarea></div>
+            <fieldset class="efficacite-bloc" id="blocEfficacite" hidden>
+              <legend>Vérification de l'efficacité</legend>
+              <p class="efficacite-aide">Une fois l'action faite : a-t-elle supprimé ou réduit le risque visé ? (ISO 45001, § 10.2)</p>
+              <div class="form-grid">
+                <div><label for="fEfficacite">Résultat</label>
+                  <select id="fEfficacite"><option value="">À vérifier</option><option value="Efficace">Efficace</option><option value="Non efficace">Non efficace</option></select>
+                </div>
+                <div><label for="fEfficaciteDate">Vérifiée le</label><input type="date" id="fEfficaciteDate"></div>
+                <div><label for="fEfficacitePar">Vérifiée par</label><input type="text" id="fEfficacitePar" placeholder="Nom"></div>
+                <div class="span3"><label for="fEfficaciteNote">Constat</label><textarea id="fEfficaciteNote" placeholder="Ce qui a été observé pour juger l'efficacité…"></textarea></div>
+              </div>
+            </fieldset>
           </div>
           <div class="form-actions">
             <button type="submit" class="btn btn-primary">Enregistrer</button>
@@ -527,6 +547,38 @@
 
   function isOverdue(a){ return a.statut !== "Fait" && a.echeance && a.echeance < VigieDates.aujourdhui(); }
 
+  // Vérification de l'efficacité d'une action faite (ISO 45001 § 10.2) : résultat, date, par qui, constat.
+  // Elle ne vaut que pour une action « Fait » : rouverte, l'action perd sa vérification. Aucun délai imposé.
+  const EFFICACITE = ["Efficace", "Non efficace"];
+  const CHAMPS_EFFICACITE = ["efficacite", "efficaciteDate", "efficacitePar", "efficaciteNote"];
+  // retire les champs ; vrai s'il y avait une vérification renseignée
+  function retirerEfficacite(rec){
+    let avait = false;
+    CHAMPS_EFFICACITE.forEach(k => { if (k in rec){ if (rec[k]) avait = true; delete rec[k]; } });
+    return avait;
+  }
+  function poserEfficacite(rec, v){
+    retirerEfficacite(rec);
+    if (rec.statut !== "Fait") return;
+    const resultat = EFFICACITE.includes(v.efficacite) ? v.efficacite : "";
+    if (resultat) rec.efficacite = resultat;
+    if (v.efficaciteDate) rec.efficaciteDate = v.efficaciteDate; else if (resultat) rec.efficaciteDate = VigieDates.aujourdhui();
+    if (v.efficacitePar) rec.efficacitePar = v.efficacitePar;
+    if (v.efficaciteNote) rec.efficaciteNote = v.efficaciteNote;
+  }
+  function pastilleEfficacite(a){
+    if (a.statut !== "Fait") return "";
+    if (a.efficacite === "Efficace") return `<span class="eff eff-ok">Efficace</span>`;
+    if (a.efficacite === "Non efficace") return `<span class="eff eff-ko">Non efficace</span>`;
+    return `<span class="eff eff-attente">Efficacité à vérifier</span>`;
+  }
+  function statutCorrespond(a, st){
+    if (st === "all") return true;
+    if (st === "Fait:averifier") return a.statut === "Fait" && !a.efficacite;
+    if (st === "Fait:non") return a.statut === "Fait" && a.efficacite === "Non efficace";
+    return a.statut === st;
+  }
+
   // ---------- Filtres ----------
   const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatut = $("fStatut"), fPriorite = $("fPriorite");
   function fillServiceOptions(){
@@ -560,7 +612,7 @@
     let rows = DATASET.filter(a =>
       (col === "all" || VigieOrga.actuel(a.collectivite) === col) &&
       (svc === "all" || a.service === svc) &&
-      (st === "all" || a.statut === st) &&
+      statutCorrespond(a, st) &&
       (pr === "all" || a.priorite === pr)
     );
     rows = rows.slice().sort((a,b) => (a.echeance || "").localeCompare(b.echeance || ""));
@@ -571,7 +623,9 @@
     $("kpiTotalSub").innerHTML = `<b>${DATASET.filter(a=>a.origine==='DUERP').length}</b> issues du DUERP`;
     $("kpiRetard").textContent = DATASET.filter(isOverdue).length;
     $("kpiEnCours").textContent = DATASET.filter(a => a.statut === "En cours").length;
-    $("kpiFait").textContent = DATASET.filter(a => a.statut === "Fait").length;
+    const faites = DATASET.filter(a => a.statut === "Fait");
+    $("kpiFait").textContent = faites.length;
+    $("kpiFaitSub").textContent = faites.length ? `${faites.filter(a => !a.efficacite).length} à vérifier` : "";
     $("resultCount").textContent = rows.length;
     $("totalCount").textContent = DATASET.length;
 
@@ -593,7 +647,7 @@
         <td><span class="chip ${prioCls[a.priorite] || 'p-basse'}">${esc(a.priorite)}</span></td>
         <td>${canEdit
           ? `<select class="statut-select" data-id="${esc(a.id)}"><option ${a.statut==='À faire'?'selected':''}>À faire</option><option ${a.statut==='En cours'?'selected':''}>En cours</option><option ${a.statut==='Fait'?'selected':''}>Fait</option></select>`
-          : esc(a.statut)}</td>
+          : esc(a.statut)}${pastilleEfficacite(a)}</td>
         ${canEdit ? `<td class="actions-float">
           <button type="button" class="act-edit" data-edit="${esc(a.id)}">Modifier</button>
           <button type="button" class="act-del" data-id="${esc(a.id)}">Suppr.</button>
@@ -628,7 +682,16 @@
       const collectivite = VigieOrga.reconnaitre(collectiviteRaw);
       const priorite = String(pick(["priorite"])).trim() || "Moyenne";
       const statut = String(pick(["statut"])).trim() || "À faire";
+      // colonnes d'efficacité : lues seulement si le fichier les a (un ancien modèle n'efface rien)
+      const colonnesEff = ["efficacite", "efficacite verifiee le", "verifiee par", "constat d efficacite"];
+      const efficacite = colonnesEff.some(k => Object.prototype.hasOwnProperty.call(n, k)) ? {
+        efficacite: String(pick(["efficacite"])).trim(),
+        efficaciteDate: parseDateImp(pick(["efficacite verifiee le"])),
+        efficacitePar: String(pick(["verifiee par"])).trim(),
+        efficaciteNote: String(pick(["constat d efficacite"])).trim(),
+      } : null;
       return {
+        _efficacite: efficacite,
         id: String(pick(["id"])).trim() || "",
         titre, description, collectivite,
         service: String(pick(["service"])).trim(),
@@ -659,9 +722,15 @@
         rawRows.forEach(raw => {
           const rec = mapImportedRow(raw);
           if (!rec){ skipped++; return; }
+          const eff = rec._efficacite; delete rec._efficacite;
           const idx = rec.id ? DATASET.findIndex(d => d.id === rec.id) : -1;
-          if (idx >= 0){ DATASET[idx] = rec; updated++; }
-          else { rec.id = rec.id || genId(); DATASET.push(rec); added++; }
+          if (idx >= 0){
+            // les champs que le tableur ne porte pas (venus d'un autre module) sont gardés
+            const fusion = Object.assign({}, DATASET[idx], rec);
+            if (eff) poserEfficacite(fusion, eff); else if (fusion.statut !== "Fait") retirerEfficacite(fusion);
+            DATASET[idx] = fusion; updated++;
+          }
+          else { rec.id = rec.id || genId(); if (eff) poserEfficacite(rec, eff); DATASET.push(rec); added++; }
         });
         saveDataset(DATASET);
         render();
@@ -682,8 +751,9 @@
         "ID": r.id, "Titre": r.titre, "Description": r.description, [VigieOrga.libelle()]: VigieOrga.de(r), "Service": r.service,
         "Risque lié": r.risqueLie || "", "Origine": r.origine, "Responsable": r.responsable || "", "Échéance": r.echeance,
         "Priorité": r.priorite, "Statut": r.statut, "Date de création": r.dateCreation || "",
+        "Efficacité": r.efficacite || "", "Efficacité vérifiée le": r.efficaciteDate || "", "Vérifiée par": r.efficacitePar || "", "Constat d'efficacité": r.efficaciteNote || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Titre", "Description", VigieOrga.libelle(), "Service", "Risque lié", "Origine", "Responsable", "Échéance", "Priorité", "Statut", "Date de création"] });
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Titre", "Description", VigieOrga.libelle(), "Service", "Risque lié", "Origine", "Responsable", "Échéance", "Priorité", "Statut", "Date de création", "Efficacité", "Efficacité vérifiée le", "Vérifiée par", "Constat d'efficacité"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Plan d'Actions");
       const today = VigieDates.aujourdhui();
@@ -698,7 +768,17 @@
     fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
 
-    function openForm(rec){
+    function majBlocEfficacite(){ $("blocEfficacite").hidden = $("fStatutForm").value !== "Fait"; }
+    $("fStatutForm").addEventListener("change", majBlocEfficacite);
+    // un résultat choisi sans date ni vérificateur : la date du jour et le compte connecté, modifiables
+    $("fEfficacite").addEventListener("change", () => {
+      if (!$("fEfficacite").value) return;
+      if (!$("fEfficaciteDate").value) $("fEfficaciteDate").value = VigieDates.aujourdhui();
+      if (!$("fEfficacitePar").value.trim()) $("fEfficacitePar").value = (session && session.user) || "";
+    });
+
+    // pre : valeurs d'une nouvelle action pré-remplie (suite d'une action jugée non efficace)
+    function openForm(rec, pre){
       form.reset();
       if (rec){
         $("formTitle").textContent = "Modifier l'action";
@@ -713,12 +793,25 @@
         $("fPrioriteForm").value = rec.priorite || "Moyenne";
         $("fStatutForm").value = rec.statut || "À faire";
         $("fDescription").value = rec.description || "";
+        $("fEfficacite").value = rec.efficacite || "";
+        $("fEfficaciteDate").value = rec.efficaciteDate || "";
+        $("fEfficacitePar").value = rec.efficacitePar || "";
+        $("fEfficaciteNote").value = rec.efficaciteNote || "";
       } else {
         $("formTitle").textContent = "Nouvelle action";
         $("fId").value = "";
         fillFormServiceOptions(VigieOrga.premier());
         $("fEcheance").value = VigieDates.aujourdhui();
+        if (pre){
+          $("fTitre").value = pre.titre || "";
+          if (pre.collectivite){ $("fCollectiviteForm").value = pre.collectivite; fillFormServiceOptions(pre.collectivite); }
+          if (pre.service) VigieOrga.choisirService($("fServiceForm"), pre.service);
+          $("fRisqueLie").value = pre.risqueLie || "";
+          if (pre.priorite) $("fPrioriteForm").value = pre.priorite;
+          $("fDescription").value = pre.description || "";
+        }
       }
+      majBlocEfficacite();
       formPanel.style.display = "";
       formPanel.scrollIntoView({ behavior:"smooth", block:"start" });
     }
@@ -729,7 +822,9 @@
       e.preventDefault();
       const id = $("fId").value;
       const isNew = !id;
-      const rec = {
+      const ancien = (!isNew && DATASET.find(d => d.id === id)) || {};
+      // les champs que le formulaire ne connaît pas (venus d'un autre module) sont gardés
+      const rec = Object.assign({}, ancien, {
         id: id || genId(),
         titre: $("fTitre").value.trim(),
         description: $("fDescription").value.trim(),
@@ -742,14 +837,31 @@
         priorite: $("fPrioriteForm").value,
         statut: $("fStatutForm").value,
         dateCreation: isNew ? VigieDates.aujourdhui() : (DATASET.find(d => d.id === id) || {}).dateCreation || VigieDates.aujourdhui(),
-      };
+      });
+      poserEfficacite(rec, {
+        efficacite: $("fEfficacite").value, efficaciteDate: $("fEfficaciteDate").value,
+        efficacitePar: $("fEfficacitePar").value.trim(), efficaciteNote: $("fEfficaciteNote").value.trim(),
+      });
       const idx = DATASET.findIndex(d => d.id === rec.id);
       if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);
       saveDataset(DATASET);
-      logAudit("Plan d'Actions", isNew ? "Création" : "Modification", `Action « ${rec.titre} » — ${rec.service}`);
+      let suiteJournal = "";
+      if (rec.efficacite && rec.efficacite !== ancien.efficacite) suiteJournal = ` — efficacité : ${rec.efficacite}`;
+      else if (!rec.efficacite && ancien.efficacite) suiteJournal = " — vérification d'efficacité retirée";
+      logAudit("Plan d'Actions", isNew ? "Création" : "Modification", `Action « ${rec.titre} » — ${rec.service}${suiteJournal}`);
       formPanel.style.display = "none";
       form.reset();
       render();
+      // jugée non efficace : il faut une autre action (ISO 45001 § 10.2) — proposée, pas imposée
+      if (rec.efficacite === "Non efficace" && ancien.efficacite !== "Non efficace" &&
+          confirm(`L'action « ${rec.titre} » n'a pas été efficace. Créer une nouvelle action pour y remédier ?`)){
+        const le = rec.efficaciteDate ? ` le ${rec.efficaciteDate.split("-").reverse().join("/")}` : "";
+        openForm(null, {
+          titre: `Suite : ${rec.titre}`, collectivite: rec.collectivite, service: rec.service,
+          risqueLie: rec.risqueLie, priorite: rec.priorite,
+          description: `L'action « ${rec.titre} » a été jugée non efficace${le}.` + (rec.efficaciteNote ? ` Constat : ${rec.efficaciteNote}` : ""),
+        });
+      }
     });
 
     $("tbody").addEventListener("click", (e) => {
@@ -774,8 +886,9 @@
       const rec = DATASET.find(d => d.id === sel.dataset.id);
       if (!rec) return;
       rec.statut = sel.value;
+      const retiree = rec.statut !== "Fait" && retirerEfficacite(rec);
       saveDataset(DATASET);
-      logAudit("Plan d'Actions", "Modification", `Statut de « ${rec.titre} » → ${rec.statut}`);
+      logAudit("Plan d'Actions", "Modification", `Statut de « ${rec.titre} » → ${rec.statut}${retiree ? " (vérification d'efficacité retirée)" : ""}`);
       render();
     });
   }

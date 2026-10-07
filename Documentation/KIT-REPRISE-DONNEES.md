@@ -1,6 +1,6 @@
 # Kit de reprise des données
 
-> Fichier **généré** par `Documentation/outils/generer-kit-reprise.js` — ne pas l'éditer à la main, relancer le générateur. Dernière génération : 2026-10-06.
+> Fichier **généré** par `Documentation/outils/generer-kit-reprise.js` — ne pas l'éditer à la main, relancer le générateur. Dernière génération : 2026-10-07.
 
 Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes (registres Excel, historique des accidents, suivi des visites…) se chargent par les imports de chaque module. Le dossier `KIT-REPRISE/` contient un modèle Excel par module importable et un mode d'emploi (`00-mode-d-emploi.xlsx`).
 
@@ -18,7 +18,7 @@ Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes
 | 04 | `04-dossiers-atmp-citis.xlsx` | Dossiers AT/MP & CITIS | Dossiers AT/MP & CITIS → Importer .xlsx | Chaque ligne se rattache à un accident déjà présent dans le Registre AT/MP, par sa colonne « ID AT/MP » ou, à défaut, par « Nom » + « Date AT ». |
 | 05 | `05-analyses-accident.xlsx` | Analyses d'accident | Analyse d'accident → Importer .xlsx | La méthode, la conclusion, les actions correctives et l'arbre causal (feuilles « Faits », « Pourquoi », « Ishikawa ») se reprennent. Dans « Faits », la colonne « Découle du fait n° » désigne un autre fait de la même analyse par son numéro. |
 | 06 | `06-document-unique.xlsx` | Document Unique (DUERP) | Document Unique → Importer .xlsx | Une ligne par unité de travail et par risque. |
-| 07 | `07-plan-actions.xlsx` | Plan d'actions | Plan d'actions → Importer .xlsx | Les actions saisies à la main. Celles qui découlent du Document Unique, des inspections, des analyses d'accident ou des exercices se créent toutes seules depuis ces modules : inutile de les importer ici. |
+| 07 | `07-plan-actions.xlsx` | Plan d'actions | Plan d'actions → Importer .xlsx | Les actions saisies à la main. Celles qui découlent du Document Unique, des inspections, des analyses d'accident ou des exercices se créent toutes seules depuis ces modules : inutile de les importer ici. Les quatre colonnes d'efficacité (Efficacité, vérifiée le, par, constat) ne valent que pour une action « Fait » ; « Efficace » ou « Non efficace », sinon laisser vide. |
 | 08 | `08-registre-sst.xlsx` | Registre santé et sécurité au travail | Registre SST → Importer .xlsx |  |
 | 09 | `09-sante-visites.xlsx` | Santé & visites médicales | Santé & Visites → onglet Suivi → Importer .xlsx | Le suivi des visites (dernière visite, périodicité). Les rendez-vous se saisissent dans l'agenda. |
 | 10 | `10-verifications-periodiques.xlsx` | Vérifications périodiques | Vérifications périodiques → Importer .xlsx |  |
@@ -47,7 +47,7 @@ Le détail complet (format, valeurs acceptées, remarques) est dans la feuille �
 - **`04-dossiers-atmp-citis.xlsx`** — Dossiers AT/MP & CITIS : obligatoires Arretes › « Type ».
 - **`05-analyses-accident.xlsx`** — Analyses d'accident : obligatoires Actions › « Action », Faits › « Fait », Ishikawa › « Catégorie », Ishikawa › « Cause » ; listes : « Type » (une valeur inconnue est remplacée par « Fait »), « Catégorie » (une valeur inconnue fait refuser la ligne).
 - **`06-document-unique.xlsx`** — Document Unique (DUERP) : au moins une de « Risques », « Taches » ; listes : « Collectivite » (une valeur inconnue est remplacée par « Ville »).
-- **`07-plan-actions.xlsx`** — Plan d'actions : obligatoires « Titre » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »), « Priorité » (une valeur inconnue est remplacée par « Moyenne »), « Statut » (une valeur inconnue est remplacée par « À faire »).
+- **`07-plan-actions.xlsx`** — Plan d'actions : obligatoires « Titre » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »), « Priorité » (une valeur inconnue est remplacée par « Moyenne »), « Statut » (une valeur inconnue est remplacée par « À faire »), « Efficacité » (une valeur inconnue est laissée vide).
 - **`08-registre-sst.xlsx`** — Registre santé et sécurité au travail : au moins une de « Nature », « Description » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »), « Gravité » (une valeur inconnue est remplacée par « Moyenne »), « Statut » (une valeur inconnue est remplacée par « Nouvelle »).
 - **`09-sante-visites.xlsx`** — Santé & visites médicales : obligatoires « Nom » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »).
 - **`10-verifications-periodiques.xlsx`** — Vérifications périodiques : obligatoires « Équipement » ; listes : « Catégorie » (une valeur inconnue est remplacée par « Installations électriques »), « Collectivité » (une valeur inconnue est remplacée par « Ville »), « Conformité » (une valeur inconnue est remplacée par « Conforme »).

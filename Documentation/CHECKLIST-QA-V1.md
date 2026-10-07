@@ -79,6 +79,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 ### `manager` (manager@verchamps.fr — scopé Voirie + Espace Vert)
 - [ ] Ne voit que les données des services Voirie/Espace Vert dans les modules concernés (Registre AT/MP, Document Unique, Plan d'Actions, etc.) — pas les autres services.
 - [ ] Ne peut pas créer/modifier/supprimer (lecture seule), sauf dans **Registre Santé & Sécurité** où il peut déposer une observation.
+- [ ] Sur le site hébergé : en `RH1`, déposer au **Registre Santé & Sécurité** une observation pour un service hors Voirie / Espaces Verts (ex. Restauration Collective) ; se reconnecter en `manager`, déposer une observation pour Voirie ; revenir en `RH1` : **les deux observations sont là** (le dépôt du manager n'efface plus celles des autres services).
 - [ ] Ne voit ni Administration ni Indicateurs & Reporting.
 
 ### `ag` (AG1)

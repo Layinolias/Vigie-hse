@@ -307,13 +307,64 @@
     },
   };
 
+  // ---------- Périmètre en mode navigateur : même règle que serveur/perimetre.js ----------
+  // Un compte limité à certains services (un manager) ne voit que leurs enregistrements, et la page
+  // enregistre la liste qu'elle a : sans cette greffe, écrire effaçait du stockage tous les enregistrements
+  // des autres services. Sa part est greffée sur le registre complet, comme le fait le serveur : les
+  // enregistrements hors périmètre gardent leur version et leur place, ce qu'il soumettrait hors de son
+  // périmètre est ignoré, et une suppression n'efface que sa part.
+  function servicesLimites(){
+    try {
+      var s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      var l = s && s.services;
+      return Array.isArray(l) && l.indexOf("*") === -1 ? l : null;
+    } catch(e){ return null; }
+  }
+  function enListe(v){ if (v == null) return null; try { var l = JSON.parse(v); return Array.isArray(l) ? l : null; } catch(e){ return null; } }
+  function serviceDe(r){
+    if (!r || typeof r !== "object") return null;
+    if (typeof r.service === "string") return r.service;
+    return r.record && typeof r.record.service === "string" ? r.record.service : null;
+  }
+  function horsDe(r, services){ var s = serviceDe(r); return !!s && services.indexOf(s) === -1; }
+  function greffer(complet, soumis, services){
+    var base = complet == null ? [] : enListe(complet);
+    if (!base) return soumis;
+    var s = soumis === null ? [] : enListe(soumis);
+    if (!s) return soumis;
+    var idsHors = {};
+    base.forEach(function(r){ if (horsDe(r, services) && r.id != null) idsHors[String(r.id)] = true; });
+    var retenus = s.filter(function(r){ return !horsDe(r, services) && !(r && r.id != null && idsHors[String(r.id)]); });
+    if (!base.some(function(r){ return horsDe(r, services); })) return soumis === null || retenus.length === s.length ? soumis : JSON.stringify(retenus);
+    var gardes = {};
+    retenus.forEach(function(r){ if (r && r.id != null) gardes[String(r.id)] = true; });
+    var apres = {}, enTete = [], ancre = null;   // identifiant du périmètre → enregistrements hors périmètre qui le suivent
+    base.forEach(function(r){
+      if (horsDe(r, services)){ if (ancre === null) enTete.push(r); else apres[ancre].push(r); }
+      else if (r && r.id != null && gardes[String(r.id)]){ ancre = String(r.id); if (!apres[ancre]) apres[ancre] = []; }
+    });
+    var sortie = enTete.slice();
+    retenus.forEach(function(r){
+      sortie.push(r);
+      var id = r && r.id != null ? String(r.id) : null;
+      if (id !== null && apres[id]){ sortie.push.apply(sortie, apres[id]); delete apres[id]; }
+    });
+    return JSON.stringify(sortie);
+  }
+  function ecrireLocal(cle, valeur){
+    var services = servicesLimites();
+    if (services) valeur = greffer(fond().getItem(cle), valeur, services);
+    if (valeur === null){ fond().removeItem(cle); return; }
+    try { fond().setItem(cle, valeur); }
+    catch(e){ if (estPlein(e)) signalerPlein(); throw e; }
+  }
+
   window.VigieStore = {
     CLES: CLES,
     getItem: function(cle){ return SERVEUR ? distant.getItem(cle) : fond().getItem(cle); },
     setItem: function(cle, valeur){
       if (SERVEUR) return distant.setItem(cle, valeur);
-      try { fond().setItem(cle, valeur); }
-      catch(e){ if (estPlein(e)) signalerPlein(); throw e; }
+      ecrireLocal(cle, String(valeur));
     },
     // caractères occupés par les clés de l'application (clé + valeur), pour suivre l'approche de la limite
     occupation: function(){
@@ -321,7 +372,7 @@
       Object.keys(CLES).forEach(function(k){ var v = window.VigieStore.getItem(k); if (v != null) n += k.length + v.length; });
       return n;
     },
-    removeItem: function(cle){ if (SERVEUR) return distant.removeItem(cle); fond().removeItem(cle); },
+    removeItem: function(cle){ if (SERVEUR) return distant.removeItem(cle); ecrireLocal(cle, null); },
     // « Réinitialiser les données de démonstration » : tout ce que l'application a stocké
     // (en mode serveur : pour tous les utilisateurs — le serveur garde une copie de la base avant)
     clear: function(){ if (SERVEUR) return distant.clear(); fond().clear(); },

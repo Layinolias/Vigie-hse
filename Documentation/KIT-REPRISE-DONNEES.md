@@ -31,6 +31,7 @@ Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes
 | 17 | `17-epi-dotations.xlsx` | Dotations d'EPI | EPI & Dotation → onglet Dotations → Importer .xlsx |  |
 | 18 | `18-plans-urgence.xlsx` | Plans d'urgence par site | Situations d'urgence → onglet Plans d'urgence par site → Importer .xlsx | Un plan par site. Les quatre feuilles de listes se rattachent à leur plan par « ID Plan » (ou, à défaut, par le site) ; une feuille présente remplace la liste du plan qu'elle cite. |
 | — | *saisie à l'écran* | Accueil au poste | Accueil au poste | Pas d'import : les parcours se créent à l'arrivée de chaque agent. |
+| — | *saisie à l'écran* | Revues de direction | Revue de direction | Pas d'import : chaque revue se prépare à l'écran à partir des données reprises. |
 | — | *saisie à l'écran* | Signalements | Signalements | Pas d'import : chaque presque-accident se signale à l'écran ; un historique se reprend au Registre AT/MP (type « Presque accident »). |
 | — | *saisie à l'écran* | Entreprises extérieures | Entreprises extérieures | Pas d'import : une fiche par intervention. |
 | — | *saisie à l'écran* | Base documentaire | Base documentaire | Pas d'import : fiches et documents se saisissent à l'écran. |

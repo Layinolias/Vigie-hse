@@ -16,6 +16,8 @@
 //     Plan d'actions affiche à tous (generateAnalyseActionSeeds).
 //   - Journal de saisie AT/MP (copie complète des déclarations) : comptes qui reçoivent le registre complet.
 //   - Journal d'audit, comptes utilisateurs : administrateur (Administration est la seule page qui les lit).
+//   - Revues de direction (2026-10-12) : complètes pour le niveau « consulter » du module ; aux autres, les seules
+//     décisions (le Plan d'actions les affiche à tous, comme les actions des analyses d'accident).
 //   - Signalements de presque-accidents et leurs photos (question 20, 2026-10-12) : complets (périmètre appliqué) pour
 //     qui peut les traiter ; à tout autre compte, ses seuls signalements (champ « auteur »), qu'il suit sur sa page.
 //   - Suivi médical et rendez-vous : l'encadrement seulement — manager (ses services, par le périmètre), RH et
@@ -35,6 +37,7 @@ const SIENS = 'siens';   // les seuls enregistrements dont le compte est l'auteu
 const ATMP_VUE_AGENT = ['id', 'collectivite', 'service', 'dateAT', 'dateMois', 'typeAtMp', 'arret', 'statutArret', 'joursArret',
   'circonstances', 'etat', 'risque', 'siege', 'nature', 'elementMateriel', 'signalementId'];
 const ANALYSE_VUE_ACTIONS = ['id', 'atmpId', 'collectivite', 'service', 'dateAnalyse', 'actions'];
+const REVUE_VUE_DECISIONS = ['id', 'dateRevue', 'statut', 'decisions'];
 
 // ce que les profils du compte lui donnent (assets/droits.js, via serveur/droits.js)
 const peut = (p, module, niveau) => !!p && atteint(p, module, niveau);
@@ -70,6 +73,7 @@ function regle(page, cle){
     case 'vigie_hse_analyses_accident': return peut(page, 'accident-analyse', 'consulter') ? null : ANALYSE_VUE_ACTIONS;
     case 'vigie_hse_visites':
     case 'vigie_hse_rdv_medicaux':      return encadrement(page) ? null : RETIRE;
+    case 'vigie_hse_revues_direction':  return peut(page, 'revue-direction', 'consulter') ? null : REVUE_VUE_DECISIONS;
     case 'vigie_hse_signalements':
     case 'vigie_hse_signalements_photos': return peut(page, 'signalements', 'traiter') ? null : SIENS;
     case 'vigie_hse_audit_log':
@@ -116,4 +120,4 @@ function ecriture(page, cle, complet, soumis){
   return grefferAjouts(complet, soumis);
 }
 
-module.exports = { regle, vue, filtrer, ecriture, RETIRE, SIENS, ATMP_VUE_AGENT, PAGE_UNIQUE };
+module.exports = { regle, vue, filtrer, ecriture, RETIRE, SIENS, ATMP_VUE_AGENT, REVUE_VUE_DECISIONS, PAGE_UNIQUE };

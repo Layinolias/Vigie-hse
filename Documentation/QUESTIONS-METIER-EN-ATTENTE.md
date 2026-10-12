@@ -52,6 +52,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 20 | Presque-accidents : par où les agents les signalent-ils, et qu'en fait-on ? | Jalon J2 (culture sécurité) — Registre AT/MP, RSST, Indicateurs & Reporting | ✅ répondue le 2026-10-11 : un formulaire « Signaler » à part — mise en œuvre le 2026-10-12 (module Signalements) |
 | 21 | Plans d'urgence : la liste des rubriques obligatoires est-elle la bonne ? | Situations d'urgence → Plans d'urgence par site (en service) | 🟠 En attente de réponse |
 | 22 | Signalements : anonymat, délai de traitement, lecture de la pyramide de Bird | Signalements, Indicateurs & Reporting (en service) | 🟠 En attente de réponse |
+| 23 | Revue de direction : à quelle fréquence, avec qui, et qui la valide ? | Revue de direction (en service, ISO 45001 § 9.3) | 🟠 En attente de réponse |
 
 ---
 
@@ -622,6 +623,29 @@ Côté technique, (B) réutilise un écran existant et son anonymat ; (C) donne 
 4. **Objectif** — un objectif annuel pour toute l'organisation suffit-il, ou faut-il un objectif par service ?
 
 **Options.** Anonymat : (A) non ; (B) oui, au choix du déclarant. Délai : (A) aucun ; (B) un délai fixe (lequel), signalé au-delà. Pyramide : (A) telle quelle ; (B) une autre répartition (laquelle). Objectif : (A) pour toute l'organisation ; (B) par service. Côté technique : la répartition est une table (`NIVEAUX_BIRD` et `niveauBird`, `assets/signalements-ref.js`) ; l'anonymat reprendrait celui du registre santé et sécurité.
+
+### Décision
+
+> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-12)._
+
+---
+
+## 🟠 Question 23 — Revue de direction : à quelle fréquence, avec qui, et qui la valide ?
+
+**Contexte.** La norme ISO 45001 demande que la direction passe en revue, à intervalles planifiés, la démarche de santé et de sécurité au travail (§ 9.3) : c'est l'exigence qu'un auditeur demande en premier, et elle manquait au logiciel. Depuis le 2026-10-12, la page **« Revue de direction »** (menu Pilotage) la prépare : elle rassemble les données de la période déjà présentes dans le logiciel — suites des revues précédentes, veille réglementaire, objectif de remontée des presque-accidents, accidents et pyramide de Bird, actions correctives et leur efficacité, retards de visites médicales, de vérifications, d'habilitations et d'EPI, inspections, observations du registre santé et sécurité, questions des représentants — et recueille l'analyse, les conclusions et les actions décidées. Une revue validée est figée (chiffres du jour de la validation), s'imprime en compte rendu, et ses actions rejoignent le Plan d'actions.
+
+**Ce que le logiciel fait aujourd'hui.**
+- **Fréquence** : aucune n'est imposée. Une nouvelle revue couvre la période qui suit la précédente (ou les 12 derniers mois pour la première) ; rien n'est signalé « en retard ».
+- **Participants** : une ligne de texte libre. **Validation** : par le compte qui clique « Valider la revue » (profils Administrateur et RH) ; le compte rendu imprimé porte deux zones de signature, « pour la direction » et « pour les participants ».
+- **Accès** : réservé aux profils Administrateur et RH (droit « Revue de direction », à donner à d'autres profils dans Administration → Profils). Les représentants du personnel n'y ont pas accès ; ils voient les actions décidées dans le Plan d'actions, comme tout le monde.
+
+**Les questions.**
+1. **Fréquence** — une revue par an ? Le logiciel doit-il signaler une revue en retard au-delà d'un délai ?
+2. **Participants et validation** — qui doit y participer (autorité territoriale ou élu, direction générale, encadrement, préventeur, médecine de prévention, représentants du personnel), et qui la valide ou la signe ?
+3. **Instance** — la revue doit-elle être présentée à la formation spécialisée (F3SCT, ou CSSCT en entreprise) ? Les représentants doivent-ils pouvoir la consulter dans le logiciel ?
+4. **Contenu** — manque-t-il une donnée que l'auditeur attend pour une collectivité (programme annuel de prévention, rapport annuel, bilan des formations…) ?
+
+**Options.** Fréquence : (A) libre, comme aujourd'hui ; (B) annuelle, avec un signalement au-delà ; (C) autre. Lecture par les représentants : (A) non ; (B) oui, en lecture seule. Côté technique : le droit se règle par profil, sans code ; une alerte de fréquence est un réglage de plus.
 
 ### Décision
 

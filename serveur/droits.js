@@ -65,6 +65,7 @@ const REGLES = {
   // Signalements (question 20) : chacun ajoute les siens ; « traiter » modifie, supprime, fixe l'objectif
   signalements: regle('signalements', 'traiter', 'signaler'), signalements_photos: regle('signalements', 'traiter', 'signaler'),
   signalements_parametres: regle('signalements', 'traiter'),
+  revues_direction: GERER('revue-direction'),
   ds_questions: regle('dialogue-social', 'participer'), ds_reunions: regle('dialogue-social', 'participer'), ds_visites: regle('dialogue-social', 'participer'),
 };
 const regleGenerale = GERER('administration');

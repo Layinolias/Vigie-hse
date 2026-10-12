@@ -57,6 +57,7 @@
     vigie_hse_veille:             { nature:"donnees",    sensible:false, module:"Administration (veille)" },
     vigie_hse_signalements:       { nature:"donnees",    sensible:false, module:"Signalements" },
     vigie_hse_signalements_photos:{ nature:"donnees",    sensible:false, module:"Signalements" },
+    vigie_hse_revues_direction:   { nature:"donnees",    sensible:false, module:"Revue de direction" },
     vigie_hse_users:              { nature:"parametres", sensible:false, module:"Administration (comptes) — relèvera de l'authentification" },
     vigie_hse_profils:            { nature:"parametres", sensible:false, module:"Administration (profils de droits)" },
     vigie_hse_referentials:       { nature:"parametres", sensible:false, module:"Administration (référentiels)" },

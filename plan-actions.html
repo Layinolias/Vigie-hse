@@ -108,6 +108,7 @@
   .origine-chip.analyse{ color:var(--accent-violet); border-color:rgba(var(--accent-violet-rgb),.4); background:rgba(var(--accent-violet-rgb),.1); }
   .origine-chip.urgence{ color:var(--danger); border-color:rgba(var(--danger-rgb),.4); background:rgba(var(--danger-rgb),.1); }
   .origine-chip.ds{ color:var(--success); border-color:rgba(var(--success-rgb),.4); background:rgba(var(--success-rgb),.1); }
+  .origine-chip.revue{ color:var(--accent-violet); border-color:rgba(var(--accent-violet-rgb),.4); background:transparent; }
   .origine-chip.signalement{ color:var(--text-muted); border-color:var(--border); background:var(--bg-2); }
   .origine-chip.ee{ color:var(--critical); border-color:rgba(var(--critical-rgb),.4); background:rgba(var(--critical-rgb),.1); }
   .statut-select{ min-width:118px; padding:6px 28px 6px 10px; font-size:12px; }
@@ -527,6 +528,37 @@
     return out;
   }
 
+  // Actions décidées en revue de direction (ISO 45001 § 9.3, 2026-10-12) : seulement une fois la revue validée.
+  const REVUES_KEY = "vigie_hse_revues_direction";
+  function generateRevueActionSeeds(){
+    let revues = [];
+    try { const raw = VigieStore.getItem(REVUES_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) revues = p; } } catch(e){}
+    const out = [];
+    const today = new Date();
+    revues.forEach(r => {
+      if (!r || r.statut !== "Validée" || !Array.isArray(r.decisions)) return;
+      const jj = String(r.dateRevue || "").split("-").reverse().join("/");
+      r.decisions.forEach(d => {
+        if (!d || !d.description || !String(d.description).trim()) return;
+        out.push({
+          id: "pa-rd-" + r.id + "-" + d.id,
+          titre: "Revue de direction du " + jj,
+          description: d.description,
+          service: "",
+          collectivite: "",
+          risqueLie: "",
+          origine: "Revue de direction",
+          responsable: d.responsable || "",
+          echeance: d.echeance || VigieDates.iso(today),
+          priorite: "Moyenne",
+          statut: "À faire",
+          dateCreation: r.dateRevue || VigieDates.iso(today),
+        });
+      });
+    });
+    return out;
+  }
+
   // Actions décidées au traitement d'un signalement de presque-accident (question 20, 2026-10-12).
   const SIGNALEMENTS_KEY = "vigie_hse_signalements";
   function generateSignalementActionSeeds(){
@@ -564,7 +596,7 @@
   function loadDataset(){
     let stored = [];
     try { const raw = VigieStore.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds()).concat(generateDialogueSocialActionSeeds()).concat(generateSignalementActionSeeds());
+    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds()).concat(generateDialogueSocialActionSeeds()).concat(generateSignalementActionSeeds()).concat(generateRevueActionSeeds());
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
@@ -667,7 +699,7 @@
       return;
     }
     const prioCls = { "Critique":"p-critique", "Haute":"p-haute", "Moyenne":"p-moyenne", "Basse":"p-basse" };
-    const origineCls = { "DUERP":"duerp", "Inspection":"inspection", "Analyse":"analyse", "Urgence":"urgence", "Prévention EE":"ee", "Dialogue social":"ds", "Signalement":"signalement" };
+    const origineCls = { "DUERP":"duerp", "Inspection":"inspection", "Analyse":"analyse", "Urgence":"urgence", "Prévention EE":"ee", "Dialogue social":"ds", "Signalement":"signalement", "Revue de direction":"revue" };
     tbody.innerHTML = rows.map(a => `
       <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${esc(a.id)}">
         <td class="wrap">${esc(a.titre)}</td>

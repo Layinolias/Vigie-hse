@@ -15,6 +15,7 @@
 <script src="assets/dates-locales.js"></script>
 <script src="assets/hse-formulas.js"></script>
 <script src="assets/signalements-ref.js"></script>
+<script src="assets/indicateurs.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
 <link rel="stylesheet" href="assets/commun.css">
 <style>
@@ -294,30 +295,8 @@
 
   VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
 
-  // ---------- Lecture défensive des jeux de données de chaque module (aucune génération de seed ici) ----------
-  function readKey(key){
-    try { const raw = VigieStore.getItem(key); if (!raw) return []; const p = JSON.parse(raw); return Array.isArray(p) ? p : []; }
-    catch(e){ return []; }
-  }
+  // Lecture des registres et calculs de la période : assets/indicateurs.js (VigieIndicateurs.calculer).
   const MOIS = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
-
-  function computeStatus(dateStr, periodiciteMois, fallbackMonths){
-    if (!dateStr) return "inconnu";
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "inconnu";
-    const prochaine = new Date(d); prochaine.setMonth(prochaine.getMonth() + (Number(periodiciteMois) || fallbackMonths));
-    const today = new Date(); const in60 = new Date(today); in60.setDate(in60.getDate()+60);
-    if (prochaine < today) return "late";
-    if (prochaine <= in60) return "soon";
-    return "ok";
-  }
-
-  function inPeriod(dateStr, dDebut, dFin){
-    if (!dateStr) return true;
-    if (dDebut && dateStr < dDebut) return false;
-    if (dFin && dateStr > dFin) return false;
-    return true;
-  }
 
   function applyPreset(){
     const preset = $("fPeriodePreset").value;
@@ -341,139 +320,20 @@
     if (dDebut && dFin && dDebut > dFin){ const tmp = dDebut; dDebut = dFin; dFin = tmp; }
     const today = new Date();
 
-    // ---- AT/MP ----
-    const ATMP_ALL = readKey("vigie_hse_dataset");
-    const ATMP = ATMP_ALL.filter(r => inPeriod(r.dateAT, dDebut, dFin));
-    const atTotal = ATMP.length;
-    const atAvec = ATMP.filter(r => r.arret).length;
-    const atJours = ATMP.reduce((s,r) => s + (Number(r.joursArret)||0), 0);
-    // Question 2 du Cahier du préventeur, répondue le 2026-09-15 (option B) : le taux de
-    // fréquence se calcule désormais au prorata de la durée réelle de la période plutôt
-    // qu'en comptant les années civiles distinctes présentes dans les données — l'ancien
-    // calcul divisait le TF par deux selon qu'une période à cheval sur le 1er janvier
-    // comptait pour 1 ou 2 années pleines. Sans borne de début (« Depuis le début »), on
-    // part de l'événement le plus ancien affiché jusqu'à la borne de fin. Formule (EFFECTIF/
-    // HEURES_AN) partagée avec registre-at-mp.html via assets/hse-formulas.js.
-    const dureeAtJours = (() => {
-      let fin = dFin || VigieDates.iso(today);
-      let debut = dDebut;
-      if (!debut){
-        const dates = ATMP.map(r => r.dateAT).filter(Boolean).sort();
-        debut = dates.length ? dates[0] : fin;
-      }
-      // dDebut/dFin sont déjà remis dans l'ordre en tête de renderReport() : debut <= fin ici.
-      const ms = new Date(fin) - new Date(debut);
-      return Math.max(1, Math.round(ms / 86400000) + 1);
-    })();
-    const tf = VigieFormules.tauxFrequence(atAvec, dureeAtJours);
+    // ---- Les chiffres de la période : assets/indicateurs.js (mêmes calculs que la Revue de direction) ----
+    // Questions 1 (retard hors période), 2 (TF au prorata) et 20 (pyramide, objectif) : voir ce composant.
+    const I = VigieIndicateurs.calculer(VigieStore, dDebut, dFin);
+    const { ATMP, ATMP_ALL, VISITES_ALL, VERIF_ALL, HABS_ALL, EPI_DOT_ALL, dureeAtJours,
+      atTotal, atAvec, atJours, tf, tfReel, hseScorePct, duTotal, duPrio,
+      paTotal, paTaux, paEnCours, paRetard, svTotal, svOk, svSoon, svLate, svLateHorsPeriode,
+      rsstTotal, rsstTaux, rsstNouvelle, vpTotal, vpOk, vpNonConforme, vpLateHorsPeriode,
+      iaTotal, iaTaux, iaNonConforme, pcTotal, pcCmr, fhTotal, fhOk, fhExpiree, fhExpireeHorsPeriode,
+      epiTotal, epiOk, epiRenew, epiLateHorsPeriode, riskCounts, riskJours, typeCounts,
+      bird, objectifAnnuel, objectifPeriode } = I;
     $("kpiAtTotal").textContent = atTotal;
-    // TF "réel" (module Gestion RH) : coexiste avec le TF estimé ci-dessus, ne le remplace pas
-    // (réponse Q2 du préventeur). Basé sur les heures effectivement saisies sur la période
-    // affichée (tous services confondus) — "—" si aucune heure n'a été saisie.
-    // Les heures sont saisies au mois : numérateur et dénominateur sont donc bornés au MÊME
-    // mois entiers (un AT sans date est écarté ici, comme dans l'onglet Indicateurs de Gestion RH).
-    const periodeDebut = dDebut ? dDebut.slice(0,7) : "";
-    const periodeFin = dFin ? dFin.slice(0,7) : "";
-    const atAvecReel = ATMP_ALL.filter(r => r.arret && r.dateAT &&
-      (!periodeDebut || r.dateAT.slice(0,7) >= periodeDebut) && (!periodeFin || r.dateAT.slice(0,7) <= periodeFin)).length;
-    const heuresReelles = VigieFormules.sommeHeures(readKey("vigie_hse_heures_travaillees"), { debut: periodeDebut, fin: periodeFin });
-    const tfReel = VigieFormules.tauxFrequenceReel(atAvecReel, heuresReelles);
     $("kpiTfReel").textContent = tfReel === null ? "—" : tfReel.toFixed(1);
-
-    // ---- DUERP ----
-    const DUERP = readKey("vigie_hse_duerp_dataset")
-      .filter(r => inPeriod(r.dateEvaluation, dDebut, dFin))
-      .map(r => ({ ...r, score:(Number(r.frequence)||0)*(Number(r.gravite)||0) }));
-    const duTotal = DUERP.length;
-    const duPrio = DUERP.filter(r => r.score > 6);
-    const hseScorePct = duTotal ? Math.round(((duTotal - duPrio.length) / duTotal) * 100) : null;
     $("kpiHseScore").textContent = hseScorePct === null ? "–" : hseScorePct + "%";
-
-    // ---- Plan d'Actions ----
-    const ACTIONS = readKey("vigie_hse_actions").filter(a => inPeriod(a.dateCreation, dDebut, dFin));
-    const paTotal = ACTIONS.length;
-    const todayStr = VigieDates.iso(today);
-    const paRetard = ACTIONS.filter(a => a.statut !== "Fait" && a.echeance && a.echeance < todayStr).length;
-    const paEnCours = ACTIONS.filter(a => a.statut === "En cours").length;
-    const paFait = ACTIONS.filter(a => a.statut === "Fait").length;
-    const paTaux = paTotal ? Math.round((paFait/paTotal)*100) : null;
     $("kpiPaTaux").textContent = paTaux === null ? "–" : paTaux + "%";
-
-    // ---- Santé & Visites ----
-    // Question 1 du Cahier du préventeur, répondue le 2026-09-15 (option B) : un retard ne
-    // doit pas disparaître silencieusement quand la période filtre l'élément hors champ —
-    // on calcule aussi le retard sur l'ensemble des données pour afficher un repère.
-    const VISITES_ALL = readKey("vigie_hse_visites");
-    const VISITES = VISITES_ALL.filter(v => inPeriod(v.dateDerniere, dDebut, dFin));
-    const svTotal = VISITES.length;
-    const svStatus = VISITES.map(v => computeStatus(v.dateDerniere, v.periodiciteMois, 24));
-    const svOk = svStatus.filter(s => s === "ok").length;
-    const svSoon = svStatus.filter(s => s === "soon").length;
-    const svLate = svStatus.filter(s => s === "late").length;
-    const svLateTous = VISITES_ALL.map(v => computeStatus(v.dateDerniere, v.periodiciteMois, 24)).filter(s => s === "late").length;
-    const svLateHorsPeriode = Math.max(0, svLateTous - svLate);
-
-    // ---- Registre Santé & Sécurité ----
-    const RSST = readKey("vigie_hse_rsst").filter(r => inPeriod(r.date, dDebut, dFin));
-    const rsstTotal = RSST.length;
-    const rsstNouvelle = RSST.filter(r => r.statut === "Nouvelle").length;
-    const rsstTraitee = RSST.filter(r => r.statut === "Traitée").length;
-    const rsstTaux = rsstTotal ? Math.round((rsstTraitee/rsstTotal)*100) : null;
-
-    // ---- Vérifications Périodiques ----
-    const VERIF_ALL = readKey("vigie_hse_verifications");
-    const VERIF = VERIF_ALL.filter(v => inPeriod(v.dateDerniere, dDebut, dFin));
-    const vpTotal = VERIF.length;
-    const vpStatus = VERIF.map(v => computeStatus(v.dateDerniere, v.periodiciteMois, 12));
-    const vpOk = vpStatus.filter(s => s === "ok").length;
-    const vpNonConforme = VERIF.filter(v => v.conformite === "Non conforme").length;
-    const vpLate = vpStatus.filter(s => s === "late").length;
-    const vpLateTous = VERIF_ALL.map(v => computeStatus(v.dateDerniere, v.periodiciteMois, 12)).filter(s => s === "late").length;
-    const vpLateHorsPeriode = Math.max(0, vpLateTous - vpLate);
-
-    // ---- Inspection / Audit ----
-    const INSPECTIONS = readKey("vigie_hse_inspections").filter(i => inPeriod(i.dateInspection, dDebut, dFin));
-    const iaTotal = INSPECTIONS.length;
-    const iaConforme = INSPECTIONS.filter(i => i.statutGlobal === "Conforme").length;
-    const iaTaux = iaTotal ? Math.round((iaConforme/iaTotal)*100) : null;
-    const iaNonConforme = INSPECTIONS.filter(i => i.statutGlobal === "Non conforme").length;
-
-    // ---- Produits Chimiques ----
-    const PRODUITS = readKey("vigie_hse_produits_chimiques").filter(p => inPeriod(p.dateMajFDS, dDebut, dFin));
-    const pcTotal = PRODUITS.length;
-    const pcCmr = PRODUITS.filter(p => Array.isArray(p.pictogrammes) && p.pictogrammes.some(c => c === "GHS06" || c === "GHS08")).length;
-
-    // ---- Formation / Habilitation ----
-    const HABS_ALL = readKey("vigie_hse_habilitations");
-    const HABS = HABS_ALL.filter(h => inPeriod(h.dateObtention, dDebut, dFin));
-    const fhTotal = HABS.length;
-    const fhStatus = HABS.map(h => computeStatus(h.dateObtention, h.dureeValiditeMois, 24));
-    const fhOk = fhStatus.filter(s => s === "ok").length;
-    const fhExpiree = fhStatus.filter(s => s === "late").length;
-    const fhExpireeTous = HABS_ALL.map(h => computeStatus(h.dateObtention, h.dureeValiditeMois, 24)).filter(s => s === "late").length;
-    const fhExpireeHorsPeriode = Math.max(0, fhExpireeTous - fhExpiree);
-
-    // ---- EPI & Dotation ----
-    const EPI_CAT = readKey("vigie_hse_epi_catalogue");
-    const EPI_DOT_ALL = readKey("vigie_hse_epi_dotations");
-    const EPI_DOT = EPI_DOT_ALL.filter(d => inPeriod(d.dateRemise, dDebut, dFin));
-    const catById = Object.fromEntries(EPI_CAT.map(c => [c.id, c]));
-    const epiTotal = EPI_DOT.length;
-    let epiOk = 0, epiRenew = 0, epiLate = 0;
-    EPI_DOT.forEach(d => {
-      const cat = catById[d.articleId] || {};
-      if (!cat.dureeVieMois) return;
-      const s = computeStatus(d.dateRemise, cat.dureeVieMois, cat.dureeVieMois);
-      if (s === "ok") epiOk++; else if (s === "soon" || s === "late") epiRenew++;
-      if (s === "late") epiLate++;
-    });
-    let epiLateTous = 0;
-    EPI_DOT_ALL.forEach(d => {
-      const cat = catById[d.articleId] || {};
-      if (!cat.dureeVieMois) return;
-      if (computeStatus(d.dateRemise, cat.dureeVieMois, cat.dureeVieMois) === "late") epiLateTous++;
-    });
-    const epiLateHorsPeriode = Math.max(0, epiLateTous - epiLate);
 
     // ---- Grille des modules ----
     const MODULES = [
@@ -549,12 +409,6 @@
             <div class="risk-row-value">${esc(v)}${unit||""}</div>
           </div>`).join("");
     }
-    const riskCounts = {}, riskJours = {};
-    ATMP.forEach(r => {
-      const risque = r.risque || "Non renseigné";
-      riskCounts[risque] = (riskCounts[risque]||0) + 1;
-      riskJours[risque] = (riskJours[risque]||0) + (Number(r.joursArret)||0);
-    });
     renderRiskBars("riskCountBars", riskCounts, "");
     renderRiskBars("riskJoursBars", riskJours, "j");
 
@@ -562,24 +416,11 @@
     // Comptes bruts, dans l'ordre de gravité posé par l'utilisateur pour J2 (presque-accident → incident
     // bénin → accident sans puis avec arrêt), trajet et maladie professionnelle ensuite. Aucune proportion
     // de référence : la lecture de ces chiffres revient au préventeur (question 20).
-    const TYPES_REMONTEE = [
-      ["Presque accident", r => r.typeAtMp === "Presque accident"],
-      ["Incident bénin", r => r.typeAtMp === "Incident bénin" || r.typeAtMp === "Bénin"],
-      ["Accident de travail sans arrêt", r => r.typeAtMp === "Accident de travail" && !r.arret],
-      ["Accident de travail avec arrêt", r => r.typeAtMp === "Accident de travail" && !!r.arret],
-      ["Accident de trajet", r => r.typeAtMp === "Accident de trajet"],
-      ["Maladie professionnelle", r => r.typeAtMp === "Maladie professionnelle"],
-    ];
-    const typeCounts = TYPES_REMONTEE.map(([libelle, f]) => [libelle, ATMP.filter(f).length]);
-    const typeAutres = ATMP.filter(r => !TYPES_REMONTEE.some(([, f]) => f(r))).length;
-    if (typeAutres) typeCounts.push(["Autre ou non renseigné", typeAutres]);
     renderRiskBars("typeBars", ATMP.length ? typeCounts : [], "");
 
     // ---- Pyramide de Bird et objectif de remontée (question 20, 2026-10-12) ----
     // « Tout doit compter » : chaque événement du registre va dans un niveau (assets/signalements-ref.js), et les
     // presque-accidents signalés s'ajoutent à la base — un signalement inscrit au registre n'est compté qu'une fois.
-    const SIG = readKey(VigieSignalements.CLE).filter(s => inPeriod(s.date, dDebut, dFin));
-    const bird = VigieSignalements.pyramide(ATMP, SIG, ATMP_ALL);
     const sommet = bird.niveaux[0];
     const maxBird = Math.max(1, ...bird.niveaux);
     $("birdPyramide").innerHTML = VigieSignalements.NIVEAUX_BIRD.map((n, i) => {
@@ -594,8 +435,6 @@
     $("birdPied").textContent = (sommet ? "" : "Aucun événement avec arrêt sur la période : les rapports au sommet ne se calculent pas. ")
       + (bird.signalementsSeuls ? `Dont ${bird.signalementsSeuls} presque-accident${bird.signalementsSeuls > 1 ? "s" : ""} signalé${bird.signalementsSeuls > 1 ? "s" : ""} (page Signalements) et pas encore inscrit${bird.signalementsSeuls > 1 ? "s" : ""} au registre. ` : "")
       + (bird.horsPyramide ? `${bird.horsPyramide} événement${bird.horsPyramide > 1 ? "s" : ""} sans type reconnu, hors pyramide.` : "");
-    const objectifAnnuel = Number(VigieSignalements.lireParametres(VigieStore).objectifAnnuel) || 0;
-    const objectifPeriode = VigieSignalements.objectifSurPeriode(objectifAnnuel, dureeAtJours);
     $("objectifRemontee").hidden = objectifPeriode === null;
     if (objectifPeriode !== null){
       const pct = Math.round(bird.niveaux[3] / objectifPeriode * 100);

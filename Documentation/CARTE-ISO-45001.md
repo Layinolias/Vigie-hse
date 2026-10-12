@@ -85,7 +85,7 @@ Le cœur opérationnel est solide : évaluation des risques, actions, compétenc
 | Exigence | Repère | Ce que fait VIGIE HSE — preuve produite | Ce qui manque |
 |---|---|---|---|
 | 10.1 Généralités | ➖ | — | — |
-| 10.2 Événement indésirable, non-conformité, action corrective | 🔶 | **Registre AT/MP** (cinq types, dont presque-accident et incident bénin), **Analyse d'accident** (arbre des causes, 5 pourquoi, Ishikawa), **Dossiers AT/MP & CITIS**, non-conformités d'inspection, actions correctives au **Plan d'actions**, avec la **vérification de leur efficacité** (résultat, date, par qui, constat ; une action jugée non efficace propose une action de suite — 2026-10-07) | le signalement des presque-accidents par les agents eux-mêmes (question 20, jalon J2) |
+| 10.2 Événement indésirable, non-conformité, action corrective | ✅ | **Signalements** : tout le personnel signale ses presque-accidents (photos, mesure prise sur le moment), l'encadrement en décide la suite (2026-10-12) ; **Registre AT/MP** (cinq types, dont presque-accident et incident bénin), **Analyse d'accident** (arbre des causes, 5 pourquoi, Ishikawa), **Dossiers AT/MP & CITIS**, non-conformités d'inspection, actions correctives au **Plan d'actions**, avec la **vérification de leur efficacité** (résultat, date, par qui, constat ; une action jugée non efficace propose une action de suite — 2026-10-07) ; pyramide de Bird et objectif de remontée dans **Indicateurs & Reporting** | — |
 | 10.3 Amélioration continue | 🔶 | Plan d'actions et tendances du reporting | sans objectifs (6.2), pas de mesure du progrès |
 
 ## Écarts à combler, par ordre de valeur probable

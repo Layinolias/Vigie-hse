@@ -108,6 +108,7 @@
   .origine-chip.analyse{ color:var(--accent-violet); border-color:rgba(var(--accent-violet-rgb),.4); background:rgba(var(--accent-violet-rgb),.1); }
   .origine-chip.urgence{ color:var(--danger); border-color:rgba(var(--danger-rgb),.4); background:rgba(var(--danger-rgb),.1); }
   .origine-chip.ds{ color:var(--success); border-color:rgba(var(--success-rgb),.4); background:rgba(var(--success-rgb),.1); }
+  .origine-chip.signalement{ color:var(--text-muted); border-color:var(--border); background:var(--bg-2); }
   .origine-chip.ee{ color:var(--critical); border-color:rgba(var(--critical-rgb),.4); background:rgba(var(--critical-rgb),.1); }
   .statut-select{ min-width:118px; padding:6px 28px 6px 10px; font-size:12px; }
   .eff{ display:block; margin-top:5px; font-size:10.5px; font-weight:600; white-space:nowrap; }
@@ -526,6 +527,36 @@
     return out;
   }
 
+  // Actions décidées au traitement d'un signalement de presque-accident (question 20, 2026-10-12).
+  const SIGNALEMENTS_KEY = "vigie_hse_signalements";
+  function generateSignalementActionSeeds(){
+    let signalements = [];
+    try { const raw = VigieStore.getItem(SIGNALEMENTS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) signalements = p; } } catch(e){}
+    const out = [];
+    const today = new Date();
+    signalements.forEach(s => {
+      if (!s || !Array.isArray(s.actions)) return;
+      s.actions.forEach(act => {
+        if (!act || !act.description || !String(act.description).trim()) return;
+        out.push({
+          id: "pa-sig-" + s.id + "-" + act.id,
+          titre: "Presque-accident — " + (s.lieu || ""),
+          description: act.description,
+          service: s.service || "",
+          collectivite: VigieOrga.de(s),
+          risqueLie: "",
+          origine: "Signalement",
+          responsable: act.responsable || "",
+          echeance: act.echeance || VigieDates.iso(today),
+          priorite: "Haute",
+          statut: act.statut || "À faire",
+          dateCreation: s.date || VigieDates.iso(today),
+        });
+      });
+    });
+    return out;
+  }
+
   // ---------- Dataset Plan d'Actions (always-merge) ----------
   const STORAGE_KEY = "vigie_hse_actions";
   function genId(){ return "man-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -533,7 +564,7 @@
   function loadDataset(){
     let stored = [];
     try { const raw = VigieStore.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds()).concat(generateDialogueSocialActionSeeds());
+    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds()).concat(generateDialogueSocialActionSeeds()).concat(generateSignalementActionSeeds());
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
@@ -636,7 +667,7 @@
       return;
     }
     const prioCls = { "Critique":"p-critique", "Haute":"p-haute", "Moyenne":"p-moyenne", "Basse":"p-basse" };
-    const origineCls = { "DUERP":"duerp", "Inspection":"inspection", "Analyse":"analyse", "Urgence":"urgence", "Prévention EE":"ee", "Dialogue social":"ds" };
+    const origineCls = { "DUERP":"duerp", "Inspection":"inspection", "Analyse":"analyse", "Urgence":"urgence", "Prévention EE":"ee", "Dialogue social":"ds", "Signalement":"signalement" };
     tbody.innerHTML = rows.map(a => `
       <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${esc(a.id)}">
         <td class="wrap">${esc(a.titre)}</td>

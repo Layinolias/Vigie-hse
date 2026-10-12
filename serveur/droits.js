@@ -62,6 +62,9 @@ const REGLES = {
   accueils: GERER('accueil-poste'), modeles_accueil: GERER('accueil-poste'), accueil_delai: GERER('accueil-poste'),
   wiki: regle('documentation', 'rediger'), documents: regle('documentation', 'rediger'), doc_types: regle('documentation', 'rediger'),
   postes: GERER('penibilite'), expositions: GERER('penibilite'), penibilite_parametres: GERER('penibilite'),
+  // Signalements (question 20) : chacun ajoute les siens ; « traiter » modifie, supprime, fixe l'objectif
+  signalements: regle('signalements', 'traiter', 'signaler'), signalements_photos: regle('signalements', 'traiter', 'signaler'),
+  signalements_parametres: regle('signalements', 'traiter'),
   ds_questions: regle('dialogue-social', 'participer'), ds_reunions: regle('dialogue-social', 'participer'), ds_visites: regle('dialogue-social', 'participer'),
 };
 const regleGenerale = GERER('administration');

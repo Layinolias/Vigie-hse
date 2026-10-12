@@ -14,6 +14,7 @@
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/hse-formulas.js"></script>
+<script src="assets/signalements-ref.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
 <link rel="stylesheet" href="assets/commun.css">
 <style>
@@ -77,6 +78,18 @@
   .risk-row-label{ grid-area:label; font-size:11.5px; color:var(--text-muted); }
   .risk-row-track{ grid-area:track; height:8px; border-radius:var(--r-pill); background:var(--bg-2); overflow:hidden; }
   .risk-row-fill{ height:100%; border-radius:var(--r-pill); background:linear-gradient(90deg, rgba(var(--accent-rgb),.55), rgba(var(--accent-rgb),.85)); }
+  /* Pyramide de Bird (question 20) : une barre centrée par niveau, longueur proportionnelle au nombre */
+  .bird{ display:flex; flex-direction:column; gap:2px; margin-top:14px; }
+  .bird-row{ display:grid; grid-template-columns:minmax(0,1fr) minmax(150px,220px); gap:6px 14px; align-items:center; }
+  .bird-track{ display:flex; justify-content:center; height:30px; }
+  .bird-fill{ height:100%; border-radius:4px; background:rgba(var(--accent-rgb),.78); min-width:4px; }
+  .bird-texte{ font-size:11.5px; color:var(--text-muted); line-height:1.35; }
+  .bird-texte b{ color:var(--text); font-family:"IBM Plex Mono",monospace; font-size:12.5px; }
+  .bird-texte .repere{ display:block; color:var(--text-faint); font-size:10.5px; }
+  .bird-pied{ margin:12px 0 0; font-size:11px; color:var(--text-faint); line-height:1.6; }
+  .objectif-ligne{ margin:12px 0 0; padding:10px 12px; border-radius:8px; background:var(--bg-2); font-size:12.5px; color:var(--text-muted); }
+  .objectif-ligne b{ color:var(--text); }
+  @media (max-width:560px){ .bird-row{ grid-template-columns:1fr; } .bird-track{ height:22px; } }
   .risk-row-value{ grid-area:value; font-size:11.5px; font-weight:700; font-family:"IBM Plex Mono",monospace; color:var(--text); white-space:nowrap; }
 
   .perimetre-note{ margin:10px 0 0; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:600; color:var(--warning); background:var(--warning-bg); }
@@ -225,6 +238,14 @@
         <div class="trend-label">Remontée des événements par type</div>
         <p class="type-note">Du signal faible à l'accident : nombre d'événements de chaque type sur la période.</p>
         <div class="risk-bars" id="typeBars"></div>
+      </div>
+
+      <div class="panel risk-card type-card">
+        <div class="trend-label">Pyramide de Bird — du presque-accident à l'arrêt de travail</div>
+        <p class="type-note">Nombre d'événements de chaque niveau sur la période, avec le repère de Bird (1969) : pour 1 accident avec arrêt, 10 sans arrêt, 30 incidents bénins et 600 presque-accidents. Beaucoup de presque-accidents remontés pour peu d'accidents est bon signe : les signaux faibles sont vus.</p>
+        <div class="bird" id="birdPyramide"></div>
+        <p class="bird-pied" id="birdPied"></p>
+        <div class="objectif-ligne" id="objectifRemontee" hidden></div>
       </div>
 
       <div class="module-grid" id="moduleGrid"></div>
@@ -554,13 +575,41 @@
     if (typeAutres) typeCounts.push(["Autre ou non renseigné", typeAutres]);
     renderRiskBars("typeBars", ATMP.length ? typeCounts : [], "");
 
+    // ---- Pyramide de Bird et objectif de remontée (question 20, 2026-10-12) ----
+    // « Tout doit compter » : chaque événement du registre va dans un niveau (assets/signalements-ref.js), et les
+    // presque-accidents signalés s'ajoutent à la base — un signalement inscrit au registre n'est compté qu'une fois.
+    const SIG = readKey(VigieSignalements.CLE).filter(s => inPeriod(s.date, dDebut, dFin));
+    const bird = VigieSignalements.pyramide(ATMP, SIG, ATMP_ALL);
+    const sommet = bird.niveaux[0];
+    const maxBird = Math.max(1, ...bird.niveaux);
+    $("birdPyramide").innerHTML = VigieSignalements.NIVEAUX_BIRD.map((n, i) => {
+      const v = bird.niveaux[i];
+      const rapport = i === 0 ? "" : (sommet ? `soit ${(v / sommet).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} pour 1 avec arrêt — repère : ${n.repere}` : `repère : ${n.repere} pour 1 avec arrêt`);
+      const titre = `${n.libelle} : ${v}${n.detail ? " (" + n.detail + ")" : ""}`;
+      return `<div class="bird-row" title="${esc(titre)}">
+        <div class="bird-track"><div class="bird-fill" style="width:${Math.max(1, v / maxBird * 100)}%"></div></div>
+        <div class="bird-texte"><b>${v}</b> ${esc(n.libelle)}${n.detail ? " <span class=\"repere\">" + esc(n.detail) + "</span>" : ""}${rapport ? "<span class=\"repere\">" + esc(rapport) + "</span>" : ""}</div>
+      </div>`;
+    }).join("");
+    $("birdPied").textContent = (sommet ? "" : "Aucun événement avec arrêt sur la période : les rapports au sommet ne se calculent pas. ")
+      + (bird.signalementsSeuls ? `Dont ${bird.signalementsSeuls} presque-accident${bird.signalementsSeuls > 1 ? "s" : ""} signalé${bird.signalementsSeuls > 1 ? "s" : ""} (page Signalements) et pas encore inscrit${bird.signalementsSeuls > 1 ? "s" : ""} au registre. ` : "")
+      + (bird.horsPyramide ? `${bird.horsPyramide} événement${bird.horsPyramide > 1 ? "s" : ""} sans type reconnu, hors pyramide.` : "");
+    const objectifAnnuel = Number(VigieSignalements.lireParametres(VigieStore).objectifAnnuel) || 0;
+    const objectifPeriode = VigieSignalements.objectifSurPeriode(objectifAnnuel, dureeAtJours);
+    $("objectifRemontee").hidden = objectifPeriode === null;
+    if (objectifPeriode !== null){
+      const pct = Math.round(bird.niveaux[3] / objectifPeriode * 100);
+      $("objectifRemontee").innerHTML = `Objectif de remontée : <b>${objectifAnnuel}</b> presque-accidents par an, soit <b>${objectifPeriode.toLocaleString("fr-FR")}</b> sur la période — <b>${bird.niveaux[3]}</b> remontés (${pct} %).`;
+    }
+
     // stash for export
     window.__reportData = { atTotal, atJours, atAvec, tf, duTotal, hseScorePct, duPrioCount:duPrio.length,
       paTotal, paTaux, paEnCours, paRetard, svTotal, svOk, svSoon, svLate, svLateHorsPeriode,
       rsstTotal, rsstTaux, rsstNouvelle,
       vpTotal, vpOk, vpNonConforme, vpLateHorsPeriode, iaTotal, iaTaux, iaNonConforme, pcTotal, pcCmr,
       fhTotal, fhOk, fhExpiree, fhExpireeHorsPeriode,
-      epiTotal, epiOk, epiRenew, epiLateHorsPeriode, riskCounts, riskJours, typeCounts };
+      epiTotal, epiOk, epiRenew, epiLateHorsPeriode, riskCounts, riskJours, typeCounts,
+      birdNiveaux: bird.niveaux, objectifAnnuel, objectifPeriode };
   }
 
   $("fPeriodePreset").addEventListener("change", () => { applyPreset(); renderReport(); });
@@ -619,6 +668,8 @@
       .map(r => ({ "Type de risque":r, "Accidents":d.riskCounts[r]||0, "Jours d'arrêt":d.riskJours[r]||0 }));
     if (riskRows.length) addSheet("AT-MP par risque", riskRows);
     if (d.atTotal) addSheet("AT-MP par type", (d.typeCounts || []).map(([t, n]) => ({ "Type d'événement":t, "Événements":n })));
+    if (d.birdNiveaux) addSheet("Pyramide de Bird", VigieSignalements.NIVEAUX_BIRD.map((n, i) => ({ "Niveau": n.libelle, "Événements": d.birdNiveaux[i], "Repère de Bird (pour 1 avec arrêt)": n.repere }))
+      .concat(d.objectifPeriode !== null ? [{ "Niveau": "Objectif de remontée sur la période (presque-accidents)", "Événements": d.objectifPeriode, "Repère de Bird (pour 1 avec arrêt)": "" }] : []));
     const todayIso = VigieDates.aujourdhui();
     XLSX.writeFile(wb, `rapport-indicateurs-hse_${todayIso}.xlsx`);
   });

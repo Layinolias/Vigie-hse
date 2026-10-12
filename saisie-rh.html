@@ -521,6 +521,9 @@
 
   const params = new URLSearchParams(location.search);
   const editId = params.get("id");
+  // ?signalement=<id> : inscrire au registre un presque-accident signalé (question 20) — formulaire pré-rempli,
+  // l'événement enregistré porte signalementId, puis retour au signalement
+  const signalementId = editId ? null : params.get("signalement");
 
   function prefillForm(rec){
     $("fStatut").value = rec.statut || "";
@@ -590,6 +593,36 @@
       prefillForm(editingRecord);
     } else {
       alert("Déclaration introuvable dans ce navigateur — ouverture en mode création.");
+    }
+  }
+
+  let signalement = null;
+  if (signalementId && DATASET){
+    try { signalement = (JSON.parse(VigieStore.getItem("vigie_hse_signalements") || "[]") || []).find(s => s && s.id === signalementId) || null; } catch(e){}
+    const deja = signalement ? DATASET.find(d => d.signalementId === signalement.id) : null;
+    if (!signalement){
+      alert("Signalement introuvable — ouverture d'une déclaration vide.");
+    } else if (deja){
+      alert("Ce signalement est déjà inscrit au Registre AT/MP.");
+      location.href = "signalements.html?ouvrir=" + encodeURIComponent(signalement.id);
+    } else {
+      const jj = String(signalement.date || "").split("-").reverse().join("/");
+      $("pageSub").textContent = `Inscription au Registre AT/MP du presque-accident signalé le ${jj} — ${signalement.lieu || ""}`;
+      prefillForm({
+        typeAtMp: "Presque accident", dateAT: signalement.date, collectivite: signalement.collectivite, service: signalement.service,
+        circonstances: [
+          "Lieu : " + (signalement.lieu || ""),
+          "Ce qui s'est passé : " + (signalement.faits || ""),
+          "Ce qui aurait pu arriver : " + (signalement.risque || ""),
+          signalement.mesure ? "Mesure prise sur le moment : " + signalement.mesure : "",
+          "(Signalement du " + jj + (signalement.heure ? " à " + signalement.heure : "") + ")",
+        ].filter(Boolean).join("\n"),
+      });
+      const cancel = document.createElement("a");
+      cancel.href = "signalements.html?ouvrir=" + encodeURIComponent(signalement.id);
+      cancel.className = "btn btn-ghost";
+      cancel.textContent = "Annuler";
+      $("formActions").appendChild(cancel);
     }
   }
 
@@ -696,8 +729,9 @@
 
     if (editingRecord){
       const idx = DATASET.findIndex(d => d.id === editingRecord.id);
-      if (idx >= 0) DATASET[idx] = record; else DATASET.push(record);
+      if (idx >= 0) DATASET[idx] = Object.assign({}, DATASET[idx], record); else DATASET.push(record);
     } else {
+      if (signalement) record.signalementId = signalement.id;
       DATASET.push(record);
     }
     saveDataset(DATASET);
@@ -709,6 +743,10 @@
 
     if (editingRecord){
       window.location.href = "registre-at-mp.html";
+      return;
+    }
+    if (signalement){
+      window.location.href = "signalements.html?ouvrir=" + encodeURIComponent(signalement.id);
       return;
     }
 

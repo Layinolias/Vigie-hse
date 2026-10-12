@@ -18,6 +18,8 @@
     commentaire:"Commentaire", notes:"Notes", description:"Description", titre:"Titre", type:"Type", nature:"Nature",
     site:"Site", responsable:"Responsable", echeance:"Échéance", priorite:"Priorité", origine:"Origine",
     risque:"Risque", risqueLie:"Risque lié", periodiciteMois:"Périodicité (mois)", dateDerniere:"Dernière réalisation",
+    periodiciteRevueMois:"Revue tous les (mois)", faits:"Ce qui s'est passé", mesure:"Mesure prise sur le moment", nbPhotos:"Photos jointes",
+    traitement:"Traitement", clos:"Clos", closPar:"Clos par", closLe:"Clos le", signalementId:"Signalement (identifiant)",
     efficacite:"Efficacité", efficaciteDate:"Efficacité vérifiée le", efficacitePar:"Efficacité vérifiée par", efficaciteNote:"Constat d'efficacité",
     actions:"Actions", points:"Points", reference:"Référence", ref:"Référence", source:"Source", url:"Lien", lien:"Lien",
     // comptes et journaux
@@ -79,6 +81,7 @@
     vigie_hse_visites:      { dateDerniere:"Date de la dernière visite" },
     vigie_hse_verifications:{ dateDerniere:"Date de la dernière vérification" },
     vigie_hse_rsst:         { nature:"Nature de l'observation" },
+    vigie_hse_signalements: { risque:"Ce qui aurait pu arriver", date:"Date du presque-accident" },
     vigie_hse_audit_log:    { type:"Type d'action" }
   };
   function decouper(champ){

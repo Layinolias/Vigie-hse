@@ -63,7 +63,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 
 | Jalon | Statut |
 |---|---|
-| **J0 — Généralisation commerciale (collectivités + secteur privé)** | 🟡 En cours — organisation configurable et secteur (vocabulaire) faits le 2026-09-30, **profils de droits et marque blanche faits le 2026-10-01** ; restent la question 18, le paquet de marque et le serveur multi-client |
+| **J0 — Généralisation commerciale (collectivités + secteur privé)** | 🟡 En cours — organisation configurable et secteur (vocabulaire) faits le 2026-09-30, **profils de droits et marque blanche faits le 2026-10-01** ; question 18 répondue le 2026-10-11 (tout garder en secteur entreprise, vocabulaire confirmé) ; restent le paquet de marque et le serveur multi-client |
 | **J1 — Accompagnement certification sécurité (ISO 45001, MASE...)** | 🟡 Étude ISO 45001 faite (2026-10-06, `CARTE-ISO-45001.md` : 8 exigences couvertes, 13 partielles, 6 écarts) — premier écart comblé le 2026-10-07 : vérification de l'efficacité des actions (§ 10.2) ; MASE à étudier |
 | **J2 — Culture sécurité, remontée presque-accident/incident/accident** | 🟡 Cadrage engagé (2026-10-06) — question 20 posée au préventeur (canal, contenu, traitement, lecture des chiffres) ; comptage par type livré dans Indicateurs & Reporting |
 
@@ -86,7 +86,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | 13 | Dialogue social | ✅ Fait (2026-09-25) — `dialogue-social.html`, comptes anonymisés côté serveur |
 | 14 | Gestion administrative RH | ✅ Fait (2026-09-19) — `gestion-rh.html`, les deux volets (données RH + organigramme) |
 | 15 | Analyse d'accident (arbre des causes) | ✅ Fait (2026-09-14) — `accident-analyse.html`, 3 méthodes au choix, alimente le Plan d'Actions |
-| 16 | Situations d'urgence & exercices d'évacuation | ✅ Fait — volet "exercices réalisés" (2026-09-18), puis plans d'urgence par site (2026-10-06 ; contenu, revue et lecture par tous : question 19) |
+| 16 | Situations d'urgence & exercices d'évacuation | ✅ Fait — volet "exercices réalisés" (2026-09-18), puis plans d'urgence par site (2026-10-06) ; revue par plan, rubriques obligatoires et lecture par tous (2026-10-12, question 19) |
 | 17 | Entreprises extérieures & Plan de Prévention | ✅ Fait (2026-09-19) — `entreprises-exterieures.html` ; seuil précisé « au moins 400 h » le 2026-09-21 (réponse Q8) |
 | 18 | Gestion administrative des dossiers AT/MP & CITIS | ✅ Fait (2026-09-13) — `dossiers-atmp-citis.html`, premier cas d'usage du modèle de permissions granulaires (voir J0) |
 
@@ -472,6 +472,8 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 - « Imprimer la consigne » : une page A4 « Consignes de sécurité » à afficher (numéros en grand, puis alerte, consignes, rassemblement, personnes, moyens).
 - Import/export `.xlsx` (feuille « Plans » + quatre feuilles de listes rattachées par « ID Plan »), aller-retour sans perte ; plan de démonstration pour l'Hôtel de Ville (`DATATEST/12-REF-plans-urgence.xlsx`).
 - Hors périmètre, à voir après la question 19 : plan des lieux (pièce jointe — pas de stockage de fichiers), alerte de revue, lecture par les agents.
+
+**Livré le 2026-10-12 — réponse du préventeur à la question 19** : fréquence de revue propre à chaque plan (« À revoir », « À revoir bientôt » dans les 60 jours, filtre et synthèse, prochaine revue sur la consigne imprimée et à l'export) ; toutes les rubriques du plan obligatoires — un plan incomplet est signalé avec ce qui lui manque (liste à confirmer : question 21) ; lecture par tout compte grâce au module de droits `plans-urgence` (Agent, Manager, Représentant du personnel), sans le registre des exercices. Reste : le plan des lieux (question 21).
 
 ## 17. Entreprises extérieures & Plan de Prévention — ✅ Fait (2026-09-19)
 

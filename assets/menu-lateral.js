@@ -91,7 +91,7 @@
       "saisie-duerp.html": D.peut("duerp", "gerer"),
       "dossiers-atmp-citis.html": lire("atmp-admin"),
       "accident-analyse.html": lire("accident-analyse"),
-      "urgences-exercices.html": lire("urgences"),
+      "urgences-exercices.html": lire("urgences") || lire("plans-urgence"),   // plans seuls : question 19
       "gestion-rh.html": lire("gestion-rh"),
       "entreprises-exterieures.html": lire("entreprises-ext"),
       "accueil-poste.html": lire("accueil-poste"),

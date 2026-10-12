@@ -46,6 +46,9 @@
     mod("atmp-admin", "Administratif", "Dossiers AT/MP & CITIS", STD),
     mod("accident-analyse", "Administratif", "Analyse d'accident", STD),
     mod("urgences", "Administratif", "Situations d'urgence", STD),
+    // Plans d'urgence en lecture seule, sans les exercices (question 19 : « tous » doivent pouvoir les lire). Un module à
+    // part plutôt qu'un niveau de « urgences » : un préréglage déjà enregistré y garde « aucun », un module nouveau prend la graine.
+    mod("plans-urgence", "Administratif", "Plans d'urgence (consultation)", [["consulter", "Consulter"]]),
     mod("gestion-rh", "Administratif", "Gestion RH", STD),
     mod("entreprises-ext", "Administratif", "Entreprises extérieures", STD),
     mod("accueil-poste", "Administratif", "Accueil au poste", STD),
@@ -76,15 +79,15 @@
     { id: "p-manager", nom: "Manager", libelle: "Manager", pastille: "MANAGER", droits: {
       atmp: "consulter", rsst: "auteurs", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "sante-visites": "consulter" } },
+      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter" } },
     { id: "p-agent", nom: "Agent", libelle: "Compte Agent", pastille: "AG", droits: {
       atmp: "consulter", rsst: "deposer", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter" } },
+      documentation: "consulter", "plans-urgence": "consulter" } },
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
       atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
-      "dialogue-social": "participer" } }
+      "dialogue-social": "participer", "plans-urgence": "consulter" } }
   ];
   var PREREGLE_PAR_ID = {};
   PREREGLES.forEach(function (p) { PREREGLE_PAR_ID[p.id] = p; });

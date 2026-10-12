@@ -69,7 +69,7 @@ Le cœur opérationnel est solide : évaluation des risques, actions, compétenc
 | 8.1.2 Élimination des dangers et réduction des risques | 🔶 | mesures de prévention du Document unique, EPI | l'ordre des mesures (supprimer, remplacer, protéger collectivement, organiser, puis seulement l'EPI) n'est pas représenté : une mesure n'est pas rangée par niveau |
 | 8.1.3 Management du changement | ❌ | — (seul l'accueil « changement de poste » s'en approche) | une fiche de changement : ce qui change, risques réévalués, mesures avant mise en œuvre |
 | 8.1.4 Achats, intervenants extérieurs, externalisation | 🔶 | **Entreprises extérieures** : inspection commune préalable, plan de prévention, seuil de 400 h par opération, travaux dangereux | les critères de santé-sécurité à l'achat d'un équipement ou d'un produit |
-| 8.2 Préparation et réponse aux situations d'urgence | ✅ | **Situations d'urgence** : plans par site (consignes, alerte, numéros d'urgence, points de rassemblement, personnes désignées, moyens de secours, consigne A4 à afficher) ; exercices avec périodicité, échéance et actions correctives | — |
+| 8.2 Préparation et réponse aux situations d'urgence | ✅ | **Situations d'urgence** : plans par site (consignes, alerte, numéros d'urgence, points de rassemblement, personnes désignées, moyens de secours, consigne A4 à afficher), chacun avec sa fréquence de revue (plan « à revoir ») et ses rubriques obligatoires signalées, consultables par tout le personnel (2026-10-12) ; exercices avec périodicité, échéance et actions correctives | — |
 
 ### 9 — Évaluation des performances
 

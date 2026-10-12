@@ -39,7 +39,8 @@ const registreComplet = p => peut(p, 'atmp', 'gerer') || peut(p, 'atmp-admin', '
 const encadrement = p => peut(p, 'sante-visites', 'consulter');
 const administrateur = p => peut(p, 'administration', 'gerer') && !p.anonymise;
 
-// Registres lus par UNE seule page (relevé du 2026-10-01 : aucune autre page ne les nomme) → le module dont elle dépend.
+// Registres lus par UNE seule page (relevé du 2026-10-01 : aucune autre page ne les nomme) → le module dont elle dépend
+// (ou une liste de modules : le niveau « consulter » de l'un d'eux suffit).
 // Un compte qui n'a pas le niveau « consulter » de ce module (profil sans accès) ne reçoit plus ces registres : sa page
 // est de toute façon fermée. Les registres que d'autres pages lisent aussi (tableau de bord, Reporting, Plan d'actions,
 // sélecteur d'agents, fiches utiles…) restent transmis : les retirer vide leur affichage.
@@ -51,8 +52,10 @@ const PAGE_UNIQUE = {
   vigie_hse_documents: 'documentation', vigie_hse_doc_types: 'documentation',
   vigie_hse_inspection_trames: 'inspections',
   vigie_hse_modeles_convocation: 'sante-visites',
-  vigie_hse_plans_urgence: 'urgences',
+  vigie_hse_plans_urgence: ['urgences', 'plans-urgence'],   // tout compte lit les plans (question 19)
 };
+// un registre s'ouvre au niveau « consulter » de l'un des modules cités
+const ouvert = (page, modules) => [].concat(modules).some(m => peut(page, m, 'consulter'));
 
 // null : valeur complète ; RETIRE : rien ; tableau : les seuls champs transmis de chaque enregistrement
 function regle(page, cle){
@@ -67,7 +70,7 @@ function regle(page, cle){
     case 'vigie_hse_audit_log':
     case 'vigie_hse_users':
     case 'vigie_hse_profils':           return administrateur(page) ? null : RETIRE;
-    default:                            return PAGE_UNIQUE[cle] && !peut(page, PAGE_UNIQUE[cle], 'consulter') ? RETIRE : null;
+    default:                            return PAGE_UNIQUE[cle] && !ouvert(page, PAGE_UNIQUE[cle]) ? RETIRE : null;
   }
 }
 

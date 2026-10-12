@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 193 points au 2026-10-07 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 196 points au 2026-10-12 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -90,6 +90,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Peut déposer une observation dans le Registre Santé & Sécurité, en cochant "anonyme" si souhaité.
 - [ ] Ne voit **pas** le lien "Dossiers AT/MP & CITIS" dans la sidebar (module 18, accès par le profil Préventeur — voir ci-dessous).
 - [ ] **Filtres du Document unique** : les filtres Collectivité / Service sont visibles (ils ne le sont plus seulement aux comptes qui gèrent) ; rien de plus n'est affiché.
+- [ ] Le lien « Situations d'urgence » ouvre les seuls **plans d'urgence par site**, en lecture seule (titre « Plans d'urgence par site », ni onglet ni compteurs des exercices, aucun bouton d'écriture) ; « Imprimer la consigne » fonctionne (question 19).
 
 ### `PREV1` (profils Agent + Préventeur : déclarer un AT/MP, gérer Dossiers AT/MP, Analyse d'accident et Urgences, Santé & Visites en lecture — ni RH ni administrateur)
 - [ ] Voit "Dossiers AT/MP & CITIS", "Analyse d'accident" et "Situations d'urgence" dans la sidebar (section "Administratif"), et "Déclarer un AT/MP" (section "Espace RH") — alors que son premier profil est Agent.
@@ -110,6 +111,8 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Cliquer un site de cette liste ouvre un nouveau plan pré-rempli (site, rattachement repris de l'exercice, les cinq numéros d'urgence publics) ; ajouter un point de rassemblement et un moyen de secours, enregistrer : le plan apparaît et reste après rechargement. Créer un second plan pour le même site (même écrit avec d'autres majuscules ou sans accents) est refusé.
 - [ ] « Imprimer la consigne » donne une seule page A4 « Consignes de sécurité » lisible, numéros d'urgence en grand ; l'export `.xlsx` des plans se réimporte sans doublon ni perte ; supprimer un plan puis réimporter l'export avec un autre compte : il revient, et un nouvel export garde dans sa colonne « Auteur » l'auteur d'origine.
 - [ ] Un compte qui n'a que « consulter » sur Situations d'urgence voit les plans et peut imprimer la consigne, sans les boutons Nouveau plan / Importer / Modifier / Supprimer.
+- [ ] Un plan auquel il manque une rubrique (ex. aucun point de rassemblement) porte « Incomplet — manque : … » ; le filtre « État → Incomplets » le retrouve ; en tête, la synthèse « N plans · N incomplets · N à revoir » ; le formulaire rappelle les rubriques obligatoires et enregistre quand même un plan incomplet.
+- [ ] « Revoir le plan tous les 12 mois » avec une dernière revue vieille de plus d'un an : « À revoir » et la date de prochaine revue ; à moins de 60 jours de l'échéance : « À revoir bientôt » ; sans fréquence : « Fréquence de revue manquante » ; le filtre « À revoir » les retrouve ; la prochaine revue figure sur la consigne imprimée et dans l'export (colonnes « Revue tous les (mois) », « Prochaine revue », « État de la revue », « Rubriques manquantes »).
 - [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : les quatre modules/liens doivent être invisibles, et taper les URLs `dossiers-atmp-citis.html` / `accident-analyse.html` / `saisie-rh.html` / `urgences-exercices.html` directement doit rediriger (dashboard ou registre AT/MP selon la page).
 
 ### Gestion RH (`RH1`/`RH2` ou `admin` — accès write d'office, pas une permission granulaire pour ces deux rôles)

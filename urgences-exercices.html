@@ -137,6 +137,11 @@
   .plan-numeros b{ color:var(--danger); font-family:"IBM Plex Mono",monospace; font-size:13px; }
   .plan-liens{ font-size:12px; border-top:1px dashed var(--border); padding-top:9px; display:flex; flex-direction:column; gap:5px; }
   .plan-liens .chip{ margin-left:4px; }
+  .plan-etat{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-size:12px; color:var(--text-muted); }
+  .plan-manque{ font-size:12px; color:var(--danger); }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.5; }
+  .plan-synthese{ font-size:12.5px; color:var(--text-muted); margin-bottom:12px; }
+  .plan-synthese b{ color:var(--text); }
   .plan-actions{ display:flex; gap:14px; align-items:center; border-top:1px solid var(--border); padding-top:10px; margin-top:auto; }
   .plan-actions .act-del{ margin-left:0; }
   .plan-empty{ padding:30px 10px; text-align:center; color:var(--text-faint); font-size:13px; }
@@ -186,11 +191,11 @@
         <div class="page-summary-id">
           <div class="page-summary-icon"><svg class="icon"><use href="#i-life-buoy"/></svg></div>
           <div class="page-summary-text">
-            <h1>Situations d'urgence — plans et exercices</h1>
-            <p title="Plan d'urgence de chaque site (consignes, numéros d'urgence, points de rassemblement, personnes désignées, moyens de secours), et registre chronologique des exercices d'évacuation, d'intrusion et de risque environnemental : preuve datée que les exercices ont bien lieu, pas seulement qu'un plan existe sur le papier.">Plan d'urgence de chaque site, et registre chronologique des exercices réalisés : preuve datée que les exercices ont bien lieu. Les anomalies constatées alimentent le Plan d'Actions.</p>
+            <h1 id="pageTitre">Situations d'urgence — plans et exercices</h1>
+            <p id="pageIntro" title="Plan d'urgence de chaque site (consignes, numéros d'urgence, points de rassemblement, personnes désignées, moyens de secours), et registre chronologique des exercices d'évacuation, d'intrusion et de risque environnemental : preuve datée que les exercices ont bien lieu, pas seulement qu'un plan existe sur le papier.">Plan d'urgence de chaque site, et registre chronologique des exercices réalisés : preuve datée que les exercices ont bien lieu. Les anomalies constatées alimentent le Plan d'Actions.</p>
           </div>
         </div>
-        <div class="page-summary-kpis">
+        <div class="page-summary-kpis" id="kpisExercices">
           <div class="ps-kpi">
             <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-life-buoy"/></svg></div>
             <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Exercices enregistrés</span></div>
@@ -215,7 +220,7 @@
         <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
       </div>
 
-      <div class="ue-tabs">
+      <div class="ue-tabs" id="ongletsUrgence">
         <button type="button" class="ue-tab active" data-tab="exercices"><svg class="icon"><use href="#i-life-buoy"/></svg> Exercices</button>
         <button type="button" class="ue-tab" data-tab="plans"><svg class="icon"><use href="#i-clipboard"/></svg> Plans d'urgence par site</button>
       </div>
@@ -304,6 +309,13 @@
           </div>
           <div class="field"><span class="flabel">Service</span><select id="pService"></select></div>
           <div class="field"><span class="flabel">Site</span><input type="search" id="pRecherche" placeholder="Rechercher un site…"></div>
+          <div class="field"><span class="flabel">État</span>
+            <select id="pEtat">
+              <option value="all">Tous les plans</option>
+              <option value="incomplet">Incomplets</option>
+              <option value="arevoir">À revoir (en retard ou sous 60 jours)</option>
+            </select>
+          </div>
           <button type="button" class="btn btn-ghost" id="pReset">Réinitialiser</button>
           <span class="result-count"><b id="pCount">–</b> / <span id="pTotal">–</span> plans</span>
         </div>
@@ -319,6 +331,8 @@
               </div>
               <div><label for="pServiceForm">Service</label><select id="pServiceForm" required></select></div>
               <div><label for="pDateRevue">Dernière revue du plan</label><input type="date" id="pDateRevue"></div>
+              <div><label for="pPeriodiciteRevue">Revoir le plan tous les (mois)</label><input type="number" id="pPeriodiciteRevue" min="1" step="1" placeholder="ex. 12"></div>
+              <div class="span3 form-note" id="pRubriquesNote"></div>
               <div class="span3"><label for="pConsignes">Consignes de sécurité (incendie, évacuation, confinement…)</label><textarea id="pConsignes" rows="5" placeholder="Ce que chacun doit faire en cas d'alarme : arrêter son poste, fermer les portes, ne pas utiliser l'ascenseur, rejoindre le point de rassemblement…"></textarea></div>
               <div class="span3"><label for="pAlerte">Donner l'alerte</label><textarea id="pAlerte" placeholder="Comment déclencher l'alarme, qui prévenir et dans quel ordre, quoi dire aux secours (adresse exacte, accès)…"></textarea></div>
             </div>
@@ -353,11 +367,12 @@
             <h3 class="panel-title">Plans d'urgence par site</h3>
             <div class="panel-actions" id="planActionsBtns"></div>
           </div>
+          <div class="plan-synthese" id="planSynthese"></div>
           <div id="sansPlan"></div>
           <div class="plan-grid" id="planList"></div>
         </div>
 
-        <p class="footnote">Un plan par site : ce qu'il faut faire, qui appeler, où se rassembler, qui fait quoi et où sont les moyens de secours. « Imprimer la consigne » en tire une page A4 à afficher. Les exercices et les équipements suivis en Vérifications périodiques s'affichent sous le plan quand leur site porte le même nom. Le contenu attendu d'un plan et la fréquence de sa revue sont en attente de l'avis du préventeur (question 19) : l'application n'impose rien pour l'instant.</p>
+        <p class="footnote">Un plan par site : ce qu'il faut faire, qui appeler, où se rassembler, qui fait quoi et où sont les moyens de secours. « Imprimer la consigne » en tire une page A4 à afficher. Les exercices et les équipements suivis en Vérifications périodiques s'affichent sous le plan quand leur site porte le même nom. Chaque plan a sa propre fréquence de revue : au-delà, il est signalé « à revoir » (60 jours avant, « à revoir bientôt »). Toutes ses rubriques sont obligatoires : un plan incomplet s'enregistre, mais il est signalé. Tout compte peut consulter les plans, en lecture seule (réponse du préventeur à la question 19, 2026-10-11).</p>
       </section>
     </div>
   </div>
@@ -397,7 +412,9 @@
   // ---------- Contrôle d'accès (permissions granulaires par module) ----------
   const canUrgences = D.peut("urgences", "consulter");
   const canUrgencesWrite = D.peut("urgences", "gerer");
-  if (!canUrgences){ location.href = "dashboard.html"; }
+  // Question 19 : tout compte lit les plans d'urgence, en lecture seule — module « plans-urgence », sans les exercices
+  const plansSeuls = !canUrgences && D.peut("plans-urgence", "consulter");
+  if (!canUrgences && !plansSeuls){ location.href = "dashboard.html"; }
 
   if (!canUrgencesWrite){ $("btnAddAction").style.display = "none"; }
   $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
@@ -809,12 +826,21 @@
     document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("show", p.id === "tab-" + name));
   }
   document.querySelectorAll(".ue-tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+  if (plansSeuls){
+    $("ongletsUrgence").style.display = "none";
+    $("kpisExercices").style.display = "none";
+    $("pageTitre").textContent = "Plans d'urgence par site";
+    $("pageIntro").textContent = "Ce qu'il faut faire en cas d'urgence sur chaque site : qui appeler, comment donner l'alerte, où se rassembler, qui fait quoi et où sont les moyens de secours.";
+    $("pageIntro").removeAttribute("title");
+    showTab("plans");
+  }
 
   // ---------- Plans d'urgence par site (2026-10-06) ----------
   // Un plan par site : consignes, alerte, numéros d'urgence, points de rassemblement, personnes désignées,
   // moyens de secours, date de dernière revue. Le site se rapproche des exercices et des équipements des
-  // Vérifications périodiques par son nom (accents, casse et ponctuation ignorés). Contenu attendu d'un plan
-  // et fréquence de sa revue : question 19 au préventeur — rien n'est imposé ni signalé en retard d'ici là.
+  // Vérifications périodiques par son nom (accents, casse et ponctuation ignorés).
+  // Question 19, répondue le 2026-10-11 : une fréquence de revue propre à chaque plan (`periodiciteRevueMois`), les
+  // rubriques obligatoires signalées quand elles manquent, et la lecture ouverte à tout compte (module « plans-urgence »).
   var plansPrets = false;   // vrai une fois cette section chargée : render() peut alors redessiner les plans
   const PLANS_KEY = "vigie_hse_plans_urgence";
   const VERIF_KEY = "vigie_hse_verifications";
@@ -835,6 +861,30 @@
     moyens:        { el:"pMoyens", vide:"Aucun moyen de secours.", feuille:"Moyens de secours",
                      champs:[{ k:"type", t:"Type", ph:"Type", list:"pTypesMoyens" }, { k:"emplacement", t:"Emplacement", ph:"Emplacement" }, { k:"quantite", t:"Quantité", ph:"Qté", w:"0 0 90px", nombre:true }] },
   };
+  // « Les plans doivent avoir les rubriques obligatoires » (question 19) : lu comme toutes les rubriques du plan, le
+  // préventeur n'en ayant ni ajouté ni retiré — liste à confirmer avec lui (question 21). Un plan incomplet s'enregistre
+  // (on le complète en plusieurs fois), mais il est signalé.
+  const remplie = (v) => String(v == null ? "" : v).trim() !== "";
+  const RUBRIQUES_OBLIGATOIRES = [
+    ["Numéros d'urgence", p => (p.contacts || []).some(c => c && remplie(c.numero))],
+    ["Donner l'alerte", p => remplie(p.alerte)],
+    ["Consignes", p => remplie(p.consignes)],
+    ["Points de rassemblement", p => (p.rassemblement || []).some(r => r && (remplie(r.libelle) || remplie(r.emplacement)))],
+    ["Personnes désignées", p => (p.designes || []).some(d => d && remplie(d.personne))],
+    ["Moyens de secours", p => (p.moyens || []).some(m => m && remplie(m.type))],
+    ["Date de dernière revue", p => /^\d{4}-\d{2}-\d{2}$/.test(p.dateRevue || "")],
+    ["Fréquence de revue", p => Number(p.periodiciteRevueMois) > 0],
+  ];
+  const rubriquesManquantes = (p) => RUBRIQUES_OBLIGATOIRES.filter(r => !r[1](p)).map(r => r[0]);
+  // Revue du plan : sa propre fréquence, comme la périodicité des exercices (question 6) — rien d'inventé quand elle manque.
+  function etatRevue(p){
+    const mois = Number(p.periodiciteRevueMois);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(p.dateRevue || "")) return { statut: "Date de revue manquante", cls: "soon", prochaine: "" };
+    if (!(mois > 0)) return { statut: "Fréquence de revue manquante", cls: "soon", prochaine: "" };
+    const { prochaine, cls } = VigieEcheance.classify(p.dateRevue, mois);
+    return { statut: cls === "late" ? "À revoir" : cls === "soon" ? "À revoir bientôt" : "À jour", cls, prochaine };
+  }
+  const aRevoir = (p) => { const e = etatRevue(p); return !!e.prochaine && e.cls !== "ok"; };
   const normSite = (s) => String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
   const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
 
@@ -884,7 +934,7 @@
   }
 
   // Filtres de l'onglet
-  const pCollectivite = $("pCollectivite"), pService = $("pService"), pRecherche = $("pRecherche");
+  const pCollectivite = $("pCollectivite"), pService = $("pService"), pRecherche = $("pRecherche"), pEtat = $("pEtat");
   function fillPlanServiceOptions(){
     const col = pCollectivite.value;
     const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
@@ -896,7 +946,8 @@
   pCollectivite.addEventListener("change", () => { fillPlanServiceOptions(); renderPlans(); });
   pService.addEventListener("change", renderPlans);
   pRecherche.addEventListener("input", renderPlans);
-  $("pReset").addEventListener("click", () => { pCollectivite.value = "all"; fillPlanServiceOptions(); pService.value = "all"; pRecherche.value = ""; renderPlans(); });
+  pEtat.addEventListener("change", renderPlans);
+  $("pReset").addEventListener("click", () => { pCollectivite.value = "all"; fillPlanServiceOptions(); pService.value = "all"; pRecherche.value = ""; pEtat.value = "all"; renderPlans(); });
 
   function listeHtml(items, fmt){
     const l = (items || []).filter(Boolean);
@@ -905,21 +956,24 @@
   const texteHtml = (t) => t ? `<div class="texte">${esc(t)}</div>` : `<span class="plan-vide">Non renseigné</span>`;
 
   function renderPlans(){
-    const col = pCollectivite.value, svc = pService.value, q = normSite(pRecherche.value);
+    const col = pCollectivite.value, svc = pService.value, q = normSite(pRecherche.value), etat = pEtat.value;
     const rows = PLANS.filter(p =>
       (col === "all" || VigieOrga.actuel(p.collectivite) === col) &&
       (svc === "all" || p.service === svc) &&
-      (!q || normSite(p.site).includes(q))
+      (!q || normSite(p.site).includes(q)) &&
+      (etat === "all" || (etat === "incomplet" ? rubriquesManquantes(p).length > 0 : aRevoir(p)))
     ).sort((a,b) => String(a.site).localeCompare(String(b.site), "fr"));
     $("pCount").textContent = rows.length;
     $("pTotal").textContent = PLANS.length;
+    const nIncomplets = PLANS.filter(p => rubriquesManquantes(p).length).length, nARevoir = PLANS.filter(aRevoir).length;
+    $("planSynthese").innerHTML = PLANS.length ? `<b>${PLANS.length}</b> plan${PLANS.length > 1 ? "s" : ""} · <b>${nIncomplets}</b> incomplet${nIncomplets > 1 ? "s" : ""} · <b>${nARevoir}</b> à revoir` : "";
 
     // Sites où des exercices ont eu lieu, sans plan d'urgence
     const avecPlan = new Set(PLANS.map(p => normSite(p.site)));
     const sansPlan = [];
     DATASET.forEach(r => { if (r.site && !avecPlan.has(normSite(r.site)) && !sansPlan.some(s => normSite(s) === normSite(r.site))) sansPlan.push(r.site); });
     sansPlan.sort((a,b) => a.localeCompare(b, "fr"));
-    $("sansPlan").innerHTML = sansPlan.length ? `<div class="sans-plan"><b>${sansPlan.length} site${sansPlan.length > 1 ? "s" : ""} avec des exercices mais sans plan d'urgence :</b> ` +
+    $("sansPlan").innerHTML = sansPlan.length && canUrgences ? `<div class="sans-plan"><b>${sansPlan.length} site${sansPlan.length > 1 ? "s" : ""} avec des exercices mais sans plan d'urgence :</b> ` +
       sansPlan.map(s => canUrgencesWrite ? `<button type="button" data-creer-plan="${esc(s)}">${esc(s)}</button>` : esc(s)).join(" · ") + `</div>` : "";
 
     if (rows.length === 0){
@@ -930,12 +984,18 @@
       const ex = exercicesDuSite(p.site);
       const eq = equipementsDuSite(p.site);
       const numeros = (p.contacts || []).filter(c => c.numero || c.libelle);
+      const manque = rubriquesManquantes(p), rev = etatRevue(p);
       return `
       <article class="plan-card" data-plan="${esc(p.id)}">
         <div>
           <h4>${esc(p.site)}</h4>
-          <div class="plan-meta">${esc(VigieOrga.de(p))} · ${esc(p.service)} · ${p.dateRevue ? "revu le " + esc(dateFr(p.dateRevue)) : "date de revue non renseignée"}</div>
+          <div class="plan-meta">${esc(VigieOrga.de(p))} · ${esc(p.service)} · ${p.dateRevue ? "revu le " + esc(dateFr(p.dateRevue)) : "date de revue non renseignée"}${Number(p.periodiciteRevueMois) > 0 ? " · à revoir tous les " + esc(p.periodiciteRevueMois) + " mois" : ""}</div>
         </div>
+        <div class="plan-etat">
+          <span class="chip ${manque.length ? "late" : "ok"}">${manque.length ? "Incomplet" : "Complet"}</span>
+          <span class="chip ${esc(rev.cls)}">${esc(rev.statut)}</span>${rev.prochaine ? `<span>prochaine revue avant le ${esc(dateFr(rev.prochaine))}</span>` : ""}
+        </div>
+        ${manque.length ? `<div class="plan-manque">Manque : ${manque.map(esc).join(", ")}</div>` : ""}
         <div class="plan-sec"><div class="plan-sec-titre">Numéros d'urgence</div>
           ${numeros.length ? `<div class="plan-numeros">${numeros.map(c => `<span><b>${esc(c.numero)}</b>${esc(c.libelle)}</span>`).join("")}</div>` : `<span class="plan-vide">Non renseigné</span>`}</div>
         <div class="plan-sec"><div class="plan-sec-titre">Donner l'alerte</div>${texteHtml(p.alerte)}</div>
@@ -944,7 +1004,7 @@
         <div class="plan-sec"><div class="plan-sec-titre">Personnes désignées</div>${listeHtml(p.designes, d => `${d.role ? esc(d.role) + " : " : ""}<b>${esc(d.personne)}</b>${d.telephone ? " · " + esc(d.telephone) : ""}`)}</div>
         <div class="plan-sec"><div class="plan-sec-titre">Moyens de secours</div>${listeHtml(p.moyens, m => `${m.quantite ? esc(m.quantite) + " × " : ""}${esc(m.type)}${m.emplacement ? " — " + esc(m.emplacement) : ""}`)}</div>
         <div class="plan-liens">
-          <div><b>Exercices :</b> ${ex.length ? ex.map(e => `${esc(e.type)}, dernier le ${esc(dateFr(e.dateExercice))}<span class="chip ${esc(e.cls)}">${esc(e.statut)}</span>`).join(" · ") : `<span class="plan-vide">aucun exercice enregistré pour ce site</span>`}</div>
+          ${canUrgences ? `<div><b>Exercices :</b> ${ex.length ? ex.map(e => `${esc(e.type)}, dernier le ${esc(dateFr(e.dateExercice))}<span class="chip ${esc(e.cls)}">${esc(e.statut)}</span>`).join(" · ") : `<span class="plan-vide">aucun exercice enregistré pour ce site</span>`}</div>` : ""}
           ${canVerif ? `<div><b>Équipements suivis (Vérifications périodiques) :</b> ${eq.length ? eq.map(v => `${esc(v.equipement)}<span class="chip ${esc(v.cls)}">${esc(v.statut)}</span>`).join(" · ") : `<span class="plan-vide">aucun équipement suivi sous ce nom de site</span>`}</div>` : ""}
         </div>
         <div class="plan-actions">
@@ -1006,6 +1066,7 @@
       fillPlanFormServiceOptions(VigieOrga.de(p));
       VigieOrga.choisirService($("pServiceForm"), p.service);
       $("pDateRevue").value = p.dateRevue || "";
+      $("pPeriodiciteRevue").value = Number(p.periodiciteRevueMois) > 0 ? p.periodiciteRevueMois : "";
       $("pConsignes").value = p.consignes || "";
       $("pAlerte").value = p.alerte || "";
       Object.keys(LISTES).forEach(k => { courant[k] = (p[k] || []).map(x => Object.assign({}, x)); });
@@ -1022,6 +1083,7 @@
       courant = { contacts: NUMEROS_PUBLICS.map(n => Object.assign({ id: genId("pl") }, n)), rassemblement:[], designes:[], moyens:[] };
     }
     Object.keys(LISTES).forEach(rendreListe);
+    $("pRubriquesNote").textContent = "Rubriques obligatoires : " + RUBRIQUES_OBLIGATOIRES.map(r => r[0].toLowerCase()).join(", ") + ". Un plan incomplet s'enregistre, mais il reste signalé « Incomplet ».";
     $("planFormPanel").style.display = "";
     $("planFormPanel").scrollIntoView({ behavior:"smooth", block:"start" });
   }
@@ -1043,6 +1105,7 @@
       collectivite: $("pCollectiviteForm").value,
       service: $("pServiceForm").value,
       dateRevue: $("pDateRevue").value,
+      periodiciteRevueMois: Number($("pPeriodiciteRevue").value) > 0 ? Math.round(Number($("pPeriodiciteRevue").value)) : "",
       consignes: $("pConsignes").value.trim(),
       alerte: $("pAlerte").value.trim(),
       contacts: garde(courant.contacts, ["libelle", "numero"]),
@@ -1117,7 +1180,7 @@
     bloc.innerHTML = `
       <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "VIGIE HSE")}</div>
       <h1>Consignes de sécurité — ${esc(p.site)}</h1>
-      <p class="pi-meta">${esc(VigieOrga.de(p))} · ${esc(p.service)}${p.dateRevue ? " · plan revu le " + esc(dateFr(p.dateRevue)) : ""}</p>
+      <p class="pi-meta">${esc(VigieOrga.de(p))} · ${esc(p.service)}${p.dateRevue ? " · plan revu le " + esc(dateFr(p.dateRevue)) : ""}${etatRevue(p).prochaine ? " · prochaine revue avant le " + esc(dateFr(etatRevue(p).prochaine)) : ""}</p>
       <section><h2>En cas d'urgence, appeler</h2>
         <div class="pi-numeros">${(p.contacts || []).filter(c => c.numero || c.libelle).map(c => `<div><b>${esc(c.numero)}</b>${esc(c.libelle)}</div>`).join("") || "—"}</div></section>
       <section><h2>Donner l'alerte</h2>${texte(p.alerte)}</section>
@@ -1139,11 +1202,13 @@
     (canUrgencesWrite ? `<button type="button" class="btn btn-primary" id="btnNewPlan"><svg class="icon"><use href="#i-plus"/></svg> Nouveau plan</button>` : "");
   if (canUrgencesWrite){ $("btnNewPlan").addEventListener("click", () => ouvrirPlan(null)); }
 
-  const ENTETES_PLANS = () => ["ID", "Site", VigieOrga.libelle(), "Service", "Dernière revue", "Consignes", "Donner l'alerte", "Auteur"];
+  const ENTETES_PLANS = () => ["ID", "Site", VigieOrga.libelle(), "Service", "Dernière revue", "Revue tous les (mois)", "Prochaine revue", "État de la revue", "Rubriques manquantes", "Consignes", "Donner l'alerte", "Auteur"];
   $("btnExportPlans").addEventListener("click", () => {
     const wb = XLSX.utils.book_new();
     const lignes = PLANS.map(p => ({ "ID": p.id, "Site": p.site, [VigieOrga.libelle()]: VigieOrga.de(p), "Service": p.service,
-      "Dernière revue": p.dateRevue || "", "Consignes": p.consignes || "", "Donner l'alerte": p.alerte || "", "Auteur": p.auteur || "" }));
+      "Dernière revue": p.dateRevue || "", "Revue tous les (mois)": Number(p.periodiciteRevueMois) > 0 ? Number(p.periodiciteRevueMois) : "",
+      "Prochaine revue": etatRevue(p).prochaine, "État de la revue": etatRevue(p).statut, "Rubriques manquantes": rubriquesManquantes(p).join(", "),
+      "Consignes": p.consignes || "", "Donner l'alerte": p.alerte || "", "Auteur": p.auteur || "" }));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: ENTETES_PLANS() }), "Plans");
     Object.keys(LISTES).forEach(nom => {
       const L = LISTES[nom], rows = [];
@@ -1176,6 +1241,10 @@
         consignes: String(rawPick(raw, ["consignes"])).trim(),
         alerte: String(rawPick(raw, ["donner l alerte", "alerte"])).trim(),
       };
+      if (Object.keys(raw).some(k => normKeyImp(k) === "revue tous les mois")){
+        const m = Number(rawPick(raw, ["revue tous les mois"]));
+        champs.periodiciteRevueMois = m > 0 ? Math.round(m) : "";
+      }
       if (isScoped && !myServices.includes(champs.service)){ ignores++; return; }
       let p = (idFichier && tous.find(x => x.id === idFichier)) || tous.find(x => normSite(x.site) === normSite(site));
       if (p){ Object.assign(p, champs, { modifiePar: auteur, dateMaj: new Date().toISOString() }); maj++; }

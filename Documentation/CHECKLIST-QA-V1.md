@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 201 points au 2026-10-12 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 204 points au 2026-10-12 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -22,7 +22,7 @@ Ce fichier-ci reste la version de référence (diff dans l'historique du dépôt
 ## 1. Page d'accueil (avant connexion)
 
 - [ ] `index.html` (l'URL racine) s'affiche sans erreur, sans passer par l'écran de connexion.
-- [ ] La grille des modules est complète et lisible : 20 cartes, dans l'ordre du menu latéral (de « Registre AT/MP » à « Administration »), chacune avec son icône.
+- [ ] La grille des modules est complète et lisible : 21 cartes, dans l'ordre du menu latéral (de « Registre AT/MP » à « Administration »), chacune avec son icône.
 - [ ] Le bouton "Accéder à la démonstration" mène bien à l'écran de connexion.
 - [ ] Le bouton "Réinitialiser les données de démonstration" fonctionne (demande confirmation, puis redirige vers la connexion).
 - [ ] Basculer le thème du système (clair/sombre) et recharger la page : les couleurs suivent bien.
@@ -79,6 +79,9 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] **Signalements → Registre AT/MP** : sur un signalement dont la suite est « Inscription au Registre AT/MP », « inscrire au Registre AT/MP » ouvre la déclaration pré-remplie (presque accident, date, service, circonstances) ; enregistrée, elle revient au signalement marqué « inscrit » ; une seconde inscription est refusée ; avec « Analyse d'accident », le lien « analyser » ouvre l'analyse de cet événement.
 - [ ] **Objectif de remontée** (page Signalements) : fixer 24 par an → « N presque-accidents remontés en 2026 — objectif de l'année : 24 (x %) » avec sa jauge ; Indicateurs & Reporting rappelle l'objectif ramené à la période choisie.
 - [ ] **Pyramide de Bird** (Indicateurs & Reporting) : quatre niveaux (avec arrêt, sans arrêt, incidents bénins, presque-accidents) avec leur nombre, le rapport au sommet et le repère 1 · 10 · 30 · 600 ; un presque-accident signalé puis inscrit au registre n'est compté qu'une fois ; feuille « Pyramide de Bird » dans l'export Excel.
+- [ ] **Revue de direction** (menu Pilotage) : « Nouvelle revue » crée un brouillon sur les 12 derniers mois, avec ses données d'entrée chiffrées (accidents, pyramide de Bird, actions et efficacité, retards de visites, de vérifications, d'habilitations, inspections, observations, questions des représentants, veille de la période) — les mêmes chiffres qu'Indicateurs & Reporting sur la même période ; changer la période puis « Enregistrer » ou « Actualiser les chiffres » les recalcule.
+- [ ] **Revue de direction — valider** : saisir participants, analyse, conclusions et deux actions ; « Valider la revue » : chiffres figés, champs verrouillés, les deux actions apparaissent au Plan d'actions (origine « Revue de direction ») ; la revue suivante part du lendemain de la période et montre en « a. Suites des revues précédentes » ces actions avec leur état ; « Rouvrir » remet en brouillon sans retirer les actions.
+- [ ] **Revue de direction — compte rendu** : « Imprimer le compte rendu » donne un document A4 (date, période, participants, chaque donnée d'entrée avec ses chiffres et l'analyse, résultats, actions, deux zones de signature) ; un compte sans le droit « Revue de direction » ne voit pas le lien, et un profil qui n'a que « Consulter » ouvre les revues en lecture seule.
 - [ ] **Remontée des événements par type** (Indicateurs & Reporting, après avoir ouvert le Registre AT/MP) : période « Depuis le début », le panneau liste dans cet ordre Presque accident 7, Incident bénin 10, Accident de travail sans arrêt 0, Accident de travail avec arrêt 6, Accident de trajet 2, Maladie professionnelle 0 (données de démonstration) ; leur somme est le chiffre « AT/MP » de l'en-tête. Déclarer un presque-accident le fait passer à 8 ; l'export Excel du rapport a une feuille « AT-MP par type ».
 
 ### `manager` (manager@verchamps.fr — scopé Voirie + Espace Vert)

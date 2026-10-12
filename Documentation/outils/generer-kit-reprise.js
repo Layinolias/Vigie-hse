@@ -165,6 +165,7 @@ const MODULES = [
 const SAISIE_ECRAN = [
   ['Comptes utilisateurs', 'Administration → Utilisateurs', "Créés un par un, avec leur mot de passe et leurs profils de droits."],
   ['Accueil au poste', 'Accueil au poste', "Pas d'import : les parcours se créent à l'arrivée de chaque agent."],
+  ['Revues de direction', 'Revue de direction', "Pas d'import : chaque revue se prépare à l'écran à partir des données reprises."],
   ['Signalements', 'Signalements', "Pas d'import : chaque presque-accident se signale à l'écran ; un historique se reprend au Registre AT/MP (type « Presque accident »)."],
   ['Entreprises extérieures', 'Entreprises extérieures', "Pas d'import : une fiche par intervention."],
   ['Base documentaire', 'Base documentaire', "Pas d'import : fiches et documents se saisissent à l'écran."],

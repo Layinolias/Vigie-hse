@@ -59,6 +59,8 @@
     mod("documentation", "Ressources", "Base documentaire", [["consulter", "Consulter"], ["rediger", "Rédiger"]]),
     mod("dialogue-social", "Ressources", "Dialogue social", [["consulter", "Consulter"], ["participer", "Participer (représentant)"], ["direction", "Direction (répondre, clôturer)"]]),
     mod("reporting", "Pilotage", "Indicateurs & Reporting", [["consulter", "Consulter"]]),
+    // Revue de direction (ISO 45001 § 9.3, 2026-10-12) : préparer, valider, rouvrir. Aucun préréglage hors Administrateur et RH.
+    mod("revue-direction", "Pilotage", "Revue de direction", STD),
     mod("administration", "Pilotage", "Administration", [["gerer", "Gérer"]])
   ];
   var PAR_ID = {};

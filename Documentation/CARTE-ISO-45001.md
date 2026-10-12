@@ -17,7 +17,7 @@
 
 ## Synthèse
 
-Sur 30 exigences (clauses 4 à 10, au niveau des sous-clauses) : **8 couvertes**, **13 partielles**, **6 écarts**, **3 hors outil**.
+Sur 30 exigences (clauses 4 à 10, au niveau des sous-clauses) : **10 couvertes**, **12 partielles**, **5 écarts**, **3 hors outil** (au 2026-10-12 ; à l'étude du 2026-10-06 : 8, 13, 6, 3).
 
 Le cœur opérationnel est solide : évaluation des risques, actions, compétences, urgences, surveillance, accidents et leurs analyses. Ce qui manque, c'est surtout la **couche « pilotage du système »** qu'un auditeur demande en premier : revue de direction, objectifs chiffrés, évaluation de la conformité réglementaire, programme d'audit interne. Les données d'entrée de ces exigences existent déjà presque toutes dans l'application ; il manque l'écran qui les assemble et en garde la trace.
 
@@ -78,7 +78,7 @@ Le cœur opérationnel est solide : évaluation des risques, actions, compétenc
 | 9.1.1 Surveillance, mesure, analyse | ✅ | **Indicateurs & Reporting** (taux de fréquence estimé et réel, remontée des événements par type, accidents et jours d'arrêt par risque, indicateurs de chaque module, export Excel) ; taux de gravité au **Registre AT/MP** et dans **Gestion RH** ; **Santé & Visites** (surveillance médicale) ; **Vérifications périodiques** | — |
 | 9.1.2 Évaluation de la conformité | ❌ | — (la veille dit qu'un texte existe, pas qu'on le respecte) | pour chaque exigence applicable : conforme ou non, date d'évaluation, preuve, action si non conforme |
 | 9.2 Audit interne | 🔶 | **Inspection / Audit** : contrôles de terrain à partir de trames, non-conformités vers le Plan d'actions | un programme d'audit du **système** : calendrier, critères (les clauses), auditeur et son indépendance, rapport à la direction |
-| 9.3 Revue de direction | ❌ | les données d'entrée existent toutes (reporting, plan d'actions, audits, observations, dialogue social) ; les réunions de la formation spécialisée ne sont pas une revue de direction | un compte rendu daté de revue : éléments examinés, décisions, actions envoyées au Plan d'actions |
+| 9.3 Revue de direction | ✅ | **Revue de direction** (2026-10-12) : données d'entrée rassemblées pour la période (suites des revues précédentes, veille, objectifs, performance, participation), analyse, conclusions et décisions ; revue validée figée, compte rendu daté imprimable, actions au **Plan d'actions** | fréquence, participants et validation attendus pour une collectivité (question 23) |
 
 ### 10 — Amélioration
 
@@ -92,7 +92,7 @@ Le cœur opérationnel est solide : évaluation des risques, actions, compétenc
 
 Classement technique, à revoir avec le préventeur et l'utilisateur avant tout chantier :
 
-1. **Revue de direction (9.3)** — l'exigence la plus systématiquement demandée en audit, et la moins chère ici : toutes ses données d'entrée sont déjà dans l'application. Un écran qui les assemble pour une période, recueille les décisions et envoie les actions au Plan d'actions.
+1. ~~**Revue de direction (9.3)**~~ — ✅ fait le 2026-10-12 : page « Revue de direction » (Pilotage) — données d'entrée de la période calculées par le même composant que le Reporting (`assets/indicateurs.js`), analyse, conclusions, actions vers le Plan d'actions, revue validée figée et imprimable. Fréquence, participants et validation : question 23.
 2. **Objectifs (6.2)** — un objectif chiffré par indicateur du reporting, avec l'écart affiché. Alimente la revue de direction (1) et l'amélioration continue (10.3).
 3. **Évaluation de la conformité (9.1.2, avec 6.1.3)** — prolonger la veille réglementaire : à quoi s'applique le texte, l'obligation qu'il crée, conforme ou non, preuve, date, action.
 4. ~~**Efficacité des actions correctives (10.2)**~~ — ✅ fait le 2026-10-07 : Plan d'actions → une action « Fait » porte sa vérification d'efficacité (Efficace / Non efficace, date, par qui, constat), filtre « efficacité à vérifier », colonnes à l'export et à l'import ; « Non efficace » propose une action de suite. Aucun délai de vérification imposé (à décider avec le préventeur si besoin).

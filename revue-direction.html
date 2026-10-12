@@ -1,0 +1,537 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revue de direction</title>
+<meta name="description" content="Revue de direction du système de management de la santé et de la sécurité au travail (ISO 45001, § 9.3).">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/hse-formulas.js"></script>
+<script src="assets/signalements-ref.js"></script>
+<script src="assets/indicateurs.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  input[type="text"], input[type="date"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:72px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled{ background:var(--bg-2); color:var(--text); opacity:1; }
+  @media (max-width:640px){ input[type="text"], input[type="date"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:720px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.brouillon{ color:var(--warning); background:var(--warning-bg); } .chip.brouillon::before{ background:var(--warning); }
+  .chip.validee{ color:var(--success); background:var(--success-bg); } .chip.validee::before{ background:var(--success); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  /* Revue ouverte */
+  .revue{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .revue-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .chiffres{ display:grid; grid-template-columns:repeat(auto-fill,minmax(min(170px,100%),1fr)); gap:8px; margin:0 0 12px; }
+  .chiffre{ background:var(--bg-2); border-radius:var(--r-sm); padding:9px 12px; }
+  .chiffre b{ display:block; font:600 18px "IBM Plex Mono",monospace; color:var(--text); }
+  .chiffre span{ font-size:11.5px; color:var(--text-muted); line-height:1.35; display:block; margin-top:2px; }
+  .liste-auto{ font-size:12.5px; color:var(--text-muted); margin:0 0 12px; padding-left:18px; line-height:1.6; }
+  .liste-auto b{ color:var(--text); }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Pilotage / <b>Revue de direction</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-target"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Revue de direction</h1>
+            <p>À intervalles planifiés, la direction examine si la démarche de santé et de sécurité au travail reste pertinente, suffisante et efficace (ISO 45001, § 9.3). La page rassemble les données d'entrée déjà présentes dans l'application, recueille l'analyse et les décisions, et envoie les actions décidées au Plan d'actions. Une revue validée est figée : c'est la trace datée que demande un audit.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-target"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiRevues">–</span><span class="ps-kpi-label">Revues validées</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-calendar"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiDerniere">–</span><span class="ps-kpi-label">Dernière revue</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiDecisions">–</span><span class="ps-kpi-label">Décisions non soldées</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-pencil"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiBrouillons">–</span><span class="ps-kpi-label">Brouillons</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel revue" id="revue" style="display:none;"></div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Revues de direction</h3>
+          <div class="panel-actions" id="listeActions"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg">
+            <thead><tr><th>Date de la revue</th><th>Période examinée</th><th>Statut</th><th>Décisions</th><th>Participants</th><th></th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Les chiffres viennent des mêmes calculs que la page Indicateurs &amp; Reporting, sur la période choisie. Un brouillon se met à jour avec « Actualiser les chiffres » ; une fois validée, la revue garde les chiffres de ce jour-là, et ses décisions rejoignent le Plan d'actions (origine « Revue de direction »). Fréquence des revues, participants et validation attendus pour une collectivité : question posée au préventeur (question 23).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("revue-direction", "consulter");
+  const peutGerer = D.peut("revue-direction", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Revue de direction", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const nombre = (v, dec) => v === null || v === undefined || v === "" ? "—" : (typeof v === "number" ? v.toLocaleString("fr-FR", { maximumFractionDigits: dec == null ? 1 : dec }) : String(v));
+  const lire = VigieIndicateurs.lecteur(VigieStore);
+
+  // ---------- Stockage ----------
+  const CLE = "vigie_hse_revues_direction";
+  const toutes = () => lire(CLE);
+  function modifierRevues(modif){ const l = toutes(); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
+  const parDate = (a, b) => String(b.dateRevue || "").localeCompare(String(a.dateRevue || ""));
+  const idAction = (r, d) => "pa-rd-" + r.id + "-" + d.id;
+  // statut d'une décision : celui de son action au Plan d'actions (une décision d'un brouillon n'y est pas encore)
+  function statutDecision(r, d, actions){
+    if (r.statut !== "Validée") return "pas encore au Plan d'actions";
+    const a = (actions || lire("vigie_hse_actions")).find(x => x && x.id === idAction(r, d));
+    return a ? a.statut : (d.statut || "À faire");
+  }
+
+  // ---------- Données d'entrée : les chiffres de la période (ISO 45001 § 9.3) ----------
+  // Calculés par assets/indicateurs.js (les mêmes que le Reporting) ; un brouillon les recalcule, une revue validée les garde.
+  function photographier(debut, fin, revueId){
+    const I = VigieIndicateurs.calculer(VigieStore, debut, fin);
+    const dans = (d) => VigieIndicateurs.inPeriod(d, I.dDebut, I.dFin);
+    const ds = (cle, champ) => lire(cle).filter(x => x && x[champ] && dans(x[champ])).length;
+    const veille = lire("vigie_hse_veille").filter(v => v && v.date && dans(v.date) && v.statut !== "Archivé")
+      .sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 15)
+      .map(v => ({ titre: v.titre || "", date: v.date, source: v.source || "" }));
+    // a) suites données aux revues précédentes : chaque décision et l'état de son action
+    const actions = lire("vigie_hse_actions");
+    const precedentes = toutes().filter(r => r.statut === "Validée" && r.id !== revueId).sort(parDate).slice(0, 3)
+      .flatMap(r => (r.decisions || []).map(d => ({ revue: r.dateRevue, description: d.description, responsable: d.responsable || "", echeance: d.echeance || "", statut: statutDecision(r, d, actions) })));
+    return {
+      periode: { debut: I.dDebut, fin: I.dFin }, calculeLe: new Date().toISOString(),
+      precedentes, veille,
+      objectif: { annuel: I.objectifAnnuel || null, periode: I.objectifPeriode, remontes: I.bird.niveaux[3] },
+      incidents: { total: I.atTotal, avecArret: I.atAvec, joursArret: I.atJours, tf: Math.round(I.tf * 10) / 10, tfReel: I.tfReel === null ? null : Math.round(I.tfReel * 10) / 10,
+        bird: I.bird.niveaux, signalements: I.sigTotal, signalementsNouveaux: I.sigNouveaux },
+      actions: { total: I.paTotal, faites: I.paFait, taux: I.paTaux, enCours: I.paEnCours, enRetard: I.paRetard, efficaces: I.paEfficaces, nonEfficaces: I.paNonEfficaces, aVerifier: I.paAVerifier },
+      surveillance: { visitesEnRetard: I.svLateTous, verificationsEnRetard: I.vpLateTous, verificationsNonConformes: I.vpNonConforme, habilitationsExpirees: I.fhExpireeTous, epiEnRetard: I.epiLateTous },
+      audits: { inspections: I.iaTotal, tauxConformite: I.iaTaux, nonConformes: I.iaNonConforme },
+      participation: { observations: I.rsstTotal, observationsTraitees: I.rsstTaux, questionsDirection: ds("vigie_hse_ds_questions", "date"), reunions: ds("vigie_hse_ds_reunions", "date"), visitesSite: ds("vigie_hse_ds_visites", "date") },
+      risques: { evaluations: I.duTotal, prioritaires: I.duPrio.length },
+    };
+  }
+
+  // ---------- Sections de la revue ----------
+  // Données d'entrée (§ 9.3 a à f) puis résultats (sorties) : formulations propres à l'application, pas le texte de la norme.
+  const ENTREES = [
+    { id:"suitesPrecedentes", titre:"Suites des revues précédentes", aide:"Où en sont les actions décidées lors des dernières revues ?",
+      auto: c => c.precedentes.length ? `<ul class="liste-auto">${c.precedentes.map(p => `<li>Revue du ${esc(dateFr(p.revue))} : ${esc(p.description)}${p.responsable ? " — " + esc(p.responsable) : ""}${p.echeance ? ", échéance " + esc(dateFr(p.echeance)) : ""} · <b>${esc(p.statut)}</b></li>`).join("")}</ul>` : `<p class="vide">Aucune revue validée auparavant.</p>` },
+    { id:"changements", titre:"Changements du contexte", aide:"Enjeux internes et externes, attentes des agents et des parties intéressées, exigences légales nouvelles, risques et opportunités pour la démarche.",
+      auto: c => c.veille.length ? `<p class="form-note" style="margin:0 0 6px;">Veille réglementaire de la période :</p><ul class="liste-auto">${c.veille.map(v => `<li>${esc(dateFr(v.date))} — ${esc(v.titre)}${v.source ? " (" + esc(v.source) + ")" : ""}</li>`).join("")}</ul>` : `<p class="vide">Aucune actualité de veille réglementaire datée de la période.</p>` },
+    { id:"objectifs", titre:"Politique et objectifs", aide:"La politique de santé et de sécurité est-elle tenue ? Les objectifs sont-ils atteints ?",
+      auto: c => chiffres([[c.objectif.annuel === null ? "—" : nombre(c.objectif.annuel, 0), "objectif annuel de remontée des presque-accidents"], [c.objectif.periode === null ? "—" : nombre(c.objectif.periode), "objectif ramené à la période"], [nombre(c.objectif.remontes, 0), "presque-accidents remontés"]]) },
+    { id:"performance", titre:"Performance de santé et sécurité", aide:"Événements et tendances, non-conformités et actions correctives, résultats de surveillance, d'audit, de consultation des agents.",
+      auto: c => `<p class="form-note" style="margin:0 0 6px;">Événements</p>` + chiffres([[nombre(c.incidents.total, 0), "événements AT/MP"], [nombre(c.incidents.avecArret, 0), "avec arrêt de travail"], [nombre(c.incidents.joursArret, 0), "jours d'arrêt"], [nombre(c.incidents.tf), "taux de fréquence estimé"], [nombre(c.incidents.tfReel), "taux de fréquence réel"], [c.incidents.bird.map(n => nombre(n, 0)).join(" · "), "pyramide de Bird : avec arrêt · sans arrêt · bénins · presque-accidents"], [nombre(c.incidents.signalements, 0), "signalements de presque-accidents"]])
+        + `<p class="form-note" style="margin:0 0 6px;">Actions correctives (créées sur la période)</p>` + chiffres([[nombre(c.actions.total, 0), "actions"], [c.actions.taux === null ? "—" : c.actions.taux + " %", "soldées"], [nombre(c.actions.enRetard, 0), "en retard"], [nombre(c.actions.efficaces, 0), "jugées efficaces"], [nombre(c.actions.nonEfficaces, 0), "jugées non efficaces"], [nombre(c.actions.aVerifier, 0), "faites, efficacité à vérifier"]])
+        + `<p class="form-note" style="margin:0 0 6px;">Surveillance (à la date du calcul) et audits</p>` + chiffres([[nombre(c.surveillance.visitesEnRetard, 0), "visites médicales en retard"], [nombre(c.surveillance.verificationsEnRetard, 0), "vérifications périodiques en retard"], [nombre(c.surveillance.verificationsNonConformes, 0), "vérifications non conformes (période)"], [nombre(c.surveillance.habilitationsExpirees, 0), "habilitations expirées"], [nombre(c.surveillance.epiEnRetard, 0), "EPI à renouveler en retard"], [nombre(c.audits.inspections, 0), "inspections (période)"], [c.audits.tauxConformite === null ? "—" : c.audits.tauxConformite + " %", "inspections conformes"]])
+        + `<p class="form-note" style="margin:0 0 6px;">Consultation et participation, risques</p>` + chiffres([[nombre(c.participation.observations, 0), "observations au registre santé et sécurité"], [c.participation.observationsTraitees === null ? "—" : c.participation.observationsTraitees + " %", "observations traitées"], [nombre(c.participation.questionsDirection, 0), "questions des représentants"], [nombre(c.participation.reunions, 0), "réunions de l'instance"], [nombre(c.risques.prioritaires, 0), "risques élevés ou critiques évalués (période)"]]) },
+    { id:"ressources", titre:"Ressources", aide:"Les moyens humains, techniques et financiers sont-ils suffisants ?", auto: null },
+    { id:"communications", titre:"Communications avec les parties intéressées", aide:"Échanges avec l'inspection du travail, la médecine de prévention, les assureurs, les entreprises extérieures, les représentants du personnel…", auto: null },
+    { id:"ameliorations", titre:"Pistes d'amélioration", aide:"Ce qui pourrait être fait mieux, ou autrement.", auto: null },
+  ];
+  const SORTIES = [
+    { id:"conclusions", titre:"Conclusions", aide:"La démarche reste-t-elle pertinente, suffisante et efficace ?" },
+    { id:"changementsNecessaires", titre:"Changements à apporter", aide:"Au système de management, à son intégration dans les autres activités." },
+    { id:"ressourcesNecessaires", titre:"Ressources décidées", aide:"Moyens accordés ou à rechercher." },
+    { id:"orientations", titre:"Orientations", aide:"Incidences pour les orientations de la collectivité ou de l'entreprise." },
+  ];
+  function chiffres(l){ return `<div class="chiffres">${l.map(([v, t]) => `<div class="chiffre"><b>${esc(v)}</b><span>${esc(t)}</span></div>`).join("")}</div>`; }
+
+  // ---------- Liste ----------
+  function render(){
+    const l = toutes().sort(parDate);
+    const validees = l.filter(r => r.statut === "Validée");
+    const actions = lire("vigie_hse_actions");
+    const ouvertes = validees.flatMap(r => (r.decisions || []).map(d => statutDecision(r, d, actions))).filter(s => s !== "Fait").length;
+    $("kpiRevues").textContent = validees.length;
+    $("kpiDerniere").textContent = validees.length ? dateFr(validees[0].dateRevue) : "—";
+    $("kpiDecisions").textContent = ouvertes;
+    $("kpiBrouillons").textContent = l.filter(r => r.statut !== "Validée").length;
+    $("tbody").innerHTML = l.length ? l.map(r => {
+      const dec = r.decisions || [];
+      const faites = r.statut === "Validée" ? dec.filter(d => statutDecision(r, d, actions) === "Fait").length : 0;
+      return `<tr>
+        <td class="mono">${esc(dateFr(r.dateRevue))}</td>
+        <td>${r.periodeDebut ? esc(dateFr(r.periodeDebut)) : "depuis le début"} → ${esc(dateFr(r.periodeFin))}</td>
+        <td><span class="chip ${r.statut === "Validée" ? "validee" : "brouillon"}">${esc(r.statut === "Validée" ? "Validée" : "Brouillon")}</span></td>
+        <td>${dec.length ? (r.statut === "Validée" ? `${faites} / ${dec.length} soldée${dec.length > 1 ? "s" : ""}` : `${dec.length} prévue${dec.length > 1 ? "s" : ""}`) : "—"}</td>
+        <td style="white-space:normal;">${esc(r.participants || "—")}</td>
+        <td><button type="button" class="act-edit" data-ouvrir="${esc(r.id)}">Ouvrir</button></td>
+      </tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="6">Aucune revue de direction pour le moment.${peutGerer ? " « Nouvelle revue » en prépare une à partir des données de l'application." : ""}</td></tr>`;
+  }
+  $("tbody").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); });
+  if (peutGerer){
+    $("listeActions").innerHTML = `<button type="button" class="btn btn-primary" id="btnNouvelle"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle revue</button>`;
+    $("btnNouvelle").addEventListener("click", nouvelle);
+  }
+
+  // Nouvelle revue : la période part du lendemain de la dernière revue validée, sinon couvre les 12 derniers mois.
+  function nouvelle(){
+    const aujourdhui = VigieDates.aujourdhui();
+    const derniere = toutes().filter(r => r.statut === "Validée" && r.periodeFin).sort((a, b) => String(b.periodeFin).localeCompare(String(a.periodeFin)))[0];
+    let debut;
+    if (derniere && derniere.periodeFin < aujourdhui){ const d = VigieDates.lire(derniere.periodeFin); d.setDate(d.getDate() + 1); debut = VigieDates.iso(d); }
+    else { const d = VigieDates.lire(aujourdhui); d.setFullYear(d.getFullYear() - 1); d.setDate(d.getDate() + 1); debut = VigieDates.iso(d); }
+    const r = { id: genId("rd"), dateRevue: aujourdhui, periodeDebut: debut, periodeFin: aujourdhui, participants: "", entrees: {}, sorties: {}, decisions: [],
+      statut: "Brouillon", auteur: moi, dateCreation: new Date().toISOString() };
+    r.chiffres = photographier(r.periodeDebut, r.periodeFin, r.id);
+    try { modifierRevues(l => l.push(r)); } catch(e){ alert("La revue n'a pas pu être créée."); return; }
+    logAudit("Création", `Revue de direction du ${dateFr(r.dateRevue)} (brouillon)`);
+    render();
+    ouvrir(r.id);
+  }
+
+  // ---------- Revue ouverte ----------
+  let courante = null, decisions = [];
+  function ouvrir(id){
+    const r = toutes().find(x => x.id === id);
+    if (!r) return;
+    courante = r;
+    const fige = r.statut === "Validée" || !peutGerer;
+    const c = r.chiffres || photographier(r.periodeDebut, r.periodeFin, r.id);
+    const dis = fige ? " disabled" : "";
+    decisions = (r.decisions || []).map(d => Object.assign({}, d));
+    const actions = lire("vigie_hse_actions");
+    $("revue").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">Revue de direction du ${esc(dateFr(r.dateRevue))}</h3>
+          <div class="revue-etat"><span class="chip ${r.statut === "Validée" ? "validee" : "brouillon"}">${esc(r.statut === "Validée" ? "Validée" : "Brouillon")}</span>
+          ${r.statut === "Validée" ? ` validée par ${esc(r.validePar || "—")} le ${esc(dateFr(r.valideLe))}` : ""} · chiffres calculés le ${esc(new Date(c.calculeLe).toLocaleString("fr-FR"))}</div></div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnImprimer"><svg class="icon"><use href="#i-printer"/></svg> Imprimer le compte rendu</button><button type="button" class="btn btn-ghost" id="btnFermer">Fermer</button></div>
+      </div>
+      <form id="revueForm">
+        <div class="form-grid">
+          <div><label for="rDate">Date de la revue</label><input type="date" id="rDate" value="${esc(r.dateRevue)}"${dis} required></div>
+          <div><label for="rDebut">Période examinée : du</label><input type="date" id="rDebut" value="${esc(r.periodeDebut || "")}"${dis}></div>
+          <div><label for="rFin">au</label><input type="date" id="rFin" value="${esc(r.periodeFin)}"${dis} required></div>
+          <div class="span3"><label for="rParticipants">Participants</label><input type="text" id="rParticipants" value="${esc(r.participants || "")}" placeholder="Nom et fonction de chacun" maxlength="400"${dis}></div>
+        </div>
+        ${fige ? "" : `<div style="margin-top:10px;"><button type="button" class="btn btn-ghost" id="btnActualiser">Actualiser les chiffres</button> <span class="form-note">après avoir changé la période, ou quand les données ont bougé</span></div>`}
+        <div class="form-sub" style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:22px 0 0;">Données d'entrée</div>
+        ${ENTREES.map((s, i) => `<div class="sec"><h4>${String.fromCharCode(97 + i)}. ${esc(s.titre)}</h4><p class="aide">${esc(s.aide)}</p>${s.auto ? s.auto(c) : ""}
+          <label for="e-${s.id}">Analyse</label><textarea id="e-${s.id}" data-entree="${s.id}"${dis}>${esc((r.entrees || {})[s.id] || "")}</textarea></div>`).join("")}
+        <div class="form-sub" style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:22px 0 0;">Résultats de la revue</div>
+        ${SORTIES.map(s => `<div class="sec"><h4>${esc(s.titre)}</h4><p class="aide">${esc(s.aide)}</p><textarea id="s-${s.id}" data-sortie="${s.id}" aria-label="${esc(s.titre)}"${dis}>${esc((r.sorties || {})[s.id] || "")}</textarea></div>`).join("")}
+        <div class="sec"><h4>Actions décidées</h4><p class="aide">${fige ? "Reprises au Plan d'actions (origine « Revue de direction ») : leur état est celui du Plan d'actions." : "Elles rejoindront le Plan d'actions à la validation de la revue."}</p>
+          <div id="rDecisions"></div>
+          ${fige ? "" : `<button type="button" class="btn btn-ghost" id="btnAjoutDecision"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une action</button>`}
+        </div>
+        ${peutGerer ? `<div class="form-actions">
+          ${fige ? `<button type="button" class="btn btn-ghost" id="btnRouvrir">Rouvrir la revue</button>` : `<button type="submit" class="btn btn-primary">Enregistrer</button>
+          <button type="button" class="btn btn-ghost" id="btnValider">Valider la revue</button>
+          <button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer le brouillon</button>`}
+        </div>` : ""}
+      </form>`;
+    rendreDecisions(fige, actions);
+    $("revue").style.display = "";
+    $("revue").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function rendreDecisions(fige, actions){
+    if (fige){
+      $("rDecisions").innerHTML = decisions.length ? `<ul class="liste-auto">${decisions.map(d => `<li>${esc(d.description)}${d.responsable ? " — " + esc(d.responsable) : ""}${d.echeance ? ", échéance " + esc(dateFr(d.echeance)) : ""} · <b>${esc(statutDecision(courante, d, actions))}</b></li>`).join("")}</ul>` : `<p class="vide">Aucune action décidée.</p>`;
+      return;
+    }
+    $("rDecisions").innerHTML = decisions.map((d, i) => `
+      <div class="dyn-row" data-i="${i}">
+        <input type="text" data-k="description" placeholder="Action décidée" aria-label="Action" value="${esc(d.description || "")}">
+        <input type="text" data-k="responsable" placeholder="Responsable" aria-label="Responsable" value="${esc(d.responsable || "")}" style="flex:0 1 180px">
+        <input type="date" data-k="echeance" aria-label="Échéance" value="${esc(d.echeance || "")}" style="flex:0 0 150px">
+        <button type="button" class="act-del" data-retirer="${i}">Suppr.</button>
+      </div>`).join("") || `<p class="vide">Aucune action pour l'instant.</p>`;
+  }
+  function lireDecisions(){
+    const lignes = $("rDecisions").querySelectorAll(".dyn-row");
+    decisions = Array.prototype.map.call(lignes, (row, i) => {
+      const o = Object.assign({}, decisions[i] || { id: genId("dec") });
+      row.querySelectorAll("[data-k]").forEach(inp => { o[inp.dataset.k] = inp.value.trim(); });
+      return o;
+    });
+  }
+  function fermer(){ $("revue").style.display = "none"; $("revue").innerHTML = ""; courante = null; }
+
+  // Relit le formulaire dans la revue enregistrée ; « recalculer » refait la photo des chiffres
+  function enregistrer(recalculer, valider){
+    const r0 = courante;
+    if (!r0 || !peutGerer || r0.statut === "Validée") return null;
+    lireDecisions();
+    const dateRevue = $("rDate").value, debut = $("rDebut").value, fin = $("rFin").value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateRevue) || !/^\d{4}-\d{2}-\d{2}$/.test(fin)){ alert("La date de la revue et la fin de la période sont obligatoires."); return null; }
+    if (debut && debut > fin){ alert("Le début de la période est après sa fin."); return null; }
+    let fait = null;
+    try {
+      modifierRevues(l => {
+        const i = l.findIndex(x => x && x.id === r0.id);
+        if (i < 0) return;
+        const r = Object.assign({}, l[i], { dateRevue, periodeDebut: debut, periodeFin: fin, participants: $("rParticipants").value.trim(), modifiePar: moi, dateMaj: new Date().toISOString() });
+        r.entrees = {}; document.querySelectorAll("[data-entree]").forEach(t => { if (t.value.trim()) r.entrees[t.dataset.entree] = t.value.trim(); });
+        r.sorties = {}; document.querySelectorAll("[data-sortie]").forEach(t => { if (t.value.trim()) r.sorties[t.dataset.sortie] = t.value.trim(); });
+        r.decisions = decisions.filter(d => d.description);
+        const periodeChangee = r.periodeDebut !== (l[i].periodeDebut || "") || r.periodeFin !== l[i].periodeFin;
+        if (recalculer || valider || periodeChangee || !r.chiffres) r.chiffres = photographier(r.periodeDebut, r.periodeFin, r.id);
+        if (valider){ r.statut = "Validée"; r.validePar = moi; r.valideLe = VigieDates.aujourdhui(); }
+        l[i] = r; fait = r;
+      });
+    } catch(e){ alert("La revue n'a pas pu être enregistrée."); return null; }
+    return fait;
+  }
+
+  $("revue").addEventListener("click", (e) => {
+    if (e.target.closest("#btnFermer")){ fermer(); return; }
+    if (e.target.closest("#btnImprimer")){ if (courante) imprimer(toutes().find(x => x.id === courante.id) || courante); return; }
+    if (e.target.closest("#btnAjoutDecision")){ lireDecisions(); decisions.push({ id: genId("dec") }); rendreDecisions(false); return; }
+    const ret = e.target.closest("[data-retirer]");
+    if (ret){ lireDecisions(); decisions.splice(Number(ret.dataset.retirer), 1); rendreDecisions(false); return; }
+    if (e.target.closest("#btnActualiser")){ const r = enregistrer(true); if (r){ render(); ouvrir(r.id); } return; }
+    if (e.target.closest("#btnValider")){
+      if (!confirm("Valider la revue ? Ses chiffres seront figés à aujourd'hui et ses actions rejoindront le Plan d'actions.")) return;
+      const r = enregistrer(false, true);
+      if (r){ logAudit("Validation", `Revue de direction du ${dateFr(r.dateRevue)} validée — ${r.decisions.length} action(s)`); render(); ouvrir(r.id); }
+      return;
+    }
+    if (e.target.closest("#btnRouvrir")){
+      if (!courante || !confirm("Rouvrir la revue ? Elle redevient un brouillon modifiable ; ses actions déjà reprises au Plan d'actions y restent.")) return;
+      try { modifierRevues(l => { const i = l.findIndex(x => x && x.id === courante.id); if (i >= 0){ const r = Object.assign({}, l[i], { statut: "Brouillon" }); delete r.validePar; delete r.valideLe; l[i] = r; } }); }
+      catch(err){ alert("La revue n'a pas pu être rouverte."); return; }
+      logAudit("Modification", `Revue de direction du ${dateFr(courante.dateRevue)} rouverte`);
+      const id = courante.id; render(); ouvrir(id);
+      return;
+    }
+    if (e.target.closest("#btnSupprimer")){
+      if (!courante || courante.statut === "Validée" || !confirm(`Supprimer le brouillon de revue du ${dateFr(courante.dateRevue)} ?`)) return;
+      try { modifierRevues(l => { const i = l.findIndex(x => x && x.id === courante.id); if (i >= 0) l.splice(i, 1); }); }
+      catch(err){ alert("Le brouillon n'a pas pu être supprimé."); return; }
+      logAudit("Suppression", `Brouillon de revue de direction du ${dateFr(courante.dateRevue)}`);
+      fermer(); render();
+    }
+  });
+  $("revue").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const r = enregistrer(false);
+    if (r){ logAudit("Modification", `Revue de direction du ${dateFr(r.dateRevue)} (brouillon)`); render(); ouvrir(r.id); }
+  });
+
+  // ---------- Compte rendu imprimé : une revue, une page A4 portrait (ou plus), à signer ----------
+  function imprimer(r){
+    const ancien = document.getElementById("rd-impression");
+    if (ancien) ancien.remove();
+    let style = document.getElementById("rd-impression-style");
+    if (!style){
+      style = document.createElement("style"); style.id = "rd-impression-style";
+      style.textContent = [
+        "@page{ size:A4 portrait; margin:14mm; }",
+        "@media screen{ #rd-impression{ display:none; } }",
+        "@media print{",
+        "  body{ background:#fff !important; }",
+        "  body > *:not(#rd-impression){ display:none !important; }",
+        "  #rd-impression{ display:block !important; color:#000; font:11px/1.5 'IBM Plex Sans',Arial,sans-serif; }",
+        "  #rd-impression .ri-marque{ font:700 10px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#555; }",
+        "  #rd-impression h1{ font:700 22px 'Barlow Condensed',Arial,sans-serif; margin:2px 0; }",
+        "  #rd-impression .ri-meta{ font-size:10.5px; color:#333; margin:0 0 8px; }",
+        "  #rd-impression h2{ font:700 13px 'Barlow Condensed',Arial,sans-serif; text-transform:uppercase; letter-spacing:.06em; border-bottom:1.5px solid #000; margin:12px 0 5px; padding-bottom:2px; }",
+        "  #rd-impression h3{ font:600 12px 'IBM Plex Sans',Arial,sans-serif; margin:8px 0 2px; }",
+        "  #rd-impression .chiffres{ display:flex; flex-wrap:wrap; gap:4px 14px; margin:2px 0 4px; }",
+        "  #rd-impression .chiffre b{ font-family:'IBM Plex Mono',monospace; margin-right:3px; }",
+        "  #rd-impression .texte{ white-space:pre-line; }",
+        "  #rd-impression ul{ margin:0; padding-left:16px; }",
+        "  #rd-impression section{ break-inside:avoid; page-break-inside:avoid; }",
+        "  #rd-impression .ri-signatures{ display:flex; gap:30px; margin-top:22px; }",
+        "  #rd-impression .ri-signatures div{ flex:1; border-top:1px solid #000; padding-top:4px; min-height:50px; font-size:10px; }",
+        "}",
+      ].join("\n");
+      document.head.appendChild(style);
+    }
+    const c = r.chiffres || photographier(r.periodeDebut, r.periodeFin, r.id);
+    const plat = (html) => html.replace(/<div class="chiffre"><b>([^<]*)<\/b><span>([^<]*)<\/span><\/div>/g, '<span class="chiffre"><b>$1</b>$2</span>');
+    const texte = (t) => t ? `<div class="texte">${esc(t)}</div>` : "<p>—</p>";
+    const actions = lire("vigie_hse_actions");
+    const bloc = document.createElement("div");
+    bloc.id = "rd-impression";
+    bloc.innerHTML = `
+      <div class="ri-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "VIGIE HSE")}</div>
+      <h1>Compte rendu de revue de direction — ${esc(dateFr(r.dateRevue))}</h1>
+      <p class="ri-meta">Période examinée : ${r.periodeDebut ? "du " + esc(dateFr(r.periodeDebut)) : "depuis le début"} au ${esc(dateFr(r.periodeFin))} · ${r.statut === "Validée" ? "validée par " + esc(r.validePar || "—") + " le " + esc(dateFr(r.valideLe)) : "brouillon, non validé"} · chiffres du ${esc(new Date(c.calculeLe).toLocaleDateString("fr-FR"))}<br>Participants : ${esc(r.participants || "—")}</p>
+      <h2>Données d'entrée</h2>
+      ${ENTREES.map((s, i) => `<section><h3>${String.fromCharCode(97 + i)}. ${esc(s.titre)}</h3>${s.auto ? plat(s.auto(c)) : ""}${texte((r.entrees || {})[s.id])}</section>`).join("")}
+      <h2>Résultats de la revue</h2>
+      ${SORTIES.map(s => `<section><h3>${esc(s.titre)}</h3>${texte((r.sorties || {})[s.id])}</section>`).join("")}
+      <section><h3>Actions décidées</h3>${(r.decisions || []).length ? `<ul>${r.decisions.map(d => `<li>${esc(d.description)}${d.responsable ? " — " + esc(d.responsable) : ""}${d.echeance ? ", échéance " + esc(dateFr(d.echeance)) : ""} (${esc(statutDecision(r, d, actions))})</li>`).join("")}</ul>` : "<p>—</p>"}</section>
+      <div class="ri-signatures"><div>Pour la direction</div><div>Pour les participants</div></div>`;
+    document.body.appendChild(bloc);
+    const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
+    window.addEventListener("afterprint", nettoyer);
+    window.print();
+  }
+
+  render();
+  // ?ouvrir=<id>
+  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && toutes().some(r => r.id === id)) ouvrir(id); })();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

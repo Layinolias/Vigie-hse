@@ -1,0 +1,742 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signalements — presque-accidents</title>
+<meta name="description" content="Signaler un presque-accident, et suivre ce qui en est fait.">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/signalements-ref.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+  .ps-kpi-icon.violet{ background:rgba(var(--accent-violet-rgb),.14); color:var(--accent-violet); }
+
+  .console{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:18px; }
+  select, input[type="text"], input[type="date"], input[type="time"], input[type="number"], input[type="search"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:170px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:70px; width:100%; font-weight:400; line-height:1.5; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .result-count{ align-self:center; margin-left:auto; font-size:12px; color:var(--text-faint); }
+  .result-count b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+  .checkline{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text); font-weight:500; cursor:pointer; }
+  .checkline input{ width:16px; height:16px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+
+  /* Appel à signaler */
+  .appel{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:18px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .appel h2{ margin:0; font:600 19px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .appel p{ margin:4px 0 0; font-size:13px; color:var(--text-muted); max-width:70ch; line-height:1.55; }
+  .merci{ display:none; padding:12px 16px; margin-bottom:18px; border-radius:var(--r-sm); background:var(--success-bg); color:var(--text); font-size:13px; }
+  .merci.show{ display:block; }
+
+  .form-panel{ padding:20px 22px 22px; margin-bottom:18px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  .form-grid label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid label .requis{ color:var(--danger); }
+  .form-actions{ display:flex; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.5; }
+  .form-sub{ font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin:18px 0 8px; }
+  @media (max-width:640px){
+    select, input[type="text"], input[type="date"], input[type="time"], input[type="number"], input[type="search"], textarea{ font-size:16px; }
+    .form-actions{ flex-direction:column; align-items:stretch; }
+    .form-actions .btn{ width:100%; justify-content:center; min-height:46px; }
+    .appel .btn{ width:100%; justify-content:center; min-height:46px; }
+  }
+
+  /* Photos */
+  .photos{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+  .photo{ position:relative; width:110px; height:110px; border-radius:var(--r-sm); overflow:hidden; border:1px solid var(--border); background:var(--bg-2); }
+  .photo img{ width:100%; height:100%; object-fit:cover; display:block; cursor:zoom-in; }
+  .photo button{ position:absolute; top:4px; right:4px; width:24px; height:24px; border-radius:50%; border:none; background:rgba(0,0,0,.6); color:#fff; font:600 14px/1 "IBM Plex Sans",sans-serif; cursor:pointer; }
+  .visionneuse{ position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.82); display:none; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; }
+  .visionneuse.show{ display:flex; }
+  .visionneuse img{ max-width:100%; max-height:100%; border-radius:6px; }
+
+  .table-panel{ overflow:auto; max-height:70vh; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.reg thead th{ position:sticky; top:0; background:var(--bg-2); z-index:2; border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr{ border-left:3px solid transparent; transition:background .12s ease; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg tbody td.wrap{ white-space:normal; min-width:240px; max-width:380px; }
+  table.reg tbody td.wrap .clamp{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .empty-row td{ padding:36px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.s-nouveau{ color:var(--accent); background:rgba(var(--accent-rgb),.12); } .chip.s-nouveau::before{ background:var(--accent); }
+  .chip.s-encours{ color:var(--warning); background:var(--warning-bg); } .chip.s-encours::before{ background:var(--warning); }
+  .chip.s-clos{ color:var(--success); background:var(--success-bg); } .chip.s-clos::before{ background:var(--success); }
+  .suite-tag{ display:inline-block; font-size:11px; color:var(--text-muted); background:var(--bg-2); border-radius:var(--r-sm); padding:2px 7px; margin:1px 3px 1px 0; }
+  .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  /* Fiche d'un signalement */
+  .fiche{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .fiche-meta{ font-size:12px; color:var(--text-faint); margin-top:2px; }
+  .fiche-grille{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr)); gap:14px 20px; margin-top:14px; }
+  .fiche-sec{ font-size:13px; line-height:1.55; }
+  .fiche-titre{ font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:3px; }
+  .fiche-sec .texte{ white-space:pre-line; }
+  .vide{ color:var(--text-faint); font-style:italic; }
+  .suites{ display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+  .liens{ font-size:12.5px; color:var(--text-muted); background:var(--bg-2); border-radius:var(--r-sm); padding:10px 12px; margin-top:12px; line-height:1.7; }
+  .liens b{ color:var(--text); }
+  .liens a, .liens button.lien{ color:var(--accent); font-weight:600; }
+  .liens button.lien{ background:none; border:none; padding:0; font:600 12.5px "IBM Plex Sans",sans-serif; cursor:pointer; text-decoration:underline; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+
+  .objectif{ padding:16px 20px; margin-bottom:18px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  .objectif .jauge{ flex:1 1 200px; height:8px; border-radius:99px; background:var(--bg-2); overflow:hidden; min-width:120px; }
+  .objectif .jauge i{ display:block; height:100%; background:var(--success); border-radius:99px; }
+  .objectif-texte{ font-size:13px; color:var(--text-muted); }
+  .objectif-texte b{ color:var(--text); }
+  .objectif input{ width:110px; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Santé au travail / <b>Signalements</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-flag"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Signalements — presque-accidents</h1>
+            <p>Un presque-accident, c'est un événement qui aurait pu blesser quelqu'un et ne l'a pas fait. Le signaler permet d'agir avant l'accident : chacun peut le faire, en quelques lignes et avec des photos ; l'encadrement en décide la suite.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-flag"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label" id="kpiTotalLabel">Signalements</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiNouveau">–</span><span class="ps-kpi-label">Nouveaux</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-activity"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEnCours">–</span><span class="ps-kpi-label">En cours</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiClos">–</span><span class="ps-kpi-label">Clos</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="merci" id="merci" role="status"></div>
+
+      <div class="panel appel" id="appel">
+        <div>
+          <h2>Vous avez vu un presque-accident ?</h2>
+          <p>Ce qui s'est passé, ce qui aurait pu arriver, ce que vous avez fait sur le moment : quelques lignes suffisent. Une photo aide beaucoup.</p>
+        </div>
+        <button type="button" class="btn btn-primary" id="btnSignaler"><svg class="icon"><use href="#i-flag"/></svg> Signaler un presque-accident</button>
+      </div>
+
+      <div class="panel form-panel" id="formPanel" style="display:none;">
+        <div class="panel-head"><h3 class="panel-title">Signaler un presque-accident</h3></div>
+        <form id="sigForm" novalidate>
+          <div class="form-grid">
+            <div><label for="fDate">Date <span class="requis">*</span></label><input type="date" id="fDate" required></div>
+            <div><label for="fHeure">Heure</label><input type="time" id="fHeure"></div>
+            <div><label for="fCollectivite" data-org-libelle>Collectivité</label>
+              <select id="fCollectivite" required data-org="saisie"></select>
+            </div>
+            <div><label for="fService">Service concerné <span class="requis">*</span></label><select id="fService" required></select></div>
+            <div class="span3"><label for="fLieu">Lieu précis <span class="requis">*</span></label><input type="text" id="fLieu" required maxlength="200" placeholder="ex. Atelier mécanique, escalier B, parking des services techniques…"></div>
+            <div class="span3"><label for="fFaits">Ce qui s'est passé <span class="requis">*</span></label><textarea id="fFaits" required placeholder="Décrivez les faits : qui faisait quoi, ce qui s'est produit."></textarea></div>
+            <div class="span3"><label for="fRisque">Ce qui aurait pu arriver <span class="requis">*</span></label><textarea id="fRisque" required placeholder="ex. une chute de hauteur, une main écrasée, un véhicule renversé…"></textarea></div>
+            <div class="span3"><label for="fMesure">Mesure prise sur le moment</label><textarea id="fMesure" placeholder="ex. zone balisée, machine arrêtée, responsable prévenu — ou « aucune »."></textarea></div>
+          </div>
+          <div class="form-sub">Photos (3 au plus)</div>
+          <div class="form-note">Les photos sont réduites avant l'envoi. Évitez de photographier des visages.</div>
+          <div class="photos" id="fPhotos"></div>
+          <div style="margin-top:10px;">
+            <button type="button" class="btn btn-ghost" id="btnPhoto"><svg class="icon"><use href="#i-camera"/></svg> Ajouter une photo</button>
+            <input type="file" id="fPhotoFile" accept="image/*" multiple style="display:none">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Envoyer le signalement</button>
+            <button type="button" class="btn btn-ghost" id="btnAnnuler">Annuler</button>
+            <span class="form-note" id="formErreur" role="alert"></span>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel fiche" id="fiche" style="display:none;"></div>
+
+      <div class="panel objectif" id="objectif" style="display:none;"></div>
+
+      <div class="panel console" id="filtres">
+        <div class="field"><span class="flabel" data-org-libelle>Collectivité</span>
+          <select id="fCollectiviteFiltre" data-org="filtre"></select>
+        </div>
+        <div class="field"><span class="flabel">Service</span><select id="fServiceFiltre"></select></div>
+        <div class="field"><span class="flabel">Statut</span>
+          <select id="fStatut"><option value="all">Tous</option><option value="Nouveau">Nouveau</option><option value="En cours">En cours</option><option value="Clos">Clos</option></select>
+        </div>
+        <div class="field"><span class="flabel">Recherche</span><input type="search" id="fRecherche" placeholder="Lieu, description…"></div>
+        <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
+        <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> signalements</span>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title" id="listeTitre">Signalements</h3>
+          <div class="panel-actions" id="panelActionsBtns"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableSignalements">
+            <thead><tr id="thead"></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote" id="piedDePage">Chacun peut signaler un presque-accident et suivre ce qui est fait de ses propres signalements. Les comptes qui traitent les signalements (le manager pour ses services, et tout profil à qui ce droit est donné dans Administration → Profils) décident de la suite : classé, action au Plan d'actions, analyse d'accident, inscription au Registre AT/MP.</p>
+    </div>
+  </div>
+</div>
+
+<div class="visionneuse" id="visionneuse" role="dialog" aria-label="Photo"><img id="visionneuseImg" alt="Photo du signalement"></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutSignaler = D.peut("signalements", "signaler");
+  const peutTraiter = D.peut("signalements", "traiter");
+  if (!peutSignaler){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  const myServices = (session && session.services) || ["*"];
+  const isScoped = !myServices.includes("*");
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Signalements", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const S = VigieSignalements;   // suites, statut, pyramide, objectif : assets/signalements-ref.js
+
+  // ---------- Stockage ----------
+  // Un compte qui signale seulement ne voit que ses propres signalements (le serveur ne lui transmet que ceux-là) ;
+  // un compte qui traite voit ceux de ses services. Toute écriture repart de la liste enregistrée complète.
+  function lireListe(cle){ try { const l = JSON.parse(VigieStore.getItem(cle) || "[]"); return Array.isArray(l) ? l : []; } catch(e){ return []; } }
+  function modifierListe(cle, modif){ const l = lireListe(cle); modif(l); VigieStore.setItem(cle, JSON.stringify(l)); }
+  const visible = (r) => !!r && (peutTraiter ? (!isScoped || myServices.includes(r.service)) : r.auteur === moi);
+  let LISTE = [];
+  function recharger(){ LISTE = lireListe(S.CLE).filter(visible); }
+  recharger();
+  const photosDe = (id) => lireListe(S.CLE_PHOTOS).filter(p => p && p.signalementId === id && visible(p));
+  // une photo ne s'affiche que si c'est bien une image encodée (jamais une adresse ou un script)
+  const imageSure = (d) => /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(String(d || "")) ? d : "";
+
+  // Liens vers les autres modules, toujours recalculés : un événement du Registre AT/MP porte le signalementId
+  // du signalement inscrit ; son analyse, l'atmpId de cet événement ; une action, l'identifiant pa-sig-….
+  const lireRegistre = () => lireListe("vigie_hse_dataset");
+  const inscriptionDe = (id, registre) => (registre || lireRegistre()).find(r => r && r.signalementId === id) || null;
+  const idAction = (s, a) => "pa-sig-" + s.id + "-" + a.id;
+
+  // ---------- Compteurs ----------
+  function renderKpis(){
+    const st = LISTE.map(S.statut);
+    $("kpiTotal").textContent = LISTE.length;
+    $("kpiTotalLabel").textContent = peutTraiter ? "Signalements" : "Mes signalements";
+    $("kpiNouveau").textContent = st.filter(x => x === "Nouveau").length;
+    $("kpiEnCours").textContent = st.filter(x => x === "En cours").length;
+    $("kpiClos").textContent = st.filter(x => x === "Clos").length;
+  }
+
+  // ---------- Formulaire de signalement ----------
+  const fCollectivite = $("fCollectivite"), fService = $("fService");
+  function remplirServices(col){
+    let list = VigieOrga.services(col);
+    if (isScoped) list = list.filter(s => myServices.includes(s));
+    fService.innerHTML = `<option value="">— choisir —</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+  }
+  fCollectivite.addEventListener("change", () => remplirServices(fCollectivite.value));
+  const PHOTOS_MAX = 3, PHOTO_COTE = 1280, PHOTO_QUALITE = 0.7;
+  let photosEnCours = [];
+  function rendrePhotosForm(){
+    $("fPhotos").innerHTML = photosEnCours.map((d, i) => `<div class="photo"><img src="${esc(d)}" alt="Photo ${i + 1}" data-voir="${i}"><button type="button" data-retirer-photo="${i}" aria-label="Retirer la photo ${i + 1}">×</button></div>`).join("");
+    $("btnPhoto").disabled = photosEnCours.length >= PHOTOS_MAX;
+  }
+  // Réduit une image (côté le plus long : 1 280 px, JPEG) : une photo de téléphone passe de plusieurs Mo à ~150 Ko.
+  function reduirePhoto(fichier){
+    return new Promise((ok, ko) => {
+      if (!fichier || !/^image\//.test(fichier.type || "")) return ko(new Error("pas une image"));
+      const lecteur = new FileReader();
+      lecteur.onerror = () => ko(lecteur.error);
+      lecteur.onload = () => {
+        const img = new Image();
+        img.onerror = () => ko(new Error("image illisible"));
+        img.onload = () => {
+          const k = Math.min(1, PHOTO_COTE / Math.max(img.width, img.height, 1));
+          const cv = document.createElement("canvas");
+          cv.width = Math.max(1, Math.round(img.width * k)); cv.height = Math.max(1, Math.round(img.height * k));
+          try { cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); ok(cv.toDataURL("image/jpeg", PHOTO_QUALITE)); } catch(e){ ko(e); }
+        };
+        img.src = lecteur.result;
+      };
+      lecteur.readAsDataURL(fichier);
+    });
+  }
+  $("btnPhoto").addEventListener("click", () => $("fPhotoFile").click());
+  $("fPhotoFile").addEventListener("change", async (e) => {
+    const fichiers = Array.prototype.slice.call(e.target.files || []);
+    let refusees = 0;
+    for (const f of fichiers){
+      if (photosEnCours.length >= PHOTOS_MAX){ refusees++; continue; }
+      try { const d = await reduirePhoto(f); if (imageSure(d)) photosEnCours.push(d); else refusees++; } catch(err){ refusees++; }
+    }
+    e.target.value = "";
+    rendrePhotosForm();
+    $("formErreur").textContent = refusees ? `${refusees} fichier(s) non ajouté(s) : ce n'est pas une image lisible, ou ${PHOTOS_MAX} photos sont déjà jointes.` : "";
+  });
+  $("fPhotos").addEventListener("click", (e) => {
+    const r = e.target.closest("[data-retirer-photo]");
+    if (r){ photosEnCours.splice(Number(r.dataset.retirerPhoto), 1); rendrePhotosForm(); return; }
+    const v = e.target.closest("[data-voir]");
+    if (v) voirPhoto(photosEnCours[Number(v.dataset.voir)]);
+  });
+
+  function ouvrirFormulaire(){
+    $("sigForm").reset();
+    photosEnCours = [];
+    rendrePhotosForm();
+    $("formErreur").textContent = "";
+    $("fDate").value = VigieDates.aujourdhui();
+    $("fDate").max = VigieDates.aujourdhui();
+    fCollectivite.value = VigieOrga.premier();
+    remplirServices(fCollectivite.value);
+    if (isScoped && myServices.length === 1) VigieOrga.choisirService(fService, myServices[0]);
+    $("merci").classList.remove("show");
+    $("formPanel").style.display = "";
+    $("appel").style.display = "none";
+    $("formPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function fermerFormulaire(){ $("formPanel").style.display = "none"; $("appel").style.display = ""; }
+  $("btnSignaler").addEventListener("click", ouvrirFormulaire);
+  $("btnAnnuler").addEventListener("click", fermerFormulaire);
+
+  $("sigForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const champs = { date: $("fDate").value, heure: $("fHeure").value, collectivite: fCollectivite.value, service: fService.value,
+      lieu: $("fLieu").value.trim(), faits: $("fFaits").value.trim(), risque: $("fRisque").value.trim(), mesure: $("fMesure").value.trim() };
+    const manque = [];
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(champs.date)) manque.push("la date");
+    if (!champs.service) manque.push("le service concerné");
+    if (!champs.lieu) manque.push("le lieu");
+    if (!champs.faits) manque.push("ce qui s'est passé");
+    if (!champs.risque) manque.push("ce qui aurait pu arriver");
+    if (manque.length){ $("formErreur").textContent = "À compléter : " + manque.join(", ") + "."; return; }
+    if (champs.date > VigieDates.aujourdhui()){ $("formErreur").textContent = "La date ne peut pas être dans le futur."; return; }
+    const rec = Object.assign({ id: genId("sig") }, champs, { auteur: moi, dateCreation: new Date().toISOString(), nbPhotos: photosEnCours.length, traitement: { suites: [], commentaire: "" }, actions: [], clos: false });
+    // les photos d'abord : si la place manque, rien n'est envoyé (pas de signalement privé de ses photos sans le savoir)
+    try {
+      if (photosEnCours.length){
+        modifierListe(S.CLE_PHOTOS, l => photosEnCours.forEach(d => l.push({ id: genId("sph"), signalementId: rec.id, collectivite: rec.collectivite, service: rec.service, auteur: moi, data: d })));
+      }
+      modifierListe(S.CLE, l => l.push(rec));
+    } catch(err){
+      try { if (photosEnCours.length) modifierListe(S.CLE_PHOTOS, l => { for (let i = l.length - 1; i >= 0; i--) if (l[i] && l[i].signalementId === rec.id) l.splice(i, 1); }); } catch(e2){}
+      $("formErreur").textContent = "Le signalement n'a pas pu être enregistré" + (photosEnCours.length ? " : la place manque pour les photos — réessayez avec moins de photos, ou sans." : ".");
+      return;
+    }
+    logAudit("Création", `Signalement d'un presque-accident — ${rec.lieu} (${rec.service})`);
+    recharger();
+    fermerFormulaire();
+    $("merci").textContent = "Merci : votre signalement a été transmis. Vous pouvez suivre ici ce qui en est fait.";
+    $("merci").classList.add("show");
+    render();
+  });
+
+  // ---------- Visionneuse ----------
+  function voirPhoto(d){ const s = imageSure(d); if (!s) return; $("visionneuseImg").src = s; $("visionneuse").classList.add("show"); }
+  $("visionneuse").addEventListener("click", () => { $("visionneuse").classList.remove("show"); $("visionneuseImg").removeAttribute("src"); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("visionneuse").click(); });
+
+  // ---------- Liste ----------
+  const fColF = $("fCollectiviteFiltre"), fSvcF = $("fServiceFiltre"), fStatut = $("fStatut"), fRecherche = $("fRecherche");
+  function remplirServicesFiltre(){
+    const col = fColF.value;
+    const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
+    const cur = fSvcF.value;
+    fSvcF.innerHTML = `<option value="all">Tous les services</option>` + list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+    fSvcF.value = list.includes(cur) ? cur : "all";
+  }
+  remplirServicesFiltre();
+  fColF.addEventListener("change", () => { remplirServicesFiltre(); renderTable(); });
+  [fSvcF, fStatut].forEach(el => el.addEventListener("change", renderTable));
+  fRecherche.addEventListener("input", renderTable);
+  $("btnReset").addEventListener("click", () => { fColF.value = "all"; remplirServicesFiltre(); fSvcF.value = "all"; fStatut.value = "all"; fRecherche.value = ""; renderTable(); });
+  const norm = (s) => String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const chipStatut = (st) => `<span class="chip ${st === "Clos" ? "s-clos" : st === "En cours" ? "s-encours" : "s-nouveau"}">${esc(st)}</span>`;
+  const tagsSuites = (s) => ((s.traitement && s.traitement.suites) || []).map(id => `<span class="suite-tag">${esc(S.libelleSuite(id))}</span>`).join("") || `<span class="vide">—</span>`;
+
+  function renderTable(){
+    $("thead").innerHTML = `<th>Date</th><th>Lieu</th><th>Service</th><th style="min-width:240px;">Ce qui s'est passé</th><th>Photos</th><th>Statut</th><th>Suite</th>${peutTraiter ? "<th>Déclarant</th>" : ""}<th></th>`;
+    const col = fColF.value, svc = fSvcF.value, st = fStatut.value, q = norm(fRecherche.value.trim());
+    const rows = LISTE.filter(s =>
+      (col === "all" || VigieOrga.actuel(s.collectivite) === col) &&
+      (svc === "all" || s.service === svc) &&
+      (st === "all" || S.statut(s) === st) &&
+      (!q || norm([s.lieu, s.faits, s.risque, s.mesure].join(" ")).includes(q))
+    ).sort((a,b) => (String(b.date) + String(b.heure || "")).localeCompare(String(a.date) + String(a.heure || "")));
+    $("resultCount").textContent = rows.length;
+    $("totalCount").textContent = LISTE.length;
+    const nCol = peutTraiter ? 9 : 8;
+    if (!rows.length){
+      $("tbody").innerHTML = `<tr class="empty-row"><td colspan="${nCol}">${LISTE.length ? "Aucun signalement ne correspond aux filtres." : (peutTraiter ? "Aucun signalement pour le moment." : "Vous n'avez encore envoyé aucun signalement.")}</td></tr>`;
+      return;
+    }
+    $("tbody").innerHTML = rows.map(s => `
+      <tr>
+        <td class="mono">${esc(dateFr(s.date))}${s.heure ? " " + esc(s.heure) : ""}</td>
+        <td>${esc(s.lieu)}</td>
+        <td>${esc(s.service)}</td>
+        <td class="wrap"><div class="clamp">${esc(s.faits)}</div></td>
+        <td class="mono">${Number(s.nbPhotos) > 0 ? esc(s.nbPhotos) : "—"}</td>
+        <td>${chipStatut(S.statut(s))}</td>
+        <td>${tagsSuites(s)}</td>
+        ${peutTraiter ? `<td>${esc(s.auteur || "—")}</td>` : ""}
+        <td><button type="button" class="act-edit" data-ouvrir="${esc(s.id)}">Ouvrir</button></td>
+      </tr>`).join("");
+  }
+  $("tbody").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrirFiche(b.dataset.ouvrir); });
+
+  // ---------- Fiche d'un signalement, et son traitement ----------
+  let ficheCourante = null, actionsCourantes = [];
+  function sectionTexte(titre, t){ return `<div class="fiche-sec"><div class="fiche-titre">${titre}</div>${t ? `<div class="texte">${esc(t)}</div>` : `<span class="vide">Non renseigné</span>`}</div>`; }
+  function liensHtml(s){
+    const registre = lireRegistre();
+    const inscrit = inscriptionDe(s.id, registre);
+    const suites = (s.traitement && s.traitement.suites) || [];
+    const l = [];
+    if (inscrit){
+      l.push(`<div><b>Registre AT/MP :</b> inscrit (${esc(inscrit.typeAtMp || "événement")} du ${esc(dateFr(inscrit.dateAT))})${D.peut("atmp", "consulter") ? ` — <a href="registre-at-mp.html">ouvrir le registre</a>` : ""}</div>`);
+      if (suites.includes("analyse")){
+        let analyse = null;
+        try { analyse = lireListe("vigie_hse_analyses_accident").find(a => a && a.atmpId === inscrit.id) || null; } catch(e){}
+        const faite = !!(analyse && analyse.methode);
+        l.push(`<div><b>Analyse d'accident :</b> ${faite ? "faite (" + esc(analyse.methode) + ")" : "à faire"}${D.peut("accident-analyse", "consulter") ? ` — <a href="accident-analyse.html?atmpId=${encodeURIComponent(inscrit.id)}">${faite ? "ouvrir l'analyse" : "analyser"}</a>` : ""}</div>`);
+      }
+    } else if (suites.includes("atmp") || suites.includes("analyse")){
+      l.push(`<div><b>Registre AT/MP :</b> à inscrire${suites.includes("analyse") ? " (l'analyse d'accident part d'un événement du registre)" : ""} — ${D.peut("atmp", "declarer") && peutTraiter ? `<button type="button" class="lien" id="btnInscrire">inscrire au Registre AT/MP</button>` : "par un compte qui peut déclarer un AT/MP (RH, préventeur)"}</div>`);
+    }
+    if ((s.actions || []).length){
+      const pa = lireListe("vigie_hse_actions");
+      l.push(`<div><b>Plan d'actions :</b> ${s.actions.map(a => { const p = pa.find(x => x && x.id === idAction(s, a)); return `${esc(a.description)} (${esc(p ? p.statut : (a.statut || "À faire"))}${a.echeance ? ", échéance " + esc(dateFr(a.echeance)) : ""})`; }).join(" · ")}${D.peut("actions", "consulter") ? ` — <a href="plan-actions.html">ouvrir le Plan d'actions</a>` : ""}</div>`);
+    }
+    return l.length ? `<div class="liens">${l.join("")}</div>` : "";
+  }
+  function rendreActions(){
+    $("tActions").innerHTML = actionsCourantes.map((a, i) => `
+      <div class="dyn-row" data-i="${i}">
+        <input type="text" data-k="description" placeholder="Action à mener" aria-label="Action" value="${esc(a.description || "")}">
+        <input type="text" data-k="responsable" placeholder="Responsable" aria-label="Responsable" value="${esc(a.responsable || "")}" style="flex:0 1 170px">
+        <input type="date" data-k="echeance" aria-label="Échéance" value="${esc(a.echeance || "")}" style="flex:0 0 150px">
+        <button type="button" class="act-del" data-retirer-action="${i}">Suppr.</button>
+      </div>`).join("") || `<div class="form-note" style="margin-bottom:8px;">Aucune action.</div>`;
+  }
+  function lireActions(){
+    const lignes = $("tActions").querySelectorAll(".dyn-row");
+    actionsCourantes = Array.prototype.map.call(lignes, (row, i) => {
+      const o = Object.assign({}, actionsCourantes[i] || { id: genId("act"), statut: "À faire" });
+      row.querySelectorAll("[data-k]").forEach(inp => { o[inp.dataset.k] = inp.value.trim(); });
+      return o;
+    });
+  }
+  function majSuites(source){
+    const coches = () => Array.prototype.filter.call(document.querySelectorAll("[data-suite]"), c => c.checked).map(c => c.dataset.suite);
+    const c = (id) => document.querySelector(`[data-suite="${id}"]`);
+    // « Classé » exclut les autres suites ; une analyse d'accident part d'un événement du Registre AT/MP
+    if (source === "classe" && c("classe").checked) ["action", "analyse", "atmp"].forEach(id => { c(id).checked = false; });
+    else if (source && source !== "classe" && c(source).checked) c("classe").checked = false;
+    if (source === "analyse" && c("analyse").checked) c("atmp").checked = true;
+    if (source === "atmp" && !c("atmp").checked) c("analyse").checked = false;
+    $("blocActions").style.display = coches().includes("action") ? "" : "none";
+  }
+
+  function ouvrirFiche(id){
+    const s = LISTE.find(x => x.id === id);
+    if (!s) return;
+    ficheCourante = s;
+    const photos = photosDe(s.id).map(p => imageSure(p.data)).filter(Boolean);
+    const t = s.traitement || {};
+    const st = S.statut(s);
+    let html = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">Presque-accident du ${esc(dateFr(s.date))}${s.heure ? " à " + esc(s.heure) : ""} — ${esc(s.lieu)}</h3>
+        <div class="fiche-meta">${esc(VigieOrga.de(s))} · ${esc(s.service)}${peutTraiter ? " · signalé par " + esc(s.auteur || "—") : ""} · ${chipStatut(st)}</div></div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnFermerFiche">Fermer</button></div>
+      </div>
+      <div class="fiche-grille">
+        ${sectionTexte("Ce qui s'est passé", s.faits)}
+        ${sectionTexte("Ce qui aurait pu arriver", s.risque)}
+        ${sectionTexte("Mesure prise sur le moment", s.mesure)}
+      </div>
+      ${photos.length ? `<div class="fiche-sec" style="margin-top:14px;"><div class="fiche-titre">Photos</div><div class="photos">${photos.map((d, i) => `<div class="photo"><img src="${esc(d)}" alt="Photo ${i + 1} du signalement" data-voir-fiche="${i}"></div>`).join("")}</div></div>`
+        : (Number(s.nbPhotos) > 0 ? `<div class="form-note" style="margin-top:12px;">${esc(s.nbPhotos)} photo(s) jointe(s), non transmise(s) à ce compte.</div>` : "")}
+      ${liensHtml(s)}`;
+    if (peutTraiter){
+      html += `
+      <form id="traitementForm" style="margin-top:16px;">
+        <div class="form-sub">Suite donnée</div>
+        <div class="suites">
+          ${S.SUITES.map(x => `<label class="checkline"><input type="checkbox" data-suite="${x.id}"${(t.suites || []).includes(x.id) ? " checked" : ""}> ${esc(x.libelle)}</label>`).join("")}
+        </div>
+        <div id="blocActions" style="display:none;">
+          <div class="form-sub">Actions au Plan d'actions</div>
+          <div id="tActions"></div>
+          <button type="button" class="btn btn-ghost" id="btnAjoutAction"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une action</button>
+        </div>
+        <div class="form-grid" style="margin-top:14px;">
+          <div class="span3"><label for="tCommentaire">Commentaire (lu par le déclarant)</label><textarea id="tCommentaire" placeholder="Ce qui a été décidé, ce qui va changer…">${esc(t.commentaire || "")}</textarea></div>
+        </div>
+        <label class="checkline" style="margin-top:12px;"><input type="checkbox" id="tClos"${s.clos ? " checked" : ""}> Signalement clos (la suite a été donnée)</label>
+        ${t.par ? `<div class="form-note" style="margin-top:8px;">Dernier traitement : ${esc(t.par)}, le ${esc(dateFr(t.date))}${s.clos && s.closLe ? ` · clos par ${esc(s.closPar || "—")} le ${esc(dateFr(s.closLe))}` : ""}</div>` : ""}
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Enregistrer le traitement</button>
+          <button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer le signalement</button>
+        </div>
+      </form>`;
+    } else {
+      html += `<div class="fiche-sec" style="margin-top:14px;"><div class="fiche-titre">Suite donnée</div>
+        ${(t.suites || []).length || t.commentaire ? `<div>${tagsSuites(s)}</div>${t.commentaire ? `<div class="texte" style="margin-top:6px;">${esc(t.commentaire)}</div>` : ""}` : `<span class="vide">Pas encore de suite : votre signalement est en attente de traitement.</span>`}</div>`;
+    }
+    $("fiche").innerHTML = html;
+    $("fiche").style.display = "";
+    if (peutTraiter){
+      actionsCourantes = (s.actions || []).map(a => Object.assign({}, a));
+      rendreActions();
+      majSuites(null);
+    }
+    $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function fermerFiche(){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; ficheCourante = null; }
+
+  // Enregistre le traitement saisi ; renvoie le signalement enregistré (ou null)
+  function enregistrerTraitement(){
+    const s = ficheCourante;
+    if (!s || !peutTraiter) return null;
+    lireActions();
+    const suites = Array.prototype.filter.call(document.querySelectorAll("[data-suite]"), c => c.checked).map(c => c.dataset.suite);
+    const actions = suites.includes("action") ? actionsCourantes.filter(a => String(a.description || "").trim()) : [];
+    const clos = $("tClos").checked;
+    let enregistre = null;
+    try {
+      modifierListe(S.CLE, l => {
+        const i = l.findIndex(x => x && x.id === s.id);
+        if (i < 0) return;
+        const r = Object.assign({}, l[i]);
+        r.traitement = { suites, commentaire: $("tCommentaire").value.trim(), par: moi, date: VigieDates.aujourdhui() };
+        r.actions = actions;
+        if (clos && !r.clos){ r.clos = true; r.closPar = moi; r.closLe = VigieDates.aujourdhui(); }
+        if (!clos && r.clos){ r.clos = false; delete r.closPar; delete r.closLe; }
+        l[i] = r; enregistre = r;
+      });
+    } catch(e){ alert("Le traitement n'a pas pu être enregistré."); return null; }
+    if (enregistre) logAudit("Modification", `Traitement d'un signalement — ${enregistre.lieu} : ${suites.map(S.libelleSuite).join(", ") || "sans suite choisie"}${enregistre.clos ? " (clos)" : ""}`);
+    recharger();
+    return enregistre;
+  }
+
+  $("fiche").addEventListener("click", (e) => {
+    if (e.target.closest("#btnFermerFiche")){ fermerFiche(); return; }
+    const v = e.target.closest("[data-voir-fiche]");
+    if (v){ voirPhoto(e.target.getAttribute("src")); return; }
+    const sup = e.target.closest("[data-suite]");
+    if (sup){ majSuites(sup.dataset.suite); return; }
+    if (e.target.closest("#btnAjoutAction")){ lireActions(); actionsCourantes.push({ id: genId("act"), statut: "À faire" }); rendreActions(); return; }
+    const ra = e.target.closest("[data-retirer-action]");
+    if (ra){ lireActions(); actionsCourantes.splice(Number(ra.dataset.retirerAction), 1); rendreActions(); return; }
+    if (e.target.closest("#btnInscrire")){
+      const s = enregistrerTraitement();
+      if (s) location.href = "saisie-rh.html?signalement=" + encodeURIComponent(s.id);
+      return;
+    }
+    if (e.target.closest("#btnSupprimer")){
+      const s = ficheCourante;
+      if (!s || !confirm(`Supprimer le signalement du ${dateFr(s.date)} (${s.lieu}) et ses photos ? Ses actions déjà reprises au Plan d'actions y restent.`)) return;
+      try {
+        modifierListe(S.CLE_PHOTOS, l => { for (let i = l.length - 1; i >= 0; i--) if (l[i] && l[i].signalementId === s.id) l.splice(i, 1); });
+        modifierListe(S.CLE, l => { const i = l.findIndex(x => x && x.id === s.id); if (i >= 0) l.splice(i, 1); });
+      } catch(err){ alert("Le signalement n'a pas pu être supprimé."); return; }
+      logAudit("Suppression", `Signalement d'un presque-accident — ${s.lieu} (${s.service})`);
+      recharger(); fermerFiche(); render();
+    }
+  });
+  $("fiche").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const s = enregistrerTraitement();
+    if (s){ render(); ouvrirFiche(s.id); }
+  });
+
+  // ---------- Objectif de remontée (question 20) ----------
+  // Un nombre de presque-accidents remontés par an : signalements, et presque-accidents inscrits directement au
+  // Registre AT/MP (un signalement inscrit ne compte qu'une fois). Fixé par un compte qui traite tous les services.
+  function renderObjectif(){
+    if (!peutTraiter){ $("objectif").style.display = "none"; return; }
+    const annee = VigieDates.aujourdhui().slice(0, 4);
+    const registre = lireRegistre().filter(r => !isScoped || myServices.includes(r.service));
+    const p = S.pyramide(registre.filter(r => String(r.dateAT || "").slice(0, 4) === annee), LISTE.filter(s => String(s.date || "").slice(0, 4) === annee), registre);
+    const remontes = p.niveaux[3];
+    const objectif = Number(S.lireParametres(VigieStore).objectifAnnuel) || 0;
+    const pct = objectif > 0 ? Math.round(remontes / objectif * 100) : 0;
+    $("objectif").innerHTML = `
+      <div class="objectif-texte"><b>${remontes}</b> presque-accident${remontes > 1 ? "s" : ""} remonté${remontes > 1 ? "s" : ""} en ${esc(annee)}${isScoped ? " dans vos services" : ""}${objectif > 0 ? ` — objectif de l'année : <b>${objectif}</b> (${pct} %)` : " — aucun objectif de remontée fixé"}</div>
+      ${objectif > 0 ? `<div class="jauge" aria-hidden="true"><i style="width:${Math.min(100, pct)}%"></i></div>` : ""}
+      ${isScoped ? (objectif > 0 ? `<span class="form-note">objectif fixé pour toute l'organisation</span>` : "") : `
+      <label class="form-note" for="oObjectif">Objectif par an</label>
+      <input type="number" id="oObjectif" min="0" step="1" value="${objectif > 0 ? objectif : ""}" placeholder="ex. 50">
+      <button type="button" class="btn btn-ghost" id="btnObjectif">Enregistrer</button>`}`;
+    $("objectif").style.display = "";
+  }
+  $("objectif").addEventListener("click", (e) => {
+    if (!e.target.closest("#btnObjectif") || isScoped || !peutTraiter) return;
+    const v = Math.round(Number($("oObjectif").value));
+    const p = S.lireParametres(VigieStore);
+    if (v > 0) p.objectifAnnuel = v; else delete p.objectifAnnuel;
+    try { VigieStore.setItem(S.CLE_PARAMETRES, JSON.stringify(p)); } catch(err){ alert("L'objectif n'a pas pu être enregistré."); return; }
+    logAudit("Modification", v > 0 ? `Objectif de remontée des presque-accidents : ${v} par an` : "Objectif de remontée des presque-accidents retiré");
+    renderObjectif();
+  });
+
+  // ---------- Export (comptes qui traitent) ----------
+  if (peutTraiter){
+    $("panelActionsBtns").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+    $("btnExport").addEventListener("click", () => {
+      const registre = lireRegistre();
+      const lignes = LISTE.map(s => { const t = s.traitement || {}, ins = inscriptionDe(s.id, registre); return {
+        "ID": s.id, "Date": s.date, "Heure": s.heure || "", [VigieOrga.libelle()]: VigieOrga.de(s), "Service": s.service, "Lieu": s.lieu,
+        "Ce qui s'est passé": s.faits, "Ce qui aurait pu arriver": s.risque, "Mesure prise sur le moment": s.mesure || "", "Photos": Number(s.nbPhotos) || 0,
+        "Déclarant": s.auteur || "", "Statut": S.statut(s), "Suite": (t.suites || []).map(S.libelleSuite).join(", "), "Commentaire": t.commentaire || "",
+        "Traité par": t.par || "", "Traité le": t.date || "", "Clos le": s.closLe || "", "ID Registre AT/MP": ins ? ins.id : "" }; });
+      const actions = [];
+      LISTE.forEach(s => (s.actions || []).forEach(a => actions.push({ "ID Signalement": s.id, "Lieu": s.lieu, "Action": a.description, "Responsable": a.responsable || "", "Échéance": a.echeance || "" })));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: ["ID", "Date", "Heure", VigieOrga.libelle(), "Service", "Lieu", "Ce qui s'est passé", "Ce qui aurait pu arriver", "Mesure prise sur le moment", "Photos", "Déclarant", "Statut", "Suite", "Commentaire", "Traité par", "Traité le", "Clos le", "ID Registre AT/MP"] }), "Signalements");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(actions, { header: ["ID Signalement", "Lieu", "Action", "Responsable", "Échéance"] }), "Actions");
+      XLSX.writeFile(wb, `signalements_${VigieDates.aujourdhui()}.xlsx`);
+    });
+    VigieImpression.brancher("btnExport", { table: "#tableSignalements" });
+  } else {
+    $("listeTitre").textContent = "Mes signalements";
+  }
+
+  function render(){ renderKpis(); renderTable(); renderObjectif(); }
+  render();
+
+  // ?ouvrir=<id> : retour depuis la déclaration AT/MP faite à partir d'un signalement
+  (function(){
+    const id = new URLSearchParams(location.search).get("ouvrir");
+    if (id && LISTE.some(s => s.id === id)) ouvrirFiche(id);
+  })();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

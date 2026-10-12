@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 196 points au 2026-10-12 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 201 points au 2026-10-12 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -22,7 +22,7 @@ Ce fichier-ci reste la version de référence (diff dans l'historique du dépôt
 ## 1. Page d'accueil (avant connexion)
 
 - [ ] `index.html` (l'URL racine) s'affiche sans erreur, sans passer par l'écran de connexion.
-- [ ] La grille des modules est complète et lisible : 19 cartes, dans l'ordre du menu latéral (de « Registre AT/MP » à « Administration »), chacune avec son icône.
+- [ ] La grille des modules est complète et lisible : 20 cartes, dans l'ordre du menu latéral (de « Registre AT/MP » à « Administration »), chacune avec son icône.
 - [ ] Le bouton "Accéder à la démonstration" mène bien à l'écran de connexion.
 - [ ] Le bouton "Réinitialiser les données de démonstration" fonctionne (demande confirmation, puis redirige vers la connexion).
 - [ ] Basculer le thème du système (clair/sombre) et recharger la page : les couleurs suivent bien.
@@ -76,11 +76,15 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] **Action non efficace** : sur une action « Fait », choisir « Non efficace » et enregistrer — l'application propose une nouvelle action ; accepter : le formulaire s'ouvre pré-rempli (« Suite : … », même service, même risque). Le filtre Statut « Fait — non efficace » ne montre que celles-là. L'export Excel contient les colonnes Efficacité, Efficacité vérifiée le, Vérifiée par, Constat d'efficacité.
 - [ ] Exporter un module en Excel (le fichier se télécharge et s'ouvre).
 - [ ] Exporter le Document Unique ou le Registre AT/MP en PDF (le dialogue d'impression s'ouvre, aperçu correct).
+- [ ] **Signalements → Registre AT/MP** : sur un signalement dont la suite est « Inscription au Registre AT/MP », « inscrire au Registre AT/MP » ouvre la déclaration pré-remplie (presque accident, date, service, circonstances) ; enregistrée, elle revient au signalement marqué « inscrit » ; une seconde inscription est refusée ; avec « Analyse d'accident », le lien « analyser » ouvre l'analyse de cet événement.
+- [ ] **Objectif de remontée** (page Signalements) : fixer 24 par an → « N presque-accidents remontés en 2026 — objectif de l'année : 24 (x %) » avec sa jauge ; Indicateurs & Reporting rappelle l'objectif ramené à la période choisie.
+- [ ] **Pyramide de Bird** (Indicateurs & Reporting) : quatre niveaux (avec arrêt, sans arrêt, incidents bénins, presque-accidents) avec leur nombre, le rapport au sommet et le repère 1 · 10 · 30 · 600 ; un presque-accident signalé puis inscrit au registre n'est compté qu'une fois ; feuille « Pyramide de Bird » dans l'export Excel.
 - [ ] **Remontée des événements par type** (Indicateurs & Reporting, après avoir ouvert le Registre AT/MP) : période « Depuis le début », le panneau liste dans cet ordre Presque accident 7, Incident bénin 10, Accident de travail sans arrêt 0, Accident de travail avec arrêt 6, Accident de trajet 2, Maladie professionnelle 0 (données de démonstration) ; leur somme est le chiffre « AT/MP » de l'en-tête. Déclarer un presque-accident le fait passer à 8 ; l'export Excel du rapport a une feuille « AT-MP par type ».
 
 ### `manager` (manager@verchamps.fr — scopé Voirie + Espace Vert)
 - [ ] Ne voit que les données des services Voirie/Espace Vert dans les modules concernés (Registre AT/MP, Document Unique, Plan d'Actions, etc.) — pas les autres services.
-- [ ] Ne peut pas créer/modifier/supprimer (lecture seule), sauf dans **Registre Santé & Sécurité** où il peut déposer une observation.
+- [ ] Ne peut pas créer/modifier/supprimer (lecture seule), sauf dans **Registre Santé & Sécurité** où il peut déposer une observation, et dans **Signalements** où il traite ceux de ses services.
+- [ ] **Signalements** : ne voit que les signalements de ses services, avec leur déclarant ; « Ouvrir » → suites (« Classé » exclut les autres ; « Analyse d'accident » coche l'inscription au registre), actions (elles apparaissent au Plan d'actions, origine « Signalement »), commentaire, « clos » ; ne peut pas fixer l'objectif de remontée ; au tableau de bord, la carte Signalements dit « N nouveaux à traiter ».
 - [ ] Sur le site hébergé : en `RH1`, déposer au **Registre Santé & Sécurité** une observation pour un service hors Voirie / Espaces Verts (ex. Restauration Collective) ; se reconnecter en `manager`, déposer une observation pour Voirie ; revenir en `RH1` : **les deux observations sont là** (le dépôt du manager n'efface plus celles des autres services).
 - [ ] Ne voit ni Administration ni Indicateurs & Reporting.
 
@@ -90,6 +94,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] Peut déposer une observation dans le Registre Santé & Sécurité, en cochant "anonyme" si souhaité.
 - [ ] Ne voit **pas** le lien "Dossiers AT/MP & CITIS" dans la sidebar (module 18, accès par le profil Préventeur — voir ci-dessous).
 - [ ] **Filtres du Document unique** : les filtres Collectivité / Service sont visibles (ils ne le sont plus seulement aux comptes qui gèrent) ; rien de plus n'est affiché.
+- [ ] **Signalements** : « Signaler un presque-accident » — sans service, lieu, ce qui s'est passé ou ce qui aurait pu arriver, l'envoi est refusé avec ce qui manque ; avec une photo (réduite, 3 au plus), il part et un message remercie ; « Mes signalements » ne montre que les siens, sans colonne Déclarant ; la fiche dit « Pas encore de suite », puis, une fois traité, la suite et le commentaire du manager.
 - [ ] Le lien « Situations d'urgence » ouvre les seuls **plans d'urgence par site**, en lecture seule (titre « Plans d'urgence par site », ni onglet ni compteurs des exercices, aucun bouton d'écriture) ; « Imprimer la consigne » fonctionne (question 19).
 
 ### `PREV1` (profils Agent + Préventeur : déclarer un AT/MP, gérer Dossiers AT/MP, Analyse d'accident et Urgences, Santé & Visites en lecture — ni RH ni administrateur)

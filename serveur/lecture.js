@@ -16,6 +16,8 @@
 //     Plan d'actions affiche à tous (generateAnalyseActionSeeds).
 //   - Journal de saisie AT/MP (copie complète des déclarations) : comptes qui reçoivent le registre complet.
 //   - Journal d'audit, comptes utilisateurs : administrateur (Administration est la seule page qui les lit).
+//   - Signalements de presque-accidents et leurs photos (question 20, 2026-10-12) : complets (périmètre appliqué) pour
+//     qui peut les traiter ; à tout autre compte, ses seuls signalements (champ « auteur »), qu'il suit sur sa page.
 //   - Suivi médical et rendez-vous : l'encadrement seulement — manager (ses services, par le périmètre), RH et
 //     administrateur ; un agent n'en reçoit rien, et la page Santé & Visites le renvoie au tableau de bord.
 //     Réponse du préventeur à la question 17 (2026-09-29, option « l'encadrement seulement ») ; un autre compte y
@@ -29,8 +31,9 @@ const { grefferAjouts } = require('./anonymisation.js');
 const { atteint } = require('./droits.js');
 
 const RETIRE = 'retire';
+const SIENS = 'siens';   // les seuls enregistrements dont le compte est l'auteur
 const ATMP_VUE_AGENT = ['id', 'collectivite', 'service', 'dateAT', 'dateMois', 'typeAtMp', 'arret', 'statutArret', 'joursArret',
-  'circonstances', 'etat', 'risque', 'siege', 'nature', 'elementMateriel'];
+  'circonstances', 'etat', 'risque', 'siege', 'nature', 'elementMateriel', 'signalementId'];
 const ANALYSE_VUE_ACTIONS = ['id', 'atmpId', 'collectivite', 'service', 'dateAnalyse', 'actions'];
 
 // ce que les profils du compte lui donnent (assets/droits.js, via serveur/droits.js)
@@ -57,7 +60,7 @@ const PAGE_UNIQUE = {
 // un registre s'ouvre au niveau « consulter » de l'un des modules cités
 const ouvert = (page, modules) => [].concat(modules).some(m => peut(page, m, 'consulter'));
 
-// null : valeur complète ; RETIRE : rien ; tableau : les seuls champs transmis de chaque enregistrement
+// null : valeur complète ; RETIRE : rien ; SIENS : les enregistrements du compte ; tableau : les seuls champs transmis de chaque enregistrement
 function regle(page, cle){
   switch (cle){
     case 'vigie_hse_dataset':           return registreComplet(page) ? null : ATMP_VUE_AGENT;
@@ -67,6 +70,8 @@ function regle(page, cle){
     case 'vigie_hse_analyses_accident': return peut(page, 'accident-analyse', 'consulter') ? null : ANALYSE_VUE_ACTIONS;
     case 'vigie_hse_visites':
     case 'vigie_hse_rdv_medicaux':      return encadrement(page) ? null : RETIRE;
+    case 'vigie_hse_signalements':
+    case 'vigie_hse_signalements_photos': return peut(page, 'signalements', 'traiter') ? null : SIENS;
     case 'vigie_hse_audit_log':
     case 'vigie_hse_users':
     case 'vigie_hse_profils':           return administrateur(page) ? null : RETIRE;
@@ -88,6 +93,10 @@ function projeter(valeur, champs){
 function vue(page, cle, valeur){
   const r = regle(page, cle);
   if (r === null || valeur == null) return valeur;
+  if (r === SIENS){
+    let l; try { l = JSON.parse(valeur); } catch(e){ return '[]'; }
+    return JSON.stringify(Array.isArray(l) ? l.filter(x => x && typeof x === 'object' && page && x.auteur != null && x.auteur === page.user) : []);
+  }
   return r === RETIRE ? null : projeter(valeur, r);
 }
 
@@ -107,4 +116,4 @@ function ecriture(page, cle, complet, soumis){
   return grefferAjouts(complet, soumis);
 }
 
-module.exports = { regle, vue, filtrer, ecriture, RETIRE, ATMP_VUE_AGENT, PAGE_UNIQUE };
+module.exports = { regle, vue, filtrer, ecriture, RETIRE, SIENS, ATMP_VUE_AGENT, PAGE_UNIQUE };

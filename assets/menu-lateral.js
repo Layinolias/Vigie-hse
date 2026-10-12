@@ -39,7 +39,8 @@
     { liens: [["dashboard.html", "i-grid", "Accueil"]] },
     { titre: "Santé au travail", liens: [
       ["registre-at-mp.html", "i-activity", "Registre AT/MP"],
-      ["registre-sst.html", "i-message-square", "Registre SST"]] },
+      ["registre-sst.html", "i-message-square", "Registre SST"],
+      ["signalements.html", "i-flag", "Signalements"]] },
     { titre: "Sécurité &amp; Risques", liens: [
       ["document-unique.html", "i-alert-triangle", "Document Unique"],
       ["produits-chimiques.html", "i-flask", "Produits chimiques"]] },
@@ -78,6 +79,7 @@
     return {
       "registre-at-mp.html": lire("atmp"),
       "registre-sst.html": D.peut("rsst", "deposer"),
+      "signalements.html": D.peut("signalements", "signaler"),   // presque-accidents : question 20
       "document-unique.html": lire("duerp"),
       "produits-chimiques.html": lire("produits"),
       "plan-actions.html": lire("actions"),

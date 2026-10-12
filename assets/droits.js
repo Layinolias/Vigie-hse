@@ -34,6 +34,10 @@
   var MODULES = [
     mod("atmp", "Santé au travail", "Registre AT/MP", [["consulter", "Consulter"], ["declarer", "Consulter et déclarer"], ["gerer", "Gérer"]]),
     mod("rsst", "Santé au travail", "Registre SST", [["deposer", "Déposer une observation"], ["auteurs", "Déposer et voir les auteurs"], ["repondre", "Répondre et clôturer"]]),
+    // Presque-accidents (question 20) : chacun signale et suit ses propres signalements ; « traiter » voit ceux de ses
+    // services, décide de la suite et fixe l'objectif de remontée — le manager, et tout profil à qui on le donne (pas le préréglage
+    // Préventeur : un ancien compte PREV1 doit encore se convertir en Agent + Préventeur, voir convertirComptes).
+    mod("signalements", "Santé au travail", "Signalements (presque-accidents)", [["signaler", "Signaler et suivre ses signalements"], ["traiter", "Traiter les signalements"]]),
     mod("duerp", "Sécurité & Risques", "Document unique", STD),
     mod("produits", "Sécurité & Risques", "Produits chimiques", STD),
     mod("actions", "Suivi", "Plan d'actions", STD),
@@ -79,15 +83,15 @@
     { id: "p-manager", nom: "Manager", libelle: "Manager", pastille: "MANAGER", droits: {
       atmp: "consulter", rsst: "auteurs", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter" } },
+      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter" } },
     { id: "p-agent", nom: "Agent", libelle: "Compte Agent", pastille: "AG", droits: {
       atmp: "consulter", rsst: "deposer", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "plans-urgence": "consulter" } },
+      documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler" } },
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
       atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
-      "dialogue-social": "participer", "plans-urgence": "consulter" } }
+      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler" } }
   ];
   var PREREGLE_PAR_ID = {};
   PREREGLES.forEach(function (p) { PREREGLE_PAR_ID[p.id] = p; });

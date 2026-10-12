@@ -391,6 +391,7 @@
 <script src="assets/icones.js"></script>
 <script src="assets/menu-lateral.js"></script>
 <script src="assets/organisation.js"></script>
+<script src="assets/signalements-ref.js"></script>
 <script>
   (function(){
     try {
@@ -609,6 +610,11 @@
             <div><div class="module-name">Registre Santé &amp; Sécurité</div><div class="module-desc" data-mots>Signalements agents, remontées F3SCT, actions correctives.</div></div>
             <div class="module-foot"><span><b id="modRsstCount">–</b> observations</span><span class="module-open">Ouvrir <svg class="icon" style="width:13px;height:13px"><use href="#i-arrow-right"/></svg></span></div>
           </a>
+          <a class="module-card panel active" href="signalements.html" id="modSignalements">
+            <div class="module-top"><div class="module-icon"><svg class="icon"><use href="#i-flag"/></svg></div></div>
+            <div><div class="module-name">Signalements</div><div class="module-desc">Signaler un presque-accident, et suivre ce qui en est fait.</div></div>
+            <div class="module-foot"><span><b id="modSigCount">–</b> <span id="modSigLabel">signalements</span></span><span class="module-open">Ouvrir <svg class="icon" style="width:13px;height:13px"><use href="#i-arrow-right"/></svg></span></div>
+          </a>
           <a class="module-card panel active" href="verifications-periodiques.html">
             <div class="module-top"><div class="module-icon"><svg class="icon"><use href="#i-check-circle"/></svg></div></div>
             <div><div class="module-name">Vérifications Périodiques</div><div class="module-desc">Contrôles réglementaires des équipements et installations.</div></div>
@@ -737,6 +743,21 @@
       const rsstRaw = JSON.parse(VigieStore.getItem("vigie_hse_rsst") || "null");
       $("modRsstCount").textContent = Array.isArray(rsstRaw) ? rsstRaw.length : "–";
     } catch(e){ $("modRsstCount").textContent = "–"; }
+    // Signalements (question 20) : à traiter pour qui les traite (ses services), sinon ses propres signalements
+    try {
+      if (!D.peut("signalements", "signaler")){ $("modSignalements").style.display = "none"; }
+      else {
+        const sig = JSON.parse(VigieStore.getItem(VigieSignalements.CLE) || "[]");
+        const l = Array.isArray(sig) ? sig : [];
+        if (D.peut("signalements", "traiter")){
+          const n = l.filter(s => s && (!isScoped || myServices.includes(s.service)) && VigieSignalements.statut(s) === "Nouveau").length;
+          $("modSigCount").textContent = n; $("modSigLabel").textContent = n > 1 ? "nouveaux à traiter" : "nouveau à traiter";
+        } else {
+          const n = l.filter(s => s && s.auteur === session.user).length;
+          $("modSigCount").textContent = n; $("modSigLabel").textContent = n > 1 ? "signalements envoyés" : "signalement envoyé";
+        }
+      }
+    } catch(e){ $("modSigCount").textContent = "–"; }
     try {
       const verifRaw = JSON.parse(VigieStore.getItem("vigie_hse_verifications") || "null");
       $("modVerifCount").textContent = Array.isArray(verifRaw) ? verifRaw.length : "–";
@@ -810,7 +831,7 @@
   $("zoneSwitch").addEventListener("change", (e) => { if (e.target.matches(".zone-select")) setZone(e.target.value); });
   renderDashboardData();
 
-  $("moduleNote").textContent = "4 modules actifs";
+  $("moduleNote").textContent = [...document.querySelectorAll(".module-grid .module-card")].filter(c => c.style.display !== "none").length + " modules actifs";
 
   // ---------- Météo en direct (localisation choisie manuellement) ----------
   // Facultative (2026-09-29) : aucune requête vers Open-Meteo tant qu'aucune ville n'a été choisie — rien n'en

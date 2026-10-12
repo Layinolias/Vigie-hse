@@ -49,8 +49,9 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 17 | Suivi médical : qui doit pouvoir le consulter ? | Santé & Visites (en service), droits de lecture du serveur | ✅ répondue le 2026-09-29 — l'encadrement seulement, mis en œuvre |
 | 18 | Entreprise privée : que deviennent les notions propres à la fonction publique ? | Secteur « Entreprise privée » (Administration → Organisation, en service) | ✅ répondue le 2026-10-11 : tout garder pour l'instant, vocabulaire confirmé |
 | 19 | Plans d'urgence par site : que doit contenir un plan, à quelle fréquence le revoir, qui doit pouvoir le lire ? | Situations d'urgence → Plans d'urgence par site (en service) | ✅ répondue le 2026-10-11 : fréquence par plan, rubriques obligatoires, lecture par tous — mise en œuvre le 2026-10-12 |
-| 20 | Presque-accidents : par où les agents les signalent-ils, et qu'en fait-on ? | Jalon J2 (culture sécurité) — Registre AT/MP, RSST, Indicateurs & Reporting | ✅ répondue le 2026-10-11 : un formulaire « Signaler » à part — mise en œuvre en cours |
+| 20 | Presque-accidents : par où les agents les signalent-ils, et qu'en fait-on ? | Jalon J2 (culture sécurité) — Registre AT/MP, RSST, Indicateurs & Reporting | ✅ répondue le 2026-10-11 : un formulaire « Signaler » à part — mise en œuvre le 2026-10-12 (module Signalements) |
 | 21 | Plans d'urgence : la liste des rubriques obligatoires est-elle la bonne ? | Situations d'urgence → Plans d'urgence par site (en service) | 🟠 En attente de réponse |
+| 22 | Signalements : anonymat, délai de traitement, lecture de la pyramide de Bird | Signalements, Indicateurs & Reporting (en service) | 🟠 En attente de réponse |
 
 ---
 
@@ -577,7 +578,11 @@ Côté technique, (B) réutilise un écran existant et son anonymat ; (C) donne 
 > - Traitement : « Le manager (gérer les permissions pour pouvoir distribuer d'autres droits) ; classé, action au plan d'action, analyse d'accident, inscription AT/MP. »
 > - Lecture des chiffres : « Tout doit compter, ajoute une pyramide de Bird, tu peux également ajouter un objectif de remontée. »
 >
-> Non tranchés : l'anonymat, le délai de réponse. **Mise en œuvre en cours** (module « Signalements »).
+> **Mis en œuvre le 2026-10-12 — module « Signalements »** (`signalements.html`, menu Santé au travail) :
+> - **Signaler** (tout compte, droit « signaler ») : date, heure, service, lieu, ce qui s'est passé, ce qui aurait pu arriver, mesure prise sur le moment, jusqu'à 3 photos (réduites à 1 280 px avant l'envoi, rangées à part : `vigie_hse_signalements_photos`). Le déclarant suit ses propres signalements et la suite qui leur est donnée.
+> - **Traiter** (droit « traiter » : profil Manager — pour ses services, par le périmètre —, et RH, Administrateur ; à donner à tout autre profil, Préventeur compris, dans Administration → Profils) : suites *Classé* (exclusive), *Action au Plan d'actions* (les actions saisies y apparaissent, origine « Signalement »), *Analyse d'accident*, *Inscription au Registre AT/MP* (déclaration pré-remplie, reliée par `signalementId` ; l'analyse part de cet événement, comme toute analyse) ; commentaire lu par le déclarant ; clôture. Le tableau de bord affiche le nombre de nouveaux signalements à traiter.
+> - **Lecture des chiffres** : le chiffre « AT/MP » compte tout (inchangé) ; **pyramide de Bird** dans Indicateurs & Reporting (quatre niveaux, repère 1 · 10 · 30 · 600, un signalement inscrit compté une fois) ; **objectif de remontée** (presque-accidents par an, fixé sur la page Signalements, ramené à la période dans le rapport).
+> - Non tranchés, et rapprochement de la pyramide avec les types du registre : **question 22**.
 
 ---
 
@@ -593,6 +598,30 @@ Côté technique, (B) réutilise un écran existant et son anonymat ; (C) donne 
 3. Faut-il exiger un **rôle précis** parmi les personnes désignées (par exemple au moins un chargé d'évacuation, ou un sauveteur secouriste du travail) ?
 
 **Options.** (A) la liste actuelle convient ; (B) retirer ou ajouter des rubriques — lesquelles ; (C) laisser chaque organisation régler elle-même sa liste dans le logiciel. Côté technique : la liste est une table (`RUBRIQUES_OBLIGATOIRES`, `urgences-exercices.html`) ; une rubrique nouvelle en texte (ex. coupures d'énergie) est un champ de plus dans le formulaire, l'export et la consigne imprimée ; un plan des lieux demande de conserver une image, ce que le logiciel saura faire avec les photos des signalements (question 20).
+
+### Décision
+
+> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-12)._
+
+---
+
+## 🟠 Question 22 — Signalements de presque-accidents : anonymat, délai de traitement, lecture de la pyramide
+
+**Contexte.** Le module « Signalements » est en service depuis le 2026-10-12 (réponse à la question 20). Trois points n'ont pas reçu de réponse, et la pyramide de Bird demandée a dû être rapprochée des types du Registre AT/MP : c'est à confirmer.
+
+**Ce que le logiciel fait aujourd'hui.**
+- **Auteur** : chaque signalement porte le compte de son auteur ; pas d'envoi anonyme (le registre santé et sécurité, lui, en propose un). Le déclarant ne voit que ses propres signalements et la suite qui leur est donnée ; le manager voit ceux de ses services, avec leur auteur.
+- **Délai** : aucun. Un signalement « Nouveau » le reste sans alerte ; le tableau de bord du manager affiche seulement le nombre de signalements nouveaux à traiter.
+- **Pyramide de Bird** (Indicateurs & Reporting) : chaque événement va dans l'un de quatre niveaux — *avec arrêt de travail* (accidents du travail, de trajet, maladies professionnelles avec arrêt) ; *sans arrêt* (les mêmes, sans arrêt) ; *incidents bénins* ; *presque-accidents* (inscrits au registre ou signalés ; un signalement inscrit au registre ne compte qu'une fois). Repère affiché : 1 · 10 · 30 · 600. Le troisième niveau de Bird (les accidents matériels, des dégâts sans blessure) n'a pas d'équivalent dans le registre : les incidents bénins y ont été placés.
+- **Objectif de remontée** : un nombre de presque-accidents par an, pour toute l'organisation, fixé sur la page Signalements ; le rapport le ramène à la durée de la période choisie.
+
+**Les questions.**
+1. **Anonymat** — faut-il permettre d'envoyer un signalement sans son nom ? (Le déclarant ne pourrait alors plus en suivre la suite dans le logiciel.)
+2. **Délai** — dans quel délai un signalement doit-il être traité ? Le logiciel doit-il signaler, au-delà, un signalement resté « Nouveau » (au manager, au préventeur) ?
+3. **Pyramide** — la répartition en quatre niveaux convient-elle ? Les maladies professionnelles et les accidents de trajet y ont-ils leur place (« tout doit compter »), ou faut-il les mettre à part ? Les incidents bénins correspondent-ils au troisième niveau ?
+4. **Objectif** — un objectif annuel pour toute l'organisation suffit-il, ou faut-il un objectif par service ?
+
+**Options.** Anonymat : (A) non ; (B) oui, au choix du déclarant. Délai : (A) aucun ; (B) un délai fixe (lequel), signalé au-delà. Pyramide : (A) telle quelle ; (B) une autre répartition (laquelle). Objectif : (A) pour toute l'organisation ; (B) par service. Côté technique : la répartition est une table (`NIVEAUX_BIRD` et `niveauBird`, `assets/signalements-ref.js`) ; l'anonymat reprendrait celui du registre santé et sécurité.
 
 ### Décision
 

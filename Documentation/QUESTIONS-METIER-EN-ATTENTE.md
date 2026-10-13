@@ -53,6 +53,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 21 | Plans d'urgence : la liste des rubriques obligatoires est-elle la bonne ? | Situations d'urgence → Plans d'urgence par site (en service) | 🟠 En attente de réponse |
 | 22 | Signalements : anonymat, délai de traitement, lecture de la pyramide de Bird | Signalements, Indicateurs & Reporting (en service) | 🟠 En attente de réponse |
 | 23 | Revue de direction : à quelle fréquence, avec qui, et qui la valide ? | Revue de direction (en service, ISO 45001 § 9.3) | 🟠 En attente de réponse |
+| 24 | Objectifs santé-sécurité : qui les fixe, qui les voit, comment les suivre en cours d'année ? | Objectifs santé-sécurité (en service, ISO 45001 § 6.2) | 🟠 En attente de réponse |
 
 ---
 
@@ -650,6 +651,31 @@ Côté technique, (B) réutilise un écran existant et son anonymat ; (C) donne 
 ### Décision
 
 > _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-12)._
+
+---
+
+## 🟠 Question 24 — Objectifs santé-sécurité : qui les fixe, qui les voit, et comment les suivre en cours d'année ?
+
+**Contexte.** La norme ISO 45001 demande des objectifs de santé et de sécurité mesurables, suivis, communiqués, avec un plan pour les atteindre (§ 6.2). Depuis le 2026-10-13, la page **« Objectifs santé-sécurité »** (menu Pilotage) les tient : un objectif porte sur un indicateur que le logiciel calcule déjà (taux de fréquence et de gravité, accidents avec arrêt, jours d'arrêt, presque-accidents remontés, score du Document unique, inspections conformes, observations traitées, actions soldées ou en retard, retards de visites, de vérifications, d'habilitations, d'EPI) ou sur une valeur saisie à la main ; il a une cible « au plus » ou « au moins », une période et une échéance, un responsable, ses moyens, sa justification et ses actions, qui rejoignent le Plan d'actions. Le logiciel affiche la valeur du jour, l'écart à la cible et un état ; clos, l'objectif garde son résultat. La revue de direction les reprend.
+
+**Ce que le logiciel fait aujourd'hui.**
+- **Qui les fixe** : les profils Administrateur et RH (droit « Objectifs santé-sécurité », à donner à d'autres profils dans Administration → Profils). Pas d'étape d'adoption : un objectif enregistré est en vigueur.
+- **Qui les voit** : ces mêmes profils, et ceux qui ont la Revue de direction ; les autres ne voient que leurs actions, au Plan d'actions.
+- **Périmètre** : toute l'organisation ; pas d'objectif par service.
+- **Suivi en cours de période** : un taux (taux de fréquence, part d'actions soldées…) est comparé tel quel à la cible : « Tenu à ce jour » ou « En écart ». Un nombre qui s'accumule (accidents, jours d'arrêt, presque-accidents) **n'est pas ramené au prorata** : il reste « En cours » jusqu'à franchir la cible (« Atteint » pour un « au moins », « Non atteint » pour un « au plus »). Mesuré sur les données de démonstration le 13/10 : 2 accidents avec arrêt pour une cible annuelle « au plus 10 » → « En cours » ; au prorata (10 × 286 / 365 ≈ 7,8 à cette date), ce serait « tenu ».
+
+**Les questions.**
+1. **Adoption** — qui fixe et adopte les objectifs (autorité territoriale, direction générale, après avis de la formation spécialisée ?) ; faut-il une étape « proposé → adopté », avec la date et le signataire ?
+2. **Communication** — qui doit les voir dans le logiciel : l'encadrement, les représentants du personnel, tout le personnel ?
+3. **Par service** — faut-il des objectifs par service ou par entité (le taux de fréquence des services techniques, par exemple), en plus des objectifs globaux ?
+4. **Suivi d'un nombre en cours d'année** — afficher un repère au prorata (comme l'objectif de remontée des presque-accidents, question 20), ou seulement constater à l'échéance ?
+5. **Indicateurs** — en manque-t-il un dans la liste (absentéisme, agents formés, part du Document unique mise à jour…) ?
+
+**Options.** Communication : (A) Administrateur et RH, comme aujourd'hui ; (B) l'encadrement en lecture ; (C) tout le personnel en lecture. Suivi d'un nombre : (A) sans prorata, comme aujourd'hui ; (B) avec un repère au prorata, en plus. Côté technique : la lecture se règle par profil, sans code ; l'adoption, le repère au prorata et les objectifs par service sont des ajouts.
+
+### Décision
+
+> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-13)._
 
 ---
 

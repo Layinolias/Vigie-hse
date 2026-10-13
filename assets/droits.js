@@ -59,6 +59,8 @@
     mod("documentation", "Ressources", "Base documentaire", [["consulter", "Consulter"], ["rediger", "Rédiger"]]),
     mod("dialogue-social", "Ressources", "Dialogue social", [["consulter", "Consulter"], ["participer", "Participer (représentant)"], ["direction", "Direction (répondre, clôturer)"]]),
     mod("reporting", "Pilotage", "Indicateurs & Reporting", [["consulter", "Consulter"]]),
+    // Objectifs santé-sécurité (ISO 45001 § 6.2, 2026-10-13) : fixer, suivre, clore. Aucun préréglage hors Administrateur et RH (question 24).
+    mod("objectifs", "Pilotage", "Objectifs santé-sécurité", STD),
     // Revue de direction (ISO 45001 § 9.3, 2026-10-12) : préparer, valider, rouvrir. Aucun préréglage hors Administrateur et RH.
     mod("revue-direction", "Pilotage", "Revue de direction", STD),
     mod("administration", "Pilotage", "Administration", [["gerer", "Gérer"]])

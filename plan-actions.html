@@ -108,6 +108,7 @@
   .origine-chip.analyse{ color:var(--accent-violet); border-color:rgba(var(--accent-violet-rgb),.4); background:rgba(var(--accent-violet-rgb),.1); }
   .origine-chip.urgence{ color:var(--danger); border-color:rgba(var(--danger-rgb),.4); background:rgba(var(--danger-rgb),.1); }
   .origine-chip.ds{ color:var(--success); border-color:rgba(var(--success-rgb),.4); background:rgba(var(--success-rgb),.1); }
+  .origine-chip.objectif{ color:var(--accent); border-color:rgba(var(--accent-rgb),.35); background:transparent; }
   .origine-chip.revue{ color:var(--accent-violet); border-color:rgba(var(--accent-violet-rgb),.4); background:transparent; }
   .origine-chip.signalement{ color:var(--text-muted); border-color:var(--border); background:var(--bg-2); }
   .origine-chip.ee{ color:var(--critical); border-color:rgba(var(--critical-rgb),.4); background:rgba(var(--critical-rgb),.1); }
@@ -528,6 +529,36 @@
     return out;
   }
 
+  // Actions prévues pour atteindre un objectif santé-sécurité (ISO 45001 § 6.2, 2026-10-13) : dès l'enregistrement de l'objectif.
+  const OBJECTIFS_KEY = "vigie_hse_objectifs";
+  function generateObjectifActionSeeds(){
+    let objectifs = [];
+    try { const raw = VigieStore.getItem(OBJECTIFS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) objectifs = p; } } catch(e){}
+    const out = [];
+    const today = new Date();
+    objectifs.forEach(o => {
+      if (!o || !Array.isArray(o.actions)) return;
+      o.actions.forEach(a => {
+        if (!a || !a.description || !String(a.description).trim()) return;
+        out.push({
+          id: "pa-obj-" + o.id + "-" + a.id,
+          titre: "Objectif : " + (o.intitule || ""),
+          description: a.description,
+          service: "",
+          collectivite: "",
+          risqueLie: "",
+          origine: "Objectif",
+          responsable: a.responsable || "",
+          echeance: a.echeance || VigieDates.iso(today),
+          priorite: "Moyenne",
+          statut: "À faire",
+          dateCreation: VigieDates.iso(today),
+        });
+      });
+    });
+    return out;
+  }
+
   // Actions décidées en revue de direction (ISO 45001 § 9.3, 2026-10-12) : seulement une fois la revue validée.
   const REVUES_KEY = "vigie_hse_revues_direction";
   function generateRevueActionSeeds(){
@@ -596,7 +627,7 @@
   function loadDataset(){
     let stored = [];
     try { const raw = VigieStore.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds()).concat(generateDialogueSocialActionSeeds()).concat(generateSignalementActionSeeds()).concat(generateRevueActionSeeds());
+    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds()).concat(generateDialogueSocialActionSeeds()).concat(generateSignalementActionSeeds()).concat(generateRevueActionSeeds()).concat(generateObjectifActionSeeds());
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
@@ -699,7 +730,7 @@
       return;
     }
     const prioCls = { "Critique":"p-critique", "Haute":"p-haute", "Moyenne":"p-moyenne", "Basse":"p-basse" };
-    const origineCls = { "DUERP":"duerp", "Inspection":"inspection", "Analyse":"analyse", "Urgence":"urgence", "Prévention EE":"ee", "Dialogue social":"ds", "Signalement":"signalement", "Revue de direction":"revue" };
+    const origineCls = { "DUERP":"duerp", "Inspection":"inspection", "Analyse":"analyse", "Urgence":"urgence", "Prévention EE":"ee", "Dialogue social":"ds", "Signalement":"signalement", "Revue de direction":"revue", "Objectif":"objectif" };
     tbody.innerHTML = rows.map(a => `
       <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${esc(a.id)}">
         <td class="wrap">${esc(a.titre)}</td>

@@ -1,0 +1,510 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Objectifs santé-sécurité</title>
+<meta name="description" content="Objectifs de santé et de sécurité au travail : cible chiffrée par indicateur, écart, actions pour les atteindre (ISO 45001, § 6.2).">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/hse-formulas.js"></script>
+<script src="assets/signalements-ref.js"></script>
+<script src="assets/indicateurs.js"></script>
+<script src="assets/objectifs-ref.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  select, input[type="text"], input[type="date"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:150px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:68px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled, select:disabled{ background:var(--bg-2); color:var(--text); opacity:1; cursor:default; }
+  @media (max-width:640px){ select, input[type="text"], input[type="date"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg td.num{ font-family:"IBM Plex Mono",monospace; text-align:right; }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.bon{ color:var(--success); background:var(--success-bg); } .chip.bon::before{ background:var(--success); }
+  .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
+  .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
+  .ecart.bon{ color:var(--success); } .ecart.mauvais{ color:var(--danger); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  /* Objectif ouvert */
+  .fiche{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .fiche-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .chiffres{ display:grid; grid-template-columns:repeat(auto-fill,minmax(min(170px,100%),1fr)); gap:8px; margin:16px 0 0; }
+  .chiffre{ background:var(--bg-2); border-radius:var(--r-sm); padding:9px 12px; }
+  .chiffre b{ display:block; font:600 18px "IBM Plex Mono",monospace; color:var(--text); }
+  .chiffre span{ font-size:11.5px; color:var(--text-muted); line-height:1.35; display:block; margin-top:2px; }
+  .liste-auto{ font-size:12.5px; color:var(--text-muted); margin:0 0 12px; padding-left:18px; line-height:1.6; }
+  .liste-auto b{ color:var(--text); }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Pilotage / <b>Objectifs santé-sécurité</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-trending-up"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Objectifs santé-sécurité</h1>
+            <p data-mots>Des objectifs chiffrés, mesurés par les indicateurs de l'application (ISO 45001, § 6.2) : pour chacun, une cible et une échéance, l'écart d'aujourd'hui, les moyens, un responsable et les actions pour l'atteindre, suivies au Plan d'actions. La revue de direction les reprend.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-trending-up"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEnVigueur">–</span><span class="ps-kpi-label">Objectifs en vigueur</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTenus">–</span><span class="ps-kpi-label">Tenus ou atteints</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEcart">–</span><span class="ps-kpi-label">En écart ou non atteints</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-clipboard"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiActions">–</span><span class="ps-kpi-label">Actions non soldées</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel fiche" id="fiche" style="display:none;"></div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Objectifs</h3>
+          <div class="panel-actions">
+            <select id="fStatut" aria-label="Filtrer par statut"><option value="En vigueur">En vigueur</option><option value="Clos">Clos</option><option value="">Tous</option></select>
+            <span id="listeActions" class="panel-actions"></span>
+          </div>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableObjectifs">
+            <thead><tr><th>Objectif</th><th>Indicateur</th><th>Cible</th><th>Valeur</th><th>Écart</th><th>État</th><th>Échéance</th><th>Responsable</th><th>Actions</th><th></th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Valeurs calculées comme la page Indicateurs &amp; Reporting, sur la période de chaque objectif jusqu'à aujourd'hui (ou jusqu'à son échéance), sans prorata : la cible vaut pour la période entière. Un objectif clos garde le résultat du jour de sa clôture. L'objectif de remontée des presque-accidents se règle dans Signalements (question 20). Qui fixe les objectifs, qui les voit, et le suivi en cours d'année : question posée au préventeur (question 24).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("objectifs", "consulter");
+  const peutGerer = D.peut("objectifs", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Objectifs santé-sécurité", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const lire = VigieIndicateurs.lecteur(VigieStore);
+  const VO = VigieObjectifs;
+
+  // ---------- Stockage ----------
+  const CLE = VO.CLE;
+  const tous = () => lire(CLE);
+  function modifierObjectifs(modif){ const l = tous(); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
+  // Les actions d'un objectif rejoignent le Plan d'actions sous cet identifiant (plan-actions.html, generateObjectifActionSeeds)
+  const idAction = (o, a) => "pa-obj-" + o.id + "-" + a.id;
+  const actionAuPlan = (o, a, actions) => (actions || lire("vigie_hse_actions")).find(x => x && x.id === idAction(o, a)) || null;
+  function statutAction(o, a, actions){ const x = actionAuPlan(o, a, actions); return x ? (x.statut || "À faire") : (a.statut || "À faire"); }
+  const nomIndicateur = (id) => (VO.indicateur(id) || { nom: "—" }).nom;
+  const cibleTexte = (o, e) => e.cible === null ? "—" : VO.libelleSens(e.sens) + " " + VO.formater(e.cible, o);
+  const tonEcart = (e) => e.ecart === null ? "" : ((e.sens === "max" ? e.ecart <= 0 : e.ecart >= 0) ? "bon" : "mauvais");
+
+  // ---------- Liste ----------
+  function render(){
+    const actions = lire("vigie_hse_actions");
+    const l = tous();
+    const lus = l.map(o => ({ o, e: VO.evaluer(o, VigieStore) }));
+    const enVigueur = lus.filter(x => x.o.statut !== "Clos");
+    $("kpiEnVigueur").textContent = enVigueur.length;
+    $("kpiTenus").textContent = enVigueur.filter(x => VO.ton(x.e.etat) === "bon").length;
+    $("kpiEcart").textContent = enVigueur.filter(x => VO.ton(x.e.etat) === "mauvais").length;
+    $("kpiActions").textContent = enVigueur.reduce((n, x) => n + (x.o.actions || []).filter(a => statutAction(x.o, a, actions) !== "Fait").length, 0);
+    const filtre = $("fStatut").value;
+    const vus = lus.filter(x => !filtre || (filtre === "Clos" ? x.o.statut === "Clos" : x.o.statut !== "Clos"))
+      .sort((a, b) => String(a.o.periodeFin || "").localeCompare(String(b.o.periodeFin || "")) || String(a.o.intitule || "").localeCompare(String(b.o.intitule || "")));
+    $("tbody").innerHTML = vus.length ? vus.map(({ o, e }) => {
+      const acts = o.actions || [];
+      const faites = acts.filter(a => statutAction(o, a, actions) === "Fait").length;
+      return `<tr>
+        <td style="white-space:normal;min-width:220px;"><b>${esc(o.intitule)}</b></td>
+        <td style="white-space:normal;">${esc(nomIndicateur(o.indicateur))}</td>
+        <td>${esc(cibleTexte(o, e))}</td>
+        <td class="num">${esc(VO.formater(e.valeur, o))}</td>
+        <td class="num"><span class="ecart ${tonEcart(e)}">${esc(VO.formaterEcart(e.ecart, o))}</span></td>
+        <td><span class="chip ${VO.ton(e.etat)}">${esc(e.libelle)}</span>${o.statut === "Clos" ? ` <span class="form-note">clos</span>` : ""}</td>
+        <td class="mono">${esc(dateFr(o.periodeFin))}</td>
+        <td style="white-space:normal;">${esc(o.responsable || "—")}</td>
+        <td>${acts.length ? `${faites} / ${acts.length} soldée${acts.length > 1 ? "s" : ""}` : "—"}</td>
+        <td><button type="button" class="act-edit" data-ouvrir="${esc(o.id)}">Ouvrir</button></td>
+      </tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="10">${l.length ? "Aucun objectif avec ce statut." : "Aucun objectif pour le moment." + (peutGerer ? " « Nouvel objectif » en fixe un sur un indicateur de l'application." : "")}</td></tr>`;
+  }
+  $("fStatut").addEventListener("change", render);
+  $("tbody").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); });
+  $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`
+    + (peutGerer ? `<button type="button" class="btn btn-primary" id="btnNouveau"><svg class="icon"><use href="#i-plus"/></svg> Nouvel objectif</button>` : "");
+  if (peutGerer) $("btnNouveau").addEventListener("click", () => ouvrir(null));
+
+  // ---------- Export ----------
+  $("btnExport").addEventListener("click", () => {
+    const actions = lire("vigie_hse_actions");
+    const lignes = [], lignesActions = [];
+    tous().forEach(o => {
+      const e = VO.evaluer(o, VigieStore);
+      lignes.push({ "Objectif": o.intitule || "", "Indicateur": nomIndicateur(o.indicateur), "Sens": VO.libelleSens(e.sens), "Cible": e.cible === null ? "" : e.cible,
+        "Unité": VO.unite(o), "Valeur": e.valeur === null ? "" : e.valeur, "Écart": e.ecart === null ? "" : e.ecart, "État": e.libelle,
+        "Début": dateFr(o.periodeDebut), "Échéance": dateFr(o.periodeFin), "Responsable": o.responsable || "", "Pourquoi": o.justification || "", "Moyens": o.moyens || "",
+        "Bilan": o.bilan || "", "Statut": o.statut || "En vigueur", "Clos par": o.closPar || "", "Clos le": dateFr(o.closLe) });
+      (o.actions || []).forEach(a => lignesActions.push({ "Objectif": o.intitule || "", "Action": a.description || "", "Responsable": a.responsable || "", "Échéance": dateFr(a.echeance), "État au Plan d'actions": statutAction(o, a, actions) }));
+    });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: ["Objectif", "Indicateur", "Sens", "Cible", "Unité", "Valeur", "Écart", "État", "Début", "Échéance", "Responsable", "Pourquoi", "Moyens", "Bilan", "Statut", "Clos par", "Clos le"] }), "Objectifs");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignesActions, { header: ["Objectif", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
+    XLSX.writeFile(wb, `objectifs_sante_securite_${VigieDates.aujourdhui()}.xlsx`);
+  });
+  VigieImpression.brancher("btnExport", { table: "#tableObjectifs" });
+
+  // ---------- Objectif ouvert ----------
+  // Nouvel objectif : l'année civile en cours, une cible à fixer.
+  let courant = null, actionsFiche = [];
+  function optionsIndicateurs(choisi){
+    const groupes = [];
+    VO.INDICATEURS.forEach(i => { let g = groupes.find(x => x.nom === i.groupe); if (!g){ g = { nom: i.groupe, l: [] }; groupes.push(g); } g.l.push(i); });
+    return `<option value="">— choisir —</option>` + groupes.map(g => `<optgroup label="${esc(g.nom)}">${g.l.map(i => `<option value="${esc(i.id)}"${i.id === choisi ? " selected" : ""}>${esc(i.nom)}</option>`).join("")}</optgroup>`).join("");
+  }
+  function ouvrir(id){
+    const o = id ? tous().find(x => x.id === id) : null;
+    if (id && !o) return;
+    if (!o && !peutGerer) return;
+    const annee = VigieDates.aujourdhui().slice(0, 4);
+    courant = o || { id: null, intitule: "", indicateur: "", sens: "max", cible: "", unite: "", valeurManuelle: "", periodeDebut: annee + "-01-01", periodeFin: annee + "-12-31",
+      responsable: "", justification: "", moyens: "", actions: [], bilan: "", statut: "En vigueur" };
+    const clos = courant.statut === "Clos";
+    const fige = clos || !peutGerer;
+    const dis = fige ? " disabled" : "";
+    actionsFiche = (courant.actions || []).map(a => Object.assign({}, a));
+    const nb = (v) => v === null || v === undefined ? "" : String(v).replace(".", ",");
+    $("fiche").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">${o ? esc(o.intitule) : "Nouvel objectif"}</h3>
+          ${o ? `<div class="fiche-etat">${clos ? `Clos par ${esc(o.closPar || "—")} le ${esc(dateFr(o.closLe))}` : "En vigueur"}${o.auteur ? ` · créé par ${esc(o.auteur)}` : ""}${o.modifiePar ? ` · modifié par ${esc(o.modifiePar)}` : ""}</div>` : ""}</div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnFermer">Fermer</button></div>
+      </div>
+      <form id="ficheForm" novalidate>
+        <div class="form-grid">
+          <div class="span3"><label for="oIntitule">Objectif</label><input type="text" id="oIntitule" value="${esc(courant.intitule)}" maxlength="200" placeholder="Ex. : réduire les accidents avec arrêt des services techniques"${dis}></div>
+          <div class="span3" style="max-width:520px;"><label for="oIndicateur">Indicateur suivi</label><select id="oIndicateur"${dis}>${optionsIndicateurs(courant.indicateur)}</select></div>
+          <div><label for="oSens">Sens</label><select id="oSens"${dis}><option value="max"${courant.sens !== "min" ? " selected" : ""}>au plus</option><option value="min"${courant.sens === "min" ? " selected" : ""}>au moins</option></select></div>
+          <div><label for="oCible">Cible</label><input type="text" inputmode="decimal" id="oCible" value="${esc(nb(courant.cible))}" placeholder="Ex. : 12,5"${dis}></div>
+          <div data-manuel><label for="oUnite">Unité</label><input type="text" id="oUnite" value="${esc(courant.unite || "")}" maxlength="30" placeholder="agents, €, %…"${dis}></div>
+          <div data-manuel><label for="oValeur">Valeur relevée</label><input type="text" inputmode="decimal" id="oValeur" value="${esc(nb(courant.valeurManuelle))}"${dis}></div>
+          <div><label for="oDebut">Période : du</label><input type="date" id="oDebut" value="${esc(courant.periodeDebut || "")}"${dis}></div>
+          <div><label for="oFin">Échéance</label><input type="date" id="oFin" value="${esc(courant.periodeFin || "")}"${dis}></div>
+          <div><label for="oResponsable">Responsable</label><input type="text" id="oResponsable" value="${esc(courant.responsable || "")}" maxlength="120" placeholder="Nom et fonction"${dis}></div>
+          <div class="span3"><p class="form-note" id="oAide"></p></div>
+        </div>
+        <div id="oLecture"></div>
+        <div class="sec"><h4>Pourquoi cet objectif</h4><p class="aide">${esc(VigieOrga.mots("Ce qui le justifie : risques prioritaires du Document unique, accidents, exigences légales, attentes des agents et de leurs représentants, politique de santé et de sécurité."))}</p>
+          <textarea id="oJustification" aria-label="Pourquoi cet objectif"${dis}>${esc(courant.justification || "")}</textarea></div>
+        <div class="sec"><h4>Moyens</h4><p class="aide">Les ressources nécessaires : budget, temps, personnes, matériel.</p>
+          <textarea id="oMoyens" aria-label="Moyens"${dis}>${esc(courant.moyens || "")}</textarea></div>
+        <div class="sec"><h4>Actions pour l'atteindre</h4><p class="aide">Elles rejoignent le Plan d'actions (origine « Objectif ») dès l'enregistrement ; leur état est celui du Plan d'actions, où elles se suivent ensuite.</p>
+          <div id="oActions"></div>
+          ${fige ? "" : `<button type="button" class="btn btn-ghost" id="btnAjoutAction"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une action</button>`}
+        </div>
+        <div class="sec"><h4>Bilan</h4><p class="aide">Ce qui a été obtenu, ce qui reste à faire : en cours de route ou à la clôture.</p>
+          <textarea id="oBilan" aria-label="Bilan"${dis}>${esc(courant.bilan || "")}</textarea>
+          <div id="oConstatBloc" style="margin-top:10px;max-width:260px;"><label for="oConstat">Résultat constaté à la clôture</label><select id="oConstat"${dis}><option value="">—</option><option value="atteint">Atteint</option><option value="non-atteint">Non atteint</option></select></div>
+        </div>
+        ${peutGerer ? `<div class="form-actions">
+          ${clos ? `<button type="button" class="btn btn-ghost" id="btnRouvrir">Rouvrir l'objectif</button>` : `<button type="submit" class="btn btn-primary">Enregistrer</button>
+          ${o ? `<button type="button" class="btn btn-ghost" id="btnClore">Clore l'objectif</button>
+          <button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer l'objectif</button>` : ""}`}
+        </div>` : ""}
+      </form>`;
+    rendreActions(fige);
+    majLecture();
+    $("fiche").style.display = "";
+    $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  // l'objectif tel que le formulaire le décrit (pour la lecture en direct et l'enregistrement)
+  function depuisFormulaire(){
+    return Object.assign({}, courant, {
+      intitule: $("oIntitule").value.trim(), indicateur: $("oIndicateur").value, sens: $("oSens").value === "min" ? "min" : "max",
+      cible: VO.nombre($("oCible").value), unite: $("oUnite").value.trim(), valeurManuelle: VO.nombre($("oValeur").value),
+      periodeDebut: $("oDebut").value, periodeFin: $("oFin").value, responsable: $("oResponsable").value.trim(),
+      justification: $("oJustification").value.trim(), moyens: $("oMoyens").value.trim(), bilan: $("oBilan").value.trim(),
+    });
+  }
+  function majLecture(){
+    const o = courant && courant.statut === "Clos" ? courant : depuisFormulaire();
+    const ind = VO.indicateur(o.indicateur);
+    const manuel = !!ind && ind.id === "manuel";
+    document.querySelectorAll("[data-manuel]").forEach(el => { el.style.display = manuel ? "" : "none"; });
+    $("oConstatBloc").style.display = manuel && o.cible === null && courant.statut !== "Clos" && peutGerer ? "" : "none";
+    $("oAide").textContent = ind ? ind.aide : "Choisissez l'indicateur sur lequel porte l'objectif.";
+    if (!ind){ $("oLecture").innerHTML = ""; return; }
+    const e = VO.evaluer(o, VigieStore);
+    const quand = e.fige ? "au " + dateFr((e.calculeLe || "").slice(0, 10) || o.closLe) + " (clôture)" : e.borne ? "au " + dateFr(e.borne) : "";
+    $("oLecture").innerHTML = `<div class="chiffres">
+      <div class="chiffre"><b>${esc(VO.formater(e.valeur, o))}</b><span>valeur ${esc(quand)}</span></div>
+      <div class="chiffre"><b>${esc(cibleTexte(o, e))}</b><span>cible à l'échéance${o.periodeFin ? " du " + esc(dateFr(o.periodeFin)) : ""}</span></div>
+      <div class="chiffre"><b class="ecart ${tonEcart(e)}">${esc(VO.formaterEcart(e.ecart, o))}</b><span>écart à la cible</span></div>
+      <div class="chiffre"><b style="font-size:13px;padding:4px 0;"><span class="chip ${VO.ton(e.etat)}">${esc(e.libelle)}</span></b><span>${esc(ind.nature === "cumul" ? "un cumul sur la période" : ind.nature === "taux" ? "un taux sur la période écoulée" : "un état à la date du calcul")}</span></div>
+    </div>`;
+  }
+  // un indicateur choisi propose son sens habituel (modifiable)
+  $("fiche").addEventListener("change", (e) => {
+    if (!courant || courant.statut === "Clos") return;
+    if (e.target.id === "oIndicateur"){ const ind = VO.indicateur(e.target.value); if (ind && ind.id !== "manuel") $("oSens").value = ind.sens; }
+    if (["oIndicateur", "oSens", "oCible", "oValeur", "oUnite", "oDebut", "oFin"].includes(e.target.id)) majLecture();
+  });
+
+  function rendreActions(fige){
+    const actions = lire("vigie_hse_actions");
+    // une action déjà reprise au Plan d'actions ne se modifie plus ici : on la suit là-bas
+    $("oActions").innerHTML = actionsFiche.map((a, i) => {
+      const auPlan = courant.id && actionAuPlan(courant, a, actions);
+      if (fige || auPlan) return `<div class="dyn-row" data-i="${i}" data-fixe><span style="flex:1 1 auto;font-size:12.8px;">${esc(a.description)}${a.responsable ? " — " + esc(a.responsable) : ""}${a.echeance ? ", échéance " + esc(dateFr(a.echeance)) : ""} · <b>${esc(courant.id ? statutAction(courant, a, actions) : "À faire")}</b>${auPlan ? ` <a class="act-edit" href="plan-actions.html">au Plan d'actions</a>` : ""}</span></div>`;
+      return `<div class="dyn-row" data-i="${i}">
+        <input type="text" data-k="description" placeholder="Action" aria-label="Action" value="${esc(a.description || "")}" maxlength="300">
+        <input type="text" data-k="responsable" placeholder="Responsable" aria-label="Responsable" value="${esc(a.responsable || "")}" style="flex:0 1 180px">
+        <input type="date" data-k="echeance" aria-label="Échéance" value="${esc(a.echeance || "")}" style="flex:0 0 150px">
+        <button type="button" class="act-del" data-retirer="${i}">Suppr.</button>
+      </div>`;
+    }).join("") || `<p class="vide">Aucune action pour l'instant.</p>`;
+  }
+  function lireActions(){
+    $("oActions").querySelectorAll(".dyn-row:not([data-fixe])").forEach(row => {
+      const a = actionsFiche[Number(row.dataset.i)];
+      if (a) row.querySelectorAll("[data-k]").forEach(inp => { a[inp.dataset.k] = inp.value.trim(); });
+    });
+  }
+  function fermer(){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; courant = null; }
+
+  // Relit le formulaire dans l'objectif enregistré ; « clore » fige son résultat à aujourd'hui.
+  function enregistrer(clore){
+    if (!courant || !peutGerer || courant.statut === "Clos") return null;
+    lireActions();
+    const o = depuisFormulaire();
+    if (!o.intitule){ alert("Indiquez l'objectif."); return null; }
+    if (!VO.indicateur(o.indicateur)){ alert("Choisissez l'indicateur suivi."); return null; }
+    if ($("oCible").value.trim() && o.cible === null){ alert("La cible doit être un nombre."); return null; }
+    if (o.indicateur !== "manuel" && o.cible === null){ alert("Indiquez la cible."); return null; }
+    if ($("oValeur").value.trim() && o.valeurManuelle === null && o.indicateur === "manuel"){ alert("La valeur relevée doit être un nombre."); return null; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(o.periodeFin)){ alert("L'échéance est obligatoire."); return null; }
+    if (o.periodeDebut && o.periodeDebut > o.periodeFin){ alert("Le début de la période est après l'échéance."); return null; }
+    if (o.indicateur !== "manuel"){ o.unite = undefined; o.valeurManuelle = undefined; }   // effacés à l'enregistrement (JSON)
+    o.actions = actionsFiche.filter(a => a.description).map(a => Object.assign({ id: a.id || genId("act") }, a));
+    if (clore){
+      const constat = $("oConstat").value;
+      if (o.indicateur === "manuel" && o.cible === null && !constat){ alert("Indiquez le résultat constaté (atteint ou non) avant de clore."); return null; }
+      o.resultat = VO.resultatDeCloture(o, VigieStore, VigieDates.aujourdhui(), constat);
+      o.statut = "Clos"; o.closPar = moi; o.closLe = VigieDates.aujourdhui();
+    }
+    const nouveau = !o.id;
+    if (nouveau){ o.id = genId("obj"); o.auteur = moi; o.dateCreation = new Date().toISOString(); }
+    else { o.modifiePar = moi; o.dateMaj = new Date().toISOString(); }
+    try {
+      modifierObjectifs(l => {
+        const i = l.findIndex(x => x && x.id === o.id);
+        if (i < 0) l.push(o); else l[i] = Object.assign({}, l[i], o);
+      });
+    } catch(e){ alert("L'objectif n'a pas pu être enregistré."); return null; }
+    logAudit(nouveau ? "Création" : clore ? "Clôture" : "Modification", `Objectif « ${o.intitule} »${clore ? " clos : " + o.resultat.libelle : ""}`);
+    return o;
+  }
+
+  $("fiche").addEventListener("click", (e) => {
+    if (e.target.closest("#btnFermer")){ fermer(); return; }
+    if (e.target.closest("#btnAjoutAction")){ lireActions(); actionsFiche.push({ id: genId("act") }); rendreActions(false); return; }
+    const ret = e.target.closest("[data-retirer]");
+    if (ret){ lireActions(); actionsFiche.splice(Number(ret.dataset.retirer), 1); rendreActions(false); return; }
+    if (e.target.closest("#btnClore")){
+      if (!confirm("Clore l'objectif ? Son résultat sera figé à aujourd'hui.")) return;
+      const o = enregistrer(true);
+      if (o){ render(); ouvrir(o.id); }
+      return;
+    }
+    if (e.target.closest("#btnRouvrir")){
+      if (!courant || !confirm("Rouvrir l'objectif ? Son résultat figé est effacé ; il redevient en vigueur.")) return;
+      try { modifierObjectifs(l => { const i = l.findIndex(x => x && x.id === courant.id); if (i >= 0){ const o = Object.assign({}, l[i], { statut: "En vigueur", modifiePar: moi, dateMaj: new Date().toISOString() }); delete o.resultat; delete o.closPar; delete o.closLe; l[i] = o; } }); }
+      catch(err){ alert("L'objectif n'a pas pu être rouvert."); return; }
+      logAudit("Modification", `Objectif « ${courant.intitule} » rouvert`);
+      const id = courant.id; render(); ouvrir(id);
+      return;
+    }
+    if (e.target.closest("#btnSupprimer")){
+      if (!courant || !courant.id || !confirm(`Supprimer l'objectif « ${courant.intitule} » ?${(courant.actions || []).length ? " Ses actions déjà reprises au Plan d'actions y restent." : ""}`)) return;
+      try { modifierObjectifs(l => { const i = l.findIndex(x => x && x.id === courant.id); if (i >= 0) l.splice(i, 1); }); }
+      catch(err){ alert("L'objectif n'a pas pu être supprimé."); return; }
+      logAudit("Suppression", `Objectif « ${courant.intitule} »`);
+      fermer(); render();
+    }
+  });
+  $("fiche").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const o = enregistrer(false);
+    if (o){ render(); ouvrir(o.id); }
+  });
+
+  render();
+  // ?ouvrir=<id>
+  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(o => o.id === id)) ouvrir(id); })();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

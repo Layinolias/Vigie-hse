@@ -1,6 +1,6 @@
 # Kit de reprise des données
 
-> Fichier **généré** par `Documentation/outils/generer-kit-reprise.js` — ne pas l'éditer à la main, relancer le générateur. Dernière génération : 2026-10-12.
+> Fichier **généré** par `Documentation/outils/generer-kit-reprise.js` — ne pas l'éditer à la main, relancer le générateur. Dernière génération : 2026-10-13.
 
 Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes (registres Excel, historique des accidents, suivi des visites…) se chargent par les imports de chaque module. Le dossier `KIT-REPRISE/` contient un modèle Excel par module importable et un mode d'emploi (`00-mode-d-emploi.xlsx`).
 
@@ -31,6 +31,7 @@ Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes
 | 17 | `17-epi-dotations.xlsx` | Dotations d'EPI | EPI & Dotation → onglet Dotations → Importer .xlsx |  |
 | 18 | `18-plans-urgence.xlsx` | Plans d'urgence par site | Situations d'urgence → onglet Plans d'urgence par site → Importer .xlsx | Un plan par site. Les quatre feuilles de listes se rattachent à leur plan par « ID Plan » (ou, à défaut, par le site) ; une feuille présente remplace la liste du plan qu'elle cite. |
 | — | *saisie à l'écran* | Accueil au poste | Accueil au poste | Pas d'import : les parcours se créent à l'arrivée de chaque agent. |
+| — | *saisie à l'écran* | Objectifs santé-sécurité | Objectifs santé-sécurité | Pas d'import : chaque objectif se fixe à l'écran, sur un indicateur que l'application calcule. |
 | — | *saisie à l'écran* | Revues de direction | Revue de direction | Pas d'import : chaque revue se prépare à l'écran à partir des données reprises. |
 | — | *saisie à l'écran* | Signalements | Signalements | Pas d'import : chaque presque-accident se signale à l'écran ; un historique se reprend au Registre AT/MP (type « Presque accident »). |
 | — | *saisie à l'écran* | Entreprises extérieures | Entreprises extérieures | Pas d'import : une fiche par intervention. |

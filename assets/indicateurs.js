@@ -2,7 +2,8 @@
    VIGIE HSE — Indicateurs d'une période : une seule définition des chiffres (2026-10-12)
    ----------------------------------------------------------------------------
    Les calculs d'Indicateurs & Reporting, sortis de la page pour être partagés avec la Revue de direction
-   (ISO 45001 § 9.3) : les mêmes chiffres, calculés de la même façon, des deux côtés. Aucune écriture.
+   (ISO 45001 § 9.3) et les Objectifs santé-sécurité (§ 6.2, assets/objectifs-ref.js) : les mêmes chiffres, calculés de la
+   même façon, partout. Aucune écriture.
 
      VigieIndicateurs.calculer(store, debut, fin) → un objet de chiffres (et les listes filtrées utiles aux
      graphiques). « store » : VigieStore (ou tout objet qui a getItem) ; « debut » et « fin » : dates
@@ -68,6 +69,8 @@
       return Math.max(1, Math.round(ms / 86400000) + 1);
     })();
     const tf = VF.tauxFrequence(atAvec, dureeAtJours);
+    // TG estimé, même formule que le Registre AT/MP (2026-10-13 : lu par les Objectifs santé-sécurité, pas affiché par le Reporting)
+    const tg = VF.tauxGravite(atJours, dureeAtJours);
     // TF « réel » (heures saisies dans Gestion RH, au mois) : numérateur et dénominateur bornés aux mêmes mois entiers.
     const periodeDebut = dDebut ? dDebut.slice(0, 7) : "";
     const periodeFin = dFin ? dFin.slice(0, 7) : "";
@@ -205,7 +208,7 @@
     return {
       dDebut, dFin, dureeAtJours,
       ATMP, ATMP_ALL, VISITES_ALL, VERIF_ALL, HABS_ALL, EPI_DOT_ALL, SIG,
-      atTotal, atAvec, atJours, tf, tfReel, hseScorePct, duTotal, duPrio,
+      atTotal, atAvec, atJours, tf, tg, tfReel, hseScorePct, duTotal, duPrio,
       paTotal, paTaux, paEnCours, paRetard, paFait, paEfficaces, paNonEfficaces, paAVerifier,
       svTotal, svOk, svSoon, svLate, svLateHorsPeriode, svLateTous,
       rsstTotal, rsstTaux, rsstNouvelle, rsstTraitee,

@@ -67,6 +67,7 @@
       ["dialogue-social.html", "i-messages", "Dialogue social"]] },
     { titre: "Pilotage", liens: [
       ["reporting.html", "i-bar-chart", "Indicateurs &amp; Reporting"],
+      ["objectifs.html", "i-trending-up", "Objectifs santé-sécurité"],
       ["revue-direction.html", "i-target", "Revue de direction"],
       ["administration.html", "i-settings", "Administration"]] }
   ];
@@ -101,6 +102,7 @@
       "base-documentaire.html": lire("documentation"),
       "dialogue-social.html": lire("dialogue-social"),
       "reporting.html": lire("reporting"),
+      "objectifs.html": lire("objectifs"),               // ISO 45001 § 6.2
       "revue-direction.html": lire("revue-direction"),   // ISO 45001 § 9.3
       "administration.html": D.peut("administration", "gerer")
     };

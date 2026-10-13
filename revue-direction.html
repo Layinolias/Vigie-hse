@@ -14,6 +14,7 @@
 <script src="assets/hse-formulas.js"></script>
 <script src="assets/signalements-ref.js"></script>
 <script src="assets/indicateurs.js"></script>
+<script src="assets/objectifs-ref.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
 <link rel="stylesheet" href="assets/commun.css">
 <style>
@@ -261,6 +262,8 @@
       periode: { debut: I.dDebut, fin: I.dFin }, calculeLe: new Date().toISOString(),
       precedentes, veille,
       objectif: { annuel: I.objectifAnnuel || null, periode: I.objectifPeriode, remontes: I.bird.niveaux[3] },
+      // objectifs santé-sécurité dont la période croise celle de la revue, lus au jour du calcul (2026-10-13)
+      objectifs: VigieObjectifs.pourPeriode(lire(VigieObjectifs.CLE), VigieStore, I.dDebut, I.dFin),
       incidents: { total: I.atTotal, avecArret: I.atAvec, joursArret: I.atJours, tf: Math.round(I.tf * 10) / 10, tfReel: I.tfReel === null ? null : Math.round(I.tfReel * 10) / 10,
         bird: I.bird.niveaux, signalements: I.sigTotal, signalementsNouveaux: I.sigNouveaux },
       actions: { total: I.paTotal, faites: I.paFait, taux: I.paTaux, enCours: I.paEnCours, enRetard: I.paRetard, efficaces: I.paEfficaces, nonEfficaces: I.paNonEfficaces, aVerifier: I.paAVerifier },
@@ -279,7 +282,7 @@
     { id:"changements", titre:"Changements du contexte", aide:"Enjeux internes et externes, attentes des agents et des parties intéressées, exigences légales nouvelles, risques et opportunités pour la démarche.",
       auto: c => c.veille.length ? `<p class="form-note" style="margin:0 0 6px;">Veille réglementaire de la période :</p><ul class="liste-auto">${c.veille.map(v => `<li>${esc(dateFr(v.date))} — ${esc(v.titre)}${v.source ? " (" + esc(v.source) + ")" : ""}</li>`).join("")}</ul>` : `<p class="vide">Aucune actualité de veille réglementaire datée de la période.</p>` },
     { id:"objectifs", titre:"Politique et objectifs", aide:"La politique de santé et de sécurité est-elle tenue ? Les objectifs sont-ils atteints ?",
-      auto: c => chiffres([[c.objectif.annuel === null ? "—" : nombre(c.objectif.annuel, 0), "objectif annuel de remontée des presque-accidents"], [c.objectif.periode === null ? "—" : nombre(c.objectif.periode), "objectif ramené à la période"], [nombre(c.objectif.remontes, 0), "presque-accidents remontés"]]) },
+      auto: c => objectifsDeLaRevue(c) + chiffres([[c.objectif.annuel === null ? "—" : nombre(c.objectif.annuel, 0), "objectif annuel de remontée des presque-accidents"], [c.objectif.periode === null ? "—" : nombre(c.objectif.periode), "objectif ramené à la période"], [nombre(c.objectif.remontes, 0), "presque-accidents remontés"]]) },
     { id:"performance", titre:"Performance de santé et sécurité", aide:"Événements et tendances, non-conformités et actions correctives, résultats de surveillance, d'audit, de consultation des agents.",
       auto: c => `<p class="form-note" style="margin:0 0 6px;">Événements</p>` + chiffres([[nombre(c.incidents.total, 0), "événements AT/MP"], [nombre(c.incidents.avecArret, 0), "avec arrêt de travail"], [nombre(c.incidents.joursArret, 0), "jours d'arrêt"], [nombre(c.incidents.tf), "taux de fréquence estimé"], [nombre(c.incidents.tfReel), "taux de fréquence réel"], [c.incidents.bird.map(n => nombre(n, 0)).join(" · "), "pyramide de Bird : avec arrêt · sans arrêt · bénins · presque-accidents"], [nombre(c.incidents.signalements, 0), "signalements de presque-accidents"]])
         + `<p class="form-note" style="margin:0 0 6px;">Actions correctives (créées sur la période)</p>` + chiffres([[nombre(c.actions.total, 0), "actions"], [c.actions.taux === null ? "—" : c.actions.taux + " %", "soldées"], [nombre(c.actions.enRetard, 0), "en retard"], [nombre(c.actions.efficaces, 0), "jugées efficaces"], [nombre(c.actions.nonEfficaces, 0), "jugées non efficaces"], [nombre(c.actions.aVerifier, 0), "faites, efficacité à vérifier"]])
@@ -293,8 +296,16 @@
     { id:"conclusions", titre:"Conclusions", aide:"La démarche reste-t-elle pertinente, suffisante et efficace ?" },
     { id:"changementsNecessaires", titre:"Changements à apporter", aide:"Au système de management, à son intégration dans les autres activités." },
     { id:"ressourcesNecessaires", titre:"Ressources décidées", aide:"Moyens accordés ou à rechercher." },
-    { id:"orientations", titre:"Orientations", aide:"Incidences pour les orientations de la collectivité ou de l'entreprise." },
+    { id:"orientations", titre:"Orientations", aide:"Incidences pour les orientations de la collectivité." },
   ];
+  // Les objectifs santé-sécurité de la période (une revue antérieure au 2026-10-13 n'en a pas : rien n'est ajouté)
+  function objectifsDeLaRevue(c){
+    if (!Array.isArray(c.objectifs)) return "";
+    const f = (v, x) => VigieObjectifs.formater(v, { indicateur: x.indicateurId, unite: x.unite });
+    const ligne = x => `<li>${esc(x.intitule)} — ${esc(x.indicateur)} : ${esc(f(x.valeur, x))}, cible ${esc(x.cible === null ? "non chiffrée" : VigieObjectifs.libelleSens(x.sens) + " " + f(x.cible, x))}${x.echeance ? ", échéance " + esc(dateFr(x.echeance)) : ""} · <b>${esc(x.libelle)}</b></li>`;
+    return (c.objectifs.length ? `<p class="form-note" style="margin:0 0 6px;">Objectifs santé-sécurité de la période, au jour du calcul :</p><ul class="liste-auto">${c.objectifs.map(ligne).join("")}</ul>` : `<p class="vide">Aucun objectif santé-sécurité sur la période.</p>`)
+      + `<p class="form-note" style="margin:0 0 6px;">Remontée des presque-accidents</p>`;
+  }
   function chiffres(l){ return `<div class="chiffres">${l.map(([v, t]) => `<div class="chiffre"><b>${esc(v)}</b><span>${esc(t)}</span></div>`).join("")}</div>`; }
 
   // ---------- Liste ----------
@@ -369,10 +380,10 @@
         </div>
         ${fige ? "" : `<div style="margin-top:10px;"><button type="button" class="btn btn-ghost" id="btnActualiser">Actualiser les chiffres</button> <span class="form-note">après avoir changé la période, ou quand les données ont bougé</span></div>`}
         <div class="form-sub" style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:22px 0 0;">Données d'entrée</div>
-        ${ENTREES.map((s, i) => `<div class="sec"><h4>${String.fromCharCode(97 + i)}. ${esc(s.titre)}</h4><p class="aide">${esc(s.aide)}</p>${s.auto ? s.auto(c) : ""}
+        ${ENTREES.map((s, i) => `<div class="sec"><h4>${String.fromCharCode(97 + i)}. ${esc(s.titre)}</h4><p class="aide">${esc(VigieOrga.mots(s.aide))}</p>${s.auto ? s.auto(c) : ""}
           <label for="e-${s.id}">Analyse</label><textarea id="e-${s.id}" data-entree="${s.id}"${dis}>${esc((r.entrees || {})[s.id] || "")}</textarea></div>`).join("")}
         <div class="form-sub" style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:22px 0 0;">Résultats de la revue</div>
-        ${SORTIES.map(s => `<div class="sec"><h4>${esc(s.titre)}</h4><p class="aide">${esc(s.aide)}</p><textarea id="s-${s.id}" data-sortie="${s.id}" aria-label="${esc(s.titre)}"${dis}>${esc((r.sorties || {})[s.id] || "")}</textarea></div>`).join("")}
+        ${SORTIES.map(s => `<div class="sec"><h4>${esc(s.titre)}</h4><p class="aide">${esc(VigieOrga.mots(s.aide))}</p><textarea id="s-${s.id}" data-sortie="${s.id}" aria-label="${esc(s.titre)}"${dis}>${esc((r.sorties || {})[s.id] || "")}</textarea></div>`).join("")}
         <div class="sec"><h4>Actions décidées</h4><p class="aide">${fige ? "Reprises au Plan d'actions (origine « Revue de direction ») : leur état est celui du Plan d'actions." : "Elles rejoindront le Plan d'actions à la validation de la revue."}</p>
           <div id="rDecisions"></div>
           ${fige ? "" : `<button type="button" class="btn btn-ghost" id="btnAjoutDecision"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une action</button>`}

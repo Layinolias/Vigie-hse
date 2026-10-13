@@ -17,7 +17,7 @@
 
 ## Synthèse
 
-Sur 30 exigences (clauses 4 à 10, au niveau des sous-clauses) : **10 couvertes**, **12 partielles**, **5 écarts**, **3 hors outil** (au 2026-10-12 ; à l'étude du 2026-10-06 : 8, 13, 6, 3).
+Sur 30 exigences (clauses 4 à 10, au niveau des sous-clauses) : **11 couvertes**, **12 partielles**, **4 écarts**, **3 hors outil** (au 2026-10-13 ; à l'étude du 2026-10-06 : 8, 13, 6, 3).
 
 Le cœur opérationnel est solide : évaluation des risques, actions, compétences, urgences, surveillance, accidents et leurs analyses. Ce qui manque, c'est surtout la **couche « pilotage du système »** qu'un auditeur demande en premier : revue de direction, objectifs chiffrés, évaluation de la conformité réglementaire, programme d'audit interne. Les données d'entrée de ces exigences existent déjà presque toutes dans l'application ; il manque l'écran qui les assemble et en garde la trace.
 
@@ -49,7 +49,7 @@ Le cœur opérationnel est solide : évaluation des risques, actions, compétenc
 | 6.1.2 Identification des dangers, évaluation des risques | ✅ | **Document unique** (évaluations par service, cotation, familles de risque avec leur fiche), **Pénibilité** (expositions par poste et par an, seuils de l'article D4163-2), **Produits chimiques** (pictogrammes CLP, FDS, CMR) ; exports Excel et impression du registre | — |
 | 6.1.3 Exigences légales et autres exigences | 🔶 | **Veille réglementaire** (Administration) : titre, source, date, catégorie, statut, affichée au tableau de bord | à quels sites ou activités un texte s'applique, et l'obligation qu'il crée (voir 9.1.2) |
 | 6.1.4 Planification des actions | ✅ | **Plan d'actions** : rassemble les actions du Document unique (risques élevés et critiques), des inspections, des analyses d'accident, des exercices d'urgence et du dialogue social, avec responsable, échéance, priorité et statut | — |
-| 6.2 Objectifs de S&ST | ❌ | Indicateurs & Reporting **mesure** (taux de fréquence, actions soldées, observations traitées…), le Registre AT/MP le taux de gravité | un objectif chiffré par indicateur, son échéance, et l'écart affiché |
+| 6.2 Objectifs de S&ST | ✅ | **Objectifs santé-sécurité** (2026-10-13) : un objectif par indicateur calculé (taux de fréquence et de gravité, accidents, presque-accidents remontés, score du Document unique, inspections, observations, actions, retards de surveillance) ou mesure manuelle ; cible, échéance, écart du jour, responsable, moyens, justification, actions au **Plan d'actions**, résultat figé à la clôture ; repris par la **Revue de direction** | adoption, communication au personnel, objectifs par service, suivi au prorata (question 24) ; pas de politique (5.2) à laquelle les rattacher |
 
 ### 7 — Support
 
@@ -86,14 +86,14 @@ Le cœur opérationnel est solide : évaluation des risques, actions, compétenc
 |---|---|---|---|
 | 10.1 Généralités | ➖ | — | — |
 | 10.2 Événement indésirable, non-conformité, action corrective | ✅ | **Signalements** : tout le personnel signale ses presque-accidents (photos, mesure prise sur le moment), l'encadrement en décide la suite (2026-10-12) ; **Registre AT/MP** (cinq types, dont presque-accident et incident bénin), **Analyse d'accident** (arbre des causes, 5 pourquoi, Ishikawa), **Dossiers AT/MP & CITIS**, non-conformités d'inspection, actions correctives au **Plan d'actions**, avec la **vérification de leur efficacité** (résultat, date, par qui, constat ; une action jugée non efficace propose une action de suite — 2026-10-07) ; pyramide de Bird et objectif de remontée dans **Indicateurs & Reporting** | — |
-| 10.3 Amélioration continue | 🔶 | Plan d'actions et tendances du reporting | sans objectifs (6.2), pas de mesure du progrès |
+| 10.3 Amélioration continue | 🔶 | Plan d'actions, tendances du reporting, **objectifs chiffrés et leur écart** (6.2, 2026-10-13), revue de direction | la communication des résultats au personnel (question 24) |
 
 ## Écarts à combler, par ordre de valeur probable
 
 Classement technique, à revoir avec le préventeur et l'utilisateur avant tout chantier :
 
 1. ~~**Revue de direction (9.3)**~~ — ✅ fait le 2026-10-12 : page « Revue de direction » (Pilotage) — données d'entrée de la période calculées par le même composant que le Reporting (`assets/indicateurs.js`), analyse, conclusions, actions vers le Plan d'actions, revue validée figée et imprimable. Fréquence, participants et validation : question 23.
-2. **Objectifs (6.2)** — un objectif chiffré par indicateur du reporting, avec l'écart affiché. Alimente la revue de direction (1) et l'amélioration continue (10.3).
+2. ~~**Objectifs (6.2)**~~ — ✅ fait le 2026-10-13 : page « Objectifs santé-sécurité » (Pilotage) — cible chiffrée sur un indicateur calculé par `assets/indicateurs.js` (ou mesure manuelle), écart et état du jour, moyens, actions au Plan d'actions, résultat figé à la clôture ; repris par la revue de direction. Adoption, communication, suivi en cours d'année : question 24.
 3. **Évaluation de la conformité (9.1.2, avec 6.1.3)** — prolonger la veille réglementaire : à quoi s'applique le texte, l'obligation qu'il crée, conforme ou non, preuve, date, action.
 4. ~~**Efficacité des actions correctives (10.2)**~~ — ✅ fait le 2026-10-07 : Plan d'actions → une action « Fait » porte sa vérification d'efficacité (Efficace / Non efficace, date, par qui, constat), filtre « efficacité à vérifier », colonnes à l'export et à l'import ; « Non efficace » propose une action de suite. Aucun délai de vérification imposé (à décider avec le préventeur si besoin).
 5. **Programme d'audit interne (9.2)** — un type « audit du système » dans Inspection / Audit : calendrier, clauses auditées, auditeur, constats vers le Plan d'actions.

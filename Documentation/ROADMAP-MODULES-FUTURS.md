@@ -64,7 +64,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 | Jalon | Statut |
 |---|---|
 | **J0 — Généralisation commerciale (collectivités + secteur privé)** | 🟡 En cours — organisation configurable et secteur (vocabulaire) faits le 2026-09-30, **profils de droits et marque blanche faits le 2026-10-01** ; question 18 répondue le 2026-10-11 (tout garder en secteur entreprise, vocabulaire confirmé) ; restent le paquet de marque et le serveur multi-client |
-| **J1 — Accompagnement certification sécurité (ISO 45001, MASE...)** | 🟡 Étude ISO 45001 faite (2026-10-06, `CARTE-ISO-45001.md`) — au 2026-10-12 : 10 exigences couvertes, 12 partielles, 5 écarts ; comblés : efficacité des actions (§ 10.2, 2026-10-07), revue de direction (§ 9.3, 2026-10-12) ; MASE à étudier |
+| **J1 — Accompagnement certification sécurité (ISO 45001, MASE...)** | 🟡 Étude ISO 45001 faite (2026-10-06, `CARTE-ISO-45001.md`) — au 2026-10-13 : 11 exigences couvertes, 12 partielles, 4 écarts ; comblés : efficacité des actions (§ 10.2, 2026-10-07), revue de direction (§ 9.3, 2026-10-12), objectifs (§ 6.2, 2026-10-13) ; MASE à étudier |
 | **J2 — Culture sécurité, remontée presque-accident/incident/accident** | 🟡 Premier volet livré (2026-10-12) — module **Signalements** (réponse à la question 20), pyramide de Bird et objectif de remontée dans Indicateurs & Reporting ; restent l'anonymat, un délai de traitement et la lecture de la pyramide (question 22) |
 
 **Modules fonctionnels** :
@@ -171,6 +171,8 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 ---
 
 ## J1 — Jalon complémentaire : accompagnement à la certification sécurité (ISO 45001 et autres) — 🟡 Étude ISO 45001 faite (2026-10-06)
+
+**Fait le 2026-10-13 — objectifs santé-sécurité (§ 6.2, écart n° 2 de la carte)** : page `objectifs.html` (Pilotage, droit `objectifs`, Administrateur et RH d'office). Un objectif porte sur un indicateur du catalogue `assets/objectifs-ref.js` — les chiffres d'`assets/indicateurs.js`, plus le taux de gravité estimé — ou sur une mesure manuelle : cible « au plus » / « au moins », période, échéance, responsable, justification, moyens ; ses actions rejoignent le Plan d'actions (origine « Objectif »). La page montre la valeur du jour, l'écart et un état (sans prorata) ; « Clore » fige le résultat. La revue de direction liste les objectifs de sa période. Adoption, communication, suivi en cours d'année, objectifs par service : question 24. Écart suivant de la carte : l'évaluation de la conformité (§ 9.1.2).
 
 **Fait le 2026-10-12 — revue de direction (§ 9.3, écart n° 1 de la carte)** : page `revue-direction.html` (Pilotage, droit `revue-direction`, Administrateur et RH d'office). Une nouvelle revue photographie les données d'entrée de la période (suites des revues précédentes, veille réglementaire, objectif de remontée, accidents et pyramide, actions et efficacité, retards de surveillance, inspections, participation, risques) ; on y écrit l'analyse, les conclusions et les actions ; validée, elle est figée, imprimable en compte rendu, et ses actions rejoignent le Plan d'actions. Les chiffres viennent du nouveau composant `assets/indicateurs.js`, désormais utilisé aussi par Indicateurs & Reporting (rendu prouvé identique). Fréquence, participants, validation : question 23. Écart suivant de la carte : les objectifs chiffrés (§ 6.2).
 

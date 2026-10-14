@@ -20,6 +20,8 @@
 //     décisions (le Plan d'actions les affiche à tous, comme les actions des analyses d'accident).
 //   - Objectifs santé-sécurité (2026-10-13) : complets pour le niveau « consulter » des Objectifs ou de la Revue de
 //     direction (qui les reprend) ; aux autres, les seules actions (le Plan d'actions les affiche à tous).
+//   - Exigences de conformité réglementaire (2026-10-15) : complètes pour le niveau « consulter » de la Conformité
+//     réglementaire ou de la Revue de direction (qui en reprend le bilan) ; aux autres, les seules actions, avec leur service.
 //   - Signalements de presque-accidents et leurs photos (question 20, 2026-10-12) : complets (périmètre appliqué) pour
 //     qui peut les traiter ; à tout autre compte, ses seuls signalements (champ « auteur »), qu'il suit sur sa page.
 //   - Suivi médical et rendez-vous : l'encadrement seulement — manager (ses services, par le périmètre), RH et
@@ -41,6 +43,7 @@ const ATMP_VUE_AGENT = ['id', 'collectivite', 'service', 'dateAT', 'dateMois', '
 const ANALYSE_VUE_ACTIONS = ['id', 'atmpId', 'collectivite', 'service', 'dateAnalyse', 'actions'];
 const REVUE_VUE_DECISIONS = ['id', 'dateRevue', 'statut', 'decisions'];
 const OBJECTIF_VUE_ACTIONS = ['id', 'intitule', 'actions'];
+const EXIGENCE_VUE_ACTIONS = ['id', 'intitule', 'service', 'actions'];
 
 // ce que les profils du compte lui donnent (assets/droits.js, via serveur/droits.js)
 const peut = (p, module, niveau) => !!p && atteint(p, module, niveau);
@@ -79,6 +82,7 @@ function regle(page, cle){
     case 'vigie_hse_rdv_medicaux':      return encadrement(page) ? null : RETIRE;
     case 'vigie_hse_revues_direction':  return peut(page, 'revue-direction', 'consulter') ? null : REVUE_VUE_DECISIONS;
     case 'vigie_hse_objectifs':         return ouvert(page, ['objectifs', 'revue-direction']) ? null : OBJECTIF_VUE_ACTIONS;
+    case 'vigie_hse_exigences':         return ouvert(page, ['conformite', 'revue-direction']) ? null : EXIGENCE_VUE_ACTIONS;
     case 'vigie_hse_signalements':
     case 'vigie_hse_signalements_photos': return peut(page, 'signalements', 'traiter') ? null : SIENS;
     case 'vigie_hse_audit_log':
@@ -131,4 +135,4 @@ function partielles(tout, recu){
   return Object.keys(tout).filter(k => !recu[k] || recu[k].valeur !== tout[k].valeur).sort();
 }
 
-module.exports = { regle, vue, filtrer, ecriture, partielles, RETIRE, SIENS, ATMP_VUE_AGENT, REVUE_VUE_DECISIONS, OBJECTIF_VUE_ACTIONS, PAGE_UNIQUE };
+module.exports = { regle, vue, filtrer, ecriture, partielles, RETIRE, SIENS, ATMP_VUE_AGENT, REVUE_VUE_DECISIONS, OBJECTIF_VUE_ACTIONS, EXIGENCE_VUE_ACTIONS, PAGE_UNIQUE };

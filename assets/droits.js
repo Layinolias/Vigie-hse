@@ -62,6 +62,9 @@
     // Objectifs santé-sécurité (ISO 45001 § 6.2, 2026-10-13) : fixer, suivre, clore. Question 24 (2026-10-14) : fixés par le HSE
     // (Préventeur, avec Administrateur et RH), lus par l'encadrement (Manager).
     mod("objectifs", "Pilotage", "Objectifs santé-sécurité", STD),
+    // Conformité réglementaire (ISO 45001 § 6.1.3 et § 9.1.2, 2026-10-15) : exigences applicables, évaluation de leur
+    // respect. Aucun préréglage hors Administrateur et RH en attendant la question 26.
+    mod("conformite", "Pilotage", "Conformité réglementaire", STD),
     // Revue de direction (ISO 45001 § 9.3, 2026-10-12) : préparer, valider, rouvrir. Aucun préréglage hors Administrateur et RH.
     mod("revue-direction", "Pilotage", "Revue de direction", STD),
     mod("administration", "Pilotage", "Administration", [["gerer", "Gérer"]])

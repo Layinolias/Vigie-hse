@@ -67,6 +67,7 @@ const REGLES = {
   signalements_parametres: regle('signalements', 'traiter'),
   revues_direction: GERER('revue-direction'),
   objectifs: GERER('objectifs'),
+  exigences: GERER('conformite'),
   ds_questions: regle('dialogue-social', 'participer'), ds_reunions: regle('dialogue-social', 'participer'), ds_visites: regle('dialogue-social', 'participer'),
 };
 const regleGenerale = GERER('administration');

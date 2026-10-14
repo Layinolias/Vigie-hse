@@ -79,6 +79,8 @@
   };
   // Même nom de champ, autre sens selon le registre
   var PAR_REGISTRE = {
+    vigie_hse_exigences:    { intitule:"Exigence", reference:"Texte de référence", theme:"Thème", prochaineEvaluation:"Prochaine évaluation",
+                              evaluations:"Évaluations de conformité", veilleId:"Actualité de veille (identifiant)", retireeLe:"Retirée le", retireePar:"Retirée par" },
     vigie_hse_dataset:      { nature:"Nature de la lésion", statut:"Statut de l'agent" },
     vigie_hse_rh_log:       { record:"Déclaration" },
     vigie_hse_visites:      { dateDerniere:"Date de la dernière visite" },

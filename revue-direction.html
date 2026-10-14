@@ -234,7 +234,10 @@
 
   // ---------- Stockage ----------
   const CLE = "vigie_hse_revues_direction";
-  const toutes = () => lire(CLE);
+  // Lecture seule (question 23 : l'administrateur ouvre la revue, par les profils, à qui il veut — les représentants
+  // par exemple) : les seules revues validées, figées au jour de la validation. Un brouillon se recalcule avec les
+  // données du compte qui l'ouvre ; celles d'un compte limité (services, données de santé) donneraient des chiffres faux.
+  const toutes = () => lire(CLE).filter(r => peutGerer || r.statut === "Validée");
   function modifierRevues(modif){ const l = toutes(); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
   const parDate = (a, b) => String(b.dateRevue || "").localeCompare(String(a.dateRevue || ""));
   const idAction = (r, d) => "pa-rd-" + r.id + "-" + d.id;
@@ -318,6 +321,7 @@
     $("kpiDerniere").textContent = validees.length ? dateFr(validees[0].dateRevue) : "—";
     $("kpiDecisions").textContent = ouvertes;
     $("kpiBrouillons").textContent = l.filter(r => r.statut !== "Validée").length;
+    if (!peutGerer) $("kpiBrouillons").closest(".ps-kpi").style.display = "none";
     $("tbody").innerHTML = l.length ? l.map(r => {
       const dec = r.decisions || [];
       const faites = r.statut === "Validée" ? dec.filter(d => statutDecision(r, d, actions) === "Fait").length : 0;
@@ -329,7 +333,7 @@
         <td style="white-space:normal;">${esc(r.participants || "—")}</td>
         <td><button type="button" class="act-edit" data-ouvrir="${esc(r.id)}">Ouvrir</button></td>
       </tr>`;
-    }).join("") : `<tr class="empty-row"><td colspan="6">Aucune revue de direction pour le moment.${peutGerer ? " « Nouvelle revue » en prépare une à partir des données de l'application." : ""}</td></tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="6">Aucune revue de direction ${peutGerer ? "" : "validée "}pour le moment.${peutGerer ? " « Nouvelle revue » en prépare une à partir des données de l'application." : ""}</td></tr>`;
   }
   $("tbody").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); });
   if (peutGerer){

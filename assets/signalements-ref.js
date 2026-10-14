@@ -4,10 +4,11 @@
    Réponse du préventeur à la question 20 (Cahier, 2026-10-11) : un formulaire « Signaler » à part, ouvert à
    tous ; le manager le traite (droit distribuable par profil) ; suites possibles : classé, action au Plan
    d'actions, analyse d'accident, inscription au Registre AT/MP ; « tout doit compter », une pyramide de Bird
-   et un objectif de remontée.
+   et un objectif de remontée. Question 22 (Cahier, 2026-10-14) : pas d'anonymat, un délai de traitement de
+   8 jours, la pyramide confirmée telle quelle, un objectif de remontée pour toute l'organisation.
 
    Lu par signalements.html (saisie, traitement), reporting.html (pyramide, objectif) et dashboard.html
-   (compteur). Une seule définition des suites, du statut, des niveaux de la pyramide et du décompte des
+   (compteur). Une seule définition des suites, du statut, du délai de traitement, des niveaux de la pyramide et du décompte des
    presque-accidents remontés — Documentation/QUESTIONS-METIER-EN-ATTENTE.md, questions 20 et 22.
    ========================================================================== */
 (function (racine) {
@@ -40,7 +41,7 @@
 
   // Pyramide de Bird (Frank E. Bird, 1969 : pour 1 accident grave, 10 accidents légers, 30 accidents matériels
   // et 600 incidents sans dommage). Le préventeur l'a demandée ; la correspondance avec les types du Registre
-  // AT/MP est une lecture, à confirmer (question 22) : « tout doit compter », chaque événement va dans un niveau.
+  // AT/MP, confirmée à la question 22 : « tout doit compter », chaque événement va dans un niveau.
   var NIVEAUX_BIRD = [
     { id: "arret", libelle: "Avec arrêt de travail", detail: "accidents du travail ou de trajet, maladies professionnelles", repere: 1 },
     { id: "sansArret", libelle: "Sans arrêt", detail: "accidents du travail ou de trajet, maladies professionnelles", repere: 10 },
@@ -82,10 +83,34 @@
     try { var p = JSON.parse(store.getItem(CLE_PARAMETRES) || "null"); return p && typeof p === "object" ? p : {}; } catch (e) { return {}; }
   }
 
+  // Délai de traitement (question 22 : « 8 jours ») : un signalement encore « Nouveau » au-delà de ce délai après
+  // son envoi est en retard. 8 jours calendaires par défaut ; chaque organisation le règle sur la page Signalements.
+  var DELAI_TRAITEMENT = 8;
+  function delaiTraitement(params) {
+    var d = Number(params && params.delaiTraitement);
+    return Math.floor(d) === d && d >= 1 && d <= 365 ? d : DELAI_TRAITEMENT;
+  }
+  // Date limite de traitement (« AAAA-MM-JJ », heure locale) : jour de l'envoi + délai — à défaut de date d'envoi,
+  // le jour des faits. null si aucune date n'est lisible.
+  function echeanceTraitement(s, delai) {
+    var D = racine.VigieDates, t = null;
+    if (s && s.dateCreation) { t = new Date(s.dateCreation); if (isNaN(t)) t = null; }
+    if (!t && s && /^\d{4}-\d{2}-\d{2}$/.test(String(s.date || ""))) t = D.lire(s.date);
+    if (!t) return null;
+    t.setDate(t.getDate() + (delai || DELAI_TRAITEMENT));
+    return D.iso(t);
+  }
+  function enRetard(s, aujourdhui, delai) {
+    if (statut(s) !== "Nouveau") return false;
+    var e = echeanceTraitement(s, delai);
+    return !!e && aujourdhui > e;
+  }
+
   racine.VigieSignalements = {
     CLE: CLE, CLE_PHOTOS: CLE_PHOTOS, CLE_PARAMETRES: CLE_PARAMETRES,
     SUITES: SUITES, libelleSuite: libelleSuite, statut: statut,
     NIVEAUX_BIRD: NIVEAUX_BIRD, niveauBird: niveauBird, pyramide: pyramide,
-    objectifSurPeriode: objectifSurPeriode, lireParametres: lireParametres
+    objectifSurPeriode: objectifSurPeriode, lireParametres: lireParametres,
+    DELAI_TRAITEMENT: DELAI_TRAITEMENT, delaiTraitement: delaiTraitement, echeanceTraitement: echeanceTraitement, enRetard: enRetard
   };
 })(typeof window !== "undefined" ? window : this);

@@ -391,6 +391,7 @@
 <script src="assets/icones.js"></script>
 <script src="assets/menu-lateral.js"></script>
 <script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
 <script src="assets/signalements-ref.js"></script>
 <script>
   (function(){
@@ -750,8 +751,10 @@
         const sig = JSON.parse(VigieStore.getItem(VigieSignalements.CLE) || "[]");
         const l = Array.isArray(sig) ? sig : [];
         if (D.peut("signalements", "traiter")){
-          const n = l.filter(s => s && (!isScoped || myServices.includes(s.service)) && VigieSignalements.statut(s) === "Nouveau").length;
-          $("modSigCount").textContent = n; $("modSigLabel").textContent = n > 1 ? "nouveaux à traiter" : "nouveau à traiter";
+          const aTraiter = l.filter(s => s && (!isScoped || myServices.includes(s.service)) && VigieSignalements.statut(s) === "Nouveau");
+          const delai = VigieSignalements.delaiTraitement(VigieSignalements.lireParametres(VigieStore));
+          const n = aTraiter.length, r = aTraiter.filter(s => VigieSignalements.enRetard(s, VigieDates.aujourdhui(), delai)).length;
+          $("modSigCount").textContent = n; $("modSigLabel").textContent = (n > 1 ? "nouveaux à traiter" : "nouveau à traiter") + (r ? `, dont ${r} en retard` : "");
         } else {
           const n = l.filter(s => s && s.auteur === session.user).length;
           $("modSigCount").textContent = n; $("modSigLabel").textContent = n > 1 ? "signalements envoyés" : "signalement envoyé";

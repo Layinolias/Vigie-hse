@@ -104,6 +104,7 @@
   .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
   .chip.s-nouveau{ color:var(--accent); background:rgba(var(--accent-rgb),.12); } .chip.s-nouveau::before{ background:var(--accent); }
   .chip.s-encours{ color:var(--warning); background:var(--warning-bg); } .chip.s-encours::before{ background:var(--warning); }
+  .chip.s-retard{ color:var(--danger); background:var(--danger-bg); margin-left:4px; } .chip.s-retard::before{ background:var(--danger); }
   .chip.s-clos{ color:var(--success); background:var(--success-bg); } .chip.s-clos::before{ background:var(--success); }
   .suite-tag{ display:inline-block; font-size:11px; color:var(--text-muted); background:var(--bg-2); border-radius:var(--r-sm); padding:2px 7px; margin:1px 3px 1px 0; }
   .act-edit{ color:var(--accent); font-weight:600; text-decoration:none; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
@@ -191,7 +192,7 @@
           </div>
           <div class="ps-kpi">
             <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
-            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiNouveau">–</span><span class="ps-kpi-label">Nouveaux</span></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiNouveau">–</span><span class="ps-kpi-label" id="kpiNouveauLabel">Nouveaux</span></div>
           </div>
           <div class="ps-kpi">
             <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-activity"/></svg></div>
@@ -254,7 +255,7 @@
         </div>
         <div class="field"><span class="flabel">Service</span><select id="fServiceFiltre"></select></div>
         <div class="field"><span class="flabel">Statut</span>
-          <select id="fStatut"><option value="all">Tous</option><option value="Nouveau">Nouveau</option><option value="En cours">En cours</option><option value="Clos">Clos</option></select>
+          <select id="fStatut"><option value="all">Tous</option><option value="Nouveau">Nouveau</option><option value="retard">En retard</option><option value="En cours">En cours</option><option value="Clos">Clos</option></select>
         </div>
         <div class="field"><span class="flabel">Recherche</span><input type="search" id="fRecherche" placeholder="Lieu, description…"></div>
         <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
@@ -334,6 +335,9 @@
   const lireRegistre = () => lireListe("vigie_hse_dataset");
   const inscriptionDe = (id, registre) => (registre || lireRegistre()).find(r => r && r.signalementId === id) || null;
   const idAction = (s, a) => "pa-sig-" + s.id + "-" + a.id;
+  // Délai de traitement (question 22) : un signalement encore « Nouveau » au-delà est en retard.
+  const delai = () => S.delaiTraitement(S.lireParametres(VigieStore));
+  const enRetard = (s) => S.enRetard(s, VigieDates.aujourdhui(), delai());
 
   // ---------- Compteurs ----------
   function renderKpis(){
@@ -341,6 +345,8 @@
     $("kpiTotal").textContent = LISTE.length;
     $("kpiTotalLabel").textContent = peutTraiter ? "Signalements" : "Mes signalements";
     $("kpiNouveau").textContent = st.filter(x => x === "Nouveau").length;
+    const nRetard = LISTE.filter(enRetard).length;
+    $("kpiNouveauLabel").textContent = nRetard ? `Nouveaux · ${nRetard} en retard` : "Nouveaux";
     $("kpiEnCours").textContent = st.filter(x => x === "En cours").length;
     $("kpiClos").textContent = st.filter(x => x === "Clos").length;
   }
@@ -470,6 +476,7 @@
   $("btnReset").addEventListener("click", () => { fColF.value = "all"; remplirServicesFiltre(); fSvcF.value = "all"; fStatut.value = "all"; fRecherche.value = ""; renderTable(); });
   const norm = (s) => String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   const chipStatut = (st) => `<span class="chip ${st === "Clos" ? "s-clos" : st === "En cours" ? "s-encours" : "s-nouveau"}">${esc(st)}</span>`;
+  const chipRetard = (s) => enRetard(s) ? `<span class="chip s-retard" title="À traiter avant le ${esc(dateFr(S.echeanceTraitement(s, delai())))}">En retard</span>` : "";
   const tagsSuites = (s) => ((s.traitement && s.traitement.suites) || []).map(id => `<span class="suite-tag">${esc(S.libelleSuite(id))}</span>`).join("") || `<span class="vide">—</span>`;
 
   function renderTable(){
@@ -478,7 +485,7 @@
     const rows = LISTE.filter(s =>
       (col === "all" || VigieOrga.actuel(s.collectivite) === col) &&
       (svc === "all" || s.service === svc) &&
-      (st === "all" || S.statut(s) === st) &&
+      (st === "all" || (st === "retard" ? enRetard(s) : S.statut(s) === st)) &&
       (!q || norm([s.lieu, s.faits, s.risque, s.mesure].join(" ")).includes(q))
     ).sort((a,b) => (String(b.date) + String(b.heure || "")).localeCompare(String(a.date) + String(a.heure || "")));
     $("resultCount").textContent = rows.length;
@@ -495,7 +502,7 @@
         <td>${esc(s.service)}</td>
         <td class="wrap"><div class="clamp">${esc(s.faits)}</div></td>
         <td class="mono">${Number(s.nbPhotos) > 0 ? esc(s.nbPhotos) : "—"}</td>
-        <td>${chipStatut(S.statut(s))}</td>
+        <td>${chipStatut(S.statut(s))}${chipRetard(s)}</td>
         <td>${tagsSuites(s)}</td>
         ${peutTraiter ? `<td>${esc(s.auteur || "—")}</td>` : ""}
         <td><button type="button" class="act-edit" data-ouvrir="${esc(s.id)}">Ouvrir</button></td>
@@ -566,7 +573,7 @@
     let html = `
       <div class="panel-head">
         <div><h3 class="panel-title">Presque-accident du ${esc(dateFr(s.date))}${s.heure ? " à " + esc(s.heure) : ""} — ${esc(s.lieu)}</h3>
-        <div class="fiche-meta">${esc(VigieOrga.de(s))} · ${esc(s.service)}${peutTraiter ? " · signalé par " + esc(s.auteur || "—") : ""} · ${chipStatut(st)}</div></div>
+        <div class="fiche-meta">${esc(VigieOrga.de(s))} · ${esc(s.service)}${peutTraiter ? " · signalé par " + esc(s.auteur || "—") : ""} · ${chipStatut(st)}${chipRetard(s)}${st === "Nouveau" && S.echeanceTraitement(s, delai()) ? ` · à traiter avant le ${esc(dateFr(S.echeanceTraitement(s, delai())))}` : ""}</div></div>
         <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnFermerFiche">Fermer</button></div>
       </div>
       <div class="fiche-grille">
@@ -680,25 +687,30 @@
     const registre = lireRegistre().filter(r => !isScoped || myServices.includes(r.service));
     const p = S.pyramide(registre.filter(r => String(r.dateAT || "").slice(0, 4) === annee), LISTE.filter(s => String(s.date || "").slice(0, 4) === annee), registre);
     const remontes = p.niveaux[3];
-    const objectif = Number(S.lireParametres(VigieStore).objectifAnnuel) || 0;
+    const objectif = Number(S.lireParametres(VigieStore).objectifAnnuel) || 0, j = delai();
     const pct = objectif > 0 ? Math.round(remontes / objectif * 100) : 0;
     $("objectif").innerHTML = `
       <div class="objectif-texte"><b>${remontes}</b> presque-accident${remontes > 1 ? "s" : ""} remonté${remontes > 1 ? "s" : ""} en ${esc(annee)}${isScoped ? " dans vos services" : ""}${objectif > 0 ? ` — objectif de l'année : <b>${objectif}</b> (${pct} %)` : " — aucun objectif de remontée fixé"}</div>
       ${objectif > 0 ? `<div class="jauge" aria-hidden="true"><i style="width:${Math.min(100, pct)}%"></i></div>` : ""}
-      ${isScoped ? (objectif > 0 ? `<span class="form-note">objectif fixé pour toute l'organisation</span>` : "") : `
+      ${isScoped ? `${objectif > 0 ? `<span class="form-note">objectif fixé pour toute l'organisation</span>` : ""}<span class="form-note">délai de traitement : ${j} jour${j > 1 ? "s" : ""}</span>` : `
       <label class="form-note" for="oObjectif">Objectif par an</label>
       <input type="number" id="oObjectif" min="0" step="1" value="${objectif > 0 ? objectif : ""}" placeholder="ex. 50">
+      <label class="form-note" for="oDelai">Délai de traitement (jours)</label>
+      <input type="number" id="oDelai" min="1" max="365" step="1" value="${j}">
       <button type="button" class="btn btn-ghost" id="btnObjectif">Enregistrer</button>`}`;
     $("objectif").style.display = "";
   }
   $("objectif").addEventListener("click", (e) => {
     if (!e.target.closest("#btnObjectif") || isScoped || !peutTraiter) return;
-    const v = Math.round(Number($("oObjectif").value));
-    const p = S.lireParametres(VigieStore);
+    const v = Math.round(Number($("oObjectif").value)), j = Number($("oDelai").value);
+    if (!(Math.floor(j) === j && j >= 1 && j <= 365)){ alert("Le délai de traitement est un nombre entier de jours, de 1 à 365."); $("oDelai").focus(); return; }
+    const p = S.lireParametres(VigieStore), avant = Number(p.objectifAnnuel) || 0, delaiAvant = S.delaiTraitement(p);
     if (v > 0) p.objectifAnnuel = v; else delete p.objectifAnnuel;
-    try { VigieStore.setItem(S.CLE_PARAMETRES, JSON.stringify(p)); } catch(err){ alert("L'objectif n'a pas pu être enregistré."); return; }
-    logAudit("Modification", v > 0 ? `Objectif de remontée des presque-accidents : ${v} par an` : "Objectif de remontée des presque-accidents retiré");
-    renderObjectif();
+    if (j === S.DELAI_TRAITEMENT) delete p.delaiTraitement; else p.delaiTraitement = j;
+    try { VigieStore.setItem(S.CLE_PARAMETRES, JSON.stringify(p)); } catch(err){ alert("Le réglage n'a pas pu être enregistré."); return; }
+    if ((v > 0 ? v : 0) !== avant) logAudit("Modification", v > 0 ? `Objectif de remontée des presque-accidents : ${v} par an` : "Objectif de remontée des presque-accidents retiré");
+    if (j !== delaiAvant) logAudit("Modification", `Délai de traitement des signalements : ${j} jour${j > 1 ? "s" : ""}`);
+    render();
   });
 
   // ---------- Export (comptes qui traitent) ----------
@@ -709,12 +721,12 @@
       const lignes = LISTE.map(s => { const t = s.traitement || {}, ins = inscriptionDe(s.id, registre); return {
         "ID": s.id, "Date": s.date, "Heure": s.heure || "", [VigieOrga.libelle()]: VigieOrga.de(s), "Service": s.service, "Lieu": s.lieu,
         "Ce qui s'est passé": s.faits, "Ce qui aurait pu arriver": s.risque, "Mesure prise sur le moment": s.mesure || "", "Photos": Number(s.nbPhotos) || 0,
-        "Déclarant": s.auteur || "", "Statut": S.statut(s), "Suite": (t.suites || []).map(S.libelleSuite).join(", "), "Commentaire": t.commentaire || "",
+        "Déclarant": s.auteur || "", "Statut": S.statut(s), "À traiter avant": S.echeanceTraitement(s, delai()) || "", "En retard": enRetard(s) ? "Oui" : "", "Suite": (t.suites || []).map(S.libelleSuite).join(", "), "Commentaire": t.commentaire || "",
         "Traité par": t.par || "", "Traité le": t.date || "", "Clos le": s.closLe || "", "ID Registre AT/MP": ins ? ins.id : "" }; });
       const actions = [];
       LISTE.forEach(s => (s.actions || []).forEach(a => actions.push({ "ID Signalement": s.id, "Lieu": s.lieu, "Action": a.description, "Responsable": a.responsable || "", "Échéance": a.echeance || "" })));
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: ["ID", "Date", "Heure", VigieOrga.libelle(), "Service", "Lieu", "Ce qui s'est passé", "Ce qui aurait pu arriver", "Mesure prise sur le moment", "Photos", "Déclarant", "Statut", "Suite", "Commentaire", "Traité par", "Traité le", "Clos le", "ID Registre AT/MP"] }), "Signalements");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: ["ID", "Date", "Heure", VigieOrga.libelle(), "Service", "Lieu", "Ce qui s'est passé", "Ce qui aurait pu arriver", "Mesure prise sur le moment", "Photos", "Déclarant", "Statut", "À traiter avant", "En retard", "Suite", "Commentaire", "Traité par", "Traité le", "Clos le", "ID Registre AT/MP"] }), "Signalements");
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(actions, { header: ["ID Signalement", "Lieu", "Action", "Responsable", "Échéance"] }), "Actions");
       XLSX.writeFile(wb, `signalements_${VigieDates.aujourdhui()}.xlsx`);
     });

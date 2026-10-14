@@ -68,6 +68,7 @@
     { titre: "Pilotage", liens: [
       ["reporting.html", "i-bar-chart", "Indicateurs &amp; Reporting"],
       ["objectifs.html", "i-trending-up", "Objectifs santé-sécurité"],
+      ["conformite.html", "i-shield-check", "Conformité réglementaire"],
       ["revue-direction.html", "i-target", "Revue de direction"],
       ["administration.html", "i-settings", "Administration"]] }
   ];
@@ -103,6 +104,7 @@
       "dialogue-social.html": lire("dialogue-social"),
       "reporting.html": lire("reporting"),
       "objectifs.html": lire("objectifs"),               // ISO 45001 § 6.2
+      "conformite.html": lire("conformite"),             // ISO 45001 § 6.1.3 et § 9.1.2
       "revue-direction.html": lire("revue-direction"),   // ISO 45001 § 9.3
       "administration.html": D.peut("administration", "gerer")
     };

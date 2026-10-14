@@ -15,6 +15,7 @@
 <script src="assets/signalements-ref.js"></script>
 <script src="assets/indicateurs.js"></script>
 <script src="assets/objectifs-ref.js"></script>
+<script src="assets/conformite-ref.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
 <link rel="stylesheet" href="assets/commun.css">
 <style>
@@ -267,6 +268,8 @@
       objectif: { annuel: I.objectifAnnuel || null, periode: I.objectifPeriode, remontes: I.bird.niveaux[3] },
       // objectifs santé-sécurité dont la période croise celle de la revue, lus au jour du calcul (2026-10-13)
       objectifs: VigieObjectifs.pourPeriode(lire(VigieObjectifs.CLE), VigieStore, I.dDebut, I.dFin),
+      // bilan de la conformité réglementaire à la date du calcul (2026-10-15) ; null si ce compte ne reçoit pas toutes les exigences
+      conformite: conformiteDuJour(),
       incidents: { total: I.atTotal, avecArret: I.atAvec, joursArret: I.atJours, tf: Math.round(I.tf * 10) / 10, tfReel: I.tfReel === null ? null : Math.round(I.tfReel * 10) / 10,
         bird: I.bird.niveaux, signalements: I.sigTotal, signalementsNouveaux: I.sigNouveaux },
       actions: { total: I.paTotal, faites: I.paFait, taux: I.paTaux, enCours: I.paEnCours, enRetard: I.paRetard, efficaces: I.paEfficaces, nonEfficaces: I.paNonEfficaces, aVerifier: I.paAVerifier },
@@ -290,7 +293,7 @@
       auto: c => `<p class="form-note" style="margin:0 0 6px;">Événements</p>` + chiffres([[nombre(c.incidents.total, 0), "événements AT/MP"], [nombre(c.incidents.avecArret, 0), "avec arrêt de travail"], [nombre(c.incidents.joursArret, 0), "jours d'arrêt"], [nombre(c.incidents.tf), "taux de fréquence estimé"], [nombre(c.incidents.tfReel), "taux de fréquence réel"], [c.incidents.bird.map(n => nombre(n, 0)).join(" · "), "pyramide de Bird : avec arrêt · sans arrêt · bénins · presque-accidents"], [nombre(c.incidents.signalements, 0), "signalements de presque-accidents"]])
         + `<p class="form-note" style="margin:0 0 6px;">Actions correctives (créées sur la période)</p>` + chiffres([[nombre(c.actions.total, 0), "actions"], [c.actions.taux === null ? "—" : c.actions.taux + " %", "soldées"], [nombre(c.actions.enRetard, 0), "en retard"], [nombre(c.actions.efficaces, 0), "jugées efficaces"], [nombre(c.actions.nonEfficaces, 0), "jugées non efficaces"], [nombre(c.actions.aVerifier, 0), "faites, efficacité à vérifier"]])
         + `<p class="form-note" style="margin:0 0 6px;">Surveillance (à la date du calcul) et audits</p>` + chiffres([[nombre(c.surveillance.visitesEnRetard, 0), "visites médicales en retard"], [nombre(c.surveillance.verificationsEnRetard, 0), "vérifications périodiques en retard"], [nombre(c.surveillance.verificationsNonConformes, 0), "vérifications non conformes (période)"], [nombre(c.surveillance.habilitationsExpirees, 0), "habilitations expirées"], [nombre(c.surveillance.epiEnRetard, 0), "EPI à renouveler en retard"], [nombre(c.audits.inspections, 0), "inspections (période)"], [c.audits.tauxConformite === null ? "—" : c.audits.tauxConformite + " %", "inspections conformes"]])
-        + `<p class="form-note" style="margin:0 0 6px;">Consultation et participation, risques</p>` + chiffres([[nombre(c.participation.observations, 0), "observations au registre santé et sécurité"], [c.participation.observationsTraitees === null ? "—" : c.participation.observationsTraitees + " %", "observations traitées"], [nombre(c.participation.questionsDirection, 0), "questions des représentants"], [nombre(c.participation.reunions, 0), "réunions de l'instance"], [nombre(c.risques.prioritaires, 0), "risques élevés ou critiques évalués (période)"]]) },
+        + `<p class="form-note" style="margin:0 0 6px;">Consultation et participation, risques</p>` + chiffres([[nombre(c.participation.observations, 0), "observations au registre santé et sécurité"], [c.participation.observationsTraitees === null ? "—" : c.participation.observationsTraitees + " %", "observations traitées"], [nombre(c.participation.questionsDirection, 0), "questions des représentants"], [nombre(c.participation.reunions, 0), "réunions de l'instance"], [nombre(c.risques.prioritaires, 0), "risques élevés ou critiques évalués (période)"]]) + conformiteDeLaRevue(c) },
     { id:"ressources", titre:"Ressources", aide:"Les moyens humains, techniques et financiers sont-ils suffisants ?", auto: null },
     { id:"communications", titre:"Communications avec les parties intéressées", aide:"Échanges avec l'inspection du travail, la médecine de prévention, les assureurs, les entreprises extérieures, les représentants du personnel…", auto: null },
     { id:"ameliorations", titre:"Pistes d'amélioration", aide:"Ce qui pourrait être fait mieux, ou autrement.", auto: null },
@@ -308,6 +311,24 @@
     const ligne = x => `<li>${esc(x.intitule)}${x.service ? " (" + esc(x.service) + ")" : ""} — ${esc(x.indicateur)} : ${esc(f(x.valeur, x))}, cible ${esc(x.cible === null ? "non chiffrée" : VigieObjectifs.libelleSens(x.sens) + " " + f(x.cible, x))}${x.echeance ? ", échéance " + esc(dateFr(x.echeance)) : ""} · <b>${esc(x.libelle)}</b></li>`;
     return (c.objectifs.length ? `<p class="form-note" style="margin:0 0 6px;">Objectifs santé-sécurité de la période, au jour du calcul :</p><ul class="liste-auto">${c.objectifs.map(ligne).join("")}</ul>` : `<p class="vide">Aucun objectif santé-sécurité sur la période.</p>`)
       + `<p class="form-note" style="margin:0 0 6px;">Remontée des presque-accidents</p>`;
+  }
+  // Conformité réglementaire (ISO 45001 § 9.1.2) : le bilan des exigences en vigueur, et leurs écarts (15 au plus)
+  function conformiteDuJour(){
+    if (!VigieStore.complet(VigieConformite.CLE)) return null;
+    const s = VigieConformite.synthese(lire(VigieConformite.CLE), VigieDates.aujourdhui());
+    s.ecarts = s.ecarts.slice(0, 15);
+    return s;
+  }
+  // (une revue calculée avant le 2026-10-15 n'en a pas : rien n'est ajouté)
+  function conformiteDeLaRevue(c){
+    if (c.conformite === undefined) return "";
+    const t = `<p class="form-note" style="margin:0 0 6px;">Évaluation de la conformité réglementaire (à la date du calcul)</p>`;
+    if (c.conformite === null) return t + `<p class="vide">Bilan non calculé : le compte qui a fait le calcul ne recevait pas toutes les exigences.</p>`;
+    const k = c.conformite;
+    if (!k.total) return t + `<p class="vide">Aucune exigence au registre de conformité réglementaire.</p>`;
+    return t + chiffres([[nombre(k.total, 0), "exigences en vigueur"], [k.taux === null ? "—" : k.taux + " %", "conformes, parmi les exigences évaluées"], [nombre(k.nonConformes, 0), "non conformes"],
+        [nombre(k.partiels, 0), "partiellement conformes"], [nombre(k.aEvaluer, 0), "jamais évaluées"], [nombre(k.aReevaluer, 0), "à réévaluer (date passée)"]])
+      + (k.ecarts.length ? `<ul class="liste-auto">${k.ecarts.map(x => `<li>${esc(x.intitule)}${x.reference ? " — " + esc(x.reference) : ""}${x.service ? " (" + esc(x.service) + ")" : ""} · <b>${esc(x.libelle)}</b>${x.date ? " le " + esc(dateFr(x.date)) : ""}</li>`).join("")}</ul>` : "");
   }
   function chiffres(l){ return `<div class="chiffres">${l.map(([v, t]) => `<div class="chiffre"><b>${esc(v)}</b><span>${esc(t)}</span></div>`).join("")}</div>`; }
 

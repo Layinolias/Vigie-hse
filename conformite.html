@@ -1,0 +1,666 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conformité réglementaire</title>
+<meta name="description" content="Conformité réglementaire : les exigences légales qui s'appliquent et l'évaluation de leur respect, avec preuves et actions (ISO 45001, § 6.1.3 et § 9.1.2).">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/conformite-ref.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<script src="assets/import-fichier.js"></script>
+<script src="assets/impression.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  select, input[type="text"], input[type="date"], input[type="search"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:150px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:68px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled, select:disabled{ background:var(--bg-2); color:var(--text); opacity:1; cursor:default; }
+  @media (max-width:640px){ select, input[type="text"], input[type="date"], input[type="search"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  @media (min-width:560px){ .form-grid .span2{ grid-column:span 2; } }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg td.num{ font-family:"IBM Plex Mono",monospace; text-align:right; }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.bon{ color:var(--success); background:var(--success-bg); } .chip.bon::before{ background:var(--success); }
+  .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
+  .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  .chip.attention{ color:var(--warning); background:var(--warning-bg); } .chip.attention::before{ background:var(--warning); }
+  .ref{ display:block; font-size:11.5px; color:var(--text-faint); margin-top:2px; font-weight:400; }
+  .filtres{ display:flex; gap:9px; flex-wrap:wrap; margin:0 0 12px; }
+  .filtres input[type="search"]{ flex:1 1 240px; min-width:0; }
+
+  /* Exigence ouverte */
+  .fiche{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .fiche-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  .evals{ list-style:none; margin:0 0 12px; padding:0; }
+  .evals li{ padding:9px 0; border-bottom:1px solid var(--border); font-size:12.8px; line-height:1.55; }
+  .evals li:last-child{ border-bottom:none; }
+  .evals .par{ color:var(--text-muted); font-size:12px; }
+  .evals li div{ color:var(--text-muted); margin-top:3px; white-space:pre-wrap; }
+  .nouvelle-eval{ background:var(--bg-2); border-radius:var(--r-sm); padding:12px 14px; margin:4px 0 6px; }
+  .alerte{ font-size:12.5px; color:var(--danger); margin:0 0 10px; font-weight:600; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Pilotage / <b>Conformité réglementaire</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-shield-check"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Conformité réglementaire</h1>
+            <p>Les exigences légales et autres exigences qui s'appliquent (ISO 45001, § 6.1.3) et l'évaluation de leur respect (§ 9.1.2) : pour chacune, le texte, ce qu'il faut faire, à quoi elle s'applique, son état — conforme ou non — avec la preuve et la date, et les actions pour la rétablir, suivies au Plan d'actions. La revue de direction en reprend le bilan.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-shield-check"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTotal">–</span><span class="ps-kpi-label">Exigences en vigueur</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiConformes">–</span><span class="ps-kpi-label" id="kpiConformesLabel">Conformes</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEcarts">–</span><span class="ps-kpi-label">Non conformes ou partiellement</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-clock"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiAEvaluer">–</span><span class="ps-kpi-label">À évaluer ou à réévaluer</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel fiche" id="fiche" style="display:none;"></div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Exigences applicables</h3>
+          <div class="panel-actions" id="listeActions"></div>
+        </div>
+        <div class="filtres">
+          <input type="search" id="fTexte" placeholder="Rechercher : exigence, texte, thème, responsable" aria-label="Rechercher">
+          <select id="fEtat" aria-label="Filtrer par état">
+            <option value="">Tous les états</option><option value="a-evaluer">À évaluer</option><option value="reevaluer">À réévaluer (date passée)</option>
+            <option value="non-conforme">Non conforme</option><option value="partiel">Partiellement conforme</option><option value="conforme">Conforme</option><option value="na">Non applicable</option>
+          </select>
+          <select id="fTheme" aria-label="Filtrer par thème"></select>
+          <select id="fPerimetre" aria-label="Filtrer par périmètre"></select>
+          <select id="fStatut" aria-label="Filtrer par statut"><option value="En vigueur">En vigueur</option><option value="Retirée">Retirées</option><option value="">Toutes</option></select>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableExigences">
+            <thead><tr><th>Exigence</th><th>Thème</th><th>Périmètre</th><th>État</th><th>Évaluée le</th><th>Prochaine évaluation</th><th>Responsable</th><th>Actions</th><th></th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <input type="file" id="importFile" accept=".xlsx,.xls,.ods,.csv" style="display:none;" aria-label="Fichier à importer">
+      </div>
+
+      <p class="footnote">L'état d'une exigence est celui de sa dernière évaluation. Aucune périodicité n'est imposée : la prochaine évaluation se fixe exigence par exigence, et une fois sa date passée l'exigence est à réévaluer (question 26 au préventeur). Les textes nouveaux se repèrent dans la veille réglementaire (Administration). Import : un tableur avec une colonne « Exigence » ; le fichier exporté ici sert de modèle et se réimporte sans doublon.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("conformite", "consulter");
+  const peutGerer = D.peut("conformite", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Conformité réglementaire", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const lire = (cle) => { try { const v = JSON.parse(VigieStore.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } };
+  const fr = (a, b) => String(a).localeCompare(String(b), "fr");
+  const norm = (t) => String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const VC = VigieConformite;
+  const ajd = () => VigieDates.aujourdhui();
+  // Périmètre (comme les objectifs, question 24) : une exigence vaut pour toute l'organisation ou pour un service. Un compte
+  // limité à certains services voit celles de toute l'organisation et celles de ses services.
+  const mesServices = (session && session.services) || ["*"];
+  const limite = !mesServices.includes("*");
+  const visible = (x) => !!x && (!limite || !x.service || mesServices.includes(x.service));
+  const TOUTE = "Toute l'organisation";
+  const perimetreTexte = (x) => x.service || TOUTE;
+
+  // ---------- Stockage ----------
+  const CLE = VC.CLE;
+  const tous = () => lire(CLE).filter(x => x && typeof x === "object" && x.id);
+  function modifierExigences(modif){ const l = lire(CLE); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
+  // Les actions d'une exigence rejoignent le Plan d'actions sous VigieConformite.idAction (plan-actions.html, generateExigenceActionSeeds)
+  const actionAuPlan = (x, a, actions) => (actions || lire("vigie_hse_actions")).find(p => p && p.id === VC.idAction(x, a)) || null;
+  function statutAction(x, a, actions){ const p = actionAuPlan(x, a, actions); return p ? (p.statut || "À faire") : (a.statut || "À faire"); }
+  const ORDRE = { "non-conforme": 0, partiel: 1, "a-evaluer": 2, conforme: 3, na: 4 };
+  const chipEtat = (e) => `<span class="chip ${e.ton}">${esc(e.libelle)}</span>${e.aReevaluer ? ` <span class="chip attention">À réévaluer</span>` : ""}`;
+
+  // ---------- Liste ----------
+  function render(){
+    const jour = ajd(), actions = lire("vigie_hse_actions");
+    const l = tous().filter(visible);
+    const s = VC.synthese(l, jour);
+    $("kpiTotal").textContent = s.total;
+    $("kpiConformes").textContent = s.conformes;
+    $("kpiConformesLabel").textContent = s.taux === null ? "Conformes" : `Conformes · ${s.taux} % des évaluées`;
+    $("kpiEcarts").textContent = s.partiels + s.nonConformes;
+    $("kpiAEvaluer").textContent = s.aEvaluer + s.aReevaluer;
+    const fp = $("fPerimetre"), gp = fp.value, services = [...new Set(l.map(x => x.service).filter(Boolean))].sort(fr);
+    fp.innerHTML = `<option value="">Tous les périmètres</option><option value="-">${TOUTE}</option>` + services.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
+    fp.value = gp === "-" || services.includes(gp) ? gp : "";
+    const ft = $("fTheme"), gt = ft.value, themes = [...new Set(l.map(x => String(x.theme || "").trim()).filter(Boolean))].sort(fr);
+    ft.innerHTML = `<option value="">Tous les thèmes</option>` + themes.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
+    ft.value = themes.includes(gt) ? gt : "";
+    const st = $("fStatut").value, et = $("fEtat").value, per = fp.value, th = ft.value, q = norm($("fTexte").value.trim());
+    const vus = l.map(x => ({ x, e: VC.etat(x, jour) }))
+      .filter(({ x, e }) => (!st || (st === "Retirée" ? x.statut === "Retirée" : x.statut !== "Retirée"))
+        && (!et || (et === "reevaluer" ? e.aReevaluer : e.code === et))
+        && (!per || (per === "-" ? !x.service : x.service === per))
+        && (!th || String(x.theme || "").trim() === th)
+        && (!q || norm([x.intitule, x.reference, x.theme, x.responsable, x.service].join(" ")).includes(q)))
+      .sort((a, b) => (ORDRE[a.e.code] - ORDRE[b.e.code]) || (b.e.aReevaluer - a.e.aReevaluer) || fr(a.x.intitule || "", b.x.intitule || ""));
+    $("tbody").innerHTML = vus.length ? vus.map(({ x, e }) => {
+      const acts = (x.actions || []).filter(a => a && a.description);
+      const faites = acts.filter(a => statutAction(x, a, actions) === "Fait").length;
+      return `<tr>
+        <td style="white-space:normal;min-width:240px;"><b>${esc(x.intitule)}</b>${x.reference ? `<span class="ref">${esc(x.reference)}</span>` : ""}${x.statut === "Retirée" ? ` <span class="form-note">retirée</span>` : ""}</td>
+        <td style="white-space:normal;">${esc(x.theme || "—")}</td>
+        <td style="white-space:normal;">${esc(perimetreTexte(x))}</td>
+        <td>${chipEtat(e)}</td>
+        <td class="mono">${esc(dateFr(e.date) || "—")}</td>
+        <td class="mono">${esc(dateFr(x.prochaineEvaluation) || "—")}</td>
+        <td style="white-space:normal;">${esc(x.responsable || "—")}</td>
+        <td>${acts.length ? `${faites} / ${acts.length} soldée${acts.length > 1 ? "s" : ""}` : "—"}</td>
+        <td><button type="button" class="act-edit" data-ouvrir="${esc(x.id)}">Ouvrir</button></td>
+      </tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="9">${l.length ? "Aucune exigence avec ces filtres." : "Aucune exigence pour le moment." + (peutGerer ? " « Nouvelle exigence » en ajoute une ; « Importer » reprend un registre tenu dans un tableur." : "")}</td></tr>`;
+  }
+  ["fEtat", "fTheme", "fPerimetre", "fStatut"].forEach(id => $(id).addEventListener("change", render));
+  $("fTexte").addEventListener("input", render);
+  $("tbody").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); });
+  $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`
+    + (peutGerer ? `<button type="button" class="btn btn-ghost" id="btnImport"><svg class="icon"><use href="#i-upload"/></svg> Importer</button>`
+      + `<button type="button" class="btn btn-primary" id="btnNouveau"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle exigence</button>` : "");
+  if (peutGerer) $("btnNouveau").addEventListener("click", () => ouvrir(null));
+
+  // ---------- Export ----------
+  // La feuille « Exigences » se réimporte telle quelle (même identifiant : mise à jour, pas de doublon).
+  const ENTETES = ["Identifiant", "Exigence", "Texte de référence", "Lien", "Thème", "Périmètre", "Responsable", "Prochaine évaluation", "État", "Évaluée le", "Évaluée par", "Preuve", "Observations", "Statut"];
+  $("btnExport").addEventListener("click", () => {
+    const jour = ajd(), actions = lire("vigie_hse_actions");
+    const lignes = [], evals = [], acts = [];
+    tous().filter(visible).forEach(x => {
+      const d = VC.derniere(x), e = VC.etat(x, jour);
+      lignes.push({ "Identifiant": x.id, "Exigence": x.intitule || "", "Texte de référence": x.reference || "", "Lien": x.lien || "", "Thème": x.theme || "", "Périmètre": perimetreTexte(x),
+        "Responsable": x.responsable || "", "Prochaine évaluation": dateFr(x.prochaineEvaluation), "État": e.libelle, "Évaluée le": dateFr(e.date), "Évaluée par": d ? d.par || "" : "",
+        "Preuve": d ? d.preuve || "" : "", "Observations": d ? d.constat || "" : "", "Statut": x.statut === "Retirée" ? "Retirée" : "En vigueur" });
+      VC.evaluations(x).forEach(v => evals.push({ "Identifiant": x.id, "Exigence": x.intitule || "", "Périmètre": perimetreTexte(x), "Date": dateFr(v.date), "État": v.etat, "Évaluée par": v.par || "", "Preuve": v.preuve || "", "Observations": v.constat || "" }));
+      (x.actions || []).filter(a => a && a.description).forEach(a => acts.push({ "Exigence": x.intitule || "", "Périmètre": perimetreTexte(x), "Action": a.description || "", "Responsable": a.responsable || "", "Échéance": dateFr(a.echeance), "État au Plan d'actions": statutAction(x, a, actions) }));
+    });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: ENTETES }), "Exigences");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(evals, { header: ["Identifiant", "Exigence", "Périmètre", "Date", "État", "Évaluée par", "Preuve", "Observations"] }), "Évaluations");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(acts, { header: ["Exigence", "Périmètre", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
+    XLSX.writeFile(wb, `conformite_reglementaire_${jour}.xlsx`);
+  });
+  VigieImpression.brancher("btnExport", { table: "#tableExigences" });
+
+  // ---------- Import ----------
+  // Un registre tenu dans un tableur : une ligne par exigence, colonne « Exigence » obligatoire. Une ligne qui porte un
+  // identifiant connu met l'exigence à jour (seules les colonnes présentes dans le fichier) ; un état reconnu (Conforme,
+  // Partiellement conforme, Non conforme, Non applicable, ou C, PC, NC, NA) ajoute une évaluation, sauf si c'est déjà la dernière.
+  const cleImport = (s) => norm(s).replace(/[^a-z0-9]+/g, " ").trim();
+  const ABREGES = { c: "Conforme", pc: "Partiellement conforme", nc: "Non conforme", na: "Non applicable", "sans objet": "Non applicable" };
+  function etatImporte(v){ const n = cleImport(v); return VC.ETATS.find(s => cleImport(s) === n) || ABREGES[n] || ""; }
+  function importer(lignes){
+    const jour = ajd(), r = { ajoutees: 0, modifiees: 0, evaluations: 0, ignorees: 0, horsPerimetre: 0 };
+    const l = lire(CLE);
+    lignes.forEach(brut => {
+      const n = {}; Object.keys(brut).forEach(k => { n[cleImport(k)] = brut[k]; });
+      const col = (noms) => { for (const c of noms) if (Object.prototype.hasOwnProperty.call(n, c)) return { ok: true, v: n[c] }; return { ok: false, v: "" }; };
+      const texte = (noms) => { const c = col(noms); return { ok: c.ok, v: String(c.v == null ? "" : c.v).trim() }; };
+      const intitule = texte(["exigence", "intitule", "obligation"]).v;
+      if (!intitule){ r.ignorees++; return; }
+      const champs = { intitule };
+      [["reference", ["texte de reference", "reference", "texte"]], ["lien", ["lien", "url"]], ["theme", ["theme", "domaine"]], ["responsable", ["responsable"]]]
+        .forEach(([k, noms]) => { const c = texte(noms); if (c.ok) champs[k] = c.v; });
+      const pe = col(["prochaine evaluation"]);
+      if (pe.ok) champs.prochaineEvaluation = VigieDates.depuisImport(pe.v);
+      const per = texte(["perimetre", "service"]);
+      if (per.ok) champs.service = !per.v || cleImport(per.v) === cleImport(TOUTE) ? undefined : per.v;
+      const etatV = etatImporte(col(["etat", "conformite"]).v);
+      const ev = etatV ? { etat: etatV, date: VigieDates.depuisImport(col(["evaluee le", "date d evaluation", "date"]).v) || jour,
+        par: texte(["evaluee par", "evaluateur"]).v || moi, preuve: texte(["preuve"]).v, constat: texte(["observations", "constat"]).v } : null;
+      const id = texte(["identifiant", "id"]).v;
+      const i = id ? l.findIndex(x => x && x.id === id) : -1;
+      const avant = i >= 0 ? l[i] : null;
+      const service = per.ok ? champs.service : (avant ? avant.service : undefined);
+      if (limite && ((service && !mesServices.includes(service)) || (avant && !visible(avant)))){ r.horsPerimetre++; return; }
+      const statut = texte(["statut"]);
+      const appliquerStatut = (x) => {
+        if (!statut.ok || !statut.v) return;
+        if (cleImport(statut.v).startsWith("retire")){ if (x.statut !== "Retirée"){ x.statut = "Retirée"; x.retireeLe = jour; x.retireePar = moi; } }
+        else if (x.statut === "Retirée"){ x.statut = "En vigueur"; delete x.retireeLe; delete x.retireePar; }
+      };
+      if (avant){
+        const x = Object.assign({}, avant, champs);
+        Object.keys(champs).forEach(k => { if ((x[k] === "" || x[k] === undefined) && avant[k] === undefined) delete x[k]; });
+        if (per.ok && !champs.service) delete x.service;
+        appliquerStatut(x);
+        if (ev){
+          const d = VC.derniere(x);
+          if (!d || d.date !== ev.date || d.etat !== ev.etat || (d.preuve || "") !== ev.preuve || (d.constat || "") !== ev.constat){
+            x.evaluations = (Array.isArray(x.evaluations) ? x.evaluations : []).concat([Object.assign({ id: genId("ev") }, ev)]); r.evaluations++;
+          }
+        }
+        if (JSON.stringify(x) !== JSON.stringify(avant)){ x.modifiePar = moi; x.dateMaj = new Date().toISOString(); l[i] = x; r.modifiees++; }
+      } else {
+        const x = Object.assign({ id: id || genId("ex") }, champs, { evaluations: ev ? [Object.assign({ id: genId("ev") }, ev)] : [], actions: [], statut: "En vigueur", auteur: moi, dateCreation: new Date().toISOString() });
+        if (!x.service) delete x.service;
+        appliquerStatut(x);
+        if (ev) r.evaluations++;
+        l.push(x); r.ajoutees++;
+      }
+    });
+    if (r.ajoutees || r.modifiees){
+      VigieStore.setItem(CLE, JSON.stringify(l));
+      logAudit("Import", `${r.ajoutees} exigence(s) ajoutée(s), ${r.modifiees} mise(s) à jour, ${r.evaluations} évaluation(s) nouvelle(s)`);
+    }
+    return r;
+  }
+  if (peutGerer){
+    $("btnImport").addEventListener("click", () => $("importFile").click());
+    $("importFile").addEventListener("change", async (ev) => {
+      const f = ev.target.files[0];
+      if (!f) return;
+      let lignes;
+      try {
+        const wb = VigieImport.lireClasseur(await f.arrayBuffer());
+        const nom = wb.SheetNames.find(s => cleImport(s) === "exigences") || wb.SheetNames[0];
+        lignes = XLSX.utils.sheet_to_json(wb.Sheets[nom], { defval: "" });
+      } catch(e){ ev.target.value = ""; alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit d'un tableur (.xlsx, .ods) ou d'un fichier .csv."); return; }
+      ev.target.value = "";
+      let r;
+      try { r = importer(lignes); } catch(e){ alert("L'import n'a pas pu être enregistré."); return; }
+      render();
+      if (!r.ajoutees && !r.modifiees && !r.evaluations){
+        alert(r.ignorees && !r.horsPerimetre && !lignes.some(x => Object.keys(x).some(k => ["exigence", "intitule", "obligation"].includes(cleImport(k))))
+          ? "Aucune ligne importée : le fichier n'a pas de colonne « Exigence »."
+          : `Rien de nouveau dans ce fichier (${lignes.length} ligne(s) lue(s)${r.horsPerimetre ? `, dont ${r.horsPerimetre} hors de vos services` : ""}).`);
+      } else {
+        alert(`Import terminé — ${r.ajoutees} exigence(s) ajoutée(s), ${r.modifiees} mise(s) à jour, dont ${r.evaluations} évaluation(s) nouvelle(s)`
+          + (r.ignorees ? ` ; ${r.ignorees} ligne(s) sans exigence ignorée(s)` : "") + (r.horsPerimetre ? ` ; ${r.horsPerimetre} hors de vos services, ignorée(s)` : "") + ".");
+      }
+    });
+  }
+
+  // ---------- Exigence ouverte ----------
+  let courant = null, evalsFiche = [], actionsFiche = [];
+  // toute l'organisation, ou l'un des services de ses entrées (ceux de l'agent limité, s'il l'est)
+  function optionsPerimetre(choisi){
+    const groupes = VigieOrga.noms().map(n => ({ nom: n, l: VigieOrga.services(n).filter(s => !limite || mesServices.includes(s)) })).filter(g => g.l.length);
+    const connus = groupes.some(g => g.l.includes(choisi));
+    return `<option value="">${TOUTE}</option>`
+      + (choisi && !connus ? `<option value="${esc(choisi)}" selected>${esc(choisi)}</option>` : "")
+      + groupes.map(g => `<optgroup label="${esc(g.nom)}">${g.l.map(s => `<option value="${esc(s)}"${s === choisi ? " selected" : ""}>${esc(s)}</option>`).join("")}</optgroup>`).join("");
+  }
+  // les actualités de la veille réglementaire (Administration), pour reprendre un texte nouveau
+  const veille = () => lire("vigie_hse_veille").filter(v => v && v.id);
+  function optionsVeille(choisi){
+    const l = veille().filter(v => v.statut !== "Archivé" || v.id === choisi).sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    return `<option value="">—</option>` + (choisi && !l.some(v => v.id === choisi) ? `<option value="${esc(choisi)}" selected>Actualité retirée de la veille</option>` : "")
+      + l.map(v => `<option value="${esc(v.id)}"${v.id === choisi ? " selected" : ""}>${esc(dateFr(v.date))} — ${esc(v.titre)}</option>`).join("");
+  }
+  function ouvrir(id){
+    const x = id ? tous().find(e => e.id === id && visible(e)) : null;
+    if (id && !x) return;
+    if (!x && !peutGerer) return;
+    courant = x || { id: null, intitule: "", reference: "", lien: "", theme: "", responsable: "", prochaineEvaluation: "", evaluations: [], actions: [], statut: "En vigueur" };
+    const retiree = courant.statut === "Retirée";
+    const fige = retiree || !peutGerer;
+    const dis = fige ? " disabled" : "";
+    evalsFiche = (Array.isArray(courant.evaluations) ? courant.evaluations : []).map(v => Object.assign({}, v));
+    actionsFiche = (Array.isArray(courant.actions) ? courant.actions : []).map(a => Object.assign({}, a));
+    const e = VC.etat(courant, ajd());
+    const themes = [...new Set(tous().map(t => String(t.theme || "").trim()).filter(Boolean))].sort(fr);
+    const deVeille = courant.veilleId ? veille().find(v => v.id === courant.veilleId) : null;
+    const lienOk = /^https?:\/\//i.test(courant.lien || "");
+    $("fiche").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">${x ? esc(x.intitule) : "Nouvelle exigence"}</h3>
+          ${x ? `<div class="fiche-etat">${chipEtat(e)}${e.date ? ` évaluée le ${esc(dateFr(e.date))}${e.par ? " par " + esc(e.par) : ""}` : ""}${retiree ? ` · retirée du registre${x.retireePar ? " par " + esc(x.retireePar) : ""}${x.retireeLe ? " le " + esc(dateFr(x.retireeLe)) : ""}` : ""}${x.auteur ? ` · créée par ${esc(x.auteur)}` : ""}${x.modifiePar ? ` · modifiée par ${esc(x.modifiePar)}` : ""}</div>` : ""}</div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnFermer">Fermer</button></div>
+      </div>
+      <form id="ficheForm" novalidate>
+        <div class="form-grid">
+          <div class="span3"><label for="cIntitule">Exigence : ce qu'il faut faire</label><input type="text" id="cIntitule" value="${esc(courant.intitule)}" maxlength="300" placeholder="Ex. : faire vérifier chaque année les installations électriques"${dis}></div>
+          <div class="span2"><label for="cReference">Texte de référence</label><input type="text" id="cReference" value="${esc(courant.reference || "")}" maxlength="200" placeholder="Ex. : Code du travail, art. R4226-16"${dis}></div>
+          <div><label for="cTheme">Thème</label><input type="text" id="cTheme" list="cThemes" value="${esc(courant.theme || "")}" maxlength="80" placeholder="Électricité, incendie…"${dis}><datalist id="cThemes">${themes.map(t => `<option value="${esc(t)}">`).join("")}</datalist></div>
+          <div class="span2"><label for="cLien">Lien vers le texte</label><input type="text" inputmode="url" id="cLien" value="${esc(courant.lien || "")}" maxlength="500" placeholder="https://www.legifrance.gouv.fr/…"${dis}></div>
+          <div><label for="cService">Périmètre</label><select id="cService"${dis}>${optionsPerimetre(courant.service || "")}</select></div>
+          <div><label for="cResponsable">Responsable</label><input type="text" id="cResponsable" value="${esc(courant.responsable || "")}" maxlength="120" placeholder="Nom et fonction"${dis}></div>
+          <div><label for="cProchaine">Prochaine évaluation</label><input type="date" id="cProchaine" value="${esc(courant.prochaineEvaluation || "")}"${dis}></div>
+          ${fige ? (deVeille ? `<div class="span3"><p class="form-note">Reprise de la veille réglementaire : ${esc(deVeille.titre)}</p></div>` : "")
+            : (veille().length || courant.veilleId ? `<div class="span3" style="max-width:640px;"><label for="cVeille">Reprise d'une actualité de la veille réglementaire (facultatif)</label><select id="cVeille">${optionsVeille(courant.veilleId || "")}</select></div>` : "")}
+          ${lienOk ? `<div class="span3"><a class="act-edit" href="${esc(courant.lien)}" target="_blank" rel="noopener noreferrer">Ouvrir le texte</a></div>` : ""}
+        </div>
+        <div class="sec"><h4>Évaluations</h4><p class="aide">Chaque évaluation dit si l'exigence est respectée à sa date, et sur quelle preuve : rapport de vérification, registre, document, visite. L'état de l'exigence est celui de la dernière.</p>
+          <div id="cEvaluations"></div>
+          ${fige ? "" : `<div class="nouvelle-eval"><p class="form-note" style="margin:0 0 10px;"><b>Nouvelle évaluation</b>, enregistrée à votre nom avec l'exigence :</p>
+            <div class="form-grid">
+              <div><label for="nEtat">État constaté</label><select id="nEtat"><option value="">— pas d'évaluation maintenant —</option>${VC.ETATS.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("")}</select></div>
+              <div><label for="nDate">Date de l'évaluation</label><input type="date" id="nDate" value="${esc(ajd())}"></div>
+              <div class="span2"><label for="nPreuve">Preuve</label><input type="text" id="nPreuve" maxlength="300" placeholder="Ex. : rapport de vérification du 12/03, registre de sécurité p. 14"></div>
+              <div class="span3"><label for="nConstat">Observations</label><textarea id="nConstat" placeholder="Ce qui a été vu, ce qui manque"></textarea></div>
+            </div></div>`}
+        </div>
+        <div class="sec"><h4>Actions pour rétablir la conformité</h4><p class="aide">Elles rejoignent le Plan d'actions (origine « Conformité ») dès l'enregistrement ; leur état est celui du Plan d'actions, où elles se suivent ensuite.</p>
+          <p class="alerte" id="cSansAction" style="display:none;"></p>
+          <div id="cActions"></div>
+          ${fige ? "" : `<button type="button" class="btn btn-ghost" id="btnAjoutAction"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une action</button>`}
+        </div>
+        ${peutGerer ? `<div class="form-actions">
+          ${retiree ? `<button type="button" class="btn btn-ghost" id="btnRemettre">Remettre en vigueur</button>` : `<button type="submit" class="btn btn-primary">Enregistrer</button>
+          ${x ? `<button type="button" class="btn btn-ghost" id="btnRetirer">Retirer du registre</button>` : ""}`}
+          ${x ? `<button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer l'exigence</button>` : ""}
+        </div>` : ""}
+      </form>`;
+    rendreEvaluations(fige);
+    rendreActions(fige);
+    majSansAction();
+    $("fiche").style.display = "";
+    $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  function rendreEvaluations(fige){
+    const l = evalsFiche.map((v, i) => ({ v, i })).filter(z => z.v && VC.ETATS.includes(z.v.etat))
+      .sort((a, b) => String(b.v.date || "").localeCompare(String(a.v.date || "")) || b.i - a.i);
+    $("cEvaluations").innerHTML = l.length ? `<ul class="evals">${l.map(({ v, i }) => {
+      const t = VC.etat({ evaluations: [v] }, "");
+      return `<li><span class="mono">${esc(dateFr(v.date))}</span> <span class="chip ${t.code === "a-evaluer" ? "neutre" : t.ton}">${esc(v.etat)}</span>${v.par ? ` <span class="par">${esc(v.par)}</span>` : ""}`
+        + `${fige ? "" : ` <button type="button" class="act-del" data-retirer-eval="${i}">Retirer</button>`}`
+        + `${v.preuve ? `<div>Preuve : ${esc(v.preuve)}</div>` : ""}${v.constat ? `<div>${esc(v.constat)}</div>` : ""}</li>`;
+    }).join("")}</ul>` : `<p class="vide">Pas encore évaluée.</p>`;
+  }
+  function rendreActions(fige){
+    const actions = lire("vigie_hse_actions");
+    // une action déjà reprise au Plan d'actions ne se modifie plus ici : on la suit là-bas
+    $("cActions").innerHTML = actionsFiche.map((a, i) => {
+      const auPlan = courant.id && actionAuPlan(courant, a, actions);
+      if (fige || auPlan) return `<div class="dyn-row" data-i="${i}" data-fixe><span style="flex:1 1 auto;font-size:12.8px;">${esc(a.description)}${a.responsable ? " — " + esc(a.responsable) : ""}${a.echeance ? ", échéance " + esc(dateFr(a.echeance)) : ""} · <b>${esc(courant.id ? statutAction(courant, a, actions) : "À faire")}</b>${auPlan ? ` <a class="act-edit" href="plan-actions.html">au Plan d'actions</a>` : ""}</span></div>`;
+      return `<div class="dyn-row" data-i="${i}">
+        <input type="text" data-k="description" placeholder="Action" aria-label="Action" value="${esc(a.description || "")}" maxlength="300">
+        <input type="text" data-k="responsable" placeholder="Responsable" aria-label="Responsable" value="${esc(a.responsable || "")}" style="flex:0 1 180px">
+        <input type="date" data-k="echeance" aria-label="Échéance" value="${esc(a.echeance || "")}" style="flex:0 0 150px">
+        <button type="button" class="act-del" data-retirer="${i}">Suppr.</button>
+      </div>`;
+    }).join("") || `<p class="vide">Aucune action pour l'instant.</p>`;
+  }
+  function lireActions(){
+    $("cActions").querySelectorAll(".dyn-row:not([data-fixe])").forEach(row => {
+      const a = actionsFiche[Number(row.dataset.i)];
+      if (a) row.querySelectorAll("[data-k]").forEach(inp => { a[inp.dataset.k] = inp.value.trim(); });
+    });
+  }
+  // un écart (dernier état, ou celui qu'on s'apprête à enregistrer) sans aucune action : le dire
+  function majSansAction(){
+    const n = $("nEtat"), choisi = n && n.value;
+    const etat = choisi || (VC.derniere({ evaluations: evalsFiche }) || {}).etat;
+    if (!courant || courant.statut === "Retirée") { $("cSansAction").style.display = "none"; return; }
+    lireActions();
+    const ecart = etat === "Non conforme" || etat === "Partiellement conforme";
+    const sans = !actionsFiche.some(a => a && String(a.description || "").trim());
+    $("cSansAction").textContent = ecart && sans ? `${etat} sans action : ${peutGerer ? "ajoutez celle qui rétablira la conformité." : "aucune action prévue pour rétablir la conformité."}` : "";
+    $("cSansAction").style.display = ecart && sans ? "" : "none";
+  }
+  function fermer(){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; courant = null; }
+
+  // l'exigence telle que le formulaire la décrit
+  function depuisFormulaire(){
+    const v = $("cVeille");
+    return Object.assign({}, courant, {
+      intitule: $("cIntitule").value.trim(), reference: $("cReference").value.trim(), lien: $("cLien").value.trim(), theme: $("cTheme").value.trim(),
+      service: $("cService").value || undefined, responsable: $("cResponsable").value.trim(), prochaineEvaluation: $("cProchaine").value,
+      veilleId: v ? (v.value || undefined) : courant.veilleId,
+    });
+  }
+
+  // Relit le formulaire dans l'exigence enregistrée, avec la nouvelle évaluation s'il y en a une ; « retirer » la sort du registre.
+  function enregistrer(retirer){
+    if (!courant || !peutGerer || courant.statut === "Retirée") return null;
+    lireActions();
+    const x = depuisFormulaire();
+    if (!x.intitule){ alert("Indiquez l'exigence : ce qu'il faut faire."); return null; }
+    if (x.lien && !/^https?:\/\//i.test(x.lien)){ alert("Le lien doit commencer par http:// ou https://."); return null; }
+    const jour = ajd(), etatN = $("nEtat").value;
+    let ev = null;
+    if (etatN){
+      const date = $("nDate").value;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)){ alert("Indiquez la date de l'évaluation."); return null; }
+      if (date > jour){ alert("La date de l'évaluation ne peut pas être dans le futur."); return null; }
+      if (x.prochaineEvaluation && x.prochaineEvaluation <= date && !confirm(`La prochaine évaluation (${dateFr(x.prochaineEvaluation)}) ne vient pas après celle-ci : l'exigence restera « à réévaluer ». Enregistrer quand même ?`)) return null;
+      ev = { id: genId("ev"), date, etat: etatN, par: moi, preuve: $("nPreuve").value.trim(), constat: $("nConstat").value.trim() };
+    } else if ($("nPreuve").value.trim() || $("nConstat").value.trim()){
+      alert("Choisissez l'état constaté de la nouvelle évaluation, ou videz sa preuve et ses observations."); return null;
+    }
+    const retirees = (Array.isArray(courant.evaluations) ? courant.evaluations.length : 0) - evalsFiche.length;
+    x.evaluations = evalsFiche.concat(ev ? [ev] : []);
+    x.actions = actionsFiche.filter(a => a.description).map(a => Object.assign({ id: a.id || genId("act") }, a));
+    if (retirer){ x.statut = "Retirée"; x.retireeLe = jour; x.retireePar = moi; }
+    const nouveau = !x.id;
+    if (nouveau){ x.id = genId("ex"); x.auteur = moi; x.dateCreation = new Date().toISOString(); }
+    else { x.modifiePar = moi; x.dateMaj = new Date().toISOString(); }
+    try {
+      modifierExigences(l => {
+        const i = l.findIndex(e => e && e.id === x.id);
+        if (i < 0) l.push(x); else l[i] = Object.assign({}, l[i], x);
+      });
+    } catch(e){ alert("L'exigence n'a pas pu être enregistrée."); return null; }
+    logAudit(nouveau ? "Création" : "Modification", `Exigence « ${x.intitule} »${ev ? " évaluée : " + ev.etat : ""}${retirees > 0 ? ` (${retirees} évaluation(s) retirée(s))` : ""}${retirer ? " retirée du registre" : ""}`);
+    return x;
+  }
+
+  $("fiche").addEventListener("click", (e) => {
+    if (e.target.closest("#btnFermer")){ fermer(); return; }
+    if (e.target.closest("#btnAjoutAction")){ lireActions(); actionsFiche.push({ id: genId("act") }); rendreActions(false); return; }
+    const ret = e.target.closest("[data-retirer]");
+    if (ret){ lireActions(); actionsFiche.splice(Number(ret.dataset.retirer), 1); rendreActions(false); majSansAction(); return; }
+    const retEval = e.target.closest("[data-retirer-eval]");
+    if (retEval){
+      if (!confirm("Retirer cette évaluation ? Elle disparaîtra à l'enregistrement de l'exigence.")) return;
+      evalsFiche.splice(Number(retEval.dataset.retirerEval), 1); rendreEvaluations(false); majSansAction();
+      return;
+    }
+    if (e.target.closest("#btnRetirer")){
+      if (!confirm("Retirer l'exigence du registre (texte abrogé, ou qui ne concerne plus l'organisation) ? Elle reste consultable avec ses évaluations, sous « Retirées ».")) return;
+      const x = enregistrer(true);
+      if (x){ render(); ouvrir(x.id); }
+      return;
+    }
+    if (e.target.closest("#btnRemettre")){
+      if (!courant || !confirm("Remettre l'exigence en vigueur ?")) return;
+      try { modifierExigences(l => { const i = l.findIndex(x => x && x.id === courant.id); if (i >= 0){ const x = Object.assign({}, l[i], { statut: "En vigueur", modifiePar: moi, dateMaj: new Date().toISOString() }); delete x.retireeLe; delete x.retireePar; l[i] = x; } }); }
+      catch(err){ alert("L'exigence n'a pas pu être remise en vigueur."); return; }
+      logAudit("Modification", `Exigence « ${courant.intitule} » remise en vigueur`);
+      const id = courant.id; render(); ouvrir(id);
+      return;
+    }
+    if (e.target.closest("#btnSupprimer")){
+      if (!courant || !courant.id || !confirm(`Supprimer l'exigence « ${courant.intitule} » et ses évaluations ?${(courant.actions || []).length ? " Ses actions déjà reprises au Plan d'actions y restent." : ""} Pour garder la trace d'un texte abrogé, préférez « Retirer du registre ».`)) return;
+      try { modifierExigences(l => { const i = l.findIndex(x => x && x.id === courant.id); if (i >= 0) l.splice(i, 1); }); }
+      catch(err){ alert("L'exigence n'a pas pu être supprimée."); return; }
+      logAudit("Suppression", `Exigence « ${courant.intitule} »`);
+      fermer(); render();
+    }
+  });
+  $("fiche").addEventListener("change", (e) => {
+    if (!courant) return;
+    // une actualité de la veille choisie complète le texte de référence et le lien, s'ils sont vides
+    if (e.target.id === "cVeille"){
+      const v = veille().find(a => a.id === e.target.value);
+      if (v){
+        if (!$("cReference").value.trim()) $("cReference").value = (v.titre || "") + (v.source ? " (" + v.source + ")" : "");
+        if (!$("cLien").value.trim() && /^https?:\/\//i.test(v.url || "")) $("cLien").value = v.url;
+      }
+    }
+    majSansAction();
+  });
+  $("fiche").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const x = enregistrer(false);
+    if (x){ render(); ouvrir(x.id); }
+  });
+
+  render();
+  // ?ouvrir=<id>
+  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(x => x.id === id && visible(x))) ouvrir(id); })();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

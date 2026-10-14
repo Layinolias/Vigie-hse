@@ -50,7 +50,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 18 | Entreprise privée : que deviennent les notions propres à la fonction publique ? | Secteur « Entreprise privée » (Administration → Organisation, en service) | ✅ répondue le 2026-10-11 : tout garder pour l'instant, vocabulaire confirmé |
 | 19 | Plans d'urgence par site : que doit contenir un plan, à quelle fréquence le revoir, qui doit pouvoir le lire ? | Situations d'urgence → Plans d'urgence par site (en service) | ✅ répondue le 2026-10-11 : fréquence par plan, rubriques obligatoires, lecture par tous — mise en œuvre le 2026-10-12 |
 | 20 | Presque-accidents : par où les agents les signalent-ils, et qu'en fait-on ? | Jalon J2 (culture sécurité) — Registre AT/MP, RSST, Indicateurs & Reporting | ✅ répondue le 2026-10-11 : un formulaire « Signaler » à part — mise en œuvre le 2026-10-12 (module Signalements) |
-| 21 | Plans d'urgence : la liste des rubriques obligatoires est-elle la bonne ? | Situations d'urgence → Plans d'urgence par site (en service) | ✅ répondue le 2026-10-14 : chaque organisation règle sa liste — mise en œuvre à suivre |
+| 21 | Plans d'urgence : la liste des rubriques obligatoires est-elle la bonne ? | Situations d'urgence → Plans d'urgence par site (en service) | ✅ répondue le 2026-10-14 : chaque organisation règle sa liste — mise en œuvre le 2026-10-15 |
 | 22 | Signalements : anonymat, délai de traitement, lecture de la pyramide de Bird | Signalements, Indicateurs & Reporting (en service) | ✅ répondue le 2026-10-14 : pas d'anonymat, 8 jours, pyramide confirmée — mise en œuvre le 2026-10-14 |
 | 23 | Revue de direction : à quelle fréquence, avec qui, et qui la valide ? | Revue de direction (en service, ISO 45001 § 9.3) | ✅ répondue le 2026-10-14 : fréquence libre, lecture ouverte par les profils, PAPRIPACT — mise en œuvre le 2026-10-14 (PAPRIPACT à construire) |
 | 24 | Objectifs santé-sécurité : qui les fixe, qui les voit, comment les suivre en cours d'année ? | Objectifs santé-sécurité (en service, ISO 45001 § 6.2) | ✅ répondue le 2026-10-14 : l'encadrement en lecture, fixés par le HSE, objectifs par service — mise en œuvre le 2026-10-14 |
@@ -605,7 +605,7 @@ Côté technique, (B) réutilise un écran existant et son anonymat ; (C) donne 
 
 > **Réponse du préventeur (Cahier, 2026-10-14) : option C, laisser chaque organisation régler sa liste** — chaque client choisit dans le logiciel les rubriques qu'il exige. Aucune rubrique à retirer ni à ajouter n'a été citée, ni de rôle à exiger parmi les personnes désignées.
 >
-> _Mise en œuvre : à suivre._
+> **Mis en œuvre le 2026-10-15** : bouton **« Rubriques exigées »** au-dessus des plans (comptes qui gèrent les Situations d'urgence : préventeur, RH, administrateur) ; on y coche, parmi les huit rubriques du plan, celles qu'un plan doit avoir pour être « Complet ». Le réglage vaut pour tous les plans de l'organisation (`vigie_hse_plans_urgence_parametres`) ; sans réglage, les huit restent exigées, comme avant. Les lecteurs voient le résultat (« Complet » / « Incomplet — manque : … ») et la liste exigée dans la note du formulaire. Chaque changement est inscrit au journal. Aucune rubrique n'a été ajoutée au plan (plan des lieux, coupures d'énergie…) ni de rôle exigé : la réponse n'en demande pas.
 
 ---
 

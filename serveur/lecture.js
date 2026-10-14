@@ -62,6 +62,7 @@ const PAGE_UNIQUE = {
   vigie_hse_inspection_trames: 'inspections',
   vigie_hse_modeles_convocation: 'sante-visites',
   vigie_hse_plans_urgence: ['urgences', 'plans-urgence'],   // tout compte lit les plans (question 19)
+  vigie_hse_plans_urgence_parametres: ['urgences', 'plans-urgence'],   // et les rubriques exigées (question 21)
 };
 // un registre s'ouvre au niveau « consulter » de l'un des modules cités
 const ouvert = (page, modules) => [].concat(modules).some(m => peut(page, m, 'consulter'));

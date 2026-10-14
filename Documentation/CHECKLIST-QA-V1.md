@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 210 points au 2026-10-15 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 211 points au 2026-10-15 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -126,6 +126,7 @@ Pour chaque rôle, vérifier que le menu latéral affiche les bons modules et qu
 - [ ] « Imprimer la consigne » donne une seule page A4 « Consignes de sécurité » lisible, numéros d'urgence en grand ; l'export `.xlsx` des plans se réimporte sans doublon ni perte ; supprimer un plan puis réimporter l'export avec un autre compte : il revient, et un nouvel export garde dans sa colonne « Auteur » l'auteur d'origine.
 - [ ] Un compte qui n'a que « consulter » sur Situations d'urgence voit les plans et peut imprimer la consigne, sans les boutons Nouveau plan / Importer / Modifier / Supprimer.
 - [ ] Un plan auquel il manque une rubrique (ex. aucun point de rassemblement) porte « Incomplet — manque : … » ; le filtre « État → Incomplets » le retrouve ; en tête, la synthèse « N plans · N incomplets · N à revoir » ; le formulaire rappelle les rubriques obligatoires et enregistre quand même un plan incomplet.
+- [ ] **Rubriques exigées** (`PREV1`, onglet Plans d'urgence par site) : « Rubriques exigées » montre les huit rubriques, toutes cochées ; décocher « Points de rassemblement » puis « Enregistrer » : un plan auquel il ne manque que celle-ci passe « Complet », la note du formulaire ne la cite plus et `AG1` voit le même état. Tout recocher ensuite.
 - [ ] « Revoir le plan tous les 12 mois » avec une dernière revue vieille de plus d'un an : « À revoir » et la date de prochaine revue ; à moins de 60 jours de l'échéance : « À revoir bientôt » ; sans fréquence : « Fréquence de revue manquante » ; le filtre « À revoir » les retrouve ; la prochaine revue figure sur la consigne imprimée et dans l'export (colonnes « Revue tous les (mois) », « Prochaine revue », « État de la revue », « Rubriques manquantes »).
 - [ ] Se déconnecter, se reconnecter en `AG2` (sans permission) : les quatre modules/liens doivent être invisibles, et taper les URLs `dossiers-atmp-citis.html` / `accident-analyse.html` / `saisie-rh.html` / `urgences-exercices.html` directement doit rediriger (dashboard ou registre AT/MP selon la page).
 

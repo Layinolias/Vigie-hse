@@ -141,6 +141,10 @@
   .plan-manque{ font-size:12px; color:var(--danger); }
   .form-note{ font-size:12px; color:var(--text-muted); line-height:1.5; }
   .plan-synthese{ font-size:12.5px; color:var(--text-muted); margin-bottom:12px; }
+  .rubriques-panel{ border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:14px; background:var(--bg-2); }
+  .rubriques-panel p{ font-size:12.5px; color:var(--text-muted); margin:0 0 10px; }
+  .rubriques{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-bottom:12px; }
+  .rubriques label{ display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; }
   .plan-synthese b{ color:var(--text); }
   .plan-actions{ display:flex; gap:14px; align-items:center; border-top:1px solid var(--border); padding-top:10px; margin-top:auto; }
   .plan-actions .act-del{ margin-left:0; }
@@ -367,12 +371,13 @@
             <h3 class="panel-title">Plans d'urgence par site</h3>
             <div class="panel-actions" id="planActionsBtns"></div>
           </div>
+          <div class="rubriques-panel" id="planRubriques" style="display:none;"></div>
           <div class="plan-synthese" id="planSynthese"></div>
           <div id="sansPlan"></div>
           <div class="plan-grid" id="planList"></div>
         </div>
 
-        <p class="footnote">Un plan par site : ce qu'il faut faire, qui appeler, où se rassembler, qui fait quoi et où sont les moyens de secours. « Imprimer la consigne » en tire une page A4 à afficher. Les exercices et les équipements suivis en Vérifications périodiques s'affichent sous le plan quand leur site porte le même nom. Chaque plan a sa propre fréquence de revue : au-delà, il est signalé « à revoir » (60 jours avant, « à revoir bientôt »). Toutes ses rubriques sont obligatoires : un plan incomplet s'enregistre, mais il est signalé. Tout compte peut consulter les plans, en lecture seule (réponse du préventeur à la question 19, 2026-10-11).</p>
+        <p class="footnote">Un plan par site : ce qu'il faut faire, qui appeler, où se rassembler, qui fait quoi et où sont les moyens de secours. « Imprimer la consigne » en tire une page A4 à afficher. Les exercices et les équipements suivis en Vérifications périodiques s'affichent sous le plan quand leur site porte le même nom. Chaque plan a sa propre fréquence de revue : au-delà, il est signalé « à revoir » (60 jours avant, « à revoir bientôt »). Les rubriques exigées se règlent pour toute l'organisation (« Rubriques exigées » ; par défaut, toutes) : un plan incomplet s'enregistre, mais il est signalé. Tout compte peut consulter les plans, en lecture seule (réponse du préventeur à la question 19, 2026-10-11).</p>
       </section>
     </div>
   </div>
@@ -861,21 +866,27 @@
     moyens:        { el:"pMoyens", vide:"Aucun moyen de secours.", feuille:"Moyens de secours",
                      champs:[{ k:"type", t:"Type", ph:"Type", list:"pTypesMoyens" }, { k:"emplacement", t:"Emplacement", ph:"Emplacement" }, { k:"quantite", t:"Quantité", ph:"Qté", w:"0 0 90px", nombre:true }] },
   };
-  // « Les plans doivent avoir les rubriques obligatoires » (question 19) : lu comme toutes les rubriques du plan, le
-  // préventeur n'en ayant ni ajouté ni retiré — liste à confirmer avec lui (question 21). Un plan incomplet s'enregistre
+  // « Les plans doivent avoir les rubriques obligatoires » (question 19) ; question 21 (2026-10-14) : « laisser chaque
+  // organisation régler sa liste ». Les rubriques exigées sont réglées pour toute l'organisation par qui gère les plans
+  // (vigie_hse_plans_urgence_parametres : { rubriques: [id…] }) ; sans réglage, toutes. Un plan incomplet s'enregistre
   // (on le complète en plusieurs fois), mais il est signalé.
   const remplie = (v) => String(v == null ? "" : v).trim() !== "";
-  const RUBRIQUES_OBLIGATOIRES = [
-    ["Numéros d'urgence", p => (p.contacts || []).some(c => c && remplie(c.numero))],
-    ["Donner l'alerte", p => remplie(p.alerte)],
-    ["Consignes", p => remplie(p.consignes)],
-    ["Points de rassemblement", p => (p.rassemblement || []).some(r => r && (remplie(r.libelle) || remplie(r.emplacement)))],
-    ["Personnes désignées", p => (p.designes || []).some(d => d && remplie(d.personne))],
-    ["Moyens de secours", p => (p.moyens || []).some(m => m && remplie(m.type))],
-    ["Date de dernière revue", p => /^\d{4}-\d{2}-\d{2}$/.test(p.dateRevue || "")],
-    ["Fréquence de revue", p => Number(p.periodiciteRevueMois) > 0],
+  const RUBRIQUES = [
+    { id:"contacts", libelle:"Numéros d'urgence", ok: p => (p.contacts || []).some(c => c && remplie(c.numero)) },
+    { id:"alerte", libelle:"Donner l'alerte", ok: p => remplie(p.alerte) },
+    { id:"consignes", libelle:"Consignes", ok: p => remplie(p.consignes) },
+    { id:"rassemblement", libelle:"Points de rassemblement", ok: p => (p.rassemblement || []).some(r => r && (remplie(r.libelle) || remplie(r.emplacement))) },
+    { id:"designes", libelle:"Personnes désignées", ok: p => (p.designes || []).some(d => d && remplie(d.personne)) },
+    { id:"moyens", libelle:"Moyens de secours", ok: p => (p.moyens || []).some(m => m && remplie(m.type)) },
+    { id:"dateRevue", libelle:"Date de dernière revue", ok: p => /^\d{4}-\d{2}-\d{2}$/.test(p.dateRevue || "") },
+    { id:"frequenceRevue", libelle:"Fréquence de revue", ok: p => Number(p.periodiciteRevueMois) > 0 },
   ];
-  const rubriquesManquantes = (p) => RUBRIQUES_OBLIGATOIRES.filter(r => !r[1](p)).map(r => r[0]);
+  const PLANS_PARAM_KEY = "vigie_hse_plans_urgence_parametres";
+  function lireParamPlans(){ try { const v = JSON.parse(VigieStore.getItem(PLANS_PARAM_KEY) || "null"); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch(e){ return {}; } }
+  // les rubriques exigées, dans l'ordre du plan (un identifiant inconnu est ignoré)
+  function rubriquesExigees(){ const l = lireParamPlans().rubriques; return Array.isArray(l) ? RUBRIQUES.filter(r => l.includes(r.id)) : RUBRIQUES; }
+  const rubriquesManquantes = (p) => rubriquesExigees().filter(r => !r.ok(p)).map(r => r.libelle);
+  const noteRubriques = () => { const l = rubriquesExigees(); return l.length ? "Rubriques exigées : " + l.map(r => r.libelle.toLowerCase()).join(", ") + ". Un plan incomplet s'enregistre, mais il reste signalé « Incomplet »." : "Aucune rubrique n'est exigée : un plan n'est jamais signalé « Incomplet »."; };
   // Revue du plan : sa propre fréquence, comme la périodicité des exercices (question 6) — rien d'inventé quand elle manque.
   function etatRevue(p){
     const mois = Number(p.periodiciteRevueMois);
@@ -1083,7 +1094,7 @@
       courant = { contacts: NUMEROS_PUBLICS.map(n => Object.assign({ id: genId("pl") }, n)), rassemblement:[], designes:[], moyens:[] };
     }
     Object.keys(LISTES).forEach(rendreListe);
-    $("pRubriquesNote").textContent = "Rubriques obligatoires : " + RUBRIQUES_OBLIGATOIRES.map(r => r[0].toLowerCase()).join(", ") + ". Un plan incomplet s'enregistre, mais il reste signalé « Incomplet ».";
+    $("pRubriquesNote").textContent = noteRubriques();
     $("planFormPanel").style.display = "";
     $("planFormPanel").scrollIntoView({ behavior:"smooth", block:"start" });
   }
@@ -1199,8 +1210,36 @@
   // Feuille « Plans » (une ligne par plan) + une feuille par liste, rattachée par « ID Plan » (ou, à défaut, par le site).
   $("planActionsBtns").innerHTML = (canUrgencesWrite ? `<button type="button" class="btn btn-ghost" id="btnImportPlans"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importPlansFile" accept=".xlsx,.xls,.ods,.csv" style="display:none">` : "") +
     `<button type="button" class="btn btn-ghost" id="btnExportPlans"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>` +
+    (canUrgencesWrite ? `<button type="button" class="btn btn-ghost" id="btnRubriques" aria-expanded="false" aria-controls="planRubriques">Rubriques exigées</button>` : "") +
     (canUrgencesWrite ? `<button type="button" class="btn btn-primary" id="btnNewPlan"><svg class="icon"><use href="#i-plus"/></svg> Nouveau plan</button>` : "");
   if (canUrgencesWrite){ $("btnNewPlan").addEventListener("click", () => ouvrirPlan(null)); }
+
+  // ---------- Rubriques exigées (question 21) : pour toute l'organisation, par qui gère les plans ----------
+  function ouvrirRubriques(){
+    const exigees = rubriquesExigees().map(r => r.id);
+    $("planRubriques").innerHTML = `<p>Les rubriques qu'un plan doit avoir pour être « Complet ». Le réglage vaut pour tous les plans de l'organisation ; un plan auquel il en manque une s'enregistre, mais il est signalé « Incomplet ».</p>
+      <div class="rubriques">${RUBRIQUES.map(r => `<label><input type="checkbox" data-rubrique="${r.id}"${exigees.includes(r.id) ? " checked" : ""}> ${esc(r.libelle)}</label>`).join("")}</div>
+      <button type="button" class="btn btn-primary" id="btnRubriquesOk">Enregistrer</button>
+      <button type="button" class="btn btn-ghost" id="btnRubriquesAnnuler">Annuler</button>`;
+    $("planRubriques").style.display = "";
+    $("btnRubriques").setAttribute("aria-expanded", "true");
+  }
+  function fermerRubriques(){ $("planRubriques").style.display = "none"; $("planRubriques").innerHTML = ""; $("btnRubriques").setAttribute("aria-expanded", "false"); }
+  if (canUrgencesWrite){
+    $("btnRubriques").addEventListener("click", () => { if ($("planRubriques").style.display === "none") ouvrirRubriques(); else fermerRubriques(); });
+    $("planRubriques").addEventListener("click", (e) => {
+      if (e.target.closest("#btnRubriquesAnnuler")){ fermerRubriques(); return; }
+      if (!e.target.closest("#btnRubriquesOk")) return;
+      const choisies = [...$("planRubriques").querySelectorAll("[data-rubrique]:checked")].map(c => c.dataset.rubrique);
+      const avant = rubriquesExigees().map(r => r.id).join(",");
+      const param = lireParamPlans();
+      if (choisies.length === RUBRIQUES.length) delete param.rubriques; else param.rubriques = choisies;   // toutes = le réglage par défaut
+      try { VigieStore.setItem(PLANS_PARAM_KEY, JSON.stringify(param)); } catch(err){ alert("Le réglage n'a pas pu être enregistré."); return; }
+      if (choisies.join(",") !== avant) logAudit("Situations d'urgence", "Modification", "Rubriques exigées des plans d'urgence : " + (choisies.length ? RUBRIQUES.filter(r => choisies.includes(r.id)).map(r => r.libelle.toLowerCase()).join(", ") : "aucune"));
+      fermerRubriques();
+      renderPlans();
+    });
+  }
 
   const ENTETES_PLANS = () => ["ID", "Site", VigieOrga.libelle(), "Service", "Dernière revue", "Revue tous les (mois)", "Prochaine revue", "État de la revue", "Rubriques manquantes", "Consignes", "Donner l'alerte", "Auteur"];
   $("btnExportPlans").addEventListener("click", () => {

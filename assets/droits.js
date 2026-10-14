@@ -35,8 +35,8 @@
     mod("atmp", "Santé au travail", "Registre AT/MP", [["consulter", "Consulter"], ["declarer", "Consulter et déclarer"], ["gerer", "Gérer"]]),
     mod("rsst", "Santé au travail", "Registre SST", [["deposer", "Déposer une observation"], ["auteurs", "Déposer et voir les auteurs"], ["repondre", "Répondre et clôturer"]]),
     // Presque-accidents (question 20) : chacun signale et suit ses propres signalements ; « traiter » voit ceux de ses
-    // services, décide de la suite et fixe l'objectif de remontée — le manager, et tout profil à qui on le donne (pas le préréglage
-    // Préventeur : un ancien compte PREV1 doit encore se convertir en Agent + Préventeur, voir convertirComptes).
+    // services, décide de la suite et fixe l'objectif de remontée — le manager, et tout profil à qui on le donne (la question 20
+    // l'a confié au manager ; pas d'office au Préventeur).
     mod("signalements", "Santé au travail", "Signalements (presque-accidents)", [["signaler", "Signaler et suivre ses signalements"], ["traiter", "Traiter les signalements"]]),
     mod("duerp", "Sécurité & Risques", "Document unique", STD),
     mod("produits", "Sécurité & Risques", "Produits chimiques", STD),
@@ -59,7 +59,8 @@
     mod("documentation", "Ressources", "Base documentaire", [["consulter", "Consulter"], ["rediger", "Rédiger"]]),
     mod("dialogue-social", "Ressources", "Dialogue social", [["consulter", "Consulter"], ["participer", "Participer (représentant)"], ["direction", "Direction (répondre, clôturer)"]]),
     mod("reporting", "Pilotage", "Indicateurs & Reporting", [["consulter", "Consulter"]]),
-    // Objectifs santé-sécurité (ISO 45001 § 6.2, 2026-10-13) : fixer, suivre, clore. Aucun préréglage hors Administrateur et RH (question 24).
+    // Objectifs santé-sécurité (ISO 45001 § 6.2, 2026-10-13) : fixer, suivre, clore. Question 24 (2026-10-14) : fixés par le HSE
+    // (Préventeur, avec Administrateur et RH), lus par l'encadrement (Manager).
     mod("objectifs", "Pilotage", "Objectifs santé-sécurité", STD),
     // Revue de direction (ISO 45001 § 9.3, 2026-10-12) : préparer, valider, rouvrir. Aucun préréglage hors Administrateur et RH.
     mod("revue-direction", "Pilotage", "Revue de direction", STD),
@@ -87,13 +88,13 @@
     { id: "p-manager", nom: "Manager", libelle: "Manager", pastille: "MANAGER", droits: {
       atmp: "consulter", rsst: "auteurs", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter" } },
+      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter" } },
     { id: "p-agent", nom: "Agent", libelle: "Compte Agent", pastille: "AG", droits: {
       atmp: "consulter", rsst: "deposer", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
       documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler" } },
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
-      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter" } },
+      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
       "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler" } }
   ];
@@ -134,6 +135,9 @@
   function parId(profils) { var o = {}; profils.forEach(function (p) { o[p.id] = p; }); return o; }
 
   // ---- ancien format --------------------------------------------------------------------------------------
+  // Les droits d'un ancien compte préventeur (PREV1), tels qu'ils étaient : la conversion le reconnaît à eux, même
+  // si le préréglage Préventeur a gagné des droits depuis (objectifs, question 24) ou a été modifié dans Administration.
+  var PREVENTEUR_ANCIEN = { atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter" };
   // clé de modulePermissions → [module, niveau pour « read », niveau pour « write »]
   var ANCIENNES = {
     "atmp-admin": ["atmp-admin", "consulter", "gerer"],
@@ -208,11 +212,6 @@
     for (var i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
     return h.toString(36);
   }
-  function nonNuls(d) {
-    var o = {};
-    MODULES.forEach(function (m) { if (d[m.id] && d[m.id] !== "aucun") o[m.id] = d[m.id]; });
-    return o;
-  }
   function memesDroits(a, b) {
     var ka = Object.keys(a).sort(), kb = Object.keys(b).sort();
     return ka.length === kb.length && ka.every(function (k, i) { return k === kb[i] && a[k] === b[k]; });
@@ -231,7 +230,7 @@
       Object.keys(h.extras).forEach(function (m) { if (rang(m, h.extras[m]) > rang(m, base.droits[m])) reste[m] = h.extras[m]; });
       var ids = [h.profil];
       if (Object.keys(reste).length) {
-        if (memesDroits(reste, nonNuls(index["p-preventeur"].droits))) ids.push("p-preventeur");
+        if (memesDroits(reste, PREVENTEUR_ANCIEN)) ids.push("p-preventeur");
         else {
           var cle = Object.keys(reste).sort().map(function (m) { return m + "=" + reste[m]; }).join(","), id = "p-part-" + empreinte(cle);
           if (!index[id]) {

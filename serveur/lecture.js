@@ -124,4 +124,10 @@ function ecriture(page, cle, complet, soumis){
   return grefferAjouts(complet, soumis);
 }
 
-module.exports = { regle, vue, filtrer, ecriture, RETIRE, SIENS, ATMP_VUE_AGENT, REVUE_VUE_DECISIONS, OBJECTIF_VUE_ACTIONS, PAGE_UNIQUE };
+// les clés dont ce compte reçoit une valeur différente de la valeur complète (retirée, projetée, filtrée à ses services
+// ou à ses enregistrements, santé masquée) : « tout » et « recu » au format de filtrer() — VigieStore.complet côté page
+function partielles(tout, recu){
+  return Object.keys(tout).filter(k => !recu[k] || recu[k].valeur !== tout[k].valeur).sort();
+}
+
+module.exports = { regle, vue, filtrer, ecriture, partielles, RETIRE, SIENS, ATMP_VUE_AGENT, REVUE_VUE_DECISIONS, OBJECTIF_VUE_ACTIONS, PAGE_UNIQUE };

@@ -19,7 +19,7 @@
     site:"Site", responsable:"Responsable", echeance:"Échéance", priorite:"Priorité", origine:"Origine",
     risque:"Risque", risqueLie:"Risque lié", periodiciteMois:"Périodicité (mois)", dateDerniere:"Dernière réalisation",
     periodiciteRevueMois:"Revue tous les (mois)", faits:"Ce qui s'est passé", mesure:"Mesure prise sur le moment", nbPhotos:"Photos jointes",
-    indicateur:"Indicateur suivi", sens:"Sens de la cible", cible:"Cible", valeurManuelle:"Valeur relevée", justification:"Pourquoi cet objectif", bilan:"Bilan", resultat:"Résultat à la clôture",
+    indicateur:"Indicateur suivi", sens:"Sens de la cible", cible:"Cible", valeurManuelle:"Valeur relevée", justification:"Pourquoi cet objectif", bilan:"Bilan", resultat:"Résultat à la clôture", releve:"Dernier relevé",
     dateRevue:"Date de la revue", periodeDebut:"Début de la période examinée", periodeFin:"Fin de la période examinée", participants:"Participants",
     entrees:"Données d'entrée", sorties:"Résultats de la revue", decisions:"Actions décidées", chiffres:"Chiffres de la période", validePar:"Validée par", valideLe:"Validée le",
     traitement:"Traitement", clos:"Clos", closPar:"Clos par", closLe:"Clos le", signalementId:"Signalement (identifiant)",

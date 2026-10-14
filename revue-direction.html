@@ -305,7 +305,7 @@
   function objectifsDeLaRevue(c){
     if (!Array.isArray(c.objectifs)) return "";
     const f = (v, x) => VigieObjectifs.formater(v, { indicateur: x.indicateurId, unite: x.unite });
-    const ligne = x => `<li>${esc(x.intitule)} — ${esc(x.indicateur)} : ${esc(f(x.valeur, x))}, cible ${esc(x.cible === null ? "non chiffrée" : VigieObjectifs.libelleSens(x.sens) + " " + f(x.cible, x))}${x.echeance ? ", échéance " + esc(dateFr(x.echeance)) : ""} · <b>${esc(x.libelle)}</b></li>`;
+    const ligne = x => `<li>${esc(x.intitule)}${x.service ? " (" + esc(x.service) + ")" : ""} — ${esc(x.indicateur)} : ${esc(f(x.valeur, x))}, cible ${esc(x.cible === null ? "non chiffrée" : VigieObjectifs.libelleSens(x.sens) + " " + f(x.cible, x))}${x.echeance ? ", échéance " + esc(dateFr(x.echeance)) : ""} · <b>${esc(x.libelle)}</b></li>`;
     return (c.objectifs.length ? `<p class="form-note" style="margin:0 0 6px;">Objectifs santé-sécurité de la période, au jour du calcul :</p><ul class="liste-auto">${c.objectifs.map(ligne).join("")}</ul>` : `<p class="vide">Aucun objectif santé-sécurité sur la période.</p>`)
       + `<p class="form-note" style="margin:0 0 6px;">Remontée des presque-accidents</p>`;
   }

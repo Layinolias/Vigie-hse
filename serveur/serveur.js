@@ -99,8 +99,8 @@ const depuisCePoste = req => ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(r
 // anciens moteurs JavaScript).
 // Ce que ce compte peut recevoir : ce que les écrans de son rôle affichent, rien de santé s'il est anonymisé,
 // rien hors de ses services s'il y est limité.
-function donneesPour(page){
-  let d = Lecture.filtrer(page, base.lireTout());
+function donneesPour(page, tout){
+  let d = Lecture.filtrer(page, tout || base.lireTout());
   if (Anonymisation.estAnonyme(page)) d = Anonymisation.filtrer(d);
   if (Perimetre.limite(page)) d = Perimetre.filtrer(d, page.services);
   return d;
@@ -114,9 +114,12 @@ function valeurPour(page, cle, valeur){
 function injection(session, chemin){
   const etat = { api: '/api/', donnees: {}, session: session ? session.page : null };
   if (session){
-    const d = donneesPour(session.page);
+    const tout = base.lireTout(), d = donneesPour(session.page, tout);
     Consultations.noter(base, session.page, chemin, d);
     for (const [cle, x] of Object.entries(d)) etat.donnees[cle] = { v: x.valeur, r: x.revision };
+    // les clés que ce compte reçoit incomplètes (champs retirés, ses seuls enregistrements, hors de ses services, santé
+    // masquée) : une page qui fait des totaux sur l'organisation ne les calcule pas dessus (VigieStore.complet)
+    etat.partielles = Lecture.partielles(tout, d);
     etat.droits = droits.resume(session.page);
   }
   else {

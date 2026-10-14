@@ -397,6 +397,10 @@
       }
       return { ok: false, erreur: (r.reponse && r.reponse.erreur) || "invalide", secondes: r.reponse && r.reponse.secondes };
     },
+    // Cette page a-t-elle la valeur complète de la clé ? Sans serveur, toujours. Avec, le serveur dit lesquelles il a
+    // filtrées pour ce compte (champs retirés, ses seuls enregistrements, hors de ses services, données de santé
+    // masquées) : un total calculé dessus serait faux (Objectifs santé-sécurité, question 24).
+    complet: function(cle){ return !(SERVEUR && Array.isArray(SERVEUR.partielles) && SERVEUR.partielles.indexOf(cle) >= 0); },
     // base neuve, sans aucun compte : l'écran de connexion y inscrit les comptes de démonstration
     premierLancement: function(){ return !!(SERVEUR && SERVEUR.premierLancement); },
     _fusionner: fusionner,   // exposé pour les tests

@@ -58,6 +58,7 @@
   .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
   .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
   .form-grid .span3{ grid-column:1 / -1; }
+  @media (min-width:560px){ .form-grid .span2{ grid-column:span 2; } }
   .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
   .form-grid input, .form-grid select{ width:100%; }
   .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
@@ -75,6 +76,7 @@
   .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
   .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
   .ecart.bon{ color:var(--success); } .ecart.mauvais{ color:var(--danger); }
+  .releve{ display:block; font-size:11px; color:var(--text-faint); font-family:inherit; }
   .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
   .act-edit:hover{ text-decoration:underline; }
   .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
@@ -179,13 +181,14 @@
         <div class="panel-head">
           <h3 class="panel-title">Objectifs</h3>
           <div class="panel-actions">
+            <select id="fPerimetre" aria-label="Filtrer par périmètre"></select>
             <select id="fStatut" aria-label="Filtrer par statut"><option value="En vigueur">En vigueur</option><option value="Clos">Clos</option><option value="">Tous</option></select>
             <span id="listeActions" class="panel-actions"></span>
           </div>
         </div>
         <div class="table-panel">
           <table class="reg" id="tableObjectifs">
-            <thead><tr><th>Objectif</th><th>Indicateur</th><th>Cible</th><th>Valeur</th><th>Écart</th><th>État</th><th>Échéance</th><th>Responsable</th><th>Actions</th><th></th></tr></thead>
+            <thead><tr><th>Objectif</th><th>Périmètre</th><th>Indicateur</th><th>Cible</th><th>Valeur</th><th>Écart</th><th>État</th><th>Échéance</th><th>Responsable</th><th>Actions</th><th></th></tr></thead>
             <tbody id="tbody"></tbody>
           </table>
         </div>
@@ -243,6 +246,13 @@
   const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
   const lire = VigieIndicateurs.lecteur(VigieStore);
   const VO = VigieObjectifs;
+  // Périmètre (question 24) : un objectif porte sur toute l'organisation ou sur un service. Un compte limité à certains
+  // services voit ceux de toute l'organisation et ceux de ses services.
+  const mesServices = (session && session.services) || ["*"];
+  const limite = !mesServices.includes("*");
+  const visible = (o) => !!o && (!limite || !o.service || mesServices.includes(o.service));
+  const TOUTE = "Toute l'organisation";
+  const perimetreTexte = (o) => o.service || TOUTE;
 
   // ---------- Stockage ----------
   const CLE = VO.CLE;
@@ -254,29 +264,35 @@
   function statutAction(o, a, actions){ const x = actionAuPlan(o, a, actions); return x ? (x.statut || "À faire") : (a.statut || "À faire"); }
   const nomIndicateur = (id) => (VO.indicateur(id) || { nom: "—" }).nom;
   const cibleTexte = (o, e) => e.cible === null ? "—" : VO.libelleSens(e.sens) + " " + VO.formater(e.cible, o);
+  // la valeur lue : calculée ici, ou relevée par un compte qui a toutes les données (VigieObjectifs.lire)
+  const quandReleve = (e) => e.releveLe ? `relevée le ${dateFr(e.releveLe)}` : "";
   const tonEcart = (e) => e.ecart === null ? "" : ((e.sens === "max" ? e.ecart <= 0 : e.ecart >= 0) ? "bon" : "mauvais");
 
   // ---------- Liste ----------
   function render(){
     const actions = lire("vigie_hse_actions");
-    const l = tous();
-    const lus = l.map(o => ({ o, e: VO.evaluer(o, VigieStore) }));
+    const l = tous().filter(visible);
+    const lus = l.map(o => ({ o, e: VO.lire(o, VigieStore) }));
+    const fp = $("fPerimetre"), garde = fp.value, services = [...new Set(l.map(o => o.service).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr"));
+    fp.innerHTML = `<option value="">Tous les périmètres</option><option value="-">${TOUTE}</option>` + services.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+    fp.value = garde === "-" || services.includes(garde) ? garde : "";
     const enVigueur = lus.filter(x => x.o.statut !== "Clos");
     $("kpiEnVigueur").textContent = enVigueur.length;
     $("kpiTenus").textContent = enVigueur.filter(x => VO.ton(x.e.etat) === "bon").length;
     $("kpiEcart").textContent = enVigueur.filter(x => VO.ton(x.e.etat) === "mauvais").length;
     $("kpiActions").textContent = enVigueur.reduce((n, x) => n + (x.o.actions || []).filter(a => statutAction(x.o, a, actions) !== "Fait").length, 0);
-    const filtre = $("fStatut").value;
-    const vus = lus.filter(x => !filtre || (filtre === "Clos" ? x.o.statut === "Clos" : x.o.statut !== "Clos"))
+    const filtre = $("fStatut").value, per = fp.value;
+    const vus = lus.filter(x => (!filtre || (filtre === "Clos" ? x.o.statut === "Clos" : x.o.statut !== "Clos")) && (!per || (per === "-" ? !x.o.service : x.o.service === per)))
       .sort((a, b) => String(a.o.periodeFin || "").localeCompare(String(b.o.periodeFin || "")) || String(a.o.intitule || "").localeCompare(String(b.o.intitule || "")));
     $("tbody").innerHTML = vus.length ? vus.map(({ o, e }) => {
       const acts = o.actions || [];
       const faites = acts.filter(a => statutAction(o, a, actions) === "Fait").length;
       return `<tr>
         <td style="white-space:normal;min-width:220px;"><b>${esc(o.intitule)}</b></td>
+        <td style="white-space:normal;">${esc(perimetreTexte(o))}</td>
         <td style="white-space:normal;">${esc(nomIndicateur(o.indicateur))}</td>
         <td>${esc(cibleTexte(o, e))}</td>
-        <td class="num">${esc(VO.formater(e.valeur, o))}</td>
+        <td class="num">${esc(VO.formater(e.valeur, o))}${e.releveLe ? `<span class="releve">${esc(quandReleve(e))}</span>` : ""}</td>
         <td class="num"><span class="ecart ${tonEcart(e)}">${esc(VO.formaterEcart(e.ecart, o))}</span></td>
         <td><span class="chip ${VO.ton(e.etat)}">${esc(e.libelle)}</span>${o.statut === "Clos" ? ` <span class="form-note">clos</span>` : ""}</td>
         <td class="mono">${esc(dateFr(o.periodeFin))}</td>
@@ -284,9 +300,10 @@
         <td>${acts.length ? `${faites} / ${acts.length} soldée${acts.length > 1 ? "s" : ""}` : "—"}</td>
         <td><button type="button" class="act-edit" data-ouvrir="${esc(o.id)}">Ouvrir</button></td>
       </tr>`;
-    }).join("") : `<tr class="empty-row"><td colspan="10">${l.length ? "Aucun objectif avec ce statut." : "Aucun objectif pour le moment." + (peutGerer ? " « Nouvel objectif » en fixe un sur un indicateur de l'application." : "")}</td></tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="11">${l.length ? "Aucun objectif avec ces filtres." : "Aucun objectif pour le moment." + (peutGerer ? " « Nouvel objectif » en fixe un sur un indicateur de l'application." : "")}</td></tr>`;
   }
   $("fStatut").addEventListener("change", render);
+  $("fPerimetre").addEventListener("change", render);
   $("tbody").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); });
   $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`
     + (peutGerer ? `<button type="button" class="btn btn-primary" id="btnNouveau"><svg class="icon"><use href="#i-plus"/></svg> Nouvel objectif</button>` : "");
@@ -296,17 +313,17 @@
   $("btnExport").addEventListener("click", () => {
     const actions = lire("vigie_hse_actions");
     const lignes = [], lignesActions = [];
-    tous().forEach(o => {
-      const e = VO.evaluer(o, VigieStore);
-      lignes.push({ "Objectif": o.intitule || "", "Indicateur": nomIndicateur(o.indicateur), "Sens": VO.libelleSens(e.sens), "Cible": e.cible === null ? "" : e.cible,
-        "Unité": VO.unite(o), "Valeur": e.valeur === null ? "" : e.valeur, "Écart": e.ecart === null ? "" : e.ecart, "État": e.libelle,
+    tous().filter(visible).forEach(o => {
+      const e = VO.lire(o, VigieStore);
+      lignes.push({ "Objectif": o.intitule || "", "Périmètre": perimetreTexte(o), "Indicateur": nomIndicateur(o.indicateur), "Sens": VO.libelleSens(e.sens), "Cible": e.cible === null ? "" : e.cible,
+        "Unité": VO.unite(o), "Valeur": e.valeur === null ? "" : e.valeur, "Écart": e.ecart === null ? "" : e.ecart, "État": e.libelle, "Relevé le": dateFr(e.releveLe || ""),
         "Début": dateFr(o.periodeDebut), "Échéance": dateFr(o.periodeFin), "Responsable": o.responsable || "", "Pourquoi": o.justification || "", "Moyens": o.moyens || "",
         "Bilan": o.bilan || "", "Statut": o.statut || "En vigueur", "Clos par": o.closPar || "", "Clos le": dateFr(o.closLe) });
-      (o.actions || []).forEach(a => lignesActions.push({ "Objectif": o.intitule || "", "Action": a.description || "", "Responsable": a.responsable || "", "Échéance": dateFr(a.echeance), "État au Plan d'actions": statutAction(o, a, actions) }));
+      (o.actions || []).forEach(a => lignesActions.push({ "Objectif": o.intitule || "", "Périmètre": perimetreTexte(o), "Action": a.description || "", "Responsable": a.responsable || "", "Échéance": dateFr(a.echeance), "État au Plan d'actions": statutAction(o, a, actions) }));
     });
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: ["Objectif", "Indicateur", "Sens", "Cible", "Unité", "Valeur", "Écart", "État", "Début", "Échéance", "Responsable", "Pourquoi", "Moyens", "Bilan", "Statut", "Clos par", "Clos le"] }), "Objectifs");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignesActions, { header: ["Objectif", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: ["Objectif", "Périmètre", "Indicateur", "Sens", "Cible", "Unité", "Valeur", "Écart", "État", "Relevé le", "Début", "Échéance", "Responsable", "Pourquoi", "Moyens", "Bilan", "Statut", "Clos par", "Clos le"] }), "Objectifs");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignesActions, { header: ["Objectif", "Périmètre", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
     XLSX.writeFile(wb, `objectifs_sante_securite_${VigieDates.aujourdhui()}.xlsx`);
   });
   VigieImpression.brancher("btnExport", { table: "#tableObjectifs" });
@@ -314,13 +331,23 @@
   // ---------- Objectif ouvert ----------
   // Nouvel objectif : l'année civile en cours, une cible à fixer.
   let courant = null, actionsFiche = [];
-  function optionsIndicateurs(choisi){
+  // pour un service, un indicateur qui ne se calcule que sur toute l'organisation reste visible mais n'est pas proposé
+  function optionsIndicateurs(choisi, service){
     const groupes = [];
     VO.INDICATEURS.forEach(i => { let g = groupes.find(x => x.nom === i.groupe); if (!g){ g = { nom: i.groupe, l: [] }; groupes.push(g); } g.l.push(i); });
-    return `<option value="">— choisir —</option>` + groupes.map(g => `<optgroup label="${esc(g.nom)}">${g.l.map(i => `<option value="${esc(i.id)}"${i.id === choisi ? " selected" : ""}>${esc(i.nom)}</option>`).join("")}</optgroup>`).join("");
+    return `<option value="">— choisir —</option>` + groupes.map(g => `<optgroup label="${esc(g.nom)}">${g.l.map(i => { const non = !!service && !VO.parService(i.id);
+      return `<option value="${esc(i.id)}"${i.id === choisi ? " selected" : ""}${non && i.id !== choisi ? " disabled" : ""}>${esc(i.nom)}${non ? " (toute l'organisation seulement)" : ""}</option>`; }).join("")}</optgroup>`).join("");
+  }
+  // toute l'organisation, ou l'un des services de ses entrées (ceux de l'agent limité, s'il l'est)
+  function optionsPerimetre(choisi){
+    const groupes = VigieOrga.noms().map(n => ({ nom: n, l: VigieOrga.services(n).filter(s => !limite || mesServices.includes(s)) })).filter(g => g.l.length);
+    const connus = groupes.some(g => g.l.includes(choisi));
+    return `<option value="">${TOUTE}</option>`
+      + (choisi && !connus ? `<option value="${esc(choisi)}" selected>${esc(choisi)}</option>` : "")
+      + groupes.map(g => `<optgroup label="${esc(g.nom)}">${g.l.map(s => `<option value="${esc(s)}"${s === choisi ? " selected" : ""}>${esc(s)}</option>`).join("")}</optgroup>`).join("");
   }
   function ouvrir(id){
-    const o = id ? tous().find(x => x.id === id) : null;
+    const o = id ? tous().find(x => x.id === id && visible(x)) : null;
     if (id && !o) return;
     if (!o && !peutGerer) return;
     const annee = VigieDates.aujourdhui().slice(0, 4);
@@ -340,7 +367,8 @@
       <form id="ficheForm" novalidate>
         <div class="form-grid">
           <div class="span3"><label for="oIntitule">Objectif</label><input type="text" id="oIntitule" value="${esc(courant.intitule)}" maxlength="200" placeholder="Ex. : réduire les accidents avec arrêt des services techniques"${dis}></div>
-          <div class="span3" style="max-width:520px;"><label for="oIndicateur">Indicateur suivi</label><select id="oIndicateur"${dis}>${optionsIndicateurs(courant.indicateur)}</select></div>
+          <div><label for="oService">Périmètre</label><select id="oService"${dis}>${optionsPerimetre(courant.service || "")}</select></div>
+          <div class="span2" style="max-width:520px;"><label for="oIndicateur">Indicateur suivi</label><select id="oIndicateur"${dis}>${optionsIndicateurs(courant.indicateur, courant.service)}</select></div>
           <div><label for="oSens">Sens</label><select id="oSens"${dis}><option value="max"${courant.sens !== "min" ? " selected" : ""}>au plus</option><option value="min"${courant.sens === "min" ? " selected" : ""}>au moins</option></select></div>
           <div><label for="oCible">Cible</label><input type="text" inputmode="decimal" id="oCible" value="${esc(nb(courant.cible))}" placeholder="Ex. : 12,5"${dis}></div>
           <div data-manuel><label for="oUnite">Unité</label><input type="text" id="oUnite" value="${esc(courant.unite || "")}" maxlength="30" placeholder="agents, €, %…"${dis}></div>
@@ -378,7 +406,7 @@
   // l'objectif tel que le formulaire le décrit (pour la lecture en direct et l'enregistrement)
   function depuisFormulaire(){
     return Object.assign({}, courant, {
-      intitule: $("oIntitule").value.trim(), indicateur: $("oIndicateur").value, sens: $("oSens").value === "min" ? "min" : "max",
+      intitule: $("oIntitule").value.trim(), service: $("oService").value || undefined, indicateur: $("oIndicateur").value, sens: $("oSens").value === "min" ? "min" : "max",
       cible: VO.nombre($("oCible").value), unite: $("oUnite").value.trim(), valeurManuelle: VO.nombre($("oValeur").value),
       periodeDebut: $("oDebut").value, periodeFin: $("oFin").value, responsable: $("oResponsable").value.trim(),
       justification: $("oJustification").value.trim(), moyens: $("oMoyens").value.trim(), bilan: $("oBilan").value.trim(),
@@ -392,8 +420,8 @@
     $("oConstatBloc").style.display = manuel && o.cible === null && courant.statut !== "Clos" && peutGerer ? "" : "none";
     $("oAide").textContent = ind ? ind.aide : "Choisissez l'indicateur sur lequel porte l'objectif.";
     if (!ind){ $("oLecture").innerHTML = ""; return; }
-    const e = VO.evaluer(o, VigieStore);
-    const quand = e.fige ? "au " + dateFr((e.calculeLe || "").slice(0, 10) || o.closLe) + " (clôture)" : e.borne ? "au " + dateFr(e.borne) : "";
+    const e = VO.lire(o, VigieStore);
+    const quand = e.etat === "non-releve" ? "pas encore relevée" : e.releveLe ? quandReleve(e) + (e.borne ? ", au " + dateFr(e.borne) : "") : e.fige ? "au " + dateFr((e.calculeLe || "").slice(0, 10) || o.closLe) + " (clôture)" : e.borne ? "au " + dateFr(e.borne) : "";
     $("oLecture").innerHTML = `<div class="chiffres">
       <div class="chiffre"><b>${esc(VO.formater(e.valeur, o))}</b><span>valeur ${esc(quand)}</span></div>
       <div class="chiffre"><b>${esc(cibleTexte(o, e))}</b><span>cible à l'échéance${o.periodeFin ? " du " + esc(dateFr(o.periodeFin)) : ""}</span></div>
@@ -405,7 +433,8 @@
   $("fiche").addEventListener("change", (e) => {
     if (!courant || courant.statut === "Clos") return;
     if (e.target.id === "oIndicateur"){ const ind = VO.indicateur(e.target.value); if (ind && ind.id !== "manuel") $("oSens").value = ind.sens; }
-    if (["oIndicateur", "oSens", "oCible", "oValeur", "oUnite", "oDebut", "oFin"].includes(e.target.id)) majLecture();
+    if (e.target.id === "oService"){ const v = $("oIndicateur").value; $("oIndicateur").innerHTML = optionsIndicateurs(v, e.target.value); $("oIndicateur").value = v; }
+    if (["oService", "oIndicateur", "oSens", "oCible", "oValeur", "oUnite", "oDebut", "oFin"].includes(e.target.id)) majLecture();
   });
 
   function rendreActions(fige){
@@ -437,6 +466,7 @@
     const o = depuisFormulaire();
     if (!o.intitule){ alert("Indiquez l'objectif."); return null; }
     if (!VO.indicateur(o.indicateur)){ alert("Choisissez l'indicateur suivi."); return null; }
+    if (o.service && !VO.parService(o.indicateur)){ alert(`« ${nomIndicateur(o.indicateur)} » ne se calcule que pour toute l'organisation : l'effectif d'un service n'est pas connu. Choisissez un autre indicateur, ou « ${TOUTE} ».`); return null; }
     if ($("oCible").value.trim() && o.cible === null){ alert("La cible doit être un nombre."); return null; }
     if (o.indicateur !== "manuel" && o.cible === null){ alert("Indiquez la cible."); return null; }
     if ($("oValeur").value.trim() && o.valeurManuelle === null && o.indicateur === "manuel"){ alert("La valeur relevée doit être un nombre."); return null; }
@@ -449,6 +479,10 @@
       if (o.indicateur === "manuel" && o.cible === null && !constat){ alert("Indiquez le résultat constaté (atteint ou non) avant de clore."); return null; }
       o.resultat = VO.resultatDeCloture(o, VigieStore, VigieDates.aujourdhui(), constat);
       o.statut = "Clos"; o.closPar = moi; o.closLe = VigieDates.aujourdhui();
+      o.releve = undefined;
+    } else {
+      const r = VO.releve(o, VigieStore);
+      if (r) o.releve = r;
     }
     const nouveau = !o.id;
     if (nouveau){ o.id = genId("obj"); o.auteur = moi; o.dateCreation = new Date().toISOString(); }
@@ -496,9 +530,19 @@
     if (o){ render(); ouvrir(o.id); }
   });
 
+  // Relevés (question 24) : un compte qui gère les objectifs et a toutes leurs données note ce que dit le calcul, pour
+  // ceux qui ne peuvent pas le refaire (un compte limité reçoit du serveur des registres filtrés). Écrits seulement s'ils ont changé.
+  function releverTout(){
+    if (!peutGerer) return;
+    const ajd = VigieDates.aujourdhui(), maj = {};
+    tous().forEach(o => { const r = VO.releve(o, VigieStore, ajd); if (r && !VO.memeReleve(r, o.releve)) maj[o.id] = r; });
+    if (!Object.keys(maj).length) return;
+    try { modifierObjectifs(l => l.forEach((o, i) => { if (o && maj[o.id]) l[i] = Object.assign({}, o, { releve: maj[o.id] }); })); } catch(e){}
+  }
+  releverTout();
   render();
   // ?ouvrir=<id>
-  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(o => o.id === id)) ouvrir(id); })();
+  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(o => o.id === id && visible(o))) ouvrir(id); })();
 
   function tickClock(){
     const now = new Date();

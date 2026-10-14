@@ -53,7 +53,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 21 | Plans d'urgence : la liste des rubriques obligatoires est-elle la bonne ? | Situations d'urgence → Plans d'urgence par site (en service) | ✅ répondue le 2026-10-14 : chaque organisation règle sa liste — mise en œuvre à suivre |
 | 22 | Signalements : anonymat, délai de traitement, lecture de la pyramide de Bird | Signalements, Indicateurs & Reporting (en service) | ✅ répondue le 2026-10-14 : pas d'anonymat, 8 jours, pyramide confirmée — mise en œuvre le 2026-10-14 |
 | 23 | Revue de direction : à quelle fréquence, avec qui, et qui la valide ? | Revue de direction (en service, ISO 45001 § 9.3) | ✅ répondue le 2026-10-14 : fréquence libre, lecture ouverte par les profils, PAPRIPACT — mise en œuvre le 2026-10-14 (PAPRIPACT à construire) |
-| 24 | Objectifs santé-sécurité : qui les fixe, qui les voit, comment les suivre en cours d'année ? | Objectifs santé-sécurité (en service, ISO 45001 § 6.2) | ✅ répondue le 2026-10-14 : l'encadrement en lecture, fixés par le HSE, objectifs par service — mise en œuvre à suivre |
+| 24 | Objectifs santé-sécurité : qui les fixe, qui les voit, comment les suivre en cours d'année ? | Objectifs santé-sécurité (en service, ISO 45001 § 6.2) | ✅ répondue le 2026-10-14 : l'encadrement en lecture, fixés par le HSE, objectifs par service — mise en œuvre le 2026-10-14 |
 
 ---
 
@@ -701,7 +701,13 @@ Côté technique, (B) réutilise un écran existant et son anonymat ; (C) donne 
 > - Suivi et périmètre : « Cela doit être personnalisé. On peut avoir un objectif global et d'autres par service. »
 > - Indicateurs : pas de réponse — la liste reste celle d'aujourd'hui.
 >
-> _Mise en œuvre : à suivre._
+> **Mis en œuvre le 2026-10-14** :
+> - **Qui les fixe** : le profil **Préventeur** gère désormais les objectifs, avec Administrateur et RH. Pas d'étape « proposé → adopté » : la réponse ne la demande pas.
+> - **Qui les voit** : le profil **Manager** les consulte, en lecture seule. Un manager limité à certains services voit les objectifs de toute l'organisation et ceux de ses services.
+> - **Par service** : un objectif porte sur toute l'organisation ou sur un service (champ « Périmètre ») ; il se calcule alors sur les seuls enregistrements de ce service. Colonne et filtre « Périmètre », export, revue de direction (« (service) » après l'intitulé).
+> - Le **taux de fréquence et le taux de gravité estimés** ne se calculent pas par service : ils reposent sur l'effectif de toute l'organisation, et celui d'un service n'est pas connu. Le **taux de fréquence réel** (heures saisies dans Gestion RH, qui portent leur service) se calcule, lui, par service.
+> - **Suivi en cours d'année** : « Cela doit être personnalisé » ne tranche pas le prorata ; rien ne change (pas de repère au prorata). Si le préventeur en veut un, objectif par objectif, c'est un ajout.
+> - **Lecture sur le serveur** : un compte limité (à ses services, ou sans le registre complet) reçoit des registres filtrés ; un total calculé dessus serait faux. Il lit donc la valeur **relevée** par un compte qui gère les objectifs et a toutes les données (« relevée le JJ/MM/AAAA ») ; le relevé est remis à jour à chaque ouverture de la page par un tel compte, et à chaque enregistrement.
 
 ---
 

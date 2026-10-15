@@ -1,0 +1,680 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audit interne</title>
+<meta name="description" content="Audit interne du système de management de la santé et de la sécurité : programme d'audit, clauses auditées, auditeur, constats et actions (ISO 45001, § 9.2).">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/audit-interne-ref.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  select, input[type="text"], input[type="date"], input[type="search"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:150px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:68px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled, select:disabled{ background:var(--bg-2); color:var(--text); opacity:1; cursor:default; }
+  @media (max-width:640px){ select, input[type="text"], input[type="date"], input[type="search"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  @media (min-width:560px){ .form-grid .span2{ grid-column:span 2; } }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg td.num{ font-family:"IBM Plex Mono",monospace; text-align:right; }
+  table.reg tr.chap td{ background:var(--bg-2); font-weight:600; font-size:11.5px; color:var(--text-muted); padding:7px 14px; }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.bon{ color:var(--success); background:var(--success-bg); } .chip.bon::before{ background:var(--success); }
+  .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
+  .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
+  .chip.attention{ color:var(--warning); background:var(--warning-bg); } .chip.attention::before{ background:var(--warning); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; text-align:left; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  .ref{ display:block; font-size:11.5px; color:var(--text-faint); margin-top:2px; font-weight:400; white-space:normal; }
+  .filtres{ display:flex; gap:9px; flex-wrap:wrap; margin:0 0 12px; }
+  .filtres input[type="search"]{ flex:1 1 240px; min-width:0; }
+
+  /* Audit ouvert */
+  .fiche{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .fiche-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  .clauses{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(270px,100%),1fr)); gap:12px 20px; }
+  .clauses fieldset{ border:none; margin:0; padding:0; min-width:0; }
+  .clauses legend{ font:600 12px "IBM Plex Sans",sans-serif; color:var(--text-muted); margin:0 0 5px; padding:0; }
+  .sec .clauses label{ display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--text); font-weight:400; margin:0 0 4px; line-height:1.4; cursor:pointer; }
+  .clauses input{ margin:2px 0 0; flex-shrink:0; }
+  .constat{ background:var(--bg-2); border-radius:var(--r-sm); padding:12px 14px; margin:0 0 10px; }
+  .constat .texte{ white-space:pre-wrap; font-size:12.8px; line-height:1.55; margin:6px 0 4px; }
+  .constat .actions-constat{ margin-top:10px; }
+  .constat .actions-constat .dyn-row > span{ flex:1 1 auto; font-size:12.8px; }
+  .alerte{ font-size:12.5px; color:var(--danger); margin:8px 0 0; font-weight:600; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Pilotage / <b>Audit interne</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-list"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Audit interne</h1>
+            <p>Le programme d'audit du système de management de la santé et de la sécurité (ISO 45001, § 9.2) : les audits prévus et réalisés, les clauses de la norme que chacun examine, l'auditeur et ce qui garantit son indépendance, les constats avec leur preuve, et les actions qui corrigent les non-conformités, suivies au Plan d'actions. La couverture des clauses montre ce qui a été audité, et quand. Les contrôles de terrain restent dans Inspection / Audit.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-calendar"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiAudits">–</span><span class="ps-kpi-label" id="kpiAuditsLabel">Audits</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiRealises">–</span><span class="ps-kpi-label" id="kpiRealisesLabel">Réalisés</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiNc">–</span><span class="ps-kpi-label">Non-conformités non soldées</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-clock"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiJamais">–</span><span class="ps-kpi-label" id="kpiJamaisLabel">Clauses jamais auditées</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel fiche" id="fiche" style="display:none;"></div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Programme d'audit</h3>
+          <div class="panel-actions" id="listeActions"></div>
+        </div>
+        <div class="filtres">
+          <select id="fAnnee" aria-label="Année"></select>
+          <input type="search" id="fTexte" placeholder="Rechercher : audit, clause, auditeur, critère" aria-label="Rechercher">
+          <select id="fEtat" aria-label="Filtrer par état">
+            <option value="">Tous les états</option><option value="planifie">Planifié</option><option value="depasse">Date dépassée</option><option value="realise">Réalisé</option><option value="annule">Annulé</option>
+          </select>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableAudits">
+            <thead><tr><th>Audit</th><th>Périmètre</th><th>Prévu le</th><th>Réalisé le</th><th>Auditeur</th><th>État</th><th>Constats</th><th>Actions</th><th></th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Couverture des clauses</h3>
+          <p class="form-note" id="couvertureNote">Toutes années confondues, audits annulés exclus.</p>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableCouverture">
+            <thead><tr><th>Clause d'ISO 45001</th><th>Audits réalisés</th><th>Dernier audit</th><th>Prochain audit prévu</th><th>Non-conformités ouvertes / relevées</th></tr></thead>
+            <tbody id="tbodyCouverture"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Aucune fréquence n'est imposée : la couverture montre, clause par clause, le dernier audit réalisé et le prochain prévu (question 27 posée au préventeur : fréquence, indépendance de l'auditeur, classement des constats). Une non-conformité est soldée quand toutes ses actions sont faites au Plan d'actions, où elles arrivent avec l'origine « Audit interne ». La revue de direction reprend les audits de sa période.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("audit-interne", "consulter");
+  const peutGerer = D.peut("audit-interne", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Audit interne", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const lire = (cle) => { try { const v = JSON.parse(VigieStore.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } };
+  const fr = (a, b) => String(a).localeCompare(String(b), "fr");
+  const norm = (t) => String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const VA = VigieAuditInterne;
+  const ajd = () => VigieDates.aujourdhui();
+  const dateOk = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d || "");
+  // Périmètre (comme les objectifs et la conformité) : un audit porte sur toute l'organisation ou sur un service. Un compte
+  // limité à certains services voit ceux de toute l'organisation et ceux de ses services.
+  const mesServices = (session && session.services) || ["*"];
+  const limite = !mesServices.includes("*");
+  const visible = (x) => !!x && (!limite || !x.service || mesServices.includes(x.service));
+  const TOUTE = "Toute l'organisation";
+  const perimetreTexte = (x) => x.service || TOUTE;
+
+  // ---------- Stockage ----------
+  const CLE = VA.CLE;
+  const tous = () => lire(CLE).filter(x => x && typeof x === "object" && x.id);
+  function modifierAudits(modif){ const l = lire(CLE); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
+  // Les actions d'un constat rejoignent le Plan d'actions sous VigieAuditInterne.idAction (plan-actions.html, generateAuditInterneActionSeeds)
+  const actionAuPlan = (au, a, actions) => (actions || lire("vigie_hse_actions")).find(p => p && p.id === VA.idAction(au, a)) || null;
+  const toutesActions = (au) => VA.constats(au).flatMap(k => VA.actionsDe(k));
+  const chipEtat = (e) => `<span class="chip ${e.ton}">${esc(e.libelle)}</span>`;
+  const quand = (au) => au.dateRealisee || au.datePrevue || "";
+  function resumeConstats(au){
+    const n = (t) => VA.constats(au).filter(k => k.type === t).length;
+    const l = [[n("Non-conformité"), "NC"], [n("Observation"), "obs."], [n("Point fort"), "point(s) fort(s)"]].filter(z => z[0]).map(z => z[0] + " " + z[1]);
+    return l.length ? l.join(" · ") : "—";
+  }
+
+  // ---------- Années ----------
+  const anActuel = Number(ajd().slice(0, 4));
+  let anneeChoisie = (function(){ const q = new URLSearchParams(location.search).get("annee"); return q === "" || /^\d{4}$/.test(q || "") ? q : String(anActuel); })();
+  function remplirAnnees(l){
+    const ans = new Set([anActuel, anActuel + 1]);
+    l.forEach(au => { const a = VA.annee(au); if (a) ans.add(a); });
+    if (/^\d{4}$/.test(anneeChoisie)) ans.add(Number(anneeChoisie));
+    $("fAnnee").innerHTML = `<option value="">Toutes les années</option>` + [...ans].sort((a, b) => a - b).map(a => `<option value="${a}">${a}</option>`).join("");
+    $("fAnnee").value = anneeChoisie;
+  }
+
+  // ---------- Liste et couverture ----------
+  function render(){
+    const jour = ajd(), actions = lire("vigie_hse_actions");
+    const l = tous().filter(visible);
+    remplirAnnees(l);
+    const an = anneeChoisie;
+    const deLAn = l.filter(au => !an || String(VA.annee(au)) === an);
+    const s = VA.synthese(deLAn, actions, jour), g = VA.synthese(l, actions, jour), cv = VA.couverture(l, actions, jour);
+    $("kpiAudits").textContent = s.audits;
+    $("kpiAuditsLabel").textContent = an ? `Audits en ${an}` : "Audits, toutes années";
+    $("kpiRealises").textContent = s.realises;
+    $("kpiRealisesLabel").textContent = s.depasses ? `Réalisés · ${s.depasses} date dépassée` : "Réalisés";
+    $("kpiNc").textContent = g.ncSansAction + g.ncEnCours;
+    $("kpiJamais").textContent = cv.filter(r => !r.audits).length;
+    $("kpiJamaisLabel").textContent = `Clauses jamais auditées, sur ${VA.CLAUSES.length}`;
+    const et = $("fEtat").value, q = norm($("fTexte").value.trim());
+    const vus = deLAn.map(au => ({ au, e: VA.etat(au, jour) }))
+      .filter(({ au, e }) => (!et || e.code === et)
+        && (!q || norm([au.titre, au.auditeur, au.criteres, au.service, VA.clausesDe(au).map(VA.nomClause).join(" ")].join(" ")).includes(q)))
+      .sort((a, b) => (a.e.code === "annule") - (b.e.code === "annule") || String(quand(a.au)).localeCompare(String(quand(b.au))) || fr(a.au.titre || "", b.au.titre || ""));
+    $("tbody").innerHTML = vus.length ? vus.map(({ au, e }) => {
+      const acts = toutesActions(au), faites = acts.filter(a => VA.statutAction(au, a, actions) === "Fait").length;
+      const cl = VA.clausesDe(au);
+      return `<tr>
+        <td style="white-space:normal;min-width:240px;"><b>${esc(au.titre)}</b><span class="ref">${esc([cl.length ? "Clauses " + cl.join(", ") : "", au.criteres || ""].filter(Boolean).join(" · "))}</span></td>
+        <td style="white-space:normal;">${esc(perimetreTexte(au))}</td>
+        <td class="mono">${esc(dateFr(au.datePrevue) || "—")}</td>
+        <td class="mono">${esc(dateFr(au.dateRealisee) || "—")}</td>
+        <td style="white-space:normal;">${esc(au.auditeur || "—")}</td>
+        <td>${chipEtat(e)}</td>
+        <td>${esc(resumeConstats(au))}</td>
+        <td>${acts.length ? `${faites} / ${acts.length} soldée${acts.length > 1 ? "s" : ""}` : "—"}</td>
+        <td><button type="button" class="act-edit" data-ouvrir="${esc(au.id)}">Ouvrir</button></td>
+      </tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="9">${deLAn.length ? "Aucun audit avec ces filtres." : (an ? `Aucun audit prévu en ${esc(an)}.` : "Aucun audit pour le moment.") + (peutGerer ? " « Nouvel audit » en planifie un." : "")}</td></tr>`;
+    rendreCouverture(cv);
+  }
+  function rendreCouverture(cv){
+    let chap = "";
+    $("couvertureNote").textContent = "Toutes années confondues, audits annulés exclus" + (limite ? ", parmi les audits de toute l'organisation et de vos services." : ".");
+    $("tbodyCouverture").innerHTML = cv.map(r => {
+      const c = r.clause.split(".")[0];
+      const tete = c !== chap ? `<tr class="chap"><td colspan="5">${esc(c)} — ${esc(VA.CHAPITRES[c])}</td></tr>` : "";
+      chap = c;
+      return tete + `<tr>
+        <td style="white-space:normal;min-width:260px;"><b class="mono">${esc(r.clause)}</b> ${esc(r.nom)}</td>
+        <td class="num">${r.audits}</td>
+        <td style="white-space:normal;">${r.dernierAudit ? `<span class="mono">${esc(dateFr(r.dernier))}</span> · <button type="button" class="act-edit" data-ouvrir="${esc(r.dernierAudit.id)}">${esc(r.dernierAudit.titre || "Audit")}</button>` : `<span class="chip attention">Jamais auditée</span>`}</td>
+        <td style="white-space:normal;">${r.prochainAudit ? `<span class="mono">${esc(dateFr(r.prochain))}</span> · <button type="button" class="act-edit" data-ouvrir="${esc(r.prochainAudit.id)}">${esc(r.prochainAudit.titre || "Audit")}</button>` : "—"}</td>
+        <td>${r.nonConformites ? `${r.ncOuvertes} / ${r.nonConformites}` : "—"}</td>
+      </tr>`;
+    }).join("");
+  }
+  $("fAnnee").addEventListener("change", () => { anneeChoisie = $("fAnnee").value; render(); });
+  $("fEtat").addEventListener("change", render);
+  $("fTexte").addEventListener("input", render);
+  ["tbody", "tbodyCouverture"].forEach(id => $(id).addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); }));
+  $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`
+    + (peutGerer ? `<button type="button" class="btn btn-primary" id="btnNouveau"><svg class="icon"><use href="#i-plus"/></svg> Nouvel audit</button>` : "");
+  if (peutGerer) $("btnNouveau").addEventListener("click", () => ouvrir(null));
+
+  // ---------- Export ----------
+  $("btnExport").addEventListener("click", () => {
+    const jour = ajd(), actions = lire("vigie_hse_actions"), l = tous().filter(visible);
+    const audits = [], cons = [], acts = [];
+    l.forEach(au => {
+      const n = (t) => VA.constats(au).filter(k => k.type === t).length;
+      audits.push({ "Identifiant": au.id, "Audit": au.titre || "", "Clauses": VA.clausesDe(au).join(", "), "Autres critères": au.criteres || "", "Périmètre": perimetreTexte(au),
+        "Prévu le": dateFr(au.datePrevue), "Réalisé le": dateFr(au.dateRealisee), "Auditeur": au.auditeur || "", "Indépendance de l'auditeur": au.independance || "",
+        "État": VA.etat(au, jour).libelle, "Motif d'annulation": au.annule ? au.motifAnnulation || "" : "", "Non-conformités": n("Non-conformité"), "Observations": n("Observation"), "Points forts": n("Point fort"), "Conclusion": au.conclusion || "" });
+      VA.constats(au).forEach(k => {
+        cons.push({ "Audit": au.titre || "", "Réalisé le": dateFr(au.dateRealisee), "Clause": VA.nomClause(k.clause), "Type": k.type || "", "Constat": k.texte || "", "Preuve": k.preuve || "",
+          "État": k.type === "Non-conformité" ? (!VA.actionsDe(k).length ? "Sans action" : VA.ncSoldee(au, k, actions) ? "Soldée" : "Action en cours") : "" });
+        VA.actionsDe(k).forEach(a => acts.push({ "Audit": au.titre || "", "Constat": k.texte || "", "Action": a.description || "", "Responsable": a.responsable || "", "Échéance": dateFr(a.echeance), "État au Plan d'actions": VA.statutAction(au, a, actions) }));
+      });
+    });
+    const cv = VA.couverture(l, actions, jour).map(r => ({ "Clause": r.clause + " " + r.nom, "Audits réalisés": r.audits, "Dernier audit": r.dernierAudit ? dateFr(r.dernier) + " — " + (r.dernierAudit.titre || "") : "Jamais auditée",
+      "Prochain audit prévu": r.prochainAudit ? dateFr(r.prochain) + " — " + (r.prochainAudit.titre || "") : "", "Non-conformités relevées": r.nonConformites, "Non-conformités ouvertes": r.ncOuvertes }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(audits, { header: ["Identifiant", "Audit", "Clauses", "Autres critères", "Périmètre", "Prévu le", "Réalisé le", "Auditeur", "Indépendance de l'auditeur", "État", "Motif d'annulation", "Non-conformités", "Observations", "Points forts", "Conclusion"] }), "Audits");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cons, { header: ["Audit", "Réalisé le", "Clause", "Type", "Constat", "Preuve", "État"] }), "Constats");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(acts, { header: ["Audit", "Constat", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cv, { header: ["Clause", "Audits réalisés", "Dernier audit", "Prochain audit prévu", "Non-conformités relevées", "Non-conformités ouvertes"] }), "Couverture");
+    XLSX.writeFile(wb, `audit_interne_${jour}.xlsx`);
+  });
+  VigieImpression.brancher("btnExport", { table: "#tableAudits" });
+
+  // ---------- Audit ouvert ----------
+  let courant = null, constatsFiche = [];
+  // toute l'organisation, ou l'un des services de ses entrées (ceux du compte limité, s'il l'est)
+  function optionsPerimetre(choisi){
+    const groupes = VigieOrga.noms().map(n => ({ nom: n, l: VigieOrga.services(n).filter(s => !limite || mesServices.includes(s)) })).filter(g => g.l.length);
+    const connus = groupes.some(g => g.l.includes(choisi));
+    return `<option value="">${TOUTE}</option>`
+      + (choisi && !connus ? `<option value="${esc(choisi)}" selected>${esc(choisi)}</option>` : "")
+      + groupes.map(g => `<optgroup label="${esc(g.nom)}">${g.l.map(s => `<option value="${esc(s)}"${s === choisi ? " selected" : ""}>${esc(s)}</option>`).join("")}</optgroup>`).join("");
+  }
+  const fige = () => !courant || !!courant.annule || !peutGerer;
+  function ouvrir(id){
+    const x = id ? tous().find(a => a.id === id && visible(a)) : null;
+    if (id && !x) return;
+    if (!x && !peutGerer) return;
+    courant = x || { id: null, titre: "", clauses: [], criteres: "", datePrevue: "", auditeur: "", independance: "", conclusion: "", constats: [] };
+    const annule = !!courant.annule, dis = fige() ? " disabled" : "";
+    constatsFiche = VA.constats(courant).map(k => Object.assign({}, k, { actions: (Array.isArray(k.actions) ? k.actions : []).filter(a => a && typeof a === "object").map(a => Object.assign({}, a)) }));
+    const e = VA.etat(courant, ajd());
+    const coche = new Set(VA.clausesDe(courant));
+    const clauses = Object.keys(VA.CHAPITRES).map(ch => `<fieldset><legend>${esc(ch)} — ${esc(VA.CHAPITRES[ch])}</legend>`
+      + VA.CLAUSES.filter(c => c[0].split(".")[0] === ch).map(([c, nom]) => `<label><input type="checkbox" data-clause="${esc(c)}"${coche.has(c) ? " checked" : ""}${dis}><span><b class="mono">${esc(c)}</b> ${esc(nom)}</span></label>`).join("")
+      + `</fieldset>`).join("");
+    $("fiche").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">${x ? esc(x.titre) : "Nouvel audit"}</h3>
+          ${x ? `<div class="fiche-etat">${chipEtat(e)}${annule ? ` annulé${x.annulePar ? " par " + esc(x.annulePar) : ""}${x.annuleLe ? " le " + esc(dateFr(x.annuleLe)) : ""}${x.motifAnnulation ? " : " + esc(x.motifAnnulation) : ""}` : ""}${x.auteur ? ` · créé par ${esc(x.auteur)}` : ""}${x.modifiePar ? ` · modifié par ${esc(x.modifiePar)}` : ""}</div>` : ""}</div>
+        <div class="panel-actions">${x ? `<button type="button" class="btn btn-ghost" id="btnRapport"><svg class="icon"><use href="#i-printer"/></svg> Imprimer le rapport</button>` : ""}<button type="button" class="btn btn-ghost" id="btnFermer">Fermer</button></div>
+      </div>
+      <form id="ficheForm" novalidate>
+        <div class="form-grid">
+          <div class="span3"><label for="cTitre">Audit : ce qui est audité</label><input type="text" id="cTitre" value="${esc(courant.titre || "")}" maxlength="200" placeholder="Ex. : planification des actions et suivi des non-conformités"${dis}></div>
+          <div><label for="cPrevue">Prévu le</label><input type="date" id="cPrevue" value="${esc(courant.datePrevue || "")}"${dis}></div>
+          <div><label for="cRealisee">Réalisé le</label><input type="date" id="cRealisee" value="${esc(courant.dateRealisee || "")}"${dis}></div>
+          <div><label for="cService">Périmètre</label><select id="cService"${dis}>${optionsPerimetre(courant.service || "")}</select></div>
+          <div><label for="cAuditeur">Auditeur</label><input type="text" id="cAuditeur" value="${esc(courant.auditeur || "")}" maxlength="120" placeholder="Nom et fonction"${dis}></div>
+          <div class="span3"><label for="cIndependance">Indépendance de l'auditeur</label><textarea id="cIndependance" placeholder="Ce qui garantit qu'il n'audite pas son propre travail : il n'appartient pas au service audité, n'a pas conçu ce qu'il examine…"${dis}>${esc(courant.independance || "")}</textarea></div>
+        </div>
+        <div class="sec"><h4>Critères de l'audit</h4><p class="aide">Les clauses de la norme ISO 45001 que l'audit examine, et d'autres critères s'il y en a : procédure interne, autre référentiel. La couverture des clauses, sous le programme, en tient le compte une fois l'audit réalisé.</p>
+          <div class="clauses">${clauses}</div>
+          <div class="form-grid" style="margin-top:12px;"><div class="span3"><label for="cCriteres">Autres critères</label><input type="text" id="cCriteres" value="${esc(courant.criteres || "")}" maxlength="300" placeholder="Ex. : procédure interne de dotation des EPI"${dis}></div></div>
+        </div>
+        <div class="sec"><h4>Constats</h4><p class="aide">Ce que l'audit a relevé, clause par clause, avec la preuve vue. Les actions d'un constat rejoignent le Plan d'actions (origine « Audit interne ») dès l'enregistrement ; leur état est celui du Plan d'actions, où elles se suivent ensuite. Une non-conformité est soldée quand toutes ses actions y sont faites.</p>
+          <div id="cConstats"></div>
+          ${fige() ? "" : `<button type="button" class="btn btn-ghost" id="btnAjoutConstat"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un constat</button>`}
+        </div>
+        <div class="sec"><h4>Conclusion</h4><p class="aide">L'avis de l'auditeur : le système est-il appliqué, tenu à jour, efficace sur le périmètre audité ?</p>
+          <textarea id="cConclusion" aria-label="Conclusion"${dis}>${esc(courant.conclusion || "")}</textarea>
+        </div>
+        ${peutGerer ? `<div class="form-actions">
+          ${annule ? `<button type="button" class="btn btn-ghost" id="btnRetablir">Rétablir l'audit</button>` : `<button type="submit" class="btn btn-primary">Enregistrer</button>
+          ${x && !dateOk(x.dateRealisee) ? `<button type="button" class="btn btn-ghost" id="btnAnnuler">Annuler l'audit</button>` : ""}`}
+          ${x ? `<button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer l'audit</button>` : ""}
+        </div>` : ""}
+      </form>`;
+    rendreConstats();
+    $("fiche").style.display = "";
+    $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  function rendreConstats(){
+    const actions = lire("vigie_hse_actions"), f = fige();
+    const optsClause = (choisi) => `<option value="">Autre critère</option>`
+      + (choisi && !VA.CLAUSES.some(c => c[0] === choisi) ? `<option value="${esc(choisi)}" selected>${esc(choisi)}</option>` : "")
+      + VA.CLAUSES.map(([c, nom]) => `<option value="${esc(c)}"${c === choisi ? " selected" : ""}>${esc(c)} ${esc(nom)}</option>`).join("");
+    $("cConstats").innerHTML = constatsFiche.map((k, i) => {
+      // une action déjà reprise au Plan d'actions ne se modifie plus ici : on la suit là-bas
+      const lignes = (k.actions || []).map((a, j) => {
+        const auPlan = courant.id && actionAuPlan(courant, a, actions);
+        if (f || auPlan) return String(a.description || "").trim() ? `<div class="dyn-row" data-j="${j}" data-fixe><span>${esc(a.description)}${a.responsable ? " — " + esc(a.responsable) : ""}${a.echeance ? ", échéance " + esc(dateFr(a.echeance)) : ""} · <b>${esc(courant.id ? VA.statutAction(courant, a, actions) : "À faire")}</b>${auPlan ? ` <a class="act-edit" href="plan-actions.html">au Plan d'actions</a>` : ""}</span></div>` : "";
+        return `<div class="dyn-row" data-j="${j}">
+          <input type="text" data-a="description" placeholder="Action" aria-label="Action" value="${esc(a.description || "")}" maxlength="300">
+          <input type="text" data-a="responsable" placeholder="Responsable" aria-label="Responsable" value="${esc(a.responsable || "")}" style="flex:0 1 180px">
+          <input type="date" data-a="echeance" aria-label="Échéance" value="${esc(a.echeance || "")}" style="flex:0 0 150px">
+          <button type="button" class="act-del" data-retirer-action="${i}:${j}">Suppr.</button>
+        </div>`;
+      }).join("");
+      if (f) return `<div class="constat" data-i="${i}"><div><span class="chip ${VA.TONS_TYPE[k.type] || "neutre"}">${esc(k.type || "—")}</span> <b>${esc(VA.nomClause(k.clause))}</b></div>`
+        + `${k.texte ? `<div class="texte">${esc(k.texte)}</div>` : ""}${k.preuve ? `<p class="form-note">Preuve : ${esc(k.preuve)}</p>` : ""}`
+        + `${lignes ? `<div class="actions-constat">${lignes}</div>` : ""}<p class="alerte" data-alerte style="display:none;"></p></div>`;
+      return `<div class="constat" data-i="${i}">
+        <div class="form-grid">
+          <div><label>Type</label><select data-k="type" aria-label="Type de constat">${VA.TYPES.map(t => `<option value="${esc(t)}"${t === k.type ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></div>
+          <div class="span2"><label>Clause</label><select data-k="clause" aria-label="Clause du constat">${optsClause(k.clause || "")}</select></div>
+          <div class="span3"><label>Constat</label><textarea data-k="texte" aria-label="Constat" placeholder="Ce qui a été vu">${esc(k.texte || "")}</textarea></div>
+          <div class="span3"><label>Preuve</label><input type="text" data-k="preuve" aria-label="Preuve" value="${esc(k.preuve || "")}" maxlength="300" placeholder="Ex. : registre consulté, entretien avec le responsable, dossier n° …"></div>
+        </div>
+        <p class="alerte" data-alerte style="display:none;"></p>
+        <div class="actions-constat">${lignes}</div>
+        <div class="dyn-row"><button type="button" class="btn btn-ghost" data-ajout-action="${i}"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une action</button><button type="button" class="act-del" data-retirer-constat="${i}" style="margin-left:auto;">Retirer le constat</button></div>
+      </div>`;
+    }).join("") || `<p class="vide">Aucun constat.</p>`;
+    majAlertes();
+  }
+  function lireConstats(){
+    if (fige()) return;
+    $("cConstats").querySelectorAll(".constat[data-i]").forEach(el => {
+      const k = constatsFiche[Number(el.dataset.i)];
+      if (!k) return;
+      el.querySelectorAll("[data-k]").forEach(inp => { k[inp.dataset.k] = inp.value.trim(); });
+      el.querySelectorAll(".dyn-row[data-j]:not([data-fixe])").forEach(row => {
+        const a = k.actions[Number(row.dataset.j)];
+        if (a) row.querySelectorAll("[data-a]").forEach(inp => { a[inp.dataset.a] = inp.value.trim(); });
+      });
+    });
+  }
+  // une non-conformité décrite sans aucune action : le dire
+  function majAlertes(){
+    if (!courant) return;
+    lireConstats();
+    $("cConstats").querySelectorAll(".constat[data-i]").forEach(el => {
+      const k = constatsFiche[Number(el.dataset.i)], p = el.querySelector("[data-alerte]");
+      if (!k || !p) return;
+      const sans = !courant.annule && k.type === "Non-conformité" && !!String(k.texte || "").trim() && !VA.actionsDe(k).length;
+      p.textContent = sans ? `Non-conformité sans action : ${fige() ? "aucune action prévue pour la corriger." : "ajoutez celle qui la corrigera."}` : "";
+      p.style.display = sans ? "" : "none";
+    });
+  }
+  function fermer(){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; courant = null; }
+
+  // Relit le formulaire dans l'audit enregistré.
+  function enregistrer(){
+    if (fige()) return null;
+    lireConstats();
+    const jour = ajd();
+    const x = Object.assign({}, courant, {
+      titre: $("cTitre").value.trim(), datePrevue: $("cPrevue").value, dateRealisee: $("cRealisee").value,
+      service: $("cService").value || undefined, auditeur: $("cAuditeur").value.trim(), independance: $("cIndependance").value.trim(),
+      clauses: [...$("fiche").querySelectorAll("[data-clause]")].filter(c => c.checked).map(c => c.dataset.clause),
+      criteres: $("cCriteres").value.trim(), conclusion: $("cConclusion").value.trim(),
+    });
+    if (!x.titre){ alert("Indiquez ce qui est audité."); return null; }
+    if (!dateOk(x.datePrevue)){ alert("Indiquez la date prévue de l'audit."); return null; }
+    if (!x.clauses.length && !x.criteres){ alert("Cochez au moins une clause auditée, ou indiquez d'autres critères."); return null; }
+    if (x.dateRealisee){
+      if (!dateOk(x.dateRealisee)){ alert("La date de réalisation n'est pas lisible."); return null; }
+      if (x.dateRealisee > jour){ alert("La date de réalisation ne peut pas être dans le futur."); return null; }
+      if (!x.auditeur){ alert("Indiquez l'auditeur : l'audit est réalisé."); return null; }
+    }
+    const ks = constatsFiche.filter(k => String(k.texte || "").trim() || VA.actionsDe(k).length);
+    if (ks.some(k => !String(k.texte || "").trim())){ alert("Décrivez chaque constat qui porte une action."); return null; }
+    if (ks.length && !x.dateRealisee){ alert("Indiquez la date de réalisation : l'audit a des constats."); return null; }
+    x.constats = ks.map(k => ({ id: k.id || genId("k"), clause: k.clause || "", type: VA.TYPES.includes(k.type) ? k.type : VA.TYPES[0], texte: String(k.texte).trim(), preuve: String(k.preuve || "").trim(),
+      actions: (k.actions || []).filter(a => a && String(a.description || "").trim()).map(a => Object.assign({ id: a.id || genId("act") }, a)) }));
+    if (!x.dateRealisee) delete x.dateRealisee;
+    if (!x.service) delete x.service;
+    const nouveau = !x.id;
+    if (nouveau){ x.id = genId("au"); x.auteur = moi; x.dateCreation = new Date().toISOString(); }
+    else { x.modifiePar = moi; x.dateMaj = new Date().toISOString(); }
+    try {
+      modifierAudits(l => {
+        const i = l.findIndex(a => a && a.id === x.id);
+        if (i < 0) l.push(x);
+        else { const y = Object.assign({}, l[i], x); if (!x.dateRealisee) delete y.dateRealisee; if (!x.service) delete y.service; l[i] = y; }
+      });
+    } catch(e){ alert("L'audit n'a pas pu être enregistré."); return null; }
+    const nc = x.constats.filter(k => k.type === "Non-conformité").length;
+    logAudit(nouveau ? "Création" : "Modification", `Audit interne « ${x.titre} »${x.dateRealisee ? ` réalisé le ${dateFr(x.dateRealisee)}, ${x.constats.length} constat(s) dont ${nc} non-conformité(s)` : ` prévu le ${dateFr(x.datePrevue)}`}`);
+    return x;
+  }
+
+  $("fiche").addEventListener("click", (e) => {
+    if (e.target.closest("#btnFermer")){ fermer(); return; }
+    if (e.target.closest("#btnRapport")){ imprimerRapport(courant && courant.id); return; }
+    if (e.target.closest("#btnAjoutConstat")){
+      lireConstats();
+      const coches = [...$("fiche").querySelectorAll("[data-clause]")].filter(c => c.checked).map(c => c.dataset.clause);
+      constatsFiche.push({ id: genId("k"), type: VA.TYPES[0], clause: coches.length === 1 ? coches[0] : "", texte: "", preuve: "", actions: [] });
+      rendreConstats();
+      return;
+    }
+    const aj = e.target.closest("[data-ajout-action]");
+    if (aj){ lireConstats(); const k = constatsFiche[Number(aj.dataset.ajoutAction)]; if (k){ k.actions.push({ id: genId("act") }); rendreConstats(); } return; }
+    const ra = e.target.closest("[data-retirer-action]");
+    if (ra){ lireConstats(); const [i, j] = ra.dataset.retirerAction.split(":").map(Number); if (constatsFiche[i]) constatsFiche[i].actions.splice(j, 1); rendreConstats(); return; }
+    const rc = e.target.closest("[data-retirer-constat]");
+    if (rc){
+      lireConstats();
+      const i = Number(rc.dataset.retirerConstat), k = constatsFiche[i], auPlan = k && courant.id && VA.actionsDe(k).some(a => actionAuPlan(courant, a));
+      if (k && (String(k.texte || "").trim() || VA.actionsDe(k).length) && !confirm(`Retirer ce constat ? Il disparaîtra à l'enregistrement de l'audit.${auPlan ? " Ses actions déjà reprises au Plan d'actions y restent." : ""}`)) return;
+      constatsFiche.splice(i, 1); rendreConstats();
+      return;
+    }
+    if (e.target.closest("#btnAnnuler")){
+      if (!courant || !courant.id) return;
+      const motif = prompt("Motif de l'annulation ? L'audit reste au programme, marqué annulé.", "");
+      if (motif === null) return;
+      if (!motif.trim()){ alert("Indiquez le motif de l'annulation."); return; }
+      try { modifierAudits(l => { const i = l.findIndex(a => a && a.id === courant.id); if (i >= 0) l[i] = Object.assign({}, l[i], { annule: true, motifAnnulation: motif.trim(), annuleLe: ajd(), annulePar: moi, modifiePar: moi, dateMaj: new Date().toISOString() }); }); }
+      catch(err){ alert("L'audit n'a pas pu être annulé."); return; }
+      logAudit("Modification", `Audit interne « ${courant.titre} » annulé : ${motif.trim()}`);
+      const id = courant.id; render(); ouvrir(id);
+      return;
+    }
+    if (e.target.closest("#btnRetablir")){
+      if (!courant || !confirm("Rétablir l'audit au programme ?")) return;
+      try { modifierAudits(l => { const i = l.findIndex(a => a && a.id === courant.id); if (i >= 0){ const y = Object.assign({}, l[i], { modifiePar: moi, dateMaj: new Date().toISOString() }); ["annule", "motifAnnulation", "annuleLe", "annulePar"].forEach(k => delete y[k]); l[i] = y; } }); }
+      catch(err){ alert("L'audit n'a pas pu être rétabli."); return; }
+      logAudit("Modification", `Audit interne « ${courant.titre} » rétabli`);
+      const id = courant.id; render(); ouvrir(id);
+      return;
+    }
+    if (e.target.closest("#btnSupprimer")){
+      if (!courant || !courant.id || !confirm(`Supprimer l'audit « ${courant.titre} » et ses constats ?${toutesActions(courant).length ? " Ses actions déjà reprises au Plan d'actions y restent." : ""} Pour garder la trace d'un audit qui n'aura pas lieu, préférez « Annuler l'audit ».`)) return;
+      try { modifierAudits(l => { const i = l.findIndex(a => a && a.id === courant.id); if (i >= 0) l.splice(i, 1); }); }
+      catch(err){ alert("L'audit n'a pas pu être supprimé."); return; }
+      logAudit("Suppression", `Audit interne « ${courant.titre} »`);
+      fermer(); render();
+    }
+  });
+  $("fiche").addEventListener("change", () => { if (courant) majAlertes(); });
+  $("fiche").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const x = enregistrer();
+    if (x){ render(); ouvrir(x.id); }
+  });
+
+  // ---------- Rapport d'audit (impression) ----------
+  // l'audit tel qu'il est enregistré : ce qui n'est pas encore enregistré dans le formulaire n'y figure pas
+  function imprimerRapport(id){
+    const au = id ? tous().find(a => a.id === id && visible(a)) : null;
+    if (!au) return;
+    const jour = ajd(), actions = lire("vigie_hse_actions"), e = VA.etat(au, jour);
+    const ancien = document.getElementById("ai-impression");
+    if (ancien) ancien.remove();
+    if (!document.getElementById("ai-impression-style")){
+      const style = document.createElement("style"); style.id = "ai-impression-style";
+      style.textContent = [
+        "@page{ size:A4 portrait; margin:14mm; }",
+        "@media screen{ #ai-impression{ display:none; } }",
+        "@media print{",
+        "  body{ background:#fff !important; }",
+        "  body > *:not(#ai-impression){ display:none !important; }",
+        "  #ai-impression{ display:block !important; color:#000; font:10.5px/1.45 'IBM Plex Sans',Arial,sans-serif; }",
+        "  #ai-impression .pi-marque{ font:700 10px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#555; }",
+        "  #ai-impression h1{ font:700 21px 'Barlow Condensed',Arial,sans-serif; margin:2px 0; }",
+        "  #ai-impression .pi-meta{ font-size:10px; color:#333; margin:0 0 6px; }",
+        "  #ai-impression h2{ font:700 13px 'Barlow Condensed',Arial,sans-serif; text-transform:uppercase; letter-spacing:.06em; border-bottom:1.5px solid #000; margin:12px 0 5px; padding-bottom:2px; }",
+        "  #ai-impression p{ margin:0 0 5px; }",
+        "  #ai-impression table{ width:100%; border-collapse:collapse; }",
+        "  #ai-impression th, #ai-impression td{ border:1px solid #999; padding:3px 5px; text-align:left; vertical-align:top; }",
+        "  #ai-impression th{ background:#eee; font-weight:600; }",
+        "  #ai-impression tr{ break-inside:avoid; page-break-inside:avoid; }",
+        "  #ai-impression .texte{ white-space:pre-line; }",
+        "  #ai-impression .pi-signatures{ display:flex; gap:30px; margin-top:20px; break-inside:avoid; }",
+        "  #ai-impression .pi-signatures div{ flex:1; border-top:1px solid #000; padding-top:4px; min-height:50px; font-size:10px; }",
+        "}",
+      ].join("\n");
+      document.head.appendChild(style);
+    }
+    const cl = VA.clausesDe(au), ks = VA.constats(au);
+    const bloc = document.createElement("div");
+    bloc.id = "ai-impression";
+    bloc.innerHTML = `
+      <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "")}</div>
+      <h1>Rapport d'audit interne</h1>
+      <p class="pi-meta"><b>${esc(au.titre)}</b> · ${esc(perimetreTexte(au))} · ${e.code === "realise" ? "réalisé le " + esc(dateFr(au.dateRealisee)) : "prévu le " + esc(dateFr(au.datePrevue)) + " (" + esc(e.libelle.toLowerCase()) + ")"} · édité le ${esc(dateFr(jour))}</p>
+      <h2>Critères</h2>
+      ${cl.length ? `<p>Clauses d'ISO 45001 : ${cl.map(c => esc(VA.nomClause(c))).join(" ; ")}.</p>` : ""}
+      ${au.criteres ? `<p>Autres critères : ${esc(au.criteres)}</p>` : ""}
+      <h2>Auditeur</h2>
+      <p>${esc(au.auditeur || "—")}</p>
+      ${au.independance ? `<p class="texte">Indépendance : ${esc(au.independance)}</p>` : ""}
+      <h2>Constats</h2>
+      ${ks.length ? `<table><thead><tr><th>Clause</th><th>Type</th><th>Constat</th><th>Preuve</th><th>Actions</th></tr></thead><tbody>${ks.map(k => `<tr><td>${esc(VA.nomClause(k.clause))}</td><td>${esc(k.type || "")}</td><td class="texte">${esc(k.texte || "")}</td><td>${esc(k.preuve || "")}</td><td>${VA.actionsDe(k).map(a => `${esc(a.description)}${a.responsable ? " — " + esc(a.responsable) : ""}${a.echeance ? ", " + esc(dateFr(a.echeance)) : ""} : ${esc(VA.statutAction(au, a, actions))}`).join("<br>") || (k.type === "Non-conformité" ? "<b>Aucune action</b>" : "—")}</td></tr>`).join("")}</tbody></table>` : `<p>Aucun constat enregistré.</p>`}
+      <h2>Conclusion</h2>
+      <div class="texte">${esc(au.conclusion || "—")}</div>
+      <div class="pi-signatures"><div>L'auditeur</div><div>Le responsable du périmètre audité</div></div>`;
+    document.body.appendChild(bloc);
+    const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
+    window.addEventListener("afterprint", nettoyer);
+    window.print();
+  }
+
+  render();
+  // ?ouvrir=<id>
+  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(x => x.id === id && visible(x))) ouvrir(id); })();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

@@ -55,7 +55,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 23 | Revue de direction : à quelle fréquence, avec qui, et qui la valide ? | Revue de direction (en service, ISO 45001 § 9.3) | ✅ répondue le 2026-10-14 : fréquence libre, lecture ouverte par les profils, PAPRIPACT — mise en œuvre le 2026-10-14 (PAPRIPACT à construire) |
 | 24 | Objectifs santé-sécurité : qui les fixe, qui les voit, comment les suivre en cours d'année ? | Objectifs santé-sécurité (en service, ISO 45001 § 6.2) | ✅ répondue le 2026-10-14 : l'encadrement en lecture, fixés par le HSE, objectifs par service — mise en œuvre le 2026-10-14 |
 | 25 | PAPRIPACT : que doit contenir le programme annuel de prévention, et d'où le tirer ? | Programme annuel de prévention (à construire, demandé à la question 23) — Plan d'actions, Revue de direction | 🟠 En attente de réponse |
-| 26 | Conformité réglementaire : qui la tient, qui la lit, et à quel rythme réévaluer ? | Conformité réglementaire (construite le 2026-10-15) — Revue de direction | 🟠 En attente de réponse |
+| 26 | Conformité réglementaire : qui la tient, qui la lit, et à quel rythme réévaluer ? | Conformité réglementaire (construite le 2026-10-15) — Revue de direction | ✅ Répondu le 2026-10-15 — mis en œuvre |
 
 ---
 
@@ -739,7 +739,7 @@ Le Plan d'actions n'a aujourd'hui **ni coût estimé ni indicateur de résultat*
 
 ---
 
-## 🟠 Question 26 — Conformité réglementaire : qui la tient, qui la lit, et à quel rythme réévaluer ?
+## ✅ Question 26 — Conformité réglementaire : qui la tient, qui la lit, et à quel rythme réévaluer ?
 
 **Contexte.** Le logiciel a désormais une page **« Conformité réglementaire »** (Pilotage), construite sans attendre parce qu'elle ne fixe aucune règle de métier. C'est le registre des exigences légales qui s'appliquent à l'organisation (ISO 45001, § 6.1.3) et l'évaluation de leur respect (§ 9.1.2) :
 - pour chaque exigence : ce qu'il faut faire, le texte (article, décret, arrêté), le lien, un thème, le périmètre (toute l'organisation ou un service), un responsable ;
@@ -763,7 +763,15 @@ Le Plan d'actions n'a aujourd'hui **ni coût estimé ni indicateur de résultat*
 
 ### Décision
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-15)._
+> **Réponse du préventeur (Cahier, 2026-10-15) : comme les objectifs — le Préventeur tient le registre, l'encadrement le lit.**
+> - Rythme : « Au cas par cas ».
+> - États, alerte au tableau de bord : pas de réponse — rien ne change.
+>
+> **Mis en œuvre le 2026-10-15** :
+> - **Qui** : le profil **Préventeur** gère la conformité réglementaire, avec Administrateur et RH ; le profil **Manager** la consulte, en lecture seule. Un manager limité à certains services voit les exigences de toute l'organisation et celles de ses services (le serveur ne lui transmet pas les autres).
+> - **Rythme** : inchangé — la date de prochaine évaluation se fixe exigence par exigence, « à réévaluer » une fois passée.
+> - **États** : les quatre restent (Conforme, Partiellement conforme, Non conforme, Non applicable) ; « partiellement conforme » compte toujours comme un écart.
+> - **Tableau de bord** : rien n'y est ajouté.
 
 ---
 

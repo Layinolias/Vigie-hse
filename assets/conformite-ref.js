@@ -15,7 +15,7 @@
    Ses actions rejoignent le Plan d'actions sous l'identifiant « pa-conf-<exigence>-<action> » (origine « Conformité »).
 
    Aucune périodicité n'est imposée : la date de la prochaine évaluation se fixe exigence par exigence, et une
-   exigence dont la date est passée est « à réévaluer » (question 26 au préventeur).
+   exigence dont la date est passée est « à réévaluer » (question 26 : au cas par cas).
    ========================================================================== */
 (function (racine) {
   "use strict";

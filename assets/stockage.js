@@ -63,6 +63,8 @@
     vigie_hse_exigences:          { nature:"donnees",    sensible:false, module:"Conformité réglementaire" },
     vigie_hse_programmes:         { nature:"donnees",    sensible:false, module:"Programme annuel de prévention" },
     vigie_hse_audits_internes:    { nature:"donnees",    sensible:false, module:"Audit interne" },
+    vigie_hse_politiques:         { nature:"donnees",    sensible:false, module:"Politique santé-sécurité" },
+    vigie_hse_politique_lectures: { nature:"donnees",    sensible:false, module:"Politique santé-sécurité (prises de connaissance)" },
     vigie_hse_users:              { nature:"parametres", sensible:false, module:"Administration (comptes) — relèvera de l'authentification" },
     vigie_hse_profils:            { nature:"parametres", sensible:false, module:"Administration (profils de droits)" },
     vigie_hse_referentials:       { nature:"parametres", sensible:false, module:"Administration (référentiels)" },

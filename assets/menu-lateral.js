@@ -63,6 +63,7 @@
       ["entreprises-exterieures.html", "i-briefcase", "Entreprises extérieures"],
       ["accueil-poste.html", "i-user-plus", "Accueil au poste"]] },
     { titre: "Ressources", liens: [
+      ["politique-sante-securite.html", "i-file-text", "Politique santé-sécurité"],
       ["base-documentaire.html", "i-book", "Base documentaire"],
       ["dialogue-social.html", "i-messages", "Dialogue social"]] },
     { titre: "Pilotage", liens: [
@@ -102,6 +103,7 @@
       "gestion-rh.html": lire("gestion-rh"),
       "entreprises-exterieures.html": lire("entreprises-ext"),
       "accueil-poste.html": lire("accueil-poste"),
+      "politique-sante-securite.html": lire("politique"),   // ISO 45001 § 5.2
       "base-documentaire.html": lire("documentation"),
       "dialogue-social.html": lire("dialogue-social"),
       "reporting.html": lire("reporting"),

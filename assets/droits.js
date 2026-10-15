@@ -57,6 +57,9 @@
     mod("entreprises-ext", "Administratif", "Entreprises extérieures", STD),
     mod("accueil-poste", "Administratif", "Accueil au poste", STD),
     mod("documentation", "Ressources", "Base documentaire", [["consulter", "Consulter"], ["rediger", "Rédiger"]]),
+    // Politique de santé et de sécurité (ISO 45001 § 5.2, 2026-10-15) : lue par tous — la norme demande qu'elle soit
+    // communiquée à tous —, tenue par le Préventeur (avec Administrateur et RH) ; question 28.
+    mod("politique", "Ressources", "Politique santé-sécurité", STD),
     mod("dialogue-social", "Ressources", "Dialogue social", [["consulter", "Consulter"], ["participer", "Participer (représentant)"], ["direction", "Direction (répondre, clôturer)"]]),
     mod("reporting", "Pilotage", "Indicateurs & Reporting", [["consulter", "Consulter"]]),
     // Objectifs santé-sécurité (ISO 45001 § 6.2, 2026-10-13) : fixer, suivre, clore. Question 24 (2026-10-14) : fixés par le HSE
@@ -98,15 +101,15 @@
     { id: "p-manager", nom: "Manager", libelle: "Manager", pastille: "MANAGER", droits: {
       atmp: "consulter", rsst: "auteurs", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter", "audit-interne": "consulter" } },
+      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter", "audit-interne": "consulter", politique: "consulter" } },
     { id: "p-agent", nom: "Agent", libelle: "Compte Agent", pastille: "AG", droits: {
       atmp: "consulter", rsst: "deposer", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler" } },
+      documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter" } },
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
-      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer" } },
+      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
-      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler" } }
+      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter" } }
   ];
   var PREREGLE_PAR_ID = {};
   PREREGLES.forEach(function (p) { PREREGLE_PAR_ID[p.id] = p; });

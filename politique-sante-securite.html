@@ -1,0 +1,605 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Politique santé-sécurité</title>
+<meta name="description" content="Politique de santé et de sécurité au travail : le texte en vigueur, ses versions, ses revues, sa communication et la prise de connaissance de chacun (ISO 45001, § 5.2).">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/politique-ref.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  select, input[type="text"], input[type="date"], input[type="search"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:150px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:68px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled, select:disabled{ background:var(--bg-2); color:var(--text); opacity:1; cursor:default; }
+  @media (max-width:640px){ select, input[type="text"], input[type="date"], input[type="search"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  @media (min-width:560px){ .form-grid .span2{ grid-column:span 2; } }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:760px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg td.num{ font-family:"IBM Plex Mono",monospace; text-align:right; }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.bon{ color:var(--success); background:var(--success-bg); } .chip.bon::before{ background:var(--success); }
+  .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
+  .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
+  .chip.attention{ color:var(--warning); background:var(--warning-bg); } .chip.attention::before{ background:var(--warning); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; text-align:left; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  .bloc{ padding:20px 22px 22px; margin-bottom:18px; }
+  .bloc.vigueur{ border-left:3px solid var(--accent); }
+  .fiche-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; line-height:1.6; }
+  .texte-politique{ white-space:pre-wrap; font-size:14px; line-height:1.7; max-width:85ch; margin:6px 0 14px; color:var(--text); }
+  .signature{ font-size:13px; color:var(--text-muted); margin:0 0 14px; }
+  .lecture{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:var(--bg-2); border-radius:var(--r-sm); padding:12px 14px; font-size:13px; }
+  .lecture.faite{ color:var(--success); }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .engagements{ list-style:none; margin:0; padding:0; display:grid; gap:6px; }
+  .engagements li{ font-size:12.8px; display:flex; gap:8px; align-items:flex-start; line-height:1.45; }
+  .engagements li b{ flex:0 0 16px; text-align:center; }
+  .engagements li.oui b{ color:var(--success); } .engagements li.non{ color:var(--text-muted); } .engagements li.non b{ color:var(--warning); }
+  .sec .engagements label{ display:flex; gap:8px; align-items:flex-start; font-size:12.8px; color:var(--text); font-weight:400; margin:0; line-height:1.45; cursor:pointer; }
+  .engagements input{ margin:2px 0 0; flex-shrink:0; }
+  .liste{ list-style:none; margin:0 0 12px; padding:0; }
+  .liste li{ padding:8px 0; border-bottom:1px solid var(--border); font-size:12.8px; line-height:1.55; }
+  .liste li:last-child{ border-bottom:none; }
+  .liste .par{ color:var(--text-muted); font-size:12px; }
+  .liste li div{ color:var(--text-muted); margin-top:3px; white-space:pre-wrap; }
+  .ajout{ background:var(--bg-2); border-radius:var(--r-sm); padding:12px 14px; margin:4px 0 6px; }
+  .case{ display:flex; gap:8px; align-items:flex-start; font-size:12.8px; cursor:pointer; line-height:1.45; }
+  .case input{ margin:2px 0 0; flex-shrink:0; }
+  .colonnes{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr)); gap:4px 28px; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  #dTexte{ min-height:260px; font-size:13.5px; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Ressources / <b>Politique santé-sécurité</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-file-text"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Politique de santé et de sécurité</h1>
+            <p>Les engagements de l'organisation pour la santé et la sécurité au travail (ISO 45001, § 5.2) : le texte en vigueur, signé, que chacun peut lire et imprimer. Pour qui la tient : la rédaction d'une nouvelle version, ses revues, la trace de sa communication, et qui en a pris connaissance. La revue de direction en reprend l'état.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-file-text"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiVersion">–</span><span class="ps-kpi-label" id="kpiVersionLabel">Version en vigueur</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-clock"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiRevue">–</span><span class="ps-kpi-label" id="kpiRevueLabel">Prochaine revue</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiLectures">–</span><span class="ps-kpi-label" id="kpiLecturesLabel">Prises de connaissance</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-megaphone"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiComm">–</span><span class="ps-kpi-label">Actions de communication</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="panel bloc vigueur" id="vigueur"></div>
+      <div class="panel bloc" id="brouillon" style="display:none;"></div>
+      <div class="panel bloc" id="suivi" style="display:none;"></div>
+      <div class="panel bloc" id="fiche" style="display:none;"></div>
+
+      <div class="panel bloc">
+        <div class="panel-head">
+          <h3 class="panel-title">Versions</h3>
+          <div class="panel-actions" id="versionsActions"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableVersions">
+            <thead id="theadVersions"></thead>
+            <tbody id="tbodyVersions"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Aucun rythme de revue n'est imposé : la date de la prochaine revue se fixe à chaque version ou à chaque revue, et la politique est « à revoir » une fois cette date passée (question 28 posée au préventeur : rythme de revue, prise de connaissance, engagements). Une nouvelle version mise en vigueur remplace la précédente, qui reste consultable, et ses prises de connaissance repartent de zéro.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("politique", "consulter");
+  const peutGerer = D.peut("politique", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Politique santé-sécurité", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  // un horodatage (prise de connaissance) : sa date à l'heure locale
+  const jourDe = (ts) => { const d = new Date(ts || ""); return isNaN(d) ? "" : VigieDates.iso(d); };
+  const lire = (cle) => { try { const v = JSON.parse(VigieStore.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } };
+  const fr = (a, b) => String(a).localeCompare(String(b), "fr");
+  const VP = VigiePolitique;
+  const ajd = () => VigieDates.aujourdhui();
+  const dateOk = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d || "");
+
+  // ---------- Stockage ----------
+  const politiques = () => lire(VP.CLE).filter(v => v && typeof v === "object" && v.id);
+  const lectures = () => lire(VP.CLE_LECTURES);
+  function modifierPolitiques(modif){ const l = lire(VP.CLE); modif(l); VigieStore.setItem(VP.CLE, JSON.stringify(l)); }
+  function modifierVersion(id, modif){ modifierPolitiques(l => { const i = l.findIndex(v => v && v.id === id); if (i >= 0){ const v = Object.assign({}, l[i]); modif(v); v.modifiePar = moi; v.dateMaj = new Date().toISOString(); l[i] = v; } }); }
+  const titreVersion = (v) => v.statut === "Brouillon" ? "Brouillon" : "Version " + (v.version || "?");
+  const chip = (e) => `<span class="chip ${e.ton}">${esc(e.libelle)}</span>`;
+
+  // Les comptes invités à la lire : actifs, et dont les profils ouvrent la politique. Seulement si ce compte reçoit
+  // les comptes et les profils (l'administrateur, en mode serveur) ; sinon null.
+  function comptesLecteurs(){
+    if (!VigieStore.complet("vigie_hse_users") || !VigieStore.complet("vigie_hse_profils")) return null;
+    const users = lire("vigie_hse_users").filter(u => u && u.active !== false && (u.username || u.email));
+    if (!users.length) return null;
+    const profils = lire("vigie_hse_profils");
+    return users.filter(u => VigieDroits.atteint(VigieDroits.resoudre(u, profils).droits, "politique", "consulter")).map(u => u.username || u.email);
+  }
+
+  // ---------- Rendu ----------
+  function render(){
+    const l = politiques(), v = VP.enVigueur(l), jour = ajd(), e = VP.etat(v, jour);
+    const lus = v ? VP.lectures(lectures(), v.id) : [];
+    const comptes = peutGerer && v ? comptesLecteurs() : null;
+    $("kpiVersion").textContent = v ? String(v.version || "?") : "—";
+    $("kpiVersionLabel").textContent = v ? `Version en vigueur · signée le ${dateFr(v.dateSignature)}` : "Aucune version en vigueur";
+    $("kpiRevue").textContent = v && dateOk(v.prochaineRevue) ? dateFr(v.prochaineRevue) : "—";
+    $("kpiRevueLabel").textContent = e.code === "a-revoir" ? "Prochaine revue · date passée" : "Prochaine revue";
+    $("kpiLectures").textContent = !v ? "—" : peutGerer ? String(lus.length) : (VP.aLu(lectures(), v.id, moi) ? "Lue" : "À lire");
+    $("kpiLecturesLabel").textContent = !v ? "Prises de connaissance" : peutGerer ? (comptes ? `Prises de connaissance, sur ${comptes.length} comptes` : "Prises de connaissance") : "Votre prise de connaissance";
+    $("kpiComm").textContent = v ? String(VP.communications(v).length) : "—";
+    rendreVigueur(v, e, lus);
+    rendreBrouillon(l, v);
+    rendreSuivi(v, lus, comptes);
+    rendreVersions(l);
+  }
+
+  function blocEngagements(v){
+    const oui = VP.engagementsCouverts(v);
+    return `<ul class="engagements">${VP.ENGAGEMENTS.map(([k, t]) => `<li class="${oui.includes(k) ? "oui" : "non"}"><b>${oui.includes(k) ? "✓" : "–"}</b><span>${esc(t)}</span></li>`).join("")}</ul>`;
+  }
+  function entete(v, e){
+    const d = VP.derniereRevue(v);
+    return `<div class="fiche-etat">${e ? chip(e) + " " : ""}${v.dateSignature ? `signée le ${esc(dateFr(v.dateSignature))}` : "pas encore signée"}${v.signataire ? " par " + esc(v.signataire) + (v.fonction ? ", " + esc(v.fonction) : "") : ""}`
+      + `${v.publieLe ? ` · en vigueur depuis le ${esc(dateFr(v.publieLe))}` : ""}${v.remplaceeLe ? ` · remplacée le ${esc(dateFr(v.remplaceeLe))}` : ""}`
+      + `${v.statut !== "Remplacée" && dateOk(v.prochaineRevue) ? ` · prochaine revue le ${esc(dateFr(v.prochaineRevue))}` : ""}${d ? ` · dernière revue le ${esc(dateFr(d.date))} : ${esc(d.conclusion || "")}` : ""}</div>`;
+  }
+
+  function rendreVigueur(v, e, lus){
+    if (!v){
+      $("vigueur").innerHTML = `<div class="panel-head"><h3 class="panel-title">Politique en vigueur</h3></div><p class="vide">Aucune politique de santé et de sécurité n'est en vigueur pour le moment.${peutGerer ? " Rédigez-en la première version ci-dessous, puis mettez-la en vigueur une fois signée." : ""}</p>`;
+      return;
+    }
+    const lue = VP.lectures(lectures(), v.id).find(x => x.auteur === moi);
+    $("vigueur").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">Politique en vigueur — version ${esc(v.version)}</h3>${entete(v, e)}</div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" data-imprimer="${esc(v.id)}"><svg class="icon"><use href="#i-printer"/></svg> Imprimer</button></div>
+      </div>
+      <div class="texte-politique">${esc(v.texte || "")}</div>
+      <p class="signature">${v.dateSignature ? "Fait le " + esc(dateFr(v.dateSignature)) : ""}${v.signataire ? " — " + esc(v.signataire) + (v.fonction ? ", " + esc(v.fonction) : "") : ""}</p>
+      <div class="lecture${lue ? " faite" : ""}" id="maLecture">${lue
+        ? `<svg class="icon"><use href="#i-check-circle"/></svg> Vous en avez pris connaissance le ${esc(dateFr(jourDe(lue.le)))}.`
+        : `<span>Après l'avoir lue, confirmez-le : votre prise de connaissance est enregistrée à votre nom, avec la date.</span><button type="button" class="btn btn-primary" id="btnLu">J'en ai pris connaissance</button>`}</div>
+      ${peutGerer ? `<div class="sec"><h4>Engagements attendus par ISO 45001 (§ 5.2)</h4><p class="aide">Cochés par le rédacteur : ce que le texte couvre. ${VP.engagementsManquants(v).length ? `<b>${VP.engagementsManquants(v).length} non couvert(s).</b>` : "Tous sont couverts."}</p>${blocEngagements(v)}</div>` : ""}`;
+  }
+
+  // ---------- Brouillon (rédaction d'une version) ----------
+  function rendreBrouillon(l, v){
+    const b = VP.brouillon(l), p = $("brouillon");
+    if (!peutGerer){ p.style.display = "none"; p.innerHTML = ""; return; }
+    p.style.display = "";
+    if (!b){
+      p.innerHTML = `<div class="panel-head"><div><h3 class="panel-title">${v ? "Nouvelle version" : "Première version"}</h3><p class="form-note">${v ? "Le texte en vigueur sert de point de départ ; il reste en vigueur jusqu'à ce que la nouvelle version le remplace." : "Écrivez la politique, faites-la signer, puis mettez-la en vigueur : elle sera alors visible de tous."}</p></div>`
+        + `<div class="panel-actions"><button type="button" class="btn btn-primary" id="btnNouvelle"><svg class="icon"><use href="#i-pencil"/></svg> ${v ? "Préparer une nouvelle version" : "Rédiger la politique"}</button></div></div>`;
+      return;
+    }
+    const coches = VP.engagementsCouverts(b);
+    p.innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">Brouillon de la version ${esc(VP.prochainNumero(l))}</h3><div class="fiche-etat">Visible de qui tient la politique seulement${b.auteur ? ` · commencé par ${esc(b.auteur)}` : ""}${b.modifiePar ? ` · modifié par ${esc(b.modifiePar)}` : ""}</div></div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" data-imprimer="${esc(b.id)}"><svg class="icon"><use href="#i-printer"/></svg> Imprimer le projet</button></div>
+      </div>
+      <form id="brouillonForm" novalidate>
+        <div class="form-grid">
+          <div class="span3"><label for="dTexte">Texte de la politique</label><textarea id="dTexte" placeholder="Les engagements de l'organisation pour la santé et la sécurité au travail : ce qu'elle vise, ce qu'elle s'engage à faire, comment elle associe le personnel…">${esc(b.texte || "")}</textarea></div>
+          <div><label for="dSignataire">Signataire</label><input type="text" id="dSignataire" value="${esc(b.signataire || "")}" maxlength="120" placeholder="Nom de qui la signe"></div>
+          <div><label for="dFonction">Fonction</label><input type="text" id="dFonction" value="${esc(b.fonction || "")}" maxlength="120" placeholder="Autorité qui engage l'organisation"></div>
+          <div><label for="dSignature">Signée le</label><input type="date" id="dSignature" value="${esc(b.dateSignature || "")}"></div>
+          <div><label for="dRevue">Prochaine revue (facultatif)</label><input type="date" id="dRevue" value="${esc(b.prochaineRevue || "")}"></div>
+        </div>
+        <div class="sec"><h4>Engagements attendus par ISO 45001 (§ 5.2)</h4><p class="aide">Cochez ce que le texte couvre. Une politique peut être mise en vigueur sans les couvrir tous, mais un auditeur les cherchera.</p>
+          <div class="engagements">${VP.ENGAGEMENTS.map(([k, t]) => `<label><input type="checkbox" data-engagement="${esc(k)}"${coches.includes(k) ? " checked" : ""}><span>${esc(t)}</span></label>`).join("")}</div>
+        </div>
+        <div class="sec"><h4>Prise de connaissance</h4>
+          <label class="case"><input type="checkbox" id="dDemander"${b.demanderLecture !== false ? " checked" : ""}><span>Demander à chaque compte d'en prendre connaissance : un rappel s'affiche sur son tableau de bord jusqu'à ce qu'il confirme l'avoir lue.</span></label>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-ghost">Enregistrer le brouillon</button>
+          <button type="button" class="btn btn-primary" id="btnPublier">Mettre en vigueur</button>
+          <button type="button" class="act-del" id="btnSupprimerBrouillon" style="margin-left:auto;">Supprimer le brouillon</button>
+        </div>
+      </form>`;
+  }
+  function depuisBrouillon(b){
+    return Object.assign({}, b, {
+      texte: $("dTexte").value.trim(), signataire: $("dSignataire").value.trim(), fonction: $("dFonction").value.trim(),
+      dateSignature: $("dSignature").value, prochaineRevue: $("dRevue").value, demanderLecture: $("dDemander").checked,
+      engagements: [...$("brouillon").querySelectorAll("[data-engagement]")].filter(c => c.checked).map(c => c.dataset.engagement),
+    });
+  }
+  function enregistrerBrouillon(){
+    const b = VP.brouillon(politiques());
+    if (!b) return null;
+    const x = depuisBrouillon(b);
+    try { modifierVersion(b.id, v => Object.assign(v, x)); } catch(e){ alert("Le brouillon n'a pas pu être enregistré."); return null; }
+    return x;
+  }
+  function nouvelleVersion(){
+    const l = politiques();
+    if (VP.brouillon(l)) return;
+    const v = VP.enVigueur(l);
+    const b = { id: genId("pol"), statut: "Brouillon", texte: v ? v.texte || "" : "", engagements: v && Array.isArray(v.engagements) ? v.engagements.slice() : [],
+      signataire: v ? v.signataire || "" : "", fonction: v ? v.fonction || "" : "", dateSignature: "", prochaineRevue: "", demanderLecture: v ? v.demanderLecture !== false : true,
+      revues: [], communications: [], auteur: moi, dateCreation: new Date().toISOString() };
+    try { modifierPolitiques(x => x.push(b)); } catch(e){ alert("Le brouillon n'a pas pu être créé."); return; }
+    logAudit("Création", `Politique de santé et de sécurité : brouillon d'une ${v ? "nouvelle version" : "première version"}`);
+    render();
+    $("brouillon").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function publier(){
+    const l = politiques(), b = VP.brouillon(l);
+    if (!b) return;
+    const x = depuisBrouillon(b), jour = ajd(), avant = VP.enVigueur(l), n = VP.prochainNumero(l);
+    if (!x.texte){ alert("Écrivez le texte de la politique."); return; }
+    if (!x.signataire){ alert("Indiquez qui signe la politique."); return; }
+    if (!dateOk(x.dateSignature)){ alert("Indiquez la date de signature."); return; }
+    if (x.dateSignature > jour){ alert("La date de signature ne peut pas être dans le futur."); return; }
+    if (x.prochaineRevue && (!dateOk(x.prochaineRevue) || x.prochaineRevue <= x.dateSignature)){ alert("La prochaine revue doit venir après la date de signature."); return; }
+    const manquants = VP.engagementsManquants(x);
+    if (manquants.length && !confirm(`Le texte ne couvre pas ${manquants.length} des ${VP.ENGAGEMENTS.length} engagements attendus par ISO 45001 :\n- ${manquants.map(m => m[1]).join("\n- ")}\n\nLa mettre en vigueur quand même ?`)) return;
+    if (!confirm(`Mettre en vigueur la version ${n} ?${avant ? ` Elle remplacera la version ${avant.version}, qui restera consultable, et les prises de connaissance repartiront de zéro.` : " Elle sera visible de tous."}`)) return;
+    try {
+      modifierPolitiques(liste => liste.forEach((v, i) => {
+        if (!v || typeof v !== "object") return;
+        if (v.id === b.id) liste[i] = Object.assign({}, v, x, { statut: "En vigueur", version: n, publieLe: jour, publiePar: moi, modifiePar: moi, dateMaj: new Date().toISOString() });
+        else if (v.statut === "En vigueur") liste[i] = Object.assign({}, v, { statut: "Remplacée", remplaceeLe: jour, modifiePar: moi, dateMaj: new Date().toISOString() });
+      }));
+    } catch(e){ alert("La politique n'a pas pu être mise en vigueur."); return; }
+    logAudit("Modification", `Politique de santé et de sécurité : version ${n} mise en vigueur${avant ? `, remplace la version ${avant.version}` : ""}`);
+    render();
+    $("vigueur").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  // ---------- Suivi : revues, communication, prises de connaissance ----------
+  function rendreSuivi(v, lus, comptes){
+    const p = $("suivi");
+    if (!peutGerer || !v){ p.style.display = "none"; p.innerHTML = ""; return; }
+    p.style.display = "";
+    const rv = VP.revues(v).slice().reverse(), cm = VP.communications(v);
+    const pasEncore = comptes ? comptes.filter(c => !lus.some(x => x.auteur === c)).sort(fr) : null;
+    p.innerHTML = `
+      <div class="panel-head"><h3 class="panel-title">Suivi de la version ${esc(v.version)}</h3></div>
+      <div class="sec" style="border-top:none;margin-top:0;padding-top:0;"><h4>Revues</h4><p class="aide">La politique est-elle toujours adaptée ? Une revue la maintient, ou conclut qu'il faut la modifier — une nouvelle version se prépare alors ci-dessus. Elle fixe la date de la prochaine revue.</p>
+        ${rv.length ? `<ul class="liste">${rv.map(r => `<li><span class="mono">${esc(dateFr(r.date))}</span> <span class="chip ${r.conclusion === "Maintenue" ? "bon" : "attention"}">${esc(r.conclusion || "—")}</span>${r.par ? ` <span class="par">${esc(r.par)}</span>` : ""}${r.commentaire ? `<div>${esc(r.commentaire)}</div>` : ""}</li>`).join("")}</ul>` : `<p class="vide">Aucune revue de cette version.</p>`}
+        <div class="ajout"><div class="form-grid">
+          <div><label for="rDate">Date de la revue</label><input type="date" id="rDate" value="${esc(ajd())}"></div>
+          <div><label for="rConclusion">Conclusion</label><select id="rConclusion">${VP.CONCLUSIONS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")}</select></div>
+          <div><label for="rProchaine">Prochaine revue</label><input type="date" id="rProchaine" value="${esc(v.prochaineRevue || "")}"></div>
+          <div class="span3"><label for="rCommentaire">Commentaire</label><textarea id="rCommentaire" placeholder="Ce qui a été examiné, avec qui, ce qui change"></textarea></div>
+        </div><div class="form-actions" style="border-top:none;margin-top:10px;padding-top:0;"><button type="button" class="btn btn-ghost" id="btnRevue">Enregistrer la revue</button></div></div>
+      </div>
+      <div class="sec"><h4>Communication</h4><p class="aide">Comment la politique a été portée à la connaissance du personnel et des parties intéressées : affichage, réunion, note de service, livret d'accueil, intranet…</p>
+        ${cm.length ? `<ul class="liste">${cm.map(c => `<li><span class="mono">${esc(dateFr(c.date))}</span> <b>${esc(c.moyen || "—")}</b>${c.destinataires ? " — " + esc(c.destinataires) : ""}${c.par ? ` <span class="par">${esc(c.par)}</span>` : ""} <button type="button" class="act-del" data-retirer-comm="${esc(c.id)}">Retirer</button></li>`).join("")}</ul>` : `<p class="vide">Aucune action de communication enregistrée.</p>`}
+        <div class="ajout"><div class="form-grid">
+          <div><label for="cDate">Date</label><input type="date" id="cDate" value="${esc(ajd())}"></div>
+          <div><label for="cMoyen">Moyen</label><input type="text" id="cMoyen" list="cMoyens" maxlength="80" placeholder="Affichage, réunion…"><datalist id="cMoyens">${["Affichage", "Réunion", "Note de service", "Livret d'accueil", "Intranet ou messagerie"].map(m => `<option value="${esc(m)}">`).join("")}</datalist></div>
+          <div class="span2"><label for="cDestinataires">Destinataires</label><input type="text" id="cDestinataires" maxlength="200" placeholder="Ex. : tous les services, l'encadrement, les entreprises extérieures"></div>
+        </div><div class="form-actions" style="border-top:none;margin-top:10px;padding-top:0;"><button type="button" class="btn btn-ghost" id="btnComm">Ajouter</button></div></div>
+      </div>
+      <div class="sec"><h4>Prises de connaissance</h4><p class="aide">${v.demanderLecture ? "Chaque compte est invité, sur son tableau de bord, à lire cette version et à le confirmer." : "Le rappel au tableau de bord n'a pas été demandé pour cette version : chacun peut néanmoins confirmer sa lecture sur cette page."}</p>
+        <div class="colonnes">
+          <div><p class="form-note" style="margin-bottom:6px;"><b>${lus.length}</b> compte(s) en ont pris connaissance${comptes ? `, sur ${comptes.length}` : ""}</p>
+            ${lus.length ? `<ul class="liste">${lus.map(x => `<li>${esc(x.auteur)} <span class="par">le ${esc(dateFr(jourDe(x.le)))}</span></li>`).join("")}</ul>` : `<p class="vide">Personne pour le moment.</p>`}</div>
+          <div>${pasEncore ? `<p class="form-note" style="margin-bottom:6px;"><b>${pasEncore.length}</b> compte(s) pas encore</p>${pasEncore.length ? `<ul class="liste">${pasEncore.map(c => `<li>${esc(c)}</li>`).join("")}</ul>` : `<p class="vide">Tous les comptes l'ont lue.</p>`}`
+            : `<p class="form-note">La liste des comptes n'est transmise qu'à l'administrateur : ceux qui n'ont pas encore lu la politique ne peuvent pas être listés ici.</p>`}</div>
+        </div>
+      </div>`;
+  }
+  function enregistrerRevue(){
+    const v = VP.enVigueur(politiques());
+    if (!v) return;
+    const jour = ajd(), r = { id: genId("rev"), date: $("rDate").value, conclusion: $("rConclusion").value, commentaire: $("rCommentaire").value.trim(), par: moi };
+    const prochaine = $("rProchaine").value;
+    if (!dateOk(r.date)){ alert("Indiquez la date de la revue."); return; }
+    if (r.date > jour){ alert("La date de la revue ne peut pas être dans le futur."); return; }
+    if (prochaine && prochaine <= r.date){ alert("La prochaine revue doit venir après celle-ci."); return; }
+    try { modifierVersion(v.id, x => { x.revues = (Array.isArray(x.revues) ? x.revues : []).concat([r]); if (prochaine) x.prochaineRevue = prochaine; else delete x.prochaineRevue; }); }
+    catch(e){ alert("La revue n'a pas pu être enregistrée."); return; }
+    logAudit("Modification", `Politique de santé et de sécurité, version ${v.version} : revue du ${dateFr(r.date)}, ${r.conclusion.toLowerCase()}`);
+    render();
+    if (r.conclusion === "À modifier" && !VP.brouillon(politiques()) && confirm("Préparer maintenant une nouvelle version de la politique ?")) nouvelleVersion();
+  }
+  function ajouterCommunication(){
+    const v = VP.enVigueur(politiques());
+    if (!v) return;
+    const c = { id: genId("com"), date: $("cDate").value, moyen: $("cMoyen").value.trim(), destinataires: $("cDestinataires").value.trim(), par: moi };
+    if (!dateOk(c.date)){ alert("Indiquez la date."); return; }
+    if (c.date > ajd()){ alert("La date ne peut pas être dans le futur."); return; }
+    if (!c.moyen){ alert("Indiquez le moyen de communication."); return; }
+    try { modifierVersion(v.id, x => { x.communications = (Array.isArray(x.communications) ? x.communications : []).concat([c]); }); }
+    catch(e){ alert("La communication n'a pas pu être enregistrée."); return; }
+    logAudit("Modification", `Politique de santé et de sécurité, version ${v.version} : communication du ${dateFr(c.date)} (${c.moyen})`);
+    render();
+  }
+  function prendreConnaissance(){
+    const v = VP.enVigueur(politiques());
+    if (!v) return;
+    const l = lectures();
+    if (VP.aLu(l, v.id, moi)) return;
+    l.push({ id: VP.idLecture(v.id, moi), versionId: v.id, auteur: moi, le: new Date().toISOString() });
+    try { VigieStore.setItem(VP.CLE_LECTURES, JSON.stringify(l)); } catch(e){ alert("Votre prise de connaissance n'a pas pu être enregistrée."); return; }
+    logAudit("Prise de connaissance", `Politique de santé et de sécurité, version ${v.version}`);
+    render();
+  }
+
+  // ---------- Versions ----------
+  function rendreVersions(l){
+    const h = VP.historique(l), toutes = lectures();
+    $("theadVersions").innerHTML = `<tr><th>Version</th><th>État</th><th>Signée le</th><th>Signataire</th><th>En vigueur le</th><th>Remplacée le</th>${peutGerer ? "<th>Prises de connaissance</th>" : ""}<th></th></tr>`;
+    $("tbodyVersions").innerHTML = h.length ? h.map(v => `<tr>
+        <td><b>${esc(titreVersion(v))}</b></td>
+        <td>${v.statut === "En vigueur" ? chip(VP.etat(v, ajd())) : `<span class="chip neutre">Remplacée</span>`}</td>
+        <td class="mono">${esc(dateFr(v.dateSignature) || "—")}</td>
+        <td style="white-space:normal;">${esc(v.signataire || "—")}${v.fonction ? `<br><span class="form-note">${esc(v.fonction)}</span>` : ""}</td>
+        <td class="mono">${esc(dateFr(v.publieLe) || "—")}</td>
+        <td class="mono">${esc(dateFr(v.remplaceeLe) || "—")}</td>
+        ${peutGerer ? `<td class="num">${VP.lectures(toutes, v.id).length}</td>` : ""}
+        <td>${v.statut === "En vigueur" ? "" : `<button type="button" class="act-edit" data-voir="${esc(v.id)}">Voir</button>`}</td>
+      </tr>`).join("") : `<tr class="empty-row"><td colspan="${peutGerer ? 8 : 7}">Aucune version mise en vigueur pour le moment.</td></tr>`;
+  }
+  function voir(id){
+    const v = VP.historique(politiques()).find(x => x.id === id);
+    if (!v || v.statut === "En vigueur") return;
+    $("fiche").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">${esc(titreVersion(v))} — remplacée</h3>${entete(v, null)}</div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" data-imprimer="${esc(v.id)}"><svg class="icon"><use href="#i-printer"/></svg> Imprimer</button><button type="button" class="btn btn-ghost" id="btnFermer">Fermer</button></div>
+      </div>
+      <div class="texte-politique">${esc(v.texte || "")}</div>
+      ${peutGerer ? `<div class="sec"><h4>Revues et communication</h4>${VP.revues(v).length ? `<ul class="liste">${VP.revues(v).map(r => `<li><span class="mono">${esc(dateFr(r.date))}</span> Revue : <b>${esc(r.conclusion || "—")}</b>${r.commentaire ? `<div>${esc(r.commentaire)}</div>` : ""}</li>`).join("")}</ul>` : ""}`
+        + `${VP.communications(v).length ? `<ul class="liste">${VP.communications(v).map(c => `<li><span class="mono">${esc(dateFr(c.date))}</span> ${esc(c.moyen || "")}${c.destinataires ? " — " + esc(c.destinataires) : ""}</li>`).join("")}</ul>` : ""}`
+        + `${!VP.revues(v).length && !VP.communications(v).length ? `<p class="vide">Ni revue ni communication enregistrée.</p>` : ""}</div>` : ""}`;
+    $("fiche").style.display = "";
+    $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  // ---------- Événements ----------
+  document.querySelector(".content").addEventListener("click", (e) => {
+    const t = e.target;
+    if (t.closest("#btnLu")){ prendreConnaissance(); return; }
+    if (t.closest("#btnNouvelle")){ nouvelleVersion(); return; }
+    if (t.closest("#btnPublier")){ publier(); return; }
+    if (t.closest("#btnSupprimerBrouillon")){
+      const b = VP.brouillon(politiques());
+      if (!b || !confirm("Supprimer le brouillon ? La version en vigueur n'est pas touchée.")) return;
+      try { modifierPolitiques(l => { const i = l.findIndex(v => v && v.id === b.id); if (i >= 0) l.splice(i, 1); }); } catch(err){ alert("Le brouillon n'a pas pu être supprimé."); return; }
+      logAudit("Suppression", "Politique de santé et de sécurité : brouillon supprimé");
+      render(); return;
+    }
+    if (t.closest("#btnRevue")){ enregistrerRevue(); return; }
+    if (t.closest("#btnComm")){ ajouterCommunication(); return; }
+    const rc = t.closest("[data-retirer-comm]");
+    if (rc){
+      const v = VP.enVigueur(politiques());
+      if (!v || !confirm("Retirer cette action de communication ?")) return;
+      try { modifierVersion(v.id, x => { x.communications = (Array.isArray(x.communications) ? x.communications : []).filter(c => c && c.id !== rc.dataset.retirerComm); }); } catch(err){ alert("L'action n'a pas pu être retirée."); return; }
+      logAudit("Modification", `Politique de santé et de sécurité, version ${v.version} : une action de communication retirée`);
+      render(); return;
+    }
+    const vo = t.closest("[data-voir]");
+    if (vo){ voir(vo.dataset.voir); return; }
+    if (t.closest("#btnFermer")){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; return; }
+    const im = t.closest("[data-imprimer]");
+    if (im){ imprimer(im.dataset.imprimer); return; }
+  });
+  $("brouillon").addEventListener("submit", (e) => { e.preventDefault(); if (enregistrerBrouillon()){ logAudit("Modification", "Politique de santé et de sécurité : brouillon enregistré"); render(); } });
+
+  // ---------- Export (qui tient la politique) ----------
+  if (peutGerer){
+    $("versionsActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+    $("btnExport").addEventListener("click", () => {
+      const l = VP.historique(politiques()), toutes = lectures(), versions = [], revues = [], comms = [], lus = [];
+      l.forEach(v => {
+        versions.push({ "Version": v.version, "État": v.statut, "Signée le": dateFr(v.dateSignature), "Signataire": v.signataire || "", "Fonction": v.fonction || "", "En vigueur le": dateFr(v.publieLe),
+          "Remplacée le": dateFr(v.remplaceeLe), "Prochaine revue": v.statut === "En vigueur" ? dateFr(v.prochaineRevue) : "", "Engagements couverts": `${VP.engagementsCouverts(v).length} / ${VP.ENGAGEMENTS.length}`,
+          "Prise de connaissance demandée": v.demanderLecture ? "Oui" : "Non", "Prises de connaissance": VP.lectures(toutes, v.id).length, "Texte": v.texte || "" });
+        VP.revues(v).forEach(r => revues.push({ "Version": v.version, "Date": dateFr(r.date), "Conclusion": r.conclusion || "", "Commentaire": r.commentaire || "", "Par": r.par || "" }));
+        VP.communications(v).forEach(c => comms.push({ "Version": v.version, "Date": dateFr(c.date), "Moyen": c.moyen || "", "Destinataires": c.destinataires || "", "Par": c.par || "" }));
+        VP.lectures(toutes, v.id).slice().reverse().forEach(x => lus.push({ "Version": v.version, "Compte": x.auteur, "Le": dateFr(jourDe(x.le)) }));
+      });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(versions, { header: ["Version", "État", "Signée le", "Signataire", "Fonction", "En vigueur le", "Remplacée le", "Prochaine revue", "Engagements couverts", "Prise de connaissance demandée", "Prises de connaissance", "Texte"] }), "Versions");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(revues, { header: ["Version", "Date", "Conclusion", "Commentaire", "Par"] }), "Revues");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(comms, { header: ["Version", "Date", "Moyen", "Destinataires", "Par"] }), "Communication");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lus, { header: ["Version", "Compte", "Le"] }), "Prises de connaissance");
+      XLSX.writeFile(wb, `politique_sante_securite_${ajd()}.xlsx`);
+    });
+  }
+
+  // ---------- Impression : la politique à afficher, signée ----------
+  function imprimer(id){
+    const v = politiques().find(x => x.id === id);
+    if (!v || (v.statut === "Brouillon" && !peutGerer)) return;
+    const ancien = document.getElementById("po-impression");
+    if (ancien) ancien.remove();
+    if (!document.getElementById("po-impression-style")){
+      const style = document.createElement("style"); style.id = "po-impression-style";
+      style.textContent = [
+        "@page{ size:A4 portrait; margin:18mm; }",
+        "@media screen{ #po-impression{ display:none; } }",
+        "@media print{",
+        "  body{ background:#fff !important; }",
+        "  body > *:not(#po-impression){ display:none !important; }",
+        "  #po-impression{ display:block !important; color:#000; font:11.5px/1.6 'IBM Plex Sans',Arial,sans-serif; }",
+        "  #po-impression .pi-marque{ font:700 10px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#555; }",
+        "  #po-impression .pi-org{ font-size:11px; color:#333; margin:0 0 4px; }",
+        "  #po-impression h1{ font:700 24px 'Barlow Condensed',Arial,sans-serif; margin:4px 0 2px; }",
+        "  #po-impression .pi-meta{ font-size:10px; color:#333; margin:0 0 14px; padding-bottom:6px; border-bottom:1.5px solid #000; }",
+        "  #po-impression .pi-projet{ font:700 12px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; border:1.5px solid #000; display:inline-block; padding:2px 8px; margin:0 0 10px; }",
+        "  #po-impression .texte{ white-space:pre-wrap; }",
+        "  #po-impression .pi-signature{ margin-top:28px; margin-left:50%; break-inside:avoid; }",
+        "  #po-impression .pi-signature div{ border-top:1px solid #000; padding-top:4px; min-height:60px; font-size:10.5px; }",
+        "}",
+      ].join("\n");
+      document.head.appendChild(style);
+    }
+    const bloc = document.createElement("div");
+    bloc.id = "po-impression";
+    bloc.innerHTML = `
+      <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "")}</div>
+      <p class="pi-org">${esc(VigieOrga.noms().join(" · "))}</p>
+      <h1>Politique de santé et de sécurité au travail</h1>
+      <p class="pi-meta">${v.statut === "Brouillon" ? "Projet" : "Version " + esc(v.version)}${v.publieLe ? " · en vigueur depuis le " + esc(dateFr(v.publieLe)) : ""}${v.remplaceeLe ? " · remplacée le " + esc(dateFr(v.remplaceeLe)) : ""}${v.statut === "En vigueur" && dateOk(v.prochaineRevue) ? " · prochaine revue le " + esc(dateFr(v.prochaineRevue)) : ""}</p>
+      ${v.statut === "Brouillon" ? `<div class="pi-projet">Projet — non en vigueur</div>` : ""}
+      <div class="texte">${esc(v.texte || "")}</div>
+      <div class="pi-signature">${v.dateSignature ? "<p>Fait le " + esc(dateFr(v.dateSignature)) + "</p>" : ""}<div>${esc(v.signataire || "")}${v.fonction ? "<br>" + esc(v.fonction) : ""}</div></div>`;
+    document.body.appendChild(bloc);
+    const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
+    window.addEventListener("afterprint", nettoyer);
+    window.print();
+  }
+
+  render();
+  // ?voir=<id> : une version remplacée
+  (function(){ const id = new URLSearchParams(location.search).get("voir"); if (id) voir(id); })();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

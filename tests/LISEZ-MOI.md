@@ -17,7 +17,7 @@ node tests/avant-livraison.js
 - Node.js 22.5 ou plus, comme le serveur. Sous Windows : `tar.exe` et `cmd.exe` du système, `git` (`C:\Program Files\Git\cmd\git.exe` s'il n'est pas dans le PATH).
 - `avant-livraison.js` lance les trois tests dans l'ordre et donne un bilan.
   - Sans argument, la mise à jour est essayée depuis chaque paquet du tableau de `LIVRAISON-POSTE.md` qui n'a pas été remplacé ; on peut aussi donner les commits.
-  - `--brouillon` : paquet d'essai avec les fichiers non commités (le vrai paquet exige un dépôt propre).
+  - `--brouillon` : paquet d'essai avec les fichiers non commités (le vrai paquet exige un dépôt propre). Il s'appelle toujours `VIGIE-HSE-<date>-brouillon.zip`, même sur un dépôt propre : un essai ne remplace jamais le paquet du jour (avant le 2026-10-15, un essai sur un dépôt propre l'écrasait). À supprimer après l'essai.
 - Chaque test se lance aussi seul. `--garder` garde son dossier de travail, pris dans le dossier temporaire du système et effacé sinon.
 - Ports utilisés : 8861 à 8899. Aucun ne doit être pris, et un seul test à la fois.
 - Durée : une dizaine de minutes, dont deux à trois par paquet essayé en mise à jour.

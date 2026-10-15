@@ -41,7 +41,8 @@ fs.writeFileSync(path.join(dossier, 'VERSION.txt'), 'VIGIE HSE — version du ' 
 
 const sortie = path.join(RACINE, 'livraison');
 fs.mkdirSync(sortie, { recursive: true });
-const zip = path.join(sortie, 'VIGIE-HSE-' + jour + (modifies.length ? '-brouillon' : '') + '.zip');
+// un essai (--brouillon) ne remplace jamais le paquet du jour, même sur un dépôt propre
+const zip = path.join(sortie, 'VIGIE-HSE-' + jour + (modifies.length || process.argv.includes('--brouillon') ? '-brouillon' : '') + '.zip');
 fs.rmSync(zip, { force: true });
 // tar de Windows (10 et plus) écrit un vrai .zip, que l'Explorateur ouvre
 const TAR = process.platform === 'win32' ? path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'tar.exe') : 'zip';

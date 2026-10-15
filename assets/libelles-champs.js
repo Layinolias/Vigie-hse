@@ -79,6 +79,10 @@
   };
   // Même nom de champ, autre sens selon le registre
   var PAR_REGISTRE = {
+    vigie_hse_politiques:   { texte:"Texte de la politique", engagements:"Engagements couverts", signataire:"Signataire", fonction:"Fonction du signataire",
+                              dateSignature:"Signée le", prochaineRevue:"Prochaine revue", demanderLecture:"Prise de connaissance demandée", publieLe:"En vigueur le",
+                              publiePar:"Mise en vigueur par", remplaceeLe:"Remplacée le", revues:"Revues", communications:"Communication" },
+    vigie_hse_politique_lectures: { versionId:"Version de la politique (identifiant)", le:"Pris connaissance le" },
     vigie_hse_audits_internes: { titre:"Audit", clauses:"Clauses d'ISO 45001 auditées", criteres:"Autres critères", datePrevue:"Prévu le", dateRealisee:"Réalisé le",
                               auditeur:"Auditeur", independance:"Indépendance de l'auditeur", constats:"Constats", conclusion:"Conclusion",
                               annule:"Annulé", motifAnnulation:"Motif d'annulation", annuleLe:"Annulé le", annulePar:"Annulé par" },

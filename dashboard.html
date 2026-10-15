@@ -366,6 +366,10 @@
   .kpi-row-compact .kpi-trend{ font-size:10.5px; }
 
   @media (max-width:640px){ .dash-greeting{ padding:9px 16px 8px; } }
+  /* Rappel : la politique de santé et de sécurité à lire (ISO 45001 § 5.2) */
+  .politique-rappel{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:14px 18px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .politique-rappel .icon{ color:var(--accent); flex-shrink:0; }
+  .politique-rappel p{ margin:0; flex:1 1 260px; font-size:13px; line-height:1.5; }
   /* Téléphone : météo + score HSE occupent déjà toute la largeur ; le badge de rôle et l'horloge passaient
      par-dessus. Masqués ici seulement : le téléphone affiche l'heure, le pied du menu le compte et son rôle. */
   @media (max-width:640px){
@@ -393,6 +397,7 @@
 <script src="assets/organisation.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/signalements-ref.js"></script>
+<script src="assets/politique-ref.js"></script>
 <script>
   (function(){
     try {
@@ -488,6 +493,7 @@
     </div>
 
     <div class="content">
+      <div class="panel politique-rappel" id="politiqueRappel" style="display:none;"></div>
       <section class="kpi-row kpi-row-compact">
         <div class="panel kpi">
           <div class="kpi-top"><div class="kpi-icon blue"><svg class="icon"><use href="#i-activity"/></svg></div></div>
@@ -744,6 +750,14 @@
       const rsstRaw = JSON.parse(VigieStore.getItem("vigie_hse_rsst") || "null");
       $("modRsstCount").textContent = Array.isArray(rsstRaw) ? rsstRaw.length : "–";
     } catch(e){ $("modRsstCount").textContent = "–"; }
+    // Politique de santé et de sécurité (§ 5.2) : une version mise en vigueur avec rappel, que ce compte n'a pas encore lue
+    try {
+      const pv = D.peut("politique", "consulter") ? VigiePolitique.aLire(JSON.parse(VigieStore.getItem(VigiePolitique.CLE) || "[]"), JSON.parse(VigieStore.getItem(VigiePolitique.CLE_LECTURES) || "[]"), session.user) : null;
+      if (pv){
+        $("politiqueRappel").innerHTML = `<svg class="icon"><use href="#i-file-text"/></svg><p><b>Politique de santé et de sécurité : version ${esc(pv.version)}${pv.publieLe ? " du " + esc(pv.publieLe.split("-").reverse().join("/")) : ""}.</b> Prenez le temps de la lire, puis confirmez-en la lecture.</p><a class="btn btn-primary" href="politique-sante-securite.html">La lire</a>`;
+        $("politiqueRappel").style.display = "";
+      }
+    } catch(e){}
     // Signalements (question 20) : à traiter pour qui les traite (ses services), sinon ses propres signalements
     try {
       if (!D.peut("signalements", "signaler")){ $("modSignalements").style.display = "none"; }

@@ -1,0 +1,566 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programme annuel de prévention</title>
+<meta name="description" content="Programme annuel de prévention des risques professionnels et d'amélioration des conditions de travail (PAPRIPACT) : mesures de l'année, coût, financement, conditions d'exécution, indicateurs de résultat, bilan, avis et adoption.">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/programme-ref.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  select, input[type="text"], input[type="date"], input[type="search"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:150px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:68px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled, select:disabled{ background:var(--bg-2); color:var(--text); opacity:1; cursor:default; }
+  @media (max-width:640px){ select, input[type="text"], input[type="date"], input[type="search"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  @media (min-width:560px){ .form-grid .span2{ grid-column:span 2; } }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg td.num{ font-family:"IBM Plex Mono",monospace; text-align:right; }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.bon{ color:var(--success); background:var(--success-bg); } .chip.bon::before{ background:var(--success); }
+  .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
+  .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  .chip.attention{ color:var(--warning); background:var(--warning-bg); } .chip.attention::before{ background:var(--warning); }
+  .ref{ display:block; font-size:11.5px; color:var(--text-faint); margin-top:2px; font-weight:400; }
+
+  .barre-annee{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .barre-annee label{ font-size:12px; color:var(--text-muted); font-weight:600; }
+  .manque{ color:var(--warning); font-weight:600; font-size:11.5px; }
+  tr.total td{ font-weight:600; background:var(--bg-2); }
+  .abandon{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+  .abandon input{ flex:1 1 160px; min-width:0; }
+  .chiffres{ display:grid; grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr)); gap:8px; margin:0 0 12px; }
+  .chiffre{ background:var(--bg-2); border-radius:var(--r-sm); padding:9px 12px; }
+  .chiffre b{ display:block; font:600 18px "IBM Plex Mono",monospace; color:var(--text); }
+  .chiffre span{ font-size:11.5px; color:var(--text-muted); line-height:1.35; display:block; margin-top:2px; }
+  .liste-auto{ font-size:12.5px; color:var(--text-muted); margin:0 0 12px; padding-left:18px; line-height:1.7; }
+  .liste-auto b{ color:var(--text); }
+
+  /* Sections */
+  .fiche{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .fiche-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Pilotage / <b>Programme annuel de prévention</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-calendar"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Programme annuel de prévention</h1>
+            <p data-mots>Le programme de prévention des risques professionnels et d'amélioration des conditions de travail (PAPRIPACT) d'une année : toutes les actions du Plan d'actions dont l'échéance tombe dans l'année, avec leur coût estimé, leur financement, leurs conditions d'exécution et leur indicateur de résultat ; le bilan de l'année écoulée ; l'avis de l'instance (F3SCT ou CST) et l'adoption. La revue de direction le reprend.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-list"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiMesures">–</span><span class="ps-kpi-label">Mesures de l'année</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-bar-chart"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiCout">–</span><span class="ps-kpi-label">Coût estimé</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-pencil"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiCompleter">–</span><span class="ps-kpi-label">Mesures à compléter</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiRealisees">–</span><span class="ps-kpi-label">Réalisées</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel" style="padding:16px 22px;">
+        <div class="panel-head" style="margin-bottom:0;">
+          <div class="barre-annee">
+            <label for="selAnnee">Année du programme</label>
+            <select id="selAnnee"></select>
+            <span id="statutProgramme"></span>
+          </div>
+          <div class="panel-actions">
+            <button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>
+            <button type="button" class="btn btn-ghost" id="btnImprimer"><svg class="icon"><use href="#i-printer"/></svg> Imprimer le programme</button>
+          </div>
+        </div>
+        <p class="form-note" id="notePartiel" style="display:none;margin-top:10px;"></p>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head"><h3 class="panel-title" id="titreBilan">Bilan de l'année écoulée</h3></div>
+        <p class="form-note" id="noteBilan" style="margin-bottom:10px;"></p>
+        <div class="chiffres" id="chiffresBilan"></div>
+        <div id="listeBilan"></div>
+        <div class="sec"><h4>Commentaire du bilan</h4><p class="aide">Ce qui a été obtenu, ce qui n'a pas pu l'être et pourquoi : présenté avec le programme.</p>
+          <textarea id="bilanPrecedent" aria-label="Commentaire du bilan"></textarea></div>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title" id="titreMesures">Mesures de l'année</h3>
+        </div>
+        <p class="form-note" id="noteMesures" style="margin-bottom:10px;"></p>
+        <div class="table-panel">
+          <table class="reg" id="tableMesures">
+            <thead><tr><th>Mesure</th><th>Risque ou unité de travail</th><th>Responsable</th><th>Échéance</th><th>Coût estimé</th><th>Financement</th><th>Conditions d'exécution</th><th>Indicateur de résultat</th><th>État</th><th></th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div id="ajoutees"></div>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head"><h3 class="panel-title">Avis et adoption</h3></div>
+        <form id="formAdoption" novalidate>
+          <div class="form-grid">
+            <div><label for="avisDate" data-mots>Avis de l'instance (F3SCT ou CST) le</label><input type="date" id="avisDate"></div>
+            <div class="span2"><label for="avisTexte">Avis</label><input type="text" id="avisTexte" maxlength="300" placeholder="Ex. : avis favorable à l'unanimité"></div>
+            <div><label for="adopteLe">Adopté le</label><input type="date" id="adopteLe"></div>
+            <div class="span2"><label for="adoptePar">Adopté par</label><input type="text" id="adoptePar" maxlength="160" placeholder="Nom et fonction de l'autorité qui adopte le programme"></div>
+          </div>
+          <p class="form-note" id="noteAdoption" style="margin-top:10px;"></p>
+          <div class="form-actions" id="actionsAdoption"></div>
+        </form>
+      </div>
+
+      <p class="footnote">Réponse du préventeur à la question 25 : le programme reprend toutes les actions du Plan d'actions dont l'échéance tombe dans l'année, telles qu'elles y sont enregistrées ; leur coût, leur financement, leurs conditions d'exécution et leur indicateur de résultat se saisissent au Plan d'actions (« Compléter »). À l'adoption, la liste est figée : le bilan de fin d'année la compare au Plan d'actions — réalisée (faite), reportée (échéance repoussée à une année suivante), abandonnée (marquée ici avec un motif, ou retirée du Plan d'actions), non réalisée (année échue).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("programme", "consulter");
+  const peutGerer = D.peut("programme", "gerer");
+  const peutCompleter = D.peut("actions", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Programme annuel de prévention", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const lire = (cle) => { try { const v = JSON.parse(VigieStore.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } };
+  const VP = VigieProgramme;
+  const ajd = () => VigieDates.aujourdhui();
+  const mots = (t) => VigieOrga.mots(t);
+  // Un compte limité à certains services (ou qui ne reçoit pas tout le Plan d'actions du serveur) ne voit que les mesures
+  // de toute l'organisation et de ses services ; il ne peut pas adopter un programme, qui doit les contenir toutes.
+  const mesServices = (session && session.services) || ["*"];
+  const limite = !mesServices.includes("*");
+  const partiel = limite || !VigieStore.complet("vigie_hse_actions");
+  const visible = (m) => !!m && (!limite || !m.service || mesServices.includes(m.service));
+
+  // ---------- Stockage ----------
+  const CLE = VP.CLE;
+  const programmes = () => lire(CLE).filter(p => p && typeof p === "object" && p.annee);
+  function modifierProgrammes(modif){ const l = lire(CLE); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
+  // le programme d'une année, enregistré ou neuf (un par année, identifiant « pg-AAAA »)
+  function programmeOuNeuf(an){ return VP.programmeDe(programmes(), an) || { id: "pg-" + an, annee: Number(an), statut: "Brouillon" }; }
+  function enregistrerProgramme(p){
+    modifierProgrammes(l => { const i = l.findIndex(x => x && String(x.annee) === String(p.annee)); if (i < 0) l.push(p); else l[i] = Object.assign({}, l[i], p); });
+  }
+
+  // ---------- Années ----------
+  const anneeCourante = Number(ajd().slice(0, 4));
+  function remplirAnnees(){
+    const s = new Set([anneeCourante - 1, anneeCourante, anneeCourante + 1]);
+    programmes().forEach(p => s.add(Number(p.annee)));
+    const demande = Number(new URLSearchParams(location.search).get("annee"));
+    if (demande >= 2000 && demande <= 2100) s.add(demande);
+    const l = [...s].filter(a => a >= 2000 && a <= 2100).sort((a, b) => b - a);
+    $("selAnnee").innerHTML = l.map(a => `<option value="${a}">${a}</option>`).join("");
+    $("selAnnee").value = String(l.includes(demande) ? demande : anneeCourante);
+  }
+  const anneeChoisie = () => Number($("selAnnee").value);
+
+  // ---------- Affichage ----------
+  let abandonEnCours = null;
+  const montantCell = (m) => VP.estCout(m.coutEstime) ? esc(VP.euros(m.coutEstime)) : `<span class="manque">à compléter</span>`;
+  const texteCell = (t, exige) => String(t || "").trim() ? esc(t) : (exige ? `<span class="manque">à compléter</span>` : "—");
+  const risqueCell = (m) => [m.risqueLie, m.service].filter(Boolean).map(esc).join("<br>") || "—";
+  function render(){
+    const an = anneeChoisie(), jour = ajd(), actions = lire("vigie_hse_actions");
+    const p = VP.programmeDe(programmes(), an);
+    const adopte = !!p && p.statut === "Adopté";
+    const r = VP.lire(p, actions, an, jour);
+    const lignes = r.lignes.filter(l => visible(l.m));
+    // compteurs : ceux de la page (limités aux mesures visibles pour un compte limité)
+    const cout = lignes.reduce((s, l) => s + (VP.estCout(l.m.coutEstime) ? l.m.coutEstime : 0), 0);
+    $("kpiMesures").textContent = lignes.length;
+    $("kpiCout").textContent = VP.euros(cout);
+    $("kpiCompleter").textContent = lignes.filter(l => VP.aCompleter(l.m).length).length;
+    $("kpiRealisees").textContent = lignes.filter(l => l.etat.code === "realisee").length;
+    $("statutProgramme").innerHTML = adopte ? `<span class="chip bon">Adopté${p.adopteLe ? " le " + esc(dateFr(p.adopteLe)) : ""}</span>` : `<span class="chip neutre">${p ? "En préparation" : "Pas encore enregistré"}</span>`;
+    $("notePartiel").style.display = partiel ? "" : "none";
+    $("notePartiel").textContent = partiel ? "Ce compte ne voit que les mesures de toute l'organisation et de ses services : la liste et les totaux s'y limitent, et le programme ne peut pas être adopté d'ici." : "";
+
+    // bilan de l'année écoulée
+    const anP = an - 1, pP = VP.programmeDe(programmes(), anP), b = VP.lire(pP, actions, anP, jour);
+    const lb = b.lignes.filter(l => visible(l.m));
+    const compte = (code) => lb.filter(l => code.includes(l.etat.code)).length;
+    $("titreBilan").textContent = `Bilan de l'année ${anP}`;
+    $("noteBilan").textContent = pP && pP.statut === "Adopté"
+      ? `Programme ${anP} adopté${pP.adopteLe ? " le " + dateFr(pP.adopteLe) : ""} : ${lb.length} mesure(s), comparées au Plan d'actions d'aujourd'hui.`
+      : `Pas de programme ${anP} adopté : bilan des actions dont l'échéance tombait en ${anP}, telles qu'elles sont au Plan d'actions (les reports ne s'y voient que si l'échéance a été repoussée).`;
+    const chiffre = (v, t) => `<div class="chiffre"><b>${esc(v)}</b><span>${esc(t)}</span></div>`;
+    $("chiffresBilan").innerHTML = chiffre(lb.length, "mesures") + chiffre(compte(["realisee"]), "réalisées") + chiffre(compte(["reportee"]), "reportées")
+      + chiffre(compte(["abandonnee", "retiree"]), "abandonnées") + chiffre(compte(["non-realisee", "en-cours", "a-faire"]), jour > anP + "-12-31" ? "non réalisées" : "en cours ou à faire")
+      + chiffre(VP.euros(lb.filter(l => l.etat.code === "realisee").reduce((s, l) => s + (VP.estCout(l.m.coutEstime) ? l.m.coutEstime : 0), 0)), "coût estimé des mesures réalisées");
+    const nonFaites = lb.filter(l => l.etat.code !== "realisee");
+    $("listeBilan").innerHTML = nonFaites.length ? `<ul class="liste-auto">${nonFaites.map(l => `<li><b>${esc(l.m.titre)}</b>${l.m.service ? " (" + esc(l.m.service) + ")" : ""} · <span class="chip ${l.etat.ton}">${esc(l.etat.libelle)}</span>${l.etat.code === "reportee" && l.action ? " au " + esc(dateFr(l.action.echeance)) : ""}${l.abandon && l.abandon.motif ? " — " + esc(l.abandon.motif) : ""}</li>`).join("")}</ul>` : (lb.length ? `<p class="vide">Toutes les mesures sont réalisées.</p>` : `<p class="vide">Aucune mesure en ${anP}.</p>`);
+
+    // mesures de l'année
+    $("titreMesures").textContent = `Mesures de l'année ${an}`;
+    $("noteMesures").textContent = adopte
+      ? `Liste figée à l'adoption. L'état de chaque mesure est lu au Plan d'actions aujourd'hui.`
+      : `Toutes les actions du Plan d'actions dont l'échéance tombe en ${an}, telles qu'elles y sont aujourd'hui : la liste sera figée à l'adoption.`;
+    $("tbody").innerHTML = lignes.length ? lignes.map(l => {
+      const m = l.m, manque = VP.aCompleter(m);
+      const outils = [];
+      if (peutCompleter && l.action && !adopte) outils.push(`<a class="act-edit" href="plan-actions.html?modifier=${encodeURIComponent(m.id)}">Compléter</a>`);
+      if (peutGerer && adopte && !partiel){
+        if (l.abandon) outils.push(`<button type="button" class="act-edit" data-retablir="${esc(m.id)}">Rétablir</button>`);
+        else if (l.etat.code !== "realisee" && l.etat.code !== "retiree") outils.push(`<button type="button" class="act-del" data-abandonner="${esc(m.id)}">Abandonner</button>`);
+      }
+      const saisieAbandon = abandonEnCours === m.id ? `<div class="abandon"><input type="text" id="motifAbandon" maxlength="300" placeholder="Motif de l'abandon" aria-label="Motif de l'abandon"><button type="button" class="btn btn-primary btn-sm" data-confirmer-abandon="${esc(m.id)}">Abandonner</button><button type="button" class="btn btn-ghost btn-sm" data-annuler-abandon>Annuler</button></div>` : "";
+      return `<tr>
+        <td style="white-space:normal;min-width:220px;"><b>${esc(m.titre)}</b>${m.description ? `<span class="ref">${esc(m.description)}</span>` : ""}${m.origine ? `<span class="ref">Origine : ${esc(m.origine)}</span>` : ""}</td>
+        <td style="white-space:normal;">${risqueCell(m)}</td>
+        <td style="white-space:normal;">${esc(m.responsable || "—")}</td>
+        <td class="mono">${esc(dateFr(m.echeance))}${l.etat.code === "reportee" && l.action ? `<span class="ref">reportée au ${esc(dateFr(l.action.echeance))}</span>` : ""}</td>
+        <td class="num">${montantCell(m)}</td>
+        <td style="white-space:normal;">${texteCell(m.financement, false)}</td>
+        <td style="white-space:normal;min-width:180px;">${texteCell(m.conditionsExecution, true)}</td>
+        <td style="white-space:normal;min-width:160px;">${texteCell(m.indicateurResultat, true)}</td>
+        <td><span class="chip ${l.etat.ton}">${esc(l.etat.libelle)}</span>${l.abandon && l.abandon.motif ? `<span class="ref">${esc(l.abandon.motif)}</span>` : ""}</td>
+        <td style="white-space:normal;">${outils.join(" ")}${saisieAbandon}</td>
+      </tr>`;
+    }).join("") + `<tr class="total"><td colspan="4">Total${lignes.length !== r.total ? " (mesures visibles)" : ""}</td><td class="num">${esc(VP.euros(cout))}</td><td colspan="5">${lignes.filter(l => !VP.estCout(l.m.coutEstime)).length ? esc(lignes.filter(l => !VP.estCout(l.m.coutEstime)).length + " mesure(s) sans coût estimé") : ""}</td></tr>`
+      : `<tr class="empty-row"><td colspan="10">Aucune action du Plan d'actions n'a son échéance en ${an}.</td></tr>`;
+    const aj = r.ajoutees.filter(visible);
+    $("ajoutees").innerHTML = adopte && aj.length ? `<div class="sec"><h4>Ajoutées au Plan d'actions depuis l'adoption</h4><p class="aide">Actions dont l'échéance tombe en ${an}, absentes du programme adopté.</p><ul class="liste-auto">${aj.map(a => `<li><b>${esc(a.titre)}</b>${a.service ? " (" + esc(a.service) + ")" : ""} — échéance ${esc(dateFr(a.echeance))}${VP.estCout(a.coutEstime) ? ", " + esc(VP.euros(a.coutEstime)) : ""} · ${esc(a.statut || "À faire")}</li>`).join("")}</ul></div>` : "";
+
+    // bilan (commentaire), avis et adoption
+    const enCours = p || {};
+    const verrou = !peutGerer || adopte;
+    $("bilanPrecedent").value = enCours.bilanPrecedent || "";
+    $("avisDate").value = enCours.avisDate || "";
+    $("avisTexte").value = enCours.avisTexte || "";
+    $("adopteLe").value = enCours.adopteLe || "";
+    $("adoptePar").value = enCours.adoptePar || "";
+    ["bilanPrecedent", "avisDate", "avisTexte", "adopteLe", "adoptePar"].forEach(id => { $(id).disabled = verrou; });
+    $("noteAdoption").textContent = adopte
+      ? `Programme adopté${p.adopteLe ? " le " + dateFr(p.adopteLe) : ""}${p.adoptePar ? " par " + p.adoptePar : ""}${p.adopteSaisiPar ? " (enregistré par " + p.adopteSaisiPar + ")" : ""}. Sa liste de mesures est figée.`
+      : peutGerer ? "« Adopter le programme » fige la liste des mesures telle qu'elle est aujourd'hui ; le bilan de fin d'année s'y reportera." : "Programme en préparation.";
+    $("actionsAdoption").innerHTML = !peutGerer ? "" : adopte
+      ? `<button type="button" class="btn btn-ghost" id="btnRouvrir">Rouvrir le programme</button>`
+      : `<button type="submit" class="btn btn-ghost">Enregistrer</button><button type="button" class="btn btn-primary" id="btnAdopter"${partiel ? " disabled" : ""}>Adopter le programme</button>`;
+  }
+
+  // ---------- Enregistrement, adoption ----------
+  function depuisFormulaire(an){
+    return Object.assign({}, programmeOuNeuf(an), {
+      bilanPrecedent: $("bilanPrecedent").value.trim(), avisDate: $("avisDate").value, avisTexte: $("avisTexte").value.trim(),
+      adopteLe: $("adopteLe").value, adoptePar: $("adoptePar").value.trim(),
+    });
+  }
+  function marquer(p){
+    if (!p.auteur){ p.auteur = moi; p.dateCreation = new Date().toISOString(); }
+    else { p.modifiePar = moi; p.dateMaj = new Date().toISOString(); }
+    return p;
+  }
+  $("formAdoption").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const an = anneeChoisie(), avant = VP.programmeDe(programmes(), an);
+    if (!peutGerer || (avant && avant.statut === "Adopté")) return;
+    const p = depuisFormulaire(an);
+    if (p.avisDate && p.avisDate > ajd()){ alert("La date de l'avis ne peut pas être dans le futur."); return; }
+    try { enregistrerProgramme(marquer(p)); } catch(err){ alert("Le programme n'a pas pu être enregistré."); return; }
+    logAudit(avant ? "Modification" : "Création", `Programme annuel de prévention ${an} enregistré (en préparation)`);
+    render();
+  });
+  $("actionsAdoption").addEventListener("click", (e) => {
+    const an = anneeChoisie();
+    if (e.target.closest("#btnAdopter")){
+      if (!peutGerer || partiel) return;
+      const p = depuisFormulaire(an), jour = ajd();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(p.adopteLe)){ alert("Indiquez la date d'adoption."); return; }
+      if (p.adopteLe > jour){ alert("La date d'adoption ne peut pas être dans le futur."); return; }
+      if (!p.adoptePar){ alert("Indiquez qui adopte le programme."); return; }
+      if (p.avisDate && p.avisDate > jour){ alert("La date de l'avis ne peut pas être dans le futur."); return; }
+      const mesures = VP.mesuresDeLAnnee(lire("vigie_hse_actions"), an).map(VP.photo);
+      const incompletes = mesures.filter(m => VP.aCompleter(m).length).length;
+      const avert = [!p.avisDate ? mots("aucun avis de l'instance (F3SCT ou CST) n'est daté") : "", !mesures.length ? "le programme n'a aucune mesure" : "", incompletes ? incompletes + " mesure(s) restent à compléter" : ""].filter(Boolean);
+      if (!confirm(`Adopter le programme ${an} ? Sa liste de ${mesures.length} mesure(s) sera figée.${avert.length ? "\n\nAttention : " + avert.join(" ; ") + "." : ""}`)) return;
+      p.statut = "Adopté"; p.mesures = mesures; p.adopteSaisiPar = moi;
+      try { enregistrerProgramme(marquer(p)); } catch(err){ alert("Le programme n'a pas pu être adopté."); return; }
+      logAudit("Modification", `Programme annuel de prévention ${an} adopté le ${dateFr(p.adopteLe)} par ${p.adoptePar} (${mesures.length} mesure(s))`);
+      render();
+      return;
+    }
+    if (e.target.closest("#btnRouvrir")){
+      if (!peutGerer || !confirm(`Rouvrir le programme ${an} ? Sa liste figée est effacée : il redevient en préparation, sur le Plan d'actions d'aujourd'hui.`)) return;
+      try { modifierProgrammes(l => { const i = l.findIndex(x => x && String(x.annee) === String(an)); if (i >= 0){ const p = Object.assign({}, l[i], { statut: "Brouillon", modifiePar: moi, dateMaj: new Date().toISOString() }); delete p.mesures; delete p.adopteSaisiPar; l[i] = p; } }); }
+      catch(err){ alert("Le programme n'a pas pu être rouvert."); return; }
+      logAudit("Modification", `Programme annuel de prévention ${an} rouvert`);
+      render();
+    }
+  });
+  // abandon d'une mesure d'un programme adopté : avec un motif
+  $("tbody").addEventListener("click", (e) => {
+    const an = anneeChoisie();
+    const ab = e.target.closest("[data-abandonner]");
+    if (ab){ abandonEnCours = ab.dataset.abandonner; render(); const i = $("motifAbandon"); if (i) i.focus(); return; }
+    if (e.target.closest("[data-annuler-abandon]")){ abandonEnCours = null; render(); return; }
+    const ok = e.target.closest("[data-confirmer-abandon]");
+    const ret = e.target.closest("[data-retablir]");
+    if (!ok && !ret) return;
+    if (!peutGerer || partiel) return;
+    const id = ok ? ok.dataset.confirmerAbandon : ret.dataset.retablir;
+    const p = VP.programmeDe(programmes(), an);
+    if (!p || p.statut !== "Adopté") return;
+    const m = (p.mesures || []).find(x => x.id === id);
+    if (!m) return;
+    const abandons = Object.assign({}, p.abandons || {});
+    if (ok){
+      const motif = ($("motifAbandon") ? $("motifAbandon").value : "").trim();
+      if (!motif){ alert("Indiquez le motif de l'abandon."); return; }
+      abandons[id] = { motif, le: ajd(), par: moi };
+    } else delete abandons[id];
+    try { enregistrerProgramme(Object.assign({}, p, { abandons, modifiePar: moi, dateMaj: new Date().toISOString() })); } catch(err){ alert("Le programme n'a pas pu être enregistré."); return; }
+    logAudit("Modification", `Programme annuel de prévention ${an} : mesure « ${m.titre} » ${ok ? "abandonnée (" + abandons[id].motif + ")" : "rétablie"}`);
+    abandonEnCours = null;
+    render();
+  });
+  $("selAnnee").addEventListener("change", () => { abandonEnCours = null; render(); });
+
+  // ---------- Export ----------
+  const ligneExport = (l) => ({ "Identifiant": l.m.id, "Mesure": l.m.titre || "", "Description": l.m.description || "", "Risque lié": l.m.risqueLie || "", "Service": l.m.service || "",
+    "Origine": l.m.origine || "", "Responsable": l.m.responsable || "", "Échéance": dateFr(l.m.echeance), "Coût estimé (€)": VP.estCout(l.m.coutEstime) ? l.m.coutEstime : "",
+    "Financement": l.m.financement || "", "Conditions d'exécution": l.m.conditionsExecution || "", "Indicateur de résultat": l.m.indicateurResultat || "", "État": l.etat.libelle,
+    "Motif d'abandon": l.abandon && l.abandon.motif || "" });
+  const ENTETES = ["Identifiant", "Mesure", "Description", "Risque lié", "Service", "Origine", "Responsable", "Échéance", "Coût estimé (€)", "Financement", "Conditions d'exécution", "Indicateur de résultat", "État", "Motif d'abandon"];
+  $("btnExport").addEventListener("click", () => {
+    const an = anneeChoisie(), jour = ajd(), actions = lire("vigie_hse_actions");
+    const p = VP.programmeDe(programmes(), an), r = VP.lire(p, actions, an, jour), b = VP.lire(VP.programmeDe(programmes(), an - 1), actions, an - 1, jour);
+    const lignes = r.lignes.filter(l => visible(l.m));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ "Année": an, "Statut": p && p.statut === "Adopté" ? "Adopté" : "En préparation", [mots("Avis de l'instance (F3SCT ou CST) le")]: dateFr(p && p.avisDate), "Avis": p && p.avisTexte || "",
+      "Adopté le": dateFr(p && p.adopteLe), "Adopté par": p && p.adoptePar || "", "Mesures": lignes.length, "Coût estimé total (€)": lignes.reduce((s, l) => s + (VP.estCout(l.m.coutEstime) ? l.m.coutEstime : 0), 0),
+      "Commentaire du bilan": p && p.bilanPrecedent || "" }]), "Programme");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes.map(ligneExport), { header: ENTETES }), "Mesures " + an);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(b.lignes.filter(l => visible(l.m)).map(ligneExport), { header: ENTETES }), "Bilan " + (an - 1));
+    XLSX.writeFile(wb, `programme_annuel_prevention_${an}_${jour}.xlsx`);
+  });
+
+  // ---------- Impression ----------
+  $("btnImprimer").addEventListener("click", () => {
+    const an = anneeChoisie(), jour = ajd(), actions = lire("vigie_hse_actions");
+    const p = VP.programmeDe(programmes(), an), r = VP.lire(p, actions, an, jour), b = VP.lire(VP.programmeDe(programmes(), an - 1), actions, an - 1, jour);
+    const lignes = r.lignes.filter(l => visible(l.m)), lb = b.lignes.filter(l => visible(l.m));
+    const ancien = document.getElementById("pg-impression");
+    if (ancien) ancien.remove();
+    if (!document.getElementById("pg-impression-style")){
+      const style = document.createElement("style"); style.id = "pg-impression-style";
+      style.textContent = [
+        "@page{ size:A4 landscape; margin:12mm; }",
+        "@media screen{ #pg-impression{ display:none; } }",
+        "@media print{",
+        "  body{ background:#fff !important; }",
+        "  body > *:not(#pg-impression){ display:none !important; }",
+        "  #pg-impression{ display:block !important; color:#000; font:10.5px/1.45 'IBM Plex Sans',Arial,sans-serif; }",
+        "  #pg-impression .pi-marque{ font:700 10px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#555; }",
+        "  #pg-impression h1{ font:700 21px 'Barlow Condensed',Arial,sans-serif; margin:2px 0; }",
+        "  #pg-impression .pi-meta{ font-size:10px; color:#333; margin:0 0 6px; }",
+        "  #pg-impression h2{ font:700 13px 'Barlow Condensed',Arial,sans-serif; text-transform:uppercase; letter-spacing:.06em; border-bottom:1.5px solid #000; margin:12px 0 5px; padding-bottom:2px; }",
+        "  #pg-impression table{ width:100%; border-collapse:collapse; }",
+        "  #pg-impression th, #pg-impression td{ border:1px solid #999; padding:3px 5px; text-align:left; vertical-align:top; }",
+        "  #pg-impression th{ background:#eee; font-weight:600; }",
+        "  #pg-impression tr{ break-inside:avoid; page-break-inside:avoid; }",
+        "  #pg-impression .num{ text-align:right; white-space:nowrap; }",
+        "  #pg-impression .texte{ white-space:pre-line; }",
+        "  #pg-impression .pi-signatures{ display:flex; gap:30px; margin-top:20px; break-inside:avoid; }",
+        "  #pg-impression .pi-signatures div{ flex:1; border-top:1px solid #000; padding-top:4px; min-height:50px; font-size:10px; }",
+        "}",
+      ].join("\n");
+      document.head.appendChild(style);
+    }
+    const tableau = (ls, avecEtat) => ls.length ? `<table><thead><tr><th>Mesure</th><th>Risque ou unité de travail</th><th>Responsable</th><th>Échéance</th><th>Coût estimé</th><th>Financement</th><th>Conditions d'exécution</th><th>Indicateur de résultat</th>${avecEtat ? "<th>État</th>" : ""}</tr></thead><tbody>${ls.map(l => `<tr><td><b>${esc(l.m.titre)}</b>${l.m.description ? "<br>" + esc(l.m.description) : ""}</td><td>${[l.m.risqueLie, l.m.service].filter(Boolean).map(esc).join("<br>") || "—"}</td><td>${esc(l.m.responsable || "—")}</td><td>${esc(dateFr(l.m.echeance))}</td><td class="num">${esc(VP.euros(l.m.coutEstime))}</td><td>${esc(l.m.financement || "—")}</td><td>${esc(l.m.conditionsExecution || "—")}</td><td>${esc(l.m.indicateurResultat || "—")}</td>${avecEtat ? `<td>${esc(l.etat.libelle)}${l.abandon && l.abandon.motif ? " — " + esc(l.abandon.motif) : ""}</td>` : ""}</tr>`).join("")}</tbody></table>` : "<p>—</p>";
+    const cout = lignes.reduce((s, l) => s + (VP.estCout(l.m.coutEstime) ? l.m.coutEstime : 0), 0);
+    const compte = (codes) => lb.filter(l => codes.includes(l.etat.code)).length;
+    const bloc = document.createElement("div");
+    bloc.id = "pg-impression";
+    bloc.innerHTML = `
+      <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "")}</div>
+      <h1>Programme annuel de prévention ${esc(an)}</h1>
+      <p class="pi-meta">${esc(VigieOrga.noms().join(" · "))} · ${p && p.statut === "Adopté" ? "adopté le " + esc(dateFr(p.adopteLe)) + " par " + esc(p.adoptePar || "—") : "en préparation, non adopté"} · édité le ${esc(dateFr(jour))}${partiel ? " · limité aux mesures de toute l'organisation et des services de ce compte" : ""}</p>
+      <h2>Bilan de l'année ${esc(an - 1)}</h2>
+      <p>${esc(lb.length)} mesure(s) : ${esc(compte(["realisee"]))} réalisée(s), ${esc(compte(["reportee"]))} reportée(s), ${esc(compte(["abandonnee", "retiree"]))} abandonnée(s), ${esc(compte(["non-realisee", "en-cours", "a-faire"]))} non réalisée(s) ou en cours.</p>
+      ${p && p.bilanPrecedent ? `<div class="texte">${esc(p.bilanPrecedent)}</div>` : ""}
+      ${tableau(lb.filter(l => l.etat.code !== "realisee"), true)}
+      <h2>Mesures de l'année ${esc(an)}</h2>
+      ${tableau(lignes, false)}
+      <p><b>Coût estimé total : ${esc(VP.euros(cout))}</b>${lignes.some(l => !VP.estCout(l.m.coutEstime)) ? " (hors mesures sans coût estimé)" : ""}</p>
+      <h2>${esc(mots("Avis de l'instance (F3SCT ou CST)"))} et adoption</h2>
+      <p>Avis : ${p && p.avisDate ? "le " + esc(dateFr(p.avisDate)) + " — " : ""}${esc(p && p.avisTexte || "—")}</p>
+      <p>Adoption : ${p && p.adopteLe ? "le " + esc(dateFr(p.adopteLe)) + " par " + esc(p.adoptePar || "—") : "—"}</p>
+      <div class="pi-signatures"><div>${esc(mots("Pour l'instance (F3SCT ou CST)"))}</div><div>Pour l'autorité qui adopte le programme</div></div>`;
+    document.body.appendChild(bloc);
+    const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
+    window.addEventListener("afterprint", nettoyer);
+    window.print();
+  });
+
+  remplirAnnees();
+  render();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

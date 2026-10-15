@@ -16,6 +16,7 @@
 <script src="assets/impression.js"></script>
 <script src="assets/dates-locales.js"></script>
 <script src="assets/conformite-ref.js"></script>
+<script src="assets/programme-ref.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
 <link rel="stylesheet" href="assets/commun.css">
@@ -120,6 +121,7 @@
   .form-grid .efficacite-bloc{ grid-column:1 / -1; }
   .efficacite-bloc{ border:1px solid var(--border); border-radius:var(--r-sm); padding:12px 14px 14px; margin:0; min-width:0; }
   .efficacite-bloc[hidden]{ display:none; }
+  #blocProgramme .span3 input{ width:100%; }
   .efficacite-bloc .form-grid{ grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr)); }
   .efficacite-bloc legend{ font-size:12px; font-weight:600; color:var(--text); padding:0 6px; }
   .efficacite-aide{ font-size:11.5px; color:var(--text-muted); margin:0 0 10px; }
@@ -241,6 +243,16 @@
               <select id="fStatutForm"><option value="À faire">À faire</option><option value="En cours">En cours</option><option value="Fait">Fait</option></select>
             </div>
             <div class="span3"><label for="fDescription">Description / mesures</label><textarea id="fDescription" placeholder="Détail de l'action corrective à mener…"></textarea></div>
+            <fieldset class="efficacite-bloc" id="blocProgramme">
+              <legend>Programme annuel de prévention</legend>
+              <p class="efficacite-aide">Repris par le programme de l'année de l'échéance (PAPRIPACT, menu Pilotage).</p>
+              <div class="form-grid">
+                <div><label for="fCout">Coût estimé (€)</label><input type="text" inputmode="decimal" id="fCout" placeholder="Ex. : 1 250"></div>
+                <div><label for="fFinancement">Financement</label><input type="text" id="fFinancement" placeholder="Budget, subvention…"></div>
+                <div class="span3"><label for="fConditions">Conditions d'exécution</label><textarea id="fConditions" placeholder="Moyens, prestataire, étapes, calendrier…"></textarea></div>
+                <div class="span3"><label for="fIndicateur">Indicateur de résultat</label><input type="text" id="fIndicateur" placeholder="Ex. : vérification sans réserve, plus aucune chute signalée…"></div>
+              </div>
+            </fieldset>
             <fieldset class="efficacite-bloc" id="blocEfficacite" hidden>
               <legend>Vérification de l'efficacité</legend>
               <p class="efficacite-aide">Une fois l'action faite : a-t-elle supprimé ou réduit le risque visé ? (ISO 45001, § 10.2)</p>
@@ -675,6 +687,12 @@
   // Vérification de l'efficacité d'une action faite (ISO 45001 § 10.2) : résultat, date, par qui, constat.
   // Elle ne vaut que pour une action « Fait » : rouverte, l'action perd sa vérification. Aucun délai imposé.
   const EFFICACITE = ["Efficace", "Non efficace"];
+  // Programme annuel de prévention (question 25) : les champs fournis (v) posés s'ils sont remplis, retirés s'ils sont vides ;
+  // ceux que v ne porte pas (colonne absente d'un fichier importé) restent tels quels.
+  function poserProgramme(rec, v){
+    if ("coutEstime" in v){ const c = VigieProgramme.montant(v.coutEstime); if (c === null) delete rec.coutEstime; else rec.coutEstime = c; }
+    ["financement", "conditionsExecution", "indicateurResultat"].forEach(k => { if (!(k in v)) return; const t = String(v[k] == null ? "" : v[k]).trim(); if (t) rec[k] = t; else delete rec[k]; });
+  }
   const CHAMPS_EFFICACITE = ["efficacite", "efficaciteDate", "efficacitePar", "efficaciteNote"];
   // retire les champs ; vrai s'il y avait une vérification renseignée
   function retirerEfficacite(rec){
@@ -815,6 +833,10 @@
         efficacitePar: String(pick(["verifiee par"])).trim(),
         efficaciteNote: String(pick(["constat d efficacite"])).trim(),
       } : null;
+      // colonnes du programme annuel de prévention : chacune lue seulement si le fichier l'a
+      const programme = {};
+      [["cout estime", "coutEstime"], ["financement", "financement"], ["conditions d execution", "conditionsExecution"], ["indicateur de resultat", "indicateurResultat"]]
+        .forEach(([col, k]) => { if (Object.prototype.hasOwnProperty.call(n, col)) programme[k] = n[col]; });
       return {
         _efficacite: efficacite,
         id: String(pick(["id"])).trim() || "",
@@ -827,6 +849,7 @@
         priorite: ["Critique","Haute","Moyenne","Basse"].includes(priorite) ? priorite : "Moyenne",
         statut: ["À faire","En cours","Fait"].includes(statut) ? statut : "À faire",
         dateCreation: parseDateImp(pick(["date de creation"])) || VigieDates.aujourdhui(),
+        _programme: programme,
       };
     }
     $("btnImport").addEventListener("click", () => $("importFile").click());
@@ -848,14 +871,16 @@
           const rec = mapImportedRow(raw);
           if (!rec){ skipped++; return; }
           const eff = rec._efficacite; delete rec._efficacite;
+          const prog = rec._programme; delete rec._programme;
           const idx = rec.id ? DATASET.findIndex(d => d.id === rec.id) : -1;
           if (idx >= 0){
             // les champs que le tableur ne porte pas (venus d'un autre module) sont gardés
             const fusion = Object.assign({}, DATASET[idx], rec);
             if (eff) poserEfficacite(fusion, eff); else if (fusion.statut !== "Fait") retirerEfficacite(fusion);
+            poserProgramme(fusion, prog);
             DATASET[idx] = fusion; updated++;
           }
-          else { rec.id = rec.id || genId(); if (eff) poserEfficacite(rec, eff); DATASET.push(rec); added++; }
+          else { rec.id = rec.id || genId(); if (eff) poserEfficacite(rec, eff); poserProgramme(rec, prog); DATASET.push(rec); added++; }
         });
         saveDataset(DATASET);
         render();
@@ -877,8 +902,9 @@
         "Risque lié": r.risqueLie || "", "Origine": r.origine, "Responsable": r.responsable || "", "Échéance": r.echeance,
         "Priorité": r.priorite, "Statut": r.statut, "Date de création": r.dateCreation || "",
         "Efficacité": r.efficacite || "", "Efficacité vérifiée le": r.efficaciteDate || "", "Vérifiée par": r.efficacitePar || "", "Constat d'efficacité": r.efficaciteNote || "",
+        "Coût estimé (€)": VigieProgramme.estCout(r.coutEstime) ? r.coutEstime : "", "Financement": r.financement || "", "Conditions d'exécution": r.conditionsExecution || "", "Indicateur de résultat": r.indicateurResultat || "",
       }));
-      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Titre", "Description", VigieOrga.libelle(), "Service", "Risque lié", "Origine", "Responsable", "Échéance", "Priorité", "Statut", "Date de création", "Efficacité", "Efficacité vérifiée le", "Vérifiée par", "Constat d'efficacité"] });
+      const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Titre", "Description", VigieOrga.libelle(), "Service", "Risque lié", "Origine", "Responsable", "Échéance", "Priorité", "Statut", "Date de création", "Efficacité", "Efficacité vérifiée le", "Vérifiée par", "Constat d'efficacité", "Coût estimé (€)", "Financement", "Conditions d'exécution", "Indicateur de résultat"] });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Plan d'Actions");
       const today = VigieDates.aujourdhui();
@@ -922,6 +948,10 @@
         $("fEfficaciteDate").value = rec.efficaciteDate || "";
         $("fEfficacitePar").value = rec.efficacitePar || "";
         $("fEfficaciteNote").value = rec.efficaciteNote || "";
+        $("fCout").value = VigieProgramme.estCout(rec.coutEstime) ? String(rec.coutEstime).replace(".", ",") : "";
+        $("fFinancement").value = rec.financement || "";
+        $("fConditions").value = rec.conditionsExecution || "";
+        $("fIndicateur").value = rec.indicateurResultat || "";
       } else {
         $("formTitle").textContent = "Nouvelle action";
         $("fId").value = "";
@@ -947,6 +977,7 @@
       e.preventDefault();
       const id = $("fId").value;
       const isNew = !id;
+      if ($("fCout").value.trim() && VigieProgramme.montant($("fCout").value) === null){ alert("Le coût estimé doit être un montant en euros (ex. : 1 250,50)."); return; }
       const ancien = (!isNew && DATASET.find(d => d.id === id)) || {};
       // les champs que le formulaire ne connaît pas (venus d'un autre module) sont gardés
       const rec = Object.assign({}, ancien, {
@@ -967,6 +998,7 @@
         efficacite: $("fEfficacite").value, efficaciteDate: $("fEfficaciteDate").value,
         efficacitePar: $("fEfficacitePar").value.trim(), efficaciteNote: $("fEfficaciteNote").value.trim(),
       });
+      poserProgramme(rec, { coutEstime: $("fCout").value, financement: $("fFinancement").value, conditionsExecution: $("fConditions").value, indicateurResultat: $("fIndicateur").value });
       const idx = DATASET.findIndex(d => d.id === rec.id);
       if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);
       saveDataset(DATASET);
@@ -1016,6 +1048,9 @@
       logAudit("Plan d'Actions", "Modification", `Statut de « ${rec.titre} » → ${rec.statut}${retiree ? " (vérification d'efficacité retirée)" : ""}`);
       render();
     });
+
+    // ?modifier=<id> : l'action ouverte au formulaire (lien « Compléter » du programme annuel de prévention)
+    (function(){ const id = new URLSearchParams(location.search).get("modifier"); const rec = id && DATASET.find(d => d.id === id); if (rec) openForm(rec); })();
   }
 
   render();

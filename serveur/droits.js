@@ -68,6 +68,7 @@ const REGLES = {
   revues_direction: GERER('revue-direction'),
   objectifs: GERER('objectifs'),
   exigences: GERER('conformite'),
+  programmes: GERER('programme'),
   ds_questions: regle('dialogue-social', 'participer'), ds_reunions: regle('dialogue-social', 'participer'), ds_visites: regle('dialogue-social', 'participer'),
 };
 const regleGenerale = GERER('administration');

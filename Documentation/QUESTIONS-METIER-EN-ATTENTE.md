@@ -54,7 +54,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 22 | Signalements : anonymat, délai de traitement, lecture de la pyramide de Bird | Signalements, Indicateurs & Reporting (en service) | ✅ répondue le 2026-10-14 : pas d'anonymat, 8 jours, pyramide confirmée — mise en œuvre le 2026-10-14 |
 | 23 | Revue de direction : à quelle fréquence, avec qui, et qui la valide ? | Revue de direction (en service, ISO 45001 § 9.3) | ✅ répondue le 2026-10-14 : fréquence libre, lecture ouverte par les profils, PAPRIPACT — mise en œuvre le 2026-10-14 (PAPRIPACT à construire) |
 | 24 | Objectifs santé-sécurité : qui les fixe, qui les voit, comment les suivre en cours d'année ? | Objectifs santé-sécurité (en service, ISO 45001 § 6.2) | ✅ répondue le 2026-10-14 : l'encadrement en lecture, fixés par le HSE, objectifs par service — mise en œuvre le 2026-10-14 |
-| 25 | PAPRIPACT : que doit contenir le programme annuel de prévention, et d'où le tirer ? | Programme annuel de prévention (à construire, demandé à la question 23) — Plan d'actions, Revue de direction | 🟠 En attente de réponse |
+| 25 | PAPRIPACT : que doit contenir le programme annuel de prévention, et d'où le tirer ? | Programme annuel de prévention (à construire, demandé à la question 23) — Plan d'actions, Revue de direction | ✅ Répondu le 2026-10-15 — mis en œuvre |
 | 26 | Conformité réglementaire : qui la tient, qui la lit, et à quel rythme réévaluer ? | Conformité réglementaire (construite le 2026-10-15) — Revue de direction | ✅ Répondu le 2026-10-15 — mis en œuvre |
 
 ---
@@ -713,7 +713,7 @@ Côté technique, (B) réutilise un écran existant et son anonymat ; (C) donne 
 
 ---
 
-## 🟠 Question 25 — PAPRIPACT : que doit contenir le programme annuel de prévention, et d'où le tirer ?
+## ✅ Question 25 — PAPRIPACT : que doit contenir le programme annuel de prévention, et d'où le tirer ?
 
 **Contexte.** À la question 23, le préventeur a demandé, pour une collectivité, le **PAPRIPACT** (programme annuel de prévention des risques professionnels et d'amélioration des conditions de travail). Le logiciel ne l'a pas encore. Il a déjà de quoi le nourrir : le **Plan d'actions** (chaque action a une description, un responsable, une échéance, un statut et une origine : Document unique, inspection, accident, signalement, objectif, revue de direction…), le **Document unique** (les risques par unité de travail), les **objectifs santé-sécurité** et la **revue de direction**.
 
@@ -735,7 +735,19 @@ Le Plan d'actions n'a aujourd'hui **ni coût estimé ni indicateur de résultat*
 
 ### Décision
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-15)._
+> **Réponse du préventeur (Cahier, 2026-10-15) : option A, toutes les actions de l'année.**
+> - Contenu : « Oui tout cela » — coût estimé, conditions d'exécution, indicateur de résultat, calendrier, financement, et un bilan de l'année écoulée.
+> - Validation : « Oui » — garder la trace de l'avis de l'instance et de l'adoption.
+> - Entreprise privée : « Oui » — le même document convient (présenté au CSE).
+>
+> **Mis en œuvre le 2026-10-15** — page « Programme annuel de prévention » (Pilotage, `programme-prevention.html`) :
+> - **Source** : toutes les actions du Plan d'actions dont l'échéance tombe dans l'année, quelle que soit leur origine, telles qu'elles y sont enregistrées.
+> - **Contenu** : pour chaque mesure, le risque lié et le service (unité de travail), la mesure, le responsable, l'échéance (le calendrier), et quatre champs nouveaux du Plan d'actions — **coût estimé**, **financement**, **conditions d'exécution**, **indicateur de résultat** (formulaire, export, import ; « Compléter » ouvre l'action au Plan d'actions). Une mesure sans coût, conditions ou indicateur est signalée « à compléter » ; le financement n'est pas exigé (il peut ne pas y en avoir). Totaux du coût estimé.
+> - **Bilan de l'année écoulée** : les mesures du programme précédent — réalisées, reportées (échéance repoussée à une année suivante), abandonnées (marquées au programme avec un motif, ou retirées du Plan d'actions), non réalisées — avec un commentaire ; sans programme adopté l'année précédente, les actions dont l'échéance y tombait.
+> - **Validation** : avis de l'instance (date et avis — F3SCT ou CST, CSSCT ou CSE en entreprise), adoption (date et autorité). « Adopter le programme » fige la liste des mesures ; le bilan de fin d'année s'y reporte ; les actions ajoutées ensuite sont listées à part ; « Rouvrir » est possible.
+> - **Entreprise** : le même document ; seuls les noms des instances changent (secteur réglé dans Administration).
+> - Impression (A4 paysage, signatures), export Excel, reprise dans la revue de direction (« Ressources »).
+> - **Qui** : la question ne le demandait pas. Choix aligné sur les questions 24 et 26 — le Préventeur prépare et adopte (avec Administrateur et RH), le Manager consulte ; réglable dans Administration → Profils.
 
 ---
 

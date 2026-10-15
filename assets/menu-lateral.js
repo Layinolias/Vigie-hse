@@ -68,6 +68,7 @@
       ["base-documentaire.html", "i-book", "Base documentaire"],
       ["dialogue-social.html", "i-messages", "Dialogue social"]] },
     { titre: "Pilotage", liens: [
+      ["contexte.html", "i-compass", "Contexte et enjeux"],
       ["reporting.html", "i-bar-chart", "Indicateurs &amp; Reporting"],
       ["objectifs.html", "i-trending-up", "Objectifs santé-sécurité"],
       ["conformite.html", "i-shield-check", "Conformité réglementaire"],
@@ -108,6 +109,7 @@
       "politique-sante-securite.html": lire("politique"),   // ISO 45001 § 5.2
       "base-documentaire.html": lire("documentation"),
       "dialogue-social.html": lire("dialogue-social"),
+      "contexte.html": lire("contexte"),                 // ISO 45001 § 4.1, 4.2, 6.1.1
       "reporting.html": lire("reporting"),
       "objectifs.html": lire("objectifs"),               // ISO 45001 § 6.2
       "conformite.html": lire("conformite"),             // ISO 45001 § 6.1.3 et § 9.1.2

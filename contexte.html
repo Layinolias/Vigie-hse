@@ -1,0 +1,600 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contexte et enjeux</title>
+<meta name="description" content="Contexte et enjeux : enjeux internes et externes, parties intéressées et leurs attentes, risques et opportunités pour la démarche de santé et de sécurité, avec leurs actions (ISO 45001, § 4.1, 4.2 et 6.1.1).">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/contexte-ref.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  select, input[type="text"], input[type="date"], input[type="search"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:150px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:68px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled, select:disabled{ background:var(--bg-2); color:var(--text); opacity:1; cursor:default; }
+  @media (max-width:640px){ select, input[type="text"], input[type="date"], input[type="search"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  @media (min-width:560px){ .form-grid .span2{ grid-column:span 2; } }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg td.num{ font-family:"IBM Plex Mono",monospace; text-align:right; }
+  table.reg tr.chap td{ background:var(--bg-2); font-weight:600; font-size:11.5px; color:var(--text-muted); padding:7px 14px; }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.bon{ color:var(--success); background:var(--success-bg); } .chip.bon::before{ background:var(--success); }
+  .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
+  .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
+  .chip.attention{ color:var(--warning); background:var(--warning-bg); } .chip.attention::before{ background:var(--warning); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; text-align:left; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  .ref{ display:block; font-size:11.5px; color:var(--text-faint); margin-top:2px; font-weight:400; white-space:normal; }
+  .filtres{ display:flex; gap:9px; flex-wrap:wrap; margin:0 0 12px; }
+  .filtres input[type="search"]{ flex:1 1 240px; min-width:0; }
+
+  /* Élément ouvert */
+  .fiche{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .fiche-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  .form-grid input[type="checkbox"]{ width:auto; }
+  .form-grid label.coche{ display:flex; gap:8px; align-items:center; font-size:12.8px; color:var(--text); font-weight:400; margin:26px 0 0; cursor:pointer; }
+  .constat textarea{ margin-bottom:4px; }
+  table.reg td.long{ white-space:normal; min-width:180px; max-width:380px; }
+  table.reg tr.retire td{ opacity:.6; }
+  .coche-filtre{ display:flex; gap:7px; align-items:center; font-size:12.5px; color:var(--text-muted); cursor:pointer; }
+  ul.lies{ margin:0 0 10px; padding-left:18px; } ul.lies li{ margin:0 0 6px; font-size:12.8px; }
+  .constat{ background:var(--bg-2); border-radius:var(--r-sm); padding:12px 14px; margin:0 0 10px; }
+  .constat .texte{ white-space:pre-wrap; font-size:12.8px; line-height:1.55; margin:6px 0 4px; }
+  .constat .actions-constat{ margin-top:10px; }
+  .constat .actions-constat .dyn-row > span{ flex:1 1 auto; font-size:12.8px; }
+  .alerte{ font-size:12.5px; color:var(--danger); margin:8px 0 0; font-weight:600; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Pilotage / <b>Contexte et enjeux</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-compass"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Contexte et enjeux</h1>
+            <p>Ce qui, dans l'organisation et autour d'elle, pèse sur la démarche de santé et de sécurité : les enjeux internes et externes (ISO 45001, § 4.1), les parties intéressées et ce qu'elles attendent (§ 4.2), et les risques et opportunités pour la démarche elle-même, avec les actions décidées, suivies au Plan d'actions (§ 6.1.1). Les risques pour la santé des personnes restent au Document unique.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-compass"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEnjeux">–</span><span class="ps-kpi-label" id="kpiEnjeuxLabel">Enjeux</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-users"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiParties">–</span><span class="ps-kpi-label">Parties intéressées</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-target"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiRo">–</span><span class="ps-kpi-label" id="kpiRoLabel">Risques et opportunités</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiActions">–</span><span class="ps-kpi-label">Actions pas faites</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel fiche" id="fiche" style="display:none;"></div>
+
+      <div class="panel" style="padding:16px 22px;">
+        <div class="filtres" style="margin:0;">
+          <input type="search" id="fTexte" placeholder="Rechercher dans les trois registres" aria-label="Rechercher">
+          <label class="coche-filtre"><input type="checkbox" id="fRetires"> Afficher les éléments retirés</label>
+          <span class="panel-actions" id="listeActions" style="margin-left:auto;"></span>
+        </div>
+        <p class="form-note" id="majNote" style="margin-top:10px;"></p>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Enjeux internes et externes</h3>
+          <div class="panel-actions" id="actEnjeux"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableEnjeux">
+            <thead><tr><th>Enjeu</th><th>Origine</th><th>Effet sur la démarche</th><th>Risques et opportunités liés</th><th>Mis à jour</th><th></th></tr></thead>
+            <tbody id="tbEnjeux"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Parties intéressées</h3>
+          <div class="panel-actions" id="actParties"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableParties">
+            <thead><tr><th>Partie intéressée</th><th>Besoins et attentes</th><th>Comment on y répond</th><th>Risques et opportunités liés</th><th>Mis à jour</th><th></th></tr></thead>
+            <tbody id="tbParties"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Risques et opportunités pour la démarche</h3>
+          <div class="panel-actions" id="actRo"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableRo">
+            <thead><tr><th>Type</th><th>Risque ou opportunité</th><th>Vient de</th><th>Évaluation</th><th>Actions faites</th><th>Mis à jour</th><th></th></tr></thead>
+            <tbody id="tbRo"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Aucune méthode d'évaluation ni aucun rythme de revue n'est imposé (question 30 posée au préventeur) : l'évaluation est un texte, et chaque élément montre sa dernière mise à jour. Un élément qui n'est plus d'actualité se retire, il reste consultable. Les actions arrivent au Plan d'actions avec l'origine « Risques et opportunités ». La revue de direction reprend ce registre et ce qui y a changé pendant sa période.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("contexte", "consulter");
+  const peutGerer = D.peut("contexte", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Contexte et enjeux", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const lire = (cle) => { try { const v = JSON.parse(VigieStore.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } };
+  const fr = (a, b) => String(a).localeCompare(String(b), "fr");
+  const norm = (t) => String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const VX = VigieContexte;
+  const ajd = () => VigieDates.aujourdhui();
+  const M = (t) => VigieOrga.mots(t);   // « agents », « F3SCT » : les mots du secteur, pour les textes fixes (assets/organisation.js)
+
+  // ---------- Stockage ----------
+  const CLE = VX.CLE;
+  const tous = () => VX.valides(lire(CLE));
+  function modifierContexte(modif){ const l = lire(CLE); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
+  // Les actions d'un risque ou d'une opportunité rejoignent le Plan d'actions sous VigieContexte.idAction
+  // (plan-actions.html, generateContexteActionSeeds)
+  const actionAuPlan = (x, a, actions) => (actions || lire("vigie_hse_actions")).find(p => p && p.id === VX.idAction(x, a)) || null;
+  const chipType = (x) => `<span class="chip ${x.type === "Opportunité" ? "bon" : "attention"}">${esc(x.type || "Risque")}</span>`;
+  const chipRetire = (x) => x.archive ? ` <span class="chip neutre">Retiré</span>` : "";
+  const nomDe = (x) => x.registre === "enjeu" ? "l'enjeu" : x.registre === "partie" ? "la partie intéressée" : x.type === "Opportunité" ? "l'opportunité" : "le risque";
+  const TITRES_NOUVEAU = { enjeu: "Nouvel enjeu", partie: "Nouvelle partie intéressée", ro: "Nouveau risque ou opportunité" };
+  const texteDe = (x, l) => [x.texte, x.effet, x.theme, x.origine, x.partie, x.besoins, x.reponse, x.type, x.evaluation, VX.libelle(VX.source(x, l)), VX.actionsDe(x).map(a => a.description).join(" ")].join(" ");
+
+  // ---------- Registres ----------
+  function render(){
+    const actions = lire("vigie_hse_actions"), l = tous(), s = VX.synthese(l, actions);
+    $("kpiEnjeux").textContent = s.enjeux;
+    $("kpiEnjeuxLabel").textContent = s.enjeux ? `Enjeux · ${s.internes} interne${s.internes > 1 ? "s" : ""}, ${s.externes} externe${s.externes > 1 ? "s" : ""}` : "Enjeux";
+    $("kpiParties").textContent = s.parties;
+    $("kpiRo").textContent = s.risques + s.opportunites;
+    $("kpiRoLabel").textContent = s.risques + s.opportunites ? `${s.risques} risque${s.risques > 1 ? "s" : ""} · ${s.opportunites} opportunité${s.opportunites > 1 ? "s" : ""}` : "Risques et opportunités";
+    $("kpiActions").textContent = s.actionsPasFaites;
+    $("majNote").textContent = s.derniereMaj ? `Dernière mise à jour du registre : ${dateFr(s.derniereMaj)}${s.retires ? ` · ${s.retires} élément${s.retires > 1 ? "s" : ""} retiré${s.retires > 1 ? "s" : ""}` : ""}.` : "Registre vide : commencez par les enjeux, puis les parties intéressées.";
+    const vr = $("fRetires").checked, q = norm($("fTexte").value.trim());
+    const garde = (x) => (vr || !x.archive) && (!q || norm(texteDe(x, l)).includes(q));
+    const tri = (cle) => (a, b) => (!!a.archive - !!b.archive) || cle(a, b);
+    const ouvrirBtn = (x) => `<td><button type="button" class="act-edit" data-ouvrir="${esc(x.id)}">Ouvrir</button></td>`;
+    const maj = (x) => `<td class="mono">${esc(dateFr(VX.majLe(x)) || "—")}</td>`;
+    const nLies = (x) => { const n = VX.lies(l, x.id).length; return `<td>${n || "—"}</td>`; };
+    const vide = (n, rien, ajout) => `<tr class="empty-row"><td colspan="${n}">${q || vr ? rien + " avec ces filtres." : rien + " pour le moment." + (peutGerer ? " " + ajout : "")}</td></tr>`;
+    const en = VX.du(l, "enjeu").filter(garde).sort(tri((a, b) => fr(a.origine || "", b.origine || "") || fr(a.theme || "", b.theme || "") || fr(a.texte || "", b.texte || "")));
+    $("tbEnjeux").innerHTML = en.length ? en.map(x => `<tr${x.archive ? ' class="retire"' : ""}>
+        <td class="long"><b>${esc(x.texte)}</b>${chipRetire(x)}<span class="ref">${esc(x.theme || "")}</span></td>
+        <td>${esc(x.origine || "—")}</td>
+        <td class="long">${esc(x.effet || "—")}</td>
+        ${nLies(x)}${maj(x)}${ouvrirBtn(x)}</tr>`).join("") : vide(6, "Aucun enjeu", "« Ajouter un enjeu » en décrit un.");
+    const pa = VX.du(l, "partie").filter(garde).sort(tri((a, b) => fr(a.partie || "", b.partie || "")));
+    $("tbParties").innerHTML = pa.length ? pa.map(x => `<tr${x.archive ? ' class="retire"' : ""}>
+        <td class="long"><b>${esc(x.partie)}</b>${chipRetire(x)}${x.exigence ? `<span class="ref"><span class="chip attention">Obligation à suivre en conformité</span></span>` : ""}</td>
+        <td class="long">${esc(x.besoins || "—")}</td>
+        <td class="long">${esc(x.reponse || "—")}</td>
+        ${nLies(x)}${maj(x)}${ouvrirBtn(x)}</tr>`).join("") : vide(6, "Aucune partie intéressée", "« Ajouter une partie intéressée » en décrit une.");
+    const ro = VX.du(l, "ro").filter(garde).sort(tri((a, b) => fr(a.type || "Risque", b.type || "Risque") || fr(a.texte || "", b.texte || "")));
+    $("tbRo").innerHTML = ro.length ? ro.map(x => {
+      const src = VX.source(x, l), acts = VX.actionsDe(x), faites = acts.length - VX.pasFaites(x, actions).length;
+      return `<tr${x.archive ? ' class="retire"' : ""}>
+        <td>${chipType(x)}</td>
+        <td class="long"><b>${esc(x.texte)}</b>${chipRetire(x)}</td>
+        <td class="long">${src ? `${esc(VX.libelle(src))}<span class="ref">${esc(VX.REGISTRES[src.registre])}${src.archive ? " retiré" : ""}</span>` : "—"}</td>
+        <td class="long">${esc(x.evaluation || "—")}</td>
+        <td>${acts.length ? `${faites} / ${acts.length}` : (x.archive ? "—" : `<span class="chip attention">Sans action</span>`)}</td>
+        ${maj(x)}${ouvrirBtn(x)}</tr>`;
+    }).join("") : vide(7, "Aucun risque ni opportunité", "« Ajouter un risque ou une opportunité » en décrit un.");
+  }
+  $("fTexte").addEventListener("input", render);
+  $("fRetires").addEventListener("change", render);
+  ["tbEnjeux", "tbParties", "tbRo"].forEach(id => $(id).addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); }));
+  $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImprimer"><svg class="icon"><use href="#i-printer"/></svg> Imprimer le registre</button>`
+    + `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+  if (peutGerer){
+    $("actEnjeux").innerHTML = `<button type="button" class="btn btn-primary" data-nouveau="enjeu"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un enjeu</button>`;
+    $("actParties").innerHTML = `<button type="button" class="btn btn-primary" data-nouveau="partie"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une partie intéressée</button>`;
+    $("actRo").innerHTML = `<button type="button" class="btn btn-primary" data-nouveau="ro"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un risque ou une opportunité</button>`;
+    ["actEnjeux", "actParties", "actRo"].forEach(id => $(id).addEventListener("click", (e) => { const b = e.target.closest("[data-nouveau]"); if (b) ouvrir(null, { registre: b.dataset.nouveau }); }));
+  }
+
+  // ---------- Export ----------
+  $("btnExport").addEventListener("click", () => {
+    const jour = ajd(), actions = lire("vigie_hse_actions"), l = tous();
+    const etat = (x) => x.archive ? "Retiré" + (x.archiveLe ? " le " + dateFr(x.archiveLe) : "") + (x.motifArchive ? " : " + x.motifArchive : "") : "Actif";
+    const en = VX.du(l, "enjeu").map(x => ({ "Identifiant": x.id, "Enjeu": x.texte || "", "Origine": x.origine || "", "Thème": x.theme || "", "Effet sur la démarche": x.effet || "", "Risques et opportunités liés": VX.lies(l, x.id).length, "Mis à jour le": dateFr(VX.majLe(x)), "État": etat(x) }));
+    const pa = VX.du(l, "partie").map(x => ({ "Identifiant": x.id, "Partie intéressée": x.partie || "", "Besoins et attentes": x.besoins || "", "Obligation à suivre en conformité": x.exigence ? "Oui" : "Non", "Comment on y répond": x.reponse || "", "Risques et opportunités liés": VX.lies(l, x.id).length, "Mis à jour le": dateFr(VX.majLe(x)), "État": etat(x) }));
+    const ro = [], acts = [];
+    VX.du(l, "ro").forEach(x => {
+      const src = VX.source(x, l);
+      ro.push({ "Identifiant": x.id, "Type": x.type || "Risque", "Risque ou opportunité": x.texte || "", "Vient de": src ? VX.REGISTRES[src.registre] + " : " + VX.libelle(src) : "", "Évaluation": x.evaluation || "", "Actions": VX.actionsDe(x).length, "Actions pas faites": VX.pasFaites(x, actions).length, "Mis à jour le": dateFr(VX.majLe(x)), "État": etat(x) });
+      VX.actionsDe(x).forEach(a => acts.push({ "Type": x.type || "Risque", "Risque ou opportunité": x.texte || "", "Action": a.description || "", "Responsable": a.responsable || "", "Échéance": dateFr(a.echeance), "État au Plan d'actions": VX.statutAction(x, a, actions) }));
+    });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(en, { header: ["Identifiant", "Enjeu", "Origine", "Thème", "Effet sur la démarche", "Risques et opportunités liés", "Mis à jour le", "État"] }), "Enjeux");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pa, { header: ["Identifiant", "Partie intéressée", "Besoins et attentes", "Obligation à suivre en conformité", "Comment on y répond", "Risques et opportunités liés", "Mis à jour le", "État"] }), "Parties intéressées");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ro, { header: ["Identifiant", "Type", "Risque ou opportunité", "Vient de", "Évaluation", "Actions", "Actions pas faites", "Mis à jour le", "État"] }), "Risques et opportunités");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(acts, { header: ["Type", "Risque ou opportunité", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
+    XLSX.writeFile(wb, `contexte_${jour}.xlsx`);
+  });
+
+  // ---------- Élément ouvert ----------
+  let courant = null, actionsFiche = [];
+  const fige = () => !courant || !!courant.archive || !peutGerer;
+  function ouvrir(id, nouveau){
+    const x = id ? tous().find(z => z.id === id) : null;
+    if (id && !x) return;
+    if (!x && (!peutGerer || !nouveau || !VX.REGISTRES[nouveau.registre])) return;
+    const r = x ? x.registre : nouveau.registre;
+    courant = x || Object.assign({ id: null, registre: r }, r === "enjeu" ? { origine: "Interne", theme: VX.THEMES[0], texte: "", effet: "" }
+      : r === "partie" ? { partie: "", besoins: "", reponse: "" } : { type: "Risque", texte: "", sourceId: nouveau.sourceId || "", evaluation: "", actions: [] });
+    actionsFiche = (r === "ro" && Array.isArray(courant.actions) ? courant.actions : []).filter(a => a && typeof a === "object").map(a => Object.assign({}, a));
+    const dis = fige() ? " disabled" : "", l = tous();
+    const opts = (liste, choisi) => liste.concat(choisi && !liste.includes(choisi) ? [choisi] : []).map(v => `<option value="${esc(v)}"${v === choisi ? " selected" : ""}>${esc(v)}</option>`).join("");
+    let champs = "";
+    if (r === "enjeu") champs = `<div class="form-grid">
+          <div><label for="cOrigine">Origine</label><select id="cOrigine"${dis}>${opts(VX.ORIGINES, courant.origine)}</select></div>
+          <div><label for="cTheme">Thème</label><select id="cTheme"${dis}>${opts(VX.THEMES, courant.theme)}</select></div>
+          <div class="span3"><label for="cTexte">Enjeu</label><textarea id="cTexte" placeholder="Ex. : vieillissement des équipes techniques ; réorganisation des services prévue l'an prochain ; budget d'investissement contraint"${dis}>${esc(courant.texte || "")}</textarea></div>
+          <div class="span3"><label for="cEffet">Effet sur la santé-sécurité et sur la démarche</label><textarea id="cEffet" placeholder="Ce que cet enjeu change, en bien ou en mal, pour la prévention"${dis}>${esc(courant.effet || "")}</textarea></div>
+        </div>`;
+    else if (r === "partie") champs = `<div class="form-grid">
+          <div class="span3"><label for="cPartie">Partie intéressée</label><input type="text" id="cPartie" list="cPartiesListe" value="${esc(courant.partie || "")}" maxlength="150" placeholder="Choisir dans la liste ou saisir"${dis}>
+            <datalist id="cPartiesListe">${VX.PARTIES.map(p => `<option value="${esc(M(p))}"></option>`).join("")}</datalist></div>
+          <div class="span3"><label for="cBesoins">Besoins et attentes</label><textarea id="cBesoins" placeholder="Ce qu'elle attend de l'organisation en matière de santé et de sécurité"${dis}>${esc(courant.besoins || "")}</textarea></div>
+          <div class="span3"><label class="coche"><input type="checkbox" id="cExigence"${courant.exigence ? " checked" : ""}${dis}> C'est une obligation, légale ou acceptée : à suivre dans Conformité réglementaire</label></div>
+          <div class="span3"><label for="cReponse">Comment on y répond</label><textarea id="cReponse" placeholder="Ce qui est fait pour répondre à ces attentes"${dis}>${esc(courant.reponse || "")}</textarea></div>
+        </div>`;
+    else {
+      const sources = (reg) => VX.du(l, reg).filter(z => !z.archive || z.id === courant.sourceId);
+      const optSrc = (z) => `<option value="${esc(z.id)}"${z.id === courant.sourceId ? " selected" : ""}>${esc(VX.libelle(z).slice(0, 90))}${z.archive ? " (retiré)" : ""}</option>`;
+      champs = `<div class="form-grid">
+          <div><label for="cType">Type</label><select id="cType"${dis}>${opts(VX.TYPES_RO, courant.type || "Risque")}</select></div>
+          <div class="span2"><label for="cSource">Vient de</label><select id="cSource"${dis}><option value="">Aucun enjeu ni partie</option>
+            ${sources("enjeu").length ? `<optgroup label="Enjeux">${sources("enjeu").map(optSrc).join("")}</optgroup>` : ""}
+            ${sources("partie").length ? `<optgroup label="Parties intéressées">${sources("partie").map(optSrc).join("")}</optgroup>` : ""}</select></div>
+          <div class="span3"><label for="cTexte">Risque ou opportunité pour la démarche</label><textarea id="cTexte" placeholder="Ex. : départ en retraite du seul assistant de prévention ; subvention du fonds national de prévention pour du matériel"${dis}>${esc(courant.texte || "")}</textarea></div>
+          <div class="span3"><label for="cEvaluation">Évaluation</label><textarea id="cEvaluation" placeholder="Pourquoi il compte : ce qu'il pourrait coûter ou apporter, sa vraisemblance"${dis}>${esc(courant.evaluation || "")}</textarea></div>
+        </div>
+        <div class="sec"><h4>Actions décidées</h4><p class="aide">Ce qui est fait pour traiter le risque ou saisir l'opportunité. Les actions rejoignent le Plan d'actions (origine « Risques et opportunités ») dès l'enregistrement ; leur état est celui du Plan d'actions, où elles se suivent ensuite.</p>
+          <div id="cActions"></div>
+          ${fige() ? "" : `<button type="button" class="btn btn-ghost" id="btnAjoutAction"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une action</button>`}
+        </div>`;
+    }
+    const lies = x && r !== "ro" ? VX.lies(l, x.id) : [];
+    const blocLies = x && r !== "ro" ? `<div class="sec"><h4>Risques et opportunités liés</h4>
+          ${lies.length ? `<ul class="lies">${lies.map(z => `<li>${chipType(z)} <button type="button" class="act-edit" data-ouvrir-lie="${esc(z.id)}">${esc(z.texte)}</button></li>`).join("")}</ul>` : `<p class="vide">Aucun risque ni opportunité rattaché.</p>`}
+          ${peutGerer && !x.archive ? `<button type="button" class="btn btn-ghost" id="btnNouveauLie"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un risque ou une opportunité lié</button>` : ""}
+        </div>` : "";
+    $("fiche").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">${x ? esc(VX.libelle(x).slice(0, 140)) : TITRES_NOUVEAU[r]}</h3>
+          <div class="fiche-etat">${esc(VX.REGISTRES[r])}${x && x.archive ? ` · <span class="chip neutre">Retiré</span>${x.archiveLe ? " le " + esc(dateFr(x.archiveLe)) : ""}${x.archivePar ? " par " + esc(x.archivePar) : ""}${x.motifArchive ? " : " + esc(x.motifArchive) : ""}` : ""}${x && x.auteur ? ` · créé par ${esc(x.auteur)}` : ""}${x && x.modifiePar ? ` · modifié par ${esc(x.modifiePar)}` : ""}${x && VX.majLe(x) ? ` · mis à jour le ${esc(dateFr(VX.majLe(x)))}` : ""}</div></div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnFermer">Fermer</button></div>
+      </div>
+      <form id="ficheForm" novalidate>
+        ${champs}
+        ${blocLies}
+        ${peutGerer ? `<div class="form-actions">
+          ${x && x.archive ? `<button type="button" class="btn btn-ghost" id="btnRetablir">Rétablir</button>` : `<button type="submit" class="btn btn-primary">Enregistrer</button>
+          ${x ? `<button type="button" class="btn btn-ghost" id="btnRetirer">Retirer : n'est plus d'actualité</button>` : ""}`}
+          ${x ? `<button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer</button>` : ""}
+        </div>` : ""}
+      </form>`;
+    if (r === "ro") rendreActions();
+    $("fiche").style.display = "";
+    $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  function rendreActions(){
+    const actions = lire("vigie_hse_actions"), f = fige();
+    // une action déjà reprise au Plan d'actions ne se modifie plus ici : on la suit là-bas
+    $("cActions").innerHTML = actionsFiche.map((a, j) => {
+      const auPlan = courant.id && actionAuPlan(courant, a, actions);
+      if (f || auPlan) return String(a.description || "").trim() ? `<div class="dyn-row" data-j="${j}" data-fixe><span>${esc(a.description)}${a.responsable ? " — " + esc(a.responsable) : ""}${a.echeance ? ", échéance " + esc(dateFr(a.echeance)) : ""} · <b>${esc(courant.id ? VX.statutAction(courant, a, actions) : "À faire")}</b>${auPlan ? ` <a class="act-edit" href="plan-actions.html">au Plan d'actions</a>` : ""}</span></div>` : "";
+      return `<div class="dyn-row" data-j="${j}">
+        <input type="text" data-a="description" placeholder="Action" aria-label="Action" value="${esc(a.description || "")}" maxlength="300">
+        <input type="text" data-a="responsable" placeholder="Responsable" aria-label="Responsable" value="${esc(a.responsable || "")}" style="flex:0 1 180px">
+        <input type="date" data-a="echeance" aria-label="Échéance" value="${esc(a.echeance || "")}" style="flex:0 0 150px">
+        <button type="button" class="act-del" data-retirer-action="${j}">Suppr.</button>
+      </div>`;
+    }).join("") || `<p class="vide">Aucune action décidée.</p>`;
+  }
+  function lireActions(){
+    if (fige() || !$("cActions")) return;
+    $("cActions").querySelectorAll(".dyn-row[data-j]:not([data-fixe])").forEach(row => {
+      const a = actionsFiche[Number(row.dataset.j)];
+      if (a) row.querySelectorAll("[data-a]").forEach(inp => { a[inp.dataset.a] = inp.value.trim(); });
+    });
+  }
+  function fermer(){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; courant = null; }
+  const val = (id) => $(id) ? $(id).value.trim() : "";
+
+  // Relit le formulaire dans l'élément enregistré.
+  function enregistrer(){
+    if (fige()) return null;
+    lireActions();
+    const r = courant.registre;
+    const x = Object.assign({}, courant, r === "enjeu" ? { origine: val("cOrigine"), theme: val("cTheme"), texte: val("cTexte"), effet: val("cEffet") }
+      : r === "partie" ? { partie: val("cPartie"), besoins: val("cBesoins"), exigence: $("cExigence").checked, reponse: val("cReponse") }
+      : { type: val("cType"), sourceId: val("cSource"), texte: val("cTexte"), evaluation: val("cEvaluation") });
+    if (r === "enjeu" && !x.texte){ alert("Décrivez l'enjeu."); return null; }
+    if (r === "partie" && !x.partie){ alert("Nommez la partie intéressée."); return null; }
+    if (r === "partie" && !x.besoins){ alert("Indiquez ses besoins et attentes."); return null; }
+    if (r === "ro" && !x.texte){ alert("Décrivez le risque ou l'opportunité."); return null; }
+    if (r === "ro") x.actions = actionsFiche.filter(a => a && String(a.description || "").trim()).map(a => Object.assign({ id: a.id || genId("act") }, a));
+    if (!x.sourceId) delete x.sourceId;
+    if (!x.exigence) delete x.exigence;
+    const nouveau = !x.id;
+    if (nouveau){ x.id = genId("ctx"); x.auteur = moi; x.dateCreation = new Date().toISOString(); }
+    else { x.modifiePar = moi; x.dateMaj = new Date().toISOString(); }
+    try {
+      modifierContexte(l => {
+        const i = l.findIndex(z => z && z.id === x.id);
+        if (i < 0) l.push(x);
+        else { const y = Object.assign({}, l[i], x); ["sourceId", "exigence"].forEach(k => { if (!x[k]) delete y[k]; }); l[i] = y; }
+      });
+    } catch(e){ alert("L'élément n'a pas pu être enregistré."); return null; }
+    logAudit(nouveau ? "Création" : "Modification", `${VX.REGISTRES[r]} « ${VX.libelle(x).slice(0, 120)} »${r === "ro" ? ` (${x.type}, ${VX.actionsDe(x).length} action(s))` : ""}`);
+    return x;
+  }
+
+  $("fiche").addEventListener("click", (e) => {
+    if (e.target.closest("#btnFermer")){ fermer(); return; }
+    if (e.target.closest("#btnAjoutAction")){ lireActions(); actionsFiche.push({ id: genId("act") }); rendreActions(); return; }
+    const ra = e.target.closest("[data-retirer-action]");
+    if (ra){ lireActions(); actionsFiche.splice(Number(ra.dataset.retirerAction), 1); rendreActions(); return; }
+    const ol = e.target.closest("[data-ouvrir-lie]");
+    if (ol){ ouvrir(ol.dataset.ouvrirLie); return; }
+    if (e.target.closest("#btnNouveauLie")){ if (courant && courant.id) ouvrir(null, { registre: "ro", sourceId: courant.id }); return; }
+    if (e.target.closest("#btnRetirer")){
+      if (!courant || !courant.id) return;
+      const motif = prompt(`Pourquoi ${nomDe(courant)} n'est-il plus d'actualité ? Il reste consultable, marqué retiré.`, "");
+      if (motif === null) return;
+      if (!motif.trim()){ alert("Indiquez pourquoi il est retiré."); return; }
+      try { modifierContexte(l => { const i = l.findIndex(z => z && z.id === courant.id); if (i >= 0) l[i] = Object.assign({}, l[i], { archive: true, motifArchive: motif.trim(), archiveLe: ajd(), archivePar: moi, modifiePar: moi, dateMaj: new Date().toISOString() }); }); }
+      catch(err){ alert("L'élément n'a pas pu être retiré."); return; }
+      logAudit("Modification", `${VX.REGISTRES[courant.registre]} « ${VX.libelle(courant).slice(0, 120)} » retiré : ${motif.trim()}`);
+      const id = courant.id; render(); ouvrir(id);
+      return;
+    }
+    if (e.target.closest("#btnRetablir")){
+      if (!courant || !confirm("Rétablir cet élément ?")) return;
+      try { modifierContexte(l => { const i = l.findIndex(z => z && z.id === courant.id); if (i >= 0){ const y = Object.assign({}, l[i], { modifiePar: moi, dateMaj: new Date().toISOString() }); ["archive", "motifArchive", "archiveLe", "archivePar"].forEach(k => delete y[k]); l[i] = y; } }); }
+      catch(err){ alert("L'élément n'a pas pu être rétabli."); return; }
+      logAudit("Modification", `${VX.REGISTRES[courant.registre]} « ${VX.libelle(courant).slice(0, 120)} » rétabli`);
+      const id = courant.id; render(); ouvrir(id);
+      return;
+    }
+    if (e.target.closest("#btnSupprimer")){
+      if (!courant || !courant.id) return;
+      const n = VX.valides(lire(CLE)).filter(z => z.sourceId === courant.id).length;
+      if (!confirm(`Supprimer ${nomDe(courant)} « ${VX.libelle(courant).slice(0, 80)} » ?${n ? ` ${n} risque(s) ou opportunité(s) qui en viennent restent, sans origine.` : ""}${VX.actionsDe(courant).length ? " Ses actions déjà reprises au Plan d'actions y restent." : ""} Pour garder la trace d'un élément qui n'est plus d'actualité, préférez « Retirer ».`)) return;
+      try { modifierContexte(l => { const i = l.findIndex(z => z && z.id === courant.id); if (i >= 0) l.splice(i, 1); l.forEach(z => { if (z && z.sourceId === courant.id) delete z.sourceId; }); }); }
+      catch(err){ alert("L'élément n'a pas pu être supprimé."); return; }
+      logAudit("Suppression", `${VX.REGISTRES[courant.registre]} « ${VX.libelle(courant).slice(0, 120)} »`);
+      fermer(); render();
+    }
+  });
+  $("fiche").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const x = enregistrer();
+    if (x){ render(); ouvrir(x.id); }
+  });
+
+  // ---------- Registre imprimé ----------
+  // les éléments actifs, tels qu'ils sont enregistrés
+  $("btnImprimer").addEventListener("click", () => {
+    const jour = ajd(), actions = lire("vigie_hse_actions"), l = tous(), a = VX.actifs(l);
+    const ancien = document.getElementById("ctx-impression");
+    if (ancien) ancien.remove();
+    if (!document.getElementById("ctx-impression-style")){
+      const style = document.createElement("style"); style.id = "ctx-impression-style";
+      style.textContent = [
+        "@page{ size:A4 landscape; margin:12mm; }",
+        "@media screen{ #ctx-impression{ display:none; } }",
+        "@media print{",
+        "  body{ background:#fff !important; }",
+        "  body > *:not(#ctx-impression){ display:none !important; }",
+        "  #ctx-impression{ display:block !important; color:#000; font:10px/1.4 'IBM Plex Sans',Arial,sans-serif; }",
+        "  #ctx-impression .pi-marque{ font:700 10px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#555; }",
+        "  #ctx-impression h1{ font:700 21px 'Barlow Condensed',Arial,sans-serif; margin:2px 0; }",
+        "  #ctx-impression .pi-meta{ font-size:10px; color:#333; margin:0 0 6px; }",
+        "  #ctx-impression h2{ font:700 13px 'Barlow Condensed',Arial,sans-serif; text-transform:uppercase; letter-spacing:.06em; border-bottom:1.5px solid #000; margin:12px 0 5px; padding-bottom:2px; }",
+        "  #ctx-impression p{ margin:0 0 5px; }",
+        "  #ctx-impression table{ width:100%; border-collapse:collapse; }",
+        "  #ctx-impression th, #ctx-impression td{ border:1px solid #999; padding:3px 5px; text-align:left; vertical-align:top; white-space:pre-line; }",
+        "  #ctx-impression th{ background:#eee; font-weight:600; }",
+        "  #ctx-impression tr{ break-inside:avoid; page-break-inside:avoid; }",
+        "}",
+      ].join("\n");
+      document.head.appendChild(style);
+    }
+    const table = (tetes, lignes) => lignes.length ? `<table><thead><tr>${tetes.map(t => `<th>${t}</th>`).join("")}</tr></thead><tbody>${lignes.map(c => `<tr>${c.map(v => `<td>${v}</td>`).join("")}</tr>`).join("")}</tbody></table>` : `<p>Aucun.</p>`;
+    const bloc = document.createElement("div");
+    bloc.id = "ctx-impression";
+    bloc.innerHTML = `
+      <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "")}</div>
+      <h1>Contexte et enjeux de la démarche de santé et de sécurité</h1>
+      <p class="pi-meta">Édité le ${esc(dateFr(jour))} · éléments en vigueur${VX.synthese(l, actions).derniereMaj ? " · dernière mise à jour du registre le " + esc(dateFr(VX.synthese(l, actions).derniereMaj)) : ""}</p>
+      <h2>Enjeux internes et externes</h2>
+      ${table(["Origine", "Thème", "Enjeu", "Effet sur la démarche"], a.filter(x => x.registre === "enjeu").map(x => [esc(x.origine || ""), esc(x.theme || ""), esc(x.texte || ""), esc(x.effet || "")]))}
+      <h2>Parties intéressées</h2>
+      ${table(["Partie intéressée", "Besoins et attentes", "Obligation", "Comment on y répond"], a.filter(x => x.registre === "partie").map(x => [esc(x.partie || ""), esc(x.besoins || ""), x.exigence ? "Oui" : "", esc(x.reponse || "")]))}
+      <h2>Risques et opportunités pour la démarche</h2>
+      ${table(["Type", "Risque ou opportunité", "Vient de", "Évaluation", "Actions"], a.filter(x => x.registre === "ro").map(x => { const s = VX.source(x, l); return [esc(x.type || "Risque"), esc(x.texte || ""), s ? esc(VX.libelle(s)) : "", esc(x.evaluation || ""), VX.actionsDe(x).map(z => `${esc(z.description)}${z.responsable ? " — " + esc(z.responsable) : ""}${z.echeance ? ", " + esc(dateFr(z.echeance)) : ""} : ${esc(VX.statutAction(x, z, actions))}`).join("<br>") || "—"]; }))}`;
+    document.body.appendChild(bloc);
+    const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
+    window.addEventListener("afterprint", nettoyer);
+    window.print();
+  });
+
+  render();
+  // ?ouvrir=<id>
+  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(x => x.id === id)) ouvrir(id); })();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

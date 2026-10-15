@@ -79,6 +79,11 @@
   };
   // Même nom de champ, autre sens selon le registre
   var PAR_REGISTRE = {
+    vigie_hse_contexte:     { registre:"Registre (enjeu, partie intéressée, risque ou opportunité)", origine:"Origine (interne, externe)", theme:"Thème",
+                              texte:"Description", effet:"Effet sur la démarche", partie:"Partie intéressée", besoins:"Besoins et attentes",
+                              exigence:"Obligation à suivre en conformité", reponse:"Comment on y répond", type:"Risque ou opportunité",
+                              sourceId:"Vient de (identifiant)", evaluation:"Évaluation", archive:"Retiré", motifArchive:"Motif du retrait",
+                              archiveLe:"Retiré le", archivePar:"Retiré par" },
     vigie_hse_changements:  { titre:"Changement", nature:"Nature", description:"Ce qui change", concernes:"Postes et personnes concernés", responsable:"Responsable du changement",
                               datePrevue:"Mise en œuvre prévue le", risques:"Risques et effets imprévus", duerp:"Document unique à mettre à jour", duerpLe:"Document unique mis à jour le",
                               consulteLe:"Consultation le", avis:"Avis", valideLe:"Validé le", validePar:"Validé par", dateMiseEnOeuvre:"Mis en œuvre le",

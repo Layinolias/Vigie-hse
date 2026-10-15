@@ -65,6 +65,9 @@
     // Conformité réglementaire (ISO 45001 § 6.1.3 et § 9.1.2, 2026-10-15) : exigences applicables, évaluation de leur
     // respect. Question 26 (2026-10-15) : comme les objectifs — tenue par le Préventeur (avec Administrateur et RH), lue par le Manager.
     mod("conformite", "Pilotage", "Conformité réglementaire", STD),
+    // Programme annuel de prévention (PAPRIPACT, question 25, 2026-10-15) : préparé et adopté par le Préventeur (avec
+    // Administrateur et RH), lu par le Manager — comme les objectifs et la conformité (questions 24 et 26).
+    mod("programme", "Pilotage", "Programme annuel de prévention", STD),
     // Revue de direction (ISO 45001 § 9.3, 2026-10-12) : préparer, valider, rouvrir. Aucun préréglage hors Administrateur et RH.
     mod("revue-direction", "Pilotage", "Revue de direction", STD),
     mod("administration", "Pilotage", "Administration", [["gerer", "Gérer"]])
@@ -91,13 +94,13 @@
     { id: "p-manager", nom: "Manager", libelle: "Manager", pastille: "MANAGER", droits: {
       atmp: "consulter", rsst: "auteurs", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter" } },
+      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter" } },
     { id: "p-agent", nom: "Agent", libelle: "Compte Agent", pastille: "AG", droits: {
       atmp: "consulter", rsst: "deposer", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
       documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler" } },
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
-      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer" } },
+      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
       "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler" } }
   ];

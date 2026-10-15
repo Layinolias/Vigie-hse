@@ -22,6 +22,8 @@
 //     direction (qui les reprend) ; aux autres, les seules actions (le Plan d'actions les affiche à tous).
 //   - Exigences de conformité réglementaire (2026-10-15) : complètes pour le niveau « consulter » de la Conformité
 //     réglementaire ou de la Revue de direction (qui en reprend le bilan) ; aux autres, les seules actions, avec leur service.
+//   - Programmes annuels de prévention (question 25, 2026-10-15) : niveau « consulter » du Programme ou de la Revue de
+//     direction (qui le reprend) ; rien aux autres (aucune autre page ne les lit).
 //   - Signalements de presque-accidents et leurs photos (question 20, 2026-10-12) : complets (périmètre appliqué) pour
 //     qui peut les traiter ; à tout autre compte, ses seuls signalements (champ « auteur »), qu'il suit sur sa page.
 //   - Suivi médical et rendez-vous : l'encadrement seulement — manager (ses services, par le périmètre), RH et
@@ -83,6 +85,7 @@ function regle(page, cle){
     case 'vigie_hse_revues_direction':  return peut(page, 'revue-direction', 'consulter') ? null : REVUE_VUE_DECISIONS;
     case 'vigie_hse_objectifs':         return ouvert(page, ['objectifs', 'revue-direction']) ? null : OBJECTIF_VUE_ACTIONS;
     case 'vigie_hse_exigences':         return ouvert(page, ['conformite', 'revue-direction']) ? null : EXIGENCE_VUE_ACTIONS;
+    case 'vigie_hse_programmes':        return ouvert(page, ['programme', 'revue-direction']) ? null : RETIRE;
     case 'vigie_hse_signalements':
     case 'vigie_hse_signalements_photos': return peut(page, 'signalements', 'traiter') ? null : SIENS;
     case 'vigie_hse_audit_log':

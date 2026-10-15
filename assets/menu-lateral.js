@@ -69,6 +69,7 @@
       ["reporting.html", "i-bar-chart", "Indicateurs &amp; Reporting"],
       ["objectifs.html", "i-trending-up", "Objectifs santé-sécurité"],
       ["conformite.html", "i-shield-check", "Conformité réglementaire"],
+      ["programme-prevention.html", "i-calendar", "Programme annuel de prévention"],
       ["revue-direction.html", "i-target", "Revue de direction"],
       ["administration.html", "i-settings", "Administration"]] }
   ];
@@ -105,6 +106,7 @@
       "reporting.html": lire("reporting"),
       "objectifs.html": lire("objectifs"),               // ISO 45001 § 6.2
       "conformite.html": lire("conformite"),             // ISO 45001 § 6.1.3 et § 9.1.2
+      "programme-prevention.html": lire("programme"),    // PAPRIPACT, question 25
       "revue-direction.html": lire("revue-direction"),   // ISO 45001 § 9.3
       "administration.html": D.peut("administration", "gerer")
     };

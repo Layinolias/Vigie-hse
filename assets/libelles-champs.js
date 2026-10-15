@@ -23,7 +23,7 @@
     dateRevue:"Date de la revue", periodeDebut:"Début de la période examinée", periodeFin:"Fin de la période examinée", participants:"Participants",
     entrees:"Données d'entrée", sorties:"Résultats de la revue", decisions:"Actions décidées", chiffres:"Chiffres de la période", validePar:"Validée par", valideLe:"Validée le",
     traitement:"Traitement", clos:"Clos", closPar:"Clos par", closLe:"Clos le", signalementId:"Signalement (identifiant)",
-    efficacite:"Efficacité", efficaciteDate:"Efficacité vérifiée le", efficacitePar:"Efficacité vérifiée par", efficaciteNote:"Constat d'efficacité",
+    efficacite:"Efficacité", efficaciteDate:"Efficacité vérifiée le", efficacitePar:"Efficacité vérifiée par", efficaciteNote:"Constat d'efficacité", coutEstime:"Coût estimé (€)", financement:"Financement", conditionsExecution:"Conditions d'exécution", indicateurResultat:"Indicateur de résultat",
     actions:"Actions", points:"Points", reference:"Référence", ref:"Référence", source:"Source", url:"Lien", lien:"Lien",
     // comptes et journaux
     email:"Adresse électronique ou identifiant", username:"Identifiant", role:"Rôle", profils:"Profils de droits", services:"Services",
@@ -79,6 +79,8 @@
   };
   // Même nom de champ, autre sens selon le registre
   var PAR_REGISTRE = {
+    vigie_hse_programmes:   { annee:"Année", bilanPrecedent:"Bilan de l'année écoulée (commentaire)", avisDate:"Avis de l'instance le", avisTexte:"Avis de l'instance",
+                              adopteLe:"Adopté le", adoptePar:"Adopté par", adopteSaisiPar:"Adoption enregistrée par", mesures:"Mesures (figées à l'adoption)", abandons:"Mesures abandonnées" },
     vigie_hse_exigences:    { intitule:"Exigence", reference:"Texte de référence", theme:"Thème", prochaineEvaluation:"Prochaine évaluation",
                               evaluations:"Évaluations de conformité", veilleId:"Actualité de veille (identifiant)", retireeLe:"Retirée le", retireePar:"Retirée par" },
     vigie_hse_dataset:      { nature:"Nature de la lésion", statut:"Statut de l'agent" },

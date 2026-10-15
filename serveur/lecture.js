@@ -87,6 +87,8 @@ function regle(page, cle){
     case 'vigie_hse_objectifs':         return ouvert(page, ['objectifs', 'revue-direction']) ? null : OBJECTIF_VUE_ACTIONS;
     case 'vigie_hse_exigences':         return ouvert(page, ['conformite', 'revue-direction']) ? null : EXIGENCE_VUE_ACTIONS;
     case 'vigie_hse_programmes':        return ouvert(page, ['programme', 'revue-direction']) ? null : RETIRE;
+    case 'vigie_hse_politiques':        return ouvert(page, ['politique', 'revue-direction']) ? null : RETIRE;
+    case 'vigie_hse_politique_lectures': return peut(page, 'politique', 'gerer') ? null : SIENS;
     case 'vigie_hse_audits_internes':   return ouvert(page, ['audit-interne', 'revue-direction']) ? null : AUDIT_INTERNE_VUE_ACTIONS;
     case 'vigie_hse_signalements':
     case 'vigie_hse_signalements_photos': return peut(page, 'signalements', 'traiter') ? null : SIENS;

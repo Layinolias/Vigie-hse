@@ -18,6 +18,7 @@
 <script src="assets/conformite-ref.js"></script>
 <script src="assets/programme-ref.js"></script>
 <script src="assets/audit-interne-ref.js"></script>
+<script src="assets/politique-ref.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
 <link rel="stylesheet" href="assets/commun.css">
 <style>
@@ -268,6 +269,8 @@
       periode: { debut: I.dDebut, fin: I.dFin }, calculeLe: new Date().toISOString(),
       precedentes, veille,
       objectif: { annuel: I.objectifAnnuel || null, periode: I.objectifPeriode, remontes: I.bird.niveaux[3] },
+      // politique de santé et de sécurité en vigueur à la date du calcul (2026-10-15) ; null si ce compte ne reçoit pas les politiques
+      politique: VigieStore.complet(VigiePolitique.CLE) ? VigiePolitique.pourRevue(lire(VigiePolitique.CLE), lire(VigiePolitique.CLE_LECTURES), VigieDates.aujourdhui(), VigieStore.complet(VigiePolitique.CLE_LECTURES)) : null,
       // objectifs santé-sécurité dont la période croise celle de la revue, lus au jour du calcul (2026-10-13)
       objectifs: VigieObjectifs.pourPeriode(lire(VigieObjectifs.CLE), VigieStore, I.dDebut, I.dFin),
       // bilan de la conformité réglementaire à la date du calcul (2026-10-15) ; null si ce compte ne reçoit pas toutes les exigences
@@ -294,7 +297,7 @@
     { id:"changements", titre:"Changements du contexte", aide:"Enjeux internes et externes, attentes des agents et des parties intéressées, exigences légales nouvelles, risques et opportunités pour la démarche.",
       auto: c => c.veille.length ? `<p class="form-note" style="margin:0 0 6px;">Veille réglementaire de la période :</p><ul class="liste-auto">${c.veille.map(v => `<li>${esc(dateFr(v.date))} — ${esc(v.titre)}${v.source ? " (" + esc(v.source) + ")" : ""}</li>`).join("")}</ul>` : `<p class="vide">Aucune actualité de veille réglementaire datée de la période.</p>` },
     { id:"objectifs", titre:"Politique et objectifs", aide:"La politique de santé et de sécurité est-elle tenue ? Les objectifs sont-ils atteints ?",
-      auto: c => objectifsDeLaRevue(c) + chiffres([[c.objectif.annuel === null ? "—" : nombre(c.objectif.annuel, 0), "objectif annuel de remontée des presque-accidents"], [c.objectif.periode === null ? "—" : nombre(c.objectif.periode), "objectif ramené à la période"], [nombre(c.objectif.remontes, 0), "presque-accidents remontés"]]) },
+      auto: c => politiqueDeLaRevue(c) + objectifsDeLaRevue(c) + chiffres([[c.objectif.annuel === null ? "—" : nombre(c.objectif.annuel, 0), "objectif annuel de remontée des presque-accidents"], [c.objectif.periode === null ? "—" : nombre(c.objectif.periode), "objectif ramené à la période"], [nombre(c.objectif.remontes, 0), "presque-accidents remontés"]]) },
     { id:"performance", titre:"Performance de santé et sécurité", aide:"Événements et tendances, non-conformités et actions correctives, résultats de surveillance, d'audit, de consultation des agents.",
       auto: c => `<p class="form-note" style="margin:0 0 6px;">Événements</p>` + chiffres([[nombre(c.incidents.total, 0), "événements AT/MP"], [nombre(c.incidents.avecArret, 0), "avec arrêt de travail"], [nombre(c.incidents.joursArret, 0), "jours d'arrêt"], [nombre(c.incidents.tf), "taux de fréquence estimé"], [nombre(c.incidents.tfReel), "taux de fréquence réel"], [c.incidents.bird.map(n => nombre(n, 0)).join(" · "), "pyramide de Bird : avec arrêt · sans arrêt · bénins · presque-accidents"], [nombre(c.incidents.signalements, 0), "signalements de presque-accidents"]])
         + `<p class="form-note" style="margin:0 0 6px;">Actions correctives (créées sur la période)</p>` + chiffres([[nombre(c.actions.total, 0), "actions"], [c.actions.taux === null ? "—" : c.actions.taux + " %", "soldées"], [nombre(c.actions.enRetard, 0), "en retard"], [nombre(c.actions.efficaces, 0), "jugées efficaces"], [nombre(c.actions.nonEfficaces, 0), "jugées non efficaces"], [nombre(c.actions.aVerifier, 0), "faites, efficacité à vérifier"]])
@@ -362,6 +365,17 @@
     return t + chiffres([[nombre(k.realises, 0), "audits internes réalisés"], [nombre(k.planifies + k.depasses, 0), "prévus, pas encore réalisés"], [nombre(k.clausesAuditees.length, 0), "clauses de la norme auditées"],
         [nombre(k.nonConformites, 0), "non-conformités relevées"], [nombre(k.ncSansAction, 0), "sans action"], [nombre(k.ncSoldees, 0), "soldées"]])
       + (k.nc.length ? `<ul class="liste-auto">${k.nc.map(n => `<li>${esc(n.audit)}${n.date ? " (" + esc(dateFr(n.date)) + ")" : ""} — ${n.clause ? esc(n.clause) + " : " : ""}${esc(n.texte)} · <b>${esc(n.etat)}</b></li>`).join("")}</ul>` : "");
+  }
+  // Politique de santé et de sécurité (ISO 45001 § 5.2) au jour du calcul (une revue calculée avant le 2026-10-15 n'en a pas : rien)
+  function politiqueDeLaRevue(c){
+    if (c.politique === undefined) return "";
+    const t = `<p class="form-note" style="margin:0 0 6px;">Politique de santé et de sécurité (à la date du calcul)</p>`;
+    if (c.politique === null) return t + `<p class="vide">Non reprise : le compte qui a fait le calcul ne recevait pas la politique.</p>`;
+    const p = c.politique;
+    if (p.aucune) return t + `<p class="vide">Aucune politique de santé et de sécurité en vigueur.</p>`;
+    return t + `<p class="form-note" style="margin:0 0 6px;">Version ${esc(p.version)}, signée le ${esc(dateFr(p.dateSignature))}${p.signataire ? " par " + esc(p.signataire) + (p.fonction ? ", " + esc(p.fonction) : "") : ""}${p.derniereRevue ? ` · dernière revue le ${esc(dateFr(p.derniereRevue.date))} : ${esc(p.derniereRevue.conclusion.toLowerCase())}` : " · jamais revue"}${p.prochaineRevue ? ` · prochaine revue le ${esc(dateFr(p.prochaineRevue))}${p.aRevoir ? " (date passée)" : ""}` : ""}</p>`
+      + chiffres([[nombre(p.engagements, 0) + " / " + nombre(p.engagementsTotal, 0), "engagements attendus couverts"], [nombre(p.communications, 0), "actions de communication"],
+        [p.lectures === null ? "—" : nombre(p.lectures, 0), p.demandee ? "comptes en ont pris connaissance" : "prises de connaissance (non demandées)"]]);
   }
   function chiffres(l){ return `<div class="chiffres">${l.map(([v, t]) => `<div class="chiffre"><b>${esc(v)}</b><span>${esc(t)}</span></div>`).join("")}</div>`; }
 

@@ -69,6 +69,7 @@ const REGLES = {
   objectifs: GERER('objectifs'),
   exigences: GERER('conformite'),
   programmes: GERER('programme'),
+  audits_internes: GERER('audit-interne'),
   ds_questions: regle('dialogue-social', 'participer'), ds_reunions: regle('dialogue-social', 'participer'), ds_visites: regle('dialogue-social', 'participer'),
 };
 const regleGenerale = GERER('administration');

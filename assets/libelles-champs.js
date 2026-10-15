@@ -79,6 +79,9 @@
   };
   // Même nom de champ, autre sens selon le registre
   var PAR_REGISTRE = {
+    vigie_hse_audits_internes: { titre:"Audit", clauses:"Clauses d'ISO 45001 auditées", criteres:"Autres critères", datePrevue:"Prévu le", dateRealisee:"Réalisé le",
+                              auditeur:"Auditeur", independance:"Indépendance de l'auditeur", constats:"Constats", conclusion:"Conclusion",
+                              annule:"Annulé", motifAnnulation:"Motif d'annulation", annuleLe:"Annulé le", annulePar:"Annulé par" },
     vigie_hse_programmes:   { annee:"Année", bilanPrecedent:"Bilan de l'année écoulée (commentaire)", avisDate:"Avis de l'instance le", avisTexte:"Avis de l'instance",
                               adopteLe:"Adopté le", adoptePar:"Adopté par", adopteSaisiPar:"Adoption enregistrée par", mesures:"Mesures (figées à l'adoption)", abandons:"Mesures abandonnées" },
     vigie_hse_exigences:    { intitule:"Exigence", reference:"Texte de référence", theme:"Thème", prochaineEvaluation:"Prochaine évaluation",

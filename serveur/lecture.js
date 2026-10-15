@@ -46,6 +46,7 @@ const ANALYSE_VUE_ACTIONS = ['id', 'atmpId', 'collectivite', 'service', 'dateAna
 const REVUE_VUE_DECISIONS = ['id', 'dateRevue', 'statut', 'decisions'];
 const OBJECTIF_VUE_ACTIONS = ['id', 'intitule', 'actions'];
 const EXIGENCE_VUE_ACTIONS = ['id', 'intitule', 'service', 'actions'];
+const AUDIT_INTERNE_VUE_ACTIONS = ['id', 'titre', 'service', 'constats'];
 
 // ce que les profils du compte lui donnent (assets/droits.js, via serveur/droits.js)
 const peut = (p, module, niveau) => !!p && atteint(p, module, niveau);
@@ -86,6 +87,7 @@ function regle(page, cle){
     case 'vigie_hse_objectifs':         return ouvert(page, ['objectifs', 'revue-direction']) ? null : OBJECTIF_VUE_ACTIONS;
     case 'vigie_hse_exigences':         return ouvert(page, ['conformite', 'revue-direction']) ? null : EXIGENCE_VUE_ACTIONS;
     case 'vigie_hse_programmes':        return ouvert(page, ['programme', 'revue-direction']) ? null : RETIRE;
+    case 'vigie_hse_audits_internes':   return ouvert(page, ['audit-interne', 'revue-direction']) ? null : AUDIT_INTERNE_VUE_ACTIONS;
     case 'vigie_hse_signalements':
     case 'vigie_hse_signalements_photos': return peut(page, 'signalements', 'traiter') ? null : SIENS;
     case 'vigie_hse_audit_log':
@@ -138,4 +140,4 @@ function partielles(tout, recu){
   return Object.keys(tout).filter(k => !recu[k] || recu[k].valeur !== tout[k].valeur).sort();
 }
 
-module.exports = { regle, vue, filtrer, ecriture, partielles, RETIRE, SIENS, ATMP_VUE_AGENT, REVUE_VUE_DECISIONS, OBJECTIF_VUE_ACTIONS, EXIGENCE_VUE_ACTIONS, PAGE_UNIQUE };
+module.exports = { regle, vue, filtrer, ecriture, partielles, RETIRE, SIENS, ATMP_VUE_AGENT, REVUE_VUE_DECISIONS, OBJECTIF_VUE_ACTIONS, EXIGENCE_VUE_ACTIONS, AUDIT_INTERNE_VUE_ACTIONS, PAGE_UNIQUE };

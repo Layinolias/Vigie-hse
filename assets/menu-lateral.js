@@ -43,7 +43,8 @@
       ["signalements.html", "i-flag", "Signalements"]] },
     { titre: "Sécurité &amp; Risques", liens: [
       ["document-unique.html", "i-alert-triangle", "Document Unique"],
-      ["produits-chimiques.html", "i-flask", "Produits chimiques"]] },
+      ["produits-chimiques.html", "i-flask", "Produits chimiques"],
+      ["changements.html", "i-repeat", "Gestion des changements"]] },
     { titre: "Suivi", liens: [
       ["plan-actions.html", "i-clipboard", "Plan d'Actions"],
       ["sante-visites.html", "i-shield-check", "Santé &amp; Visites"],
@@ -88,6 +89,7 @@
       "signalements.html": D.peut("signalements", "signaler"),   // presque-accidents : question 20
       "document-unique.html": lire("duerp"),
       "produits-chimiques.html": lire("produits"),
+      "changements.html": lire("changements"),           // ISO 45001 § 8.1.3
       "plan-actions.html": lire("actions"),
       "sante-visites.html": lire("sante-visites"),   // encadrement (question 17)
       "verifications-periodiques.html": lire("verifications"),

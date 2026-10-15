@@ -1,0 +1,652 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestion des changements</title>
+<meta name="description" content="Gestion des changements : ce qui change, risques créés ou modifiés, mesures avant la mise en œuvre, consultation, validation, revue des effets (ISO 45001, § 8.1.3).">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/changements-ref.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  select, input[type="text"], input[type="date"], input[type="search"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:150px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:68px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled, select:disabled{ background:var(--bg-2); color:var(--text); opacity:1; cursor:default; }
+  @media (max-width:640px){ select, input[type="text"], input[type="date"], input[type="search"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  @media (min-width:560px){ .form-grid .span2{ grid-column:span 2; } }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg td.num{ font-family:"IBM Plex Mono",monospace; text-align:right; }
+  table.reg tr.chap td{ background:var(--bg-2); font-weight:600; font-size:11.5px; color:var(--text-muted); padding:7px 14px; }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.bon{ color:var(--success); background:var(--success-bg); } .chip.bon::before{ background:var(--success); }
+  .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
+  .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
+  .chip.attention{ color:var(--warning); background:var(--warning-bg); } .chip.attention::before{ background:var(--warning); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; text-align:left; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  .ref{ display:block; font-size:11.5px; color:var(--text-faint); margin-top:2px; font-weight:400; white-space:normal; }
+  .filtres{ display:flex; gap:9px; flex-wrap:wrap; margin:0 0 12px; }
+  .filtres input[type="search"]{ flex:1 1 240px; min-width:0; }
+
+  /* Changement ouvert */
+  .fiche{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .fiche-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  .form-grid input[type="checkbox"]{ width:auto; }
+  .form-grid label.coche{ display:flex; gap:8px; align-items:center; font-size:12.8px; color:var(--text); font-weight:400; margin:26px 0 0; cursor:pointer; }
+  .constat textarea{ margin-bottom:4px; }
+  .constat{ background:var(--bg-2); border-radius:var(--r-sm); padding:12px 14px; margin:0 0 10px; }
+  .constat .texte{ white-space:pre-wrap; font-size:12.8px; line-height:1.55; margin:6px 0 4px; }
+  .constat .actions-constat{ margin-top:10px; }
+  .constat .actions-constat .dyn-row > span{ flex:1 1 auto; font-size:12.8px; }
+  .alerte{ font-size:12.5px; color:var(--danger); margin:8px 0 0; font-weight:600; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Sécurité &amp; Risques / <b>Gestion des changements</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-repeat"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Gestion des changements</h1>
+            <p>Avant qu'un changement entre en service — nouvel équipement, réorganisation, nouveau produit, travaux dans des locaux, nouvelle méthode de travail, exigence légale nouvelle —, ce qu'il change et pour qui, les risques qu'il crée ou modifie et les mesures à prendre avant sa mise en œuvre, suivies au Plan d'actions. Puis la consultation, la validation, la mise en œuvre et la revue de ses effets, imprévus compris (ISO 45001, § 8.1.3).</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-repeat"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEnCours">–</span><span class="ps-kpi-label">Changements à mettre en œuvre</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon danger"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiMesures">–</span><span class="ps-kpi-label">Mesures pas faites</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-clock"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiRevues">–</span><span class="ps-kpi-label">Revues après mise en œuvre à faire</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-file-text"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiDuerp">–</span><span class="ps-kpi-label">Document unique à mettre à jour</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel fiche" id="fiche" style="display:none;"></div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Changements</h3>
+          <div class="panel-actions" id="listeActions"></div>
+        </div>
+        <div class="filtres">
+          <input type="search" id="fTexte" placeholder="Rechercher : changement, responsable, risque, mesure" aria-label="Rechercher">
+          <select id="fNature" aria-label="Filtrer par nature"></select>
+          <select id="fEtat" aria-label="Filtrer par état"></select>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableChangements">
+            <thead><tr><th>Changement</th><th>Périmètre</th><th>Mise en œuvre</th><th>Responsable</th><th>État</th><th>Mesures faites</th><th>Points d'attention</th><th></th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote" data-mots>Rien n'est imposé : ni validation, ni consultation de la F3SCT, ni mise à jour du Document unique, ni délai de revue (question 29 posée au préventeur). Les points d'attention disent ce qui manque. Une mesure est faite quand elle l'est au Plan d'actions, où elle arrive avec l'origine « Changement ». La revue de direction reprend les changements de sa période.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("changements", "consulter");
+  const peutGerer = D.peut("changements", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Gestion des changements", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const lire = (cle) => { try { const v = JSON.parse(VigieStore.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } };
+  const fr = (a, b) => String(a).localeCompare(String(b), "fr");
+  const norm = (t) => String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const VC = VigieChangements;
+  const ajd = () => VigieDates.aujourdhui();
+  const dateOk = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d || "");
+  const M = (t) => VigieOrga.mots(t);   // « F3SCT », « agent » : les mots du secteur (assets/organisation.js)
+  // Périmètre (comme les audits internes) : un changement porte sur toute l'organisation ou sur un service. Un compte
+  // limité à certains services voit ceux de toute l'organisation et ceux de ses services.
+  const mesServices = (session && session.services) || ["*"];
+  const limite = !mesServices.includes("*");
+  const visible = (x) => !!x && (!limite || !x.service || mesServices.includes(x.service));
+  const TOUTE = "Toute l'organisation";
+  const perimetreTexte = (x) => x.service || TOUTE;
+
+  // ---------- Stockage ----------
+  const CLE = VC.CLE;
+  const tous = () => lire(CLE).filter(x => x && typeof x === "object" && x.id);
+  function modifierChangements(modif){ const l = lire(CLE); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
+  // Les actions d'un risque ou d'un effet imprévu rejoignent le Plan d'actions sous VigieChangements.idAction
+  // (plan-actions.html, generateChangementActionSeeds)
+  const actionAuPlan = (c, a, actions) => (actions || lire("vigie_hse_actions")).find(p => p && p.id === VC.idAction(c, a)) || null;
+  const toutesActions = (c) => VC.risques(c).flatMap(r => VC.actionsDe(r));
+  const chipEtat = (e) => `<span class="chip ${e.ton}">${esc(e.libelle)}</span>`;
+  const chipsAlertes = (l) => l.length ? l.map(a => `<span class="chip ${a.code === "duerp" ? "attention" : "mauvais"}">${esc(a.texte)}</span>`).join(" ") : "—";
+  const RANG = { abandonne: 2, clos: 1 };
+  // champs facultatifs effacés quand ils sont vides
+  const FACULTATIFS = ["service", "consulteLe", "valideLe", "validePar", "dateMiseEnOeuvre", "revueLe", "revuePar", "duerpLe"];
+
+  // ---------- Liste ----------
+  $("fNature").innerHTML = `<option value="">Toutes les natures</option>` + VC.NATURES.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  $("fEtat").innerHTML = `<option value="">Tous les états</option>` + Object.keys(VC.LIBELLES).map(k => `<option value="${k}">${esc(VC.LIBELLES[k])}</option>`).join("");
+  function render(){
+    const jour = ajd(), actions = lire("vigie_hse_actions");
+    const l = tous().filter(visible);
+    const s = VC.synthese(l, actions, jour);
+    $("kpiEnCours").textContent = s.enCours;
+    $("kpiMesures").textContent = s.mesuresEnAttente;
+    $("kpiRevues").textContent = s.aRevoir;
+    $("kpiDuerp").textContent = s.duerpAMettreAJour;
+    const et = $("fEtat").value, na = $("fNature").value, q = norm($("fTexte").value.trim());
+    const vus = l.map(c => ({ c, e: VC.etat(c, jour) }))
+      .filter(({ c, e }) => (!et || e.code === et) && (!na || c.nature === na)
+        && (!q || norm([c.titre, c.nature, c.description, c.responsable, c.concernes, c.service, VC.risques(c).map(r => [r.texte].concat(VC.actionsDe(r).map(a => a.description)).join(" ")).join(" ")].join(" ")).includes(q)))
+      .sort((a, b) => (RANG[a.e.code] || 0) - (RANG[b.e.code] || 0) || String(VC.quand(a.c)).localeCompare(String(VC.quand(b.c))) || fr(a.c.titre || "", b.c.titre || ""));
+    $("tbody").innerHTML = vus.length ? vus.map(({ c, e }) => {
+      const m = VC.mesures(c), faites = m.length - VC.mesuresEnAttente(c, actions).length;
+      return `<tr>
+        <td style="white-space:normal;min-width:240px;"><b>${esc(c.titre)}</b><span class="ref">${esc(c.nature || "")}</span></td>
+        <td style="white-space:normal;">${esc(perimetreTexte(c))}</td>
+        <td>${dateOk(c.dateMiseEnOeuvre) ? `<span class="mono">${esc(dateFr(c.dateMiseEnOeuvre))}</span><span class="ref">mis en œuvre</span>` : `<span class="mono">${esc(dateFr(c.datePrevue) || "—")}</span><span class="ref">prévue</span>`}</td>
+        <td style="white-space:normal;">${esc(c.responsable || "—")}</td>
+        <td>${chipEtat(e)}</td>
+        <td>${m.length ? `${faites} / ${m.length}` : "—"}</td>
+        <td style="white-space:normal;">${chipsAlertes(VC.alertes(c, actions))}</td>
+        <td><button type="button" class="act-edit" data-ouvrir="${esc(c.id)}">Ouvrir</button></td>
+      </tr>`;
+    }).join("") : `<tr class="empty-row"><td colspan="8">${l.length ? "Aucun changement avec ces filtres." : "Aucun changement pour le moment." + (peutGerer ? " « Nouveau changement » en prépare un." : "")}</td></tr>`;
+  }
+  $("fEtat").addEventListener("change", render);
+  $("fNature").addEventListener("change", render);
+  $("fTexte").addEventListener("input", render);
+  $("tbody").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); });
+  $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`
+    + (peutGerer ? `<button type="button" class="btn btn-primary" id="btnNouveau"><svg class="icon"><use href="#i-plus"/></svg> Nouveau changement</button>` : "");
+  if (peutGerer) $("btnNouveau").addEventListener("click", () => ouvrir(null));
+
+  // ---------- Export ----------
+  $("btnExport").addEventListener("click", () => {
+    const jour = ajd(), actions = lire("vigie_hse_actions"), l = tous().filter(visible);
+    const chg = [], rqs = [], acts = [];
+    l.forEach(c => {
+      chg.push({ "Identifiant": c.id, "Changement": c.titre || "", "Nature": c.nature || "", "Périmètre": perimetreTexte(c), "Responsable": c.responsable || "", "Personnes concernées": c.concernes || "",
+        "Ce qui change": c.description || "", "Mise en œuvre prévue le": dateFr(c.datePrevue), "Document unique à mettre à jour": c.duerp ? "Oui" : "Non", "Document unique mis à jour le": dateFr(c.duerpLe),
+        "Consultation le": dateFr(c.consulteLe), "Avis": c.avis || "", "Validé le": dateFr(c.valideLe), "Validé par": c.validePar || "", "Mis en œuvre le": dateFr(c.dateMiseEnOeuvre),
+        "Revu le": dateFr(c.revueLe), "Revu par": c.revuePar || "", "Constat de la revue": c.revueConstat || "", "État": VC.etat(c, jour).libelle,
+        "Points d'attention": VC.alertes(c, actions).map(a => a.texte).join(" ; "), "Motif d'abandon": c.annule ? c.motifAnnulation || "" : "" });
+      VC.risques(c).forEach(r => {
+        const type = r.imprevu ? "Effet imprévu" : "Risque";
+        rqs.push({ "Changement": c.titre || "", "Type": type, "Description": r.texte || "", "Actions": VC.actionsDe(r).length });
+        VC.actionsDe(r).forEach(a => acts.push({ "Changement": c.titre || "", "Type": type, "Risque ou effet": r.texte || "", "Action": a.description || "", "Responsable": a.responsable || "", "Échéance": dateFr(a.echeance), "État au Plan d'actions": VC.statutAction(c, a, actions) }));
+      });
+    });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(chg, { header: ["Identifiant", "Changement", "Nature", "Périmètre", "Responsable", "Personnes concernées", "Ce qui change", "Mise en œuvre prévue le", "Document unique à mettre à jour", "Document unique mis à jour le", "Consultation le", "Avis", "Validé le", "Validé par", "Mis en œuvre le", "Revu le", "Revu par", "Constat de la revue", "État", "Points d'attention", "Motif d'abandon"] }), "Changements");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rqs, { header: ["Changement", "Type", "Description", "Actions"] }), "Risques et effets");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(acts, { header: ["Changement", "Type", "Risque ou effet", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
+    XLSX.writeFile(wb, `changements_${jour}.xlsx`);
+  });
+  VigieImpression.brancher("btnExport", { table: "#tableChangements" });
+
+  // ---------- Changement ouvert ----------
+  let courant = null, risquesFiche = [];
+  // toute l'organisation, ou l'un des services de ses entrées (ceux du compte limité, s'il l'est)
+  function optionsPerimetre(choisi){
+    const groupes = VigieOrga.noms().map(n => ({ nom: n, l: VigieOrga.services(n).filter(s => !limite || mesServices.includes(s)) })).filter(g => g.l.length);
+    const connus = groupes.some(g => g.l.includes(choisi));
+    return `<option value="">${TOUTE}</option>`
+      + (choisi && !connus ? `<option value="${esc(choisi)}" selected>${esc(choisi)}</option>` : "")
+      + groupes.map(g => `<optgroup label="${esc(g.nom)}">${g.l.map(s => `<option value="${esc(s)}"${s === choisi ? " selected" : ""}>${esc(s)}</option>`).join("")}</optgroup>`).join("");
+  }
+  const fige = () => !courant || !!courant.annule || !peutGerer;
+  function ouvrir(id){
+    const x = id ? tous().find(c => c.id === id && visible(c)) : null;
+    if (id && !x) return;
+    if (!x && !peutGerer) return;
+    courant = x || { id: null, titre: "", nature: VC.NATURES[0], description: "", concernes: "", responsable: "", datePrevue: "", risques: [] };
+    const annule = !!courant.annule, dis = fige() ? " disabled" : "";
+    risquesFiche = VC.risques(courant).map(r => Object.assign({}, r, { actions: (Array.isArray(r.actions) ? r.actions : []).filter(a => a && typeof a === "object").map(a => Object.assign({}, a)) }));
+    const e = VC.etat(courant, ajd());
+    const natures = VC.NATURES.concat(courant.nature && !VC.NATURES.includes(courant.nature) ? [courant.nature] : []);
+    $("fiche").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">${x ? esc(x.titre) : "Nouveau changement"}</h3>
+          ${x ? `<div class="fiche-etat">${chipEtat(e)}${annule ? ` abandonné${x.annulePar ? " par " + esc(x.annulePar) : ""}${x.annuleLe ? " le " + esc(dateFr(x.annuleLe)) : ""}${x.motifAnnulation ? " : " + esc(x.motifAnnulation) : ""}` : ""}${x.auteur ? ` · créé par ${esc(x.auteur)}` : ""}${x.modifiePar ? ` · modifié par ${esc(x.modifiePar)}` : ""}</div>` : ""}</div>
+        <div class="panel-actions">${x ? `<button type="button" class="btn btn-ghost" id="btnFicheImpr"><svg class="icon"><use href="#i-printer"/></svg> Imprimer la fiche</button>` : ""}<button type="button" class="btn btn-ghost" id="btnFermer">Fermer</button></div>
+      </div>
+      <form id="ficheForm" novalidate>
+        <div class="form-grid">
+          <div class="span3"><label for="cTitre">Changement</label><input type="text" id="cTitre" value="${esc(courant.titre || "")}" maxlength="200" placeholder="Ex. : nouvelle balayeuse de voirie, regroupement de deux ateliers"${dis}></div>
+          <div><label for="cNature">Nature</label><select id="cNature"${dis}>${natures.map(n => `<option value="${esc(n)}"${n === courant.nature ? " selected" : ""}>${esc(n)}</option>`).join("")}</select></div>
+          <div><label for="cService">Périmètre</label><select id="cService"${dis}>${optionsPerimetre(courant.service || "")}</select></div>
+          <div><label for="cResponsable">Responsable du changement</label><input type="text" id="cResponsable" value="${esc(courant.responsable || "")}" maxlength="120" placeholder="Nom et fonction"${dis}></div>
+          <div><label for="cPrevue">Mise en œuvre prévue le</label><input type="date" id="cPrevue" value="${esc(courant.datePrevue || "")}"${dis}></div>
+          <div class="span3"><label for="cConcernes">Postes et personnes concernés</label><input type="text" id="cConcernes" value="${esc(courant.concernes || "")}" maxlength="300" placeholder="Ex. : les 6 conducteurs de la voirie, l'équipe de l'atelier"${dis}></div>
+          <div class="span3"><label for="cDescription">Ce qui change</label><textarea id="cDescription" placeholder="Ce qui est modifié, pourquoi, et ce qui reste comme avant"${dis}>${esc(courant.description || "")}</textarea></div>
+        </div>
+        <div class="sec"><h4>Risques et mesures avant la mise en œuvre</h4><p class="aide">Les risques que le changement crée ou modifie pour la santé et la sécurité, et les mesures à prendre avant de le mettre en œuvre. Elles rejoignent le Plan d'actions (origine « Changement ») dès l'enregistrement ; leur état est celui du Plan d'actions, où elles se suivent ensuite.</p>
+          <div id="cRisques"></div>
+          ${fige() ? "" : `<button type="button" class="btn btn-ghost" data-ajout-risque="0"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un risque</button>`}
+          <div class="form-grid" style="margin-top:14px;">
+            <div class="span2"><label class="coche"><input type="checkbox" id="cDuerp"${courant.duerp ? " checked" : ""}${dis}> Le Document unique est à mettre à jour</label></div>
+            <div><label for="cDuerpLe">Mis à jour le</label><input type="date" id="cDuerpLe" value="${esc(courant.duerpLe || "")}"${dis}></div>
+          </div>
+        </div>
+        <div class="sec"><h4>${esc(M("Consultation de la F3SCT"))}</h4><p class="aide">${esc(M("Si le changement a été présenté à la F3SCT : la date et son avis."))}</p>
+          <div class="form-grid">
+            <div><label for="cConsulte">Consultée le</label><input type="date" id="cConsulte" value="${esc(courant.consulteLe || "")}"${dis}></div>
+            <div class="span3"><label for="cAvis">Avis</label><textarea id="cAvis"${dis}>${esc(courant.avis || "")}</textarea></div>
+          </div>
+        </div>
+        <div class="sec"><h4>Validation et mise en œuvre</h4><p class="aide">La décision de mettre le changement en œuvre, une fois ses risques examinés et ses mesures prises, puis la date à laquelle il est entré en service.</p>
+          <div class="form-grid">
+            <div><label for="cValide">Validé le</label><input type="date" id="cValide" value="${esc(courant.valideLe || "")}"${dis}></div>
+            <div><label for="cValidePar">Validé par</label><input type="text" id="cValidePar" value="${esc(courant.validePar || "")}" maxlength="120" placeholder="Nom et fonction"${dis}></div>
+            <div><label for="cMiseEnOeuvre">Mis en œuvre le</label><input type="date" id="cMiseEnOeuvre" value="${esc(courant.dateMiseEnOeuvre || "")}"${dis}></div>
+          </div>
+        </div>
+        <div class="sec"><h4>Revue après la mise en œuvre</h4><p class="aide">Les effets du changement une fois en place : ce qui s'est passé comme prévu, et les effets imprévus, avec les actions qui en atténuent les conséquences.</p>
+          <div class="form-grid">
+            <div><label for="cRevue">Revu le</label><input type="date" id="cRevue" value="${esc(courant.revueLe || "")}"${dis}></div>
+            <div><label for="cRevuePar">Revu par</label><input type="text" id="cRevuePar" value="${esc(courant.revuePar || "")}" maxlength="120" placeholder="Nom et fonction"${dis}></div>
+            <div class="span3"><label for="cRevueConstat">Constat</label><textarea id="cRevueConstat" placeholder="Les mesures ont-elles suffi ? Le changement a-t-il eu des effets que l'on n'attendait pas ?"${dis}>${esc(courant.revueConstat || "")}</textarea></div>
+          </div>
+          <div id="cImprevus" style="margin-top:12px;"></div>
+          ${fige() ? "" : `<button type="button" class="btn btn-ghost" data-ajout-risque="1"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un effet imprévu</button>`}
+        </div>
+        ${peutGerer ? `<div class="form-actions">
+          ${annule ? `<button type="button" class="btn btn-ghost" id="btnRetablir">Rétablir le changement</button>` : `<button type="submit" class="btn btn-primary">Enregistrer</button>
+          ${x && !dateOk(x.dateMiseEnOeuvre) ? `<button type="button" class="btn btn-ghost" id="btnAbandonner">Abandonner le changement</button>` : ""}`}
+          ${x ? `<button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer le changement</button>` : ""}
+        </div>` : ""}
+      </form>`;
+    rendreRisques();
+    $("fiche").style.display = "";
+    $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  // les risques (avant la mise en œuvre) et les effets imprévus (après) : une même liste, rendue en deux endroits
+  function rendreRisques(){
+    const actions = lire("vigie_hse_actions"), f = fige();
+    const bloc = (r, i) => {
+      const imp = !!r.imprevu;
+      // une action déjà reprise au Plan d'actions ne se modifie plus ici : on la suit là-bas
+      const lignes = (r.actions || []).map((a, j) => {
+        const auPlan = courant.id && actionAuPlan(courant, a, actions);
+        if (f || auPlan) return String(a.description || "").trim() ? `<div class="dyn-row" data-j="${j}" data-fixe><span>${esc(a.description)}${a.responsable ? " — " + esc(a.responsable) : ""}${a.echeance ? ", échéance " + esc(dateFr(a.echeance)) : ""} · <b>${esc(courant.id ? VC.statutAction(courant, a, actions) : "À faire")}</b>${auPlan ? ` <a class="act-edit" href="plan-actions.html">au Plan d'actions</a>` : ""}</span></div>` : "";
+        return `<div class="dyn-row" data-j="${j}">
+          <input type="text" data-a="description" placeholder="${imp ? "Action" : "Mesure"}" aria-label="${imp ? "Action" : "Mesure"}" value="${esc(a.description || "")}" maxlength="300">
+          <input type="text" data-a="responsable" placeholder="Responsable" aria-label="Responsable" value="${esc(a.responsable || "")}" style="flex:0 1 180px">
+          <input type="date" data-a="echeance" aria-label="Échéance" value="${esc(a.echeance || "")}" style="flex:0 0 150px">
+          <button type="button" class="act-del" data-retirer-action="${i}:${j}">Suppr.</button>
+        </div>`;
+      }).join("");
+      if (f) return `<div class="constat" data-i="${i}"><div><span class="chip ${imp ? "attention" : "neutre"}">${imp ? "Effet imprévu" : "Risque"}</span></div>`
+        + `${r.texte ? `<div class="texte">${esc(r.texte)}</div>` : ""}${lignes ? `<div class="actions-constat">${lignes}</div>` : ""}<p class="alerte" data-alerte style="display:none;"></p></div>`;
+      return `<div class="constat" data-i="${i}">
+        <label>${imp ? "Effet imprévu" : "Risque créé ou modifié"}</label>
+        <textarea data-k="texte" aria-label="${imp ? "Effet imprévu" : "Risque créé ou modifié"}" placeholder="${imp ? "Ce qui s'est produit et que l'on n'attendait pas" : "Ex. : bruit de la nouvelle machine, coactivité pendant les travaux"}">${esc(r.texte || "")}</textarea>
+        <p class="alerte" data-alerte style="display:none;"></p>
+        <div class="actions-constat">${lignes}</div>
+        <div class="dyn-row"><button type="button" class="btn btn-ghost" data-ajout-action="${i}"><svg class="icon"><use href="#i-plus"/></svg> ${imp ? "Ajouter une action" : "Ajouter une mesure"}</button><button type="button" class="act-del" data-retirer-risque="${i}" style="margin-left:auto;">Retirer</button></div>
+      </div>`;
+    };
+    const rendre = (imp) => risquesFiche.map((r, i) => !!r.imprevu === imp ? bloc(r, i) : "").join("");
+    $("cRisques").innerHTML = rendre(false) || `<p class="vide">Aucun risque décrit.</p>`;
+    $("cImprevus").innerHTML = rendre(true) || `<p class="vide">Aucun effet imprévu relevé.</p>`;
+    majAlertes();
+  }
+  const blocsRisques = () => $("fiche").querySelectorAll(".constat[data-i]");
+  function lireRisques(){
+    if (fige()) return;
+    blocsRisques().forEach(el => {
+      const r = risquesFiche[Number(el.dataset.i)];
+      if (!r) return;
+      el.querySelectorAll("[data-k]").forEach(inp => { r[inp.dataset.k] = inp.value.trim(); });
+      el.querySelectorAll(".dyn-row[data-j]:not([data-fixe])").forEach(row => {
+        const a = r.actions[Number(row.dataset.j)];
+        if (a) row.querySelectorAll("[data-a]").forEach(inp => { a[inp.dataset.a] = inp.value.trim(); });
+      });
+    });
+  }
+  // un effet imprévu décrit sans aucune action : le dire
+  function majAlertes(){
+    if (!courant) return;
+    lireRisques();
+    blocsRisques().forEach(el => {
+      const r = risquesFiche[Number(el.dataset.i)], p = el.querySelector("[data-alerte]");
+      if (!r || !p) return;
+      const sans = !courant.annule && r.imprevu && !!String(r.texte || "").trim() && !VC.actionsDe(r).length;
+      p.textContent = sans ? `Effet imprévu sans action : ${fige() ? "aucune action prévue pour en atténuer les conséquences." : "ajoutez celle qui en atténuera les conséquences."}` : "";
+      p.style.display = sans ? "" : "none";
+    });
+  }
+  function fermer(){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; courant = null; }
+
+  // Relit le formulaire dans le changement enregistré.
+  function enregistrer(){
+    if (fige()) return null;
+    lireRisques();
+    const jour = ajd(), avant = courant;
+    const x = Object.assign({}, courant, {
+      titre: $("cTitre").value.trim(), nature: $("cNature").value, service: $("cService").value, responsable: $("cResponsable").value.trim(),
+      datePrevue: $("cPrevue").value, concernes: $("cConcernes").value.trim(), description: $("cDescription").value.trim(),
+      duerp: $("cDuerp").checked || !!$("cDuerpLe").value, duerpLe: $("cDuerpLe").value, consulteLe: $("cConsulte").value, avis: $("cAvis").value.trim(),
+      valideLe: $("cValide").value, validePar: $("cValidePar").value.trim(), dateMiseEnOeuvre: $("cMiseEnOeuvre").value,
+      revueLe: $("cRevue").value, revuePar: $("cRevuePar").value.trim(), revueConstat: $("cRevueConstat").value.trim(),
+    });
+    if (!x.titre){ alert("Indiquez le changement."); return null; }
+    if (!dateOk(x.datePrevue)){ alert("Indiquez la date de mise en œuvre prévue."); return null; }
+    const passee = (d, quoi) => { if (!d) return false; if (!dateOk(d)){ alert(`La date ${quoi} n'est pas lisible.`); return true; } if (d > jour){ alert(`La date ${quoi} ne peut pas être dans le futur.`); return true; } return false; };
+    if (passee(x.duerpLe, "de mise à jour du Document unique") || passee(x.consulteLe, "de consultation") || passee(x.valideLe, "de validation")
+      || passee(x.dateMiseEnOeuvre, "de mise en œuvre") || passee(x.revueLe, "de la revue")) return null;
+    if (x.valideLe && !x.validePar){ alert("Indiquez qui a validé le changement."); return null; }
+    if (x.valideLe && x.dateMiseEnOeuvre && x.dateMiseEnOeuvre < x.valideLe){ alert("La mise en œuvre ne peut pas précéder la validation."); return null; }
+    const rs = risquesFiche.filter(r => String(r.texte || "").trim() || VC.actionsDe(r).length);
+    if (rs.some(r => !String(r.texte || "").trim())){ alert("Décrivez chaque risque ou effet imprévu qui porte une action."); return null; }
+    if (x.revueLe){
+      if (!x.dateMiseEnOeuvre){ alert("La revue suit la mise en œuvre : indiquez sa date."); return null; }
+      if (x.revueLe < x.dateMiseEnOeuvre){ alert("La revue ne peut pas précéder la mise en œuvre."); return null; }
+      if (!x.revueConstat){ alert("Indiquez le constat de la revue."); return null; }
+    }
+    if (rs.some(r => r.imprevu) && !x.dateMiseEnOeuvre){ alert("Un effet imprévu se relève après la mise en œuvre : indiquez sa date."); return null; }
+    x.risques = rs.map(r => Object.assign({ id: r.id || genId("r"), texte: String(r.texte).trim(), actions: (r.actions || []).filter(a => a && String(a.description || "").trim()).map(a => Object.assign({ id: a.id || genId("act") }, a)) }, r.imprevu ? { imprevu: true } : {}));
+    // ce qui manque se signale sans bloquer (question 29) : on demande seulement confirmation
+    const enAttente = VC.mesuresEnAttente(x, lire("vigie_hse_actions")).length;
+    if (x.valideLe && !avant.valideLe && enAttente && !confirm(`${enAttente} mesure${enAttente > 1 ? "s" : ""} prévue${enAttente > 1 ? "s" : ""} avant la mise en œuvre ${enAttente > 1 ? "ne sont" : "n'est"} pas faite${enAttente > 1 ? "s" : ""} au Plan d'actions. Valider le changement quand même ?`)) return null;
+    if (x.dateMiseEnOeuvre && !avant.dateMiseEnOeuvre && !x.valideLe && !confirm("Le changement n'a pas été validé. Enregistrer sa mise en œuvre quand même ?")) return null;
+    if (!x.duerp) delete x.duerp;
+    FACULTATIFS.forEach(k => { if (!x[k]) delete x[k]; });
+    const nouveau = !x.id;
+    if (nouveau){ x.id = genId("chg"); x.auteur = moi; x.dateCreation = new Date().toISOString(); }
+    else { x.modifiePar = moi; x.dateMaj = new Date().toISOString(); }
+    try {
+      modifierChangements(l => {
+        const i = l.findIndex(c => c && c.id === x.id);
+        if (i < 0) l.push(x);
+        else { const y = Object.assign({}, l[i], x); FACULTATIFS.concat(["duerp"]).forEach(k => { if (!x[k]) delete y[k]; }); l[i] = y; }
+      });
+    } catch(e){ alert("Le changement n'a pas pu être enregistré."); return null; }
+    const etape = x.revueLe ? `revu le ${dateFr(x.revueLe)}` : x.dateMiseEnOeuvre ? `mis en œuvre le ${dateFr(x.dateMiseEnOeuvre)}` : x.valideLe ? `validé le ${dateFr(x.valideLe)}` : `mise en œuvre prévue le ${dateFr(x.datePrevue)}`;
+    logAudit(nouveau ? "Création" : "Modification", `Changement « ${x.titre} » : ${etape}, ${VC.mesures(x).length} mesure(s)`);
+    return x;
+  }
+
+  $("fiche").addEventListener("click", (e) => {
+    if (e.target.closest("#btnFermer")){ fermer(); return; }
+    if (e.target.closest("#btnFicheImpr")){ imprimerFiche(courant && courant.id); return; }
+    const ar = e.target.closest("[data-ajout-risque]");
+    if (ar){ lireRisques(); risquesFiche.push(Object.assign({ id: genId("r"), texte: "", actions: [] }, ar.dataset.ajoutRisque === "1" ? { imprevu: true } : {})); rendreRisques(); return; }
+    const aj = e.target.closest("[data-ajout-action]");
+    if (aj){ lireRisques(); const r = risquesFiche[Number(aj.dataset.ajoutAction)]; if (r){ r.actions.push({ id: genId("act") }); rendreRisques(); } return; }
+    const ra = e.target.closest("[data-retirer-action]");
+    if (ra){ lireRisques(); const [i, j] = ra.dataset.retirerAction.split(":").map(Number); if (risquesFiche[i]) risquesFiche[i].actions.splice(j, 1); rendreRisques(); return; }
+    const rr = e.target.closest("[data-retirer-risque]");
+    if (rr){
+      lireRisques();
+      const i = Number(rr.dataset.retirerRisque), r = risquesFiche[i], auPlan = r && courant.id && VC.actionsDe(r).some(a => actionAuPlan(courant, a));
+      if (r && (String(r.texte || "").trim() || VC.actionsDe(r).length) && !confirm(`Retirer ${r.imprevu ? "cet effet imprévu" : "ce risque"} ? Il disparaîtra à l'enregistrement du changement.${auPlan ? " Ses actions déjà reprises au Plan d'actions y restent." : ""}`)) return;
+      risquesFiche.splice(i, 1); rendreRisques();
+      return;
+    }
+    if (e.target.closest("#btnAbandonner")){
+      if (!courant || !courant.id) return;
+      const motif = prompt("Motif de l'abandon ? Le changement reste à la liste, marqué abandonné.", "");
+      if (motif === null) return;
+      if (!motif.trim()){ alert("Indiquez le motif de l'abandon."); return; }
+      try { modifierChangements(l => { const i = l.findIndex(c => c && c.id === courant.id); if (i >= 0) l[i] = Object.assign({}, l[i], { annule: true, motifAnnulation: motif.trim(), annuleLe: ajd(), annulePar: moi, modifiePar: moi, dateMaj: new Date().toISOString() }); }); }
+      catch(err){ alert("Le changement n'a pas pu être abandonné."); return; }
+      logAudit("Modification", `Changement « ${courant.titre} » abandonné : ${motif.trim()}`);
+      const id = courant.id; render(); ouvrir(id);
+      return;
+    }
+    if (e.target.closest("#btnRetablir")){
+      if (!courant || !confirm("Rétablir le changement ?")) return;
+      try { modifierChangements(l => { const i = l.findIndex(c => c && c.id === courant.id); if (i >= 0){ const y = Object.assign({}, l[i], { modifiePar: moi, dateMaj: new Date().toISOString() }); ["annule", "motifAnnulation", "annuleLe", "annulePar"].forEach(k => delete y[k]); l[i] = y; } }); }
+      catch(err){ alert("Le changement n'a pas pu être rétabli."); return; }
+      logAudit("Modification", `Changement « ${courant.titre} » rétabli`);
+      const id = courant.id; render(); ouvrir(id);
+      return;
+    }
+    if (e.target.closest("#btnSupprimer")){
+      if (!courant || !courant.id || !confirm(`Supprimer le changement « ${courant.titre} » ?${toutesActions(courant).length ? " Ses actions déjà reprises au Plan d'actions y restent." : ""} Pour garder la trace d'un changement qui ne se fera pas, préférez « Abandonner le changement ».`)) return;
+      try { modifierChangements(l => { const i = l.findIndex(c => c && c.id === courant.id); if (i >= 0) l.splice(i, 1); }); }
+      catch(err){ alert("Le changement n'a pas pu être supprimé."); return; }
+      logAudit("Suppression", `Changement « ${courant.titre} »`);
+      fermer(); render();
+    }
+  });
+  $("fiche").addEventListener("change", () => { if (courant) majAlertes(); });
+  $("fiche").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const x = enregistrer();
+    if (x){ render(); ouvrir(x.id); }
+  });
+
+  // ---------- Fiche de changement (impression) ----------
+  // le changement tel qu'il est enregistré : ce qui n'est pas encore enregistré dans le formulaire n'y figure pas
+  function imprimerFiche(id){
+    const c = id ? tous().find(z => z.id === id && visible(z)) : null;
+    if (!c) return;
+    const jour = ajd(), actions = lire("vigie_hse_actions"), e = VC.etat(c, jour), al = VC.alertes(c, actions);
+    const ancien = document.getElementById("chg-impression");
+    if (ancien) ancien.remove();
+    if (!document.getElementById("chg-impression-style")){
+      const style = document.createElement("style"); style.id = "chg-impression-style";
+      style.textContent = [
+        "@page{ size:A4 portrait; margin:14mm; }",
+        "@media screen{ #chg-impression{ display:none; } }",
+        "@media print{",
+        "  body{ background:#fff !important; }",
+        "  body > *:not(#chg-impression){ display:none !important; }",
+        "  #chg-impression{ display:block !important; color:#000; font:10.5px/1.45 'IBM Plex Sans',Arial,sans-serif; }",
+        "  #chg-impression .pi-marque{ font:700 10px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#555; }",
+        "  #chg-impression h1{ font:700 21px 'Barlow Condensed',Arial,sans-serif; margin:2px 0; }",
+        "  #chg-impression .pi-meta{ font-size:10px; color:#333; margin:0 0 6px; }",
+        "  #chg-impression h2{ font:700 13px 'Barlow Condensed',Arial,sans-serif; text-transform:uppercase; letter-spacing:.06em; border-bottom:1.5px solid #000; margin:12px 0 5px; padding-bottom:2px; }",
+        "  #chg-impression p{ margin:0 0 5px; }",
+        "  #chg-impression table{ width:100%; border-collapse:collapse; }",
+        "  #chg-impression th, #chg-impression td{ border:1px solid #999; padding:3px 5px; text-align:left; vertical-align:top; }",
+        "  #chg-impression th{ background:#eee; font-weight:600; }",
+        "  #chg-impression tr{ break-inside:avoid; page-break-inside:avoid; }",
+        "  #chg-impression .texte{ white-space:pre-line; }",
+        "  #chg-impression .pi-signatures{ display:flex; gap:30px; margin-top:20px; break-inside:avoid; }",
+        "  #chg-impression .pi-signatures div{ flex:1; border-top:1px solid #000; padding-top:4px; min-height:50px; font-size:10px; }",
+        "}",
+      ].join("\n");
+      document.head.appendChild(style);
+    }
+    const tableau = (l, quoi) => l.length ? `<table><thead><tr><th>${quoi}</th><th>${quoi === "Risque" ? "Mesures" : "Actions"}</th></tr></thead><tbody>${l.map(r => `<tr><td class="texte">${esc(r.texte || "")}</td><td>${VC.actionsDe(r).map(a => `${esc(a.description)}${a.responsable ? " — " + esc(a.responsable) : ""}${a.echeance ? ", " + esc(dateFr(a.echeance)) : ""} : ${esc(VC.statutAction(c, a, actions))}`).join("<br>") || "—"}</td></tr>`).join("")}</tbody></table>` : "";
+    const bloc = document.createElement("div");
+    bloc.id = "chg-impression";
+    bloc.innerHTML = `
+      <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "")}</div>
+      <h1>Fiche de changement</h1>
+      <p class="pi-meta"><b>${esc(c.titre)}</b> · ${esc(c.nature || "")} · ${esc(perimetreTexte(c))} · ${esc(e.libelle)} · éditée le ${esc(dateFr(jour))}</p>
+      <h2>Le changement</h2>
+      <p>Responsable : ${esc(c.responsable || "—")} · mise en œuvre prévue le ${esc(dateFr(c.datePrevue) || "—")}</p>
+      ${c.concernes ? `<p>Postes et personnes concernés : ${esc(c.concernes)}</p>` : ""}
+      ${c.description ? `<p class="texte">${esc(c.description)}</p>` : ""}
+      <h2>Risques et mesures avant la mise en œuvre</h2>
+      ${tableau(VC.prevus(c), "Risque") || `<p>Aucun risque décrit.</p>`}
+      <p>Document unique : ${c.duerp ? (c.duerpLe ? "mis à jour le " + esc(dateFr(c.duerpLe)) : "à mettre à jour") : "pas de mise à jour indiquée"}.</p>
+      <h2>${esc(M("Consultation de la F3SCT"))}</h2>
+      <p>${c.consulteLe ? "Consultée le " + esc(dateFr(c.consulteLe)) : "Pas de consultation enregistrée."}</p>
+      ${c.avis ? `<p class="texte">${esc(c.avis)}</p>` : ""}
+      <h2>Validation et mise en œuvre</h2>
+      <p>${c.valideLe ? "Validé le " + esc(dateFr(c.valideLe)) + (c.validePar ? " par " + esc(c.validePar) : "") : "Pas encore validé."} ${c.dateMiseEnOeuvre ? "Mis en œuvre le " + esc(dateFr(c.dateMiseEnOeuvre)) + "." : ""}</p>
+      ${c.dateMiseEnOeuvre ? `<h2>Revue après la mise en œuvre</h2>
+      <p>${c.revueLe ? "Revu le " + esc(dateFr(c.revueLe)) + (c.revuePar ? " par " + esc(c.revuePar) : "") : "Revue à faire."}</p>
+      ${c.revueConstat ? `<p class="texte">${esc(c.revueConstat)}</p>` : ""}
+      ${tableau(VC.imprevus(c), "Effet imprévu")}` : ""}
+      ${al.length ? `<h2>Points d'attention</h2><p>${al.map(a => esc(a.texte)).join(" ; ")}.</p>` : ""}
+      <div class="pi-signatures"><div>Le responsable du changement</div><div>Validé par</div></div>`;
+    document.body.appendChild(bloc);
+    const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
+    window.addEventListener("afterprint", nettoyer);
+    window.print();
+  }
+
+  render();
+  // ?ouvrir=<id>
+  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(x => x.id === id && visible(x))) ouvrir(id); })();
+
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

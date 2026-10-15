@@ -72,6 +72,7 @@ const REGLES = {
   audits_internes: GERER('audit-interne'),
   // Politique (§ 5.2) : chacun ajoute sa prise de connaissance ; qui gère la politique modifie, supprime
   politiques: GERER('politique'), politique_lectures: regle('politique', 'gerer', 'consulter'),
+  changements: GERER('changements'),
   ds_questions: regle('dialogue-social', 'participer'), ds_reunions: regle('dialogue-social', 'participer'), ds_visites: regle('dialogue-social', 'participer'),
 };
 const regleGenerale = GERER('administration');

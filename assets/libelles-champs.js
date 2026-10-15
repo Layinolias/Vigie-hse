@@ -79,6 +79,10 @@
   };
   // Même nom de champ, autre sens selon le registre
   var PAR_REGISTRE = {
+    vigie_hse_changements:  { titre:"Changement", nature:"Nature", description:"Ce qui change", concernes:"Postes et personnes concernés", responsable:"Responsable du changement",
+                              datePrevue:"Mise en œuvre prévue le", risques:"Risques et effets imprévus", duerp:"Document unique à mettre à jour", duerpLe:"Document unique mis à jour le",
+                              consulteLe:"Consultation le", avis:"Avis", valideLe:"Validé le", validePar:"Validé par", dateMiseEnOeuvre:"Mis en œuvre le",
+                              revueLe:"Revu le", revuePar:"Revu par", revueConstat:"Constat de la revue" },
     vigie_hse_politiques:   { texte:"Texte de la politique", engagements:"Engagements couverts", signataire:"Signataire", fonction:"Fonction du signataire",
                               dateSignature:"Signée le", prochaineRevue:"Prochaine revue", demanderLecture:"Prise de connaissance demandée", publieLe:"En vigueur le",
                               publiePar:"Mise en vigueur par", remplaceeLe:"Remplacée le", revues:"Revues", communications:"Communication" },

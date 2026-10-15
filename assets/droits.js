@@ -40,6 +40,9 @@
     mod("signalements", "Santé au travail", "Signalements (presque-accidents)", [["signaler", "Signaler et suivre ses signalements"], ["traiter", "Traiter les signalements"]]),
     mod("duerp", "Sécurité & Risques", "Document unique", STD),
     mod("produits", "Sécurité & Risques", "Produits chimiques", STD),
+    // Gestion des changements (ISO 45001 § 8.1.3, 2026-10-15) : lue par le Manager, tenue par le Préventeur (avec
+    // Administrateur et RH) ; qui d'autre la lit (représentants du personnel ?) : question 29.
+    mod("changements", "Sécurité & Risques", "Gestion des changements", STD),
     mod("actions", "Suivi", "Plan d'actions", STD),
     mod("sante-visites", "Suivi", "Santé & Visites", STD),
     mod("verifications", "Suivi", "Vérifications périodiques", STD),
@@ -101,13 +104,13 @@
     { id: "p-manager", nom: "Manager", libelle: "Manager", pastille: "MANAGER", droits: {
       atmp: "consulter", rsst: "auteurs", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter", "audit-interne": "consulter", politique: "consulter" } },
+      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter", "audit-interne": "consulter", politique: "consulter", changements: "consulter" } },
     { id: "p-agent", nom: "Agent", libelle: "Compte Agent", pastille: "AG", droits: {
       atmp: "consulter", rsst: "deposer", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
       documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter" } },
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
-      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer" } },
+      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer", changements: "gerer" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
       "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter" } }
   ];

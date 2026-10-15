@@ -19,6 +19,7 @@
 <script src="assets/programme-ref.js"></script>
 <script src="assets/audit-interne-ref.js"></script>
 <script src="assets/changements-ref.js"></script>
+<script src="assets/contexte-ref.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
 <link rel="stylesheet" href="assets/commun.css">
@@ -115,6 +116,7 @@
   .origine-chip.conformite{ color:var(--success); border-color:rgba(var(--success-rgb),.4); background:transparent; }
   .origine-chip.audit{ color:var(--warning); border-color:rgba(var(--warning-rgb),.4); background:transparent; }
   .origine-chip.changement{ color:var(--accent); border-color:rgba(var(--accent-rgb),.4); background:transparent; }
+  .origine-chip.ro{ color:var(--text-muted); border-color:var(--border); background:transparent; }
   .origine-chip.objectif{ color:var(--accent); border-color:rgba(var(--accent-rgb),.35); background:transparent; }
   .origine-chip.revue{ color:var(--accent-violet); border-color:rgba(var(--accent-violet-rgb),.4); background:transparent; }
   .origine-chip.signalement{ color:var(--text-muted); border-color:var(--border); background:var(--bg-2); }
@@ -672,6 +674,35 @@
   // Actions qui corrigent un constat d'audit interne (ISO 45001 § 9.2, 2026-10-15) : dès l'enregistrement de l'audit.
   // Gestion des changements (ISO 45001 § 8.1.3, 2026-10-15) : les mesures d'un risque créé ou modifié par un changement,
   // et les actions d'un effet imprévu relevé à sa revue (assets/changements-ref.js).
+  // Contexte et enjeux (ISO 45001 § 6.1.1, 2026-10-15) : les actions d'un risque ou d'une opportunité pour la démarche
+  // (assets/contexte-ref.js) ; elles portent sur toute l'organisation.
+  function generateContexteActionSeeds(){
+    let ctx = [];
+    try { const raw = VigieStore.getItem(VigieContexte.CLE); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) ctx = p; } } catch(e){}
+    const out = [];
+    const today = new Date();
+    VigieContexte.valides(ctx).forEach(x => {
+      if (x.registre !== "ro") return;
+      const t = String(x.texte || "");
+      VigieContexte.actionsDe(x).forEach(a => {
+        out.push({
+          id: VigieContexte.idAction(x, a),
+          titre: (x.type === "Opportunité" ? "Opportunité" : "Risque pour la démarche") + " : " + (t.length > 100 ? t.slice(0, 99) + "…" : t),
+          description: a.description,
+          service: "",
+          collectivite: "",
+          risqueLie: "",
+          origine: "Risques et opportunités",
+          responsable: a.responsable || "",
+          echeance: a.echeance || VigieDates.iso(today),
+          priorite: "Moyenne",
+          statut: "À faire",
+          dateCreation: VigieDates.iso(today),
+        });
+      });
+    });
+    return out;
+  }
   function generateChangementActionSeeds(){
     let chg = [];
     try { const raw = VigieStore.getItem(VigieChangements.CLE); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) chg = p; } } catch(e){}
@@ -735,7 +766,7 @@
   function loadDataset(){
     let stored = [];
     try { const raw = VigieStore.getItem(STORAGE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds()).concat(generateDialogueSocialActionSeeds()).concat(generateSignalementActionSeeds()).concat(generateRevueActionSeeds()).concat(generateObjectifActionSeeds()).concat(generateExigenceActionSeeds()).concat(generateAuditInterneActionSeeds()).concat(generateChangementActionSeeds());
+    const seedList = generateActionSeeds().concat(generateInspectionActionSeeds()).concat(generateAnalyseActionSeeds()).concat(generateUrgenceActionSeeds()).concat(generateEntrepriseExtActionSeeds()).concat(generateDialogueSocialActionSeeds()).concat(generateSignalementActionSeeds()).concat(generateRevueActionSeeds()).concat(generateObjectifActionSeeds()).concat(generateExigenceActionSeeds()).concat(generateAuditInterneActionSeeds()).concat(generateChangementActionSeeds()).concat(generateContexteActionSeeds());
     const storedById = new Map(stored.map(r => [r.id, r]));
     const seeded = seedList.map(r => storedById.has(r.id) ? storedById.get(r.id) : r);
     const seedIds = new Set(seeded.map(r => r.id));
@@ -844,7 +875,7 @@
       return;
     }
     const prioCls = { "Critique":"p-critique", "Haute":"p-haute", "Moyenne":"p-moyenne", "Basse":"p-basse" };
-    const origineCls = { "DUERP":"duerp", "Inspection":"inspection", "Analyse":"analyse", "Urgence":"urgence", "Prévention EE":"ee", "Dialogue social":"ds", "Signalement":"signalement", "Revue de direction":"revue", "Objectif":"objectif", "Conformité":"conformite", "Audit interne":"audit", "Changement":"changement" };
+    const origineCls = { "DUERP":"duerp", "Inspection":"inspection", "Analyse":"analyse", "Urgence":"urgence", "Prévention EE":"ee", "Dialogue social":"ds", "Signalement":"signalement", "Revue de direction":"revue", "Objectif":"objectif", "Conformité":"conformite", "Audit interne":"audit", "Changement":"changement", "Risques et opportunités":"ro" };
     tbody.innerHTML = rows.map(a => `
       <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${esc(a.id)}">
         <td class="wrap">${esc(a.titre)}</td>

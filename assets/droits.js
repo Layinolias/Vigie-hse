@@ -82,6 +82,8 @@
     // Manager — à confirmer, question 27.
     mod("audit-interne", "Pilotage", "Audit interne", STD),
     // Revue de direction (ISO 45001 § 9.3, 2026-10-12) : préparer, valider, rouvrir. Aucun préréglage hors Administrateur et RH.
+    // Préparation ISO 45001 (2026-10-16) : la carte de couverture lue en direct, en lecture seule ; Préventeur, Administrateur, RH — question 31.
+    mod("preparation-iso", "Pilotage", "Préparation ISO 45001", [["consulter", "Consulter"]]),
     mod("revue-direction", "Pilotage", "Revue de direction", STD),
     mod("administration", "Pilotage", "Administration", [["gerer", "Gérer"]])
   ];
@@ -113,7 +115,7 @@
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
       documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter" } },
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
-      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer", changements: "gerer", contexte: "gerer" } },
+      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer", changements: "gerer", contexte: "gerer", "preparation-iso": "consulter" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
       "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", changements: "consulter", contexte: "consulter" } }
   ];

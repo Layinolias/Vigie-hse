@@ -191,6 +191,7 @@
           <span class="panel-actions" id="listeActions" style="margin-left:auto;"></span>
         </div>
         <p class="form-note" id="majNote" style="margin-top:10px;"></p>
+        <p class="form-note" id="revueNote" style="margin-top:4px;"></p>
       </div>
 
       <div class="panel" style="padding:20px 22px 22px;">
@@ -226,13 +227,13 @@
         </div>
         <div class="table-panel">
           <table class="reg" id="tableRo">
-            <thead><tr><th>Type</th><th>Risque ou opportunité</th><th>Vient de</th><th>Évaluation</th><th>Actions faites</th><th>Mis à jour</th><th></th></tr></thead>
+            <thead><tr><th>Type</th><th>Importance</th><th>Risque ou opportunité</th><th>Vient de</th><th>Évaluation</th><th>Actions faites</th><th>Mis à jour</th><th></th></tr></thead>
             <tbody id="tbRo"></tbody>
           </table>
         </div>
       </div>
 
-      <p class="footnote">Aucune méthode d'évaluation ni aucun rythme de revue n'est imposé (question 30 posée au préventeur) : l'évaluation est un texte, et chaque élément montre sa dernière mise à jour. Un élément qui n'est plus d'actualité se retire, il reste consultable. Les actions arrivent au Plan d'actions avec l'origine « Risques et opportunités ». La revue de direction reprend ce registre et ce qui y a changé pendant sa période.</p>
+      <p class="footnote">L'importance d'un risque ou d'une opportunité se dit sur trois niveaux, avec un texte d'évaluation ; le registre se tient au fil de l'eau et se revoit chaque année (question 30). Chaque élément montre sa dernière mise à jour. Un élément qui n'est plus d'actualité se retire, il reste consultable. Les actions arrivent au Plan d'actions avec l'origine « Risques et opportunités ». La revue de direction reprend ce registre et ce qui y a changé pendant sa période.</p>
     </div>
   </div>
 </div>
@@ -297,6 +298,9 @@
   // (plan-actions.html, generateContexteActionSeeds)
   const actionAuPlan = (x, a, actions) => (actions || lire("vigie_hse_actions")).find(p => p && p.id === VX.idAction(x, a)) || null;
   const chipType = (x) => `<span class="chip ${x.type === "Opportunité" ? "bon" : "attention"}">${esc(x.type || "Risque")}</span>`;
+  const TON_NIVEAU = { "Élevée": "mauvais", "Moyenne": "attention", "Faible": "neutre" };
+  const chipNiveau = (x) => VX.NIVEAUX.includes(x.niveau) ? `<span class="chip ${TON_NIVEAU[x.niveau]}">${esc(x.niveau)}</span>` : `<span class="chip neutre">À évaluer</span>`;
+  const rangNiveau = (x) => { const i = VX.NIVEAUX.indexOf(x.niveau); return i < 0 ? VX.NIVEAUX.length : i; };
   const chipRetire = (x) => x.archive ? ` <span class="chip neutre">Retiré</span>` : "";
   const nomDe = (x) => x.registre === "enjeu" ? "l'enjeu" : x.registre === "partie" ? "la partie intéressée" : x.type === "Opportunité" ? "l'opportunité" : "le risque";
   const TITRES_NOUVEAU = { enjeu: "Nouvel enjeu", partie: "Nouvelle partie intéressée", ro: "Nouveau risque ou opportunité" };
@@ -311,6 +315,11 @@
     $("kpiRo").textContent = s.risques + s.opportunites;
     $("kpiRoLabel").textContent = s.risques + s.opportunites ? `${s.risques} risque${s.risques > 1 ? "s" : ""} · ${s.opportunites} opportunité${s.opportunites > 1 ? "s" : ""}` : "Risques et opportunités";
     $("kpiActions").textContent = s.actionsPasFaites;
+    // revue annuelle du registre (question 30) : la dernière, et si elle est à faire
+    const brut = lire(CLE), rv = VX.revues(brut)[0], aFaire = VX.revueAFaire(brut, ajd());
+    $("revueNote").innerHTML = (rv ? `Dernière revue annuelle le ${esc(dateFr(rv.date))}${rv.par ? " par " + esc(rv.par) : ""}${rv.constat ? " : " + esc(rv.constat) : ""}.` : (VX.actifs(brut).length ? "Le registre n'a pas encore eu de revue annuelle." : ""))
+      + (aFaire ? ` <span class="chip attention">Revue annuelle à faire</span>` : rv ? ` Prochaine avant le ${esc(dateFr(VX.unAnApres(rv.date)))}.` : "")
+      + (peutGerer && VX.actifs(brut).length ? ` <button type="button" class="act-edit" id="btnRevueRegistre">Enregistrer la revue annuelle</button>` : "");
     $("majNote").textContent = s.derniereMaj ? `Dernière mise à jour du registre : ${dateFr(s.derniereMaj)}${s.retires ? ` · ${s.retires} élément${s.retires > 1 ? "s" : ""} retiré${s.retires > 1 ? "s" : ""}` : ""}.` : "Registre vide : commencez par les enjeux, puis les parties intéressées.";
     const vr = $("fRetires").checked, q = norm($("fTexte").value.trim());
     const garde = (x) => (vr || !x.archive) && (!q || norm(texteDe(x, l)).includes(q));
@@ -331,20 +340,30 @@
         <td class="long">${esc(x.besoins || "—")}</td>
         <td class="long">${esc(x.reponse || "—")}</td>
         ${nLies(x)}${maj(x)}${ouvrirBtn(x)}</tr>`).join("") : vide(6, "Aucune partie intéressée", "« Ajouter une partie intéressée » en décrit une.");
-    const ro = VX.du(l, "ro").filter(garde).sort(tri((a, b) => fr(a.type || "Risque", b.type || "Risque") || fr(a.texte || "", b.texte || "")));
+    const ro = VX.du(l, "ro").filter(garde).sort(tri((a, b) => rangNiveau(a) - rangNiveau(b) || fr(a.type || "Risque", b.type || "Risque") || fr(a.texte || "", b.texte || "")));
     $("tbRo").innerHTML = ro.length ? ro.map(x => {
       const src = VX.source(x, l), acts = VX.actionsDe(x), faites = acts.length - VX.pasFaites(x, actions).length;
       return `<tr${x.archive ? ' class="retire"' : ""}>
         <td>${chipType(x)}</td>
+        <td>${chipNiveau(x)}</td>
         <td class="long"><b>${esc(x.texte)}</b>${chipRetire(x)}</td>
         <td class="long">${src ? `${esc(VX.libelle(src))}<span class="ref">${esc(VX.REGISTRES[src.registre])}${src.archive ? " retiré" : ""}</span>` : "—"}</td>
         <td class="long">${esc(x.evaluation || "—")}</td>
         <td>${acts.length ? `${faites} / ${acts.length}` : (x.archive ? "—" : `<span class="chip attention">Sans action</span>`)}</td>
         ${maj(x)}${ouvrirBtn(x)}</tr>`;
-    }).join("") : vide(7, "Aucun risque ni opportunité", "« Ajouter un risque ou une opportunité » en décrit un.");
+    }).join("") : vide(8, "Aucun risque ni opportunité", "« Ajouter un risque ou une opportunité » en décrit un.");
   }
   $("fTexte").addEventListener("input", render);
   $("fRetires").addEventListener("change", render);
+  $("revueNote").addEventListener("click", (e) => {
+    if (!e.target.closest("#btnRevueRegistre") || !peutGerer) return;
+    const constat = prompt("Revue annuelle du registre : ce qui a été examiné, ce qui change (facultatif).", "");
+    if (constat === null) return;
+    try { modifierContexte(l => { l.push({ id: genId("ctx-rev"), registre: "revue", date: ajd(), par: moi, constat: constat.trim(), dateCreation: new Date().toISOString() }); }); }
+    catch(err){ alert("La revue n'a pas pu être enregistrée."); return; }
+    logAudit("Modification", "Revue annuelle du registre du contexte" + (constat.trim() ? " : " + constat.trim() : ""));
+    render();
+  });
   ["tbEnjeux", "tbParties", "tbRo"].forEach(id => $(id).addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); }));
   $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImprimer"><svg class="icon"><use href="#i-printer"/></svg> Imprimer le registre</button>`
     + `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
@@ -364,14 +383,15 @@
     const ro = [], acts = [];
     VX.du(l, "ro").forEach(x => {
       const src = VX.source(x, l);
-      ro.push({ "Identifiant": x.id, "Type": x.type || "Risque", "Risque ou opportunité": x.texte || "", "Vient de": src ? VX.REGISTRES[src.registre] + " : " + VX.libelle(src) : "", "Évaluation": x.evaluation || "", "Actions": VX.actionsDe(x).length, "Actions pas faites": VX.pasFaites(x, actions).length, "Mis à jour le": dateFr(VX.majLe(x)), "État": etat(x) });
+      ro.push({ "Identifiant": x.id, "Type": x.type || "Risque", "Importance": x.niveau || "", "Risque ou opportunité": x.texte || "", "Vient de": src ? VX.REGISTRES[src.registre] + " : " + VX.libelle(src) : "", "Évaluation": x.evaluation || "", "Actions": VX.actionsDe(x).length, "Actions pas faites": VX.pasFaites(x, actions).length, "Mis à jour le": dateFr(VX.majLe(x)), "État": etat(x) });
       VX.actionsDe(x).forEach(a => acts.push({ "Type": x.type || "Risque", "Risque ou opportunité": x.texte || "", "Action": a.description || "", "Responsable": a.responsable || "", "Échéance": dateFr(a.echeance), "État au Plan d'actions": VX.statutAction(x, a, actions) }));
     });
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(en, { header: ["Identifiant", "Enjeu", "Origine", "Thème", "Effet sur la démarche", "Risques et opportunités liés", "Mis à jour le", "État"] }), "Enjeux");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pa, { header: ["Identifiant", "Partie intéressée", "Besoins et attentes", "Obligation à suivre en conformité", "Comment on y répond", "Risques et opportunités liés", "Mis à jour le", "État"] }), "Parties intéressées");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ro, { header: ["Identifiant", "Type", "Risque ou opportunité", "Vient de", "Évaluation", "Actions", "Actions pas faites", "Mis à jour le", "État"] }), "Risques et opportunités");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ro, { header: ["Identifiant", "Type", "Importance", "Risque ou opportunité", "Vient de", "Évaluation", "Actions", "Actions pas faites", "Mis à jour le", "État"] }), "Risques et opportunités");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(acts, { header: ["Type", "Risque ou opportunité", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(VX.revues(lire(CLE)).map(r => ({ "Revue annuelle le": dateFr(r.date), "Par": r.par || "", "Constat": r.constat || "" })), { header: ["Revue annuelle le", "Par", "Constat"] }), "Revues annuelles");
     XLSX.writeFile(wb, `contexte_${jour}.xlsx`);
   });
 
@@ -407,6 +427,7 @@
       const optSrc = (z) => `<option value="${esc(z.id)}"${z.id === courant.sourceId ? " selected" : ""}>${esc(VX.libelle(z).slice(0, 90))}${z.archive ? " (retiré)" : ""}</option>`;
       champs = `<div class="form-grid">
           <div><label for="cType">Type</label><select id="cType"${dis}>${opts(VX.TYPES_RO, courant.type || "Risque")}</select></div>
+          <div><label for="cNiveau">Importance</label><select id="cNiveau"${dis}><option value="">— à évaluer —</option>${VX.NIVEAUX.map(n => `<option value="${esc(n)}"${n === courant.niveau ? " selected" : ""}>${esc(n)}</option>`).join("")}</select></div>
           <div class="span2"><label for="cSource">Vient de</label><select id="cSource"${dis}><option value="">Aucun enjeu ni partie</option>
             ${sources("enjeu").length ? `<optgroup label="Enjeux">${sources("enjeu").map(optSrc).join("")}</optgroup>` : ""}
             ${sources("partie").length ? `<optgroup label="Parties intéressées">${sources("partie").map(optSrc).join("")}</optgroup>` : ""}</select></div>
@@ -474,11 +495,12 @@
     const r = courant.registre;
     const x = Object.assign({}, courant, r === "enjeu" ? { origine: val("cOrigine"), theme: val("cTheme"), texte: val("cTexte"), effet: val("cEffet") }
       : r === "partie" ? { partie: val("cPartie"), besoins: val("cBesoins"), exigence: $("cExigence").checked, reponse: val("cReponse") }
-      : { type: val("cType"), sourceId: val("cSource"), texte: val("cTexte"), evaluation: val("cEvaluation") });
+      : { type: val("cType"), niveau: val("cNiveau"), sourceId: val("cSource"), texte: val("cTexte"), evaluation: val("cEvaluation") });
     if (r === "enjeu" && !x.texte){ alert("Décrivez l'enjeu."); return null; }
     if (r === "partie" && !x.partie){ alert("Nommez la partie intéressée."); return null; }
     if (r === "partie" && !x.besoins){ alert("Indiquez ses besoins et attentes."); return null; }
     if (r === "ro" && !x.texte){ alert("Décrivez le risque ou l'opportunité."); return null; }
+    if (r === "ro" && !VX.NIVEAUX.includes(x.niveau)){ alert("Indiquez son importance : élevée, moyenne ou faible."); return null; }
     if (r === "ro") x.actions = actionsFiche.filter(a => a && String(a.description || "").trim()).map(a => Object.assign({ id: a.id || genId("act") }, a));
     if (!x.sourceId) delete x.sourceId;
     if (!x.exigence) delete x.exigence;
@@ -573,13 +595,13 @@
     bloc.innerHTML = `
       <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "")}</div>
       <h1>Contexte et enjeux de la démarche de santé et de sécurité</h1>
-      <p class="pi-meta">Édité le ${esc(dateFr(jour))} · éléments en vigueur${VX.synthese(l, actions).derniereMaj ? " · dernière mise à jour du registre le " + esc(dateFr(VX.synthese(l, actions).derniereMaj)) : ""}</p>
+      <p class="pi-meta">Édité le ${esc(dateFr(jour))}${VX.revues(lire(CLE))[0] ? " · dernière revue annuelle le " + esc(dateFr(VX.revues(lire(CLE))[0].date)) : ""} · éléments en vigueur${VX.synthese(l, actions).derniereMaj ? " · dernière mise à jour du registre le " + esc(dateFr(VX.synthese(l, actions).derniereMaj)) : ""}</p>
       <h2>Enjeux internes et externes</h2>
       ${table(["Origine", "Thème", "Enjeu", "Effet sur la démarche"], a.filter(x => x.registre === "enjeu").map(x => [esc(x.origine || ""), esc(x.theme || ""), esc(x.texte || ""), esc(x.effet || "")]))}
       <h2>Parties intéressées</h2>
       ${table(["Partie intéressée", "Besoins et attentes", "Obligation", "Comment on y répond"], a.filter(x => x.registre === "partie").map(x => [esc(x.partie || ""), esc(x.besoins || ""), x.exigence ? "Oui" : "", esc(x.reponse || "")]))}
       <h2>Risques et opportunités pour la démarche</h2>
-      ${table(["Type", "Risque ou opportunité", "Vient de", "Évaluation", "Actions"], a.filter(x => x.registre === "ro").map(x => { const s = VX.source(x, l); return [esc(x.type || "Risque"), esc(x.texte || ""), s ? esc(VX.libelle(s)) : "", esc(x.evaluation || ""), VX.actionsDe(x).map(z => `${esc(z.description)}${z.responsable ? " — " + esc(z.responsable) : ""}${z.echeance ? ", " + esc(dateFr(z.echeance)) : ""} : ${esc(VX.statutAction(x, z, actions))}`).join("<br>") || "—"]; }))}`;
+      ${table(["Type", "Importance", "Risque ou opportunité", "Vient de", "Évaluation", "Actions"], a.filter(x => x.registre === "ro").map(x => { const s = VX.source(x, l); return [esc(x.type || "Risque"), esc(x.niveau || "À évaluer"), esc(x.texte || ""), s ? esc(VX.libelle(s)) : "", esc(x.evaluation || ""), VX.actionsDe(x).map(z => `${esc(z.description)}${z.responsable ? " — " + esc(z.responsable) : ""}${z.echeance ? ", " + esc(dateFr(z.echeance)) : ""} : ${esc(VX.statutAction(x, z, actions))}`).join("<br>") || "—"]; }))}`;
     document.body.appendChild(bloc);
     const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
     window.addEventListener("afterprint", nettoyer);

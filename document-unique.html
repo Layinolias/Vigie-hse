@@ -16,6 +16,7 @@
 <script src="assets/dates-locales.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <script src="assets/risques-ref.js"></script>
+<script src="assets/changements-ref.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
 <link rel="stylesheet" href="assets/commun.css">
 <style>
@@ -178,6 +179,10 @@
     table.reg tr{ break-inside:avoid; page-break-inside:avoid; }
     table.reg td.actions-float, table.reg th#thActions{ display:none !important; }
   }
+  /* Rappel : des changements demandent la mise à jour du Document unique (question 29) */
+  .du-rappel{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:14px 18px; margin-bottom:18px; border-left:3px solid var(--warning); }
+  .du-rappel .icon{ color:var(--warning); flex-shrink:0; }
+  .du-rappel p{ margin:0; flex:1 1 260px; font-size:13px; line-height:1.5; }
 </style>
 <link rel="stylesheet" href="assets/mobile.css">
 
@@ -220,6 +225,7 @@
     </header>
 
     <div class="content">
+      <div class="panel du-rappel" id="duRappel" style="display:none;"></div>
       <div class="print-header">
         <div class="print-brand">VIGIE HSE</div>
         <h1>Document Unique d'Évaluation des Risques Professionnels</h1>
@@ -715,6 +721,19 @@
 
   const printDateEl = $("printDate");
   if (printDateEl) printDateEl.textContent = new Date().toLocaleDateString('fr-FR');
+
+  // Gestion des changements (question 29) : les changements qui demandent une mise à jour du Document unique
+  try {
+    if (D.peut("changements", "consulter")){
+      const sv = (session && session.services) || ["*"], jourC = VigieDates.aujourdhui(), actC = JSON.parse(VigieStore.getItem("vigie_hse_actions") || "[]");
+      const chg = (JSON.parse(VigieStore.getItem(VigieChangements.CLE) || "[]") || []).filter(c => c && c.id && (sv.includes("*") || !c.service || sv.includes(c.service))
+        && VigieChangements.alertes(c, actC, jourC).some(a => a.code === "duerp"));
+      if (chg.length){
+        $("duRappel").innerHTML = `<svg class="icon"><use href="#i-alert-triangle"/></svg><p><b>${chg.length} changement${chg.length > 1 ? "s demandent" : " demande"} la mise à jour du Document unique</b> : ${chg.slice(0, 5).map(c => "« " + esc(c.titre || "") + " »" + (c.service ? " (" + esc(c.service) + ")" : "")).join(", ")}${chg.length > 5 ? "…" : ""}. Une fois l'évaluation revue, datez la mise à jour sur la fiche du changement.</p><a class="btn btn-ghost" href="changements.html?attention=duerp">Voir les changements</a>`;
+        $("duRappel").style.display = "";
+      }
+    }
+  } catch(e){}
 
   render();
 

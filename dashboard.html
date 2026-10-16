@@ -398,6 +398,7 @@
 <script src="assets/dates-locales.js"></script>
 <script src="assets/signalements-ref.js"></script>
 <script src="assets/politique-ref.js"></script>
+<script src="assets/changements-ref.js"></script>
 <script>
   (function(){
     try {
@@ -494,6 +495,7 @@
 
     <div class="content">
       <div class="panel politique-rappel" id="politiqueRappel" style="display:none;"></div>
+      <div class="panel politique-rappel" id="duerpRappel" style="display:none;"></div>
       <section class="kpi-row kpi-row-compact">
         <div class="panel kpi">
           <div class="kpi-top"><div class="kpi-icon blue"><svg class="icon"><use href="#i-activity"/></svg></div></div>
@@ -756,6 +758,18 @@
       if (pv){
         $("politiqueRappel").innerHTML = `<svg class="icon"><use href="#i-file-text"/></svg><p><b>Politique de santé et de sécurité : version ${esc(pv.version)}${pv.publieLe ? " du " + esc(pv.publieLe.split("-").reverse().join("/")) : ""}.</b> Prenez le temps de la lire, puis confirmez-en la lecture.</p><a class="btn btn-primary" href="politique-sante-securite.html">La lire</a>`;
         $("politiqueRappel").style.display = "";
+      }
+    } catch(e){}
+    // Gestion des changements (question 29) : pour qui les tient, les changements qui demandent une mise à jour du Document unique
+    try {
+      if (D.peut("changements", "gerer")){
+        const sv = (session && session.services) || ["*"], jourC = VigieDates.aujourdhui(), actC = JSON.parse(VigieStore.getItem("vigie_hse_actions") || "[]");
+        const chg = (JSON.parse(VigieStore.getItem(VigieChangements.CLE) || "[]") || []).filter(c => c && c.id && (sv.includes("*") || !c.service || sv.includes(c.service))
+          && VigieChangements.alertes(c, actC, jourC).some(a => a.code === "duerp"));
+        if (chg.length){
+          $("duerpRappel").innerHTML = `<svg class="icon"><use href="#i-alert-triangle"/></svg><p><b>Document unique à mettre à jour</b> : ${chg.length} changement${chg.length > 1 ? "s le demandent" : " le demande"} — ${chg.slice(0, 3).map(c => "« " + esc(c.titre || "") + " »").join(", ")}${chg.length > 3 ? "…" : ""}.</p><a class="btn btn-ghost" href="changements.html?attention=duerp">Voir</a>`;
+          $("duerpRappel").style.display = "";
+        }
       }
     } catch(e){}
     // Signalements (question 20) : à traiter pour qui les traite (ses services), sinon ses propres signalements

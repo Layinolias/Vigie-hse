@@ -189,6 +189,7 @@
           <input type="search" id="fTexte" placeholder="Rechercher : changement, responsable, risque, mesure" aria-label="Rechercher">
           <select id="fNature" aria-label="Filtrer par nature"></select>
           <select id="fEtat" aria-label="Filtrer par état"></select>
+          <select id="fAttention" aria-label="Filtrer par point d'attention"></select>
         </div>
         <div class="table-panel">
           <table class="reg" id="tableChangements">
@@ -198,7 +199,7 @@
         </div>
       </div>
 
-      <p class="footnote" data-mots>Rien n'est imposé : ni validation, ni consultation de la F3SCT, ni mise à jour du Document unique, ni délai de revue (question 29 posée au préventeur). Les points d'attention disent ce qui manque. Une mesure est faite quand elle l'est au Plan d'actions, où elle arrive avec l'origine « Changement ». La revue de direction reprend les changements de sa période.</p>
+      <p class="footnote" data-mots>Rien n'est imposé (question 29) : le préventeur valide, la consultation de la F3SCT reste au cas par cas, le Document unique est coché « à mettre à jour » par défaut et rappelé au tableau de bord, la revue se planifie librement. Les points d'attention disent ce qui manque. Une mesure est faite quand elle l'est au Plan d'actions, où elle arrive avec l'origine « Changement ». La revue de direction reprend les changements de sa période.</p>
     </div>
   </div>
 </div>
@@ -275,11 +276,15 @@
   const chipsAlertes = (l) => l.length ? l.map(a => `<span class="chip ${a.code === "duerp" ? "attention" : "mauvais"}">${esc(a.texte)}</span>`).join(" ") : "—";
   const RANG = { abandonne: 2, clos: 1 };
   // champs facultatifs effacés quand ils sont vides
-  const FACULTATIFS = ["service", "consulteLe", "valideLe", "validePar", "dateMiseEnOeuvre", "revueLe", "revuePar", "duerpLe"];
+  const FACULTATIFS = ["service", "consulteLe", "valideLe", "validePar", "dateMiseEnOeuvre", "revuePrevue", "revueLe", "revuePar", "duerpLe"];
 
   // ---------- Liste ----------
   $("fNature").innerHTML = `<option value="">Toutes les natures</option>` + VC.NATURES.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
   $("fEtat").innerHTML = `<option value="">Tous les états</option>` + Object.keys(VC.LIBELLES).map(k => `<option value="${k}">${esc(VC.LIBELLES[k])}</option>`).join("");
+  const ATTENTIONS = [["mesures", "Mesures pas faites"], ["sansValidation", "Mis en œuvre sans validation"], ["duerp", "Document unique à mettre à jour"], ["imprevu", "Effet imprévu sans action"], ["revueRetard", "Revue en retard"]];
+  $("fAttention").innerHTML = `<option value="">Tous les points d'attention</option>` + ATTENTIONS.map(([k, t]) => `<option value="${k}">${esc(t)}</option>`).join("");
+  // ?attention=duerp : le lien du rappel au tableau de bord
+  (function(){ const a = new URLSearchParams(location.search).get("attention"); if (a && ATTENTIONS.some(z => z[0] === a)) $("fAttention").value = a; })();
   function render(){
     const jour = ajd(), actions = lire("vigie_hse_actions");
     const l = tous().filter(visible);
@@ -288,9 +293,9 @@
     $("kpiMesures").textContent = s.mesuresEnAttente;
     $("kpiRevues").textContent = s.aRevoir;
     $("kpiDuerp").textContent = s.duerpAMettreAJour;
-    const et = $("fEtat").value, na = $("fNature").value, q = norm($("fTexte").value.trim());
+    const et = $("fEtat").value, na = $("fNature").value, at = $("fAttention").value, q = norm($("fTexte").value.trim());
     const vus = l.map(c => ({ c, e: VC.etat(c, jour) }))
-      .filter(({ c, e }) => (!et || e.code === et) && (!na || c.nature === na)
+      .filter(({ c, e }) => (!et || e.code === et) && (!na || c.nature === na) && (!at || VC.alertes(c, actions, jour).some(a => a.code === at))
         && (!q || norm([c.titre, c.nature, c.description, c.responsable, c.concernes, c.service, VC.risques(c).map(r => [r.texte].concat(VC.actionsDe(r).map(a => a.description)).join(" ")).join(" ")].join(" ")).includes(q)))
       .sort((a, b) => (RANG[a.e.code] || 0) - (RANG[b.e.code] || 0) || String(VC.quand(a.c)).localeCompare(String(VC.quand(b.c))) || fr(a.c.titre || "", b.c.titre || ""));
     $("tbody").innerHTML = vus.length ? vus.map(({ c, e }) => {
@@ -302,13 +307,14 @@
         <td style="white-space:normal;">${esc(c.responsable || "—")}</td>
         <td>${chipEtat(e)}</td>
         <td>${m.length ? `${faites} / ${m.length}` : "—"}</td>
-        <td style="white-space:normal;">${chipsAlertes(VC.alertes(c, actions))}</td>
+        <td style="white-space:normal;">${chipsAlertes(VC.alertes(c, actions, jour))}</td>
         <td><button type="button" class="act-edit" data-ouvrir="${esc(c.id)}">Ouvrir</button></td>
       </tr>`;
     }).join("") : `<tr class="empty-row"><td colspan="8">${l.length ? "Aucun changement avec ces filtres." : "Aucun changement pour le moment." + (peutGerer ? " « Nouveau changement » en prépare un." : "")}</td></tr>`;
   }
   $("fEtat").addEventListener("change", render);
   $("fNature").addEventListener("change", render);
+  $("fAttention").addEventListener("change", render);
   $("fTexte").addEventListener("input", render);
   $("tbody").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); });
   $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`
@@ -322,9 +328,9 @@
     l.forEach(c => {
       chg.push({ "Identifiant": c.id, "Changement": c.titre || "", "Nature": c.nature || "", "Périmètre": perimetreTexte(c), "Responsable": c.responsable || "", "Personnes concernées": c.concernes || "",
         "Ce qui change": c.description || "", "Mise en œuvre prévue le": dateFr(c.datePrevue), "Document unique à mettre à jour": c.duerp ? "Oui" : "Non", "Document unique mis à jour le": dateFr(c.duerpLe),
-        "Consultation le": dateFr(c.consulteLe), "Avis": c.avis || "", "Validé le": dateFr(c.valideLe), "Validé par": c.validePar || "", "Mis en œuvre le": dateFr(c.dateMiseEnOeuvre),
+        "Consultation le": dateFr(c.consulteLe), "Avis": c.avis || "", "Validé le": dateFr(c.valideLe), "Validé par": c.validePar || "", "Mis en œuvre le": dateFr(c.dateMiseEnOeuvre), "Revue prévue le": dateFr(c.revuePrevue),
         "Revu le": dateFr(c.revueLe), "Revu par": c.revuePar || "", "Constat de la revue": c.revueConstat || "", "État": VC.etat(c, jour).libelle,
-        "Points d'attention": VC.alertes(c, actions).map(a => a.texte).join(" ; "), "Motif d'abandon": c.annule ? c.motifAnnulation || "" : "" });
+        "Points d'attention": VC.alertes(c, actions, jour).map(a => a.texte).join(" ; "), "Motif d'abandon": c.annule ? c.motifAnnulation || "" : "" });
       VC.risques(c).forEach(r => {
         const type = r.imprevu ? "Effet imprévu" : "Risque";
         rqs.push({ "Changement": c.titre || "", "Type": type, "Description": r.texte || "", "Actions": VC.actionsDe(r).length });
@@ -332,7 +338,7 @@
       });
     });
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(chg, { header: ["Identifiant", "Changement", "Nature", "Périmètre", "Responsable", "Personnes concernées", "Ce qui change", "Mise en œuvre prévue le", "Document unique à mettre à jour", "Document unique mis à jour le", "Consultation le", "Avis", "Validé le", "Validé par", "Mis en œuvre le", "Revu le", "Revu par", "Constat de la revue", "État", "Points d'attention", "Motif d'abandon"] }), "Changements");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(chg, { header: ["Identifiant", "Changement", "Nature", "Périmètre", "Responsable", "Personnes concernées", "Ce qui change", "Mise en œuvre prévue le", "Document unique à mettre à jour", "Document unique mis à jour le", "Consultation le", "Avis", "Validé le", "Validé par", "Mis en œuvre le", "Revue prévue le", "Revu le", "Revu par", "Constat de la revue", "État", "Points d'attention", "Motif d'abandon"] }), "Changements");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rqs, { header: ["Changement", "Type", "Description", "Actions"] }), "Risques et effets");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(acts, { header: ["Changement", "Type", "Risque ou effet", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
     XLSX.writeFile(wb, `changements_${jour}.xlsx`);
@@ -354,7 +360,7 @@
     const x = id ? tous().find(c => c.id === id && visible(c)) : null;
     if (id && !x) return;
     if (!x && !peutGerer) return;
-    courant = x || { id: null, titre: "", nature: VC.NATURES[0], description: "", concernes: "", responsable: "", datePrevue: "", risques: [] };
+    courant = x || { id: null, titre: "", nature: VC.NATURES[0], description: "", concernes: "", responsable: "", datePrevue: "", risques: [], duerp: true };   // Document unique coché par défaut (question 29)
     const annule = !!courant.annule, dis = fige() ? " disabled" : "";
     risquesFiche = VC.risques(courant).map(r => Object.assign({}, r, { actions: (Array.isArray(r.actions) ? r.actions : []).filter(a => a && typeof a === "object").map(a => Object.assign({}, a)) }));
     const e = VC.etat(courant, ajd());
@@ -392,12 +398,13 @@
         <div class="sec"><h4>Validation et mise en œuvre</h4><p class="aide">La décision de mettre le changement en œuvre, une fois ses risques examinés et ses mesures prises, puis la date à laquelle il est entré en service.</p>
           <div class="form-grid">
             <div><label for="cValide">Validé le</label><input type="date" id="cValide" value="${esc(courant.valideLe || "")}"${dis}></div>
-            <div><label for="cValidePar">Validé par</label><input type="text" id="cValidePar" value="${esc(courant.validePar || "")}" maxlength="120" placeholder="Nom et fonction"${dis}></div>
+            <div><label for="cValidePar">Validé par</label><input type="text" id="cValidePar" value="${esc(courant.validePar || "")}" maxlength="120" placeholder="Le préventeur, en général"${dis}></div>
             <div><label for="cMiseEnOeuvre">Mis en œuvre le</label><input type="date" id="cMiseEnOeuvre" value="${esc(courant.dateMiseEnOeuvre || "")}"${dis}></div>
           </div>
         </div>
-        <div class="sec"><h4>Revue après la mise en œuvre</h4><p class="aide">Les effets du changement une fois en place : ce qui s'est passé comme prévu, et les effets imprévus, avec les actions qui en atténuent les conséquences.</p>
+        <div class="sec"><h4>Revue après la mise en œuvre</h4><p class="aide">Les effets du changement une fois en place : ce qui s'est passé comme prévu, et les effets imprévus, avec les actions qui en atténuent les conséquences. Sa date se fixe librement : une semaine, quelques mois après la mise en œuvre.</p>
           <div class="form-grid">
+            <div><label for="cRevuePrevue">Revue prévue le</label><input type="date" id="cRevuePrevue" value="${esc(courant.revuePrevue || "")}"${dis}></div>
             <div><label for="cRevue">Revu le</label><input type="date" id="cRevue" value="${esc(courant.revueLe || "")}"${dis}></div>
             <div><label for="cRevuePar">Revu par</label><input type="text" id="cRevuePar" value="${esc(courant.revuePar || "")}" maxlength="120" placeholder="Nom et fonction"${dis}></div>
             <div class="span3"><label for="cRevueConstat">Constat</label><textarea id="cRevueConstat" placeholder="Les mesures ont-elles suffi ? Le changement a-t-il eu des effets que l'on n'attendait pas ?"${dis}>${esc(courant.revueConstat || "")}</textarea></div>
@@ -484,13 +491,15 @@
       datePrevue: $("cPrevue").value, concernes: $("cConcernes").value.trim(), description: $("cDescription").value.trim(),
       duerp: $("cDuerp").checked || !!$("cDuerpLe").value, duerpLe: $("cDuerpLe").value, consulteLe: $("cConsulte").value, avis: $("cAvis").value.trim(),
       valideLe: $("cValide").value, validePar: $("cValidePar").value.trim(), dateMiseEnOeuvre: $("cMiseEnOeuvre").value,
-      revueLe: $("cRevue").value, revuePar: $("cRevuePar").value.trim(), revueConstat: $("cRevueConstat").value.trim(),
+      revuePrevue: $("cRevuePrevue").value, revueLe: $("cRevue").value, revuePar: $("cRevuePar").value.trim(), revueConstat: $("cRevueConstat").value.trim(),
     });
     if (!x.titre){ alert("Indiquez le changement."); return null; }
     if (!dateOk(x.datePrevue)){ alert("Indiquez la date de mise en œuvre prévue."); return null; }
     const passee = (d, quoi) => { if (!d) return false; if (!dateOk(d)){ alert(`La date ${quoi} n'est pas lisible.`); return true; } if (d > jour){ alert(`La date ${quoi} ne peut pas être dans le futur.`); return true; } return false; };
     if (passee(x.duerpLe, "de mise à jour du Document unique") || passee(x.consulteLe, "de consultation") || passee(x.valideLe, "de validation")
       || passee(x.dateMiseEnOeuvre, "de mise en œuvre") || passee(x.revueLe, "de la revue")) return null;
+    if (x.revuePrevue && !dateOk(x.revuePrevue)){ alert("La date de revue prévue n'est pas lisible."); return null; }
+    if (x.revuePrevue && x.dateMiseEnOeuvre && x.revuePrevue < x.dateMiseEnOeuvre){ alert("La revue prévue ne peut pas précéder la mise en œuvre."); return null; }
     if (x.valideLe && !x.validePar){ alert("Indiquez qui a validé le changement."); return null; }
     if (x.valideLe && x.dateMiseEnOeuvre && x.dateMiseEnOeuvre < x.valideLe){ alert("La mise en œuvre ne peut pas précéder la validation."); return null; }
     const rs = risquesFiche.filter(r => String(r.texte || "").trim() || VC.actionsDe(r).length);
@@ -579,7 +588,7 @@
   function imprimerFiche(id){
     const c = id ? tous().find(z => z.id === id && visible(z)) : null;
     if (!c) return;
-    const jour = ajd(), actions = lire("vigie_hse_actions"), e = VC.etat(c, jour), al = VC.alertes(c, actions);
+    const jour = ajd(), actions = lire("vigie_hse_actions"), e = VC.etat(c, jour), al = VC.alertes(c, actions, jour);
     const ancien = document.getElementById("chg-impression");
     if (ancien) ancien.remove();
     if (!document.getElementById("chg-impression-style")){
@@ -627,7 +636,7 @@
       <h2>Validation et mise en œuvre</h2>
       <p>${c.valideLe ? "Validé le " + esc(dateFr(c.valideLe)) + (c.validePar ? " par " + esc(c.validePar) : "") : "Pas encore validé."} ${c.dateMiseEnOeuvre ? "Mis en œuvre le " + esc(dateFr(c.dateMiseEnOeuvre)) + "." : ""}</p>
       ${c.dateMiseEnOeuvre ? `<h2>Revue après la mise en œuvre</h2>
-      <p>${c.revueLe ? "Revu le " + esc(dateFr(c.revueLe)) + (c.revuePar ? " par " + esc(c.revuePar) : "") : "Revue à faire."}</p>
+      <p>${c.revueLe ? "Revu le " + esc(dateFr(c.revueLe)) + (c.revuePar ? " par " + esc(c.revuePar) : "") : "Revue à faire" + (c.revuePrevue ? ", prévue le " + esc(dateFr(c.revuePrevue)) : "") + "."}</p>
       ${c.revueConstat ? `<p class="texte">${esc(c.revueConstat)}</p>` : ""}
       ${tableau(VC.imprevus(c), "Effet imprévu")}` : ""}
       ${al.length ? `<h2>Points d'attention</h2><p>${al.map(a => esc(a.texte)).join(" ; ")}.</p>` : ""}

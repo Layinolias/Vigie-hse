@@ -695,7 +695,7 @@
           origine: "Risques et opportunités",
           responsable: a.responsable || "",
           echeance: a.echeance || VigieDates.iso(today),
-          priorite: "Moyenne",
+          priorite: ({ "Élevée": "Haute", "Faible": "Basse" })[x.niveau] || "Moyenne",   // l'importance (question 30)
           statut: "À faire",
           dateCreation: VigieDates.iso(today),
         });

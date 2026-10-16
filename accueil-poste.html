@@ -713,12 +713,28 @@
         "Remise, explication et essai des équipements de protection individuelle (EPI) du poste",
         "Présentation des personnes ressources en santé-sécurité (conseiller ou assistant de prévention, secouristes, médecine de prévention)",
         "Explication de la façon de signaler un accident, un incident ou une situation dangereuse",
+        "Remise et explication de la politique de santé et de sécurité",
       ].map((t, i) => ({ id: "pt-d" + (i + 1), libelle: t })),
+      ajoutsVus: ["pt-d9"],
     };
+    // Points ajoutés au modèle par défaut après sa première version : la remise de la politique de santé et de sécurité
+    // (question 28, 2026-10-16). Ajoutés une seule fois à un modèle déjà enregistré ; retirés ensuite, ils ne reviennent pas.
+    // Les accueils existants gardent leurs points (copiés à leur création).
+    const TPL_DEFAULT_AJOUTS = ["pt-d9"];
     function loadTemplates(){
       let stored = [];
       try { const raw = VigieStore.getItem(TPL_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p.filter(t => t && t.id && Array.isArray(t.points)); } } catch(e){}
       const stockedDefault = stored.find(t => t.id === TPL_DEFAULT.id);
+      if (stockedDefault){
+        const vus = Array.isArray(stockedDefault.ajoutsVus) ? stockedDefault.ajoutsVus.slice() : [];
+        TPL_DEFAULT_AJOUTS.forEach(id => {
+          if (vus.includes(id)) return;
+          const pt = TPL_DEFAULT.points.find(p => p.id === id);
+          if (pt && !stockedDefault.points.some(p => p && p.id === id)) stockedDefault.points.push(Object.assign({}, pt));
+          vus.push(id);
+        });
+        stockedDefault.ajoutsVus = vus;
+      }
       const merged = [stockedDefault || TPL_DEFAULT].concat(stored.filter(t => t.id !== TPL_DEFAULT.id));
       try { VigieStore.setItem(TPL_KEY, JSON.stringify(merged)); } catch(e){}
       return merged;
@@ -788,6 +804,7 @@
       if (!points.length){ $("tplMsg").textContent = "Ajoutez au moins un point au parcours."; return; }
       const rec = { id: tplEditingId || ("tpl-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)), nom, description: $("tplDescription").value.trim(), points };
       const idx = TPL.findIndex(t => t.id === rec.id);
+      if (idx >= 0 && Array.isArray(TPL[idx].ajoutsVus)) rec.ajoutsVus = TPL[idx].ajoutsVus;   // un point retiré du modèle par défaut ne revient pas
       if (idx >= 0) TPL[idx] = rec; else TPL.push(rec);
       saveTemplates();
       logAudit("Accueil au poste", idx >= 0 ? "Modification" : "Création", `Modèle de parcours « ${rec.nom} » (${points.length} points)`);

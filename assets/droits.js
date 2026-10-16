@@ -40,8 +40,8 @@
     mod("signalements", "Santé au travail", "Signalements (presque-accidents)", [["signaler", "Signaler et suivre ses signalements"], ["traiter", "Traiter les signalements"]]),
     mod("duerp", "Sécurité & Risques", "Document unique", STD),
     mod("produits", "Sécurité & Risques", "Produits chimiques", STD),
-    // Gestion des changements (ISO 45001 § 8.1.3, 2026-10-15) : lue par le Manager, tenue par le Préventeur (avec
-    // Administrateur et RH) ; qui d'autre la lit (représentants du personnel ?) : question 29.
+    // Gestion des changements (ISO 45001 § 8.1.3, 2026-10-15) : lue par le Manager et les représentants du personnel,
+    // tenue par le Préventeur (avec Administrateur et RH) — question 29, réponse du 2026-10-16.
     mod("changements", "Sécurité & Risques", "Gestion des changements", STD),
     mod("actions", "Suivi", "Plan d'actions", STD),
     mod("sante-visites", "Suivi", "Santé & Visites", STD),
@@ -64,8 +64,8 @@
     // communiquée à tous —, tenue par le Préventeur (avec Administrateur et RH) ; question 28.
     mod("politique", "Ressources", "Politique santé-sécurité", STD),
     mod("dialogue-social", "Ressources", "Dialogue social", [["consulter", "Consulter"], ["participer", "Participer (représentant)"], ["direction", "Direction (répondre, clôturer)"]]),
-    // Contexte et enjeux (ISO 45001 § 4.1, 4.2 et 6.1.1, 2026-10-15) : lu par le Manager, tenu par le Préventeur (avec
-    // Administrateur et RH) ; question 30.
+    // Contexte et enjeux (ISO 45001 § 4.1, 4.2 et 6.1.1, 2026-10-15) : lu par le Manager et les représentants du personnel,
+    // tenu par le Préventeur (avec Administrateur et RH) — question 30, réponse du 2026-10-16.
     mod("contexte", "Pilotage", "Contexte et enjeux", STD),
     mod("reporting", "Pilotage", "Indicateurs & Reporting", [["consulter", "Consulter"]]),
     // Objectifs santé-sécurité (ISO 45001 § 6.2, 2026-10-13) : fixer, suivre, clore. Question 24 (2026-10-14) : fixés par le HSE
@@ -115,7 +115,7 @@
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
       atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer", changements: "gerer", contexte: "gerer" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
-      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter" } }
+      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", changements: "consulter", contexte: "consulter" } }
   ];
   var PREREGLE_PAR_ID = {};
   PREREGLES.forEach(function (p) { PREREGLE_PAR_ID[p.id] = p; });

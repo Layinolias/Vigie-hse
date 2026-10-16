@@ -75,6 +75,7 @@
       ["programme-prevention.html", "i-calendar", "Programme annuel de prévention"],
       ["audit-interne.html", "i-list", "Audit interne"],
       ["revue-direction.html", "i-target", "Revue de direction"],
+      ["preparation-iso.html", "i-check-square", "Préparation ISO 45001"],
       ["administration.html", "i-settings", "Administration"]] }
   ];
 
@@ -116,6 +117,7 @@
       "programme-prevention.html": lire("programme"),    // PAPRIPACT, question 25
       "audit-interne.html": lire("audit-interne"),       // ISO 45001 § 9.2
       "revue-direction.html": lire("revue-direction"),   // ISO 45001 § 9.3
+      "preparation-iso.html": lire("preparation-iso"),   // carte ISO 45001 en direct
       "administration.html": D.peut("administration", "gerer")
     };
   }

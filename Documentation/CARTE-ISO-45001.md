@@ -104,6 +104,6 @@ Deux points relèvent du métier et ne seront pas tranchés côté technique : l
 
 ## Et ensuite
 
-- Cette carte peut devenir les **données** de la « matrice de conformité intégrée » envisagée dans la roadmap (J1, idée 5) : une vue dans l'application qui relie chaque exigence aux enregistrements présents et signale en direct ce qui est prêt.
+- ✅ Depuis le 2026-10-16, cette carte a sa **vue en direct** : la page « Préparation ISO 45001 » (Pilotage) relie chaque exigence aux enregistrements présents et dit ce qui est prêt ou à reprendre. Sa colonne « couverture » est tenue dans `assets/preparation-ref.js` (`COUVERTURE`) : **la mettre à jour en même temps que cette carte**.
 - Faire la même carte pour **MASE** avant de choisir les chantiers : un écart commun aux deux référentiels passe devant.
 - Tenir cette carte à jour quand un module change ce qu'il produit (même règle que la checklist QA).

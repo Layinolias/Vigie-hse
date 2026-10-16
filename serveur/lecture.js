@@ -70,6 +70,7 @@ const PAGE_UNIQUE = {
   vigie_hse_ds_questions: 'dialogue-social', vigie_hse_ds_reunions: 'dialogue-social',
   vigie_hse_documents: 'documentation', vigie_hse_doc_types: 'documentation',
   vigie_hse_inspection_trames: 'inspections',
+  vigie_hse_grilles_audit: 'audit-interne',
   vigie_hse_modeles_convocation: 'sante-visites',
   vigie_hse_plans_urgence: ['urgences', 'plans-urgence'],   // tout compte lit les plans (question 19)
   vigie_hse_plans_urgence_parametres: ['urgences', 'plans-urgence'],   // et les rubriques exigées (question 21)

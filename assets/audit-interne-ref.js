@@ -12,6 +12,10 @@
        constats: [{ id, clause, type, texte, preuve, actions: [{ id, description, responsable, echeance }] }],
        annule (avec motifAnnulation, annuleLe, annulePar), auteur, dateCreation, modifiePar, dateMaj }
    Les actions d'un constat rejoignent le Plan d'actions sous « pa-audit-<audit>-<action> » (origine « Audit interne »).
+   Un audit peut se mener à partir d'une grille de questions (question 27 : « Trames : oui ») : ses questions sont copiées
+   dans l'audit (grille: { id, nom }, questions: [{ id, clause, texte, reponse (REPONSES ou vide), commentaire }]) et
+   chaque réponse « Non conforme » devient un constat (questionId). Les grilles (clé vigie_hse_grilles_audit) :
+   { id, nom, description, questions: [{ id, clause, texte }] } ; GRILLE_DEFAUT, une question par clause, se modifie.
 
    Aucune fréquence ni cycle n'est imposé (question 27) : la page montre, clause par clause, la date du dernier audit
    réalisé et celle du prochain prévu, et les clauses jamais auditées.
@@ -133,7 +137,80 @@
     return s;
   }
 
+  // ---------- Grilles de questions ----------
+  const CLE_GRILLES = "vigie_hse_grilles_audit";
+  const REPONSES = ["Conforme", "Non conforme", "Non concerné"];
+  const TONS_REPONSE = { "Conforme": "bon", "Non conforme": "mauvais", "Non concerné": "neutre" };
+  // une question par clause, formulée par l'application à partir de la norme : un point de départ, à adapter
+  const GRILLE_DEFAUT = { id: "grille-iso45001", nom: "Une question par clause d'ISO 45001", defaut: true,
+    description: "Grille proposée par l'application : une question par sous-clause des chapitres 4 à 10. À adapter à l'organisation.",
+    questions: [
+      ["4.1", "Les enjeux internes et externes qui pèsent sur la santé et la sécurité sont-ils identifiés et tenus à jour ?"],
+      ["4.2", "Les parties intéressées et leurs attentes sont-elles identifiées, et celles qui deviennent des obligations repérées ?"],
+      ["4.3", "Le périmètre du système (sites, services, activités) est-il défini et disponible ?"],
+      ["4.4", "Le système est-il établi, appliqué et tenu à jour (processus, responsabilités, documents) ?"],
+      ["5.1", "La direction montre-t-elle son engagement (moyens, revue de direction, soutien de l'encadrement) ?"],
+      ["5.2", "La politique est-elle signée, communiquée, comprise et revue ?"],
+      ["5.3", "Les rôles et responsabilités en santé et sécurité sont-ils attribués et connus ?"],
+      ["5.4", "Les travailleurs et leurs représentants sont-ils consultés et associés (instance, remontées, analyses) ?"],
+      ["6.1.1", "Les risques et opportunités pour la démarche sont-ils déterminés, avec des actions décidées ?"],
+      ["6.1.2", "Les dangers sont-ils identifiés et les risques évalués (Document unique à jour) ?"],
+      ["6.1.3", "Les exigences légales applicables sont-elles identifiées et tenues à jour ?"],
+      ["6.1.4", "Les actions sont-elles planifiées (responsable, échéance), et leur efficacité vérifiée ?"],
+      ["6.2", "Les objectifs sont-ils fixés, mesurables, suivis et communiqués ?"],
+      ["7.1", "Les ressources nécessaires (humaines, techniques, financières) sont-elles déterminées et fournies ?"],
+      ["7.2", "Les compétences requises sont-elles définies, et les formations et habilitations à jour ?"],
+      ["7.3", "Les travailleurs connaissent-ils la politique, les risques de leur poste et la conduite à tenir ?"],
+      ["7.4", "La communication interne et externe en santé et sécurité est-elle organisée ?"],
+      ["7.5", "Les informations documentées sont-elles à jour, disponibles et conservées ?"],
+      ["8.1.1", "Les mesures de prévention sont-elles appliquées sur le terrain ?"],
+      ["8.1.2", "Les mesures suivent-elles l'ordre : supprimer le danger, substituer, protéger collectivement, puis individuellement ?"],
+      ["8.1.3", "Les changements sont-ils maîtrisés avant leur mise en œuvre, et leurs effets revus ?"],
+      ["8.1.4", "Les achats, les entreprises extérieures et la sous-traitance sont-ils maîtrisés (plans de prévention) ?"],
+      ["8.2", "Les situations d'urgence sont-elles préparées, et les exercices réalisés ?"],
+      ["9.1.1", "La performance est-elle surveillée et mesurée (indicateurs, vérifications périodiques) ?"],
+      ["9.1.2", "La conformité aux exigences légales est-elle évaluée ?"],
+      ["9.2", "Le programme d'audit interne est-il établi et réalisé ?"],
+      ["9.3", "La revue de direction est-elle tenue, et ses décisions suivies ?"],
+      ["10.1", "Les possibilités d'amélioration sont-elles identifiées ?"],
+      ["10.2", "Les accidents, incidents et non-conformités sont-ils analysés et corrigés, et l'efficacité des actions vérifiée ?"],
+      ["10.3", "L'amélioration continue est-elle démontrée (tendances, résultats) ?"],
+    ].map((q, i) => ({ id: "gq-" + (i + 1), clause: q[0], texte: q[1] })) };
+  const valideGrille = g => g && typeof g === "object" && g.id && Array.isArray(g.questions);
+  // les grilles : la grille par défaut (telle qu'enregistrée si elle l'a été), puis les autres (always-merge)
+  function grilles(stockees) {
+    const l = (Array.isArray(stockees) ? stockees : []).filter(valideGrille);
+    const d = l.find(g => g.id === GRILLE_DEFAUT.id);
+    return [d || GRILLE_DEFAUT].concat(l.filter(g => g.id !== GRILLE_DEFAUT.id));
+  }
+  const questionsDe = au => (au && Array.isArray(au.questions) ? au.questions : []).filter(q => q && typeof q === "object" && q.id);
+  // ce que la grille d'un audit a donné
+  function bilanQuestions(au) {
+    const q = questionsDe(au);
+    return { total: q.length, repondues: q.filter(x => REPONSES.includes(x.reponse)).length, conformes: q.filter(x => x.reponse === "Conforme").length,
+      nonConformes: q.filter(x => x.reponse === "Non conforme").length, nonConcernes: q.filter(x => x.reponse === "Non concerné").length };
+  }
+  // Les constats qu'appellent les réponses : un constat « Non-conformité » par réponse « Non conforme » (créé s'il manque) ;
+  // le constat d'une question qui n'est plus « Non conforme » est retiré s'il n'a pas d'action, gardé sinon.
+  // → { constats, ajoutes, retires, gardes } (constats : la liste à enregistrer)
+  function constatsDesReponses(questions, constatsActuels, nouvelId) {
+    const q = (Array.isArray(questions) ? questions : []).filter(x => x && x.id), nc = new Set(q.filter(x => x.reponse === "Non conforme").map(x => x.id));
+    let ajoutes = 0, retires = 0, gardes = 0;
+    const garde = (Array.isArray(constatsActuels) ? constatsActuels : []).filter(k => {
+      if (!k || !k.questionId || nc.has(k.questionId)) return true;
+      if (actionsDe(k).length) { gardes++; return true; }
+      retires++; return false;
+    });
+    q.filter(x => nc.has(x.id) && !garde.some(k => k.questionId === x.id)).forEach(x => {
+      ajoutes++;
+      garde.push({ id: nouvelId(), clause: x.clause || "", type: "Non-conformité", texte: String(x.texte || "") + (String(x.commentaire || "").trim() ? " — " + String(x.commentaire).trim() : ""), preuve: "", actions: [], questionId: x.id });
+    });
+    return { constats: garde, ajoutes: ajoutes, retires: retires, gardes: gardes };
+  }
+
   racine.VigieAuditInterne = {
+    CLE_GRILLES: CLE_GRILLES, REPONSES: REPONSES, TONS_REPONSE: TONS_REPONSE, GRILLE_DEFAUT: GRILLE_DEFAUT, grilles: grilles,
+    questionsDe: questionsDe, bilanQuestions: bilanQuestions, constatsDesReponses: constatsDesReponses,
     CLE: CLE, CLAUSES: CLAUSES, CHAPITRES: CHAPITRES, TYPES: TYPES, TONS_TYPE: TONS_TYPE, LIBELLES: LIBELLES,
     nomClause: nomClause, clausesDe: clausesDe, constats: constats, actionsDe: actionsDe, idAction: idAction, annee: annee,
     etat: etat, statutAction: statutAction, ncSoldee: ncSoldee, synthese: synthese, couverture: couverture, pourPeriode: pourPeriode,

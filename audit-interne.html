@@ -104,6 +104,16 @@
   .constat .actions-constat{ margin-top:10px; }
   .constat .actions-constat .dyn-row > span{ flex:1 1 auto; font-size:12.8px; }
   .alerte{ font-size:12.5px; color:var(--danger); margin:8px 0 0; font-weight:600; }
+  /* Grille de questions (question 27) */
+  .questions{ display:grid; gap:8px; margin:10px 0 6px; }
+  .question{ background:var(--bg-2); border-radius:var(--r-sm); padding:10px 12px; }
+  .question .q-texte{ font-size:12.8px; line-height:1.5; margin-bottom:6px; }
+  .question .q-rep{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+  .sec .question .q-rep label{ display:flex; gap:6px; align-items:center; margin:0; font-size:12.5px; color:var(--text); font-weight:400; cursor:pointer; }
+  .question input[type="text"]{ width:100%; margin-top:8px; }
+  .grille-q{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .grille-q select{ flex:0 1 230px; min-width:0; }
+  .grille-q input{ flex:1 1 300px; min-width:0; }
   .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
 </style>
 <link rel="stylesheet" href="assets/mobile.css">
@@ -215,7 +225,22 @@
         </div>
       </div>
 
-      <p class="footnote">Aucune fréquence n'est imposée : la couverture montre, clause par clause, le dernier audit réalisé et le prochain prévu (question 27 : rythme libre). Une non-conformité est soldée quand toutes ses actions sont faites au Plan d'actions, où elles arrivent avec l'origine « Audit interne ». La revue de direction reprend les audits de sa période.</p>
+      <div class="panel" id="panelGrilles" style="padding:20px 22px 22px;display:none;">
+        <div class="panel-head">
+          <h3 class="panel-title">Grilles de questions</h3>
+          <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnNouvelleGrille"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle grille</button></div>
+        </div>
+        <p class="form-note" style="margin:0 0 12px;">Pour mener un audit à partir d'une liste de questions, comme les trames d'Inspection / Audit. Une grille se copie dans l'audit qui la choisit : la modifier ensuite ne change pas les audits déjà menés. La grille proposée par l'application (une question par clause) se modifie comme les autres.</p>
+        <div class="table-panel">
+          <table class="reg" id="tableGrilles">
+            <thead><tr><th>Grille</th><th>Questions</th><th>Clauses</th><th>Audits qui l'utilisent</th><th></th></tr></thead>
+            <tbody id="tbodyGrilles"></tbody>
+          </table>
+        </div>
+        <div id="grilleEdit"></div>
+      </div>
+
+      <p class="footnote">Aucune fréquence n'est imposée : la couverture montre, clause par clause, le dernier audit réalisé et le prochain prévu (question 27 : rythme libre). Une non-conformité est soldée quand toutes ses actions sont faites au Plan d'actions, où elles arrivent avec l'origine « Audit interne ». Un audit peut se mener à partir d'une grille de questions : une réponse « Non conforme » y devient un constat. La revue de direction reprend les audits de sa période.</p>
     </div>
   </div>
 </div>
@@ -287,6 +312,10 @@
   const actionAuPlan = (au, a, actions) => (actions || lire("vigie_hse_actions")).find(p => p && p.id === VA.idAction(au, a)) || null;
   const toutesActions = (au) => VA.constats(au).flatMap(k => VA.actionsDe(k));
   const chipEtat = (e) => `<span class="chip ${e.ton}">${esc(e.libelle)}</span>`;
+  // Grilles de questions (question 27, « Trames : oui ») : la grille proposée et celles de l'organisation (assets/audit-interne-ref.js)
+  const CLE_G = VA.CLE_GRILLES;
+  const toutesGrilles = () => VA.grilles(lire(CLE_G));
+  function modifierGrilles(modif){ const l = toutesGrilles(); modif(l); VigieStore.setItem(CLE_G, JSON.stringify(l)); }
   const quand = (au) => au.dateRealisee || au.datePrevue || "";
   // qui audite (question 27, réponse du 2026-10-16) : le préventeur ou l'ACFI — des suggestions, la saisie reste libre
   const AUDITEURS = VigieOrga.secteur() === "entreprise" ? ["Préventeur"] : ["Préventeur", "ACFI (centre de gestion)"];
@@ -331,7 +360,7 @@
       const acts = toutesActions(au), faites = acts.filter(a => VA.statutAction(au, a, actions) === "Fait").length;
       const cl = VA.clausesDe(au);
       return `<tr>
-        <td style="white-space:normal;min-width:240px;"><b>${esc(au.titre)}</b><span class="ref">${esc([cl.length ? "Clauses " + cl.join(", ") : "", au.criteres || ""].filter(Boolean).join(" · "))}</span></td>
+        <td style="white-space:normal;min-width:240px;"><b>${esc(au.titre)}</b><span class="ref">${esc([cl.length ? "Clauses " + cl.join(", ") : "", au.criteres || "", au.grille ? `Grille « ${au.grille.nom || ""} » : ${VA.bilanQuestions(au).repondues} / ${VA.bilanQuestions(au).total} répondues` : ""].filter(Boolean).join(" · "))}</span></td>
         <td style="white-space:normal;">${esc(perimetreTexte(au))}</td>
         <td class="mono">${esc(dateFr(au.datePrevue) || "—")}</td>
         <td class="mono">${esc(dateFr(au.dateRealisee) || "—")}</td>
@@ -371,12 +400,13 @@
   // ---------- Export ----------
   $("btnExport").addEventListener("click", () => {
     const jour = ajd(), actions = lire("vigie_hse_actions"), l = tous().filter(visible);
-    const audits = [], cons = [], acts = [];
+    const audits = [], cons = [], acts = [], grille = [];
     l.forEach(au => {
       const n = (t) => VA.constats(au).filter(k => k.type === t).length;
       audits.push({ "Identifiant": au.id, "Audit": au.titre || "", "Clauses": VA.clausesDe(au).join(", "), "Autres critères": au.criteres || "", "Périmètre": perimetreTexte(au),
         "Prévu le": dateFr(au.datePrevue), "Réalisé le": dateFr(au.dateRealisee), "Auditeur": au.auditeur || "", "Indépendance de l'auditeur": au.independance || "",
         "État": VA.etat(au, jour).libelle, "Motif d'annulation": au.annule ? au.motifAnnulation || "" : "", "Non-conformités": n("Non-conformité"), "Observations": n("Observation"), "Points forts": n("Point fort"), "Non concernés": n("Non concerné"), "Conclusion": au.conclusion || "" });
+      VA.questionsDe(au).forEach(q => grille.push({ "Audit": au.titre || "", "Grille": (au.grille && au.grille.nom) || "", "Clause": q.clause || "", "Question": q.texte || "", "Réponse": q.reponse || "", "Commentaire": q.commentaire || "" }));
       VA.constats(au).forEach(k => {
         cons.push({ "Audit": au.titre || "", "Réalisé le": dateFr(au.dateRealisee), "Clause": VA.nomClause(k.clause), "Type": k.type || "", "Constat": k.texte || "", "Preuve": k.preuve || "",
           "État": k.type === "Non-conformité" ? (!VA.actionsDe(k).length ? "Sans action" : VA.ncSoldee(au, k, actions) ? "Soldée" : "Action en cours") : "" });
@@ -390,12 +420,13 @@
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cons, { header: ["Audit", "Réalisé le", "Clause", "Type", "Constat", "Preuve", "État"] }), "Constats");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(acts, { header: ["Audit", "Constat", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cv, { header: ["Clause", "Audits réalisés", "Dernier audit", "Prochain audit prévu", "Non-conformités relevées", "Non-conformités ouvertes"] }), "Couverture");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(grille, { header: ["Audit", "Grille", "Clause", "Question", "Réponse", "Commentaire"] }), "Grilles");
     XLSX.writeFile(wb, `audit_interne_${jour}.xlsx`);
   });
   VigieImpression.brancher("btnExport", { table: "#tableAudits" });
 
   // ---------- Audit ouvert ----------
-  let courant = null, constatsFiche = [];
+  let courant = null, constatsFiche = [], questionsFiche = [], grilleFiche = null;
   // toute l'organisation, ou l'un des services de ses entrées (ceux du compte limité, s'il l'est)
   function optionsPerimetre(choisi){
     const groupes = VigieOrga.noms().map(n => ({ nom: n, l: VigieOrga.services(n).filter(s => !limite || mesServices.includes(s)) })).filter(g => g.l.length);
@@ -412,6 +443,8 @@
     courant = x || { id: null, titre: "", clauses: [], criteres: "", datePrevue: "", auditeur: "", independance: "", conclusion: "", constats: [] };
     const annule = !!courant.annule, dis = fige() ? " disabled" : "";
     constatsFiche = VA.constats(courant).map(k => Object.assign({}, k, { actions: (Array.isArray(k.actions) ? k.actions : []).filter(a => a && typeof a === "object").map(a => Object.assign({}, a)) }));
+    questionsFiche = VA.questionsDe(courant).map(q => Object.assign({}, q));
+    grilleFiche = courant.grille && courant.grille.id ? { id: courant.grille.id, nom: courant.grille.nom || "" } : null;
     const e = VA.etat(courant, ajd());
     const coche = new Set(VA.clausesDe(courant));
     const clauses = Object.keys(VA.CHAPITRES).map(ch => `<fieldset><legend>${esc(ch)} — ${esc(VA.CHAPITRES[ch])}</legend>`
@@ -436,6 +469,10 @@
           <div class="clauses">${clauses}</div>
           <div class="form-grid" style="margin-top:12px;"><div class="span3"><label for="cCriteres">Autres critères</label><input type="text" id="cCriteres" value="${esc(courant.criteres || "")}" maxlength="300" placeholder="Ex. : procédure interne de dotation des EPI"${dis}></div></div>
         </div>
+        <div class="sec"><h4>Grille de questions</h4><p class="aide">Pour mener l'audit à partir d'une grille : ses questions sont copiées dans l'audit et leurs clauses cochées. Chaque réponse « Non conforme » devient un constat de non-conformité à l'enregistrement, où ses actions se décident. Les grilles se préparent sous le programme.</p>
+          <div class="form-grid"><div class="span2"><label for="cGrille">Grille</label><select id="cGrille"${dis}>${optionsGrilles()}</select></div></div>
+          <div id="cQuestions"></div>
+        </div>
         <div class="sec"><h4>Constats</h4><p class="aide">Ce que l'audit a relevé, clause par clause, avec la preuve vue. Les actions d'un constat rejoignent le Plan d'actions (origine « Audit interne ») dès l'enregistrement ; leur état est celui du Plan d'actions, où elles se suivent ensuite. Une non-conformité est soldée quand toutes ses actions y sont faites.</p>
           <div id="cConstats"></div>
           ${fige() ? "" : `<button type="button" class="btn btn-ghost" id="btnAjoutConstat"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un constat</button>`}
@@ -450,6 +487,7 @@
         </div>` : ""}
       </form>`;
     rendreConstats();
+    rendreQuestions();
     $("fiche").style.display = "";
     $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
   }
@@ -512,18 +550,66 @@
       p.style.display = sans ? "" : "none";
     });
   }
+  // ---------- Grille de questions de l'audit ouvert ----------
+  function optionsGrilles(){
+    const l = toutesGrilles(), choisie = grilleFiche && grilleFiche.id;
+    return `<option value="">Sans grille</option>`
+      + l.map(g => `<option value="${esc(g.id)}"${g.id === choisie ? " selected" : ""}>${esc(g.nom || "Grille")} (${(g.questions || []).length} questions)</option>`).join("")
+      + (choisie && !l.some(g => g.id === choisie) ? `<option value="${esc(choisie)}" selected>${esc(grilleFiche.nom || "Grille")} (supprimée depuis)</option>` : "");
+  }
+  function rendreQuestions(){
+    const f = fige();
+    $("cQuestions").innerHTML = questionsFiche.length ? `<div class="questions">${questionsFiche.map((q, i) => `<div class="question" data-q="${i}">
+        <div class="q-texte">${q.clause ? `<b class="mono">${esc(q.clause)}</b> ` : ""}${esc(q.texte)}</div>
+        <div class="q-rep">${VA.REPONSES.map(r => `<label><input type="radio" name="q-${i}" value="${esc(r)}"${q.reponse === r ? " checked" : ""}${f ? " disabled" : ""}> ${esc(r)}</label>`).join("")}${f ? "" : `<button type="button" class="act-del" data-q-effacer="${i}">Effacer la réponse</button>`}</div>
+        ${f ? (q.commentaire ? `<p class="form-note">${esc(q.commentaire)}</p>` : "") : `<input type="text" data-q-commentaire="${i}" value="${esc(q.commentaire || "")}" placeholder="Commentaire, preuve vue" aria-label="Commentaire" maxlength="300">`}
+      </div>`).join("")}</div><p class="form-note" id="cBilanQ"></p>` : `<p class="vide">${grilleFiche ? "Grille sans question." : "Sans grille : l'audit se mène sur les clauses cochées."}</p>`;
+    majBilanQ();
+  }
+  function lireQuestions(){
+    if (fige() || !$("cQuestions")) return;
+    $("cQuestions").querySelectorAll(".question[data-q]").forEach(el => {
+      const q = questionsFiche[Number(el.dataset.q)];
+      if (!q) return;
+      const r = el.querySelector('input[type="radio"]:checked');
+      q.reponse = r ? r.value : "";
+      const c = el.querySelector("[data-q-commentaire]");
+      if (c) q.commentaire = c.value.trim();
+    });
+  }
+  function majBilanQ(){
+    const p = $("cBilanQ");
+    if (!p) return;
+    lireQuestions();
+    const b = VA.bilanQuestions({ questions: questionsFiche });
+    p.textContent = `${b.repondues} / ${b.total} répondues · ${b.conformes} conforme${b.conformes > 1 ? "s" : ""}, ${b.nonConformes} non conforme${b.nonConformes > 1 ? "s" : ""}, ${b.nonConcernes} non concernée${b.nonConcernes > 1 ? "s" : ""}.`
+      + (b.nonConformes && !fige() ? " Chaque non-conformité deviendra un constat à l'enregistrement." : "");
+  }
+  // choisir une grille : ses questions copiées dans l'audit, ses clauses cochées (les réponses déjà saisies sont perdues, après confirmation)
+  function changerGrille(id){
+    lireQuestions();
+    if (questionsFiche.some(q => q.reponse || q.commentaire) && !confirm("Changer de grille ? Les réponses déjà saisies seront perdues.")){ $("cGrille").value = grilleFiche ? grilleFiche.id : ""; return; }
+    const g = id ? toutesGrilles().find(z => z.id === id) : null;
+    grilleFiche = g ? { id: g.id, nom: g.nom || "" } : null;
+    questionsFiche = g ? (g.questions || []).filter(q => q && String(q.texte || "").trim()).map(q => ({ id: q.id, clause: q.clause || "", texte: q.texte, reponse: "", commentaire: "" })) : [];
+    questionsFiche.forEach(q => { const c = $("fiche").querySelector(`[data-clause="${q.clause}"]`); if (c && !c.disabled) c.checked = true; });
+    rendreQuestions();
+  }
   function fermer(){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; courant = null; }
 
   // Relit le formulaire dans l'audit enregistré.
   function enregistrer(){
     if (fige()) return null;
     lireConstats();
+    lireQuestions();
     const jour = ajd();
     const x = Object.assign({}, courant, {
       titre: $("cTitre").value.trim(), datePrevue: $("cPrevue").value, dateRealisee: $("cRealisee").value,
       service: $("cService").value || undefined, auditeur: $("cAuditeur").value.trim(),
       clauses: [...$("fiche").querySelectorAll("[data-clause]")].filter(c => c.checked).map(c => c.dataset.clause),
       criteres: $("cCriteres").value.trim(), conclusion: $("cConclusion").value.trim(),
+      grille: grilleFiche ? { id: grilleFiche.id, nom: grilleFiche.nom } : undefined,
+      questions: questionsFiche.length ? questionsFiche.map(q => ({ id: q.id, clause: q.clause || "", texte: q.texte || "", reponse: VA.REPONSES.includes(q.reponse) ? q.reponse : "", commentaire: q.commentaire || "" })) : undefined,
     });
     if (!x.titre){ alert("Indiquez ce qui est audité."); return null; }
     if (!dateOk(x.datePrevue)){ alert("Indiquez la date prévue de l'audit."); return null; }
@@ -533,13 +619,17 @@
       if (x.dateRealisee > jour){ alert("La date de réalisation ne peut pas être dans le futur."); return null; }
       if (!x.auditeur){ alert("Indiquez l'auditeur : l'audit est réalisé."); return null; }
     }
-    const ks = constatsFiche.filter(k => String(k.texte || "").trim() || VA.actionsDe(k).length);
+    if ((x.questions || []).some(q => q.reponse) && !x.dateRealisee){ alert("Indiquez la date de réalisation : la grille a des réponses."); return null; }
+    // une réponse « Non conforme » devient un constat ; celui d'une réponse changée part s'il n'a pas d'action
+    const cr = VA.constatsDesReponses(x.questions || [], constatsFiche, () => genId("k"));
+    const ks = cr.constats.filter(k => String(k.texte || "").trim() || VA.actionsDe(k).length);
     if (ks.some(k => !String(k.texte || "").trim())){ alert("Décrivez chaque constat qui porte une action."); return null; }
     if (ks.length && !x.dateRealisee){ alert("Indiquez la date de réalisation : l'audit a des constats."); return null; }
-    x.constats = ks.map(k => ({ id: k.id || genId("k"), clause: k.clause || "", type: VA.TYPES.includes(k.type) ? k.type : VA.TYPES[0], texte: String(k.texte).trim(), preuve: String(k.preuve || "").trim(),
-      actions: (k.actions || []).filter(a => a && String(a.description || "").trim()).map(a => Object.assign({ id: a.id || genId("act") }, a)) }));
+    x.constats = ks.map(k => Object.assign({ id: k.id || genId("k"), clause: k.clause || "", type: VA.TYPES.includes(k.type) ? k.type : VA.TYPES[0], texte: String(k.texte).trim(), preuve: String(k.preuve || "").trim(),
+      actions: (k.actions || []).filter(a => a && String(a.description || "").trim()).map(a => Object.assign({ id: a.id || genId("act") }, a)) }, k.questionId ? { questionId: k.questionId } : {}));
     if (!x.dateRealisee) delete x.dateRealisee;
     if (!x.service) delete x.service;
+    if (!x.questions){ delete x.questions; delete x.grille; }
     const nouveau = !x.id;
     if (nouveau){ x.id = genId("au"); x.auteur = moi; x.dateCreation = new Date().toISOString(); }
     else { x.modifiePar = moi; x.dateMaj = new Date().toISOString(); }
@@ -547,17 +637,19 @@
       modifierAudits(l => {
         const i = l.findIndex(a => a && a.id === x.id);
         if (i < 0) l.push(x);
-        else { const y = Object.assign({}, l[i], x); if (!x.dateRealisee) delete y.dateRealisee; if (!x.service) delete y.service; l[i] = y; }
+        else { const y = Object.assign({}, l[i], x); if (!x.dateRealisee) delete y.dateRealisee; if (!x.service) delete y.service; if (!x.questions){ delete y.questions; delete y.grille; } l[i] = y; }
       });
     } catch(e){ alert("L'audit n'a pas pu être enregistré."); return null; }
     const nc = x.constats.filter(k => k.type === "Non-conformité").length;
-    logAudit(nouveau ? "Création" : "Modification", `Audit interne « ${x.titre} »${x.dateRealisee ? ` réalisé le ${dateFr(x.dateRealisee)}, ${x.constats.length} constat(s) dont ${nc} non-conformité(s)` : ` prévu le ${dateFr(x.datePrevue)}`}`);
+    logAudit(nouveau ? "Création" : "Modification", `Audit interne « ${x.titre} »${x.dateRealisee ? ` réalisé le ${dateFr(x.dateRealisee)}, ${x.constats.length} constat(s) dont ${nc} non-conformité(s)` : ` prévu le ${dateFr(x.datePrevue)}`}${x.grille ? `, grille « ${x.grille.nom} » ${VA.bilanQuestions(x).repondues}/${VA.bilanQuestions(x).total}` : ""}`);
     return x;
   }
 
   $("fiche").addEventListener("click", (e) => {
     if (e.target.closest("#btnFermer")){ fermer(); return; }
     if (e.target.closest("#btnRapport")){ imprimerRapport(courant && courant.id); return; }
+    const qe = e.target.closest("[data-q-effacer]");
+    if (qe){ lireQuestions(); const q = questionsFiche[Number(qe.dataset.qEffacer)]; if (q){ q.reponse = ""; rendreQuestions(); } return; }
     if (e.target.closest("#btnAjoutConstat")){
       lireConstats();
       const coches = [...$("fiche").querySelectorAll("[data-clause]")].filter(c => c.checked).map(c => c.dataset.clause);
@@ -604,7 +696,10 @@
       fermer(); render();
     }
   });
-  $("fiche").addEventListener("change", () => { if (courant) majAlertes(); });
+  $("fiche").addEventListener("change", (e) => {
+    if (e.target.id === "cGrille"){ changerGrille(e.target.value); return; }
+    if (courant){ majAlertes(); majBilanQ(); }
+  });
   $("fiche").addEventListener("submit", (e) => {
     e.preventDefault();
     const x = enregistrer();
@@ -654,6 +749,7 @@
       <h2>Critères</h2>
       ${cl.length ? `<p>Clauses d'ISO 45001 : ${cl.map(c => esc(VA.nomClause(c))).join(" ; ")}.</p>` : ""}
       ${au.criteres ? `<p>Autres critères : ${esc(au.criteres)}</p>` : ""}
+      ${VA.questionsDe(au).length ? `<h2>Grille de questions — ${esc((au.grille && au.grille.nom) || "")}</h2><table><thead><tr><th>Clause</th><th>Question</th><th>Réponse</th><th>Commentaire</th></tr></thead><tbody>${VA.questionsDe(au).map(q => `<tr><td>${esc(q.clause || "")}</td><td>${esc(q.texte || "")}</td><td>${esc(q.reponse || "—")}</td><td>${esc(q.commentaire || "")}</td></tr>`).join("")}</tbody></table>` : ""}
       <h2>Auditeur</h2>
       <p>${esc(au.auditeur || "—")}</p>
       ${au.independance ? `<p class="texte">Indépendance : ${esc(au.independance)}</p>` : ""}
@@ -667,6 +763,89 @@
     window.addEventListener("afterprint", nettoyer);
     window.print();
   }
+
+  // ---------- Grilles de questions (qui gère l'audit interne) ----------
+  let grilleEnCours = null;
+  function rendreGrilles(){
+    if (!peutGerer) return;
+    $("panelGrilles").style.display = "";
+    const audits = tous();
+    $("tbodyGrilles").innerHTML = toutesGrilles().map(g => {
+      const q = (g.questions || []).filter(x => x && String(x.texte || "").trim()), cl = new Set(q.map(x => x.clause).filter(Boolean));
+      return `<tr>
+        <td style="white-space:normal;min-width:240px;"><b>${esc(g.nom || "Grille")}</b>${g.id === VA.GRILLE_DEFAUT.id ? ` <span class="chip neutre">Proposée</span>` : ""}${g.description ? `<span class="ref">${esc(g.description)}</span>` : ""}</td>
+        <td class="num">${q.length}</td><td class="num">${cl.size}</td>
+        <td class="num">${audits.filter(a => a.grille && a.grille.id === g.id).length}</td>
+        <td><button type="button" class="act-edit" data-grille="${esc(g.id)}">Modifier</button></td>
+      </tr>`;
+    }).join("");
+  }
+  function ouvrirGrille(id){
+    const g = id ? toutesGrilles().find(z => z.id === id) : null;
+    grilleEnCours = g ? JSON.parse(JSON.stringify(g)) : { id: null, nom: "", description: "", questions: [{ id: genId("gq"), clause: "", texte: "" }] };
+    rendreEditeurGrille();
+    $("grilleEdit").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function lireEditeurGrille(){
+    if (!grilleEnCours || !$("gNom")) return;
+    grilleEnCours.nom = $("gNom").value.trim();
+    grilleEnCours.description = $("gDescription").value.trim();
+    $("grilleEdit").querySelectorAll(".grille-q[data-i]").forEach(row => {
+      const q = grilleEnCours.questions[Number(row.dataset.i)];
+      if (q){ q.clause = row.querySelector("[data-g-clause]").value; q.texte = row.querySelector("[data-g-texte]").value.trim(); }
+    });
+  }
+  function rendreEditeurGrille(){
+    const g = grilleEnCours;
+    if (!g){ $("grilleEdit").innerHTML = ""; return; }
+    const optClause = (c) => `<option value="">Autre critère</option>` + VA.CLAUSES.map(([k, nom]) => `<option value="${esc(k)}"${k === c ? " selected" : ""}>${esc(k)} ${esc(nom)}</option>`).join("");
+    $("grilleEdit").innerHTML = `<form id="grilleForm" class="sec" novalidate>
+        <h4>${g.id ? "Modifier la grille" : "Nouvelle grille"}</h4>
+        <div class="form-grid">
+          <div class="span3"><label for="gNom">Nom de la grille</label><input type="text" id="gNom" value="${esc(g.nom || "")}" maxlength="150" placeholder="Ex. : audit des entreprises extérieures"></div>
+          <div class="span3"><label for="gDescription">Description</label><input type="text" id="gDescription" value="${esc(g.description || "")}" maxlength="300"></div>
+        </div>
+        <div style="margin-top:12px;">${(g.questions || []).map((q, i) => `<div class="grille-q" data-i="${i}"><select data-g-clause aria-label="Clause">${optClause(q.clause || "")}</select><input type="text" data-g-texte value="${esc(q.texte || "")}" placeholder="Question" aria-label="Question" maxlength="300"><button type="button" class="act-del" data-g-retirer="${i}">Suppr.</button></div>`).join("") || `<p class="vide">Aucune question.</p>`}</div>
+        <button type="button" class="btn btn-ghost" id="gAjout"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une question</button>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Enregistrer la grille</button>
+          <button type="button" class="btn btn-ghost" id="gFermer">Fermer</button>
+          ${g.id && g.id !== VA.GRILLE_DEFAUT.id ? `<button type="button" class="act-del" id="gSupprimer" style="margin-left:auto;">Supprimer la grille</button>` : ""}
+        </div>
+      </form>`;
+  }
+  if (peutGerer){
+    $("btnNouvelleGrille").addEventListener("click", () => ouvrirGrille(null));
+    $("tbodyGrilles").addEventListener("click", (e) => { const b = e.target.closest("[data-grille]"); if (b) ouvrirGrille(b.dataset.grille); });
+    $("grilleEdit").addEventListener("click", (e) => {
+      if (e.target.closest("#gAjout")){ lireEditeurGrille(); grilleEnCours.questions.push({ id: genId("gq"), clause: "", texte: "" }); rendreEditeurGrille(); return; }
+      const r = e.target.closest("[data-g-retirer]");
+      if (r){ lireEditeurGrille(); grilleEnCours.questions.splice(Number(r.dataset.gRetirer), 1); rendreEditeurGrille(); return; }
+      if (e.target.closest("#gFermer")){ grilleEnCours = null; rendreEditeurGrille(); return; }
+      if (e.target.closest("#gSupprimer")){
+        const g = grilleEnCours;
+        if (!g || !g.id || !confirm(`Supprimer la grille « ${g.nom} » ? Les audits qui l'ont utilisée gardent leurs questions et leurs réponses.`)) return;
+        try { modifierGrilles(l => { const i = l.findIndex(z => z.id === g.id); if (i >= 0) l.splice(i, 1); }); }
+        catch(err){ alert("La grille n'a pas pu être supprimée."); return; }
+        logAudit("Suppression", `Grille d'audit interne « ${g.nom} »`);
+        grilleEnCours = null; rendreEditeurGrille(); rendreGrilles();
+      }
+    });
+    $("grilleEdit").addEventListener("submit", (e) => {
+      e.preventDefault();
+      lireEditeurGrille();
+      const g = grilleEnCours;
+      if (!g.nom){ alert("Indiquez le nom de la grille."); return; }
+      const qs = g.questions.filter(q => q.texte).map(q => ({ id: q.id || genId("gq"), clause: q.clause || "", texte: q.texte }));
+      if (!qs.length){ alert("Ajoutez au moins une question."); return; }
+      const x = Object.assign({}, g, { id: g.id || genId("grille"), questions: qs });
+      try { modifierGrilles(l => { const i = l.findIndex(z => z.id === x.id); if (i >= 0) l[i] = x; else l.push(x); }); }
+      catch(err){ alert("La grille n'a pas pu être enregistrée."); return; }
+      logAudit(g.id ? "Modification" : "Création", `Grille d'audit interne « ${x.nom} » (${qs.length} questions)`);
+      grilleEnCours = null; rendreEditeurGrille(); rendreGrilles();
+    });
+  }
+  rendreGrilles();
 
   render();
   // ?ouvrir=<id>

@@ -69,7 +69,7 @@ const REGLES = {
   objectifs: GERER('objectifs'),
   exigences: GERER('conformite'),
   programmes: GERER('programme'),
-  audits_internes: GERER('audit-interne'),
+  audits_internes: GERER('audit-interne'), grilles_audit: GERER('audit-interne'),
   // Politique (§ 5.2) : chacun ajoute sa prise de connaissance ; qui gère la politique modifie, supprime
   politiques: GERER('politique'), politique_lectures: regle('politique', 'gerer', 'consulter'),
   changements: GERER('changements'),

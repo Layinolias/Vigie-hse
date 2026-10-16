@@ -827,7 +827,7 @@ Le Plan d'actions n'a aujourd'hui **ni coût estimé ni indicateur de résultat*
 > - **Rythme** : aucun imposé ; la couverture des clauses reste l'indication.
 > - **Auditeur** : « Préventeur » et « ACFI (centre de gestion) » proposés à la saisie (le préventeur seul en secteur entreprise), saisie libre. Le champ « indépendance de l'auditeur » n'est plus demandé ; une valeur déjà saisie reste lisible dans la fiche, le rapport et l'export.
 > - **Constats** : quatrième type « Non concerné » (ce qui est examiné ne s'applique pas), compté à part dans la liste, la synthèse et l'export.
-> - **Trames** : mener un audit à partir d'une grille de questions — chantier suivant.
+> - **Trames** : fait le 2026-10-16 — un audit se mène, au choix, à partir d'une **grille de questions** (Conforme, Non conforme, Non concerné, commentaire) ; une réponse « Non conforme » devient un constat de non-conformité. Une grille est proposée (une question par clause, modifiable) ; qui gère l'audit interne prépare les siennes.
 
 ---
 

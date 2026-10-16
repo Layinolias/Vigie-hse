@@ -14,7 +14,9 @@
    Une prise de connaissance (clé vigie_hse_politique_lectures) : { id: "lu-<version>-<compte>", versionId, auteur, le }
    — chacun ajoute la sienne ; le serveur ne transmet à un compte que les siennes, sauf à qui gère la politique.
 
-   Aucun rythme de revue n'est imposé (question 28) : la date de la prochaine revue se fixe version par version.
+   Rythme (question 28, réponse du 2026-10-16) : la prochaine revue est proposée un an après la signature, ou après la
+   dernière revue, et reste modifiable. Engagement « risques psychosociaux » ajouté aux six de la norme. La remise de la
+   politique aux agents se trace à l'Accueil au poste (point du parcours par défaut).
    ========================================================================== */
 (function (racine) {
   "use strict";
@@ -29,6 +31,7 @@
     ["dangers", "Éliminer les dangers et réduire les risques"],
     ["amelioration", "Améliorer en continu le système de management de la santé et de la sécurité"],
     ["participation", "Consulter les travailleurs et leurs représentants, et les faire participer"],
+    ["rps", "Prévenir les risques psychosociaux"],
   ];
   const CONCLUSIONS = ["Maintenue", "À modifier"];
   const dateOk = d => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d);
@@ -93,7 +96,15 @@
       engagements: engagementsCouverts(v).length, engagementsTotal: ENGAGEMENTS.length };
   }
 
+  // un an après une date « AAAA-MM-JJ », à l'heure locale (le rythme proposé par défaut)
+  function unAnApres(iso) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "") || !racine.VigieDates) return "";
+    const d = racine.VigieDates.lire(iso); d.setFullYear(d.getFullYear() + 1);
+    return racine.VigieDates.iso(d);
+  }
+
   racine.VigiePolitique = {
+    unAnApres: unAnApres,
     CLE: CLE, CLE_LECTURES: CLE_LECTURES, ENGAGEMENTS: ENGAGEMENTS, CONCLUSIONS: CONCLUSIONS,
     enVigueur: enVigueur, brouillon: brouillon, historique: historique, prochainNumero: prochainNumero,
     engagementsCouverts: engagementsCouverts, engagementsManquants: engagementsManquants,

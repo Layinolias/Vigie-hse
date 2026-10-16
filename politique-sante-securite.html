@@ -302,7 +302,7 @@
       <div class="lecture${lue ? " faite" : ""}" id="maLecture">${lue
         ? `<svg class="icon"><use href="#i-check-circle"/></svg> Vous en avez pris connaissance le ${esc(dateFr(jourDe(lue.le)))}.`
         : `<span>Après l'avoir lue, confirmez-le : votre prise de connaissance est enregistrée à votre nom, avec la date.</span><button type="button" class="btn btn-primary" id="btnLu">J'en ai pris connaissance</button>`}</div>
-      ${peutGerer ? `<div class="sec"><h4>Engagements attendus par ISO 45001 (§ 5.2)</h4><p class="aide">Cochés par le rédacteur : ce que le texte couvre. ${VP.engagementsManquants(v).length ? `<b>${VP.engagementsManquants(v).length} non couvert(s).</b>` : "Tous sont couverts."}</p>${blocEngagements(v)}</div>` : ""}`;
+      ${peutGerer ? `<div class="sec"><h4>Engagements attendus</h4><p class="aide">Les six d'ISO 45001 (§ 5.2), et la prévention des risques psychosociaux. Cochés par le rédacteur : ce que le texte couvre. ${VP.engagementsManquants(v).length ? `<b>${VP.engagementsManquants(v).length} non couvert(s).</b>` : "Tous sont couverts."}</p>${blocEngagements(v)}</div>` : ""}`;
   }
 
   // ---------- Brouillon (rédaction d'une version) ----------
@@ -327,9 +327,9 @@
           <div><label for="dSignataire">Signataire</label><input type="text" id="dSignataire" value="${esc(b.signataire || "")}" maxlength="120" placeholder="Nom de qui la signe"></div>
           <div><label for="dFonction">Fonction</label><input type="text" id="dFonction" value="${esc(b.fonction || "")}" maxlength="120" placeholder="Autorité qui engage l'organisation"></div>
           <div><label for="dSignature">Signée le</label><input type="date" id="dSignature" value="${esc(b.dateSignature || "")}"></div>
-          <div><label for="dRevue">Prochaine revue (facultatif)</label><input type="date" id="dRevue" value="${esc(b.prochaineRevue || "")}"></div>
+          <div><label for="dRevue">Prochaine revue (un an par défaut)</label><input type="date" id="dRevue" value="${esc(b.prochaineRevue || "")}"></div>
         </div>
-        <div class="sec"><h4>Engagements attendus par ISO 45001 (§ 5.2)</h4><p class="aide">Cochez ce que le texte couvre. Une politique peut être mise en vigueur sans les couvrir tous, mais un auditeur les cherchera.</p>
+        <div class="sec"><h4>Engagements attendus</h4><p class="aide">Les six d'ISO 45001 (§ 5.2), et la prévention des risques psychosociaux. Cochez ce que le texte couvre. Une politique peut être mise en vigueur sans les couvrir tous, mais un auditeur les cherchera.</p>
           <div class="engagements">${VP.ENGAGEMENTS.map(([k, t]) => `<label><input type="checkbox" data-engagement="${esc(k)}"${coches.includes(k) ? " checked" : ""}><span>${esc(t)}</span></label>`).join("")}</div>
         </div>
         <div class="sec"><h4>Prise de connaissance</h4>
@@ -378,7 +378,7 @@
     if (x.dateSignature > jour){ alert("La date de signature ne peut pas être dans le futur."); return; }
     if (x.prochaineRevue && (!dateOk(x.prochaineRevue) || x.prochaineRevue <= x.dateSignature)){ alert("La prochaine revue doit venir après la date de signature."); return; }
     const manquants = VP.engagementsManquants(x);
-    if (manquants.length && !confirm(`Le texte ne couvre pas ${manquants.length} des ${VP.ENGAGEMENTS.length} engagements attendus par ISO 45001 :\n- ${manquants.map(m => m[1]).join("\n- ")}\n\nLa mettre en vigueur quand même ?`)) return;
+    if (manquants.length && !confirm(`Le texte ne couvre pas ${manquants.length} des ${VP.ENGAGEMENTS.length} engagements attendus :\n- ${manquants.map(m => m[1]).join("\n- ")}\n\nLa mettre en vigueur quand même ?`)) return;
     if (!confirm(`Mettre en vigueur la version ${n} ?${avant ? ` Elle remplacera la version ${avant.version}, qui restera consultable, et les prises de connaissance repartiront de zéro.` : " Elle sera visible de tous."}`)) return;
     try {
       modifierPolitiques(liste => liste.forEach((v, i) => {
@@ -406,7 +406,7 @@
         <div class="ajout"><div class="form-grid">
           <div><label for="rDate">Date de la revue</label><input type="date" id="rDate" value="${esc(ajd())}"></div>
           <div><label for="rConclusion">Conclusion</label><select id="rConclusion">${VP.CONCLUSIONS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")}</select></div>
-          <div><label for="rProchaine">Prochaine revue</label><input type="date" id="rProchaine" value="${esc(v.prochaineRevue || "")}"></div>
+          <div><label for="rProchaine">Prochaine revue</label><input type="date" id="rProchaine" value="${esc(VP.unAnApres(ajd()))}" data-auto="1"></div>
           <div class="span3"><label for="rCommentaire">Commentaire</label><textarea id="rCommentaire" placeholder="Ce qui a été examiné, avec qui, ce qui change"></textarea></div>
         </div><div class="form-actions" style="border-top:none;margin-top:10px;padding-top:0;"><button type="button" class="btn btn-ghost" id="btnRevue">Enregistrer la revue</button></div></div>
       </div>
@@ -418,7 +418,7 @@
           <div class="span2"><label for="cDestinataires">Destinataires</label><input type="text" id="cDestinataires" maxlength="200" placeholder="Ex. : tous les services, l'encadrement, les entreprises extérieures"></div>
         </div><div class="form-actions" style="border-top:none;margin-top:10px;padding-top:0;"><button type="button" class="btn btn-ghost" id="btnComm">Ajouter</button></div></div>
       </div>
-      <div class="sec"><h4>Prises de connaissance</h4><p class="aide">${v.demanderLecture ? "Chaque compte est invité, sur son tableau de bord, à lire cette version et à le confirmer." : "Le rappel au tableau de bord n'a pas été demandé pour cette version : chacun peut néanmoins confirmer sa lecture sur cette page."}</p>
+      <div class="sec"><h4>Prises de connaissance</h4><p class="aide">${v.demanderLecture ? "Chaque compte est invité, sur son tableau de bord, à lire cette version et à le confirmer." : "Le rappel au tableau de bord n'a pas été demandé pour cette version : chacun peut néanmoins confirmer sa lecture sur cette page."} ${esc(VigieOrga.mots("Pour les agents sans compte, la remise de la politique se trace à l'Accueil au poste (point « Remise et explication de la politique de santé et de sécurité »)."))}</p>
         <div class="colonnes">
           <div><p class="form-note" style="margin-bottom:6px;"><b>${lus.length}</b> compte(s) en ont pris connaissance${comptes ? `, sur ${comptes.length}` : ""}</p>
             ${lus.length ? `<ul class="liste">${lus.map(x => `<li>${esc(x.auteur)} <span class="par">le ${esc(dateFr(jourDe(x.le)))}</span></li>`).join("")}</ul>` : `<p class="vide">Personne pour le moment.</p>`}</div>
@@ -523,6 +523,19 @@
     if (t.closest("#btnFermer")){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; return; }
     const im = t.closest("[data-imprimer]");
     if (im){ imprimer(im.dataset.imprimer); return; }
+  });
+  // Rythme par défaut (question 28) : la prochaine revue un an après la signature, ou après la revue ; une date choisie à la main reste
+  $("brouillon").addEventListener("change", (e) => {
+    const r = $("dRevue");
+    if (!r) return;
+    if (e.target.id === "dRevue"){ delete r.dataset.auto; return; }
+    if (e.target.id === "dSignature" && dateOk(e.target.value) && (!r.value || r.dataset.auto === "1")){ r.value = VP.unAnApres(e.target.value); r.dataset.auto = "1"; }
+  });
+  $("suivi").addEventListener("change", (e) => {
+    const r = $("rProchaine");
+    if (!r) return;
+    if (e.target.id === "rProchaine"){ delete r.dataset.auto; return; }
+    if (e.target.id === "rDate" && dateOk(e.target.value) && r.dataset.auto === "1") r.value = VP.unAnApres(e.target.value);
   });
   $("brouillon").addEventListener("submit", (e) => { e.preventDefault(); if (enregistrerBrouillon()){ logAudit("Modification", "Politique de santé et de sécurité : brouillon enregistré"); render(); } });
 

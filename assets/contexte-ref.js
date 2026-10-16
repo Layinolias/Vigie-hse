@@ -14,13 +14,15 @@
      partie { id, registre: "partie", partie, besoins, exigence (vrai : une obligation, à suivre dans Conformité
               réglementaire), reponse (comment on y répond) }
      ro     { id, registre: "ro", type (« Risque », « Opportunité »), texte, sourceId (enjeu ou partie d'origine),
-              evaluation, actions: [{ id, description, responsable, echeance }] }
+              niveau (NIVEAUX : importance), evaluation, actions: [{ id, description, responsable, echeance }] }
+     revue  { id, registre: "revue", date, par, constat } — la revue annuelle du registre (hors des trois registres)
    et pour tous : archive (n'est plus d'actualité : avec motifArchive, archiveLe, archivePar), auteur, dateCreation,
    modifiePar, dateMaj. Les actions rejoignent le Plan d'actions sous « pa-ro-<élément>-<action> » (origine
    « Risques et opportunités »).
 
-   Aucune méthode d'évaluation ni aucun rythme de revue n'est imposé (question 30) : l'évaluation d'un risque ou d'une
-   opportunité est un texte, et la date de dernière mise à jour de chaque élément est montrée.
+   Réponse du préventeur (question 30, 2026-10-16) : l'importance d'un risque ou d'une opportunité se dit sur trois niveaux
+   (élevée, moyenne, faible), avec un texte d'évaluation ; le registre se tient au fil de l'eau et se revoit chaque année
+   (« revue annuelle à faire » un an après la dernière) ; les listes proposées conviennent.
    ========================================================================== */
 (function (racine) {
   "use strict";
@@ -31,6 +33,7 @@
   const THEMES = ["Réglementaire", "Organisation et management", "Social et humain", "Technique et matériel",
     "Économique et budgétaire", "Environnement et territoire", "Autre"];
   const TYPES_RO = ["Risque", "Opportunité"];
+  const NIVEAUX = ["Élevée", "Moyenne", "Faible"];   // importance d'un risque ou d'une opportunité (question 30)
   // des suggestions à la saisie, pas une liste fermée (les mots du secteur s'appliquent à l'affichage)
   const PARTIES = ["Agents", "Encadrement", "Représentants du personnel et F3SCT", "Médecine de prévention",
     "Inspection en santé et sécurité", "Centre de gestion", "Assureur", "Entreprises extérieures", "Usagers", "Élus", "Fournisseurs"];
@@ -61,6 +64,22 @@
   // la dernière mise à jour d'un élément : retrait, modification ou création
   const majLe = x => [jourDe(x && x.archiveLe), jourDe(x && x.dateMaj), jourDe(x && x.dateCreation)].filter(Boolean).sort().pop() || "";
 
+  // un an après une date « AAAA-MM-JJ », à l'heure locale
+  function unAnApres(iso) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "") || !racine.VigieDates) return "";
+    const d = racine.VigieDates.lire(iso); d.setFullYear(d.getFullYear() + 1);
+    return racine.VigieDates.iso(d);
+  }
+  // les revues annuelles du registre, la plus récente d'abord
+  const revues = l => (Array.isArray(l) ? l : []).filter(x => x && typeof x === "object" && x.id && x.registre === "revue" && /^\d{4}-\d{2}-\d{2}$/.test(x.date || ""))
+    .sort((a, b) => b.date.localeCompare(a.date));
+  // la revue annuelle est à faire : un registre non vide, jamais revu, ou revu il y a un an ou plus
+  function revueAFaire(liste, aujourdhui) {
+    if (!actifs(liste).length) return false;
+    const r = revues(liste)[0];
+    return !r || unAnApres(r.date) <= aujourdhui;
+  }
+
   // Le compte des éléments actifs
   function synthese(liste, actions) {
     const a = actifs(liste), ro = a.filter(x => x.registre === "ro");
@@ -73,6 +92,9 @@
       risques: ro.filter(x => x.type !== "Opportunité").length,
       opportunites: ro.filter(x => x.type === "Opportunité").length,
       sansAction: ro.filter(x => !actionsDe(x).length).length,
+      elevees: ro.filter(x => x.niveau === "Élevée").length,
+      sansNiveau: ro.filter(x => !NIVEAUX.includes(x.niveau)).length,
+      derniereRevue: (revues(liste)[0] || {}).date || "",
       actions: ro.reduce((n, x) => n + actionsDe(x).length, 0),
       actionsPasFaites: ro.reduce((n, x) => n + pasFaites(x, actions).length, 0),
       retires: valides(liste).length - a.length,
@@ -88,12 +110,14 @@
       const ar = jourDe(x.archiveLe), cr = jourDe(x.dateCreation), mo = jourDe(x.dateMaj);
       const quoi = x.archive && dans(ar) ? ["Retiré", ar] : dans(cr) && !x.archive ? ["Ajouté", cr] : dans(mo) && !x.archive ? ["Modifié", mo] : null;
       return quoi ? { registre: REGISTRES[x.registre], libelle: libelle(x), type: x.registre === "ro" ? (x.type || "Risque") : "", quoi: quoi[0], date: quoi[1] } : null;
-    }).filter(Boolean).sort((a, b) => a.date.localeCompare(b.date));
+    }).filter(Boolean).concat(revues(liste).filter(r => dans(r.date)).map(r => ({ registre: "Revue annuelle du registre", libelle: r.constat || "", type: "", quoi: "Revu", date: r.date })))
+      .sort((a, b) => a.date.localeCompare(b.date));
     return s;
   }
 
   racine.VigieContexte = {
-    CLE: CLE, REGISTRES: REGISTRES, ORIGINES: ORIGINES, THEMES: THEMES, TYPES_RO: TYPES_RO, PARTIES: PARTIES,
+    CLE: CLE, REGISTRES: REGISTRES, ORIGINES: ORIGINES, THEMES: THEMES, TYPES_RO: TYPES_RO, NIVEAUX: NIVEAUX, PARTIES: PARTIES,
+    unAnApres: unAnApres, revues: revues, revueAFaire: revueAFaire,
     valides: valides, du: du, actifs: actifs, actionsDe: actionsDe, idAction: idAction, statutAction: statutAction, pasFaites: pasFaites,
     libelle: libelle, source: source, lies: lies, jourDe: jourDe, majLe: majLe, synthese: synthese, pourPeriode: pourPeriode,
   };

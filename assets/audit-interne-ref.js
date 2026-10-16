@@ -15,6 +15,8 @@
 
    Aucune fréquence ni cycle n'est imposé (question 27) : la page montre, clause par clause, la date du dernier audit
    réalisé et celle du prochain prévu, et les clauses jamais auditées.
+   Réponse du préventeur (2026-10-16) : rythme libre ; l'auditeur est le préventeur ou l'ACFI, sans justification de son
+   indépendance (le champ n'est plus demandé, une valeur déjà saisie reste lisible) ; constat « Non concerné » ajouté.
    ========================================================================== */
 (function (racine) {
   "use strict";
@@ -35,9 +37,9 @@
   const NOMS = {};
   CLAUSES.forEach(c => { NOMS[c[0]] = c[1]; });
   const nomClause = c => NOMS[c] ? c + " " + NOMS[c] : (c ? String(c) : "Autre critère");
-  // ce qu'un constat relève (question 27 : à confirmer avec le préventeur)
-  const TYPES = ["Non-conformité", "Observation", "Point fort"];
-  const TONS_TYPE = { "Non-conformité": "mauvais", "Observation": "attention", "Point fort": "bon" };
+  // ce qu'un constat relève ; « Non concerné » : ce qui est examiné ne s'applique pas (question 27, réponse du 2026-10-16)
+  const TYPES = ["Non-conformité", "Observation", "Point fort", "Non concerné"];
+  const TONS_TYPE = { "Non-conformité": "mauvais", "Observation": "attention", "Point fort": "bon", "Non concerné": "neutre" };
   const LIBELLES = { planifie: "Planifié", depasse: "Date dépassée", realise: "Réalisé", annule: "Annulé" };
   const TONS = { planifie: "neutre", depasse: "attention", realise: "bon", annule: "neutre" };
   const dateOk = d => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d);
@@ -69,7 +71,7 @@
 
   // Le bilan d'une liste d'audits (non annulés) : réalisés, prévus, constats par type, non-conformités sans action ou en cours.
   function synthese(liste, actions, aujourdhui) {
-    const s = { audits: 0, realises: 0, planifies: 0, depasses: 0, annules: 0, nonConformites: 0, observations: 0, pointsForts: 0,
+    const s = { audits: 0, realises: 0, planifies: 0, depasses: 0, annules: 0, nonConformites: 0, observations: 0, pointsForts: 0, nonConcernes: 0,
       ncSansAction: 0, ncEnCours: 0, ncSoldees: 0, clausesAuditees: [] };
     const vues = new Set();
     (Array.isArray(liste) ? liste : []).forEach(au => {
@@ -88,6 +90,7 @@
           else s.ncEnCours++;
         } else if (k.type === "Observation") s.observations++;
         else if (k.type === "Point fort") s.pointsForts++;
+        else if (k.type === "Non concerné") s.nonConcernes++;
       });
     });
     s.clausesAuditees = CLAUSES.map(c => c[0]).filter(c => vues.has(c));

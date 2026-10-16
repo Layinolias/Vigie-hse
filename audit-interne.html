@@ -152,7 +152,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-list"/></svg></div>
           <div class="page-summary-text">
             <h1>Audit interne</h1>
-            <p>Le programme d'audit du système de management de la santé et de la sécurité (ISO 45001, § 9.2) : les audits prévus et réalisés, les clauses de la norme que chacun examine, l'auditeur et ce qui garantit son indépendance, les constats avec leur preuve, et les actions qui corrigent les non-conformités, suivies au Plan d'actions. La couverture des clauses montre ce qui a été audité, et quand. Les contrôles de terrain restent dans Inspection / Audit.</p>
+            <p>Le programme d'audit du système de management de la santé et de la sécurité (ISO 45001, § 9.2) : les audits prévus et réalisés, les clauses de la norme que chacun examine, l'auditeur, les constats avec leur preuve, et les actions qui corrigent les non-conformités, suivies au Plan d'actions. La couverture des clauses montre ce qui a été audité, et quand. Les contrôles de terrain restent dans Inspection / Audit.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
@@ -215,7 +215,7 @@
         </div>
       </div>
 
-      <p class="footnote">Aucune fréquence n'est imposée : la couverture montre, clause par clause, le dernier audit réalisé et le prochain prévu (question 27 posée au préventeur : fréquence, indépendance de l'auditeur, classement des constats). Une non-conformité est soldée quand toutes ses actions sont faites au Plan d'actions, où elles arrivent avec l'origine « Audit interne ». La revue de direction reprend les audits de sa période.</p>
+      <p class="footnote">Aucune fréquence n'est imposée : la couverture montre, clause par clause, le dernier audit réalisé et le prochain prévu (question 27 : rythme libre). Une non-conformité est soldée quand toutes ses actions sont faites au Plan d'actions, où elles arrivent avec l'origine « Audit interne ». La revue de direction reprend les audits de sa période.</p>
     </div>
   </div>
 </div>
@@ -288,9 +288,11 @@
   const toutesActions = (au) => VA.constats(au).flatMap(k => VA.actionsDe(k));
   const chipEtat = (e) => `<span class="chip ${e.ton}">${esc(e.libelle)}</span>`;
   const quand = (au) => au.dateRealisee || au.datePrevue || "";
+  // qui audite (question 27, réponse du 2026-10-16) : le préventeur ou l'ACFI — des suggestions, la saisie reste libre
+  const AUDITEURS = VigieOrga.secteur() === "entreprise" ? ["Préventeur"] : ["Préventeur", "ACFI (centre de gestion)"];
   function resumeConstats(au){
     const n = (t) => VA.constats(au).filter(k => k.type === t).length;
-    const l = [[n("Non-conformité"), "NC"], [n("Observation"), "obs."], [n("Point fort"), "point(s) fort(s)"]].filter(z => z[0]).map(z => z[0] + " " + z[1]);
+    const l = [[n("Non-conformité"), "NC"], [n("Observation"), "obs."], [n("Point fort"), "point(s) fort(s)"], [n("Non concerné"), "non concerné"]].filter(z => z[0]).map(z => z[0] + " " + z[1]);
     return l.length ? l.join(" · ") : "—";
   }
 
@@ -374,7 +376,7 @@
       const n = (t) => VA.constats(au).filter(k => k.type === t).length;
       audits.push({ "Identifiant": au.id, "Audit": au.titre || "", "Clauses": VA.clausesDe(au).join(", "), "Autres critères": au.criteres || "", "Périmètre": perimetreTexte(au),
         "Prévu le": dateFr(au.datePrevue), "Réalisé le": dateFr(au.dateRealisee), "Auditeur": au.auditeur || "", "Indépendance de l'auditeur": au.independance || "",
-        "État": VA.etat(au, jour).libelle, "Motif d'annulation": au.annule ? au.motifAnnulation || "" : "", "Non-conformités": n("Non-conformité"), "Observations": n("Observation"), "Points forts": n("Point fort"), "Conclusion": au.conclusion || "" });
+        "État": VA.etat(au, jour).libelle, "Motif d'annulation": au.annule ? au.motifAnnulation || "" : "", "Non-conformités": n("Non-conformité"), "Observations": n("Observation"), "Points forts": n("Point fort"), "Non concernés": n("Non concerné"), "Conclusion": au.conclusion || "" });
       VA.constats(au).forEach(k => {
         cons.push({ "Audit": au.titre || "", "Réalisé le": dateFr(au.dateRealisee), "Clause": VA.nomClause(k.clause), "Type": k.type || "", "Constat": k.texte || "", "Preuve": k.preuve || "",
           "État": k.type === "Non-conformité" ? (!VA.actionsDe(k).length ? "Sans action" : VA.ncSoldee(au, k, actions) ? "Soldée" : "Action en cours") : "" });
@@ -384,7 +386,7 @@
     const cv = VA.couverture(l, actions, jour).map(r => ({ "Clause": r.clause + " " + r.nom, "Audits réalisés": r.audits, "Dernier audit": r.dernierAudit ? dateFr(r.dernier) + " — " + (r.dernierAudit.titre || "") : "Jamais auditée",
       "Prochain audit prévu": r.prochainAudit ? dateFr(r.prochain) + " — " + (r.prochainAudit.titre || "") : "", "Non-conformités relevées": r.nonConformites, "Non-conformités ouvertes": r.ncOuvertes }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(audits, { header: ["Identifiant", "Audit", "Clauses", "Autres critères", "Périmètre", "Prévu le", "Réalisé le", "Auditeur", "Indépendance de l'auditeur", "État", "Motif d'annulation", "Non-conformités", "Observations", "Points forts", "Conclusion"] }), "Audits");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(audits, { header: ["Identifiant", "Audit", "Clauses", "Autres critères", "Périmètre", "Prévu le", "Réalisé le", "Auditeur", "Indépendance de l'auditeur", "État", "Motif d'annulation", "Non-conformités", "Observations", "Points forts", "Non concernés", "Conclusion"] }), "Audits");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cons, { header: ["Audit", "Réalisé le", "Clause", "Type", "Constat", "Preuve", "État"] }), "Constats");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(acts, { header: ["Audit", "Constat", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cv, { header: ["Clause", "Audits réalisés", "Dernier audit", "Prochain audit prévu", "Non-conformités relevées", "Non-conformités ouvertes"] }), "Couverture");
@@ -427,8 +429,8 @@
           <div><label for="cPrevue">Prévu le</label><input type="date" id="cPrevue" value="${esc(courant.datePrevue || "")}"${dis}></div>
           <div><label for="cRealisee">Réalisé le</label><input type="date" id="cRealisee" value="${esc(courant.dateRealisee || "")}"${dis}></div>
           <div><label for="cService">Périmètre</label><select id="cService"${dis}>${optionsPerimetre(courant.service || "")}</select></div>
-          <div><label for="cAuditeur">Auditeur</label><input type="text" id="cAuditeur" value="${esc(courant.auditeur || "")}" maxlength="120" placeholder="Nom et fonction"${dis}></div>
-          <div class="span3"><label for="cIndependance">Indépendance de l'auditeur</label><textarea id="cIndependance" placeholder="Ce qui garantit qu'il n'audite pas son propre travail : il n'appartient pas au service audité, n'a pas conçu ce qu'il examine…"${dis}>${esc(courant.independance || "")}</textarea></div>
+          <div><label for="cAuditeur">Auditeur</label><input type="text" id="cAuditeur" list="cAuditeurs" value="${esc(courant.auditeur || "")}" maxlength="120" placeholder="Le préventeur, l'ACFI…"${dis}><datalist id="cAuditeurs">${AUDITEURS.map(a => `<option value="${esc(a)}"></option>`).join("")}</datalist></div>
+          ${courant.independance ? `<div class="span3"><label>Indépendance de l'auditeur (saisie avant le 16 octobre 2026)</label><p class="form-note">${esc(courant.independance)}</p></div>` : ""}
         </div>
         <div class="sec"><h4>Critères de l'audit</h4><p class="aide">Les clauses de la norme ISO 45001 que l'audit examine, et d'autres critères s'il y en a : procédure interne, autre référentiel. La couverture des clauses, sous le programme, en tient le compte une fois l'audit réalisé.</p>
           <div class="clauses">${clauses}</div>
@@ -519,7 +521,7 @@
     const jour = ajd();
     const x = Object.assign({}, courant, {
       titre: $("cTitre").value.trim(), datePrevue: $("cPrevue").value, dateRealisee: $("cRealisee").value,
-      service: $("cService").value || undefined, auditeur: $("cAuditeur").value.trim(), independance: $("cIndependance").value.trim(),
+      service: $("cService").value || undefined, auditeur: $("cAuditeur").value.trim(),
       clauses: [...$("fiche").querySelectorAll("[data-clause]")].filter(c => c.checked).map(c => c.dataset.clause),
       criteres: $("cCriteres").value.trim(), conclusion: $("cConclusion").value.trim(),
     });

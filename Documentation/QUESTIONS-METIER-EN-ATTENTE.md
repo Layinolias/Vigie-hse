@@ -56,10 +56,10 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 24 | Objectifs santé-sécurité : qui les fixe, qui les voit, comment les suivre en cours d'année ? | Objectifs santé-sécurité (en service, ISO 45001 § 6.2) | ✅ répondue le 2026-10-14 : l'encadrement en lecture, fixés par le HSE, objectifs par service — mise en œuvre le 2026-10-14 |
 | 25 | PAPRIPACT : que doit contenir le programme annuel de prévention, et d'où le tirer ? | Programme annuel de prévention (à construire, demandé à la question 23) — Plan d'actions, Revue de direction | ✅ Répondu le 2026-10-15 — mis en œuvre |
 | 26 | Conformité réglementaire : qui la tient, qui la lit, et à quel rythme réévaluer ? | Conformité réglementaire (construite le 2026-10-15) — Revue de direction | ✅ Répondu le 2026-10-15 — mis en œuvre |
-| 27 | Audit interne : à quel rythme, par qui, et comment classer les constats ? | Audit interne (construit le 2026-10-15, ISO 45001 § 9.2) — Plan d'actions, Revue de direction | 🟠 En attente de réponse |
-| 28 | Politique de santé et de sécurité : qui la tient, comment prouver que chacun l'a lue, à quel rythme la revoir ? | Politique santé-sécurité (construite le 2026-10-15, ISO 45001 § 5.2) — tableau de bord, Revue de direction | 🟠 En attente de réponse |
-| 29 | Gestion des changements : quels changements y passent, faut-il une validation, une consultation, une mise à jour du Document unique, une revue à date ? | Gestion des changements (construite le 2026-10-15, ISO 45001 § 8.1.3) — Plan d'actions, Revue de direction | 🟠 En attente de réponse |
-| 30 | Contexte et enjeux : comment évaluer un risque ou une opportunité, à quel rythme revoir le registre, quelles parties intéressées ? | Contexte et enjeux (construit le 2026-10-15, ISO 45001 § 4.1, 4.2, 6.1.1) — Plan d'actions, Revue de direction | 🟠 En attente de réponse |
+| 27 | Audit interne : à quel rythme, par qui, et comment classer les constats ? | Audit interne (construit le 2026-10-15, ISO 45001 § 9.2) — Plan d'actions, Revue de direction | ✅ Répondu le 2026-10-16 — mis en œuvre |
+| 28 | Politique de santé et de sécurité : qui la tient, comment prouver que chacun l'a lue, à quel rythme la revoir ? | Politique santé-sécurité (construite le 2026-10-15, ISO 45001 § 5.2) — tableau de bord, Revue de direction | ✅ Répondu le 2026-10-16 — mis en œuvre |
+| 29 | Gestion des changements : quels changements y passent, faut-il une validation, une consultation, une mise à jour du Document unique, une revue à date ? | Gestion des changements (construite le 2026-10-15, ISO 45001 § 8.1.3) — Plan d'actions, Revue de direction | ✅ Répondu le 2026-10-16 — mis en œuvre |
+| 30 | Contexte et enjeux : comment évaluer un risque ou une opportunité, à quel rythme revoir le registre, quelles parties intéressées ? | Contexte et enjeux (construit le 2026-10-15, ISO 45001 § 4.1, 4.2, 6.1.1) — Plan d'actions, Revue de direction | ✅ Répondu le 2026-10-16 — mis en œuvre |
 
 ---
 
@@ -791,7 +791,7 @@ Le Plan d'actions n'a aujourd'hui **ni coût estimé ni indicateur de résultat*
 
 ---
 
-## 🟠 Question 27 — Audit interne : à quel rythme, par qui, et comment classer les constats ?
+## ✅ Question 27 — Audit interne : à quel rythme, par qui, et comment classer les constats ?
 
 **Contexte.** Le logiciel a désormais une page **« Audit interne »** (Pilotage), construite sans attendre parce qu'elle ne fixe aucune règle de métier. C'est le programme d'audit du **système** de management (ISO 45001, § 9.2), distinct des contrôles de terrain d'Inspection / Audit :
 - pour chaque audit : ce qui est audité, les clauses de la norme qu'il examine (les 30 sous-clauses des chapitres 4 à 10) et d'autres critères s'il y en a, le périmètre (toute l'organisation ou un service), la date prévue puis la date de réalisation, l'auditeur et ce qui garantit son indépendance, une conclusion ;
@@ -814,11 +814,24 @@ Le Plan d'actions n'a aujourd'hui **ni coût estimé ni indicateur de résultat*
 
 **Options.** Accès : (A) comme les autres pages de pilotage — le Préventeur tient le programme, l'encadrement le lit, comme aujourd'hui ; (B) Administrateur et RH seulement. Rythme : (A) libre, comme aujourd'hui ; (B) un cycle à préciser, avec un signal pour les clauses en retard.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-15)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-16) : comme les autres pages de pilotage.**
+> - Rythme : « Libre ».
+> - Auditeur : « Préventeur, Acfi. Pas de justification sur l'indépendance ».
+> - Constats : « Il faut ajouter "non concerné" ».
+> - Trames : « Oui ».
+>
+> **Mis en œuvre le 2026-10-16** :
+> - **Accès** : inchangé — Préventeur, Administrateur et RH gèrent ; Manager lit.
+> - **Rythme** : aucun imposé ; la couverture des clauses reste l'indication.
+> - **Auditeur** : « Préventeur » et « ACFI (centre de gestion) » proposés à la saisie (le préventeur seul en secteur entreprise), saisie libre. Le champ « indépendance de l'auditeur » n'est plus demandé ; une valeur déjà saisie reste lisible dans la fiche, le rapport et l'export.
+> - **Constats** : quatrième type « Non concerné » (ce qui est examiné ne s'applique pas), compté à part dans la liste, la synthèse et l'export.
+> - **Trames** : mener un audit à partir d'une grille de questions — chantier suivant.
 
 ---
 
-## 🟠 Question 28 — Politique de santé et de sécurité : qui la tient, comment prouver que chacun l'a lue, à quel rythme la revoir ?
+## ✅ Question 28 — Politique de santé et de sécurité : qui la tient, comment prouver que chacun l'a lue, à quel rythme la revoir ?
 
 **Contexte.** Le logiciel a désormais une page **« Politique santé-sécurité »** (menu Ressources), construite sans attendre parce qu'elle ne fixe aucune règle de métier (ISO 45001, § 5.2 : la politique doit être écrite, signée, communiquée et revue) :
 - le texte en vigueur, avec sa version, son signataire et sa date, lisible par tous et imprimable pour l'affichage ;
@@ -841,11 +854,22 @@ Le Plan d'actions n'a aujourd'hui **ni coût estimé ni indicateur de résultat*
 
 **Options.** Accès : (A) comme aujourd'hui — le Préventeur la tient, tout le monde la lit ; (B) Administrateur et RH seulement pour la tenir. Prise de connaissance : (A) par compte, comme aujourd'hui ; (B) par compte, plus un point « politique remise » à l'Accueil au poste.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-15)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-16) : comme aujourd'hui — le Préventeur tient la politique, tout le monde la lit.**
+> - Prise de connaissance : « On le trace via l'accueil au poste pour tous les agents ».
+> - Rythme : « Défaut 1 an, modifiable ».
+> - Engagements : « Tu peux ajouter les RPS ».
+>
+> **Mis en œuvre le 2026-10-16** :
+> - **Accès** : inchangé.
+> - **Accueil au poste** : le parcours par défaut gagne un neuvième point, « Remise et explication de la politique de santé et de sécurité ». Un modèle par défaut déjà enregistré le reçoit une fois (retiré ensuite, il ne revient pas) ; les accueils déjà créés gardent leurs points. La page de la politique le rappelle ; la confirmation par compte reste pour qui a un compte.
+> - **Rythme** : la prochaine revue est proposée un an après la signature (brouillon) ou après la revue (suivi), et reste modifiable ; une date choisie à la main n'est plus remplacée.
+> - **Engagements** : un septième, « Prévenir les risques psychosociaux ». Une version déjà en vigueur qui ne le coche pas le montre comme non couvert.
 
 ---
 
-## 🟠 Question 29 — Gestion des changements : quels changements y passent, faut-il une validation, une consultation, une mise à jour du Document unique, une revue à date ?
+## ✅ Question 29 — Gestion des changements : quels changements y passent, faut-il une validation, une consultation, une mise à jour du Document unique, une revue à date ?
 
 **Contexte.** Le logiciel a désormais une page **« Gestion des changements »** (menu Sécurité & Risques), construite sans attendre parce qu'elle ne fixe aucune règle de métier (ISO 45001, § 8.1.3 : un changement prévu se maîtrise avant sa mise en œuvre, et ses conséquences imprévues se revoient). Pour chaque changement — nouvel équipement, réorganisation, nouveau produit, travaux dans des locaux, nouvelle méthode de travail, exigence légale nouvelle :
 - ce qui change, sa nature, le service concerné (ou toute l'organisation), son responsable, les postes et personnes concernés, la date de mise en œuvre prévue ;
@@ -871,11 +895,23 @@ Le Plan d'actions n'a aujourd'hui **ni coût estimé ni indicateur de résultat*
 
 **Options.** (A) Comme aujourd'hui : rien d'obligatoire, des points d'attention. (B) Validation obligatoire avant la mise en œuvre, consultation exigée pour certaines natures. (C) Comme B, avec une revue à échéance (délai à fixer) et un rappel.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-15)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-16) : comme aujourd'hui — rien d'obligatoire, des points d'attention.**
+> - Quels changements : « Tout ce qui est en lien avec la sécurité au travail, nouvel équipement, nouveau procédé, travaux, etc. ».
+> - Validation, Document unique : « Le préventeur. Oui un rappel sur le DU à mettre à jour est top ».
+> - Revue, accès : « Périodicité à définir librement, parfois 1 semaine voire quelques mois. Oui pour les RP ».
+>
+> **Mis en œuvre le 2026-10-16** :
+> - **Obligations** : aucune ; les natures restent (elles couvrent équipement, procédé, travaux).
+> - **Validation** : « le préventeur, en général » proposé dans le champ « Validé par ».
+> - **Document unique** : coché « à mettre à jour » par défaut pour un nouveau changement. Tant que la mise à jour n'est pas datée : rappel au tableau de bord de qui tient les changements (« Document unique à mettre à jour », lien vers la liste filtrée `changements.html?attention=duerp`) et bandeau sur la page Document unique pour qui lit les changements. Filtre « points d'attention » sur la page.
+> - **Revue** : date « revue prévue le », libre (pas avant la mise en œuvre) ; point d'attention « revue en retard » une fois passée, tant qu'elle n'est pas faite.
+> - **Représentants du personnel** : lisent la page (profil préréglé), sans la modifier.
 
 ---
 
-## 🟠 Question 30 — Contexte et enjeux : comment évaluer un risque ou une opportunité, à quel rythme revoir le registre, quelles parties intéressées ?
+## ✅ Question 30 — Contexte et enjeux : comment évaluer un risque ou une opportunité, à quel rythme revoir le registre, quelles parties intéressées ?
 
 **Contexte.** Le logiciel a désormais une page **« Contexte et enjeux »** (menu Pilotage), construite sans attendre parce qu'elle ne fixe aucune règle de métier (ISO 45001, § 4.1, 4.2 et 6.1.1 : connaître ce qui pèse sur la démarche, ce qu'attendent les parties intéressées, et traiter les risques et opportunités pour la démarche elle-même). Trois registres courts :
 - les **enjeux** internes et externes (thème, effet sur la démarche) — par exemple une réorganisation prévue, un budget contraint, une obligation nouvelle ;
@@ -900,7 +936,18 @@ Un élément qui n'est plus d'actualité se retire et reste consultable. Le regi
 
 **Options.** Évaluation : (A) texte libre, comme aujourd'hui ; (B) échelle à trois niveaux ; (C) vraisemblance × effet.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-15)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-16) : une échelle à trois niveaux.**
+> - Rythme : « Au fil de l'eau et un annuellement ».
+> - Listes : « Oui ».
+> - Accès : « Oui pour les RP. Pour le manager juste ce qui le concerne ».
+>
+> **Mis en œuvre le 2026-10-16** :
+> - **Importance** : élevée, moyenne ou faible, demandée pour tout risque ou opportunité enregistré (un élément plus ancien affiche « À évaluer »), avec le texte d'évaluation ; la liste est triée par importance ; au Plan d'actions, la priorité suit (élevée → haute, moyenne → moyenne, faible → basse).
+> - **Rythme** : le registre se tient au fil de l'eau, et « Enregistrer la revue annuelle » (date, par qui, constat) le date ; « Revue annuelle à faire » quand il n'a jamais été revu ou l'a été il y a un an ou plus. Export « Revues annuelles », registre imprimé et revue de direction (dernière revue annuelle ; une revue de la période figure dans ce qui a changé).
+> - **Listes** : inchangées.
+> - **Représentants du personnel** : lisent le registre (profil préréglé). **Manager** : inchangé — au Plan d'actions, il ne voit que les actions de ses services, ce qui répond à « juste ce qui le concerne ».
 
 ---
 

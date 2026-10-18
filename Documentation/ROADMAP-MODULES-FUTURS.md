@@ -172,6 +172,8 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 
 ## J1 — Jalon complémentaire : accompagnement à la certification sécurité (ISO 45001 et autres) — 🟡 Étude ISO 45001 faite (2026-10-06)
 
+**Fait le 2026-10-18 (suite) — rôles de prévention (§ 5.3, exigence « en partie » de la carte)** : page `roles-prevention.html` (Ressources, lue par tous les profils préréglés, tenue par le Préventeur, l'Administrateur et les RH) — qui tient quel rôle, périmètre, mission, désignation, lettre de mission, formation, fin de fonction qui garde l'historique ; impression pour l'affichage, export ; la Préparation ISO 45001 la reprend pour 5.3. Question 33 (liste des rôles, rôles exigés, lettre et formation à signaler, accès).
+
 **Fait le 2026-10-18 — niveau des mesures de prévention (§ 8.1.2, exigence « en partie » de la carte)** : chaque action du Plan d'actions peut être rangée à l'un des cinq niveaux de la norme (supprimer, remplacer, protection collective, consignes et formation, protection individuelle) — affichage, filtre, compte par niveau, export et import ; la Préparation ISO 45001 le reprend pour 8.1.2. Facultatif et sans signal : question 32 (signal « protection individuelle seule », niveau obligatoire, mesures en place du Document unique, vocabulaire).
 
 **Fait le 2026-10-16 (suite) — Préparation ISO 45001** (J1, idée 5, pour ISO 45001) : page `preparation-iso.html` (Pilotage, lecture seule) — pour les 30 exigences, la couverture de l'outil et l'état du jour calculé depuis les registres (des enregistrements, des points à reprendre, aucun enregistrement), avec les faits, le dernier audit interne et les liens ; impression et export. Question 31 posée (fraîcheur des preuves, accès, autres référentiels).

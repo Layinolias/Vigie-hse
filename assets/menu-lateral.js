@@ -65,6 +65,7 @@
       ["accueil-poste.html", "i-user-plus", "Accueil au poste"]] },
     { titre: "Ressources", liens: [
       ["politique-sante-securite.html", "i-file-text", "Politique santé-sécurité"],
+      ["roles-prevention.html", "i-users", "Rôles de prévention"],
       ["base-documentaire.html", "i-book", "Base documentaire"],
       ["dialogue-social.html", "i-messages", "Dialogue social"]] },
     { titre: "Pilotage", liens: [
@@ -108,6 +109,7 @@
       "entreprises-exterieures.html": lire("entreprises-ext"),
       "accueil-poste.html": lire("accueil-poste"),
       "politique-sante-securite.html": lire("politique"),   // ISO 45001 § 5.2
+      "roles-prevention.html": lire("roles-prevention"),   // ISO 45001 § 5.3
       "base-documentaire.html": lire("documentation"),
       "dialogue-social.html": lire("dialogue-social"),
       "contexte.html": lire("contexte"),                 // ISO 45001 § 4.1, 4.2, 6.1.1

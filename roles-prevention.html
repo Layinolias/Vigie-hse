@@ -1,0 +1,482 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rôles de prévention</title>
+<meta name="description" content="Rôles de prévention : qui tient quel rôle dans la démarche de santé et de sécurité, sur quel périmètre, avec quelle mission, désigné quand et par qui, avec quelle formation (ISO 45001, § 5.3).">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/roster.js"></script>
+<script src="assets/roles-ref.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<script src="assets/impression.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  select, input[type="text"], input[type="date"], input[type="search"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:150px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:68px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled, select:disabled{ background:var(--bg-2); color:var(--text); opacity:1; cursor:default; }
+  @media (max-width:640px){ select, input[type="text"], input[type="date"], input[type="search"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  @media (min-width:560px){ .form-grid .span2{ grid-column:span 2; } }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg td.num{ font-family:"IBM Plex Mono",monospace; text-align:right; }
+  table.reg tr.chap td{ background:var(--bg-2); font-weight:600; font-size:11.5px; color:var(--text-muted); padding:7px 14px; }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.bon{ color:var(--success); background:var(--success-bg); } .chip.bon::before{ background:var(--success); }
+  .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
+  .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
+  .chip.attention{ color:var(--warning); background:var(--warning-bg); } .chip.attention::before{ background:var(--warning); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; text-align:left; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  .ref{ display:block; font-size:11.5px; color:var(--text-faint); margin-top:2px; font-weight:400; white-space:normal; }
+  .filtres{ display:flex; gap:9px; flex-wrap:wrap; margin:0 0 12px; }
+  .filtres input[type="search"]{ flex:1 1 240px; min-width:0; }
+
+  /* Rôle ouvert */
+  .fiche{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .fiche-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  table.reg td.long{ white-space:normal; min-width:160px; max-width:340px; }
+  table.reg tr.retire td{ opacity:.6; }
+  .coche-filtre{ display:flex; gap:7px; align-items:center; font-size:12.5px; color:var(--text-muted); cursor:pointer; }
+  .lien-lettre{ display:inline-block; margin-top:5px; font-size:12px; }
+  .constat{ background:var(--bg-2); border-radius:var(--r-sm); padding:12px 14px; margin:0 0 10px; }
+  .constat .texte{ white-space:pre-wrap; font-size:12.8px; line-height:1.55; margin:6px 0 4px; }
+  .constat .actions-constat{ margin-top:10px; }
+  .constat .actions-constat .dyn-row > span{ flex:1 1 auto; font-size:12.8px; }
+  .alerte{ font-size:12.5px; color:var(--danger); margin:8px 0 0; font-weight:600; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Ressources / <b>Rôles de prévention</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-users"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Rôles de prévention</h1>
+            <p>Qui fait quoi dans la démarche de santé et de sécurité (ISO 45001, § 5.3) : chaque rôle, la personne qui le tient, son périmètre, sa mission, sa désignation et sa formation. Le registre se lit par tous et s'imprime pour l'affichage.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-users"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiEnFonction">–</span><span class="ps-kpi-label">Rôles en fonction</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-user-plus"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiPersonnes">–</span><span class="ps-kpi-label">Personnes</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon warn"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiCompleter">–</span><span class="ps-kpi-label">À compléter</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-history"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTermines">–</span><span class="ps-kpi-label">Terminés</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel fiche" id="fiche" style="display:none;"></div>
+
+      <div class="panel" style="padding:16px 22px;">
+        <div class="filtres" style="margin:0;">
+          <input type="search" id="fTexte" placeholder="Rechercher un rôle, une personne, une mission" aria-label="Rechercher">
+          <select id="fRole" aria-label="Rôle"><option value="">Tous les rôles</option></select>
+          <label class="coche-filtre"><input type="checkbox" id="fTermines"> Afficher les rôles terminés</label>
+          <span class="panel-actions" id="listeActions" style="margin-left:auto;"></span>
+        </div>
+        <p class="form-note" id="majNote" style="margin-top:10px;"></p>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Rôles</h3>
+          <div class="panel-actions" id="actRoles"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableRoles">
+            <thead><tr><th>Rôle</th><th>Personne</th><th>Périmètre</th><th>Mission</th><th>Désignation</th><th>Formation</th><th>État</th><th></th></tr></thead>
+            <tbody id="tbRoles"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Aucun rôle n'est exigé et aucune formation n'a de durée de validité ici (question 33 posée au préventeur) : la page dit seulement ce qui manque pour qu'un rôle soit attribué par écrit, sa mission et sa date de désignation. Un rôle qui prend fin garde sa fiche, marquée terminée. Les formations réglementaires et leurs recyclages se suivent dans Formation &amp; Habilitation, les personnes désignées d'un plan d'urgence dans Situations d'urgence.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("roles-prevention", "consulter");
+  const peutGerer = D.peut("roles-prevention", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Rôles de prévention", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const lire = (cle) => { try { const v = JSON.parse(VigieStore.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } };
+  const fr = (a, b) => String(a).localeCompare(String(b), "fr");
+  const norm = (t) => String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const VR = VigieRoles;
+  const ajd = () => VigieDates.aujourdhui();
+  const M = (t) => VigieOrga.mots(t);   // les mots du secteur, pour les textes fixes (assets/organisation.js)
+
+  // ---------- Stockage et périmètre ----------
+  const CLE = VR.CLE;
+  const services = (session && session.services) || ["*"], voitTout = services.includes("*");
+  // un compte limité à des services voit les rôles de toute l'organisation et ceux de ses services (comme le serveur les transmet)
+  const visible = (r) => voitTout || !r.service || services.includes(r.service);
+  const tous = () => VR.valides(lire(CLE)).filter(visible);
+  function modifierRoles(modif){ const l = lire(CLE); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
+  const perimetre = (r) => r.service || "Toute l'organisation";
+  const nomDe = (r) => `« ${r.role || ""} »${r.personne ? " — " + r.personne : ""}`;
+  const texteDe = (r) => [r.role, r.personne, r.contact, r.service, r.mission, r.designePar, r.lettre, r.formation, r.motifFin].join(" ");
+  const TONS = { enfonction: "bon", acompleter: "attention", termine: "neutre" };
+  function chipEtat(r, jour){
+    const e = VR.etat(r, jour), m = VR.manques(r);
+    return `<span class="chip ${TONS[e.code]}"${e.code === "acompleter" ? ` title="Manque : ${esc(m.join(", "))}"` : ""}>${esc(e.libelle)}</span>`
+      + (e.code === "acompleter" ? `<span class="ref">manque : ${esc(m.join(", "))}</span>` : "")
+      + (e.code === "termine" && r.finLe ? `<span class="ref">le ${esc(dateFr(r.finLe))}</span>` : "");
+  }
+  const lienSur = (t) => /^https?:\/\/\S+$/i.test(String(t || "").trim());
+
+  // ---------- Registre ----------
+  function render(){
+    const j = ajd(), l = tous(), s = VR.synthese(l, j);
+    $("kpiEnFonction").textContent = s.enFonction;
+    $("kpiPersonnes").textContent = s.personnes;
+    $("kpiCompleter").textContent = s.aCompleter;
+    $("kpiTermines").textContent = s.termines;
+    const maj = l.map(r => String(r.dateMaj || r.dateCreation || "").slice(0, 10)).filter(Boolean).sort().pop();
+    $("majNote").textContent = l.length ? `Dernière mise à jour du registre : ${dateFr(maj) || "—"}${s.termines ? ` · ${s.termines} rôle${s.termines > 1 ? "s" : ""} terminé${s.termines > 1 ? "s" : ""}` : ""}.`
+      : "Registre vide" + (peutGerer ? " : « Ajouter un rôle » en enregistre un." : ".");
+    const roles = [...new Set(l.map(r => r.role).filter(Boolean))].sort(fr), choisi = $("fRole").value;
+    $("fRole").innerHTML = `<option value="">Tous les rôles</option>` + roles.map(r => `<option value="${esc(r)}"${r === choisi ? " selected" : ""}>${esc(r)}</option>`).join("");
+    const vt = $("fTermines").checked, q = norm($("fTexte").value.trim()), fRole = $("fRole").value;
+    const rows = l.filter(r => (vt || !VR.termine(r, j)) && (!fRole || r.role === fRole) && (!q || norm(texteDe(r)).includes(q)))
+      .sort((a, b) => (VR.termine(a, j) - VR.termine(b, j)) || fr(a.role || "", b.role || "") || fr(a.personne || "", b.personne || ""));
+    $("tbRoles").innerHTML = rows.length ? rows.map(r => `<tr${VR.termine(r, j) ? ' class="retire"' : ""} data-id="${esc(r.id)}">
+        <td class="long"><b>${esc(r.role)}</b></td>
+        <td>${esc(r.personne || "—")}${r.contact ? `<span class="ref">${esc(r.contact)}</span>` : ""}</td>
+        <td>${esc(perimetre(r))}</td>
+        <td class="long">${esc(r.mission || "—")}</td>
+        <td class="mono">${esc(dateFr(r.designeLe) || "—")}${r.designePar ? `<span class="ref">par ${esc(r.designePar)}</span>` : ""}</td>
+        <td class="long">${esc(r.formation || "—")}${r.formationLe ? `<span class="ref">le ${esc(dateFr(r.formationLe))}</span>` : ""}</td>
+        <td>${chipEtat(r, j)}</td>
+        <td><button type="button" class="act-edit" data-ouvrir="${esc(r.id)}">Ouvrir</button></td></tr>`).join("")
+      : `<tr class="empty-row"><td colspan="8">${q || fRole || vt ? "Aucun rôle avec ces filtres." : "Aucun rôle pour le moment." + (peutGerer ? " « Ajouter un rôle » en enregistre un." : "")}</td></tr>`;
+  }
+  $("fTexte").addEventListener("input", render);
+  $("fRole").addEventListener("change", render);
+  $("fTermines").addEventListener("change", render);
+  $("tbRoles").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); });
+  $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImprimer"><svg class="icon"><use href="#i-printer"/></svg> Imprimer pour l'affichage</button>`
+    + `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+  if (peutGerer){
+    $("actRoles").innerHTML = `<button type="button" class="btn btn-primary" id="btnNouveau"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un rôle</button>`;
+    $("btnNouveau").addEventListener("click", () => ouvrir(null));
+  }
+
+  // ---------- Export ----------
+  $("btnExport").addEventListener("click", () => {
+    const j = ajd();
+    const lignes = tous().sort((a, b) => fr(a.role || "", b.role || "") || fr(a.personne || "", b.personne || "")).map(r => ({
+      "Identifiant": r.id, "Rôle": r.role || "", "Personne": r.personne || "", "Contact": r.contact || "", "Périmètre": perimetre(r), "Mission": r.mission || "",
+      "Désigné le": dateFr(r.designeLe), "Désigné par": r.designePar || "", "Lettre de mission": r.lettre || "", "Formation": r.formation || "", "Formé le": dateFr(r.formationLe),
+      "Fin de fonction": dateFr(r.finLe), "Motif de fin": r.motifFin || "", "État": VR.etat(r, j).libelle, "Manque": VR.termine(r, j) ? "" : VR.manques(r).join(", "),
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lignes, { header: ["Identifiant", "Rôle", "Personne", "Contact", "Périmètre", "Mission", "Désigné le", "Désigné par", "Lettre de mission", "Formation", "Formé le", "Fin de fonction", "Motif de fin", "État", "Manque"] }), "Rôles");
+    XLSX.writeFile(wb, `roles-prevention_${j}.xlsx`);
+  });
+
+  // ---------- Rôle ouvert ----------
+  let courant = null, nomChoisi = "";
+  function ouvrir(id){
+    const r = id ? tous().find(z => z.id === id) : null;
+    if (id && !r) return;
+    if (!r && !peutGerer) return;
+    courant = r || { id: null, role: "", personne: "", service: voitTout ? "" : services[0] };
+    nomChoisi = courant.agentId ? courant.personne : "";
+    const dis = peutGerer ? "" : " disabled", j = ajd();
+    // périmètre : toute l'organisation ou un service (un compte limité : ses seuls services)
+    const optService = (s) => `<option value="${esc(s)}"${s === courant.service ? " selected" : ""}>${esc(s)}</option>`;
+    const groupes = VigieOrga.noms().map(n => { const sv = VigieOrga.services(n).filter(s => voitTout || services.includes(s)); return sv.length ? `<optgroup label="${esc(n)}">${sv.map(optService).join("")}</optgroup>` : ""; }).join("");
+    const connu = !courant.service || VigieOrga.noms().some(n => VigieOrga.services(n).includes(courant.service));
+    const optsService = (voitTout ? `<option value=""${!courant.service ? " selected" : ""}>Toute l'organisation</option>` : "") + groupes + (connu ? "" : optService(courant.service));
+    $("fiche").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">${r ? esc(r.role) + (r.personne ? " — " + esc(r.personne) : "") : "Nouveau rôle"}</h3>
+          <div class="fiche-etat">${r ? chipEtat(r, j) : ""}${r && r.auteur ? ` · créé par ${esc(r.auteur)}${r.dateCreation ? " le " + esc(dateFr(String(r.dateCreation).slice(0, 10))) : ""}` : ""}${r && r.modifiePar ? ` · modifié par ${esc(r.modifiePar)}${r.dateMaj ? " le " + esc(dateFr(String(r.dateMaj).slice(0, 10))) : ""}` : ""}</div></div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnFermer">Fermer</button></div>
+      </div>
+      <form id="ficheForm" novalidate>
+        <div class="form-grid">
+          <div class="span2"><label for="cRole">Rôle</label><input type="text" id="cRole" list="cRolesListe" value="${esc(courant.role || "")}" maxlength="150" placeholder="Choisir dans la liste ou saisir"${dis}>
+            <datalist id="cRolesListe">${VR.suggestions(VigieOrga.secteur()).map(s => `<option value="${esc(M(s))}"></option>`).join("")}</datalist></div>
+          <div><label for="cService">Périmètre</label><select id="cService"${dis}>${optsService}</select></div>
+          ${peutGerer ? `<div><label for="cAgent">Choisir dans Gestion RH</label><select id="cAgent"><option value="">— Saisie libre —</option></select></div>` : ""}
+          <div><label for="cPersonne">Personne</label><input type="text" id="cPersonne" value="${esc(courant.personne || "")}" maxlength="150" placeholder="Prénom et nom"${dis}></div>
+          <div><label for="cContact">Contact professionnel</label><input type="text" id="cContact" value="${esc(courant.contact || "")}" maxlength="150" placeholder="Téléphone ou courriel"${dis}></div>
+          <div class="span3"><label for="cMission">Mission</label><textarea id="cMission" placeholder="Ce que la personne fait dans ce rôle, et le temps qu'elle y consacre"${dis}>${esc(courant.mission || "")}</textarea></div>
+          <div><label for="cDesigneLe">Désigné le</label><input type="date" id="cDesigneLe" value="${esc(courant.designeLe || "")}"${dis}></div>
+          <div><label for="cDesignePar">Désigné par</label><input type="text" id="cDesignePar" value="${esc(courant.designePar || "")}" maxlength="150" placeholder="L'autorité qui désigne"${dis}></div>
+          <div><label for="cLettre">Lettre de mission</label><input type="text" id="cLettre" value="${esc(courant.lettre || "")}" maxlength="300" placeholder="Référence ou lien"${dis}>${lienSur(courant.lettre) ? `<a class="lien-lettre" href="${esc(String(courant.lettre).trim())}" target="_blank" rel="noopener noreferrer">Ouvrir la lettre</a>` : ""}</div>
+          <div class="span2"><label for="cFormation">Formation</label><input type="text" id="cFormation" value="${esc(courant.formation || "")}" maxlength="300" placeholder="Ex. : formation initiale, cinq jours"${dis}></div>
+          <div><label for="cFormationLe">Formé le</label><input type="date" id="cFormationLe" value="${esc(courant.formationLe || "")}"${dis}></div>
+          <div><label for="cFinLe">Fin de fonction le</label><input type="date" id="cFinLe" value="${esc(courant.finLe || "")}"${dis}></div>
+          <div class="span2"><label for="cMotifFin">Motif de fin</label><input type="text" id="cMotifFin" value="${esc(courant.motifFin || "")}" maxlength="300" placeholder="Ex. : départ, fin de mandat, remplacé par…"${dis}></div>
+        </div>
+        ${peutGerer ? `<div class="form-actions">
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+          ${r ? `<button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer</button>` : ""}
+        </div>` : ""}
+      </form>`;
+    if (peutGerer) VigieRoster.bindAgentPicker($("cAgent"), services, (a) => {
+      nomChoisi = [a.prenom, a.nom].filter(Boolean).join(" ").trim();
+      $("cPersonne").value = nomChoisi; courant.agentId = a.id;
+    });
+    if (peutGerer && courant.agentId && [...$("cAgent").options].some(o => o.value === courant.agentId)) $("cAgent").value = courant.agentId;
+    $("fiche").style.display = "";
+    $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function fermer(){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; courant = null; }
+  const val = (id) => $(id) ? $(id).value.trim() : "";
+
+  // Relit le formulaire dans le rôle enregistré.
+  const FACULTATIFS = ["agentId", "service", "contact", "mission", "designeLe", "designePar", "lettre", "formation", "formationLe", "finLe", "motifFin"];
+  function enregistrer(){
+    if (!peutGerer || !courant) return null;
+    const r = Object.assign({}, courant, {
+      role: val("cRole"), personne: val("cPersonne"), service: val("cService"), contact: val("cContact"), mission: val("cMission"),
+      designeLe: val("cDesigneLe"), designePar: val("cDesignePar"), lettre: val("cLettre"), formation: val("cFormation"), formationLe: val("cFormationLe"),
+      finLe: val("cFinLe"), motifFin: val("cMotifFin"),
+    });
+    if (!r.role){ alert("Indiquez le rôle."); return null; }
+    if (!r.personne){ alert("Indiquez la personne qui tient ce rôle."); return null; }
+    if (r.designeLe && r.finLe && r.finLe < r.designeLe){ alert("La fin de fonction ne peut pas précéder la désignation."); return null; }
+    if (!voitTout && !services.includes(r.service)){ alert("Choisissez un de vos services."); return null; }
+    // un nom retapé à la main n'est plus la fiche choisie dans Gestion RH
+    if (r.agentId && r.personne !== nomChoisi) delete r.agentId;
+    FACULTATIFS.forEach(k => { if (!r[k]) delete r[k]; });
+    const nouveau = !r.id;
+    if (nouveau){ r.id = genId("role"); r.auteur = moi; r.dateCreation = new Date().toISOString(); }
+    else { r.modifiePar = moi; r.dateMaj = new Date().toISOString(); }
+    try {
+      modifierRoles(l => {
+        const i = l.findIndex(z => z && z.id === r.id);
+        if (i < 0) l.push(r);
+        else { const y = Object.assign({}, l[i], r); FACULTATIFS.forEach(k => { if (!r[k]) delete y[k]; }); l[i] = y; }
+      });
+    } catch(e){ alert("Le rôle n'a pas pu être enregistré."); return null; }
+    logAudit(nouveau ? "Création" : "Modification", `Rôle ${nomDe(r)}${r.finLe ? " — fin de fonction le " + dateFr(r.finLe) : ""}`);
+    return r;
+  }
+  $("fiche").addEventListener("click", (e) => {
+    if (e.target.closest("#btnFermer")){ fermer(); return; }
+    if (e.target.closest("#btnSupprimer")){
+      if (!courant || !courant.id) return;
+      if (!confirm(`Supprimer le rôle ${nomDe(courant)} ? Pour garder sa trace, indiquez plutôt une fin de fonction.`)) return;
+      try { modifierRoles(l => { const i = l.findIndex(z => z && z.id === courant.id); if (i >= 0) l.splice(i, 1); }); }
+      catch(err){ alert("Le rôle n'a pas pu être supprimé."); return; }
+      logAudit("Suppression", `Rôle ${nomDe(courant)}`);
+      fermer(); render();
+    }
+  });
+  $("fiche").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const r = enregistrer();
+    if (r){ render(); ouvrir(r.id); }
+  });
+
+  // ---------- Affichage imprimé ----------
+  // les rôles en fonction, par rôle : la page à afficher pour que chacun sache à qui s'adresser
+  $("btnImprimer").addEventListener("click", () => {
+    const j = ajd(), l = VR.enFonction(tous(), j).sort((a, b) => fr(a.role || "", b.role || "") || fr(a.personne || "", b.personne || ""));
+    const ancien = document.getElementById("roles-impression");
+    if (ancien) ancien.remove();
+    if (!document.getElementById("roles-impression-style")){
+      const style = document.createElement("style"); style.id = "roles-impression-style";
+      style.textContent = [
+        "@page{ size:A4 portrait; margin:14mm; }",
+        "@media screen{ #roles-impression{ display:none; } }",
+        "@media print{",
+        "  body{ background:#fff !important; }",
+        "  body > *:not(#roles-impression){ display:none !important; }",
+        "  #roles-impression{ display:block !important; color:#000; font:11px/1.45 'IBM Plex Sans',Arial,sans-serif; }",
+        "  #roles-impression .pi-marque{ font:700 10px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#555; }",
+        "  #roles-impression h1{ font:700 22px 'Barlow Condensed',Arial,sans-serif; margin:2px 0; }",
+        "  #roles-impression .pi-meta{ font-size:10px; color:#333; margin:0 0 8px; }",
+        "  #roles-impression table{ width:100%; border-collapse:collapse; }",
+        "  #roles-impression th, #roles-impression td{ border:1px solid #999; padding:4px 6px; text-align:left; vertical-align:top; white-space:pre-line; }",
+        "  #roles-impression th{ background:#eee; font-weight:600; }",
+        "  #roles-impression tr{ break-inside:avoid; page-break-inside:avoid; }",
+        "}",
+      ].join("\n");
+      document.head.appendChild(style);
+    }
+    const bloc = document.createElement("div");
+    bloc.id = "roles-impression";
+    bloc.innerHTML = `
+      <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "")}</div>
+      <h1>Rôles de prévention : à qui s'adresser</h1>
+      <p class="pi-meta">Édité le ${esc(dateFr(j))} · ${l.length} rôle${l.length > 1 ? "s" : ""} en fonction</p>
+      ${l.length ? `<table><thead><tr><th>Rôle</th><th>Personne</th><th>Contact</th><th>Périmètre</th><th>Mission</th></tr></thead><tbody>${l.map(r => `<tr><td>${esc(r.role)}</td><td>${esc(r.personne || "")}</td><td>${esc(r.contact || "")}</td><td>${esc(perimetre(r))}</td><td>${esc(r.mission || "")}</td></tr>`).join("")}</tbody></table>` : "<p>Aucun rôle en fonction.</p>"}`;
+    document.body.appendChild(bloc);
+    const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
+    window.addEventListener("afterprint", nettoyer);
+    window.print();
+  });
+
+  render();
+  // ?ouvrir=<id>
+  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(x => x.id === id)) ouvrir(id); })();
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

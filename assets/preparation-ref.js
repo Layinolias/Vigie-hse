@@ -30,7 +30,7 @@
     "4.4": { c: "hors", pages: [], manque: "l'application dans son ensemble est un outil du système" },
     "5.1": { c: "partielle", pages: [P("revue-direction.html", "Revue de direction"), P("reporting.html", "Indicateurs & Reporting")], manque: "l'engagement relève de la direction ; l'outil en garde les traces" },
     "5.2": { c: "couverte", pages: [P("politique-sante-securite.html", "Politique santé-sécurité")], manque: "la communication aux parties intéressées extérieures reste à la main" },
-    "5.3": { c: "partielle", pages: [P("administration.html", "Administration (profils)"), P("gestion-rh.html", "Gestion RH"), P("urgences-exercices.html", "Situations d'urgence")], manque: "un registre des rôles de prévention, avec leur mission et leur date de désignation" },
+    "5.3": { c: "couverte", pages: [P("roles-prevention.html", "Rôles de prévention"), P("administration.html", "Administration (profils)"), P("gestion-rh.html", "Gestion RH"), P("urgences-exercices.html", "Situations d'urgence")] },
     "5.4": { c: "couverte", pages: [P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social"), P("signalements.html", "Signalements")] },
     "6.1.1": { c: "couverte", pages: [P("contexte.html", "Contexte et enjeux")] },
     "6.1.2": { c: "couverte", pages: [P("document-unique.html", "Document unique"), P("penibilite.html", "Pénibilité"), P("produits-chimiques.html", "Produits chimiques")] },
@@ -62,7 +62,7 @@
   const K = {
     contexte: "vigie_hse_contexte", referentiels: "vigie_hse_referentials", revues: "vigie_hse_revues_direction", politiques: "vigie_hse_politiques",
     users: "vigie_hse_users", profils: "vigie_hse_profils", rsst: "vigie_hse_rsst", dsReunions: "vigie_hse_ds_reunions", dsQuestions: "vigie_hse_ds_questions",
-    duerp: "vigie_hse_duerp_dataset", changements: "vigie_hse_changements", exigences: "vigie_hse_exigences", actions: "vigie_hse_actions",
+    duerp: "vigie_hse_duerp_dataset", changements: "vigie_hse_changements", exigences: "vigie_hse_exigences", actions: "vigie_hse_actions", roles: "vigie_hse_roles_prevention",
     objectifs: "vigie_hse_objectifs", habilitations: "vigie_hse_habilitations", accueils: "vigie_hse_accueils", news: "vigie_hse_news", veille: "vigie_hse_veille",
     documents: "vigie_hse_documents", verifications: "vigie_hse_verifications", inspections: "vigie_hse_inspections", epi: "vigie_hse_epi_dotations",
     ee: "vigie_hse_interventions_ee", plans: "vigie_hse_plans_urgence", exercices: "vigie_hse_exercices_urgence", atmp: "vigie_hse_dataset",
@@ -76,7 +76,7 @@
     const lire = (cle) => { try { const v = JSON.parse(store.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
     const complet = (cles) => cles.every(c => !store.complet || store.complet(c) !== false);
     const VA = racine.VigieAuditInterne, VP = racine.VigiePolitique, VC = racine.VigieChangements, VX = racine.VigieContexte,
-      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures;
+      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures, VR = racine.VigieRoles;
     let I = null;
     try { I = VI ? VI.calculer(store, "", "") : null; } catch (e) { I = null; }
     const actions = lire(K.actions);
@@ -107,9 +107,12 @@
           v.prochaineRevue ? "prochaine revue le " + dateFr(v.prochaineRevue) + (e.code === "a-revoir" ? " : dépassée" : "") : "pas de date de prochaine revue",
           VP.engagementsCouverts(v).length + " / " + VP.ENGAGEMENTS.length + " engagements attendus couverts", pl(VP.communications(v).length, "action de communication", "actions de communication")]];
       } },
-      "5.3": { cles: [K.users, K.profils], f: () => {
-        const u = lire(K.users).length, p = lire(K.profils).length;
-        return [u ? "pret" : "rien", [pl(u, "compte", "comptes") + (p ? ", " + pl(p, "profil de droits personnalisé", "profils de droits personnalisés") : "")]];
+      "5.3": { cles: [K.users, K.profils, K.roles], f: () => {
+        const u = lire(K.users).length, p = lire(K.profils).length, s = VR.synthese(lire(K.roles), aujourdhui);
+        const comptes = pl(u, "compte", "comptes") + (p ? ", " + pl(p, "profil de droits personnalisé", "profils de droits personnalisés") : "");
+        if (!s.enFonction) return ["rien", ["aucun rôle de prévention en fonction" + (s.termines ? " (" + pl(s.termines, "rôle terminé", "rôles terminés") + ")" : ""), comptes]];
+        return [s.aCompleter ? "areprendre" : "pret", [pl(s.enFonction, "rôle de prévention en fonction", "rôles de prévention en fonction") + ", " + pl(s.personnes, "personne", "personnes")
+          + (s.aCompleter ? ", dont " + s.aCompleter + " à compléter (mission ou date de désignation)" : ""), comptes]];
       } },
       "5.4": { cles: [K.rsst, K.dsReunions, K.dsQuestions], f: () => {
         const r = I ? I.rsstTotal : lire(K.rsst).length, nv = I ? I.rsstNouvelle : 0, re = lire(K.dsReunions).length, q = lire(K.dsQuestions).length;
@@ -215,7 +218,7 @@
         return ["pret", [pl(I.paFait, "action faite", "actions faites") + ", " + pl(I.paEfficaces, "jugée efficace", "jugées efficaces"), pl(lire(K.objectifs).filter(o => o && o.id).length, "objectif", "objectifs")]];
       } },
     };
-    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VO, "5.2": VP, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
+    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VO, "5.2": VP, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
     const audits = VA ? lire(K.audits) : [], cv = VA && complet([K.audits]) ? VA.couverture(audits, actions, aujourdhui) : [];
     const clauses = VA ? VA.CLAUSES : Object.keys(COUVERTURE).map(c => [c, c]);
     return clauses.map(([clause, nom]) => {

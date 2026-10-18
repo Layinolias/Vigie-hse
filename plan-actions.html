@@ -20,6 +20,7 @@
 <script src="assets/audit-interne-ref.js"></script>
 <script src="assets/changements-ref.js"></script>
 <script src="assets/contexte-ref.js"></script>
+<script src="assets/mesures-ref.js"></script>
 <script src="assets/tri-filtres.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
 <link rel="stylesheet" href="assets/commun.css">
@@ -124,6 +125,10 @@
   .statut-select{ min-width:118px; padding:6px 28px 6px 10px; font-size:12px; }
   .eff{ display:block; margin-top:5px; font-size:10.5px; font-weight:600; white-space:nowrap; }
   .eff.eff-ok{ color:var(--success); } .eff.eff-ko{ color:var(--danger); } .eff.eff-attente{ color:var(--text-faint); font-weight:500; }
+  /* niveau de la mesure (ISO 45001 § 8.1.2) */
+  .niv{ display:block; margin-top:4px; font-size:10.5px; font-weight:600; color:var(--text-muted); }
+  .niveaux-bilan{ margin:-4px 0 12px; font-size:11.5px; color:var(--text-muted); line-height:1.7; } .niveaux-bilan b{ color:var(--text); font-weight:600; }
+  .niv-aide{ display:block; margin-top:4px; font-size:11px; color:var(--text-faint); line-height:1.5; }
   .form-grid .efficacite-bloc{ grid-column:1 / -1; }
   .efficacite-bloc{ border:1px solid var(--border); border-radius:var(--r-sm); padding:12px 14px 14px; margin:0; min-width:0; }
   .efficacite-bloc[hidden]{ display:none; }
@@ -225,6 +230,7 @@
         <div class="field"><span class="flabel">Priorité</span>
           <select id="fPriorite"><option value="all">Toutes</option><option value="Critique">Critique</option><option value="Haute">Haute</option><option value="Moyenne">Moyenne</option><option value="Basse">Basse</option></select>
         </div>
+        <div class="field"><span class="flabel">Niveau de la mesure</span><select id="fNiveau"><option value="all">Tous</option></select></div>
         <button type="button" class="btn btn-ghost" id="btnReset">Réinitialiser</button>
         <span class="result-count"><b id="resultCount">–</b> / <span id="totalCount">–</span> actions</span>
       </div>
@@ -248,6 +254,7 @@
             <div><label for="fStatutForm">Statut</label>
               <select id="fStatutForm"><option value="À faire">À faire</option><option value="En cours">En cours</option><option value="Fait">Fait</option></select>
             </div>
+            <div><label for="fNiveauMesure">Niveau de la mesure</label><select id="fNiveauMesure"><option value="">Non rangée</option></select><span class="niv-aide" id="fNiveauAide">Dans l'ordre d'ISO 45001 : d'abord supprimer le danger, en dernier la protection individuelle.</span></div>
             <div class="span3"><label for="fDescription">Description / mesures</label><textarea id="fDescription" placeholder="Détail de l'action corrective à mener…"></textarea></div>
             <fieldset class="efficacite-bloc" id="blocProgramme">
               <legend>Programme annuel de prévention</legend>
@@ -284,6 +291,7 @@
           <h3 class="panel-title">Actions correctives</h3>
           <div class="panel-actions" id="panelActionsBtns"></div>
         </div>
+        <p class="niveaux-bilan" id="niveauxBilan"></p>
         <div class="table-panel">
           <table class="reg">
             <thead>
@@ -789,6 +797,16 @@
     if ("coutEstime" in v){ const c = VigieProgramme.montant(v.coutEstime); if (c === null) delete rec.coutEstime; else rec.coutEstime = c; }
     ["financement", "conditionsExecution", "indicateurResultat"].forEach(k => { if (!(k in v)) return; const t = String(v[k] == null ? "" : v[k]).trim(); if (t) rec[k] = t; else delete rec[k]; });
   }
+  // Niveau de la mesure (ISO 45001 § 8.1.2) : posé s'il est reconnu, retiré si la valeur est vide ;
+  // une valeur importée qu'on ne reconnaît pas laisse l'action telle qu'elle était.
+  function poserNiveau(rec, valeur){
+    const t = String(valeur == null ? "" : valeur).trim(), id = VigieMesures.niveau(t) ? t : VigieMesures.reconnaitre(t);
+    if (id) rec.niveauMesure = id; else if (!t) delete rec.niveauMesure;
+  }
+  function pastilleNiveau(a){
+    const n = VigieMesures.niveau(a.niveauMesure);
+    return n ? `<span class="niv" title="${esc(n.aide)}">Niveau ${n.rang} · ${esc(n.libelle)}</span>` : "";
+  }
   const CHAMPS_EFFICACITE = ["efficacite", "efficaciteDate", "efficacitePar", "efficaciteNote"];
   // retire les champs ; vrai s'il y avait une vérification renseignée
   function retirerEfficacite(rec){
@@ -819,7 +837,9 @@
   }
 
   // ---------- Filtres ----------
-  const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatut = $("fStatut"), fPriorite = $("fPriorite");
+  const fCollectivite = $("fCollectivite"), fService = $("fService"), fStatut = $("fStatut"), fPriorite = $("fPriorite"), fNiveau = $("fNiveau");
+  fNiveau.insertAdjacentHTML("beforeend", VigieMesures.NIVEAUX.map(n => `<option value="${n.id}">${n.rang}. ${esc(n.libelle)}</option>`).join("") + `<option value="none">${VigieMesures.NON_RANGEE}</option>`);
+  $("fNiveauMesure").insertAdjacentHTML("beforeend", VigieMesures.NIVEAUX.map(n => `<option value="${n.id}" title="${esc(n.aide)}">${n.rang}. ${esc(n.libelle)}</option>`).join(""));
   function fillServiceOptions(){
     const col = fCollectivite.value;
     const list = col === "all" ? VigieOrga.tousServices(true) : VigieOrga.services(col, true);
@@ -847,12 +867,13 @@
   tri.decorate($("theadFields"));
 
   function render(){
-    const col = fCollectivite.value, svc = fService.value, st = fStatut.value, pr = fPriorite.value;
+    const col = fCollectivite.value, svc = fService.value, st = fStatut.value, pr = fPriorite.value, nv = fNiveau.value;
     let rows = DATASET.filter(a =>
       (col === "all" || VigieOrga.actuel(a.collectivite) === col) &&
       (svc === "all" || a.service === svc) &&
       statutCorrespond(a, st) &&
-      (pr === "all" || a.priorite === pr)
+      (pr === "all" || a.priorite === pr) &&
+      (nv === "all" || (nv === "none" ? !VigieMesures.niveau(a.niveauMesure) : a.niveauMesure === nv))
     );
     rows = rows.slice().sort((a,b) => (a.echeance || "").localeCompare(b.echeance || ""));
     // Sans tri de colonne actif, l'ordre par défaut (échéance croissante) est conservé.
@@ -865,6 +886,8 @@
     const faites = DATASET.filter(a => a.statut === "Fait");
     $("kpiFait").textContent = faites.length;
     $("kpiFaitSub").textContent = faites.length ? `${faites.filter(a => !a.efficacite).length} à vérifier` : "";
+    const bn = VigieMesures.bilan(DATASET);
+    $("niveauxBilan").innerHTML = DATASET.length ? "Niveau des mesures (ISO 45001 § 8.1.2) : " + VigieMesures.NIVEAUX.map(n => `${esc(n.court)} <b>${bn.parNiveau[n.id]}</b>`).join(" · ") + ` · non rangées <b>${bn.nonRangees}</b>` : "";
     $("resultCount").textContent = rows.length;
     $("totalCount").textContent = DATASET.length;
 
@@ -878,7 +901,7 @@
     const origineCls = { "DUERP":"duerp", "Inspection":"inspection", "Analyse":"analyse", "Urgence":"urgence", "Prévention EE":"ee", "Dialogue social":"ds", "Signalement":"signalement", "Revue de direction":"revue", "Objectif":"objectif", "Conformité":"conformite", "Audit interne":"audit", "Changement":"changement", "Risques et opportunités":"ro" };
     tbody.innerHTML = rows.map(a => `
       <tr class="${isOverdue(a) ? 'overdue' : ''}" data-id="${esc(a.id)}">
-        <td class="wrap">${esc(a.titre)}</td>
+        <td class="wrap">${esc(a.titre)}${pastilleNiveau(a)}</td>
         <td>${esc(a.service)}</td>
         <td><span class="origine-chip ${origineCls[a.origine] || 'manuel'}">${esc(a.origine)}</span></td>
         <td>${a.responsable ? esc(a.responsable) : '<span style="color:var(--text-faint)">—</span>'}</td>
@@ -898,8 +921,9 @@
   fService.addEventListener("change", render);
   fStatut.addEventListener("change", render);
   fPriorite.addEventListener("change", render);
+  fNiveau.addEventListener("change", render);
   $("btnReset").addEventListener("click", () => {
-    fCollectivite.value = "all"; fillServiceOptions(); fService.value = "all"; fStatut.value = "all"; fPriorite.value = "all";
+    fCollectivite.value = "all"; fillServiceOptions(); fService.value = "all"; fStatut.value = "all"; fPriorite.value = "all"; fNiveau.value = "all";
     tri.reset(); render();
   });
 
@@ -933,7 +957,9 @@
       const programme = {};
       [["cout estime", "coutEstime"], ["financement", "financement"], ["conditions d execution", "conditionsExecution"], ["indicateur de resultat", "indicateurResultat"]]
         .forEach(([col, k]) => { if (Object.prototype.hasOwnProperty.call(n, col)) programme[k] = n[col]; });
+      const niveau = Object.prototype.hasOwnProperty.call(n, "niveau de la mesure") ? n["niveau de la mesure"] : null;
       return {
+        _niveau: niveau,
         _efficacite: efficacite,
         id: String(pick(["id"])).trim() || "",
         titre, description, collectivite,
@@ -968,15 +994,17 @@
           if (!rec){ skipped++; return; }
           const eff = rec._efficacite; delete rec._efficacite;
           const prog = rec._programme; delete rec._programme;
+          const niv = rec._niveau; delete rec._niveau;
           const idx = rec.id ? DATASET.findIndex(d => d.id === rec.id) : -1;
           if (idx >= 0){
             // les champs que le tableur ne porte pas (venus d'un autre module) sont gardés
             const fusion = Object.assign({}, DATASET[idx], rec);
             if (eff) poserEfficacite(fusion, eff); else if (fusion.statut !== "Fait") retirerEfficacite(fusion);
             poserProgramme(fusion, prog);
+            if (niv !== null) poserNiveau(fusion, niv);
             DATASET[idx] = fusion; updated++;
           }
-          else { rec.id = rec.id || genId(); if (eff) poserEfficacite(rec, eff); poserProgramme(rec, prog); DATASET.push(rec); added++; }
+          else { rec.id = rec.id || genId(); if (eff) poserEfficacite(rec, eff); poserProgramme(rec, prog); if (niv !== null) poserNiveau(rec, niv); DATASET.push(rec); added++; }
         });
         saveDataset(DATASET);
         render();
@@ -999,6 +1027,7 @@
         "Priorité": r.priorite, "Statut": r.statut, "Date de création": r.dateCreation || "",
         "Efficacité": r.efficacite || "", "Efficacité vérifiée le": r.efficaciteDate || "", "Vérifiée par": r.efficacitePar || "", "Constat d'efficacité": r.efficaciteNote || "",
         "Coût estimé (€)": VigieProgramme.estCout(r.coutEstime) ? r.coutEstime : "", "Financement": r.financement || "", "Conditions d'exécution": r.conditionsExecution || "", "Indicateur de résultat": r.indicateurResultat || "",
+        "Niveau de la mesure": VigieMesures.libelle(r.niveauMesure),
       }));
       const ws = XLSX.utils.json_to_sheet(rows, { header: ["ID", "Titre", "Description", VigieOrga.libelle(), "Service", "Risque lié", "Origine", "Responsable", "Échéance", "Priorité", "Statut", "Date de création", "Efficacité", "Efficacité vérifiée le", "Vérifiée par", "Constat d'efficacité", "Coût estimé (€)", "Financement", "Conditions d'exécution", "Indicateur de résultat"] });
       const wb = XLSX.utils.book_new();
@@ -1039,6 +1068,7 @@
         $("fEcheance").value = rec.echeance || "";
         $("fPrioriteForm").value = rec.priorite || "Moyenne";
         $("fStatutForm").value = rec.statut || "À faire";
+        $("fNiveauMesure").value = VigieMesures.niveau(rec.niveauMesure) ? rec.niveauMesure : "";
         $("fDescription").value = rec.description || "";
         $("fEfficacite").value = rec.efficacite || "";
         $("fEfficaciteDate").value = rec.efficaciteDate || "";
@@ -1095,6 +1125,7 @@
         efficacitePar: $("fEfficacitePar").value.trim(), efficaciteNote: $("fEfficaciteNote").value.trim(),
       });
       poserProgramme(rec, { coutEstime: $("fCout").value, financement: $("fFinancement").value, conditionsExecution: $("fConditions").value, indicateurResultat: $("fIndicateur").value });
+      poserNiveau(rec, $("fNiveauMesure").value);
       const idx = DATASET.findIndex(d => d.id === rec.id);
       if (idx >= 0) DATASET[idx] = rec; else DATASET.push(rec);
       saveDataset(DATASET);

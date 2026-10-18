@@ -43,7 +43,7 @@
     "7.4": { c: "partielle", pages: [P("dashboard.html", "Flash Info et veille"), P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social")], manque: "un plan de communication, et la communication externe" },
     "7.5": { c: "partielle", pages: [P("base-documentaire.html", "Base documentaire")], manque: "le stockage des fichiers eux-mêmes et un circuit d'approbation" },
     "8.1.1": { c: "couverte", pages: [P("verifications-periodiques.html", "Vérifications périodiques"), P("inspection-audit.html", "Inspection / Audit"), P("produits-chimiques.html", "Produits chimiques")] },
-    "8.1.2": { c: "partielle", pages: [P("document-unique.html", "Document unique"), P("epi-dotation.html", "EPI & Dotation")], manque: "le rangement des mesures par niveau : supprimer, remplacer, protéger collectivement, puis l'EPI" },
+    "8.1.2": { c: "partielle", pages: [P("document-unique.html", "Document unique"), P("plan-actions.html", "Plan d'actions"), P("epi-dotation.html", "EPI & Dotation")], manque: "les mesures déjà en place au Document unique ne sont pas rangées par niveau (seules les actions du Plan d'actions le sont) ; rien ne signale une protection individuelle prévue seule (question 32)" },
     "8.1.3": { c: "couverte", pages: [P("changements.html", "Gestion des changements")] },
     "8.1.4": { c: "partielle", pages: [P("entreprises-exterieures.html", "Entreprises extérieures")], manque: "les critères de santé et de sécurité à l'achat" },
     "8.2": { c: "couverte", pages: [P("urgences-exercices.html", "Situations d'urgence")] },
@@ -76,7 +76,7 @@
     const lire = (cle) => { try { const v = JSON.parse(store.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
     const complet = (cles) => cles.every(c => !store.complet || store.complet(c) !== false);
     const VA = racine.VigieAuditInterne, VP = racine.VigiePolitique, VC = racine.VigieChangements, VX = racine.VigieContexte,
-      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga;
+      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures;
     let I = null;
     try { I = VI ? VI.calculer(store, "", "") : null; } catch (e) { I = null; }
     const actions = lire(K.actions);
@@ -160,9 +160,12 @@
         if (!I || (!I.vpTotal && !I.iaTotal)) return ["rien", ["ni vérification périodique ni inspection"]];
         return [I.vpLateTous ? "areprendre" : "pret", [pl(I.vpTotal, "vérification périodique", "vérifications périodiques") + (I.vpLateTous ? ", dont " + I.vpLateTous + " en retard" : ""), pl(I.iaTotal, "inspection", "inspections") + (I.iaNonConforme ? ", dont " + I.iaNonConforme + " non conforme" + (I.iaNonConforme > 1 ? "s" : "") : "")]];
       } },
-      "8.1.2": { cles: [K.duerp, K.epi], f: () => {
+      "8.1.2": { cles: [K.duerp, K.epi, K.actions], f: () => {
         if (!I || (!I.duTotal && !I.epiTotal)) return ["rien", ["ni évaluation ni dotation d'EPI"]];
-        return [I.epiLateTous ? "areprendre" : "pret", [pl(I.duTotal, "évaluation et ses mesures au Document unique", "évaluations et leurs mesures au Document unique"), pl(I.epiTotal, "dotation d'EPI", "dotations d'EPI") + (I.epiLateTous ? ", dont " + I.epiLateTous + " à renouveler en retard" : "")]];
+        // le niveau des actions : un fait, sans jugement (question 32)
+        const b = VM.bilan(actions), niv = VM.NIVEAUX.filter(n => b.parNiveau[n.id]).map(n => b.parNiveau[n.id] + " " + n.court.toLowerCase());
+        return [I.epiLateTous ? "areprendre" : "pret", [pl(I.duTotal, "évaluation et ses mesures au Document unique", "évaluations et leurs mesures au Document unique"), pl(I.epiTotal, "dotation d'EPI", "dotations d'EPI") + (I.epiLateTous ? ", dont " + I.epiLateTous + " à renouveler en retard" : ""),
+          !b.total ? "aucune action au Plan d'actions" : b.rangees ? pl(b.rangees, "action rangée", "actions rangées") + " par niveau de mesure (" + niv.join(", ") + ")" + (b.nonRangees ? ", " + pl(b.nonRangees, "non rangée", "non rangées") : "") : "aucune action rangée par niveau de mesure (" + pl(b.total, "action", "actions") + " au Plan d'actions)"]];
       } },
       "8.1.3": { cles: [K.changements, K.actions], f: () => {
         const s = VC.synthese(lire(K.changements), actions, aujourdhui);
@@ -212,7 +215,7 @@
         return ["pret", [pl(I.paFait, "action faite", "actions faites") + ", " + pl(I.paEfficaces, "jugée efficace", "jugées efficaces"), pl(lire(K.objectifs).filter(o => o && o.id).length, "objectif", "objectifs")]];
       } },
     };
-    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VO, "5.2": VP, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
+    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VO, "5.2": VP, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
     const audits = VA ? lire(K.audits) : [], cv = VA && complet([K.audits]) ? VA.couverture(audits, actions, aujourdhui) : [];
     const clauses = VA ? VA.CLAUSES : Object.keys(COUVERTURE).map(c => [c, c]);
     return clauses.map(([clause, nom]) => {

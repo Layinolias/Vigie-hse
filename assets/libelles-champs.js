@@ -23,7 +23,7 @@
     dateRevue:"Date de la revue", periodeDebut:"Début de la période examinée", periodeFin:"Fin de la période examinée", participants:"Participants",
     entrees:"Données d'entrée", sorties:"Résultats de la revue", decisions:"Actions décidées", chiffres:"Chiffres de la période", validePar:"Validée par", valideLe:"Validée le",
     traitement:"Traitement", clos:"Clos", closPar:"Clos par", closLe:"Clos le", signalementId:"Signalement (identifiant)",
-    efficacite:"Efficacité", efficaciteDate:"Efficacité vérifiée le", efficacitePar:"Efficacité vérifiée par", efficaciteNote:"Constat d'efficacité", coutEstime:"Coût estimé (€)", financement:"Financement", conditionsExecution:"Conditions d'exécution", indicateurResultat:"Indicateur de résultat",
+    efficacite:"Efficacité", efficaciteDate:"Efficacité vérifiée le", efficacitePar:"Efficacité vérifiée par", efficaciteNote:"Constat d'efficacité", coutEstime:"Coût estimé (€)", financement:"Financement", conditionsExecution:"Conditions d'exécution", indicateurResultat:"Indicateur de résultat", niveauMesure:"Niveau de la mesure",
     actions:"Actions", points:"Points", reference:"Référence", ref:"Référence", source:"Source", url:"Lien", lien:"Lien",
     // comptes et journaux
     email:"Adresse électronique ou identifiant", username:"Identifiant", role:"Rôle", profils:"Profils de droits", services:"Services",

@@ -19,7 +19,8 @@
 // VIGIE_SAUVEGARDE_HEURES (24 ; 0 les désactive), VIGIE_SAUVEGARDES_GARDER (14). À chaque nouvelle version de
 // l'application (empreinte de ses fichiers), une copie de la base est prise avant qu'elle n'y écrive.
 // VIGIE_DEMO=0 : les fichiers de démonstration (DATATEST/) ne sont pas servis — les pages, qui les importent
-// d'elles-mêmes quand elles les trouvent, restent vides (poste d'un utilisateur avec ses propres données).
+// d'elles-mêmes quand elles les trouvent, restent vides (poste d'un utilisateur avec ses propres données) ; et au
+// premier lancement, l'écran de connexion fait créer le compte administrateur au lieu des comptes de démonstration.
 //
 // P1b : connexion vérifiée ici (serveur/comptes.js — mots de passe hachés, jamais conservés en clair),
 // aucune page de l'application ni aucune donnée sans session (seuls le secteur, collectivité ou entreprise,
@@ -69,7 +70,7 @@ const PUBLIQUES = new Set(['/index.html', '/login.html']);
 const COOKIE = 'vigie_session';
 
 const base = ouvrir(BASE);
-const comptes = Comptes.creer(base);
+const comptes = Comptes.creer(base, { demo: DEMO });
 const journal = (...m) => console.log(new Date().toLocaleString('fr-FR') + ' ' + m.join(' '));
 const droits = require('./droits.js');   // droits d'écriture par registre, appliqués ici
 
@@ -124,6 +125,9 @@ function injection(session, chemin){
   }
   else {
     etat.premierLancement = comptes.aucun();
+    // poste réel (VIGIE_DEMO=0) : pas de comptes de démonstration, dont les mots de passe sont publiés — l'écran de
+    // connexion fait créer le compte administrateur (amorce, plus bas)
+    if (!DEMO) etat.demo = false;
     // seuls réglages transmis sans session : le secteur (mots des pages d'accueil et de connexion, assets/organisation.js) et la marque
     try { const o = JSON.parse(base.lire('vigie_hse_referentials') || '{}').organisation; if (o && o.secteur === 'entreprise') etat.secteur = 'entreprise'; } catch(e){}
     // la marque (nom, signature, logo, couleurs) : nettoyée champ par champ par assets/marque.js, transmise seulement si elle est personnalisée
@@ -143,6 +147,27 @@ function signerJournal(avant, valeur, utilisateur){
   let change = false;
   for (const r of l) if (r && typeof r === 'object' && !connus.has(String(r.id)) && r.utilisateur !== utilisateur){ r.utilisateur = utilisateur; change = true; }
   return change ? JSON.stringify(l) : valeur;
+}
+
+// Registres où un compte qui ne peut qu'ajouter (droits « ajout ») signe ce qu'il ajoute : le champ « auteur » d'un
+// enregistrement nouveau est le nom de sa session, pas celui qu'envoie la page — un appel direct à l'API pourrait sinon
+// signer au nom d'un autre, et le lui faire voir (serveur/lecture.js : ses seuls signalements, ses prises de connaissance).
+// Un dépôt au Registre SST peut rester « Anonyme », comme la page le propose. Une prise de connaissance porte l'identifiant
+// du compte (assets/politique-ref.js, idLecture) : un autre est refusé, il empêcherait ce compte d'enregistrer la sienne.
+// Le Registre AT/MP n'a pas de champ auteur : qui déclare est inscrit au journal d'audit, signé (signerJournal).
+const SIGNES = new Set(['vigie_hse_signalements', 'vigie_hse_signalements_photos', 'vigie_hse_politique_lectures', 'vigie_hse_rsst']);
+function signerAjouts(cle, avant, valeur, utilisateur){
+  let l, connus;
+  try { l = JSON.parse(valeur); connus = new Set((JSON.parse(avant || '[]') || []).map(r => r && String(r.id))); } catch(e){ return { valeur }; }
+  if (!Array.isArray(l)) return { valeur };
+  let change = false;
+  for (const r of l){
+    if (!r || typeof r !== 'object' || connus.has(String(r.id))) continue;
+    if (cle === 'vigie_hse_politique_lectures' && r.id !== 'lu-' + r.versionId + '-' + utilisateur) return { refus: true };
+    if (cle === 'vigie_hse_rsst' && r.auteur === 'Anonyme') continue;
+    if (r.auteur !== utilisateur){ r.auteur = utilisateur; change = true; }
+  }
+  return { valeur: change ? JSON.stringify(l) : valeur };
 }
 
 function lireCorps(req, max = TAILLE_MAX){
@@ -178,8 +203,8 @@ async function api(req, res, chemin){
   const session = comptes.session(jetonDe(req));
   const m = /^\/api\/donnees\/([^/]+)$/.exec(chemin);
   const cle = m ? m[1] : null;   // chemin déjà décodé
-  // Premier lancement, base sans aucun compte : l'écran de connexion y inscrit les comptes de
-  // démonstration, comme il le fait dans un navigateur — depuis ce poste seulement.
+  // Premier lancement, base sans aucun compte : l'écran de connexion y inscrit les comptes de démonstration (serveur
+  // de démonstration) ou le compte administrateur que crée la première personne (VIGIE_DEMO=0) — depuis ce poste seulement.
   const amorce = !session && cle === comptes.CLE_COMPTES && req.method === 'PUT' && comptes.aucun() && depuisCePoste(req);
   if (!session && !amorce) return repondre(res, 401, { erreur: 'non connecté' });
 
@@ -226,8 +251,24 @@ async function api(req, res, chemin){
       return repondre(res, 403, { erreur: 'droits insuffisants' });
     }
     if (session && cle === CLE_AUDIT && valeur !== null) valeur = signerJournal(base.lire(cle), valeur, session.page.user);
+    if (session && valeur !== null && SIGNES.has(cle) && droits.niveau(session.page, cle) === 'ajout'){
+      const s = signerAjouts(cle, base.lire(cle), valeur, session.page.user);
+      if (s.refus){
+        journal('écriture refusée (prise de connaissance au nom d\'un autre) :', cle, 'par', session.page.user);
+        return repondre(res, 403, { erreur: 'droits insuffisants' });
+      }
+      valeur = s.valeur;
+    }
     let mots = [];
-    if (cle === comptes.CLE_COMPTES && valeur !== null) ({ valeur, mots } = comptes.epurer(valeur));
+    if (cle === comptes.CLE_COMPTES && valeur !== null){
+      ({ valeur, mots } = comptes.epurer(valeur));
+      // un mot de passe posé ou changé compte au moins comptes.MDP_MIN caractères (comptes.tropCourts)
+      mots = comptes.nouveaux(mots);
+      if (comptes.tropCourts(mots).length){
+        journal('écriture refusée (mot de passe trop court) :', cle, 'par', session ? session.page.user : '(premier lancement)');
+        return repondre(res, 403, { erreur: 'mot de passe trop court', min: comptes.MDP_MIN });
+      }
+    }
     const r = valeur === null ? base.supprimer(cle, revisionVue) : base.ecrire(cle, valeur, revisionVue);
     if (!r.ok){
       journal('conflit', cle, '(vue', revisionVue, '/ actuelle', r.revision + ')');
@@ -236,7 +277,7 @@ async function api(req, res, chemin){
       Consultations.noter(base, session.page, chemin + ' (conflit)', { [cle]: { valeur: v } });
       return repondre(res, 409, Object.assign({}, r, { valeur: v }));
     }
-    if (cle === comptes.CLE_COMPTES) comptes.apresEcriture(mots);
+    if (cle === comptes.CLE_COMPTES) comptes.apresEcriture(mots, session ? jetonDe(req) : null);
     journal(req.method === 'PUT' ? 'écrit' : 'supprimé', cle, '→ révision', r.revision, 'par', session ? session.page.user : '(premier lancement)');
     return repondre(res, 200, r);
   }
@@ -344,7 +385,7 @@ serveur.listen(PORT, ECOUTE, () => {
   journal('Base : ' + BASE + ' (' + base.nombre() + ' registre(s) enregistré(s))');
   if (repris) journal('Base antérieure à P1b : ' + repris + ' mot(s) de passe retiré(s) des données et haché(s).');
   if (!DEMO) journal('Données de démonstration désactivées (VIGIE_DEMO=0) : les registres ne se remplissent pas tout seuls.');
-  if (comptes.aucun()) journal('Aucun compte : le premier passage sur l\'écran de connexion, depuis ce poste, crée les comptes de démonstration.');
+  if (comptes.aucun()) journal('Aucun compte : le premier passage sur l\'écran de connexion, depuis ce poste, ' + (DEMO ? 'crée les comptes de démonstration.' : 'fait créer le compte administrateur.'));
   else if (comptes.demoActive()) journal('ATTENTION : les comptes de démonstration (mots de passe publiés dans le dépôt) sont actifs — à changer avant tout usage réel.');
 });
 const arreter = () => { arreterSauvegardes(); arreterPurge(); retirerRepere(); serveur.close(); base.fermer(); process.exit(0); };

@@ -72,6 +72,7 @@
   .btn-primary:hover{ transform:translateY(-1px); box-shadow:0 10px 24px -8px rgba(var(--accent-rgb),.6); }
   .btn-primary:active{ transform:translateY(0); }
 
+  .intro{ margin:0 0 16px; font-size:13px; line-height:1.5; color:var(--text-muted); }
   .footnote{ font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.6; max-width:340px; }
 </style>
 
@@ -98,10 +99,28 @@
       <div class="error" id="loginError">Identifiant ou mot de passe incorrect.</div>
       <button type="submit" class="btn-primary">Se connecter</button>
     </form>
+    <!-- Premier lancement d'un poste réel (serveur sans démonstration) : la première personne crée le compte administrateur -->
+    <form id="premierCompte" novalidate hidden>
+      <p class="intro">Premier lancement : créez le compte administrateur. Il servira à créer ensuite les comptes des autres utilisateurs (Administration).</p>
+      <div class="f">
+        <label for="nouvelIdentifiant">Identifiant (nom d'utilisateur ou adresse e-mail)</label>
+        <input type="text" id="nouvelIdentifiant" autocomplete="username" required>
+      </div>
+      <div class="f">
+        <label for="nouveauMdp">Mot de passe (12 caractères au moins)</label>
+        <input type="password" id="nouveauMdp" autocomplete="new-password" minlength="12" required>
+      </div>
+      <div class="f">
+        <label for="nouveauMdp2">Le même mot de passe, une seconde fois</label>
+        <input type="password" id="nouveauMdp2" autocomplete="new-password" minlength="12" required>
+      </div>
+      <div class="error" id="premierErreur"></div>
+      <button type="submit" class="btn-primary">Créer le compte et se connecter</button>
+    </form>
   </div>
 
-  <p class="footnote" data-mots>Authentification de démonstration côté navigateur — à remplacer par le dispositif d'identification sécurisé de la collectivité lors du raccordement à l'architecture back-end.</p>
-  <p class="footnote">Démonstration à données fictives : tout ce que vous saisissez reste dans ce navigateur (<span class="mono">localStorage</span>), n'est partagé avec personne et peut être réinitialisé à tout moment. <a href="index.html" style="color:var(--accent);">En savoir plus</a>.</p>
+  <p class="footnote demo-seule" data-mots>Authentification de démonstration côté navigateur — à remplacer par le dispositif d'identification sécurisé de la collectivité lors du raccordement à l'architecture back-end.</p>
+  <p class="footnote demo-seule">Démonstration à données fictives : tout ce que vous saisissez reste dans ce navigateur (<span class="mono">localStorage</span>), n'est partagé avec personne et peut être réinitialisé à tout moment. <a href="index.html" style="color:var(--accent);">En savoir plus</a>.</p>
 </div>
 
 <script src="assets/stockage.js"></script>
@@ -148,6 +167,39 @@
 
   const form = document.getElementById("loginForm");
   const errorBox = document.getElementById("loginError");
+  // servie par le serveur : ni authentification ni données dans ce navigateur, les mentions de la démonstration en ligne se taisent
+  if (VigieStore.mode() === "serveur") document.querySelectorAll(".demo-seule").forEach(p => { p.hidden = true; });
+
+  // Poste réel (serveur lancé avec VIGIE_DEMO=0), base sans aucun compte : pas de comptes de démonstration, dont les
+  // mots de passe sont publiés — la première personne crée le compte administrateur, que le serveur inscrit (amorce,
+  // depuis ce poste seulement) et qui refuse un mot de passe de moins de MDP_MIN caractères.
+  const MDP_MIN = 12;
+  const premier = document.getElementById("premierCompte");
+  const premierErreur = document.getElementById("premierErreur");
+  if (VigieStore.mode() === "serveur" && VigieStore.premierLancement() && !VigieStore.comptesDemo()){
+    form.hidden = true;
+    premier.hidden = false;
+    document.getElementById("nouvelIdentifiant").focus();
+  }
+  premier.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const ident = document.getElementById("nouvelIdentifiant").value.trim();
+    const mdp = document.getElementById("nouveauMdp").value;
+    const dire = t => { premierErreur.textContent = t; premierErreur.classList.add("show"); };
+    if (!ident) return dire("Choisissez un identifiant : un nom d'utilisateur ou une adresse e-mail.");
+    if (mdp.length < MDP_MIN) return dire("Le mot de passe doit compter au moins " + MDP_MIN + " caractères.");
+    if (mdp !== document.getElementById("nouveauMdp2").value) return dire("Les deux mots de passe ne sont pas identiques.");
+    const compte = { id:"u-admin", nom:"", prenom:"", email:ident, username:ident, password:mdp, role:"admin", profils:["p-admin"], services:["*"], active:true };
+    try { VigieStore.setItem(USERS_KEY, JSON.stringify([compte])); }
+    catch(err){
+      return dire(err && err.name === "VigieSessionFinie" ? "Le compte n'a pas pu être créé : un compte existe peut-être déjà (rechargez la page), ou cet ordinateur n'est pas celui où " + VigieMarque.nom() + " est installé."
+        : err && err.name === "VigieServeurInjoignable" ? "Le serveur " + VigieMarque.nom() + " ne répond pas. Vérifiez qu'il est lancé."
+        : "Le serveur a refusé ce compte. Rechargez la page : un compte a peut-être déjà été créé.");
+    }
+    const r = VigieStore.connecter(ident, mdp);
+    if (r.ok){ location.href = "dashboard.html"; return; }
+    dire("Le compte est créé, mais la connexion a échoué : rechargez la page, puis connectez-vous.");
+  });
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();

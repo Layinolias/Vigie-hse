@@ -9,6 +9,7 @@ const { execFileSync } = require('child_process');
 
 const BROUILLON = process.argv.includes('--brouillon'), GARDER = process.argv.includes('--garder');
 const PORT_BAT = 8881, PORT = 8882;
+const ADMIN = ['responsable.hse', 'Essai-paquet-2026'];   // le compte administrateur créé au premier lancement
 const INDISPENSABLES = ['Lancer VIGIE HSE.bat', 'Restaurer une sauvegarde.bat', 'LISEZ-MOI.txt', 'VERSION.txt', 'login.html', 'index.html', 'dashboard.html',
   'serveur/serveur.js', 'serveur/lancer-poste.js', 'serveur/restaurer.js', 'serveur/poste-commun.js', 'serveur/base-sqlite.js',
   'assets/stockage.js', 'assets/droits.js', 'assets/marque.js', 'assets/xlsx.full.min.js', 'assets/polices/polices.css'];
@@ -56,9 +57,14 @@ const crlf = t => t.includes('\r\n') && !/[^\r]\n/.test(t) && !/^\n/.test(t);
     const DONNEES = path.join(T, 'donnees');
     srv = await H.demarrer({ racine: APP, script: 'serveur/lancer-poste.js', port: PORT, env: { VIGIE_DOSSIER: DONNEES, VIGIE_NAVIGATEUR: '0' } });
     verif('lancement : aucun avertissement technique', !H.MESSAGES_TECHNIQUES.test(srv.sortie()) && !/Warning/i.test(srv.sortie()), srv.sortie().slice(-800));
+    // première connexion : pas de comptes de démonstration (mots de passe publiés), le compte administrateur se crée
     const pot = H.nouveauPot();
-    const premiere = await H.seConnecterParLaPage(PORT, 'admin@verchamps.fr', 'admin1234', pot);
-    verif('première connexion : les comptes inscrits, l\'administrateur connecté', premiere.session && premiere.session.user === 'admin@verchamps.fr' && premiere.cookie && !premiere.erreurs.length, premiere);
+    const court = await H.creerPremierCompteParLaPage(PORT, ADMIN[0], 'court-11car', H.nouveauPot());
+    const amorceCourte = await H.requete(PORT, 'PUT', '/api/donnees/vigie_hse_users', { corps: JSON.stringify([{ id: 'u-admin', username: 'admin@verchamps.fr', email: 'admin@verchamps.fr', password: 'admin1234', profils: ['p-admin'], services: ['*'], active: true }]), entetes: { 'X-Vigie-Revision': '0' } });
+    verif('premier lancement : écran de création du compte administrateur ; mot de passe de moins de 12 caractères refusé, par la page et par le serveur', court.formulaire && !court.session && /12 caractères/.test(court.message) && amorceCourte.statut === 403, { court, amorce: amorceCourte.statut });
+    const premiere = await H.creerPremierCompteParLaPage(PORT, ADMIN[0], ADMIN[1], pot);
+    const demoRefusee = await H.connecter(PORT, 'admin@verchamps.fr', 'admin1234', H.nouveauPot());
+    verif('première connexion : le compte administrateur créé et connecté, aucun compte de démonstration', premiere.session && premiere.session.user === ADMIN[0] && premiere.cookie && !premiere.erreurs.length && demoRefusee.statut !== 200, { premiere, demo: demoRefusee.statut });
     const liste = H.pages(APP).filter(p => p !== 'login.html');   // l'écran de connexion ferme la session
     const fautives = [], externes = [];
     for (const pg of liste){
@@ -93,7 +99,7 @@ const crlf = t => t.includes('\r\n') && !/[^\r]\n/.test(t) && !/^\n/.test(t);
     fs.appendFileSync(path.join(APP, 'assets', 'stockage.js'), '\n// version suivante (test du paquet)\n');
     srv = await H.demarrer({ racine: APP, script: 'serveur/lancer-poste.js', port: PORT, env: { VIGIE_DOSSIER: DONNEES, VIGIE_NAVIGATEUR: '0' } });
     const pot2 = H.nouveauPot();
-    const c = await H.connecter(PORT, 'admin@verchamps.fr', 'admin1234', pot2);
+    const c = await H.connecter(PORT, ADMIN[0], ADMIN[1], pot2);
     const d2 = c.statut === 200 ? await H.donnees(PORT, pot2) : {};
     const retrouvee = JSON.parse((d2.vigie_hse_dataset || {}).valeur || '[]').find(x => x && x.id === saisie.id);
     verif('application remplacée : comptes et données toujours là', c.statut === 200 && !!retrouvee, c);

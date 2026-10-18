@@ -15,6 +15,7 @@
 //   empreinte(idCompte) / poserEmpreinte(idCompte, empreinte) / retirerEmpreintes(idsGardes)
 //   ouvrirSession(empreinteJeton, idCompte, expire) / lireSession(empreinteJeton) / prolongerSession(…, expire)
 //   fermerSession(empreinteJeton) / purgerSessions(maintenant)
+//   fermerSessionsCompte(idCompte, sauf) : toutes ses sessions, sauf celle dont l'empreinte de jeton est « sauf »
 // Consultations des données de santé (serveur/consultations.js) — jamais transmises aux pages :
 //   noterConsultation(compte, page, registres) / consultations(depuisIso, limite) / purgerConsultations(avantIso)
 //   reprendreConsultations(lignes) — restauration : ajoute celles postérieures à la dernière ligne de la base
@@ -61,6 +62,7 @@ function ouvrir(fichier){
     prolongerSession: db.prepare('UPDATE sessions SET expire = ? WHERE jeton = ?'),
     fermerSession: db.prepare('DELETE FROM sessions WHERE jeton = ?'),
     fermerSessionsCompte: db.prepare('DELETE FROM sessions WHERE compte = ?'),
+    fermerAutresSessions: db.prepare('DELETE FROM sessions WHERE compte = ? AND jeton <> ?'),
     purgerSessions: db.prepare('DELETE FROM sessions WHERE expire < ?'),
     purgerHistorique: db.prepare('DELETE FROM historique WHERE cle = ?'),
     noterConsultation: db.prepare('INSERT INTO consultations (quand, compte, page, registres) VALUES (?, ?, ?, ?)'),
@@ -133,7 +135,7 @@ function ouvrir(fichier){
     lireSession: jeton => q.lireSession.get(jeton) || null,
     prolongerSession: (jeton, expire) => { q.prolongerSession.run(expire, jeton); },
     fermerSession: jeton => { q.fermerSession.run(jeton); },
-    fermerSessionsCompte: compte => { q.fermerSessionsCompte.run(compte); },
+    fermerSessionsCompte: (compte, sauf) => { if (sauf) q.fermerAutresSessions.run(compte, sauf); else q.fermerSessionsCompte.run(compte); },
     purgerSessions: t => { q.purgerSessions.run(t); },
     // journal des consultations des données de santé (serveur/consultations.js) : registres = JSON
     noterConsultation: (compte, page, registres) => { q.noterConsultation.run(maintenant(), compte, page, JSON.stringify(registres)); },

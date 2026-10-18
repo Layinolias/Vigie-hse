@@ -1,4 +1,4 @@
-// Avant de remettre un paquet (Documentation/LIVRAISON-POSTE.md) : les trois tests, dans l'ordre, et leur bilan.
+// Avant de remettre un paquet (Documentation/LIVRAISON-POSTE.md) : les quatre tests, dans l'ordre, et leur bilan.
 //   node tests/avant-livraison.js [--brouillon] [<commit>…]
 // Sans commit donné, la mise à jour est essayée depuis chaque paquet du tableau de LIVRAISON-POSTE.md qui n'a pas
 // été remplacé (remis, ou à remettre) : aucun utilisateur ne doit perdre ses données, quel que soit son paquet.
@@ -21,6 +21,7 @@ const etapes = [
   ['Mise à jour depuis ' + (commits.join(', ') || '(aucun paquet)'), ['test-mise-a-jour.js'].concat(commits)],
   ['Paquet', ['test-paquet.js'].concat(brouillon ? ['--brouillon'] : [])],
   ['Restauration', ['test-restauration.js']],
+  ['Sécurité des comptes', ['test-securite.js']],
 ].filter(e => e[1].length > 1 || e[1][0] !== 'test-mise-a-jour.js');
 
 const bilan = [];

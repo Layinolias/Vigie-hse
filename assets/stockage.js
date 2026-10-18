@@ -411,8 +411,10 @@
     // filtrées pour ce compte (champs retirés, ses seuls enregistrements, hors de ses services, données de santé
     // masquées) : un total calculé dessus serait faux (Objectifs santé-sécurité, question 24).
     complet: function(cle){ return !(SERVEUR && Array.isArray(SERVEUR.partielles) && SERVEUR.partielles.indexOf(cle) >= 0); },
-    // base neuve, sans aucun compte : l'écran de connexion y inscrit les comptes de démonstration
+    // base neuve, sans aucun compte : l'écran de connexion y inscrit les comptes de démonstration…
     premierLancement: function(){ return !!(SERVEUR && SERVEUR.premierLancement); },
+    // … sauf sur un poste réel (serveur lancé avec VIGIE_DEMO=0) : il y fait créer le compte administrateur
+    comptesDemo: function(){ return !(SERVEUR && SERVEUR.demo === false); },
     _fusionner: fusionner,   // exposé pour les tests
   };
   // vérifié dès le chargement : la vitrine et l'écran de connexion préviennent avant toute saisie

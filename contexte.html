@@ -107,6 +107,14 @@
   .constat .actions-constat .dyn-row > span{ flex:1 1 auto; font-size:12.8px; }
   .alerte{ font-size:12.5px; color:var(--danger); margin:8px 0 0; font-weight:600; }
   .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+  .domaine-enonce{ white-space:pre-wrap; font-size:13.5px; line-height:1.6; margin:0 0 12px; max-width:110ch; }
+  .domaine-dl{ display:grid; grid-template-columns:minmax(150px,230px) 1fr; gap:6px 16px; margin:0 0 10px; font-size:12.8px; }
+  .domaine-dl dt{ color:var(--text-muted); font-weight:500; }
+  .domaine-dl dd{ margin:0; white-space:pre-wrap; line-height:1.5; }
+  .domaine-versions{ margin-top:10px; font-size:12.5px; }
+  .domaine-versions summary{ cursor:pointer; color:var(--accent); font-weight:600; }
+  .domaine-versions ul{ margin:8px 0 0; padding-left:18px; line-height:1.6; }
+  @media (max-width:640px){ .domaine-dl{ grid-template-columns:1fr; gap:2px; } .domaine-dl dd{ margin-bottom:8px; } }
 </style>
 <link rel="stylesheet" href="assets/mobile.css">
 
@@ -154,7 +162,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-compass"/></svg></div>
           <div class="page-summary-text">
             <h1>Contexte et enjeux</h1>
-            <p>Ce qui, dans l'organisation et autour d'elle, pèse sur la démarche de santé et de sécurité : les enjeux internes et externes (ISO 45001, § 4.1), les parties intéressées et ce qu'elles attendent (§ 4.2), et les risques et opportunités pour la démarche elle-même, avec les actions décidées, suivies au Plan d'actions (§ 6.1.1). Les risques pour la santé des personnes restent au Document unique.</p>
+            <p>Ce qui, dans l'organisation et autour d'elle, pèse sur la démarche de santé et de sécurité : les enjeux internes et externes (ISO 45001, § 4.1), les parties intéressées et ce qu'elles attendent (§ 4.2), et les risques et opportunités pour la démarche elle-même, avec les actions décidées, suivies au Plan d'actions (§ 6.1.1). En tête, le domaine d'application : ce que couvre la démarche, daté et versionné (§ 4.3). Les risques pour la santé des personnes restent au Document unique.</p>
           </div>
         </div>
         <div class="page-summary-kpis">
@@ -183,6 +191,14 @@
       </div>
 
       <div class="panel fiche" id="fiche" style="display:none;"></div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Domaine d'application du système</h3>
+          <div class="panel-actions" id="actDomaine"></div>
+        </div>
+        <div id="domaine"></div>
+      </div>
 
       <div class="panel" style="padding:16px 22px;">
         <div class="filtres" style="margin:0;">
@@ -233,7 +249,7 @@
         </div>
       </div>
 
-      <p class="footnote">L'importance d'un risque ou d'une opportunité se dit sur trois niveaux, avec un texte d'évaluation ; le registre se tient au fil de l'eau et se revoit chaque année (question 30). Chaque élément montre sa dernière mise à jour. Un élément qui n'est plus d'actualité se retire, il reste consultable. Les actions arrivent au Plan d'actions avec l'origine « Risques et opportunités ». La revue de direction reprend ce registre et ce qui y a changé pendant sa période.</p>
+      <p class="footnote">L'importance d'un risque ou d'une opportunité se dit sur trois niveaux, avec un texte d'évaluation ; le registre se tient au fil de l'eau et se revoit chaque année (question 30). Chaque élément montre sa dernière mise à jour. Un élément qui n'est plus d'actualité se retire, il reste consultable. Les actions arrivent au Plan d'actions avec l'origine « Risques et opportunités ». La revue de direction reprend ce registre et ce qui y a changé pendant sa période. Le domaine d'application se change par une nouvelle version, datée ; les précédentes restent consultables, avec l'organisation suivie par l'outil le jour de chacune.</p>
     </div>
   </div>
 </div>
@@ -392,6 +408,9 @@
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ro, { header: ["Identifiant", "Type", "Importance", "Risque ou opportunité", "Vient de", "Évaluation", "Actions", "Actions pas faites", "Mis à jour le", "État"] }), "Risques et opportunités");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(acts, { header: ["Type", "Risque ou opportunité", "Action", "Responsable", "Échéance", "État au Plan d'actions"] }), "Actions");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(VX.revues(lire(CLE)).map(r => ({ "Revue annuelle le": dateFr(r.date), "Par": r.par || "", "Constat": r.constat || "" })), { header: ["Revue annuelle le", "Par", "Constat"] }), "Revues annuelles");
+    const dv = VX.domaineEnVigueur(lire(CLE), jour);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(VX.domaines(lire(CLE)).map(x => ({ "Version": Number(x.version) || "", "En vigueur à partir du": dateFr(x.depuis), "État": dv && x.id === dv.id ? "En vigueur" : x.depuis > jour ? "À venir" : "Remplacée", "Énoncé": x.enonce || "", "Activités et lieux couverts": x.activites || "", "Exclusions et leur justification": x.exclusions || "", "Validé par": x.validePar || "", "Mis à disposition": x.diffusion || "", "Organisation suivie": orgaTexte(x.organisation), "Enregistré par": x.auteur || "" })),
+      { header: ["Version", "En vigueur à partir du", "État", "Énoncé", "Activités et lieux couverts", "Exclusions et leur justification", "Validé par", "Mis à disposition", "Organisation suivie", "Enregistré par"] }), "Domaine d'application");
     XLSX.writeFile(wb, `contexte_${jour}.xlsx`);
   });
 
@@ -561,10 +580,78 @@
     if (x){ render(); ouvrir(x.id); }
   });
 
+  // ---------- Domaine d'application (ISO 45001 § 4.3) ----------
+  // Ce que couvre la démarche, en versions datées : une nouvelle version s'ajoute, les précédentes restent. Chaque
+  // version relève l'organisation suivie par l'outil ce jour-là (Administration → Organisation), pour voir ce qui a changé depuis.
+  let domaineEdition = false;
+  const orgaActuelle = () => VX.organisationDe(window.VigieOrga);
+  const orgaTexte = (o) => (Array.isArray(o) ? o : []).map(e => `${e.nom} (${e.services.length} service${e.services.length > 1 ? "s" : ""})`).join(" ; ");
+  const etatVersion = (x, v, jour) => x === v ? `<span class="chip bon">En vigueur</span>` : x.depuis > jour ? `<span class="chip attention">À venir</span>` : `<span class="chip neutre">Remplacée</span>`;
+  function formulaireDomaine(b){
+    b = b || {};
+    return `<form id="domaineForm" novalidate><div class="form-grid">
+        <div class="span3"><label for="dEnonce">Énoncé du domaine d'application</label><textarea id="dEnonce" rows="4" placeholder="${esc(M("Ex. : la démarche de santé et de sécurité couvre l'ensemble des services de la collectivité, leurs agents et les personnes qui y travaillent sous son autorité"))}">${esc(b.enonce || "")}</textarea></div>
+        <div class="span3"><label for="dActivites">Activités et lieux couverts</label><textarea id="dActivites" placeholder="${esc(M("Les activités, sites, bâtiments, chantiers ; les personnes concernées : agents, intérimaires, stagiaires, entreprises extérieures"))}">${esc(b.activites || "")}</textarea></div>
+        <div class="span3"><label for="dExclusions">Exclusions et leur justification</label><textarea id="dExclusions" placeholder="Ce qui n'est pas couvert, et pourquoi ; vide s'il n'y en a pas">${esc(b.exclusions || "")}</textarea></div>
+        <div><label for="dDepuis">En vigueur à partir du</label><input type="date" id="dDepuis" value="${esc(ajd())}"></div>
+        <div><label for="dValidePar">Validé par</label><input type="text" id="dValidePar" maxlength="150" value="${esc(b.validePar || "")}" placeholder="Ex. : la direction générale"></div>
+        <div class="span2"><label for="dDiffusion">Mis à disposition</label><input type="text" id="dDiffusion" maxlength="300" value="${esc(b.diffusion || "")}" placeholder="Ex. : base documentaire, affichage, livret d'accueil"></div>
+        <div class="span3"><p class="form-note">Organisation suivie par l'outil, relevée avec la version (Administration → Organisation) : ${esc(orgaTexte(orgaActuelle()) || "—")}.</p></div>
+      </div>
+      <div class="form-actions"><button type="submit" class="btn btn-primary">Enregistrer la version ${esc(VX.prochaineVersion(lire(CLE)))}</button><button type="button" class="btn btn-ghost" id="btnDomaineAnnuler">Annuler</button></div>
+    </form>`;
+  }
+  function renderDomaine(){
+    const l = lire(CLE), jour = ajd(), v = VX.domaineEnVigueur(l, jour), toutes = VX.domaines(l);
+    $("actDomaine").innerHTML = peutGerer && !domaineEdition ? `<button type="button" class="btn btn-primary" id="btnDomaine"><svg class="icon"><use href="#i-plus"/></svg> ${toutes.length ? "Nouvelle version" : "Écrire le domaine d'application"}</button>` : "";
+    if (domaineEdition){ $("domaine").innerHTML = formulaireDomaine(toutes[0]); return; }
+    let h = "";
+    if (!v) h = `<p class="vide">${toutes.length ? "Aucune version n'est encore en vigueur." : "Le domaine d'application n'est pas encore écrit : ce que couvre la démarche (activités, lieux, personnes), ce qui en est exclu et pourquoi."}</p>`;
+    else {
+      const e = VX.ecartOrganisation(v, orgaActuelle());
+      h = `<div class="fiche-etat" style="margin:0 0 10px;">Version ${esc(v.version)} · en vigueur depuis le ${esc(dateFr(v.depuis))}${v.validePar ? " · validée par " + esc(v.validePar) : ""}${v.auteur ? " · enregistrée par " + esc(v.auteur) : ""}</div>
+        <p class="domaine-enonce">${esc(v.enonce)}</p>
+        <dl class="domaine-dl">
+          <dt>Activités et lieux couverts</dt><dd>${esc(v.activites || "—")}</dd>
+          <dt>Exclusions et leur justification</dt><dd>${esc(v.exclusions || "Aucune")}</dd>
+          <dt>Mis à disposition</dt><dd>${esc(v.diffusion || "—")}</dd>
+          <dt>Organisation suivie</dt><dd>${esc(orgaTexte(v.organisation) || "—")}</dd>
+        </dl>
+        ${e.ajouts.length || e.retraits.length ? `<p class="form-note" id="domaineEcart"><span class="chip attention">L'organisation a changé depuis cette version</span> ${e.ajouts.length ? "Ajouté depuis : " + esc(e.ajouts.join(", ")) + ". " : ""}${e.retraits.length ? "Disparu depuis : " + esc(e.retraits.join(", ")) + ". " : ""}Une nouvelle version dira si le domaine change.</p>` : ""}`;
+    }
+    if (toutes.length) h += `<details class="domaine-versions"><summary>Toutes les versions (${toutes.length})</summary><ul>${toutes.map((x, i) => `<li>${etatVersion(x, v, jour)} <b>Version ${esc(x.version)}</b>, à partir du ${esc(dateFr(x.depuis))}${x.validePar ? ", validée par " + esc(x.validePar) : ""} — ${esc(String(x.enonce || "").slice(0, 220))}${peutGerer && i === 0 ? ` <button type="button" class="act-del" data-suppr-domaine="${esc(x.id)}">Supprimer</button>` : ""}</li>`).join("")}</ul></details>`;
+    $("domaine").innerHTML = h;
+  }
+  $("actDomaine").addEventListener("click", (e) => { if (e.target.closest("#btnDomaine") && peutGerer){ domaineEdition = true; renderDomaine(); $("dEnonce").focus(); } });
+  $("domaine").addEventListener("click", (e) => {
+    if (e.target.closest("#btnDomaineAnnuler")){ domaineEdition = false; renderDomaine(); return; }
+    const sd = e.target.closest("[data-suppr-domaine]");
+    if (!sd || !peutGerer) return;
+    const toutes = VX.domaines(lire(CLE)), x = toutes[0];
+    if (!x || x.id !== sd.dataset.supprDomaine) return;
+    if (!confirm(`Supprimer la version ${x.version} du domaine d'application ? À réserver à une version enregistrée par erreur : ${toutes[1] ? "la version " + toutes[1].version + " redevient la dernière." : "il n'y aura plus d'énoncé."}`)) return;
+    try { modifierContexte(l => { const i = l.findIndex(z => z && z.id === x.id); if (i >= 0) l.splice(i, 1); }); }
+    catch(err){ alert("La version n'a pas pu être supprimée."); return; }
+    logAudit("Suppression", `Domaine d'application, version ${x.version}`);
+    renderDomaine();
+  });
+  $("domaine").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!peutGerer || !domaineEdition) return;
+    const x = { id: genId("ctx-dom"), registre: "domaine", version: 0, depuis: val("dDepuis"), enonce: val("dEnonce"), activites: val("dActivites"), exclusions: val("dExclusions"), validePar: val("dValidePar"), diffusion: val("dDiffusion") };
+    if (!x.enonce){ alert("Écrivez l'énoncé du domaine d'application."); return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(x.depuis)){ alert("Indiquez à partir de quand cette version s'applique."); return; }
+    Object.assign(x, { organisation: orgaActuelle(), auteur: moi, dateCreation: new Date().toISOString() });
+    try { modifierContexte(l => { x.version = VX.prochaineVersion(l); l.push(x); }); }
+    catch(err){ alert("Le domaine d'application n'a pas pu être enregistré."); return; }
+    logAudit("Création", `Domaine d'application, version ${x.version}, en vigueur à partir du ${dateFr(x.depuis)}`);
+    domaineEdition = false; renderDomaine();
+  });
+
   // ---------- Registre imprimé ----------
   // les éléments actifs, tels qu'ils sont enregistrés
   $("btnImprimer").addEventListener("click", () => {
-    const jour = ajd(), actions = lire("vigie_hse_actions"), l = tous(), a = VX.actifs(l);
+    const jour = ajd(), actions = lire("vigie_hse_actions"), l = tous(), a = VX.actifs(l), dv = VX.domaineEnVigueur(lire(CLE), jour);
     const ancien = document.getElementById("ctx-impression");
     if (ancien) ancien.remove();
     if (!document.getElementById("ctx-impression-style")){
@@ -596,6 +683,9 @@
       <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "")}</div>
       <h1>Contexte et enjeux de la démarche de santé et de sécurité</h1>
       <p class="pi-meta">Édité le ${esc(dateFr(jour))}${VX.revues(lire(CLE))[0] ? " · dernière revue annuelle le " + esc(dateFr(VX.revues(lire(CLE))[0].date)) : ""} · éléments en vigueur${VX.synthese(l, actions).derniereMaj ? " · dernière mise à jour du registre le " + esc(dateFr(VX.synthese(l, actions).derniereMaj)) : ""}</p>
+      <h2>Domaine d'application du système</h2>
+      ${dv ? `<p class="pi-meta">Version ${esc(dv.version)}, en vigueur depuis le ${esc(dateFr(dv.depuis))}${dv.validePar ? ", validée par " + esc(dv.validePar) : ""}</p><p style="white-space:pre-line;">${esc(dv.enonce)}</p>
+      ${table(["Activités et lieux couverts", "Exclusions et leur justification", "Mis à disposition", "Organisation suivie"], [[esc(dv.activites || "—"), esc(dv.exclusions || "Aucune"), esc(dv.diffusion || "—"), esc(orgaTexte(dv.organisation) || "—")]])}` : `<p>Pas encore écrit.</p>`}
       <h2>Enjeux internes et externes</h2>
       ${table(["Origine", "Thème", "Enjeu", "Effet sur la démarche"], a.filter(x => x.registre === "enjeu").map(x => [esc(x.origine || ""), esc(x.theme || ""), esc(x.texte || ""), esc(x.effet || "")]))}
       <h2>Parties intéressées</h2>
@@ -609,6 +699,7 @@
   });
 
   render();
+  renderDomaine();
   // ?ouvrir=<id>
   (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(x => x.id === id)) ouvrir(id); })();
 

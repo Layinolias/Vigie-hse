@@ -26,7 +26,7 @@
   const COUVERTURE = {
     "4.1": { c: "couverte", pages: [P("contexte.html", "Contexte et enjeux")] },
     "4.2": { c: "couverte", pages: [P("contexte.html", "Contexte et enjeux"), P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social")] },
-    "4.3": { c: "partielle", pages: [P("administration.html", "Administration (organisation)")], manque: "un énoncé du périmètre, daté et diffusé" },
+    "4.3": { c: "couverte", pages: [P("contexte.html", "Contexte et enjeux (domaine d'application)"), P("administration.html", "Administration (organisation)")] },
     "4.4": { c: "hors", pages: [], manque: "l'application dans son ensemble est un outil du système" },
     "5.1": { c: "partielle", pages: [P("revue-direction.html", "Revue de direction"), P("reporting.html", "Indicateurs & Reporting")], manque: "l'engagement relève de la direction ; l'outil en garde les traces" },
     "5.2": { c: "couverte", pages: [P("politique-sante-securite.html", "Politique santé-sécurité")], manque: "la communication aux parties intéressées extérieures reste à la main" },
@@ -92,9 +92,14 @@
         if (!s.parties) return ["rien", ["aucune partie intéressée enregistrée"]];
         return [aFaire ? "areprendre" : "pret", [pl(s.parties, "partie intéressée", "parties intéressées") + ", dont " + pl(s.exigences, "obligation à suivre", "obligations à suivre") + " en conformité"].concat(aFaire ? ["revue annuelle du registre à faire"] : [])];
       } },
-      "4.3": { cles: [K.referentiels], f: () => {
-        const noms = VO ? VO.noms() : [], n = noms.reduce((t, x) => t + VO.services(x).length, 0);
-        return [n ? "pret" : "rien", [pl(noms.length, "entrée de l'organisation", "entrées de l'organisation") + " (" + noms.join(", ") + "), " + pl(n, "service suivi", "services suivis")]];
+      "4.3": { cles: [K.contexte, K.referentiels], f: () => {
+        const noms = VO.noms(), n = noms.reduce((t, x) => t + VO.services(x).length, 0);
+        const orga = pl(noms.length, "entrée de l'organisation", "entrées de l'organisation") + " (" + noms.join(", ") + "), " + pl(n, "service suivi", "services suivis");
+        const v = VX.domaineEnVigueur(lire(K.contexte), aujourdhui);
+        if (!v) return ["rien", ["aucun domaine d'application en vigueur", orga]];
+        const e = VX.ecartOrganisation(v, VX.organisationDe(VO)), change = e.ajouts.length + e.retraits.length;
+        return [change ? "areprendre" : "pret", ["domaine d'application : version " + v.version + ", en vigueur depuis le " + dateFr(v.depuis) + (v.validePar ? ", validée par " + v.validePar : ""), orga]
+          .concat(change ? ["l'organisation a changé depuis cette version : " + e.ajouts.concat(e.retraits).slice(0, 4).join(", ") + (change > 4 ? "…" : "")] : [])];
       } },
       "5.1": { cles: [K.revues], f: () => {
         const v = lire(K.revues).filter(r => r && r.statut === "Validée").sort((a, b) => String(b.dateRevue || "").localeCompare(String(a.dateRevue || "")));
@@ -218,7 +223,7 @@
         return ["pret", [pl(I.paFait, "action faite", "actions faites") + ", " + pl(I.paEfficaces, "jugée efficace", "jugées efficaces"), pl(lire(K.objectifs).filter(o => o && o.id).length, "objectif", "objectifs")]];
       } },
     };
-    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VO, "5.2": VP, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
+    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.2": VP, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
     const audits = VA ? lire(K.audits) : [], cv = VA && complet([K.audits]) ? VA.couverture(audits, actions, aujourdhui) : [];
     const clauses = VA ? VA.CLAUSES : Object.keys(COUVERTURE).map(c => [c, c]);
     return clauses.map(([clause, nom]) => {

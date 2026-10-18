@@ -1,11 +1,11 @@
 /* ============================================================================
-   VIGIE HSE — Contexte et enjeux (ISO 45001 § 4.1, 4.2 et 6.1.1, 2026-10-15)
+   VIGIE HSE — Contexte et enjeux (ISO 45001 § 4.1, 4.2 et 6.1.1, 2026-10-15 ; domaine d'application, § 4.3, 2026-10-18)
    ----------------------------------------------------------------------------
    Trois registres courts, tenus ensemble parce qu'ils se répondent : les enjeux internes et externes qui pèsent sur
    la démarche de santé et de sécurité (§ 4.1), les parties intéressées et leurs besoins et attentes (§ 4.2), et les
    risques et opportunités pour la démarche elle-même (§ 6.1.1 ; les risques pour la santé des personnes restent au
    Document unique), chacun rattaché, s'il y a lieu, à l'enjeu ou à la partie dont il vient, avec ses actions au Plan
-   d'actions. Partagé par la page Contexte et enjeux, le Plan d'actions et la Revue de direction (§ 9.3 b : les
+   d'actions ; et, à part, le domaine d'application du système, en versions datées (§ 4.3). Partagé par la page Contexte et enjeux, le Plan d'actions et la Revue de direction (§ 9.3 b : les
    changements des enjeux, des attentes, des risques et opportunités en sont une donnée d'entrée). Aucune écriture.
    À charger après dates-locales.js.
 
@@ -16,6 +16,11 @@
      ro     { id, registre: "ro", type (« Risque », « Opportunité »), texte, sourceId (enjeu ou partie d'origine),
               niveau (NIVEAUX : importance), evaluation, actions: [{ id, description, responsable, echeance }] }
      revue  { id, registre: "revue", date, par, constat } — la revue annuelle du registre (hors des trois registres)
+     domaine { id, registre: "domaine", version (1, 2…), depuis (« AAAA-MM-JJ », en vigueur depuis), enonce, activites,
+              exclusions (et leur justification), validePar, diffusion (comment il est mis à disposition),
+              organisation: [{ nom, services: [...] }] (les entrées et services suivis par l'outil le jour de la version),
+              auteur, dateCreation } — le domaine d'application du système (§ 4.3, 2026-10-18), hors des trois registres :
+              une nouvelle version s'ajoute, les précédentes restent ; celle en vigueur est la plus récente déjà commencée
    et pour tous : archive (n'est plus d'actualité : avec motifArchive, archiveLe, archivePar), auteur, dateCreation,
    modifiePar, dateMaj. Les actions rejoignent le Plan d'actions sous « pa-ro-<élément>-<action> » (origine
    « Risques et opportunités »).
@@ -80,10 +85,31 @@
     return !r || unAnApres(r.date) <= aujourdhui;
   }
 
+  // Le domaine d'application (§ 4.3) : ses versions, la plus récente d'abord, et celle en vigueur à une date
+  const domaines = l => (Array.isArray(l) ? l : []).filter(x => x && typeof x === "object" && x.id && x.registre === "domaine" && /^\d{4}-\d{2}-\d{2}$/.test(x.depuis || ""))
+    .sort((a, b) => (Number(b.version) || 0) - (Number(a.version) || 0) || b.depuis.localeCompare(a.depuis));
+  const domaineEnVigueur = (l, jour) => domaines(l).filter(x => x.depuis <= jour).sort((a, b) => b.depuis.localeCompare(a.depuis) || (Number(b.version) || 0) - (Number(a.version) || 0))[0] || null;
+  const prochaineVersion = l => domaines(l).reduce((n, x) => Math.max(n, Number(x.version) || 0), 0) + 1;
+  // l'organisation suivie par l'outil (assets/organisation.js) : [{ nom, services }]
+  const organisationDe = O => O ? O.noms().map(nom => ({ nom: nom, services: O.services(nom).slice() })) : [];
+  // Ce qui, dans l'organisation d'aujourd'hui, n'est pas celle de la version : entrées et services ajoutés ou disparus
+  // → { ajouts: ["Usine 2", "Atelier (Usine 1)"], retraits: [...] } ; vide si la version n'a pas relevé l'organisation
+  function ecartOrganisation(version, actuelle) {
+    const avant = version && Array.isArray(version.organisation) ? version.organisation : null, r = { ajouts: [], retraits: [] };
+    if (!avant) return r;
+    const plat = o => (Array.isArray(o) ? o : []).reduce((t, e) => t.concat([String(e.nom)], (Array.isArray(e.services) ? e.services : []).map(s => String(s) + " (" + e.nom + ")")), []);
+    const a = plat(avant), b = plat(actuelle);
+    r.ajouts = b.filter(x => !a.includes(x));
+    r.retraits = a.filter(x => !b.includes(x));
+    return r;
+  }
+
   // Le compte des éléments actifs
-  function synthese(liste, actions) {
+  function synthese(liste, actions, jour) {
     const a = actifs(liste), ro = a.filter(x => x.registre === "ro");
+    const d = domaineEnVigueur(liste, jour || (racine.VigieDates ? racine.VigieDates.aujourdhui() : ""));
     return {
+      domaine: d ? { version: Number(d.version) || 0, depuis: d.depuis, validePar: d.validePar || "" } : null,
       enjeux: a.filter(x => x.registre === "enjeu").length,
       internes: a.filter(x => x.registre === "enjeu" && x.origine === "Interne").length,
       externes: a.filter(x => x.registre === "enjeu" && x.origine === "Externe").length,
@@ -111,6 +137,7 @@
       const quoi = x.archive && dans(ar) ? ["Retiré", ar] : dans(cr) && !x.archive ? ["Ajouté", cr] : dans(mo) && !x.archive ? ["Modifié", mo] : null;
       return quoi ? { registre: REGISTRES[x.registre], libelle: libelle(x), type: x.registre === "ro" ? (x.type || "Risque") : "", quoi: quoi[0], date: quoi[1] } : null;
     }).filter(Boolean).concat(revues(liste).filter(r => dans(r.date)).map(r => ({ registre: "Revue annuelle du registre", libelle: r.constat || "", type: "", quoi: "Revu", date: r.date })))
+      .concat(domaines(liste).filter(x => dans(x.depuis)).map(x => ({ registre: "Domaine d'application", libelle: "version " + (Number(x.version) || "?") + (x.validePar ? ", validée par " + x.validePar : ""), type: "", quoi: "Nouvelle version", date: x.depuis })))
       .sort((a, b) => a.date.localeCompare(b.date));
     return s;
   }
@@ -118,6 +145,7 @@
   racine.VigieContexte = {
     CLE: CLE, REGISTRES: REGISTRES, ORIGINES: ORIGINES, THEMES: THEMES, TYPES_RO: TYPES_RO, NIVEAUX: NIVEAUX, PARTIES: PARTIES,
     unAnApres: unAnApres, revues: revues, revueAFaire: revueAFaire,
+    domaines: domaines, domaineEnVigueur: domaineEnVigueur, prochaineVersion: prochaineVersion, organisationDe: organisationDe, ecartOrganisation: ecartOrganisation,
     valides: valides, du: du, actifs: actifs, actionsDe: actionsDe, idAction: idAction, statutAction: statutAction, pasFaites: pasFaites,
     libelle: libelle, source: source, lies: lies, jourDe: jourDe, majLe: majLe, synthese: synthese, pourPeriode: pourPeriode,
   };

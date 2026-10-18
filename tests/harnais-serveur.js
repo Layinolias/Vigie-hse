@@ -209,6 +209,29 @@ async function seConnecterParLaPage(port, identifiant, motDePasse, pot){
   return r;
 }
 
+// Premier lancement d'un poste réel (VIGIE_DEMO=0) : le compte administrateur créé par l'écran de connexion
+// → { session, erreurs, cookie, formulaire (affiché ?), message (erreur affichée) }
+async function creerPremierCompteParLaPage(port, identifiant, motDePasse, pot, confirmation = motDePasse){
+  const P = await ouvrirPage(port, 'login.html', { pot });
+  if (P.statut !== 200) return { session: null, erreurs: ['login.html : ' + P.statut] };
+  const d = P.w.document, f = d.getElementById('premierCompte');
+  const formulaire = !!f && !f.hidden && d.getElementById('loginForm').hidden;
+  if (f){
+    d.getElementById('nouvelIdentifiant').value = identifiant;
+    d.getElementById('nouveauMdp').value = motDePasse;
+    d.getElementById('nouveauMdp2').value = confirmation;
+    P.w.dispatchEvent(new P.w.KeyboardEvent('keydown'));   // une vraie action : un refus du serveur se signale
+    f.dispatchEvent(new P.w.Event('submit', { bubbles: true, cancelable: true }));
+    await sleep(200);
+  }
+  let session = null;
+  try { session = JSON.parse(P.w.sessionStorage.getItem('vigie_hse_session') || 'null'); } catch(e){}
+  const e = d.getElementById('premierErreur');
+  const r = { session, erreurs: P.erreurs.slice(), cookie: pot.getCookieStringSync('http://localhost:' + port + '/'), formulaire, message: e && e.classList.contains('show') ? e.textContent : '' };
+  P.fermer();
+  return r;
+}
+
 // ---------- base ----------
 // le contenu d'une base, lu sur une copie (base + -wal + -shm) pour ne toucher à rien : { cle: valeur } non vides
 function contenuBase(fichier){
@@ -242,6 +265,6 @@ const MESSAGES_TECHNIQUES = /introuvable|n.est pas reconnu|not recognized|cannot
 
 module.exports = {
   DEPOT, GIT, TAR, sleep, bilan, dossierTemporaire, effacer, git, extraireCommit, deballer, lister, pages,
-  repond, tuer, attendreFin, demarrer, requete, nouveauPot, connecter, donnees, ecrire, ouvrirPage, seConnecterParLaPage,
+  repond, tuer, attendreFin, demarrer, requete, nouveauPot, connecter, donnees, ecrire, ouvrirPage, seConnecterParLaPage, creerPremierCompteParLaPage,
   contenuBase, identifiants, lancerBat, MESSAGES_TECHNIQUES,
 };

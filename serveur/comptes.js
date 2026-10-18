@@ -18,6 +18,10 @@ const CLE_PROFILS = 'vigie_hse_profils';
 const DUREE_SESSION = 8 * 3600 * 1000;       // sans activité pendant 8 h, il faut se reconnecter
 const ESSAIS_MAX = 5, PAUSE = 5 * 60 * 1000; // 5 échecs de suite sur un identifiant : 5 min de pause
 const SCRYPT = { N: 16384, r: 8, p: 1 };
+const MDP_MIN = 12;   // longueur minimale d'un mot de passe choisi (création, changement) — même seuil dans login.html et administration.html
+// les comptes de démonstration (mots de passe publiés dans le dépôt)
+const DEMO = [['admin@verchamps.fr', 'admin1234'], ['manager@verchamps.fr', 'manager1234'], ['RH1', '1234'], ['RH2', '1234'], ['AG1', '1234'], ['AG2', '1234'], ['PREV1', '1234']];
+const estDemo = u => DEMO.some(([id, mdp]) => u.password === mdp && [u.username, u.email].some(x => String(x || '').toLowerCase() === id.toLowerCase()));
 
 function hacher(motDePasse){
   const sel = crypto.randomBytes(16);
@@ -44,7 +48,8 @@ function sessionDePage(u, profils){
     profils: r.profils, droits: r.droits, compte: { libelle: r.libelle, pastille: r.pastille } };
 }
 
-function creer(base){
+// options.demo : serveur de démonstration (VIGIE_DEMO) — les comptes de démonstration y gardent leur mot de passe court
+function creer(base, options = {}){
   const echecs = new Map();   // identifiant → { n, jusqua }
 
   function comptes(){
@@ -75,7 +80,7 @@ function creer(base){
     return apres > 0 || avant === 0;
   }
 
-  // Liste de comptes écrite par une page → { valeur à stocker (sans mot de passe), mots : [[id, mdp]] }.
+  // Liste de comptes écrite par une page → { valeur à stocker (sans mot de passe), mots : [[id, mdp, compte de démonstration]] }.
   // Rien n'est rangé ici : l'empreinte ne l'est qu'une fois l'écriture acceptée (voir apresEcriture).
   function epurer(valeur){
     let l;
@@ -84,13 +89,25 @@ function creer(base){
     const mots = [];
     for (const u of l){
       if (!u || typeof u !== 'object') continue;
-      if (typeof u.password === 'string' && u.password !== '' && u.id != null) mots.push([String(u.id), u.password]);
+      if (typeof u.password === 'string' && u.password !== '' && u.id != null) mots.push([String(u.id), u.password, estDemo(u)]);
       delete u.password;
     }
     return { valeur: JSON.stringify(l), mots };
   }
-  function apresEcriture(mots){
-    for (const [id, mdp] of mots) base.poserEmpreinte(id, hacher(mdp));
+  // Les mots de passe que l'écriture pose vraiment : compte nouveau, ou autre mot de passe que le sien (la page
+  // Administration renvoie la liste avec ceux qu'elle a posés plus tôt : ceux-là ne changent rien).
+  const nouveaux = mots => mots.filter(([id, mdp]) => { const e = base.empreinte(id); return !e || !verifier(mdp, e); });
+  // identifiants des comptes dont le mot de passe a moins de MDP_MIN caractères ; un serveur de démonstration accepte
+  // ceux des comptes de démonstration, que son premier lancement inscrit
+  const tropCourts = mots => mots.filter(([, mdp, demo]) => mdp.length < MDP_MIN && !(demo && options.demo)).map(([id]) => id);
+  // Écriture acceptée : l'empreinte de chaque mot de passe. Un mot de passe changé ferme les autres sessions du compte
+  // (qui connaissait l'ancien n'y est plus), mais pas celle qui fait le changement (jetonAuteur).
+  function apresEcriture(mots, jetonAuteur){
+    for (const [id, mdp] of mots){
+      const avant = base.empreinte(id);
+      base.poserEmpreinte(id, hacher(mdp));
+      if (avant) base.fermerSessionsCompte(id, jetonAuteur ? empreinteJeton(jetonAuteur) : null);
+    }
     base.retirerEmpreintes(comptes().filter(u => u && u.id != null).map(u => String(u.id)));
   }
 
@@ -145,8 +162,7 @@ function creer(base){
 
   function deconnecter(jeton){ if (jeton) base.fermerSession(empreinteJeton(jeton)); }
 
-  // les comptes de démonstration (mots de passe publiés dans le dépôt) encore actifs avec ce mot de passe
-  const DEMO = [['admin@verchamps.fr', 'admin1234'], ['manager@verchamps.fr', 'manager1234'], ['RH1', '1234'], ['RH2', '1234'], ['AG1', '1234'], ['AG2', '1234'], ['PREV1', '1234']];
+  // les comptes de démonstration encore actifs avec leur mot de passe publié
   function demoActifs(){
     return DEMO.filter(([id, mdp]) => {
       const u = trouver(id);
@@ -156,7 +172,7 @@ function creer(base){
   }
   const demoActive = () => demoActifs().length > 0;
 
-  return { CLE_COMPTES, CLE_PROFILS, gardeAdmin, aucun: () => comptes().length === 0, epurer, apresEcriture, reprendreAncienneBase, connecter, session, deconnecter, demoActive, demoActifs };
+  return { CLE_COMPTES, CLE_PROFILS, MDP_MIN, gardeAdmin, aucun: () => comptes().length === 0, epurer, nouveaux, tropCourts, apresEcriture, reprendreAncienneBase, connecter, session, deconnecter, demoActive, demoActifs };
 }
 
 module.exports = { creer, hacher, verifier };

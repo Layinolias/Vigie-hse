@@ -33,13 +33,15 @@ VIGIE HSE a besoin d'un programme gratuit, Node.js.
 Pour arrêter : fermer la fenêtre noire. Pour relancer : double-cliquer à nouveau sur le fichier.
 
 
-4. PREMIÈRE CONNEXION — À FAIRE TOUT DE SUITE
-----------------------------------------------
-  - Se connecter avec : admin@verchamps.fr   mot de passe : admin1234
-  - Ces comptes d'essai ont des mots de passe connus de tous. Dans Administration → Utilisateurs :
-      * changer le mot de passe de l'administrateur ;
-      * désactiver les autres comptes d'essai (RH1, RH2, AG1, AG2, PREV1, manager@verchamps.fr),
-        ou changer leurs mots de passe si vous voulez vous en servir.
+4. PREMIÈRE CONNEXION — CRÉER LE COMPTE ADMINISTRATEUR
+------------------------------------------------------
+  - Au premier lancement, l'écran demande de créer le compte administrateur : choisir un identifiant
+    (un nom ou une adresse e-mail) et un mot de passe de 12 caractères au moins, à ne pas communiquer.
+  - Ce compte crée ensuite ceux des autres utilisateurs, dans Administration → Utilisateurs
+    (12 caractères au moins par mot de passe ; le bouton « Générer » en propose un).
+  - Installation plus ancienne, mise à jour : si les comptes d'essai existent encore (admin@verchamps.fr,
+    manager@verchamps.fr, RH1, RH2, AG1, AG2, PREV1), leurs mots de passe sont connus de tous.
+    Dans Administration → Utilisateurs, les désactiver, ou changer leurs mots de passe.
 
 
 5. ADAPTER À VOTRE COLLECTIVITÉ

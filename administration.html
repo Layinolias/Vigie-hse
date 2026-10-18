@@ -228,7 +228,7 @@
               <div class="f span2">
                 <label for="uPassword">Mot de passe</label>
                 <div style="display:flex; gap:8px;">
-                  <input type="text" id="uPassword" autocomplete="off" placeholder="Cliquer sur « Générer » ou saisir un mot de passe" required>
+                  <input type="text" id="uPassword" autocomplete="off" placeholder="Cliquer sur « Générer » ou saisir 12 caractères au moins" required>
                   <button type="button" class="btn btn-secondary btn-sm" id="uGenPassBtn" style="flex-shrink:0;">Générer</button>
                 </div>
               </div>
@@ -834,9 +834,12 @@
   // A. UTILISATEURS
   // ===================================================================
   const USERS_KEY = "vigie_hse_users";
+  const MDP_MIN = 12;   // longueur minimale d'un mot de passe choisi, comme le serveur (serveur/comptes.js)
   function genPassword(){
+    // MDP_MIN caractères au moins (le serveur refuse moins), tirés au hasard par le navigateur (crypto)
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
-    let s = ""; for (let i=0;i<10;i++) s += chars[Math.floor(Math.random()*chars.length)];
+    const t = new Uint32Array(14); crypto.getRandomValues(t);
+    let s = ""; for (let i=0;i<t.length;i++) s += chars[t[i] % chars.length];
     return s;
   }
   function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -1039,6 +1042,7 @@
     e.preventDefault();
     const nom = $("uNom").value.trim(), prenom = $("uPrenom").value.trim(), email = $("uEmail").value.trim();
     const passwordInput = $("uPassword").value.trim();
+    if (passwordInput && passwordInput.length < MDP_MIN){ flashBanner($("userBanner"), "Le mot de passe doit compter au moins " + MDP_MIN + " caractères (ou cliquez sur « Générer »).", "info"); return; }
     const profils = profilsCoches();
     if (!profils.length){ flashBanner($("userBanner"), "Choisissez au moins un profil.", "info"); return; }
     const services = $("uTousServices").checked ? ["*"] : Array.from($("uServicesGrid").querySelectorAll("input:checked")).map(i => i.value);

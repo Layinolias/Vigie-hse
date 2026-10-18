@@ -17,7 +17,7 @@
 
 ## Synthèse
 
-Sur 30 exigences (clauses 4 à 10, au niveau des sous-clauses) : **20 couvertes**, **7 partielles**, **0 écart**, **3 hors outil** (au 2026-10-18, avec les rôles de prévention ; avec le contexte et enjeux, le 2026-10-15 : 19, 8, 0, 3 ; avec la gestion des changements : 16, 9, 2, 3 ; avec la politique : 15, 9, 3, 3 ; avec l'audit interne : 14, 10, 3, 3 ; plus tôt le 2026-10-15 : 13, 11, 3, 3 ; au 2026-10-13 : 11, 12, 4, 3 ; à l'étude du 2026-10-06 : 8, 13, 6, 3).
+Sur 30 exigences (clauses 4 à 10, au niveau des sous-clauses) : **21 couvertes**, **6 partielles**, **0 écart**, **3 hors outil** (au 2026-10-18, avec le domaine d'application ; avec les rôles de prévention, le même jour : 20, 7, 0, 3 ; avec le contexte et enjeux, le 2026-10-15 : 19, 8, 0, 3 ; avec la gestion des changements : 16, 9, 2, 3 ; avec la politique : 15, 9, 3, 3 ; avec l'audit interne : 14, 10, 3, 3 ; plus tôt le 2026-10-15 : 13, 11, 3, 3 ; au 2026-10-13 : 11, 12, 4, 3 ; à l'étude du 2026-10-06 : 8, 13, 6, 3).
 
 Le cœur opérationnel est solide : évaluation des risques, actions, compétences, urgences, surveillance, accidents et leurs analyses. Ce qui manque, c'est surtout la **couche « pilotage du système »** qu'un auditeur demande en premier : revue de direction, objectifs chiffrés, évaluation de la conformité réglementaire, programme d'audit interne. Les données d'entrée de ces exigences existent déjà presque toutes dans l'application ; il manque l'écran qui les assemble et en garde la trace.
 
@@ -29,7 +29,7 @@ Le cœur opérationnel est solide : évaluation des risques, actions, compétenc
 |---|---|---|---|
 | 4.1 Compréhension de l'organisme et de son contexte | ✅ | **Contexte et enjeux** (2026-10-15) : enjeux internes et externes, thème, effet sur la démarche, dernière mise à jour, retrait tracé ; reprise dans la revue de direction avec ce qui a changé dans la période | — (question 30 : au fil de l'eau, et une revue annuelle) |
 | 4.2 Besoins et attentes des travailleurs et des autres parties intéressées | ✅ | **Contexte et enjeux** (2026-10-15) : liste des parties intéressées, leurs besoins et attentes, celles qui deviennent des obligations (à suivre dans **Conformité réglementaire**), la réponse apportée ; les attentes des travailleurs remontent aussi par le **Registre SST** (observations, anonymat possible, réponse tracée) et le **Dialogue social** (questions des représentants à la direction) | — |
-| 4.3 Domaine d'application du système | 🔶 | **Administration → Organisation** délimite ce qui est suivi : entrées (Ville, Agglomération, ou Usine 1…), services, secteur | un énoncé du périmètre, daté et diffusé (pourrait vivre dans la Base documentaire) |
+| 4.3 Domaine d'application du système | ✅ | **Domaine d'application** (2026-10-18), en tête de **Contexte et enjeux** : énoncé, activités et lieux couverts, exclusions et leur justification, qui l'a validé, comment il est mis à disposition, date d'application ; versions datées, les précédentes gardées ; l'organisation suivie (**Administration → Organisation** : entrées, services) relevée avec chaque version, et signalée quand elle a changé depuis ; imprimé et exporté avec le registre, repris par la revue de direction et la Préparation ISO 45001 | — (question 35 : revue à date fixe, validation, diffusion à tous) |
 | 4.4 Système de management de la S&ST | ➖ | l'application dans son ensemble est un outil du système | — |
 
 ### 5 — Leadership et participation des travailleurs

@@ -385,9 +385,11 @@
     const t = `<p class="form-note" style="margin:0 0 6px;">Contexte et enjeux (registre au jour du calcul)</p>`;
     if (c.contexteOrganisation === null) return t + `<p class="vide">Non repris : le compte qui a fait le calcul ne recevait pas tout le registre du contexte ou toutes les actions.</p>`;
     const k = c.contexteOrganisation;
-    if (!k.enjeux && !k.parties && !k.risques && !k.opportunites) return t + `<p class="vide">Registre du contexte vide.</p>`;
+    // le domaine d'application en vigueur (§ 4.3, depuis le 2026-10-18 ; une revue calculée avant n'en dit rien)
+    const dom = k.domaine === undefined ? "" : k.domaine ? `<p class="form-note" style="margin:0 0 6px;">Domaine d'application : version ${esc(k.domaine.version)}, en vigueur depuis le ${esc(dateFr(k.domaine.depuis))}${k.domaine.validePar ? ", validée par " + esc(k.domaine.validePar) : ""}.</p>` : `<p class="vide">Pas de domaine d'application en vigueur.</p>`;
+    if (!k.enjeux && !k.parties && !k.risques && !k.opportunites) return t + dom + (k.mouvements && k.mouvements.length ? `<ul class="liste-auto">${k.mouvements.map(m => `<li>${esc(m.quoi)} le ${esc(dateFr(m.date))} — ${esc(m.registre)} : ${esc(m.libelle)}</li>`).join("")}</ul>` : "") + `<p class="vide">Registre du contexte vide.</p>`;
     const rv = k.derniereRevue === undefined ? "" : k.derniereRevue ? `<p class="form-note" style="margin:0 0 6px;">Dernière revue annuelle du registre le ${esc(dateFr(k.derniereRevue))}.</p>` : `<p class="vide">Le registre n'a pas encore eu de revue annuelle.</p>`;
-    return t + rv + chiffres([[nombre(k.enjeux, 0), `enjeux (${k.internes} internes, ${k.externes} externes)`], [nombre(k.parties, 0), "parties intéressées"], [nombre(k.risques, 0), "risques pour la démarche"], [k.elevees === undefined ? "—" : nombre(k.elevees, 0), "d'importance élevée"],
+    return t + dom + rv + chiffres([[nombre(k.enjeux, 0), `enjeux (${k.internes} internes, ${k.externes} externes)`], [nombre(k.parties, 0), "parties intéressées"], [nombre(k.risques, 0), "risques pour la démarche"], [k.elevees === undefined ? "—" : nombre(k.elevees, 0), "d'importance élevée"],
         [nombre(k.opportunites, 0), "opportunités"], [nombre(k.actionsPasFaites, 0), "actions pas faites"]])
       + (k.mouvements.length ? `<p class="form-note" style="margin:0 0 6px;">Ce qui y a changé pendant la période :</p><ul class="liste-auto">${k.mouvements.map(m => `<li>${esc(m.quoi)} le ${esc(dateFr(m.date))} — ${esc(m.registre)}${m.type ? " (" + esc(m.type.toLowerCase()) + ")" : ""} : ${esc(m.libelle)}</li>`).join("")}</ul>`
         : `<p class="vide">Rien n'y a changé pendant la période.</p>`);

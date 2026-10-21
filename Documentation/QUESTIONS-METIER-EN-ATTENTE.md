@@ -67,6 +67,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 35 | Domaine d'application : faut-il le revoir à date fixe, qui le valide, qui le voit ? | Contexte et enjeux (construit le 2026-10-18, ISO 45001 § 4.3) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
 | 36 | Engagement de la direction : quelles formes proposer, faut-il un rythme ou des points exigés, qui voit la page, la revue de direction doit-elle la reprendre ? | Engagement de la direction (construit le 2026-10-21, ISO 45001 § 5.1) | 🟠 En attente de réponse |
 | 37 | Communication : quels sujets proposer au départ, faut-il un rythme vérifié, signaler une communication reçue restée sans suite, qui voit la page ? | Communication (construit le 2026-10-21, ISO 45001 § 7.4) | 🟠 En attente |
+| 38 | Documents : faut-il stocker les fichiers dans le logiciel, qui approuve, faut-il exiger l'approbation, proposer une périodicité de revue ou une durée de conservation ? | Base documentaire, circuit des documents (construit le 2026-10-21, ISO 45001 § 7.5) | 🟠 En attente |
 
 ---
 
@@ -1115,6 +1116,29 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 5. **Résultats au personnel** — une communication notée sous un sujet « résultats santé-sécurité » suffit-elle à montrer que les résultats sont communiqués au personnel (ISO 45001 § 10.3, encore « en partie » pour ce point) ?
 
 **Options.** (A) Comme aujourd'hui : pas de sujet de départ, des faits sans rythme vérifié, les reçues sans suite montrées sur la page seulement, lu par l'encadrement et les représentants. (B) Une liste de sujets de départ (à préciser). (C) Un rythme vérifié, les retards signalés. (D) Les reçues sans suite signalées (délai à préciser). (E) Lu par tous les comptes. Les options se combinent.
+
+> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-21)._
+
+---
+
+## 🟠 Question 38 — Documents : stocker les fichiers, qui approuve, faut-il une revue ou une durée de conservation ?
+
+**Contexte.** ISO 45001 (§ 7.5) demande que les documents du système (procédures, consignes, plans, enregistrements…) soient identifiés, revus et approuvés, disponibles là où il faut, protégés, tenus à jour d'une version à l'autre, conservés le temps voulu, et que les documents d'origine externe (textes, notices, rapports d'organismes) soient identifiés. Le registre des **documents officiels** de la Base documentaire a désormais un **circuit** : brouillon → à approuver (qui l'a soumis, quand) → en vigueur (qui l'a approuvé, quand) → obsolète. « Nouvelle version » prépare la suivante ; quand elle entre en vigueur, la précédente devient obsolète. Chaque document peut avoir une origine (interne ou externe), une date de revue (« À revoir le ») et une durée de conservation. La Préparation ISO 45001 le reprend pour l'exigence 7.5, désormais couverte.
+
+**Ce que fait le logiciel aujourd'hui, en attendant.**
+- **Les fichiers ne sont pas stockés** dans le logiciel : le registre mène par un lien à l'endroit où l'organisation les range (dossier partagé, gestion électronique des documents, intranet).
+- **L'approbation se note** (nom et fonction, date) par un rédacteur de la Base documentaire ; aucun compte n'est désigné pour approuver. Elle est exigée seulement pour un document qui passe par le circuit (brouillon ou à approuver, ou nouvelle version) ; un document enregistré directement « en vigueur », ou qui l'était déjà, ne l'exige pas et affiche « Approbation non notée ». Un document d'origine externe ne s'approuve pas.
+- **Aucune périodicité de revue ni durée de conservation** n'est proposée : chacun saisit les siennes ; une date de revue passée est signalée sur la page (« À revoir ») et comptée par la Préparation, sans plus.
+- **Les brouillons et les documents à approuver** ne sont pas montrés aux lecteurs ; les documents obsolètes restent visibles, marqués comme tels.
+
+**Les questions.**
+1. **Fichiers** — faut-il pouvoir déposer les fichiers dans le logiciel (avec le serveur), ou le lien vers l'endroit où l'organisation les range suffit-il ?
+2. **Qui approuve** — selon le type de document (procédure, consigne, plan de prévention…), qui approuve ? Faut-il que l'approbation se fasse dans le logiciel par un compte désigné, plutôt que de noter qui a approuvé ?
+3. **Approbation exigée** — faut-il l'exiger pour tout document en vigueur, y compris ceux enregistrés directement ?
+4. **Revue et conservation** — faut-il proposer une périodicité de revue ou une durée de conservation par type de document, et lesquelles ? Faut-il signaler ailleurs (tableau de bord) un document dont la date de revue est passée ?
+5. **Lecteurs** — les documents obsolètes doivent-ils rester visibles des agents, ou être réservés aux rédacteurs ?
+
+**Options.** (A) Comme aujourd'hui : liens, approbation notée sans compte désigné, rien d'imposé. (B) Dépôt des fichiers dans le logiciel. (C) Approbation par un compte désigné (à préciser par type). (D) Périodicités de revue ou durées de conservation proposées (à préciser). (E) Obsolètes réservés aux rédacteurs. Les options se combinent.
 
 > _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-21)._
 

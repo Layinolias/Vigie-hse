@@ -12,6 +12,7 @@
 <script src="assets/organisation.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/tri-filtres.js"></script>
+<script src="assets/documents-ref.js"></script>
 <script src="assets/risques-ref.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
@@ -293,7 +294,7 @@
         <div class="panel console">
           <div class="field"><span class="flabel">Type</span><select id="dCategorieFiltre"></select></div>
           <div class="field"><span class="flabel">Statut</span>
-            <select id="dStatutFiltre"><option value="all">Tous</option><option value="En vigueur">En vigueur</option><option value="Obsolète">Obsolète</option></select>
+            <select id="dStatutFiltre"><option value="all">Tous</option><option value="Brouillon">Brouillon</option><option value="À approuver">À approuver</option><option value="En vigueur">En vigueur</option><option value="Obsolète">Obsolète</option><option value="arevoir">À revoir (date passée)</option></select>
           </div>
           <button type="button" class="btn btn-ghost" id="dReset">Réinitialiser</button>
           <span class="result-count"><b id="dCount">–</b> / <span id="dTotal">–</span> documents</span>
@@ -309,9 +310,15 @@
               <div><label for="dReference">Référence</label><input type="text" id="dReference" placeholder="N° d'arrêté, code interne…"></div>
               <div><label for="dVersion">Version</label><input type="text" id="dVersion" placeholder="ex. v2"></div>
               <div><label for="dDate">Date du document</label><input type="date" id="dDate"></div>
-              <div><label for="dStatut">Statut</label><select id="dStatut"><option>En vigueur</option><option>Obsolète</option></select></div>
+              <div><label for="dStatut">Statut</label><select id="dStatut"><option>Brouillon</option><option>À approuver</option><option>En vigueur</option><option>Obsolète</option></select></div>
+              <div><label for="dOrigine">Origine</label><select id="dOrigine"><option value="Interne">Interne</option><option value="Externe">Externe (texte, notice, rapport d'un organisme…)</option><option value="">Non précisée</option></select></div>
+              <div><label for="dApprouvePar">Approuvé par</label><input type="text" id="dApprouvePar" placeholder="Nom et fonction"></div>
+              <div><label for="dDateApprobation">Date d'approbation</label><input type="date" id="dDateApprobation"></div>
+              <div><label for="dRevue">À revoir le</label><input type="date" id="dRevue"></div>
+              <div class="span2"><label for="dConservation">Durée de conservation</label><input type="text" id="dConservation" style="width:100%" placeholder="ex. 5 ans après son remplacement"></div>
               <div class="span3"><label for="dLien">Lien vers le document (http:// ou https://, facultatif)</label><input type="text" id="dLien" style="width:100%" placeholder="https://…"></div>
               <div class="span3"><label for="dDescription">Description</label><textarea id="dDescription" placeholder="À quoi sert ce document, à qui il s'adresse…"></textarea></div>
+              <div class="span3" id="dCircuit" style="display:none; font-size:12px; color:var(--text-muted); line-height:1.6;"></div>
             </div>
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">Enregistrer</button>
@@ -336,7 +343,7 @@
               <tbody id="docTbody"></tbody>
             </table>
           </div>
-          <p class="footnote" style="text-align:left; margin-top:12px;">Ce registre référence les documents (titre, version, date, lien) ; <b>il ne stocke pas les fichiers eux-mêmes</b> — le navigateur seul ne permet pas de les conserver de façon fiable et partagée. Le lien pointe vers l'endroit où le document est réellement hébergé.</p>
+          <p class="footnote" style="text-align:left; margin-top:12px;">Ce registre référence les documents (titre, version, date, lien) ; <b>il ne stocke pas les fichiers eux-mêmes</b> — le navigateur seul ne permet pas de les conserver de façon fiable et partagée. Le lien pointe vers l'endroit où le document est réellement hébergé. Circuit d'un document (ISO 45001, § 7.5) : brouillon, à approuver, en vigueur — avec qui l'a approuvé et quand —, obsolète ; « Nouvelle version » prépare la suivante, qui rend la précédente obsolète en entrant en vigueur. Les brouillons et les documents à approuver ne sont pas montrés aux lecteurs. Aucune périodicité de revue ni durée de conservation n'est imposée (question 38 posée au préventeur).</p>
         </div>
       </section>
 
@@ -469,7 +476,8 @@
   const isSeed = (a) => a.source === "famille-risque";
   const visibleArticles = () => canDocWrite ? ARTICLES : ARTICLES.filter(a => a.statut !== "Brouillon");
   // « Masqué » est distinct d'« Obsolète » : le préventeur choisit ce qu'il montre (réponse Q10).
-  const visibleDocs = () => canDocWrite ? DOCS : DOCS.filter(d => !d.masque);
+  // Un document pas encore approuvé (brouillon, à approuver) n'est pas montré aux lecteurs (ISO 45001 § 7.5, 2026-10-21).
+  const visibleDocs = () => canDocWrite ? DOCS : DOCS.filter(d => !d.masque && !VigieDocuments.enPreparation(d));
 
   // ----- Onglets -----
   function showTab(name){
@@ -661,10 +669,31 @@
     onChange: () => renderDocs(),
   });
   triDocs.decorate($("theadDocs"));
+  // Circuit d'un document (ISO 45001 § 7.5, 2026-10-21) : statut, approbation, origine, revue, versions
+  const CHIP_STATUT = { "Brouillon": "info", "À approuver": "soon", "En vigueur": "ok", "Obsolète": "muted" };
+  function circuitDe(d, jour){
+    const t = [];
+    if (d.origine === "Externe") t.push("Origine externe");
+    // un document d'origine externe (texte, notice, rapport) s'identifie et se suit, il ne s'approuve pas en interne
+    if (d.statut === "En vigueur" && (VigieDocuments.approuve(d) || d.origine !== "Externe")) t.push(VigieDocuments.approuve(d) ? `Approuvé par ${esc(d.approuvePar)} le ${esc(fmtFr(d.dateApprobation))}` : "Approbation non notée");
+    if (d.statut === "À approuver" && d.soumisPar) t.push(`Soumis par ${esc(d.soumisPar)}${d.dateSoumission ? " le " + esc(fmtFr(d.dateSoumission)) : ""}`);
+    if (d.revue && d.statut === "En vigueur") t.push(VigieDocuments.aRevoir(d, jour) ? `À revoir depuis le ${esc(fmtFr(d.revue))}` : `À revoir le ${esc(fmtFr(d.revue))}`);
+    const prec = d.remplace ? DOCS.find(x => x.id === d.remplace) : null, suiv = d.remplacePar ? DOCS.find(x => x.id === d.remplacePar) : null;
+    if (prec) t.push(`Remplace la version ${esc(prec.version || "précédente")}`);
+    if (suiv && canDocWrite) t.push(`Remplacé par la version ${esc(suiv.version || "suivante")}${d.dateObsolete ? " le " + esc(fmtFr(d.dateObsolete)) : ""}`);
+    return t.length ? `<div style="font-size:11.5px;color:var(--text-muted);white-space:normal;margin-top:3px;">${t.join(" · ")}</div>` : "";
+  }
+  function actionCircuit(d){
+    if (d.statut === "Brouillon") return `<button type="button" class="act-edit" data-soumettre="${esc(d.id)}" style="margin-right:10px;">Soumettre</button>`;
+    if (d.statut === "À approuver") return `<button type="button" class="act-edit" data-approuver="${esc(d.id)}" style="margin-right:10px;">Approuver</button>`;
+    if (d.statut === "En vigueur" && !DOCS.some(x => x.remplace === d.id && VigieDocuments.enPreparation(x))) return `<button type="button" class="act-edit" data-version="${esc(d.id)}" style="margin-right:10px;">Nouvelle version</button>`;
+    return "";
+  }
   function renderDocs(){
     const cat = dCategorieFiltre.value, st = dStatutFiltre.value;
     const vis = visibleDocs();
-    let rows = vis.filter(d => (cat === "all" || d.categorie === cat) && (st === "all" || d.statut === st));
+    const jour = todayLocal();
+    let rows = vis.filter(d => (cat === "all" || d.categorie === cat) && (st === "all" || (st === "arevoir" ? VigieDocuments.aRevoir(d, jour) : d.statut === st)));
     rows = rows.slice().sort((a, b) => (b.dateDocument || "").localeCompare(a.dateDocument || "") || String(a.titre).localeCompare(String(b.titre), "fr"));
     rows = triDocs.apply(rows);
     $("dCount").textContent = rows.length;
@@ -674,11 +703,11 @@
     $("docTbody").innerHTML = rows.length ? rows.map(d => {
       const url = safeUrl(d.lien);
       return `<tr data-id="${esc(d.id)}">
-        <td class="wrap"><b>${esc(d.titre)}</b>${d.description ? `<div style="font-size:11.5px;color:var(--text-faint);white-space:normal;">${esc(d.description)}</div>` : ""}</td>
+        <td class="wrap"><b>${esc(d.titre)}</b>${d.description ? `<div style="font-size:11.5px;color:var(--text-faint);white-space:normal;">${esc(d.description)}</div>` : ""}${circuitDe(d, jour)}</td>
         <td>${esc(d.categorie)}</td><td>${esc(d.reference || "—")}</td><td>${esc(d.version || "—")}</td><td>${esc(d.dateDocument || "—")}</td>
-        <td><span class="chip ${d.statut === "En vigueur" ? "ok" : "muted"}">${esc(d.statut)}</span>${d.masque ? `<span class="chip soon">Masqué</span>` : ""}</td>
+        <td><span class="chip ${CHIP_STATUT[d.statut] || "muted"}">${esc(d.statut)}</span>${d.masque ? `<span class="chip soon">Masqué</span>` : ""}${VigieDocuments.aRevoir(d, jour) ? `<span class="chip late">À revoir</span>` : ""}</td>
         <td>${url ? `<a class="doc-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Ouvrir</a>` : "—"}</td>
-        ${canDocWrite ? `<td class="actions-float"><button type="button" class="act-edit" data-masque="${esc(d.id)}">${d.masque ? "Afficher" : "Masquer"}</button><button type="button" class="act-edit" data-edit="${esc(d.id)}" style="margin-left:10px;">Modifier</button><button type="button" class="act-del" data-del="${esc(d.id)}">Suppr.</button></td>` : ""}
+        ${canDocWrite ? `<td class="actions-float">${actionCircuit(d)}<button type="button" class="act-edit" data-masque="${esc(d.id)}">${d.masque ? "Afficher" : "Masquer"}</button><button type="button" class="act-edit" data-edit="${esc(d.id)}" style="margin-left:10px;">Modifier</button><button type="button" class="act-del" data-del="${esc(d.id)}">Suppr.</button></td>` : ""}
       </tr>`;
     }).join("") : `<tr class="empty-row"><td colspan="${colspan}">${vis.length === 0 ? "Aucun document référencé pour le moment." : "Aucun document ne correspond aux filtres sélectionnés."}</td></tr>`;
   }
@@ -687,21 +716,39 @@
   $("dReset").addEventListener("click", () => { dCategorieFiltre.value = "all"; dStatutFiltre.value = "all"; triDocs.reset(); renderDocs(); });
 
   const docPanel = $("docFormPanel"), docForm = $("docForm");
-  function openDocForm(d){
+  // remplaceEnCours : la version en vigueur qu'une « Nouvelle version » remplacera (ISO 45001 § 7.5)
+  let remplaceEnCours = "";
+  function openDocForm(d, opt){
+    opt = opt || {};
     docForm.reset();
+    const src = d || opt.depuis || null;
+    remplaceEnCours = opt.depuis ? opt.depuis.id : "";
     $("dId").value = d ? d.id : "";
-    $("docFormTitle").textContent = d ? "Modifier le document" : "Nouveau document";
-    if (d){
-      $("dTitre").value = d.titre; $("dCategorie").value = d.categorie || DOC_TYPES[0];
-      $("dReference").value = d.reference || ""; $("dVersion").value = d.version || ""; $("dDate").value = d.dateDocument || "";
-      $("dStatut").value = d.statut || "En vigueur"; $("dLien").value = d.lien || ""; $("dDescription").value = d.description || "";
+    $("docFormTitle").textContent = opt.approuver ? "Approuver le document" : opt.depuis ? "Nouvelle version du document" : d ? "Modifier le document" : "Nouveau document";
+    if (src){
+      $("dTitre").value = src.titre; $("dCategorie").value = src.categorie || DOC_TYPES[0];
+      $("dReference").value = src.reference || ""; $("dVersion").value = d ? (d.version || "") : ""; $("dDate").value = d ? (d.dateDocument || "") : todayLocal();
+      $("dStatut").value = d ? (d.statut || "En vigueur") : "Brouillon"; $("dLien").value = d ? (d.lien || "") : ""; $("dDescription").value = src.description || "";
+      $("dOrigine").value = src.origine || ""; $("dConservation").value = src.conservation || "";
+      $("dApprouvePar").value = d ? (d.approuvePar || "") : ""; $("dDateApprobation").value = d ? (d.dateApprobation || "") : ""; $("dRevue").value = d ? (d.revue || "") : "";
     } else {
-      $("dCategorie").value = DOC_TYPES[0]; $("dDate").value = todayLocal(); $("dStatut").value = "En vigueur";
+      $("dCategorie").value = DOC_TYPES[0]; $("dDate").value = todayLocal(); $("dStatut").value = "En vigueur"; $("dOrigine").value = "Interne";
     }
+    if (opt.approuver){ $("dStatut").value = "En vigueur"; if (!$("dDateApprobation").value) $("dDateApprobation").value = todayLocal(); }
+    // le circuit : qui a soumis, la version remplacée, les versions
+    const info = [], cible = d || null;
+    if (cible && cible.soumisPar) info.push(`Soumis pour approbation par ${esc(cible.soumisPar)}${cible.dateSoumission ? " le " + esc(fmtFr(cible.dateSoumission)) : ""}.`);
+    const prec = opt.depuis || (cible && cible.remplace ? DOCS.find(x => x.id === cible.remplace) : null);
+    if (prec) info.push(`Remplace la version ${esc(prec.version || "précédente")} (${esc(prec.statut)}) : elle deviendra obsolète quand celle-ci entrera en vigueur.`);
+    const ch = cible ? VigieDocuments.versions(DOCS, cible.id) : [];
+    if (ch.length > 1) info.push("Versions : " + ch.map(x => `${esc(x.version || "—")} (${esc(x.statut)})`).join(" → "));
+    $("dCircuit").innerHTML = info.join("<br>");
+    $("dCircuit").style.display = info.length ? "" : "none";
     docPanel.style.display = "";
     docPanel.scrollIntoView({ behavior:"smooth", block:"start" });
+    if (opt.approuver) $("dApprouvePar").focus();
   }
-  function closeDocForm(){ docPanel.style.display = "none"; docForm.reset(); $("dId").value = ""; }
+  function closeDocForm(){ docPanel.style.display = "none"; docForm.reset(); $("dId").value = ""; remplaceEnCours = ""; }
   docForm.addEventListener("submit", (e) => {
     e.preventDefault();
     if (!canDocWrite) return;
@@ -711,14 +758,29 @@
     const prev = id ? DOCS.find(d => d.id === id) : null;
     const titre = $("dTitre").value.trim();
     if (!titre) return;
-    const rec = Object.assign({}, prev || { id: genId("doc"), auteur: (session && session.user) || "—", dateCreation: todayLocal() }, {
+    const statut = $("dStatut").value, moi = (session && session.user) || "—", jour = todayLocal();
+    // passer par le circuit jusqu'à « En vigueur » : on note qui a approuvé, et quand (un document enregistré
+    // directement en vigueur, ou qui l'était déjà, ne l'exige pas : question 38)
+    const parCircuit = statut === "En vigueur" && (prev ? VigieDocuments.enPreparation(prev) : !!remplaceEnCours);
+    if (parCircuit && (!$("dApprouvePar").value.trim() || !$("dDateApprobation").value)){ alert("Pour mettre ce document en vigueur, indiquez qui l'a approuvé et à quelle date."); return; }
+    const rec = Object.assign({}, prev || { id: genId("doc"), auteur: moi, dateCreation: jour }, {
       titre, categorie: $("dCategorie").value, reference: $("dReference").value.trim(), version: $("dVersion").value.trim(),
-      dateDocument: $("dDate").value, statut: $("dStatut").value, lien: lienRaw, description: $("dDescription").value.trim(),
+      dateDocument: $("dDate").value, statut, lien: lienRaw, description: $("dDescription").value.trim(),
       masque: prev ? !!prev.masque : false,
+      origine: $("dOrigine").value, approuvePar: $("dApprouvePar").value.trim(), dateApprobation: $("dDateApprobation").value,
+      revue: $("dRevue").value, conservation: $("dConservation").value.trim(),
     });
+    if (!prev && remplaceEnCours) rec.remplace = remplaceEnCours;
+    if (statut === "À approuver" && (!prev || prev.statut !== "À approuver")){ rec.soumisPar = moi; rec.dateSoumission = jour; }
+    ["origine", "approuvePar", "dateApprobation", "revue", "conservation", "soumisPar", "dateSoumission", "remplace"].forEach(k => { if (!rec[k]) delete rec[k]; });
     if (prev) DOCS[DOCS.findIndex(d => d.id === id)] = rec; else DOCS.push(rec);
+    // la version remplacée devient obsolète quand la nouvelle entre en vigueur
+    const ancienne = statut === "En vigueur" && rec.remplace ? DOCS.find(d => d.id === rec.remplace) : null;
+    if (ancienne && ancienne.statut !== "Obsolète"){ ancienne.statut = "Obsolète"; ancienne.remplacePar = rec.id; ancienne.dateObsolete = jour; }
+    else if (ancienne && !ancienne.remplacePar) ancienne.remplacePar = rec.id;
     saveDocs();
-    logAudit("Base documentaire", prev ? "Modification" : "Création", `Document « ${rec.titre} » (${rec.categorie}, ${rec.statut})`);
+    logAudit("Base documentaire", prev ? "Modification" : "Création", `Document « ${rec.titre} » (${rec.categorie}, ${rec.statut}${rec.version ? ", version " + rec.version : ""})${parCircuit ? " — approuvé par " + rec.approuvePar : ""}`);
+    if (ancienne && ancienne.remplacePar === rec.id && ancienne.dateObsolete === jour) logAudit("Base documentaire", "Modification", `Document « ${ancienne.titre} »${ancienne.version ? " (version " + ancienne.version + ")" : ""} obsolète : remplacé par la version ${rec.version || "nouvelle"}`);
     closeDocForm(); fillCategorieSelects(); renderDocs();
   });
   $("dCancel").addEventListener("click", closeDocForm);
@@ -736,6 +798,21 @@
       renderDocs();
       return;
     }
+    // circuit : soumettre, approuver, préparer une nouvelle version
+    const so = e.target.closest("[data-soumettre]");
+    if (so){
+      const d = DOCS.find(x => x.id === so.dataset.soumettre);
+      if (!d || d.statut !== "Brouillon") return;
+      d.statut = "À approuver"; d.soumisPar = (session && session.user) || "—"; d.dateSoumission = todayLocal();
+      saveDocs();
+      logAudit("Base documentaire", "Modification", `Document « ${d.titre} » soumis pour approbation`);
+      renderDocs();
+      return;
+    }
+    const ap = e.target.closest("[data-approuver]");
+    if (ap){ const d = DOCS.find(x => x.id === ap.dataset.approuver); if (d) openDocForm(d, { approuver: true }); return; }
+    const nv = e.target.closest("[data-version]");
+    if (nv){ const d = DOCS.find(x => x.id === nv.dataset.version); if (d) openDocForm(null, { depuis: d }); return; }
     const ed = e.target.closest("[data-edit]");
     if (ed){ const d = DOCS.find(x => x.id === ed.dataset.edit); if (d) openDocForm(d); return; }
     const del = e.target.closest("[data-del]");
@@ -797,10 +874,12 @@
     $("btnNewDoc").addEventListener("click", () => openDocForm(null));
     $("btnExport").addEventListener("click", () => {
       const articles = ARTICLES.map(a => ({ "ID": a.id, "Titre": a.titre, "Thème": a.theme, "Mots-clés": a.motsCles || "", "Statut": a.statut, "Définition": a.contenu || "", "Exemples de situation": a.exemples || "", "Le danger": a.danger || "", "Mesures de prévention": a.prevention || "", "Proposé sur les pages": (Array.isArray(a.pages) ? a.pages : []).map(p => NOM_PAGE.get(p) || p).join(", "), "Créé le": a.dateCreation || "", "Mis à jour le": a.dateMaj || "", "Auteur": a.auteur || "" }));
-      const documents = DOCS.map(d => ({ "ID": d.id, "Titre": d.titre, "Type": d.categorie, "Référence": d.reference || "", "Version": d.version || "", "Date du document": d.dateDocument || "", "Statut": d.statut, [VigieOrga.mots("Visible des agents")]: d.masque ? "non" : "oui", "Lien": d.lien || "", "Description": d.description || "" }));
+      const documents = DOCS.map(d => ({ "ID": d.id, "Titre": d.titre, "Type": d.categorie, "Référence": d.reference || "", "Version": d.version || "", "Date du document": d.dateDocument || "", "Statut": d.statut, [VigieOrga.mots("Visible des agents")]: d.masque || VigieDocuments.enPreparation(d) ? "non" : "oui", "Lien": d.lien || "", "Description": d.description || "",
+        "Origine": d.origine || "", "Approuvé par": d.approuvePar || "", "Date d'approbation": fmtFr(d.dateApprobation || ""), "Soumis par": d.soumisPar || "", "Date de soumission": fmtFr(d.dateSoumission || ""),
+        "À revoir le": fmtFr(d.revue || ""), "Durée de conservation": d.conservation || "", "Remplace": d.remplace || "", "Remplacé par": d.remplacePar || "" }));
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(articles, { header: ["ID", "Titre", "Thème", "Mots-clés", "Statut", "Définition", "Exemples de situation", "Le danger", "Mesures de prévention", "Proposé sur les pages", "Créé le", "Mis à jour le", "Auteur"] }), "Articles");
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(documents, { header: ["ID", "Titre", "Type", "Référence", "Version", "Date du document", "Statut", VigieOrga.mots("Visible des agents"), "Lien", "Description"] }), "Documents");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(documents, { header: ["ID", "Titre", "Type", "Référence", "Version", "Date du document", "Statut", VigieOrga.mots("Visible des agents"), "Lien", "Description", "Origine", "Approuvé par", "Date d'approbation", "Soumis par", "Date de soumission", "À revoir le", "Durée de conservation", "Remplace", "Remplacé par"] }), "Documents");
       XLSX.writeFile(wb, `base-documentaire_${todayLocal()}.xlsx`);
     });
   }

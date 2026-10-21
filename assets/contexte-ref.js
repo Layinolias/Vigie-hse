@@ -20,7 +20,9 @@
               exclusions (et leur justification), validePar, diffusion (comment il est mis à disposition),
               organisation: [{ nom, services: [...] }] (les entrées et services suivis par l'outil le jour de la version),
               auteur, dateCreation } — le domaine d'application du système (§ 4.3, 2026-10-18), hors des trois registres :
-              une nouvelle version s'ajoute, les précédentes restent ; celle en vigueur est la plus récente déjà commencée
+              une nouvelle version s'ajoute, les précédentes restent ; celle en vigueur est la plus récente déjà commencée.
+              Réponse du préventeur (question 35, 2026-10-21) : comme aujourd'hui — revue quand on le décide, sans rappel ;
+              « validé par » facultatif ; lu par qui lit le contexte.
    et pour tous : archive (n'est plus d'actualité : avec motifArchive, archiveLe, archivePar), auteur, dateCreation,
    modifiePar, dateMaj. Les actions rejoignent le Plan d'actions sous « pa-ro-<élément>-<action> » (origine
    « Risques et opportunités »).

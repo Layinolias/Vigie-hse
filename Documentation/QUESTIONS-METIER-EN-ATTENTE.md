@@ -60,9 +60,11 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 28 | Politique de santé et de sécurité : qui la tient, comment prouver que chacun l'a lue, à quel rythme la revoir ? | Politique santé-sécurité (construite le 2026-10-15, ISO 45001 § 5.2) — tableau de bord, Revue de direction | ✅ Répondu le 2026-10-16 — mis en œuvre |
 | 29 | Gestion des changements : quels changements y passent, faut-il une validation, une consultation, une mise à jour du Document unique, une revue à date ? | Gestion des changements (construite le 2026-10-15, ISO 45001 § 8.1.3) — Plan d'actions, Revue de direction | ✅ Répondu le 2026-10-16 — mis en œuvre |
 | 30 | Contexte et enjeux : comment évaluer un risque ou une opportunité, à quel rythme revoir le registre, quelles parties intéressées ? | Contexte et enjeux (construit le 2026-10-15, ISO 45001 § 4.1, 4.2, 6.1.1) — Plan d'actions, Revue de direction | ✅ Répondu le 2026-10-16 — mis en œuvre |
-| 31 | Préparation ISO 45001 : quelle fraîcheur des preuves un auditeur attend-il, et qui voit la page ? | Préparation ISO 45001 (construite le 2026-10-16) | 🟠 En attente de réponse |
-| 32 | Niveau des mesures de prévention : faut-il signaler une protection individuelle prévue seule, rendre le niveau obligatoire, ranger aussi les mesures du Document unique ? | Plan d'actions, Préparation ISO 45001 (construit le 2026-10-18) | 🟠 En attente de réponse |
-| 33 | Rôles de prévention : quels rôles proposer et exiger, que signaler (lettre de mission, formation), qui voit le registre ? | Rôles de prévention (construit le 2026-10-18) | 🟠 En attente de réponse |
+| 31 | Préparation ISO 45001 : quelle fraîcheur des preuves un auditeur attend-il, et qui voit la page ? | Préparation ISO 45001 (construite le 2026-10-16) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
+| 32 | Niveau des mesures de prévention : faut-il signaler une protection individuelle prévue seule, rendre le niveau obligatoire, ranger aussi les mesures du Document unique ? | Plan d'actions, Préparation ISO 45001 (construit le 2026-10-18) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
+| 33 | Rôles de prévention : quels rôles proposer et exiger, que signaler (lettre de mission, formation), qui voit le registre ? | Rôles de prévention (construit le 2026-10-18) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
+| 34 | Comptes limités à certains services : que peuvent-ils faire des enregistrements de toute l'organisation ? | Serveur local, droits de lecture et d'écriture (relevé le 2026-10-18) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
+| 35 | Domaine d'application : faut-il le revoir à date fixe, qui le valide, qui le voit ? | Contexte et enjeux (construit le 2026-10-18, ISO 45001 § 4.3) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
 
 ---
 
@@ -954,7 +956,7 @@ Un élément qui n'est plus d'actualité se retire et reste consultable. Le regi
 
 ---
 
-## 🟠 Question 31 — Préparation ISO 45001 : quelle fraîcheur des preuves un auditeur attend-il, et qui voit la page ?
+## ✅ Question 31 — Préparation ISO 45001 : quelle fraîcheur des preuves un auditeur attend-il, et qui voit la page ?
 
 **Contexte.** Le logiciel a désormais une page **« Préparation ISO 45001 »** (menu Pilotage), construite sans attendre parce qu'elle ne fixe aucune règle de métier. Pour chacune des 30 exigences des chapitres 4 à 10 de la norme, elle montre :
 - ce que l'application couvre (couverte, en partie — avec ce qui manque —, hors outil) ;
@@ -975,11 +977,15 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 **Options.** (A) Des faits seulement, comme aujourd'hui. (B) Des délais par exigence (à préciser) : une preuve trop ancienne passe « à reprendre ».
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-16)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-21) : (A) des faits seulement, comme aujourd'hui.** Aucune remarque.
+>
+> **Rien à changer** : la page donne l'état du jour et les dates ; aucune durée de validité des preuves n'est imposée. L'accès reste au Préventeur, à l'Administrateur et aux RH ; les autres référentiels (MASE…) restent à étudier, sans précision du préventeur.
 
 ---
 
-## 🟠 Question 32 — Niveau des mesures de prévention : que faut-il signaler, et où ranger ?
+## ✅ Question 32 — Niveau des mesures de prévention : que faut-il signaler, et où ranger ?
 
 **Contexte.** ISO 45001 (§ 8.1.2) demande de choisir les mesures dans un ordre : d'abord **supprimer le danger**, puis le **remplacer** par ce qui est moins dangereux, puis **protéger collectivement** (moyens techniques, réorganisation du travail), puis **organiser** (consignes, procédures, formation), et **en dernier** la **protection individuelle** (EPI). Jusqu'ici, le logiciel ne savait pas à quel niveau se situait une mesure.
 
@@ -993,11 +999,15 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 **Options.** (A) Comme aujourd'hui : facultatif, sans signal. (B) Un signal « protection individuelle seule » (critère à préciser). (C) Niveau obligatoire (pour quelles actions). Les options se combinent.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-18)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-21) : (A) pas de signal, comme aujourd'hui.** Aucune remarque.
+>
+> **Rien à changer** : le niveau d'une action reste facultatif et n'est qu'un fait ; aucun signal « protection individuelle seule ». Les mesures déjà en place au Document unique ne sont toujours pas rangées par niveau (point encore « en partie » de la carte, exigence 8.1.2).
 
 ---
 
-## 🟠 Question 33 — Rôles de prévention : quels rôles proposer et exiger, que signaler, qui voit le registre ?
+## ✅ Question 33 — Rôles de prévention : quels rôles proposer et exiger, que signaler, qui voit le registre ?
 
 **Contexte.** ISO 45001 (§ 5.3) demande que les rôles, responsabilités et autorités en santé-sécurité soient attribués et communiqués à tous les niveaux. Le logiciel a désormais une page **« Rôles de prévention »** (menu Ressources) : pour chaque rôle, la personne (choisie dans Gestion RH ou saisie), son périmètre (toute l'organisation ou un service), son contact professionnel, sa mission, la date et l'auteur de sa désignation, sa lettre de mission (référence ou lien), sa formation et sa date, et une fin de fonction qui garde la fiche, marquée terminée. La page s'imprime « pour l'affichage » (les rôles en fonction : à qui s'adresser) et s'exporte. La Préparation ISO 45001 la reprend pour l'exigence 5.3.
 
@@ -1014,9 +1024,13 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 **Options.** (A) Comme aujourd'hui : une liste de choix, rien d'exigé, seulement mission et date à compléter. (B) Des rôles exigés (à préciser). (C) D'autres points à signaler (lettre, formation, rythme à préciser). Les options se combinent.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-18)._
+### Décision
 
-## 🟠 Question 34 — Comptes limités à certains services : que peuvent-ils faire des enregistrements de toute l'organisation ?
+> **Réponse du préventeur (Cahier, 2026-10-21) : (A) comme aujourd'hui.** Aucune remarque.
+>
+> **Rien à changer** : la liste proposée convient ; aucun rôle exigé, aucune formation à durée de validité ; seuls une mission ou une date de désignation manquantes sont signalées ; tous les profils préréglés lisent le registre.
+
+## ✅ Question 34 — Comptes limités à certains services : que peuvent-ils faire des enregistrements de toute l'organisation ?
 
 **Contexte.** Un compte peut être limité à certains services (Administration → Utilisateurs : par exemple un manager limité à Voirie & Réseaux et Espaces Verts). Il ne reçoit alors que les enregistrements de ses services, par leur champ « service ». Reste une catégorie : les enregistrements **qui ne portent aucun service**, parce qu'ils concernent toute l'organisation — une action du Plan d'actions, un objectif, une exigence de conformité, un signalement saisis sans service.
 
@@ -1029,9 +1043,13 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 **Options.** (A) Comme aujourd'hui : il voit et, si son profil le permet, modifie. (B) Il voit, sans pouvoir modifier ni supprimer : seul un compte « tous les services » touche à ce qui concerne toute l'organisation. (C) Il ne les voit pas du tout. Une réponse peut différer d'un registre à l'autre (à préciser).
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-18)._
+### Décision
 
-## 🟠 Question 35 — Domaine d'application : faut-il le revoir à date fixe, qui le valide, qui le voit ?
+> **Réponse du préventeur (Cahier, 2026-10-21) : (A) comme aujourd'hui.** Aucune remarque.
+>
+> **Rien à changer** : un compte limité à certains services voit ce qui ne porte aucun service et, si son profil le permet, le modifie (`serveur/perimetre.js`).
+
+## ✅ Question 35 — Domaine d'application : faut-il le revoir à date fixe, qui le valide, qui le voit ?
 
 **Contexte.** ISO 45001 (§ 4.3) demande que l'organisme fixe le domaine d'application de sa démarche de santé et de sécurité — ce qu'elle couvre (activités, lieux, personnes) et ce qui en est exclu — et le tienne à disposition par écrit. La page **« Contexte et enjeux »** (menu Pilotage) commence désormais par un bloc **« Domaine d'application du système »** : un énoncé, les activités et lieux couverts, les exclusions et leur justification, qui l'a validé, comment il est mis à disposition, et la date à partir de laquelle il s'applique. Le changer, c'est enregistrer une **nouvelle version** datée ; les précédentes restent consultables. Chaque version relève l'organisation suivie par l'outil ce jour-là (les entrées et leurs services, Administration → Organisation).
 
@@ -1048,7 +1066,11 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 **Options.** (A) Comme aujourd'hui : versions datées, revue quand on le décide, validation facultative, lu par qui lit le contexte. (B) Un rappel de revue à date fixe (rythme à préciser). (C) Une validation obligatoire (par qui, avec ou sans avis de l'instance). (D) Une diffusion à tous les comptes. Les options se combinent.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-18)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-21) : (A) comme aujourd'hui.** Aucune remarque.
+>
+> **Rien à changer** : le domaine d'application se revoit quand on le décide, sans rappel ; « validé par » reste facultatif ; il est lu par qui lit le contexte (pas le profil Agent). Seul l'écart avec l'organisation suivie est signalé.
 
 ---
 

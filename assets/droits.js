@@ -43,6 +43,10 @@
     // Gestion des changements (ISO 45001 § 8.1.3, 2026-10-15) : lue par le Manager et les représentants du personnel,
     // tenue par le Préventeur (avec Administrateur et RH) — question 29, réponse du 2026-10-16.
     mod("changements", "Sécurité & Risques", "Gestion des changements", STD),
+    // Achats et santé-sécurité (ISO 45001 § 8.1.4, 2026-10-21) : avant un achat, les critères de santé-sécurité, l'avis,
+    // la suite. Le Manager demande (il enregistre une demande, que le serveur n'accepte qu'en ajout) ; le Préventeur (avec
+    // Administrateur et RH) examine et donne l'avis ; les représentants du personnel lisent — question 39.
+    mod("achats", "Sécurité & Risques", "Achats et santé-sécurité", [["consulter", "Consulter"], ["demander", "Demander un achat"], ["gerer", "Gérer (avis et suite)"]]),
     mod("actions", "Suivi", "Plan d'actions", STD),
     mod("sante-visites", "Suivi", "Santé & Visites", STD),
     mod("verifications", "Suivi", "Vérifications périodiques", STD),
@@ -120,15 +124,15 @@
     { id: "p-manager", nom: "Manager", libelle: "Manager", pastille: "MANAGER", droits: {
       atmp: "consulter", rsst: "auteurs", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter", "audit-interne": "consulter", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter", communication: "consulter" } },
+      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter", "audit-interne": "consulter", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter", communication: "consulter", achats: "demander" } },
     { id: "p-agent", nom: "Agent", libelle: "Compte Agent", pastille: "AG", droits: {
       atmp: "consulter", rsst: "deposer", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
       documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", "roles-prevention": "consulter" } },
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
-      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer", "roles-prevention": "gerer", changements: "gerer", contexte: "gerer", "engagement-direction": "gerer", communication: "gerer", "preparation-iso": "consulter" } },
+      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer", "roles-prevention": "gerer", changements: "gerer", contexte: "gerer", "engagement-direction": "gerer", communication: "gerer", achats: "gerer", "preparation-iso": "consulter" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
-      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter", communication: "consulter" } }
+      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter", communication: "consulter", achats: "consulter" } }
   ];
   var PREREGLE_PAR_ID = {};
   PREREGLES.forEach(function (p) { PREREGLE_PAR_ID[p.id] = p; });

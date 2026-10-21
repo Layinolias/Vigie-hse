@@ -45,7 +45,7 @@
     "8.1.1": { c: "couverte", pages: [P("verifications-periodiques.html", "Vérifications périodiques"), P("inspection-audit.html", "Inspection / Audit"), P("produits-chimiques.html", "Produits chimiques")] },
     "8.1.2": { c: "partielle", pages: [P("document-unique.html", "Document unique"), P("plan-actions.html", "Plan d'actions"), P("epi-dotation.html", "EPI & Dotation")], manque: "les mesures déjà en place au Document unique ne sont pas rangées par niveau (seules les actions du Plan d'actions le sont)" },
     "8.1.3": { c: "couverte", pages: [P("changements.html", "Gestion des changements")] },
-    "8.1.4": { c: "partielle", pages: [P("entreprises-exterieures.html", "Entreprises extérieures")], manque: "les critères de santé et de sécurité à l'achat" },
+    "8.1.4": { c: "couverte", pages: [P("achats.html", "Achats et santé-sécurité"), P("entreprises-exterieures.html", "Entreprises extérieures")] },
     "8.2": { c: "couverte", pages: [P("urgences-exercices.html", "Situations d'urgence")] },
     "9.1.1": { c: "couverte", pages: [P("reporting.html", "Indicateurs & Reporting"), P("verifications-periodiques.html", "Vérifications périodiques"), P("sante-visites.html", "Santé & Visites")] },
     "9.1.2": { c: "couverte", pages: [P("conformite.html", "Conformité réglementaire")] },
@@ -62,7 +62,7 @@
   const K = {
     contexte: "vigie_hse_contexte", referentiels: "vigie_hse_referentials", revues: "vigie_hse_revues_direction", politiques: "vigie_hse_politiques",
     users: "vigie_hse_users", profils: "vigie_hse_profils", rsst: "vigie_hse_rsst", dsReunions: "vigie_hse_ds_reunions", dsQuestions: "vigie_hse_ds_questions",
-    duerp: "vigie_hse_duerp_dataset", changements: "vigie_hse_changements", exigences: "vigie_hse_exigences", actions: "vigie_hse_actions", roles: "vigie_hse_roles_prevention", engagement: "vigie_hse_engagement_direction", communication: "vigie_hse_communication",
+    duerp: "vigie_hse_duerp_dataset", changements: "vigie_hse_changements", exigences: "vigie_hse_exigences", actions: "vigie_hse_actions", roles: "vigie_hse_roles_prevention", engagement: "vigie_hse_engagement_direction", communication: "vigie_hse_communication", achats: "vigie_hse_achats",
     objectifs: "vigie_hse_objectifs", habilitations: "vigie_hse_habilitations", accueils: "vigie_hse_accueils", news: "vigie_hse_news", veille: "vigie_hse_veille",
     documents: "vigie_hse_documents", verifications: "vigie_hse_verifications", inspections: "vigie_hse_inspections", epi: "vigie_hse_epi_dotations",
     ee: "vigie_hse_interventions_ee", plans: "vigie_hse_plans_urgence", exercices: "vigie_hse_exercices_urgence", atmp: "vigie_hse_dataset",
@@ -76,7 +76,7 @@
     const lire = (cle) => { try { const v = JSON.parse(store.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
     const complet = (cles) => cles.every(c => !store.complet || store.complet(c) !== false);
     const VA = racine.VigieAuditInterne, VP = racine.VigiePolitique, VC = racine.VigieChangements, VX = racine.VigieContexte,
-      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures, VR = racine.VigieRoles, VE = racine.VigieEngagement, VCo = racine.VigieCommunication, VD = racine.VigieDocuments;
+      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures, VR = racine.VigieRoles, VE = racine.VigieEngagement, VCo = racine.VigieCommunication, VD = racine.VigieDocuments, VAc = racine.VigieAchats;
     let I = null;
     try { I = VI ? VI.calculer(store, "", "") : null; } catch (e) { I = null; }
     const actions = lire(K.actions);
@@ -199,9 +199,14 @@
           [s.sansValidation, "mise en œuvre sans validation", "mises en œuvre sans validation"], [s.imprevusSansAction, "effet imprévu sans action", "effets imprévus sans action"]].filter(z => z[0]).map(z => pl(z[0], z[1], z[2]));
         return [pts.length ? "areprendre" : "pret", [pl(s.changements, "changement", "changements") + " (" + s.enCours + " à mettre en œuvre, " + s.aRevoir + " à revoir, " + s.clos + " revu" + (s.clos > 1 ? "s" : "") + ")"].concat(pts)];
       } },
-      "8.1.4": { cles: [K.ee], f: () => {
-        const n = lire(K.ee).length;
-        return n ? ["pret", [pl(n, "intervention d'entreprise extérieure", "interventions d'entreprises extérieures")]] : ["rien", ["aucune intervention d'entreprise extérieure"]];
+      "8.1.4": { cles: [K.ee, K.achats], f: () => {
+        const n = lire(K.ee).length, ee = n ? pl(n, "intervention d'entreprise extérieure", "interventions d'entreprises extérieures") : "aucune intervention d'entreprise extérieure";
+        // les achats examinés : des faits, un achat sans avis est dit sans être jugé (question 39)
+        const s = VAc.synthese(lire(K.achats), aujourdhui.slice(0, 4));
+        if (!s.total) return [n ? "pret" : "rien", ["aucune demande d'achat examinée", ee]];
+        return ["pret", [pl(s.total, "demande d'achat", "demandes d'achat") + " (" + s.avisDonnes + " avec un avis, " + s.aExaminer + " à examiner)"]
+          .concat(s.acheteesSansAvis ? [pl(s.acheteesSansAvis, "achat noté sans avis de santé-sécurité", "achats notés sans avis de santé-sécurité")] : [])
+          .concat([ee])];
       } },
       "8.2": { cles: [K.plans, K.exercices], f: () => {
         const p = lire(K.plans).length, e = lire(K.exercices).length;
@@ -240,7 +245,7 @@
         return ["pret", [pl(I.paFait, "action faite", "actions faites") + ", " + pl(I.paEfficaces, "jugée efficace", "jugées efficaces"), pl(lire(K.objectifs).filter(o => o && o.id).length, "objectif", "objectifs")]];
       } },
     };
-    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.1": VE, "5.2": VP, "7.4": VCo, "7.5": VD, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
+    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.1": VE, "5.2": VP, "7.4": VCo, "7.5": VD, "8.1.4": VAc, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
     const audits = VA ? lire(K.audits) : [], cv = VA && complet([K.audits]) ? VA.couverture(audits, actions, aujourdhui) : [];
     const clauses = VA ? VA.CLAUSES : Object.keys(COUVERTURE).map(c => [c, c]);
     return clauses.map(([clause, nom]) => {

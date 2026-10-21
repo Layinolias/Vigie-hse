@@ -144,8 +144,8 @@ const J = (o) => JSON.stringify(o);
   check('… deux rôles complets : « Des enregistrements », 2 rôles, 2 personnes', etat53(pp).etat === 'pret' && /2 rôles de prévention en fonction, 2 personnes/.test(faits(pp, '5.3')));
   pp = await H.page('preparation-iso.html', PREV, { [CLE]: J(ROLES) });
   check('… un rôle à compléter : « Des points à reprendre », le fait', etat53(pp).etat === 'areprendre' && /dont 1 à compléter/.test(faits(pp, '5.3')));
-  check('… lien vers Rôles de prévention ; 5.3 couverte (24 couvertes, 3 en partie, 3 hors outil, engagement de la direction, communication et documents compris)', /Rôles de prévention/.test(faits(pp, '5.3')) && pp.w.VigiePreparation.COUVERTURE['5.3'].c === 'couverte'
-    && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'couverte').length === 24 && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'partielle').length === 3);
+  check('… lien vers Rôles de prévention ; 5.3 couverte (25 couvertes, 2 en partie, 3 hors outil, engagement de la direction, communication, documents et achats compris)', /Rôles de prévention/.test(faits(pp, '5.3')) && pp.w.VigiePreparation.COUVERTURE['5.3'].c === 'couverte'
+    && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'couverte').length === 25 && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'partielle').length === 2);
   const lp = pp.w.VigiePreparation.evaluer(Object.assign({}, pp.w.VigieStore, { complet: (c) => c !== CLE }), pp.w.VigieDates.aujourdhui()).find(x => x.clause === '5.3');
   check('… registre partiel pour ce compte : « Non calculé »', lp.etat === 'partiel');
 

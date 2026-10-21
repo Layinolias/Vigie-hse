@@ -73,6 +73,7 @@ const PAGE_UNIQUE = {
   vigie_hse_grilles_audit: 'audit-interne',
   vigie_hse_roles_prevention: ['roles-prevention', 'preparation-iso'],   // lu par tous les profils préréglés (§ 5.3)
   vigie_hse_engagement_direction: ['engagement-direction', 'preparation-iso'],   // § 5.1
+  vigie_hse_achats: ['achats', 'preparation-iso'],   // § 8.1.4
   vigie_hse_communication: ['communication', 'preparation-iso', 'revue-direction'],   // § 7.4 ; la revue reprend les communications avec l'extérieur (§ 9.3)
   vigie_hse_modeles_convocation: 'sante-visites',
   vigie_hse_plans_urgence: ['urgences', 'plans-urgence'],   // tout compte lit les plans (question 19)

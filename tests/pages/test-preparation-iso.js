@@ -25,7 +25,7 @@ const J = (o) => JSON.stringify(o);
   check('30 exigences sous 7 chapitres, rien d\'écrit', p.d.querySelectorAll('#tbody tr[data-clause]').length === 30 && p.d.querySelectorAll('#tbody tr.chap').length === 7 && Object.keys(p.stockage()).length === 0, Object.keys(p.stockage()));
   check('… hors outil : 4.4, 7.1, 10.1 ; les autres sans enregistrement, domaine d\'application (4.3) compris', ['4.4', '7.1', '10.1'].every(c => etat(c) === 'Hors outil') && etat('4.3') === 'Aucun enregistrement' && etat('9.2') === 'Aucun enregistrement' && etat('5.2') === 'Aucun enregistrement');
   check('… compteurs : 0 avec enregistrements, 0 à reprendre, 27 sans, 30 jamais auditées', p.$('kpiPret').textContent === '0' && p.$('kpiReprendre').textContent === '0' && p.$('kpiRien').textContent === '27' && p.$('kpiJamais').textContent === '30');
-  check('… la couverture de l\'outil : 22 couvertes, 5 en partie, 3 hors outil, avec ce qui manque', /22 exigences couvertes par l'outil, 5 en partie, 3 hors outil/.test(p.$('calculNote').textContent) && /Manque : un plan de communication/.test(ligne('7.4').textContent) && !/Manque/.test(ligne('4.3').textContent) && !!ligne('5.2').querySelector('a[href="politique-sante-securite.html"]'));
+  check('… la couverture de l\'outil : 23 couvertes, 4 en partie, 3 hors outil, avec ce qui manque', /23 exigences couvertes par l'outil, 4 en partie, 3 hors outil/.test(p.$('calculNote').textContent) && /Manque : le stockage des fichiers/.test(ligne('7.5').textContent) && !/Manque/.test(ligne('7.4').textContent) && !/Manque/.test(ligne('4.3').textContent) && !!ligne('5.2').querySelector('a[href="politique-sante-securite.html"]'));
 
   // ---------- 3. Des registres ----------
   const ts = new Date().toISOString();

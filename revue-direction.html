@@ -21,6 +21,7 @@
 <script src="assets/politique-ref.js"></script>
 <script src="assets/changements-ref.js"></script>
 <script src="assets/contexte-ref.js"></script>
+<script src="assets/communication-ref.js"></script>
 <link rel="stylesheet" href="assets/jetons.css">
 <link rel="stylesheet" href="assets/commun.css">
 <style>
@@ -290,6 +291,8 @@
       gestionChangements: changementsDuJour(I.dDebut, I.dFin),
       // registre du contexte au jour du calcul, et ce qui y a changé dans la période (2026-10-15) ; null si ce compte ne reçoit pas tout le registre ou toutes les actions
       contexteOrganisation: contexteDuJour(I.dDebut, I.dFin),
+      // communications avec l'extérieur de la période, émises et reçues (2026-10-21) ; null si ce compte ne reçoit pas tout le registre
+      communicationsExternes: communicationsDuJour(I.dDebut, I.dFin),
       participation: { observations: I.rsstTotal, observationsTraitees: I.rsstTaux, questionsDirection: ds("vigie_hse_ds_questions", "date"), reunions: ds("vigie_hse_ds_reunions", "date"), visitesSite: ds("vigie_hse_ds_visites", "date") },
       risques: { evaluations: I.duTotal, prioritaires: I.duPrio.length },
     };
@@ -311,7 +314,7 @@
         + auditsInternesDeLaRevue(c)
         + `<p class="form-note" style="margin:0 0 6px;">Consultation et participation, risques</p>` + chiffres([[nombre(c.participation.observations, 0), "observations au registre santé et sécurité"], [c.participation.observationsTraitees === null ? "—" : c.participation.observationsTraitees + " %", "observations traitées"], [nombre(c.participation.questionsDirection, 0), "questions des représentants"], [nombre(c.participation.reunions, 0), "réunions de l'instance"], [nombre(c.risques.prioritaires, 0), "risques élevés ou critiques évalués (période)"]]) + conformiteDeLaRevue(c) },
     { id:"ressources", titre:"Ressources", aide:"Les moyens humains, techniques et financiers sont-ils suffisants ?", auto: c => programmeDeLaRevue(c) },
-    { id:"communications", titre:"Communications avec les parties intéressées", aide:"Échanges avec l'inspection du travail, la médecine de prévention, les assureurs, les entreprises extérieures, les représentants du personnel…", auto: null },
+    { id:"communications", titre:"Communications avec les parties intéressées", aide:"Échanges avec l'inspection du travail, la médecine de prévention, les assureurs, les entreprises extérieures, les représentants du personnel…", auto: c => communicationsDeLaRevue(c) },
     { id:"ameliorations", titre:"Pistes d'amélioration", aide:"Ce qui pourrait être fait mieux, ou autrement.", auto: null },
   ];
   const SORTIES = [
@@ -373,6 +376,21 @@
       + (k.nc.length ? `<ul class="liste-auto">${k.nc.map(n => `<li>${esc(n.audit)}${n.date ? " (" + esc(dateFr(n.date)) + ")" : ""} — ${n.clause ? esc(n.clause) + " : " : ""}${esc(n.texte)} · <b>${esc(n.etat)}</b></li>`).join("")}</ul>` : "");
   }
   // Contexte et enjeux (ISO 45001 § 4.1, 4.2, 6.1.1) : le registre au jour du calcul, et ce qui y a changé dans la période (15 au plus)
+  function communicationsDuJour(debut, fin){
+    if (!VigieStore.complet(VigieCommunication.CLE)) return null;
+    const s = VigieCommunication.pourRevue(lire(VigieCommunication.CLE), debut, fin);
+    s.liste = s.liste.slice(-30);   // les 30 plus récentes : la revue garde ce qu'elle a lu au calcul
+    return s;
+  }
+  function communicationsDeLaRevue(c){
+    if (c.communicationsExternes === undefined) return "";   // revue calculée avant le registre de la communication
+    const t = `<p class="form-note" style="margin:0 0 6px;">Communications avec l'extérieur notées dans la période (page Communication)</p>`;
+    if (c.communicationsExternes === null) return t + `<p class="vide">Non repris : le compte qui a fait le calcul ne recevait pas tout le registre de la communication.</p>`;
+    const k = c.communicationsExternes;
+    if (!k.liste.length) return t + `<p class="vide">Aucune communication avec l'extérieur notée dans la période.</p>`;
+    return t + chiffres([[nombre(k.emises, 0), "émises vers l'extérieur"], [nombre(k.recues, 0), "reçues de l'extérieur"], [nombre(k.sansSuite, 0), "reçues sans suite notée"]])
+      + `<ul class="liste-auto">${k.liste.map(m => `<li>${esc(dateFr(m.date))} — ${m.sens === "recue" ? "reçue de " : "à "}${esc(m.public)} : ${esc(m.objet)}${m.sens === "recue" ? (m.suite ? " · suite : " + esc(m.suite) : " · sans suite notée") : ""}</li>`).join("")}</ul>`;
+  }
   function contexteDuJour(debut, fin){
     if (!VigieStore.complet(VigieContexte.CLE) || !VigieStore.complet("vigie_hse_actions")) return null;
     const s = VigieContexte.pourPeriode(lire(VigieContexte.CLE), lire("vigie_hse_actions"), debut, fin);

@@ -64,7 +64,7 @@
     // communiquée à tous —, tenue par le Préventeur (avec Administrateur et RH) ; question 28.
     mod("politique", "Ressources", "Politique santé-sécurité", STD),
     // Rôles de prévention (ISO 45001 § 5.3, 2026-10-18) : les rôles sont communiqués à tous — lu par tous les profils
-    // préréglés —, tenu par le Préventeur (avec Administrateur et RH) ; question 33.
+    // préréglés —, tenu par le Préventeur (avec Administrateur et RH) ; confirmé par le préventeur (question 33, 2026-10-21).
     mod("roles-prevention", "Ressources", "Rôles de prévention", STD),
     mod("dialogue-social", "Ressources", "Dialogue social", [["consulter", "Consulter"], ["participer", "Participer (représentant)"], ["direction", "Direction (répondre, clôturer)"]]),
     // Contexte et enjeux (ISO 45001 § 4.1, 4.2 et 6.1.1, 2026-10-15) : lu par le Manager et les représentants du personnel,
@@ -85,7 +85,7 @@
     // Manager — à confirmer, question 27.
     mod("audit-interne", "Pilotage", "Audit interne", STD),
     // Revue de direction (ISO 45001 § 9.3, 2026-10-12) : préparer, valider, rouvrir. Aucun préréglage hors Administrateur et RH.
-    // Préparation ISO 45001 (2026-10-16) : la carte de couverture lue en direct, en lecture seule ; Préventeur, Administrateur, RH — question 31.
+    // Préparation ISO 45001 (2026-10-16) : la carte de couverture lue en direct, en lecture seule ; Préventeur, Administrateur, RH — confirmé par le préventeur (question 31, 2026-10-21).
     mod("preparation-iso", "Pilotage", "Préparation ISO 45001", [["consulter", "Consulter"]]),
     mod("revue-direction", "Pilotage", "Revue de direction", STD),
     mod("administration", "Pilotage", "Administration", [["gerer", "Gérer"]])

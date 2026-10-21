@@ -5,6 +5,8 @@
 // Règle unique, pour tous les registres : un enregistrement dont le champ « service » nomme un service hors
 // du périmètre n'est pas transmis. Ce qui n'a pas de service (référentiels, modèles, catalogues, trames,
 // enregistrements communs à la collectivité) reste transmis, comme avant.
+// Réponse du préventeur (question 34, 2026-10-21) : comme aujourd'hui — un compte limité voit ce qui ne porte aucun
+// service et, si son profil le permet, le modifie.
 //
 // En écriture, le compte ne renvoie que sa part : elle est greffée sur le registre complet, qu'il n'a jamais
 // reçu. Il ne peut ni toucher un enregistrement hors de son périmètre, ni en créer un.

@@ -7,7 +7,7 @@
 
    L'état du jour ne juge pas : il ne dit que des faits et reprend les états que chaque module calcule déjà
    (retards, revues dépassées, éléments sans action). Aucun délai n'est inventé ici — ce qu'un auditeur attend comme
-   fraîcheur des preuves est demandé au préventeur (question 31).
+   fraîcheur des preuves : des faits seulement, on lit les dates soi-même (question 31, réponse du préventeur du 2026-10-21).
      « pret »       : des enregistrements, rien que leur module signale ;
      « areprendre » : des enregistrements, et des points que leur module signale (retard, revue à faire…) ;
      « rien »       : aucun enregistrement (pas forcément un défaut : aucun changement, aucune intervention…) ;
@@ -43,7 +43,7 @@
     "7.4": { c: "partielle", pages: [P("dashboard.html", "Flash Info et veille"), P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social")], manque: "un plan de communication, et la communication externe" },
     "7.5": { c: "partielle", pages: [P("base-documentaire.html", "Base documentaire")], manque: "le stockage des fichiers eux-mêmes et un circuit d'approbation" },
     "8.1.1": { c: "couverte", pages: [P("verifications-periodiques.html", "Vérifications périodiques"), P("inspection-audit.html", "Inspection / Audit"), P("produits-chimiques.html", "Produits chimiques")] },
-    "8.1.2": { c: "partielle", pages: [P("document-unique.html", "Document unique"), P("plan-actions.html", "Plan d'actions"), P("epi-dotation.html", "EPI & Dotation")], manque: "les mesures déjà en place au Document unique ne sont pas rangées par niveau (seules les actions du Plan d'actions le sont) ; rien ne signale une protection individuelle prévue seule (question 32)" },
+    "8.1.2": { c: "partielle", pages: [P("document-unique.html", "Document unique"), P("plan-actions.html", "Plan d'actions"), P("epi-dotation.html", "EPI & Dotation")], manque: "les mesures déjà en place au Document unique ne sont pas rangées par niveau (seules les actions du Plan d'actions le sont)" },
     "8.1.3": { c: "couverte", pages: [P("changements.html", "Gestion des changements")] },
     "8.1.4": { c: "partielle", pages: [P("entreprises-exterieures.html", "Entreprises extérieures")], manque: "les critères de santé et de sécurité à l'achat" },
     "8.2": { c: "couverte", pages: [P("urgences-exercices.html", "Situations d'urgence")] },
@@ -170,7 +170,7 @@
       } },
       "8.1.2": { cles: [K.duerp, K.epi, K.actions], f: () => {
         if (!I || (!I.duTotal && !I.epiTotal)) return ["rien", ["ni évaluation ni dotation d'EPI"]];
-        // le niveau des actions : un fait, sans jugement (question 32)
+        // le niveau des actions : un fait, sans jugement (question 32 : pas de signal)
         const b = VM.bilan(actions), niv = VM.NIVEAUX.filter(n => b.parNiveau[n.id]).map(n => b.parNiveau[n.id] + " " + n.court.toLowerCase());
         return [I.epiLateTous ? "areprendre" : "pret", [pl(I.duTotal, "évaluation et ses mesures au Document unique", "évaluations et leurs mesures au Document unique"), pl(I.epiTotal, "dotation d'EPI", "dotations d'EPI") + (I.epiLateTous ? ", dont " + I.epiLateTous + " à renouveler en retard" : ""),
           !b.total ? "aucune action au Plan d'actions" : b.rangees ? pl(b.rangees, "action rangée", "actions rangées") + " par niveau de mesure (" + niv.join(", ") + ")" + (b.nonRangees ? ", " + pl(b.nonRangees, "non rangée", "non rangées") : "") : "aucune action rangée par niveau de mesure (" + pl(b.total, "action", "actions") + " au Plan d'actions)"]];

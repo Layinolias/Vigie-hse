@@ -11,7 +11,7 @@
        mission, designeLe, designePar, lettre (référence ou lien de la lettre de mission), formation, formationLe,
        contact, finLe (fin de fonction), motifFin, auteur, dateCreation, modifiePar, dateMaj }
 
-   Rien n'est imposé (question 33) : aucun rôle n'est exigé, aucune formation n'a de durée de validité. Seul est dit
+   Rien n'est imposé (question 33, confirmé par le préventeur le 2026-10-21) : aucun rôle n'est exigé, aucune formation n'a de durée de validité. Seul est dit
    ce qui manque à la fiche d'un rôle en fonction pour qu'il soit attribué par écrit : sa mission, sa date de
    désignation.
 ============================================================================ */

@@ -7,7 +7,7 @@
 
    Une action du Plan d'actions (clé vigie_hse_actions) porte, si on l'a rangée, `niveauMesure` : l'identifiant d'un
    des NIVEAUX. Rien n'est imposé ni signalé : une action non rangée reste valable, et une protection individuelle
-   prévue seule n'est pas mise en avant (question 32). Partagé par le Plan d'actions et la Préparation ISO 45001.
+   prévue seule n'est pas mise en avant (question 32 : pas de signal, réponse du préventeur du 2026-10-21). Partagé par le Plan d'actions et la Préparation ISO 45001.
    Aucune écriture.
 ============================================================================ */
 (function (racine) {

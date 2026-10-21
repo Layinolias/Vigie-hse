@@ -76,6 +76,8 @@ const REGLES = {
   roles_prevention: GERER('roles-prevention'),
   changements: GERER('changements'),
   contexte: GERER('contexte'),
+  // Engagement de la direction (§ 5.1) : qui gère le registre l'écrit
+  engagement_direction: GERER('engagement-direction'),
   ds_questions: regle('dialogue-social', 'participer'), ds_reunions: regle('dialogue-social', 'participer'), ds_visites: regle('dialogue-social', 'participer'),
 };
 const regleGenerale = GERER('administration');

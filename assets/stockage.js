@@ -69,6 +69,7 @@
     vigie_hse_roles_prevention:   { nature:"donnees",    sensible:false, module:"Rôles de prévention" },
     vigie_hse_changements:        { nature:"donnees",    sensible:false, module:"Gestion des changements" },
     vigie_hse_contexte:           { nature:"donnees",    sensible:false, module:"Contexte et enjeux" },
+    vigie_hse_engagement_direction: { nature:"donnees",  sensible:false, module:"Engagement de la direction" },
     vigie_hse_users:              { nature:"parametres", sensible:false, module:"Administration (comptes) — relèvera de l'authentification" },
     vigie_hse_profils:            { nature:"parametres", sensible:false, module:"Administration (profils de droits)" },
     vigie_hse_referentials:       { nature:"parametres", sensible:false, module:"Administration (référentiels)" },

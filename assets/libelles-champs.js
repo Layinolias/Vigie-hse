@@ -79,6 +79,8 @@
   };
   // Même nom de champ, autre sens selon le registre
   var PAR_REGISTRE = {
+    vigie_hse_engagement_direction: { date:"Date", qui:"Qui (membre de la direction)", forme:"Forme", objet:"Ce qui a été fait, dit ou décidé",
+                              points:"Points de l'engagement (ISO 45001 § 5.1)", service:"Périmètre (service)", preuve:"Preuve" },
     vigie_hse_contexte:     { registre:"Registre (enjeu, partie intéressée, risque ou opportunité)", origine:"Origine (interne, externe)", theme:"Thème",
                               texte:"Description", effet:"Effet sur la démarche", partie:"Partie intéressée", besoins:"Besoins et attentes",
                               exigence:"Obligation à suivre en conformité", reponse:"Comment on y répond", type:"Risque ou opportunité",

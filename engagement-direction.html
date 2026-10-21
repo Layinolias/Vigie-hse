@@ -1,0 +1,490 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engagement de la direction</title>
+<meta name="description" content="Engagement de la direction : les traces de ce que fait la direction pour la santé et la sécurité — visites, messages, décisions sur les moyens, participation à l'instance —, rangées par point de l'engagement (ISO 45001, § 5.1).">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/engagement-ref.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  select, input[type="text"], input[type="date"], input[type="search"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:150px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:68px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled, select:disabled{ background:var(--bg-2); color:var(--text); opacity:1; cursor:default; }
+  @media (max-width:640px){ select, input[type="text"], input[type="date"], input[type="search"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  @media (min-width:560px){ .form-grid .span2{ grid-column:span 2; } }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg td.num{ font-family:"IBM Plex Mono",monospace; text-align:right; }
+  table.reg tr.chap td{ background:var(--bg-2); font-weight:600; font-size:11.5px; color:var(--text-muted); padding:7px 14px; }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.bon{ color:var(--success); background:var(--success-bg); } .chip.bon::before{ background:var(--success); }
+  .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
+  .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
+  .chip.attention{ color:var(--warning); background:var(--warning-bg); } .chip.attention::before{ background:var(--warning); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; text-align:left; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  .ref{ display:block; font-size:11.5px; color:var(--text-faint); margin-top:2px; font-weight:400; white-space:normal; }
+  .filtres{ display:flex; gap:9px; flex-wrap:wrap; margin:0 0 12px; }
+  .filtres input[type="search"]{ flex:1 1 240px; min-width:0; }
+
+  /* Rôle ouvert */
+  .fiche{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .fiche-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  table.reg td.long{ white-space:normal; min-width:160px; max-width:340px; }
+  table.reg tr.retire td{ opacity:.6; }
+  .coche-filtre{ display:flex; gap:7px; align-items:center; font-size:12.5px; color:var(--text-muted); cursor:pointer; }
+  .lien-lettre{ display:inline-block; margin-top:5px; font-size:12px; }
+  .points-coches{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr)); gap:6px 18px; }
+  .coche-point{ display:flex; gap:8px; align-items:flex-start; font-size:12.8px; line-height:1.45; cursor:pointer; }
+  .coche-point input{ margin-top:3px; flex-shrink:0; }
+  .chip.lettre{ padding:2px 8px; font-family:"IBM Plex Mono",monospace; }
+  .chip.lettre::before{ display:none; }
+  .constat{ background:var(--bg-2); border-radius:var(--r-sm); padding:12px 14px; margin:0 0 10px; }
+  .constat .texte{ white-space:pre-wrap; font-size:12.8px; line-height:1.55; margin:6px 0 4px; }
+  .constat .actions-constat{ margin-top:10px; }
+  .constat .actions-constat .dyn-row > span{ flex:1 1 auto; font-size:12.8px; }
+  .alerte{ font-size:12.5px; color:var(--danger); margin:8px 0 0; font-weight:600; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Pilotage / <b>Engagement de la direction</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-flag"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Engagement de la direction</h1>
+            <p>L'engagement relève de la direction ; cette page en garde les traces (ISO 45001, § 5.1) : une visite de terrain, un message au personnel, une décision sur les moyens, une participation à l'instance… chacune datée, avec qui, ce qui a été fait, les points de l'engagement qu'elle illustre et sa preuve.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-flag"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiTraces">–</span><span class="ps-kpi-label">Traces</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-calendar"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiAnnee">–</span><span class="ps-kpi-label" id="kpiAnneeLabel">Cette année</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon success"><svg class="icon"><use href="#i-check-square"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiPoints">–</span><span class="ps-kpi-label">Points avec une trace</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-users"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiPersonnes">–</span><span class="ps-kpi-label">Membres de la direction</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel fiche" id="fiche" style="display:none;"></div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Les points de l'engagement</h3>
+          <div class="panel-actions"><span class="form-note">ISO 45001, § 5.1, résumé</span></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tablePoints">
+            <thead><tr><th></th><th>Point</th><th>Traces</th><th>La plus récente</th><th></th></tr></thead>
+            <tbody id="tbPoints"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:16px 22px;">
+        <div class="filtres" style="margin:0;">
+          <input type="search" id="fTexte" placeholder="Rechercher une trace, une personne, une preuve" aria-label="Rechercher">
+          <select id="fPoint" aria-label="Point de l'engagement"><option value="">Tous les points</option></select>
+          <select id="fForme" aria-label="Forme"><option value="">Toutes les formes</option></select>
+          <span class="panel-actions" id="listeActions" style="margin-left:auto;"></span>
+        </div>
+        <p class="form-note" id="majNote" style="margin-top:10px;"></p>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Traces</h3>
+          <div class="panel-actions" id="actTraces"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableTraces">
+            <thead><tr><th>Date</th><th>Qui</th><th>Forme</th><th>Ce qui a été fait</th><th>Points</th><th>Périmètre</th><th>Preuve</th><th></th></tr></thead>
+            <tbody id="tbTraces"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Des faits, sans jugement : aucun rythme n'est imposé et aucun point n'est exigé (question 36 posée au préventeur) ; la page dit combien de traces chaque point a, et la plus récente. D'autres preuves de l'engagement vivent ailleurs : la <a href="politique-sante-securite.html">politique</a> signée, les <a href="objectifs.html">objectifs</a>, le <a href="programme-prevention.html">programme annuel</a> adopté, les <a href="revue-direction.html">revues de direction</a> validées.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("engagement-direction", "consulter");
+  const peutGerer = D.peut("engagement-direction", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Engagement de la direction", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const lire = (cle) => { try { const v = JSON.parse(VigieStore.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } };
+  const fr = (a, b) => String(a).localeCompare(String(b), "fr");
+  const norm = (t) => String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const VE = VigieEngagement;
+  const ajd = () => VigieDates.aujourdhui();
+  const M = (t) => VigieOrga.mots(t);   // « F3SCT » ou « CSSCT » : les mots du secteur, pour les textes fixes (assets/organisation.js)
+  const point = (c) => M(VE.libellePoint(c));
+
+  // ---------- Stockage et périmètre ----------
+  const CLE = VE.CLE;
+  const services = (session && session.services) || ["*"], voitTout = services.includes("*");
+  // un compte limité à des services voit les traces de toute l'organisation et celles de ses services (comme le serveur les transmet)
+  const visible = (t) => voitTout || !t.service || services.includes(t.service);
+  const tous = () => VE.valides(lire(CLE)).filter(visible);
+  function modifierTraces(modif){ const l = lire(CLE); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
+  const perimetre = (t) => t.service || "Toute l'organisation";
+  const nomDe = (t) => `du ${dateFr(t.date)}${t.qui ? " (" + t.qui + ")" : ""} « ${String(t.objet || "").slice(0, 80)} »`;
+  const texteDe = (t) => [t.qui, t.forme, t.objet, t.service, t.preuve, VE.pointsDe(t).map(point).join(" ")].join(" ");
+  const lienSur = (t) => /^https?:\/\/\S+$/i.test(String(t || "").trim());
+  const preuve = (t) => !t.preuve ? "—" : lienSur(t.preuve) ? `<a class="act-edit" href="${esc(String(t.preuve).trim())}" target="_blank" rel="noopener noreferrer">Ouvrir</a>` : esc(t.preuve);
+  const pastillesPoints = (t) => VE.pointsDe(t).map(c => `<span class="chip neutre lettre" title="${esc(point(c))}">${esc(c)}</span>`).join(" ");
+
+  // ---------- Points et traces ----------
+  function render(){
+    const j = ajd(), annee = j.slice(0, 4), l = tous(), s = VE.synthese(l, annee);
+    $("kpiTraces").textContent = s.total;
+    $("kpiAnnee").textContent = s.annee;
+    $("kpiAnneeLabel").textContent = "En " + annee;
+    $("kpiPoints").textContent = `${s.pointsAvecTrace} / ${VE.LETTRES.length}`;
+    $("kpiPersonnes").textContent = s.personnes;
+    $("majNote").textContent = l.length ? `Trace la plus récente : ${dateFr(s.derniere)}.` : "Aucune trace" + (peutGerer ? " : « Ajouter une trace » en enregistre une." : ".");
+    $("tbPoints").innerHTML = VE.POINTS.map(([c]) => { const p = s.parPoint[c]; return `<tr>
+        <td class="mono"><b>${esc(c)}</b></td>
+        <td class="long">${esc(point(c))}</td>
+        <td class="num">${p.n || `<span class="chip neutre">Aucune trace</span>`}</td>
+        <td class="mono">${esc(dateFr(p.derniere) || "—")}</td>
+        <td>${p.n ? `<button type="button" class="act-edit" data-point="${esc(c)}">Voir les traces</button>` : ""}</td></tr>`; }).join("");
+    const choisi = $("fPoint").value, forme = $("fForme").value;
+    $("fPoint").innerHTML = `<option value="">Tous les points</option>` + VE.POINTS.map(([c]) => `<option value="${esc(c)}"${c === choisi ? " selected" : ""}>${esc(c)} — ${esc(point(c).slice(0, 60))}</option>`).join("");
+    const formes = [...new Set(l.map(t => t.forme).filter(Boolean))].sort(fr);
+    $("fForme").innerHTML = `<option value="">Toutes les formes</option>` + formes.map(f => `<option value="${esc(f)}"${f === forme ? " selected" : ""}>${esc(f)}</option>`).join("");
+    const q = norm($("fTexte").value.trim()), fP = $("fPoint").value, fF = $("fForme").value;
+    const rows = VE.triees(l).filter(t => (!fP || VE.pointsDe(t).includes(fP)) && (!fF || t.forme === fF) && (!q || norm(texteDe(t)).includes(q)));
+    $("tbTraces").innerHTML = rows.length ? rows.map(t => `<tr data-id="${esc(t.id)}">
+        <td class="mono">${esc(dateFr(t.date))}</td>
+        <td>${esc(t.qui || "—")}</td>
+        <td class="long">${esc(t.forme || "—")}</td>
+        <td class="long">${esc(t.objet || "—")}</td>
+        <td>${pastillesPoints(t) || "—"}</td>
+        <td>${esc(perimetre(t))}</td>
+        <td class="long">${preuve(t)}</td>
+        <td><button type="button" class="act-edit" data-ouvrir="${esc(t.id)}">Ouvrir</button></td></tr>`).join("")
+      : `<tr class="empty-row"><td colspan="8">${q || fP || fF ? "Aucune trace avec ces filtres." : "Aucune trace pour le moment." + (peutGerer ? " « Ajouter une trace » en enregistre une." : "")}</td></tr>`;
+  }
+  $("fTexte").addEventListener("input", render);
+  $("fPoint").addEventListener("change", render);
+  $("fForme").addEventListener("change", render);
+  $("tbPoints").addEventListener("click", (e) => { const b = e.target.closest("[data-point]"); if (!b) return; $("fPoint").value = b.dataset.point; render(); $("tableTraces").scrollIntoView({ behavior:"smooth", block:"start" }); });
+  $("tbTraces").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); });
+  $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImprimer"><svg class="icon"><use href="#i-printer"/></svg> Imprimer</button>`
+    + `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+  if (peutGerer){
+    $("actTraces").innerHTML = `<button type="button" class="btn btn-primary" id="btnNouveau"><svg class="icon"><use href="#i-plus"/></svg> Ajouter une trace</button>`;
+    $("btnNouveau").addEventListener("click", () => ouvrir(null));
+  }
+
+  // ---------- Export ----------
+  $("btnExport").addEventListener("click", () => {
+    const j = ajd(), l = tous(), s = VE.synthese(l, j.slice(0, 4));
+    const traces = VE.triees(l).map(t => ({ "Identifiant": t.id, "Date": dateFr(t.date), "Qui": t.qui || "", "Forme": t.forme || "", "Ce qui a été fait": t.objet || "",
+      "Points": VE.pointsDe(t).join(", "), "Périmètre": perimetre(t), "Preuve": t.preuve || "", "Enregistré par": t.auteur || "" }));
+    const points = VE.POINTS.map(([c]) => ({ "Point": c, "Libellé": point(c), "Traces": s.parPoint[c].n, "La plus récente": dateFr(s.parPoint[c].derniere) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(traces, { header: ["Identifiant", "Date", "Qui", "Forme", "Ce qui a été fait", "Points", "Périmètre", "Preuve", "Enregistré par"] }), "Traces");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(points, { header: ["Point", "Libellé", "Traces", "La plus récente"] }), "Points");
+    XLSX.writeFile(wb, `engagement-direction_${j}.xlsx`);
+  });
+
+  // ---------- Trace ouverte ----------
+  let courant = null;
+  function ouvrir(id){
+    const t = id ? tous().find(z => z.id === id) : null;
+    if (id && !t) return;
+    if (!t && !peutGerer) return;
+    courant = t || { id: null, date: ajd(), qui: "", forme: "", objet: "", points: [], service: voitTout ? "" : services[0] };
+    const dis = peutGerer ? "" : " disabled", choisis = VE.pointsDe(courant);
+    // périmètre : toute l'organisation ou un service (un compte limité : ses seuls services)
+    const optService = (s) => `<option value="${esc(s)}"${s === courant.service ? " selected" : ""}>${esc(s)}</option>`;
+    const groupes = VigieOrga.noms().map(n => { const sv = VigieOrga.services(n).filter(s => voitTout || services.includes(s)); return sv.length ? `<optgroup label="${esc(n)}">${sv.map(optService).join("")}</optgroup>` : ""; }).join("");
+    const connu = !courant.service || VigieOrga.noms().some(n => VigieOrga.services(n).includes(courant.service));
+    const optsService = (voitTout ? `<option value=""${!courant.service ? " selected" : ""}>Toute l'organisation</option>` : "") + groupes + (connu ? "" : optService(courant.service));
+    $("fiche").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">${t ? "Trace du " + esc(dateFr(t.date)) + (t.qui ? " — " + esc(t.qui) : "") : "Nouvelle trace"}</h3>
+          <div class="fiche-etat">${t && t.auteur ? `créée par ${esc(t.auteur)}${t.dateCreation ? " le " + esc(dateFr(String(t.dateCreation).slice(0, 10))) : ""}` : ""}${t && t.modifiePar ? ` · modifiée par ${esc(t.modifiePar)}${t.dateMaj ? " le " + esc(dateFr(String(t.dateMaj).slice(0, 10))) : ""}` : ""}</div></div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnFermer">Fermer</button></div>
+      </div>
+      <form id="ficheForm" novalidate>
+        <div class="form-grid">
+          <div><label for="cDate">Date</label><input type="date" id="cDate" value="${esc(courant.date || "")}"${dis}></div>
+          <div><label for="cQui">Qui</label><input type="text" id="cQui" value="${esc(courant.qui || "")}" maxlength="150" placeholder="Membre de la direction"${dis}></div>
+          <div class="span2"><label for="cForme">Forme</label><input type="text" id="cForme" list="cFormesListe" value="${esc(courant.forme || "")}" maxlength="150" placeholder="Choisir dans la liste ou saisir"${dis}>
+            <datalist id="cFormesListe">${VE.FORMES.map(f => `<option value="${esc(M(f))}"></option>`).join("")}</datalist></div>
+          <div class="span3"><label for="cObjet">Ce qui a été fait, dit ou décidé</label><textarea id="cObjet" placeholder="${esc(M("Ex. : visite de l'atelier mécanique avec le chef d'équipe, échange avec les agents sur le port des protections auditives ; décision de remplacer la cabine de peinture"))}"${dis}>${esc(courant.objet || "")}</textarea></div>
+          <div><label for="cService">Périmètre</label><select id="cService"${dis}>${optsService}</select></div>
+          <div class="span2"><label for="cPreuve">Preuve</label><input type="text" id="cPreuve" value="${esc(courant.preuve || "")}" maxlength="300" placeholder="Compte rendu, courriel, note : référence ou lien"${dis}>${lienSur(courant.preuve) ? `<a class="lien-lettre" href="${esc(String(courant.preuve).trim())}" target="_blank" rel="noopener noreferrer">Ouvrir la preuve</a>` : ""}</div>
+        </div>
+        <div class="sec"><h4>Points de l'engagement qu'elle illustre</h4><p class="aide">ISO 45001, § 5.1 : un ou plusieurs.</p>
+          <div class="points-coches">${VE.POINTS.map(([c]) => `<label class="coche-point"><input type="checkbox" data-point-coche="${esc(c)}"${choisis.includes(c) ? " checked" : ""}${dis}> <b>${esc(c)}</b> ${esc(point(c))}</label>`).join("")}</div>
+        </div>
+        ${peutGerer ? `<div class="form-actions">
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+          ${t ? `<button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer</button>` : ""}
+        </div>` : ""}
+      </form>`;
+    $("fiche").style.display = "";
+    $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function fermer(){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; courant = null; }
+  const val = (id) => $(id) ? $(id).value.trim() : "";
+
+  // Relit le formulaire dans la trace enregistrée.
+  const FACULTATIFS = ["forme", "service", "preuve"];
+  function enregistrer(){
+    if (!peutGerer || !courant) return null;
+    const t = Object.assign({}, courant, { date: val("cDate"), qui: val("cQui"), forme: val("cForme"), objet: val("cObjet"), service: val("cService"), preuve: val("cPreuve"),
+      points: VE.LETTRES.filter(c => { const b = $("fiche").querySelector(`[data-point-coche="${c}"]`); return b && b.checked; }) });
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(t.date)){ alert("Indiquez la date."); return null; }
+    if (!t.qui){ alert("Indiquez qui, dans la direction."); return null; }
+    if (!t.objet){ alert("Décrivez ce qui a été fait, dit ou décidé."); return null; }
+    if (!t.points.length){ alert("Cochez au moins un point de l'engagement."); return null; }
+    if (!voitTout && !services.includes(t.service)){ alert("Choisissez un de vos services."); return null; }
+    FACULTATIFS.forEach(k => { if (!t[k]) delete t[k]; });
+    const nouveau = !t.id;
+    if (nouveau){ t.id = genId("eng"); t.auteur = moi; t.dateCreation = new Date().toISOString(); }
+    else { t.modifiePar = moi; t.dateMaj = new Date().toISOString(); }
+    try {
+      modifierTraces(l => {
+        const i = l.findIndex(z => z && z.id === t.id);
+        if (i < 0) l.push(t);
+        else { const y = Object.assign({}, l[i], t); FACULTATIFS.forEach(k => { if (!t[k]) delete y[k]; }); l[i] = y; }
+      });
+    } catch(e){ alert("La trace n'a pas pu être enregistrée."); return null; }
+    logAudit(nouveau ? "Création" : "Modification", `Trace ${nomDe(t)} — points ${t.points.join(", ")}`);
+    return t;
+  }
+  $("fiche").addEventListener("click", (e) => {
+    if (e.target.closest("#btnFermer")){ fermer(); return; }
+    if (e.target.closest("#btnSupprimer")){
+      if (!courant || !courant.id) return;
+      if (!confirm(`Supprimer la trace ${nomDe(courant)} ?`)) return;
+      try { modifierTraces(l => { const i = l.findIndex(z => z && z.id === courant.id); if (i >= 0) l.splice(i, 1); }); }
+      catch(err){ alert("La trace n'a pas pu être supprimée."); return; }
+      logAudit("Suppression", `Trace ${nomDe(courant)}`);
+      fermer(); render();
+    }
+  });
+  $("fiche").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const t = enregistrer();
+    if (t){ render(); ouvrir(t.id); }
+  });
+
+  // ---------- Imprimé ----------
+  // les points et leurs traces, puis les traces, la plus récente d'abord
+  $("btnImprimer").addEventListener("click", () => {
+    const j = ajd(), l = tous(), s = VE.synthese(l, j.slice(0, 4));
+    const ancien = document.getElementById("eng-impression");
+    if (ancien) ancien.remove();
+    if (!document.getElementById("eng-impression-style")){
+      const style = document.createElement("style"); style.id = "eng-impression-style";
+      style.textContent = [
+        "@page{ size:A4 landscape; margin:12mm; }",
+        "@media screen{ #eng-impression{ display:none; } }",
+        "@media print{",
+        "  body{ background:#fff !important; }",
+        "  body > *:not(#eng-impression){ display:none !important; }",
+        "  #eng-impression{ display:block !important; color:#000; font:10px/1.4 'IBM Plex Sans',Arial,sans-serif; }",
+        "  #eng-impression .pi-marque{ font:700 10px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#555; }",
+        "  #eng-impression h1{ font:700 21px 'Barlow Condensed',Arial,sans-serif; margin:2px 0; }",
+        "  #eng-impression .pi-meta{ font-size:10px; color:#333; margin:0 0 6px; }",
+        "  #eng-impression h2{ font:700 13px 'Barlow Condensed',Arial,sans-serif; text-transform:uppercase; letter-spacing:.06em; border-bottom:1.5px solid #000; margin:12px 0 5px; padding-bottom:2px; }",
+        "  #eng-impression table{ width:100%; border-collapse:collapse; }",
+        "  #eng-impression th, #eng-impression td{ border:1px solid #999; padding:3px 5px; text-align:left; vertical-align:top; white-space:pre-line; }",
+        "  #eng-impression th{ background:#eee; font-weight:600; }",
+        "  #eng-impression tr{ break-inside:avoid; page-break-inside:avoid; }",
+        "}",
+      ].join("\n");
+      document.head.appendChild(style);
+    }
+    const bloc = document.createElement("div");
+    bloc.id = "eng-impression";
+    bloc.innerHTML = `
+      <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "")}</div>
+      <h1>Engagement de la direction en santé et sécurité</h1>
+      <p class="pi-meta">Édité le ${esc(dateFr(j))} · ${s.total} trace${s.total > 1 ? "s" : ""}${s.derniere ? ", la plus récente le " + esc(dateFr(s.derniere)) : ""} · ${s.pointsAvecTrace} / ${VE.LETTRES.length} points avec une trace</p>
+      <h2>Les points de l'engagement (ISO 45001, § 5.1)</h2>
+      <table><thead><tr><th></th><th>Point</th><th>Traces</th><th>La plus récente</th></tr></thead><tbody>${VE.POINTS.map(([c]) => `<tr><td>${esc(c)}</td><td>${esc(point(c))}</td><td>${s.parPoint[c].n}</td><td>${esc(dateFr(s.parPoint[c].derniere) || "—")}</td></tr>`).join("")}</tbody></table>
+      <h2>Traces</h2>
+      ${l.length ? `<table><thead><tr><th>Date</th><th>Qui</th><th>Forme</th><th>Ce qui a été fait</th><th>Points</th><th>Périmètre</th><th>Preuve</th></tr></thead><tbody>${VE.triees(l).map(t => `<tr><td>${esc(dateFr(t.date))}</td><td>${esc(t.qui || "")}</td><td>${esc(t.forme || "")}</td><td>${esc(t.objet || "")}</td><td>${esc(VE.pointsDe(t).join(", "))}</td><td>${esc(perimetre(t))}</td><td>${esc(t.preuve || "")}</td></tr>`).join("")}</tbody></table>` : "<p>Aucune trace.</p>"}`;
+    document.body.appendChild(bloc);
+    const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
+    window.addEventListener("afterprint", nettoyer);
+    window.print();
+  });
+
+  render();
+  // ?ouvrir=<id>
+  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(x => x.id === id)) ouvrir(id); })();
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

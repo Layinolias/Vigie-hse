@@ -81,6 +81,10 @@
   var PAR_REGISTRE = {
     vigie_hse_engagement_direction: { date:"Date", qui:"Qui (membre de la direction)", forme:"Forme", objet:"Ce qui a été fait, dit ou décidé",
                               points:"Points de l'engagement (ISO 45001 § 5.1)", service:"Périmètre (service)", preuve:"Preuve" },
+    vigie_hse_communication: { registre:"Registre (sujet du plan ou communication notée)", sujet:"Quoi (sujet du plan)", sens:"Sens", public:"À qui, ou de qui",
+                              quand:"Quand", canal:"Comment", responsable:"Par qui (sujet du plan)", adaptations:"Adaptations", statut:"Statut",
+                              sujetId:"Sujet du plan (identifiant)", date:"Date", objet:"Ce qui a été communiqué ou reçu", qui:"Par qui, ou reçue par",
+                              suite:"Suite donnée", service:"Périmètre (service)", preuve:"Preuve" },
     vigie_hse_contexte:     { registre:"Registre (enjeu, partie intéressée, risque ou opportunité)", origine:"Origine (interne, externe)", theme:"Thème",
                               texte:"Description", effet:"Effet sur la démarche", partie:"Partie intéressée", besoins:"Besoins et attentes",
                               exigence:"Obligation à suivre en conformité", reponse:"Comment on y répond", type:"Risque ou opportunité",

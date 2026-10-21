@@ -78,6 +78,8 @@ const REGLES = {
   contexte: GERER('contexte'),
   // Engagement de la direction (§ 5.1) : qui gère le registre l'écrit
   engagement_direction: GERER('engagement-direction'),
+  // Communication (§ 7.4) : qui gère le registre l'écrit
+  communication: GERER('communication'),
   ds_questions: regle('dialogue-social', 'participer'), ds_reunions: regle('dialogue-social', 'participer'), ds_visites: regle('dialogue-social', 'participer'),
 };
 const regleGenerale = GERER('administration');

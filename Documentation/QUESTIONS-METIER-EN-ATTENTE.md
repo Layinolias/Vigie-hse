@@ -66,6 +66,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 34 | Comptes limités à certains services : que peuvent-ils faire des enregistrements de toute l'organisation ? | Serveur local, droits de lecture et d'écriture (relevé le 2026-10-18) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
 | 35 | Domaine d'application : faut-il le revoir à date fixe, qui le valide, qui le voit ? | Contexte et enjeux (construit le 2026-10-18, ISO 45001 § 4.3) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
 | 36 | Engagement de la direction : quelles formes proposer, faut-il un rythme ou des points exigés, qui voit la page, la revue de direction doit-elle la reprendre ? | Engagement de la direction (construit le 2026-10-21, ISO 45001 § 5.1) | 🟠 En attente de réponse |
+| 37 | Communication : quels sujets proposer au départ, faut-il un rythme vérifié, signaler une communication reçue restée sans suite, qui voit la page ? | Communication (construit le 2026-10-21, ISO 45001 § 7.4) | 🟠 En attente |
 
 ---
 
@@ -1090,6 +1091,30 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 4. **Revue de direction** — doit-elle reprendre les traces de sa période ?
 
 **Options.** (A) Comme aujourd'hui : une liste de choix, des faits sans rythme ni point exigé, lu par l'encadrement et les représentants, pas repris par la revue de direction. (B) Un rythme ou des points à signaler (à préciser). (C) Lu par tous les comptes. (D) Repris par la revue de direction. Les options se combinent.
+
+> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-21)._
+
+---
+
+## 🟠 Question 37 — Communication : quels sujets proposer, faut-il un rythme, que signaler, qui voit la page ?
+
+**Contexte.** ISO 45001 (§ 7.4) demande de déterminer quoi communiquer en santé et sécurité, quand, à qui (en interne, aux entreprises extérieures et aux visiteurs, aux autres parties intéressées) et comment, en tenant compte des langues, de l'accessibilité…, de prendre en compte l'avis des parties intéressées extérieures, et d'en garder des traces. Le logiciel a désormais une page **« Communication »** (menu Pilotage) : un **plan de communication** (pour chaque sujet : quoi, interne ou externe, à qui, quand, comment, par qui, adaptations, périmètre, en cours ou arrêté) et les **communications notées** — émises en interne, émises vers l'extérieur, ou reçues de l'extérieur avec la **suite donnée**. La Préparation ISO 45001 la reprend pour l'exigence 7.4 ; la revue de direction reprend les communications avec l'extérieur de sa période (rubrique « Communications avec les parties intéressées », jusqu'ici à remplir à la main).
+
+**Ce que fait le logiciel aujourd'hui, en attendant.**
+- **Aucun sujet de départ** : le plan commence vide ; des listes de choix aident à la saisie (publics : tous les agents, l'encadrement, les membres de la F3SCT, les nouveaux arrivants, les entreprises extérieures, les visiteurs, la médecine du travail, les organismes de contrôle, l'assureur, les usagers, les riverains… ; moments ; canaux : affichage, réunion de service, note de service, courriel, intranet, Flash Info…).
+- **« Quand » est un texte libre** (« chaque année », « à l'arrivée d'une personne »…) : aucun rythme n'est vérifié ; un sujet sans communication notée est seulement dit « aucune ».
+- **Une communication reçue sans suite notée** est montrée (pastille « Sans suite notée », compteur), sans plus : rien au tableau de bord, et la Préparation ISO 45001 ne la compte pas comme « à reprendre ».
+- **Accès** : comme l'engagement de la direction — le Préventeur, les RH et l'Administrateur tiennent la page ; le Manager et le Représentant du personnel la lisent ; le profil Agent ne la voit pas. Un compte limité à des services voit ce qui vaut pour toute l'organisation et ce qui touche ses services.
+- **Revue de direction** : elle reprend les communications avec l'extérieur de sa période (émises et reçues, avec la suite), pas les communications internes.
+
+**Les questions.**
+1. **Sujets de départ** — faut-il proposer une liste de sujets à reprendre dans le plan (par exemple : les informations à afficher obligatoirement, les consignes de sécurité, la mise à disposition du document unique, les coordonnées de la médecine du travail et de l'inspection, les résultats de l'année), et lesquels, pour une collectivité et pour une entreprise ?
+2. **Rythme** — faut-il donner au « quand » un rythme vérifiable (mensuel, annuel…) et signaler un sujet dont la communication n'a pas été faite à temps ?
+3. **Communications reçues** — faut-il signaler ailleurs (tableau de bord, Préparation ISO 45001 « à reprendre ») une communication reçue restée sans suite, et au bout de combien de temps ?
+4. **Accès** — les agents doivent-ils voir le plan de communication ?
+5. **Résultats au personnel** — une communication notée sous un sujet « résultats santé-sécurité » suffit-elle à montrer que les résultats sont communiqués au personnel (ISO 45001 § 10.3, encore « en partie » pour ce point) ?
+
+**Options.** (A) Comme aujourd'hui : pas de sujet de départ, des faits sans rythme vérifié, les reçues sans suite montrées sur la page seulement, lu par l'encadrement et les représentants. (B) Une liste de sujets de départ (à préciser). (C) Un rythme vérifié, les retards signalés. (D) Les reçues sans suite signalées (délai à préciser). (E) Lu par tous les comptes. Les options se combinent.
 
 > _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-21)._
 

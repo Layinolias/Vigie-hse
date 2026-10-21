@@ -74,6 +74,10 @@
     // sur les moyens… Comme le contexte : tenu par le Préventeur (avec Administrateur et RH), lu par le Manager et les
     // représentants du personnel — question 36.
     mod("engagement-direction", "Pilotage", "Engagement de la direction", STD),
+    // Communication (ISO 45001 § 7.4, 2026-10-21) : le plan de communication et les communications notées, émises et
+    // reçues. Comme l'engagement de la direction : tenu par le Préventeur (avec Administrateur et RH), lu par le Manager
+    // et les représentants du personnel — question 37.
+    mod("communication", "Pilotage", "Communication", STD),
     mod("reporting", "Pilotage", "Indicateurs & Reporting", [["consulter", "Consulter"]]),
     // Objectifs santé-sécurité (ISO 45001 § 6.2, 2026-10-13) : fixer, suivre, clore. Question 24 (2026-10-14) : fixés par le HSE
     // (Préventeur, avec Administrateur et RH), lus par l'encadrement (Manager).
@@ -116,15 +120,15 @@
     { id: "p-manager", nom: "Manager", libelle: "Manager", pastille: "MANAGER", droits: {
       atmp: "consulter", rsst: "auteurs", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter", "audit-interne": "consulter", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter" } },
+      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter", "audit-interne": "consulter", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter", communication: "consulter" } },
     { id: "p-agent", nom: "Agent", libelle: "Compte Agent", pastille: "AG", droits: {
       atmp: "consulter", rsst: "deposer", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
       documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", "roles-prevention": "consulter" } },
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
-      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer", "roles-prevention": "gerer", changements: "gerer", contexte: "gerer", "engagement-direction": "gerer", "preparation-iso": "consulter" } },
+      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer", "roles-prevention": "gerer", changements: "gerer", contexte: "gerer", "engagement-direction": "gerer", communication: "gerer", "preparation-iso": "consulter" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
-      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter" } }
+      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter", communication: "consulter" } }
   ];
   var PREREGLE_PAR_ID = {};
   PREREGLES.forEach(function (p) { PREREGLE_PAR_ID[p.id] = p; });

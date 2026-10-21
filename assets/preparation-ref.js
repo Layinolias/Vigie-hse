@@ -40,7 +40,7 @@
     "7.1": { c: "hors", pages: [], manque: "relève du budget et des moyens de l'organisation" },
     "7.2": { c: "couverte", pages: [P("formation-habilitation.html", "Formation / Habilitation")] },
     "7.3": { c: "couverte", pages: [P("accueil-poste.html", "Accueil au poste"), P("base-documentaire.html", "Base documentaire")] },
-    "7.4": { c: "partielle", pages: [P("dashboard.html", "Flash Info et veille"), P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social")], manque: "un plan de communication, et la communication externe" },
+    "7.4": { c: "couverte", pages: [P("communication.html", "Communication"), P("dashboard.html", "Flash Info et veille"), P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social")] },
     "7.5": { c: "partielle", pages: [P("base-documentaire.html", "Base documentaire")], manque: "le stockage des fichiers eux-mêmes et un circuit d'approbation" },
     "8.1.1": { c: "couverte", pages: [P("verifications-periodiques.html", "Vérifications périodiques"), P("inspection-audit.html", "Inspection / Audit"), P("produits-chimiques.html", "Produits chimiques")] },
     "8.1.2": { c: "partielle", pages: [P("document-unique.html", "Document unique"), P("plan-actions.html", "Plan d'actions"), P("epi-dotation.html", "EPI & Dotation")], manque: "les mesures déjà en place au Document unique ne sont pas rangées par niveau (seules les actions du Plan d'actions le sont)" },
@@ -62,7 +62,7 @@
   const K = {
     contexte: "vigie_hse_contexte", referentiels: "vigie_hse_referentials", revues: "vigie_hse_revues_direction", politiques: "vigie_hse_politiques",
     users: "vigie_hse_users", profils: "vigie_hse_profils", rsst: "vigie_hse_rsst", dsReunions: "vigie_hse_ds_reunions", dsQuestions: "vigie_hse_ds_questions",
-    duerp: "vigie_hse_duerp_dataset", changements: "vigie_hse_changements", exigences: "vigie_hse_exigences", actions: "vigie_hse_actions", roles: "vigie_hse_roles_prevention", engagement: "vigie_hse_engagement_direction",
+    duerp: "vigie_hse_duerp_dataset", changements: "vigie_hse_changements", exigences: "vigie_hse_exigences", actions: "vigie_hse_actions", roles: "vigie_hse_roles_prevention", engagement: "vigie_hse_engagement_direction", communication: "vigie_hse_communication",
     objectifs: "vigie_hse_objectifs", habilitations: "vigie_hse_habilitations", accueils: "vigie_hse_accueils", news: "vigie_hse_news", veille: "vigie_hse_veille",
     documents: "vigie_hse_documents", verifications: "vigie_hse_verifications", inspections: "vigie_hse_inspections", epi: "vigie_hse_epi_dotations",
     ee: "vigie_hse_interventions_ee", plans: "vigie_hse_plans_urgence", exercices: "vigie_hse_exercices_urgence", atmp: "vigie_hse_dataset",
@@ -76,7 +76,7 @@
     const lire = (cle) => { try { const v = JSON.parse(store.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
     const complet = (cles) => cles.every(c => !store.complet || store.complet(c) !== false);
     const VA = racine.VigieAuditInterne, VP = racine.VigiePolitique, VC = racine.VigieChangements, VX = racine.VigieContexte,
-      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures, VR = racine.VigieRoles, VE = racine.VigieEngagement;
+      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures, VR = racine.VigieRoles, VE = racine.VigieEngagement, VCo = racine.VigieCommunication;
     let I = null;
     try { I = VI ? VI.calculer(store, "", "") : null; } catch (e) { I = null; }
     const actions = lire(K.actions);
@@ -161,9 +161,16 @@
         const l = lire(K.accueils).filter(a => a && a.id), fini = l.filter(a => Array.isArray(a.items) && a.items.length && a.items.every(i => i && i.fait)).length;   // comme accueil-poste.html (statutOf)
         return l.length ? ["pret", [pl(l.length, "accueil au poste", "accueils au poste") + ", " + fini + " terminé" + (fini > 1 ? "s" : "")]] : ["rien", ["aucun accueil au poste"]];
       } },
-      "7.4": { cles: [K.news, K.veille], f: () => {
-        const n = lire(K.news).length, v = lire(K.veille).length;
-        return n || v ? ["pret", [pl(n, "Flash Info", "Flash Info"), pl(v, "actualité de veille", "actualités de veille")]] : ["rien", ["ni Flash Info ni veille"]];
+      "7.4": { cles: [K.news, K.veille, K.communication], f: () => {
+        const n = lire(K.news).length, v = lire(K.veille).length, autres = pl(n, "Flash Info", "Flash Info") + ", " + pl(v, "actualité de veille", "actualités de veille");
+        // le plan de communication et les communications notées : des faits, aucun rythme vérifié (question 37)
+        const s = VCo.synthese(lire(K.communication), aujourdhui.slice(0, 4));
+        const notees = pl(s.traces, "communication notée", "communications notées") + (s.derniere ? ", la plus récente le " + dateFr(s.derniere) : "");
+        if (!s.sujets) return [s.traces || n || v ? "pret" : "rien", ["aucun sujet au plan de communication", notees, autres]];
+        return ["pret", [pl(s.sujets, "sujet au plan de communication", "sujets au plan de communication") + " (" + s.internes + " interne" + (s.internes > 1 ? "s" : "") + ", " + s.externes + " externe" + (s.externes > 1 ? "s" : "") + ")", notees]
+          .concat(s.sujetsSansTrace.length ? [pl(s.sujetsSansTrace.length, "sujet sans communication notée", "sujets sans communication notée")] : [])
+          .concat(s.recues ? [pl(s.recues, "communication reçue de l'extérieur", "communications reçues de l'extérieur") + ", " + s.recuesSansSuite + " sans suite notée"] : [])
+          .concat([autres])];
       } },
       "7.5": { cles: [K.documents], f: () => {
         const n = lire(K.documents).length;
@@ -228,7 +235,7 @@
         return ["pret", [pl(I.paFait, "action faite", "actions faites") + ", " + pl(I.paEfficaces, "jugée efficace", "jugées efficaces"), pl(lire(K.objectifs).filter(o => o && o.id).length, "objectif", "objectifs")]];
       } },
     };
-    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.1": VE, "5.2": VP, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
+    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.1": VE, "5.2": VP, "7.4": VCo, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
     const audits = VA ? lire(K.audits) : [], cv = VA && complet([K.audits]) ? VA.couverture(audits, actions, aujourdhui) : [];
     const clauses = VA ? VA.CLAUSES : Object.keys(COUVERTURE).map(c => [c, c]);
     return clauses.map(([clause, nom]) => {

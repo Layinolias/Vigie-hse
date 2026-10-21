@@ -28,7 +28,7 @@
     "4.2": { c: "couverte", pages: [P("contexte.html", "Contexte et enjeux"), P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social")] },
     "4.3": { c: "couverte", pages: [P("contexte.html", "Contexte et enjeux (domaine d'application)"), P("administration.html", "Administration (organisation)")] },
     "4.4": { c: "hors", pages: [], manque: "l'application dans son ensemble est un outil du système" },
-    "5.1": { c: "partielle", pages: [P("revue-direction.html", "Revue de direction"), P("reporting.html", "Indicateurs & Reporting")], manque: "l'engagement relève de la direction ; l'outil en garde les traces" },
+    "5.1": { c: "couverte", pages: [P("engagement-direction.html", "Engagement de la direction"), P("revue-direction.html", "Revue de direction"), P("reporting.html", "Indicateurs & Reporting")] },
     "5.2": { c: "couverte", pages: [P("politique-sante-securite.html", "Politique santé-sécurité")], manque: "la communication aux parties intéressées extérieures reste à la main" },
     "5.3": { c: "couverte", pages: [P("roles-prevention.html", "Rôles de prévention"), P("administration.html", "Administration (profils)"), P("gestion-rh.html", "Gestion RH"), P("urgences-exercices.html", "Situations d'urgence")] },
     "5.4": { c: "couverte", pages: [P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social"), P("signalements.html", "Signalements")] },
@@ -62,7 +62,7 @@
   const K = {
     contexte: "vigie_hse_contexte", referentiels: "vigie_hse_referentials", revues: "vigie_hse_revues_direction", politiques: "vigie_hse_politiques",
     users: "vigie_hse_users", profils: "vigie_hse_profils", rsst: "vigie_hse_rsst", dsReunions: "vigie_hse_ds_reunions", dsQuestions: "vigie_hse_ds_questions",
-    duerp: "vigie_hse_duerp_dataset", changements: "vigie_hse_changements", exigences: "vigie_hse_exigences", actions: "vigie_hse_actions", roles: "vigie_hse_roles_prevention",
+    duerp: "vigie_hse_duerp_dataset", changements: "vigie_hse_changements", exigences: "vigie_hse_exigences", actions: "vigie_hse_actions", roles: "vigie_hse_roles_prevention", engagement: "vigie_hse_engagement_direction",
     objectifs: "vigie_hse_objectifs", habilitations: "vigie_hse_habilitations", accueils: "vigie_hse_accueils", news: "vigie_hse_news", veille: "vigie_hse_veille",
     documents: "vigie_hse_documents", verifications: "vigie_hse_verifications", inspections: "vigie_hse_inspections", epi: "vigie_hse_epi_dotations",
     ee: "vigie_hse_interventions_ee", plans: "vigie_hse_plans_urgence", exercices: "vigie_hse_exercices_urgence", atmp: "vigie_hse_dataset",
@@ -76,7 +76,7 @@
     const lire = (cle) => { try { const v = JSON.parse(store.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
     const complet = (cles) => cles.every(c => !store.complet || store.complet(c) !== false);
     const VA = racine.VigieAuditInterne, VP = racine.VigiePolitique, VC = racine.VigieChangements, VX = racine.VigieContexte,
-      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures, VR = racine.VigieRoles;
+      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures, VR = racine.VigieRoles, VE = racine.VigieEngagement;
     let I = null;
     try { I = VI ? VI.calculer(store, "", "") : null; } catch (e) { I = null; }
     const actions = lire(K.actions);
@@ -101,9 +101,14 @@
         return [change ? "areprendre" : "pret", ["domaine d'application : version " + v.version + ", en vigueur depuis le " + dateFr(v.depuis) + (v.validePar ? ", validée par " + v.validePar : ""), orga]
           .concat(change ? ["l'organisation a changé depuis cette version : " + e.ajouts.concat(e.retraits).slice(0, 4).join(", ") + (change > 4 ? "…" : "")] : [])];
       } },
-      "5.1": { cles: [K.revues], f: () => {
+      "5.1": { cles: [K.revues, K.engagement], f: () => {
         const v = lire(K.revues).filter(r => r && r.statut === "Validée").sort((a, b) => String(b.dateRevue || "").localeCompare(String(a.dateRevue || "")));
-        return v.length ? ["pret", [pl(v.length, "revue de direction validée", "revues de direction validées") + ", la dernière le " + dateFr(v[0].dateRevue)]] : ["rien", ["aucune revue de direction validée"]];
+        const rev = v.length ? pl(v.length, "revue de direction validée", "revues de direction validées") + ", la dernière le " + dateFr(v[0].dateRevue) : "aucune revue de direction validée";
+        // les traces de l'engagement : des faits, sans rythme ni point exigé (question 36)
+        const s = VE.synthese(lire(K.engagement), aujourdhui.slice(0, 4));
+        if (!s.total) return [v.length ? "pret" : "rien", ["aucune trace de l'engagement de la direction", rev]];
+        return ["pret", [pl(s.total, "trace de l'engagement de la direction", "traces de l'engagement de la direction") + ", la plus récente le " + dateFr(s.derniere),
+          s.pointsAvecTrace + " / " + VE.LETTRES.length + " points du § 5.1 avec une trace", rev]];
       } },
       "5.2": { cles: [K.politiques], f: () => {
         const v = VP.enVigueur(lire(K.politiques)), e = VP.etat(v, aujourdhui);
@@ -223,7 +228,7 @@
         return ["pret", [pl(I.paFait, "action faite", "actions faites") + ", " + pl(I.paEfficaces, "jugée efficace", "jugées efficaces"), pl(lire(K.objectifs).filter(o => o && o.id).length, "objectif", "objectifs")]];
       } },
     };
-    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.2": VP, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
+    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.1": VE, "5.2": VP, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
     const audits = VA ? lire(K.audits) : [], cv = VA && complet([K.audits]) ? VA.couverture(audits, actions, aujourdhui) : [];
     const clauses = VA ? VA.CLAUSES : Object.keys(COUVERTURE).map(c => [c, c]);
     return clauses.map(([clause, nom]) => {

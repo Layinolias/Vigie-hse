@@ -1,9 +1,10 @@
 {
   "name": "vigie-hse-tests-livraison",
   "private": true,
-  "description": "Tests à passer avant de remettre un paquet (Documentation/LIVRAISON-POSTE.md). Hors du paquet.",
+  "description": "Tests à passer avant de remettre un paquet (Documentation/LIVRAISON-POSTE.md), et tests des pages (pages/). Hors du paquet.",
   "scripts": {
-    "avant-livraison": "node avant-livraison.js"
+    "avant-livraison": "node avant-livraison.js",
+    "pages": "node pages/suite.js"
   },
   "devDependencies": {
     "jsdom": "24.1.3"

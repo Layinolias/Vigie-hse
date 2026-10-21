@@ -64,6 +64,25 @@ node tests/avant-livraison.js
 - un compte qui ne peut qu'ajouter (signalements et leurs photos, prises de connaissance de la politique, Registre SST) signe ses ajouts du nom de sa session, quoi qu'envoie la page ; « Anonyme » reste possible au Registre SST ; une prise de connaissance au nom d'un autre est refusée ; qui gère le registre garde l'auteur qu'il saisit ;
 - serveur de démonstration : les comptes de démonstration inscrits comme avant, mais un compte nouveau demande aussi 12 caractères.
 
+## Tests des pages (`tests/pages/`)
+
+Les tests jsdom des modules (une page, ses contrôles, ses droits, son export, ce que la Préparation ISO 45001 en lit) : 21 tests, 984 contrôles au 2026-10-21, une quarantaine de secondes. Ils vivaient dans le scratchpad de session et s'y effaçaient au nettoyage des fichiers temporaires de Windows (encore le 2026-10-21) ; ils sont dans le dépôt depuis ce jour, hors du paquet comme les tests de livraison.
+
+```
+node tests/pages/suite.js                    tous, trois à la fois
+node tests/pages/suite.js contexte menu      ceux dont le nom contient « contexte » ou « menu »
+node tests/pages/suite.js --parallele 1      un à la fois
+node tests/pages/test-contexte.js            un seul, avec le détail de chaque contrôle
+```
+
+- Même `npm install` dans `tests/` (jsdom). Aucun serveur, aucun port : les pages s'ouvrent dans jsdom avec un stockage en mémoire, jamais celui d'un navigateur.
+- La bibliothèque Excel est celle de l'application (`assets/xlsx.full.min.js`, SheetJS 0.20.3), pas le paquet npm « xlsx » resté en 0.18.5.
+- `RACINE=<dossier>` : tester une autre copie du dépôt (un `git archive` extrait, pour comparer avant / après).
+- Le fuseau horaire est forcé à `Pacific/Auckland` (`harnais.js`) : une date calculée en UTC au lieu de l'heure locale tombe la veille, et le test le voit.
+- `test-menu-pages.js` : le même menu sur toutes les pages à menu, et les droits des modules existants identiques à ceux de `origin/main` pour les six profils préréglés et les comptes à rôle — à passer à chaque module ajouté ou droit modifié.
+- `test-marque-pages.js` compte les pages (38 au 2026-10-21) : une page ajoutée le fait échouer exprès, pour qu'on vérifie qu'elle suit la marque.
+- Un test qui plante sans bilan compte comme un échec ; `suite.js` en montre les dernières lignes.
+
 ## Le harnais (`harnais-serveur.js`)
 
 - Il démarre un vrai serveur : celui du dépôt, celui d'un ancien commit ou celui d'un paquet décompressé. Il l'arrête brutalement, comme une fenêtre qu'on ferme.

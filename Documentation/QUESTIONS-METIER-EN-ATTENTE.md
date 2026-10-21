@@ -68,6 +68,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 36 | Engagement de la direction : quelles formes proposer, faut-il un rythme ou des points exigés, qui voit la page, la revue de direction doit-elle la reprendre ? | Engagement de la direction (construit le 2026-10-21, ISO 45001 § 5.1) | 🟠 En attente de réponse |
 | 37 | Communication : quels sujets proposer au départ, faut-il un rythme vérifié, signaler une communication reçue restée sans suite, qui voit la page ? | Communication (construit le 2026-10-21, ISO 45001 § 7.4) | 🟠 En attente |
 | 38 | Documents : faut-il stocker les fichiers dans le logiciel, qui approuve, faut-il exiger l'approbation, proposer une périodicité de revue ou une durée de conservation ? | Base documentaire, circuit des documents (construit le 2026-10-21, ISO 45001 § 7.5) | 🟠 En attente |
+| 39 | Achats : quels critères proposer par nature d'achat, qui demande et qui donne l'avis, faut-il un avis avant tout achat, et que faire d'un avis défavorable ? | Achats et santé-sécurité (construit le 2026-10-21, ISO 45001 § 8.1.4) | 🟠 En attente |
 
 ---
 
@@ -1139,6 +1140,30 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 5. **Lecteurs** — les documents obsolètes doivent-ils rester visibles des agents, ou être réservés aux rédacteurs ?
 
 **Options.** (A) Comme aujourd'hui : liens, approbation notée sans compte désigné, rien d'imposé. (B) Dépôt des fichiers dans le logiciel. (C) Approbation par un compte désigné (à préciser par type). (D) Périodicités de revue ou durées de conservation proposées (à préciser). (E) Obsolètes réservés aux rédacteurs. Les options se combinent.
+
+> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-21)._
+
+---
+
+## 🟠 Question 39 — Achats : quels critères, qui demande, qui donne l'avis, faut-il un avis avant tout achat ?
+
+**Contexte.** ISO 45001 (§ 8.1.4) demande de maîtriser les achats pour qu'ils soient conformes aux exigences de santé et de sécurité : un équipement, un produit, un service acheté ne doit pas introduire un risque qu'on n'a pas examiné. Le logiciel a désormais une page **« Achats et santé-sécurité »** (menu Sécurité & Risques) : une **demande d'achat** (objet, nature, usage, périmètre, demandeur, fournisseur) avec des **critères de santé-sécurité** proposés selon la nature, à cocher « oui », « non » ou « sans objet » ; puis un **avis** (favorable, favorable avec réserves, défavorable : qui, quand, réserves ou motif) ; puis la **suite** (achetée, abandonnée) avec un rappel de ce qui suit l'achat (ajouter le produit au registre des produits chimiques, prévoir les vérifications périodiques…). La Préparation ISO 45001 la reprend pour l'exigence 8.1.4, désormais couverte.
+
+**Ce que fait le logiciel aujourd'hui, en attendant.**
+- **Critères proposés** (des propositions, chacun en ajoute ou les marque « sans objet ») — pour toute demande : les futurs utilisateurs ont été consultés ; les risques à l'usage ont été examinés (document unique) ; la formation ou l'habilitation nécessaire est identifiée. Puis selon la nature : **équipement de travail** (marquage CE et déclaration de conformité, notice en français, bruit-vibrations-ergonomie, vérifications et entretien) ; **produit chimique** (FDS obtenue avant l'achat, substitution recherchée, stockage et protections) ; **EPI** (marquage CE et notice, adapté et essayé, entretien et remplacement) ; **véhicule ou engin** (équipements de sécurité, poste de conduite, vérifications) ; **mobilier** (réglages et ergonomie) ; **prestation** (exigences dans le cahier des charges, compétences du prestataire, coordination sur site).
+- **Un critère « non » n'interdit rien** : l'avis reste libre ; il est exigé avec qui le donne et sa date, et les réserves ou le motif pour un avis avec réserves ou défavorable.
+- **Un achat sans avis, ou malgré un avis défavorable**, se note après une confirmation ; il est compté (« achetées sans avis ») et dit par la Préparation ISO 45001, sans plus.
+- **Accès** : le Manager **demande** (il enregistre une demande pour ses services ; une fois enregistrée, elle ne se modifie plus que par le préventeur) ; le Préventeur, les RH et l'Administrateur examinent et donnent l'avis ; le Représentant du personnel lit ; le profil Agent ne voit pas la page.
+- **Pas de lien automatique** avec le Plan d'actions ni avec la gestion des changements : les réserves sont un texte.
+
+**Les questions.**
+1. **Critères** — la liste proposée vous convient-elle, par nature ? Faut-il des critères **exigés** (par exemple la FDS avant tout achat de produit chimique), ou d'autres natures d'achat ?
+2. **Qui demande** — le Manager seulement, ou aussi les agents (une demande de matériel) ?
+3. **Avis avant tout achat** — faut-il un avis pour tout achat, ou seulement au-delà d'un montant, ou pour certaines natures ? Faut-il signaler ailleurs (tableau de bord) un achat noté sans avis ?
+4. **Avis défavorable, réserves** — faut-il bloquer l'achat après un avis défavorable, ou créer une action au Plan d'actions pour les réserves (par exemple « former les utilisateurs avant la mise en service ») ?
+5. **Changements** — un achat d'équipement nouveau doit-il ouvrir une fiche de gestion des changements (§ 8.1.3) ?
+
+**Options.** (A) Comme aujourd'hui : des critères proposés, un avis libre, un achat sans avis dit sans être bloqué, demandé par le Manager. (B) Des critères exigés (à préciser). (C) Les agents demandent aussi. (D) Un avis exigé (pour tout achat, ou au-delà d'un montant ou pour certaines natures : à préciser). (E) Les réserves deviennent des actions au Plan d'actions. (F) Un équipement nouveau ouvre une fiche de changement. Les options se combinent.
 
 > _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-21)._
 

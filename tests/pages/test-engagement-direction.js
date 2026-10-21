@@ -128,7 +128,7 @@ const J = (o) => JSON.stringify(o);
   check('… trois traces : « Des enregistrements », la plus récente, 5 / 13 points', etat51(pp).etat === 'pret' && /3 traces de l'engagement de la direction, la plus récente le 02\/04\/2026/.test(faits(pp, '5.1')) && /5 \/ 13 points du § 5\.1/.test(faits(pp, '5.1')), faits(pp, '5.1').slice(0, 300));
   pp = await H.page('preparation-iso.html', PREV, { vigie_hse_revues_direction: J([{ id:'r1', statut:'Validée', dateRevue:'2026-01-20' }]) });
   check('… une revue validée sans trace : « Des enregistrements » (comme avant)', etat51(pp).etat === 'pret' && /aucune trace/.test(faits(pp, '5.1')) && /1 revue de direction validée/.test(faits(pp, '5.1')));
-  check('… couverture : 24 couvertes, 3 en partie (communication et documents compris)', Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'couverte').length === 24 && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'partielle').length === 3);
+  check('… couverture : 25 couvertes, 2 en partie (communication, documents et achats compris)', Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'couverte').length === 25 && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'partielle').length === 2);
   const lp = pp.w.VigiePreparation.evaluer(Object.assign({}, pp.w.VigieStore, { complet: (c) => c !== CLE }), pp.w.VigieDates.aujourdhui()).find(x => x.clause === '5.1');
   check('… registre partiel pour ce compte : « Non calculé »', lp.etat === 'partiel');
 

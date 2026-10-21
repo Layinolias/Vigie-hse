@@ -153,7 +153,7 @@ const ids = (p, tb) => [...p.d.querySelectorAll(`#${tb} tr[data-id]`)].map(r => 
   check('… un plan : « Des enregistrements », sujets, communications, reçues sans suite', etat74(pp).etat === 'pret' && /2 sujets au plan de communication \(1 interne, 1 externe\)/.test(faits(pp, '7.4')) && /3 communications notées, la plus récente le 02\/04\/2026/.test(faits(pp, '7.4')) && /1 communication reçue de l'extérieur, 1 sans suite notée/.test(faits(pp, '7.4')), faits(pp, '7.4').slice(0, 400));
   pp = await H.page('preparation-iso.html', PREV, { vigie_hse_news: J([{ id:'n1', titre:'x' }]) });
   check('… un Flash Info sans plan : « Des enregistrements » (comme avant)', etat74(pp).etat === 'pret' && /aucun sujet au plan/.test(faits(pp, '7.4')) && /1 Flash Info/.test(faits(pp, '7.4')));
-  check('… couverture : 24 couvertes, 3 en partie (documents compris)', Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'couverte').length === 24 && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'partielle').length === 3);
+  check('… couverture : 25 couvertes, 2 en partie (documents et achats compris)', Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'couverte').length === 25 && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'partielle').length === 2);
   const lp = pp.w.VigiePreparation.evaluer(Object.assign({}, pp.w.VigieStore, { complet: (c) => c !== CLE }), pp.w.VigieDates.aujourdhui()).find(x => x.clause === '7.4');
   check('… registre partiel pour ce compte : « Non calculé »', lp.etat === 'partiel');
 

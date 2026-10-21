@@ -66,7 +66,7 @@ node tests/avant-livraison.js
 
 ## Tests des pages (`tests/pages/`)
 
-Les tests jsdom des modules (une page, ses contrôles, ses droits, son export, ce que la Préparation ISO 45001 en lit) : 23 tests, 1 066 contrôles au 2026-10-21, une quarantaine de secondes. Ils vivaient dans le scratchpad de session et s'y effaçaient au nettoyage des fichiers temporaires de Windows (encore le 2026-10-21) ; ils sont dans le dépôt depuis ce jour, hors du paquet comme les tests de livraison.
+Les tests jsdom des modules (une page, ses contrôles, ses droits, son export, ce que la Préparation ISO 45001 en lit) : 24 tests, 1 115 contrôles au 2026-10-21, une quarantaine de secondes. Ils vivaient dans le scratchpad de session et s'y effaçaient au nettoyage des fichiers temporaires de Windows (encore le 2026-10-21) ; ils sont dans le dépôt depuis ce jour, hors du paquet comme les tests de livraison.
 
 ```
 node tests/pages/suite.js                    tous, trois à la fois
@@ -80,7 +80,7 @@ node tests/pages/test-contexte.js            un seul, avec le détail de chaque 
 - `RACINE=<dossier>` : tester une autre copie du dépôt (un `git archive` extrait, pour comparer avant / après).
 - Le fuseau horaire est forcé à `Pacific/Auckland` (`harnais.js`) : une date calculée en UTC au lieu de l'heure locale tombe la veille, et le test le voit.
 - `test-menu-pages.js` : le même menu sur toutes les pages à menu, et les droits des modules existants identiques à ceux de `origin/main` pour les six profils préréglés et les comptes à rôle — à passer à chaque module ajouté ou droit modifié.
-- `test-marque-pages.js` compte les pages (39 au 2026-10-21) : une page ajoutée le fait échouer exprès, pour qu'on vérifie qu'elle suit la marque.
+- `test-marque-pages.js` compte les pages (40 au 2026-10-21) : une page ajoutée le fait échouer exprès, pour qu'on vérifie qu'elle suit la marque.
 - Un test qui plante sans bilan compte comme un échec ; `suite.js` en montre les dernières lignes.
 
 ## Le harnais (`harnais-serveur.js`)

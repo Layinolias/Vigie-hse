@@ -1,0 +1,561 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Achats et santé-sécurité</title>
+<meta name="description" content="Achats et santé-sécurité : avant d'acheter un équipement, un produit, des EPI, un véhicule, du mobilier ou une prestation, les critères de santé-sécurité examinés, l'avis donné et la suite (ISO 45001, § 8.1.4).">
+<link rel="stylesheet" href="assets/polices/polices.css">
+<script src="assets/stockage.js"></script>
+<script src="assets/marque.js"></script>
+<script src="assets/droits.js"></script>
+<script src="assets/icones.js"></script>
+<script src="assets/menu-lateral.js"></script>
+<script src="assets/organisation.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/achats-ref.js"></script>
+<script src="assets/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="assets/jetons.css">
+<link rel="stylesheet" href="assets/commun.css">
+<style>
+  /* Marge basse que le mode « quirks » donnait aux formulaires : gardée, comme sur les autres pages. */
+  form{ margin-bottom:1em; }
+  textarea{ vertical-align:top; }
+  .logout-btn:hover{ background:rgba(var(--danger-rgb),.12); color:var(--danger); }
+  .content{ padding:26px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  @media (min-width:981px){
+    .app-shell.sidebar-collapsed .sidebar{ width: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .main{ margin-left: var(--sidebar-w-collapsed); }
+    .app-shell.sidebar-collapsed .sidebar-brand{ justify-content:center; }
+    .app-shell.sidebar-collapsed .brand-name, .app-shell.sidebar-collapsed .brand-tag,
+    .app-shell.sidebar-collapsed .nav-label, .app-shell.sidebar-collapsed .user-meta,
+    .app-shell.sidebar-collapsed .sidebar-pin{ display:none; }
+    .app-shell.sidebar-collapsed .nav-item{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .nav-item.active::before{ left:-10px; }
+    .app-shell.sidebar-collapsed .logout-btn{ justify-content:center; gap:0; font-size:0; padding-left:0; padding-right:0; }
+    .app-shell.sidebar-collapsed .user-row{ justify-content:center; }
+  }
+  .ps-kpi-icon.danger{ background:var(--danger-bg); color:var(--danger); }
+  .ps-kpi-icon.success{ background:var(--success-bg); color:var(--success); }
+
+  select, input[type="text"], input[type="date"], input[type="search"], textarea{
+    appearance:none; -webkit-appearance:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font:500 13px "IBM Plex Sans",sans-serif;
+    padding:9px 12px; border-radius:var(--r-sm); transition:border-color .15s ease, box-shadow .15s ease; max-width:100%;
+  }
+  select{
+    background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%239AA7AF"/></svg>') no-repeat right 12px center;
+    padding-right:32px; min-width:150px; cursor:pointer;
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),.14); }
+  textarea{ resize:vertical; min-height:68px; width:100%; font-weight:400; line-height:1.5; }
+  textarea:disabled, input:disabled, select:disabled{ background:var(--bg-2); color:var(--text); opacity:1; cursor:default; }
+  @media (max-width:640px){ select, input[type="text"], input[type="date"], input[type="search"], textarea{ font-size:16px; } }
+
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+  .panel-actions{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:14px 16px; }
+  .form-grid .span3{ grid-column:1 / -1; }
+  @media (min-width:560px){ .form-grid .span2{ grid-column:span 2; } }
+  .form-grid label, .sec label{ font-size:11.5px; color:var(--text-muted); font-weight:500; display:block; margin-bottom:6px; }
+  .form-grid input, .form-grid select{ width:100%; }
+  .form-note{ font-size:12px; color:var(--text-muted); line-height:1.55; margin:0; }
+
+  .table-panel{ overflow:auto; }
+  table.reg{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.reg thead th{ background:var(--bg-2); border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight:600; font-size:11.5px; padding:10px 14px; white-space:nowrap; }
+  table.reg tbody td{ padding:11px 14px; font-size:12.8px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+  table.reg tbody tr:hover{ background:var(--bg-2); }
+  table.reg td.num{ font-family:"IBM Plex Mono",monospace; text-align:right; }
+  table.reg tr.chap td{ background:var(--bg-2); font-weight:600; font-size:11.5px; color:var(--text-muted); padding:7px 14px; }
+  .empty-row td{ padding:30px 14px; text-align:center; color:var(--text-faint); font-size:13px; white-space:normal; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:600; white-space:nowrap; }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .chip.bon{ color:var(--success); background:var(--success-bg); } .chip.bon::before{ background:var(--success); }
+  .chip.mauvais{ color:var(--danger); background:var(--danger-bg); } .chip.mauvais::before{ background:var(--danger); }
+  .chip.neutre{ color:var(--text-muted); background:var(--bg-2); } .chip.neutre::before{ background:var(--text-faint); }
+  .chip.attention{ color:var(--warning); background:var(--warning-bg); } .chip.attention::before{ background:var(--warning); }
+  .act-edit{ color:var(--accent); font-weight:600; font-size:12px; background:none; border:none; cursor:pointer; font-family:"IBM Plex Sans",sans-serif; padding:0; text-align:left; }
+  .act-edit:hover{ text-decoration:underline; }
+  .act-del{ background:none; border:none; color:var(--danger); font:600 12px "IBM Plex Sans",sans-serif; cursor:pointer; padding:0; }
+  .act-del:hover{ text-decoration:underline; }
+
+  .ref{ display:block; font-size:11.5px; color:var(--text-faint); margin-top:2px; font-weight:400; white-space:normal; }
+  .filtres{ display:flex; gap:9px; flex-wrap:wrap; margin:0 0 12px; }
+  .filtres input[type="search"]{ flex:1 1 240px; min-width:0; }
+
+  /* Rôle ouvert */
+  .fiche{ padding:20px 22px 22px; margin-bottom:18px; border-left:3px solid var(--accent); }
+  .fiche-etat{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+  .sec{ border-top:1px solid var(--border); padding:16px 0 4px; margin-top:16px; }
+  .sec h4{ margin:0 0 4px; font:600 17px "Barlow Condensed",sans-serif; letter-spacing:.01em; }
+  .sec .aide{ font-size:12px; color:var(--text-faint); margin:0 0 10px; max-width:90ch; line-height:1.5; }
+  .vide{ color:var(--text-faint); font-style:italic; font-size:12.5px; margin:0 0 12px; }
+  .dyn-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .dyn-row input{ flex:1 1 160px; min-width:0; }
+  .form-actions{ display:flex; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); align-items:center; flex-wrap:wrap; }
+  @media (max-width:640px){ .form-actions{ flex-direction:column; align-items:stretch; } .form-actions .btn{ width:100%; justify-content:center; min-height:46px; } }
+  table.reg td.long{ white-space:normal; min-width:160px; max-width:340px; }
+  table.reg tr.retire td{ opacity:.6; }
+  .coche-filtre{ display:flex; gap:7px; align-items:center; font-size:12.5px; color:var(--text-muted); cursor:pointer; }
+  .lien-lettre{ display:inline-block; margin-top:5px; font-size:12px; }
+  .points-coches{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr)); gap:6px 18px; }
+  .coche-point{ display:flex; gap:8px; align-items:flex-start; font-size:12.8px; line-height:1.45; cursor:pointer; }
+  .coche-point input{ margin-top:3px; flex-shrink:0; }
+  .chip.lettre{ padding:2px 8px; font-family:"IBM Plex Mono",monospace; }
+  .chip.lettre::before{ display:none; }
+  .constat{ background:var(--bg-2); border-radius:var(--r-sm); padding:12px 14px; margin:0 0 10px; }
+  .constat .texte{ white-space:pre-wrap; font-size:12.8px; line-height:1.55; margin:6px 0 4px; }
+  .constat .actions-constat{ margin-top:10px; }
+  .constat .actions-constat .dyn-row > span{ flex:1 1 auto; font-size:12.8px; }
+  .alerte{ font-size:12.5px; color:var(--danger); margin:8px 0 0; font-weight:600; }
+  .footnote{ margin-top:16px; font-size:11.5px; color:var(--text-faint); text-align:center; line-height:1.7; }
+</style>
+<link rel="stylesheet" href="assets/mobile.css">
+
+<script>
+  (function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+      if (!s || !s.user) location.href = "login.html";
+    } catch(e){ location.href = "login.html"; }
+  })();
+</script>
+
+
+<div class="app-shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a class="brand-mark" href="dashboard.html" style="color:var(--accent)"><svg class="icon" style="width:20px;height:20px"><use href="#i-shield"/></svg></a>
+      <div><div class="brand-name">VIGIE HSE</div><div class="brand-tag">Soft Tech</div></div>
+      <button class="sidebar-pin" id="sidebarPin" type="button" title="Épingler le menu ouvert" aria-label="Épingler le menu ouvert"><svg class="icon"><use href="#i-pin"/></svg></button>
+    </div>
+    <nav></nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-meta"><div class="user-name" id="userName">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+      </div>
+      <button class="logout-btn" id="btnLogout"><svg class="icon"><use href="#i-log-out"/></svg> Déconnexion</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <div class="breadcrumb">Sécurité &amp; Risques / <b>Achats et santé-sécurité</b></div>
+      <div class="topbar-right">
+        <span class="role-chip" id="roleChip">—</span>
+        <div class="clock"><div class="time mono" id="clockTime">--:--:--</div><div class="date" id="clockDate">—</div></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <header class="page-summary">
+        <div class="page-summary-id">
+          <div class="page-summary-icon"><svg class="icon"><use href="#i-cart"/></svg></div>
+          <div class="page-summary-text">
+            <h1>Achats et santé-sécurité</h1>
+            <p>Avant d'acheter un équipement, un produit, des EPI, un véhicule, du mobilier ou une prestation (ISO 45001, § 8.1.4) : les critères de santé-sécurité examinés, l'avis donné, puis la suite — acheté ou abandonné.</p>
+          </div>
+        </div>
+        <div class="page-summary-kpis">
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-calendar"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiAnnee">–</span><span class="ps-kpi-label" id="kpiAnneeLabel">Demandes cette année</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-clock"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiExaminer">–</span><span class="ps-kpi-label">À examiner</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiReserves">–</span><span class="ps-kpi-label">Avis avec réserves ou défavorables</span></div>
+          </div>
+          <div class="ps-kpi">
+            <div class="ps-kpi-icon blue"><svg class="icon"><use href="#i-package"/></svg></div>
+            <div class="ps-kpi-text"><span class="ps-kpi-value mono" id="kpiSansAvis">–</span><span class="ps-kpi-label">Achetées sans avis</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-notice" id="mobileNotice">
+        <span>Cette page est optimisée pour un usage sur ordinateur. Sur mobile, privilégiez le tableau de bord.</span>
+        <button type="button" id="mobileNoticeClose" aria-label="Fermer la notification">×</button>
+      </div>
+
+      <div class="panel fiche" id="fiche" style="display:none;"></div>
+
+      <div class="panel" style="padding:16px 22px;">
+        <div class="filtres" style="margin:0;">
+          <input type="search" id="fTexte" placeholder="Rechercher un achat, un fournisseur, un demandeur" aria-label="Rechercher">
+          <select id="fNature" aria-label="Nature"><option value="">Toutes les natures</option></select>
+          <select id="fEtat" aria-label="État">
+            <option value="">Tous les états</option>
+            <option value="examiner">À examiner</option>
+            <option value="avis">Avis donné</option>
+            <option value="achete">Achetées</option>
+            <option value="abandonne">Abandonnées</option>
+            <option value="reserves">Avis avec réserves ou défavorable</option>
+            <option value="sansAvis">Achetées sans avis</option>
+          </select>
+          <span class="panel-actions" id="listeActions" style="margin-left:auto;"></span>
+        </div>
+        <p class="form-note" id="majNote" style="margin-top:10px;"></p>
+      </div>
+
+      <div class="panel" style="padding:20px 22px 22px;">
+        <div class="panel-head">
+          <h3 class="panel-title">Demandes d'achat</h3>
+          <div class="panel-actions" id="actDemandes"></div>
+        </div>
+        <div class="table-panel">
+          <table class="reg" id="tableDemandes">
+            <thead><tr><th>Date</th><th>Objet</th><th>Nature</th><th>Périmètre</th><th>Demandeur</th><th>Critères</th><th>Avis</th><th>Suite</th><th></th></tr></thead>
+            <tbody id="tbDemandes"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="footnote">Les critères sont des propositions, pas une liste réglementaire : chacun en ajoute ou les marque « sans objet », et un critère « non » n'interdit rien — l'avis reste libre (question 39 posée au préventeur). Voir aussi la <a href="changements.html">gestion des changements</a> (un équipement nouveau est un changement), les <a href="produits-chimiques.html">produits chimiques</a>, les <a href="verifications-periodiques.html">vérifications périodiques</a>, les <a href="entreprises-exterieures.html">entreprises extérieures</a>.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  VigieOrga.preparer();   // listes et libellés de l'organisation (assets/organisation.js)
+  // Tout texte issu d'un enregistrement passe par ici avant d'entrer dans du innerHTML.
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  (function(){
+    try {
+      if (!sessionStorage.getItem("vigie_hse_mobile_notice_dismissed")) {
+        const n = document.getElementById("mobileNotice");
+        if (n) n.classList.add("show");
+      }
+    } catch(e){}
+    const closeBtn = document.getElementById("mobileNoticeClose");
+    if (closeBtn) closeBtn.addEventListener("click", function(){
+      try { sessionStorage.setItem("vigie_hse_mobile_notice_dismissed", "1"); } catch(e){}
+      const n = document.getElementById("mobileNotice");
+      if (n) n.classList.remove("show");
+    });
+  })();
+
+  const session = JSON.parse(sessionStorage.getItem("vigie_hse_session") || "null");
+  const D = VigieDroits.pour(session);   // droits du compte, donnés par ses profils (assets/droits.js)
+  const peutLire = D.peut("achats", "consulter");
+  const peutDemander = D.peut("achats", "demander");   // demander : enregistrer une demande (le Manager)
+  const peutGerer = D.peut("achats", "gerer");
+  if (!peutLire){ location.href = "dashboard.html"; }
+  const moi = (session && session.user) || "—";
+  $("userAvatar").textContent = (session.user || "?").slice(0,2);
+  $("userName").textContent = session.user;
+  $("userRoleLabel").textContent = VigieOrga.mots(D.libelle);
+  if (D.profils.length > 1) $("userRoleLabel").title = D.profils.join(" + ");
+  $("roleChip").textContent = D.pastille;
+  if (!D.peut("atmp", "gerer")){ $("roleChip").classList.add("ag"); }
+  $("btnLogout").addEventListener("click", () => { sessionStorage.removeItem("vigie_hse_session"); location.href = "login.html"; });
+  VigieMenu.init(session);   // menu latéral (liens permis à ce compte, téléphone, repli, épingle) : assets/menu-lateral.js
+
+  const AUDIT_KEY = "vigie_hse_audit_log";
+  function logAudit(type, description){
+    try {
+      const log = JSON.parse(VigieStore.getItem(AUDIT_KEY) || "[]");
+      log.push({ id:"a-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), timestamp:new Date().toISOString(), utilisateur:moi, module:"Achats", type, description });
+      VigieStore.setItem(AUDIT_KEY, JSON.stringify(log));
+    } catch(e){}
+  }
+  function genId(prefix){ return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  const dateFr = (iso) => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? iso.split("-").reverse().join("/") : (iso || "");
+  const lire = (cle) => { try { const v = JSON.parse(VigieStore.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch(e){ return []; } };
+  const fr = (a, b) => String(a).localeCompare(String(b), "fr");
+  const norm = (t) => String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const ajd = () => VigieDates.aujourdhui();
+  const M = (t) => VigieOrga.mots(t);   // « F3SCT » ou « CSSCT » : les mots du secteur, pour les textes fixes (assets/organisation.js)
+  const VA = VigieAchats;
+
+  // ---------- Stockage et périmètre ----------
+  const CLE = VA.CLE;
+  const services = (session && session.services) || ["*"], voitTout = services.includes("*");
+  // un compte limité à des services voit ce qui vaut pour toute l'organisation et ce qui touche ses services (comme le serveur le transmet)
+  const visible = (a) => voitTout || !a.service || services.includes(a.service);
+  const tous = () => VA.valides(lire(CLE)).filter(visible);
+  function modifier(modif){ const l = lire(CLE); modif(l); VigieStore.setItem(CLE, JSON.stringify(l)); }
+  const perimetre = (a) => a.service || "Toute l'organisation";
+  const nomDe = (a) => `du ${dateFr(a.date)} « ${String(a.objet || "").slice(0, 80)} »`;
+  const texteDe = (a) => [a.objet, a.nature, a.usage, a.service, a.demandeur, a.fournisseur, a.avisPar, a.reserves, a.noteSuite].join(" ");
+  const CHIP_AVIS = { "Favorable": "bon", "Favorable avec réserves": "attention", "Défavorable": "mauvais" };
+  const chipAvis = (a) => VA.avisDonne(a) ? `<span class="chip ${CHIP_AVIS[a.avis]}">${esc(a.avis)}</span>` : `<span class="chip neutre">À examiner</span>`;
+  const resumeCriteres = (a) => { const b = VA.bilanCriteres(a); if (!b.total) return "—";
+    return `${b.oui} oui · ${b.non ? `<span class="chip mauvais">${b.non} non</span>` : "0 non"}${b.so ? " · " + b.so + " sans objet" : ""}${b.vides ? " · " + b.vides + " à renseigner" : ""}`; };
+  const suiteDe = (a) => a.suite === "achete" ? `Achetée le ${esc(dateFr(a.dateSuite))}${VA.avisDonne(a) ? "" : ` <span class="chip mauvais">sans avis</span>`}` : a.suite === "abandonne" ? `Abandonnée le ${esc(dateFr(a.dateSuite))}` : "—";
+  const correspond = (a, f) => !f || (f === "reserves" ? a.avis === "Favorable avec réserves" || a.avis === "Défavorable" : f === "sansAvis" ? a.suite === "achete" && !VA.avisDonne(a) : VA.etat(a) === f);
+  // après l'achat : où le reporter, selon la nature (un rappel, rien d'automatique)
+  const RAPPELS = {
+    "Produit chimique": ["produits-chimiques.html", "produits", "l'ajouter au registre des produits chimiques, avec sa FDS"],
+    "Équipement de travail (machine, outil, appareil)": ["verifications-periodiques.html", "verifications", "prévoir ses vérifications périodiques"],
+    "Véhicule ou engin": ["verifications-periodiques.html", "verifications", "prévoir ses vérifications périodiques"],
+    "Équipement de protection individuelle (EPI)": ["epi-dotation.html", "epi", "l'ajouter aux dotations d'EPI"],
+    "Prestation ou sous-traitance": ["entreprises-exterieures.html", "entreprises-ext", "préparer l'intervention (inspection commune, plan de prévention)"],
+  };
+
+  // ---------- Liste ----------
+  function render(){
+    const j = ajd(), annee = j.slice(0, 4), l = tous(), s = VA.synthese(l, annee);
+    $("kpiAnnee").textContent = s.annee;
+    $("kpiAnneeLabel").textContent = "Demandes en " + annee;
+    $("kpiExaminer").textContent = s.aExaminer;
+    $("kpiReserves").textContent = s.reserves + s.defavorables;
+    $("kpiSansAvis").textContent = s.acheteesSansAvis;
+    $("majNote").textContent = l.length ? `${s.total} demande${s.total > 1 ? "s" : ""} : ${s.aExaminer} à examiner, ${s.avisDonnes} avec un avis, ${s.achetees} achetée${s.achetees > 1 ? "s" : ""}, ${s.abandonnees} abandonnée${s.abandonnees > 1 ? "s" : ""}.`
+      : "Aucune demande" + (peutDemander ? " : « Nouvelle demande » en enregistre une." : ".");
+    const nat = $("fNature").value;
+    $("fNature").innerHTML = `<option value="">Toutes les natures</option>` + VA.NATURES.map(n => `<option value="${esc(n)}"${n === nat ? " selected" : ""}>${esc(M(n))}</option>`).join("");
+    const q = norm($("fTexte").value.trim()), fN = $("fNature").value, fE = $("fEtat").value;
+    const rows = VA.triees(l).filter(a => (!fN || a.nature === fN) && correspond(a, fE) && (!q || norm(texteDe(a)).includes(q)));
+    $("tbDemandes").innerHTML = rows.length ? rows.map(a => `<tr data-id="${esc(a.id)}">
+        <td class="mono">${esc(dateFr(a.date))}</td>
+        <td class="long"><b>${esc(a.objet || "—")}</b>${a.fournisseur ? `<span class="ref">${esc(a.fournisseur)}</span>` : ""}</td>
+        <td class="long">${esc(M(a.nature || "—"))}</td>
+        <td>${esc(perimetre(a))}</td>
+        <td>${esc(a.demandeur || "—")}</td>
+        <td>${resumeCriteres(a)}</td>
+        <td>${chipAvis(a)}</td>
+        <td>${suiteDe(a)}</td>
+        <td><button type="button" class="act-edit" data-ouvrir="${esc(a.id)}">Ouvrir</button></td></tr>`).join("")
+      : `<tr class="empty-row"><td colspan="9">${q || fN || fE ? "Aucune demande avec ces filtres." : "Aucune demande d'achat pour le moment." + (peutDemander ? " « Nouvelle demande » en enregistre une." : "")}</td></tr>`;
+  }
+  $("fTexte").addEventListener("input", render);
+  $("fNature").addEventListener("change", render);
+  $("fEtat").addEventListener("change", render);
+  $("tbDemandes").addEventListener("click", (e) => { const b = e.target.closest("[data-ouvrir]"); if (b) ouvrir(b.dataset.ouvrir); });
+  $("listeActions").innerHTML = `<button type="button" class="btn btn-ghost" id="btnImprimer"><svg class="icon"><use href="#i-printer"/></svg> Imprimer</button>`
+    + `<button type="button" class="btn btn-ghost" id="btnExport"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`;
+  if (peutDemander){
+    $("actDemandes").innerHTML = `<button type="button" class="btn btn-primary" id="btnNouveau"><svg class="icon"><use href="#i-plus"/></svg> Nouvelle demande</button>`;
+    $("btnNouveau").addEventListener("click", () => ouvrir(null));
+  }
+
+  // ---------- Export ----------
+  $("btnExport").addEventListener("click", () => {
+    const j = ajd(), l = VA.triees(tous());
+    const demandes = l.map(a => { const b = VA.bilanCriteres(a); return { "Identifiant": a.id, "Date": dateFr(a.date), "Objet": a.objet || "", "Nature": M(a.nature || ""), "Usage": a.usage || "",
+      "Périmètre": perimetre(a), "Demandeur": a.demandeur || "", "Fournisseur": a.fournisseur || "", "Critères oui": b.oui, "Critères non": b.non, "Sans objet": b.so, "À renseigner": b.vides,
+      "Avis": a.avis || "", "Avis donné par": a.avisPar || "", "Date de l'avis": dateFr(a.dateAvis || ""), "Réserves ou motif": a.reserves || "",
+      "Suite": a.suite === "achete" ? "Achetée" : a.suite === "abandonne" ? "Abandonnée" : "", "Date de la suite": dateFr(a.dateSuite || ""), "Note": a.noteSuite || "", "Enregistré par": a.auteur || "" }; });
+    const crit = [];
+    l.forEach(a => VA.criteres(a).forEach(c => crit.push({ "Demande": a.id, "Objet": a.objet || "", "Critère": M(c.c), "Réponse": (VA.REPONSES.find(r => r[0] === c.r) || ["", "À renseigner"])[1], "Note": c.note || "" })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(demandes, { header: ["Identifiant", "Date", "Objet", "Nature", "Usage", "Périmètre", "Demandeur", "Fournisseur", "Critères oui", "Critères non", "Sans objet", "À renseigner", "Avis", "Avis donné par", "Date de l'avis", "Réserves ou motif", "Suite", "Date de la suite", "Note", "Enregistré par"] }), "Demandes");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(crit, { header: ["Demande", "Objet", "Critère", "Réponse", "Note"] }), "Critères");
+    XLSX.writeFile(wb, `achats-sante-securite_${j}.xlsx`);
+  });
+
+  // ---------- Demande ouverte ----------
+  let courant = null, crit = [];
+  // une demande enregistrée ne se modifie plus que par qui gère le module (le serveur n'accepte d'un demandeur que des ajouts)
+  const modifiable = (a) => peutGerer || (peutDemander && !a.id);
+  function ouvrir(id){
+    const a = id ? tous().find(z => z.id === id) : null;
+    if (id && !a) return;
+    if (!a && !peutDemander) return;
+    courant = a || { id: null, date: ajd(), objet: "", nature: "", usage: "", service: voitTout ? "" : services[0], demandeur: moi, criteres: [] };
+    crit = VA.criteres(courant).map(c => Object.assign({}, c));
+    afficher();
+  }
+  function optionsService(choisi){
+    const opt = (s) => `<option value="${esc(s)}"${s === choisi ? " selected" : ""}>${esc(s)}</option>`;
+    const groupes = VigieOrga.noms().map(n => { const sv = VigieOrga.services(n).filter(s => voitTout || services.includes(s)); return sv.length ? `<optgroup label="${esc(n)}">${sv.map(opt).join("")}</optgroup>` : ""; }).join("");
+    const connu = !choisi || VigieOrga.noms().some(n => VigieOrga.services(n).includes(choisi));
+    return (voitTout ? `<option value=""${!choisi ? " selected" : ""}>Toute l'organisation</option>` : "") + groupes + (connu ? "" : opt(choisi));
+  }
+  function lignesCriteres(dis){
+    if (!crit.length) return `<p class="vide">${courant.nature ? "Aucun critère." : "Choisissez la nature de l'achat : les critères proposés s'affichent."}</p>`;
+    return `<div class="table-panel"><table class="reg" style="min-width:0;"><tbody>${crit.map((c, i) => `<tr data-crit="${i}">
+        <td class="long">${c.perso && !dis ? `<input type="text" data-crit-libelle value="${esc(c.c)}" maxlength="200" style="width:100%;">` : esc(M(c.c))}</td>
+        <td><select data-crit-reponse${dis}><option value="">À renseigner</option>${VA.REPONSES.map(([v, t]) => `<option value="${v}"${c.r === v ? " selected" : ""}>${t}</option>`).join("")}</select></td>
+        <td class="long"><input type="text" data-crit-note value="${esc(c.note || "")}" maxlength="300" placeholder="Précision, référence"${dis} style="width:100%;"></td>
+        <td>${c.perso && !dis ? `<button type="button" class="act-del" data-crit-retirer="${i}">Retirer</button>` : ""}</td></tr>`).join("")}</tbody></table></div>`;
+  }
+  // relit les critères affichés (réponses, notes, libellés ajoutés) avant de réafficher ou d'enregistrer
+  function relireCriteres(){
+    $("fiche").querySelectorAll("tr[data-crit]").forEach(tr => {
+      const c = crit[+tr.dataset.crit]; if (!c) return;
+      const l = tr.querySelector("[data-crit-libelle]"), r = tr.querySelector("[data-crit-reponse]"), n = tr.querySelector("[data-crit-note]");
+      if (l) c.c = l.value.trim(); if (r) c.r = r.value; if (n) c.note = n.value.trim();
+    });
+  }
+  function afficher(){
+    const a = courant, dis = modifiable(a) ? "" : " disabled", disG = peutGerer ? "" : " disabled";
+    const rappel = a.suite === "achete" && RAPPELS[a.nature];
+    $("fiche").innerHTML = `
+      <div class="panel-head">
+        <div><h3 class="panel-title">${a.id ? "Demande " + esc(nomDe(a)) : "Nouvelle demande d'achat"}</h3>
+          <div class="fiche-etat">${a.id ? `${esc(VA.ETATS[VA.etat(a)])}${a.auteur ? ` · créée par ${esc(a.auteur)}${a.dateCreation ? " le " + esc(dateFr(String(a.dateCreation).slice(0, 10))) : ""}` : ""}${a.modifiePar ? ` · modifiée par ${esc(a.modifiePar)}${a.dateMaj ? " le " + esc(dateFr(String(a.dateMaj).slice(0, 10))) : ""}` : ""}` : ""}</div></div>
+        <div class="panel-actions"><button type="button" class="btn btn-ghost" id="btnFermer">Fermer</button></div>
+      </div>
+      <form id="ficheForm" novalidate>
+        <div class="form-grid">
+          <div><label for="cDate">Date de la demande</label><input type="date" id="cDate" value="${esc(a.date || "")}"${dis}></div>
+          <div class="span2"><label for="cObjet">Objet</label><input type="text" id="cObjet" value="${esc(a.objet || "")}" maxlength="200" placeholder="Ce qui est à acheter"${dis}></div>
+          <div class="span2"><label for="cNature">Nature</label><select id="cNature"${dis}><option value="">— Choisir —</option>${VA.NATURES.map(n => `<option value="${esc(n)}"${n === a.nature ? " selected" : ""}>${esc(M(n))}</option>`).join("")}${a.nature && !VA.NATURES.includes(a.nature) ? `<option value="${esc(a.nature)}" selected>${esc(a.nature)}</option>` : ""}</select></div>
+          <div><label for="cService">Périmètre</label><select id="cService"${dis}>${optionsService(a.service || "")}</select></div>
+          <div class="span3"><label for="cUsage">Usage</label><textarea id="cUsage" placeholder="${esc(M("Pour quoi faire, à quels postes, par combien d'agents"))}"${dis}>${esc(a.usage || "")}</textarea></div>
+          <div><label for="cDemandeur">Demandeur</label><input type="text" id="cDemandeur" value="${esc(a.demandeur || "")}" maxlength="150"${dis}></div>
+          <div class="span2"><label for="cFournisseur">Fournisseur, référence, devis</label><input type="text" id="cFournisseur" value="${esc(a.fournisseur || "")}" maxlength="300" placeholder="Fournisseur pressenti, référence du produit, numéro de devis"${dis}></div>
+        </div>
+        <div class="sec"><h4>Critères de santé-sécurité</h4><p class="aide">Des propositions selon la nature, à compléter : « Oui », « Non » ou « Sans objet », avec une précision si besoin. Un critère « non » n'interdit rien : l'avis reste libre.</p>
+          <div id="blocCriteres">${lignesCriteres(dis)}</div>
+          ${modifiable(a) ? `<button type="button" class="btn btn-ghost" id="btnAjoutCritere" style="margin-top:10px;"><svg class="icon"><use href="#i-plus"/></svg> Ajouter un critère</button>` : ""}
+        </div>
+        ${a.id || peutGerer ? `<div class="sec"><h4>Avis de santé-sécurité</h4>
+          ${peutGerer || VA.avisDonne(a) ? `<div class="form-grid">
+            <div><label for="cAvis">Avis</label><select id="cAvis"${disG}><option value="">— Pas encore donné —</option>${VA.AVIS.map(v => `<option value="${esc(v)}"${v === a.avis ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></div>
+            <div><label for="cAvisPar">Donné par</label><input type="text" id="cAvisPar" value="${esc(a.avisPar || "")}" maxlength="150" placeholder="Nom et fonction"${disG}></div>
+            <div><label for="cDateAvis">Date de l'avis</label><input type="date" id="cDateAvis" value="${esc(a.dateAvis || "")}"${disG}></div>
+            <div class="span3"><label for="cReserves">Réserves ou motif</label><textarea id="cReserves" placeholder="Conditions à remplir, mesures à prendre avant ou après l'achat, ou motif d'un avis défavorable"${disG}>${esc(a.reserves || "")}</textarea></div>
+          </div>` : `<p class="vide">Pas encore d'avis.</p>`}
+        </div>` : ""}
+        ${a.id && (peutGerer || a.suite) ? `<div class="sec"><h4>Suite</h4>
+          <div class="form-grid">
+            <div><label for="cSuite">Suite</label><select id="cSuite"${disG}><option value="">— Pas encore —</option><option value="achete"${a.suite === "achete" ? " selected" : ""}>Achetée</option><option value="abandonne"${a.suite === "abandonne" ? " selected" : ""}>Abandonnée</option></select></div>
+            <div><label for="cDateSuite">Date</label><input type="date" id="cDateSuite" value="${esc(a.dateSuite || "")}"${disG}></div>
+            <div class="span3"><label for="cNoteSuite">Note</label><input type="text" id="cNoteSuite" value="${esc(a.noteSuite || "")}" maxlength="300" placeholder="Bon de commande, mise en service, raison de l'abandon"${disG}></div>
+          </div>
+          ${rappel && D.peut(rappel[1], "consulter") ? `<p class="form-note" id="rappelSuite" style="margin-top:8px;">Après l'achat : <a href="${rappel[0]}">${esc(rappel[2])}</a>.</p>` : ""}
+        </div>` : ""}
+        ${modifiable(a) ? `<div class="form-actions">
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+          ${!peutGerer ? `<span class="form-note">Une fois enregistrée, la demande ne se modifie plus que par le préventeur.</span>` : ""}
+          ${a.id && peutGerer ? `<button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer</button>` : ""}
+        </div>` : ""}
+      </form>`;
+    $("fiche").style.display = "";
+    $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function fermer(){ $("fiche").style.display = "none"; $("fiche").innerHTML = ""; courant = null; crit = []; }
+  const val = (id) => $(id) ? $(id).value.trim() : "";
+  // relit le formulaire (sans les critères) dans la demande en cours, pour réafficher sans rien perdre
+  function relireForm(){
+    if (!courant || !$("cObjet")) return;
+    [["date", "cDate"], ["objet", "cObjet"], ["nature", "cNature"], ["service", "cService"], ["usage", "cUsage"], ["demandeur", "cDemandeur"], ["fournisseur", "cFournisseur"],
+      ["avis", "cAvis"], ["avisPar", "cAvisPar"], ["dateAvis", "cDateAvis"], ["reserves", "cReserves"], ["suite", "cSuite"], ["dateSuite", "cDateSuite"], ["noteSuite", "cNoteSuite"]]
+      .forEach(([k, id]) => { if ($(id) && !$(id).disabled) courant[k] = val(id); });
+  }
+
+  const FACULTATIFS = ["usage", "service", "fournisseur", "avis", "avisPar", "dateAvis", "reserves", "suite", "dateSuite", "noteSuite"];
+  function enregistrer(){
+    if (!courant || !modifiable(courant)) return null;
+    relireCriteres(); relireForm();
+    const avant = courant.id ? (lire(CLE).find(z => z && z.id === courant.id) || {}) : {};   // la demande telle qu'enregistrée
+    const a = Object.assign({}, courant, { criteres: crit.filter(c => c.c).map(c => Object.assign({ c: c.c, r: c.r || "", note: c.note || "" }, c.perso ? { perso: true } : {})) });
+    a.criteres.forEach(c => { if (!c.note) delete c.note; });
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(a.date || "")){ alert("Indiquez la date de la demande."); return null; }
+    if (!a.objet){ alert("Indiquez l'objet de l'achat."); return null; }
+    if (!a.nature){ alert("Choisissez la nature de l'achat."); return null; }
+    if (!voitTout && !services.includes(a.service)){ alert("Choisissez un de vos services."); return null; }
+    if (peutGerer){
+      if (a.avis && (!a.avisPar || !/^\d{4}-\d{2}-\d{2}$/.test(a.dateAvis || ""))){ alert("Pour l'avis, indiquez qui le donne et sa date."); return null; }
+      if ((a.avis === "Favorable avec réserves" || a.avis === "Défavorable") && !a.reserves){ alert(a.avis === "Défavorable" ? "Indiquez le motif de l'avis défavorable." : "Indiquez les réserves."); return null; }
+      if (!a.avis && (a.avisPar || a.dateAvis || a.reserves)){ alert("Choisissez l'avis, ou videz qui le donne, sa date et les réserves."); return null; }
+      if (a.suite && !/^\d{4}-\d{2}-\d{2}$/.test(a.dateSuite || "")){ alert("Indiquez la date de la suite (achat ou abandon)."); return null; }
+      // des faits : un achat sans avis, ou malgré un avis défavorable, se note après confirmation
+      if (a.suite === "achete" && avant.suite !== "achete"){
+        if (!a.avis && !confirm("Cette demande n'a pas d'avis de santé-sécurité. Noter l'achat quand même ?")) return null;
+        if (a.avis === "Défavorable" && !confirm("L'avis est défavorable. Noter l'achat quand même ?")) return null;
+      }
+    } else { ["avis", "avisPar", "dateAvis", "reserves", "suite", "dateSuite", "noteSuite"].forEach(k => { delete a[k]; }); }
+    if (!a.suite) { delete a.dateSuite; }
+    FACULTATIFS.forEach(k => { if (!a[k]) delete a[k]; });
+    const nouveau = !a.id;
+    if (nouveau){ a.id = genId("ach"); a.auteur = moi; a.dateCreation = new Date().toISOString(); }
+    else { a.modifiePar = moi; a.dateMaj = new Date().toISOString(); }
+    try {
+      modifier(l => {
+        const i = l.findIndex(z => z && z.id === a.id);
+        if (i < 0) l.push(a);
+        else { const y = Object.assign({}, l[i], a); FACULTATIFS.forEach(k => { if (!a[k]) delete y[k]; }); l[i] = y; }
+      });
+    } catch(e){ alert("La demande n'a pas pu être enregistrée."); return null; }
+    logAudit(nouveau ? "Création" : "Modification", `Demande d'achat ${nomDe(a)}${a.avis && a.avis !== avant.avis ? " — avis : " + a.avis : ""}${a.suite && a.suite !== avant.suite ? " — " + (a.suite === "achete" ? "achetée" : "abandonnée") : ""}`);
+    return a;
+  }
+  $("fiche").addEventListener("change", (e) => {
+    // une nature choisie : ses critères proposés, tant qu'aucun n'a de réponse (les critères ajoutés à la main restent)
+    if (e.target.id === "cNature" && courant && modifiable(courant)){
+      relireCriteres(); relireForm();
+      if (!crit.some(c => !c.perso && (c.r || c.note))) crit = VA.criteresPour(courant.nature).map(c => ({ c: c, r: "" })).concat(crit.filter(c => c.perso));
+      $("blocCriteres").innerHTML = lignesCriteres("");
+    }
+  });
+  $("fiche").addEventListener("click", (e) => {
+    if (e.target.closest("#btnFermer")){ fermer(); return; }
+    if (e.target.closest("#btnAjoutCritere")){ relireCriteres(); crit.push({ c: "", r: "", perso: true }); $("blocCriteres").innerHTML = lignesCriteres("");
+      const champs = $("fiche").querySelectorAll("[data-crit-libelle]"); if (champs.length) champs[champs.length - 1].focus(); return; }
+    const rt = e.target.closest("[data-crit-retirer]");
+    if (rt){ relireCriteres(); crit.splice(+rt.dataset.critRetirer, 1); $("blocCriteres").innerHTML = lignesCriteres(""); return; }
+    if (e.target.closest("#btnSupprimer")){
+      if (!courant || !courant.id || !peutGerer) return;
+      if (!confirm(`Supprimer la demande d'achat ${nomDe(courant)} ?`)) return;
+      try { modifier(l => { const i = l.findIndex(z => z && z.id === courant.id); if (i >= 0) l.splice(i, 1); }); }
+      catch(err){ alert("La demande n'a pas pu être supprimée."); return; }
+      logAudit("Suppression", `Demande d'achat ${nomDe(courant)}`);
+      fermer(); render();
+    }
+  });
+  $("fiche").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const a = enregistrer();
+    if (a){ render(); ouvrir(a.id); }
+  });
+
+  // ---------- Imprimé ----------
+  $("btnImprimer").addEventListener("click", () => {
+    const j = ajd(), l = VA.triees(tous()), s = VA.synthese(l, j.slice(0, 4));
+    const ancien = document.getElementById("ach-impression");
+    if (ancien) ancien.remove();
+    if (!document.getElementById("ach-impression-style")){
+      const style = document.createElement("style"); style.id = "ach-impression-style";
+      style.textContent = [
+        "@page{ size:A4 landscape; margin:12mm; }",
+        "@media screen{ #ach-impression{ display:none; } }",
+        "@media print{",
+        "  body{ background:#fff !important; }",
+        "  body > *:not(#ach-impression){ display:none !important; }",
+        "  #ach-impression{ display:block !important; color:#000; font:10px/1.4 'IBM Plex Sans',Arial,sans-serif; }",
+        "  #ach-impression .pi-marque{ font:700 10px 'Barlow Condensed',Arial,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#555; }",
+        "  #ach-impression h1{ font:700 21px 'Barlow Condensed',Arial,sans-serif; margin:2px 0; }",
+        "  #ach-impression .pi-meta{ font-size:10px; color:#333; margin:0 0 6px; }",
+        "  #ach-impression table{ width:100%; border-collapse:collapse; }",
+        "  #ach-impression th, #ach-impression td{ border:1px solid #999; padding:3px 5px; text-align:left; vertical-align:top; white-space:pre-line; }",
+        "  #ach-impression th{ background:#eee; font-weight:600; }",
+        "  #ach-impression tr{ break-inside:avoid; page-break-inside:avoid; }",
+        "}",
+      ].join("\n");
+      document.head.appendChild(style);
+    }
+    const crits = (a) => VA.criteres(a).map(c => `${M(c.c)} : ${(VA.REPONSES.find(r => r[0] === c.r) || ["", "à renseigner"])[1].toLowerCase()}${c.note ? " (" + c.note + ")" : ""}`).join("\n");
+    const bloc = document.createElement("div");
+    bloc.id = "ach-impression";
+    bloc.innerHTML = `
+      <div class="pi-marque">${esc(window.VigieMarque ? VigieMarque.nom() : "")}</div>
+      <h1>Achats et santé-sécurité</h1>
+      <p class="pi-meta">Édité le ${esc(dateFr(j))} · ${s.total} demande${s.total > 1 ? "s" : ""} : ${s.aExaminer} à examiner, ${s.favorables} favorable${s.favorables > 1 ? "s" : ""}, ${s.reserves} avec réserves, ${s.defavorables} défavorable${s.defavorables > 1 ? "s" : ""}, ${s.achetees} achetée${s.achetees > 1 ? "s" : ""} (${s.acheteesSansAvis} sans avis)</p>
+      ${l.length ? `<table><thead><tr><th>Date</th><th>Objet</th><th>Nature</th><th>Périmètre</th><th>Demandeur</th><th>Critères</th><th>Avis</th><th>Suite</th></tr></thead><tbody>${l.map(a => `<tr><td>${esc(dateFr(a.date))}</td><td>${esc(a.objet || "")}${a.fournisseur ? "\n" + esc(a.fournisseur) : ""}</td><td>${esc(M(a.nature || ""))}</td><td>${esc(perimetre(a))}</td><td>${esc(a.demandeur || "")}</td><td>${esc(crits(a))}</td><td>${esc(a.avis ? a.avis + (a.avisPar ? ", " + a.avisPar : "") + (a.dateAvis ? ", le " + dateFr(a.dateAvis) : "") + (a.reserves ? "\n" + a.reserves : "") : "À examiner")}</td><td>${esc(a.suite === "achete" ? "Achetée le " + dateFr(a.dateSuite) : a.suite === "abandonne" ? "Abandonnée le " + dateFr(a.dateSuite) : "")}</td></tr>`).join("")}</tbody></table>` : "<p>Aucune demande.</p>"}`;
+    document.body.appendChild(bloc);
+    const nettoyer = () => { window.removeEventListener("afterprint", nettoyer); bloc.remove(); };
+    window.addEventListener("afterprint", nettoyer);
+    window.print();
+  });
+
+  render();
+  // ?ouvrir=<id>
+  (function(){ const id = new URLSearchParams(location.search).get("ouvrir"); if (id && tous().some(x => x.id === id)) ouvrir(id); })();
+  function tickClock(){
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString('fr-FR');
+    $("clockDate").textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+</script>

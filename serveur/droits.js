@@ -80,6 +80,8 @@ const REGLES = {
   engagement_direction: GERER('engagement-direction'),
   // Communication (§ 7.4) : qui gère le registre l'écrit
   communication: GERER('communication'),
+  // Achats et santé-sécurité (§ 8.1.4) : qui gère écrit tout ; qui demande ne fait qu'ajouter sa demande
+  achats: regle('achats', 'gerer', 'demander'),
   ds_questions: regle('dialogue-social', 'participer'), ds_reunions: regle('dialogue-social', 'participer'), ds_visites: regle('dialogue-social', 'participer'),
 };
 const regleGenerale = GERER('administration');

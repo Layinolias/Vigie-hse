@@ -81,6 +81,10 @@
   var PAR_REGISTRE = {
     vigie_hse_engagement_direction: { date:"Date", qui:"Qui (membre de la direction)", forme:"Forme", objet:"Ce qui a été fait, dit ou décidé",
                               points:"Points de l'engagement (ISO 45001 § 5.1)", service:"Périmètre (service)", preuve:"Preuve" },
+    vigie_hse_documents:    { titre:"Titre", categorie:"Type de document", version:"Version", dateDocument:"Date du document", statut:"Statut",
+                              masque:"Masqué aux lecteurs", origine:"Origine (interne, externe)", approuvePar:"Approuvé par", dateApprobation:"Date d'approbation",
+                              soumisPar:"Soumis pour approbation par", dateSoumission:"Date de soumission", revue:"À revoir le", conservation:"Durée de conservation",
+                              remplace:"Remplace (version précédente)", remplacePar:"Remplacé par (version suivante)", dateObsolete:"Obsolète depuis le" },
     vigie_hse_communication: { registre:"Registre (sujet du plan ou communication notée)", sujet:"Quoi (sujet du plan)", sens:"Sens", public:"À qui, ou de qui",
                               quand:"Quand", canal:"Comment", responsable:"Par qui (sujet du plan)", adaptations:"Adaptations", statut:"Statut",
                               sujetId:"Sujet du plan (identifiant)", date:"Date", objet:"Ce qui a été communiqué ou reçu", qui:"Par qui, ou reçue par",

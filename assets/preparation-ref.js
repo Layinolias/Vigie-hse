@@ -41,7 +41,7 @@
     "7.2": { c: "couverte", pages: [P("formation-habilitation.html", "Formation / Habilitation")] },
     "7.3": { c: "couverte", pages: [P("accueil-poste.html", "Accueil au poste"), P("base-documentaire.html", "Base documentaire")] },
     "7.4": { c: "couverte", pages: [P("communication.html", "Communication"), P("dashboard.html", "Flash Info et veille"), P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social")] },
-    "7.5": { c: "partielle", pages: [P("base-documentaire.html", "Base documentaire")], manque: "le stockage des fichiers eux-mêmes et un circuit d'approbation" },
+    "7.5": { c: "couverte", pages: [P("base-documentaire.html", "Base documentaire")] },
     "8.1.1": { c: "couverte", pages: [P("verifications-periodiques.html", "Vérifications périodiques"), P("inspection-audit.html", "Inspection / Audit"), P("produits-chimiques.html", "Produits chimiques")] },
     "8.1.2": { c: "partielle", pages: [P("document-unique.html", "Document unique"), P("plan-actions.html", "Plan d'actions"), P("epi-dotation.html", "EPI & Dotation")], manque: "les mesures déjà en place au Document unique ne sont pas rangées par niveau (seules les actions du Plan d'actions le sont)" },
     "8.1.3": { c: "couverte", pages: [P("changements.html", "Gestion des changements")] },
@@ -76,7 +76,7 @@
     const lire = (cle) => { try { const v = JSON.parse(store.getItem(cle) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
     const complet = (cles) => cles.every(c => !store.complet || store.complet(c) !== false);
     const VA = racine.VigieAuditInterne, VP = racine.VigiePolitique, VC = racine.VigieChangements, VX = racine.VigieContexte,
-      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures, VR = racine.VigieRoles, VE = racine.VigieEngagement, VCo = racine.VigieCommunication;
+      VK = racine.VigieConformite, VI = racine.VigieIndicateurs, VO = racine.VigieOrga, VM = racine.VigieMesures, VR = racine.VigieRoles, VE = racine.VigieEngagement, VCo = racine.VigieCommunication, VD = racine.VigieDocuments;
     let I = null;
     try { I = VI ? VI.calculer(store, "", "") : null; } catch (e) { I = null; }
     const actions = lire(K.actions);
@@ -173,8 +173,13 @@
           .concat([autres])];
       } },
       "7.5": { cles: [K.documents], f: () => {
-        const n = lire(K.documents).length;
-        return n ? ["pret", [pl(n, "document au registre", "documents au registre")]] : ["rien", ["aucun document au registre de la Base documentaire"]];
+        // le circuit d'un document (brouillon, à approuver, en vigueur, obsolète) : des faits, sans périodicité imposée (question 38)
+        const s = VD.synthese(lire(K.documents), aujourdhui);
+        if (!s.total) return ["rien", ["aucun document au registre de la Base documentaire"]];
+        return ["pret", [pl(s.total, "document au registre", "documents au registre") + ", " + pl(s.enVigueur, "en vigueur", "en vigueur") + " (" + s.approuves + " avec l'approbation notée)"]
+          .concat(s.aApprouver || s.brouillons ? [pl(s.aApprouver, "document à approuver", "documents à approuver") + ", " + pl(s.brouillons, "brouillon", "brouillons")] : [])
+          .concat(s.aRevoir ? [pl(s.aRevoir, "document en vigueur dont la date de revue est passée", "documents en vigueur dont la date de revue est passée")] : [])
+          .concat(s.externes ? [pl(s.externes, "document d'origine externe", "documents d'origine externe")] : [])];
       } },
       "8.1.1": { cles: [K.verifications, K.inspections], f: () => {
         if (!I || (!I.vpTotal && !I.iaTotal)) return ["rien", ["ni vérification périodique ni inspection"]];
@@ -235,7 +240,7 @@
         return ["pret", [pl(I.paFait, "action faite", "actions faites") + ", " + pl(I.paEfficaces, "jugée efficace", "jugées efficaces"), pl(lire(K.objectifs).filter(o => o && o.id).length, "objectif", "objectifs")]];
       } },
     };
-    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.1": VE, "5.2": VP, "7.4": VCo, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
+    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.1": VE, "5.2": VP, "7.4": VCo, "7.5": VD, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
     const audits = VA ? lire(K.audits) : [], cv = VA && complet([K.audits]) ? VA.couverture(audits, actions, aujourdhui) : [];
     const clauses = VA ? VA.CLAUSES : Object.keys(COUVERTURE).map(c => [c, c]);
     return clauses.map(([clause, nom]) => {

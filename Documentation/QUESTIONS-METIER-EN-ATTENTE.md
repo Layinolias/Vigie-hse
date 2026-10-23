@@ -65,10 +65,11 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 33 | Rôles de prévention : quels rôles proposer et exiger, que signaler (lettre de mission, formation), qui voit le registre ? | Rôles de prévention (construit le 2026-10-18) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
 | 34 | Comptes limités à certains services : que peuvent-ils faire des enregistrements de toute l'organisation ? | Serveur local, droits de lecture et d'écriture (relevé le 2026-10-18) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
 | 35 | Domaine d'application : faut-il le revoir à date fixe, qui le valide, qui le voit ? | Contexte et enjeux (construit le 2026-10-18, ISO 45001 § 4.3) | ✅ Répondu le 2026-10-21 — comme aujourd'hui, rien à changer |
-| 36 | Engagement de la direction : quelles formes proposer, faut-il un rythme ou des points exigés, qui voit la page, la revue de direction doit-elle la reprendre ? | Engagement de la direction (construit le 2026-10-21, ISO 45001 § 5.1) | 🟠 En attente de réponse |
-| 37 | Communication : quels sujets proposer au départ, faut-il un rythme vérifié, signaler une communication reçue restée sans suite, qui voit la page ? | Communication (construit le 2026-10-21, ISO 45001 § 7.4) | 🟠 En attente |
-| 38 | Documents : faut-il stocker les fichiers dans le logiciel, qui approuve, faut-il exiger l'approbation, proposer une périodicité de revue ou une durée de conservation ? | Base documentaire, circuit des documents (construit le 2026-10-21, ISO 45001 § 7.5) | 🟠 En attente |
-| 39 | Achats : quels critères proposer par nature d'achat, qui demande et qui donne l'avis, faut-il un avis avant tout achat, et que faire d'un avis défavorable ? | Achats et santé-sécurité (construit le 2026-10-21, ISO 45001 § 8.1.4) | 🟠 En attente |
+| 36 | Engagement de la direction : quelles formes proposer, faut-il un rythme ou des points exigés, qui voit la page, la revue de direction doit-elle la reprendre ? | Engagement de la direction (construit le 2026-10-21, ISO 45001 § 5.1) | ✅ Répondu le 2026-10-23 — comme aujourd'hui, rien à changer |
+| 37 | Communication : quels sujets proposer au départ, faut-il un rythme vérifié, signaler une communication reçue restée sans suite, qui voit la page ? | Communication (construit le 2026-10-21, ISO 45001 § 7.4) | ✅ Répondu le 2026-10-23 — comme aujourd'hui ; point 5 (résultats au personnel) mis en œuvre, question 40 |
+| 38 | Documents : faut-il stocker les fichiers dans le logiciel, qui approuve, faut-il exiger l'approbation, proposer une périodicité de revue ou une durée de conservation ? | Base documentaire, circuit des documents (construit le 2026-10-21, ISO 45001 § 7.5) | ✅ Répondu le 2026-10-23 — comme aujourd'hui, rien à changer |
+| 39 | Achats : quels critères proposer par nature d'achat, qui demande et qui donne l'avis, faut-il un avis avant tout achat, et que faire d'un avis défavorable ? | Achats et santé-sécurité (construit le 2026-10-21, ISO 45001 § 8.1.4) | ✅ Répondu le 2026-10-23 — comme aujourd'hui, rien à changer |
+| 40 | Résultats au personnel : un sujet « résultats » du plan de communication suffit-il à montrer que les résultats sont portés à la connaissance du personnel ? Faut-il un rythme, distinguer les représentants, une reprise par la revue de direction ? | Communication et Préparation ISO 45001 (construit le 2026-10-23, ISO 45001 § 10.3) | 🟠 En attente |
 
 ---
 
@@ -1076,7 +1077,7 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 >
 > **Rien à changer** : le domaine d'application se revoit quand on le décide, sans rappel ; « validé par » reste facultatif ; il est lu par qui lit le contexte (pas le profil Agent). Seul l'écart avec l'organisation suivie est signalé.
 
-## 🟠 Question 36 — Engagement de la direction : quelles formes proposer, faut-il un rythme ou des points exigés, qui voit la page ?
+## ✅ Question 36 — Engagement de la direction : quelles formes proposer, faut-il un rythme ou des points exigés, qui voit la page ?
 
 **Contexte.** ISO 45001 (§ 5.1) demande à la direction de montrer son engagement en santé et sécurité : en rendre compte, fixer la politique et les objectifs, donner les moyens, faire savoir que la santé-sécurité compte, soutenir l'encadrement, protéger ceux qui signalent un danger, faire vivre la consultation des travailleurs, soutenir l'instance… (13 points, notés a à m). L'engagement lui-même relève de la direction ; le logiciel a désormais une page **« Engagement de la direction »** (menu Pilotage) qui en garde les **traces** : chacune datée, avec qui (membre de la direction), sa forme, ce qui a été fait, dit ou décidé, son périmètre (toute l'organisation ou un service), sa preuve (compte rendu, courriel : référence ou lien) et les points du § 5.1 qu'elle illustre. Pour chaque point, la page montre le nombre de traces et la plus récente. La Préparation ISO 45001 la reprend pour l'exigence 5.1.
 
@@ -1094,11 +1095,15 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 **Options.** (A) Comme aujourd'hui : une liste de choix, des faits sans rythme ni point exigé, lu par l'encadrement et les représentants, pas repris par la revue de direction. (B) Un rythme ou des points à signaler (à préciser). (C) Lu par tous les comptes. (D) Repris par la revue de direction. Les options se combinent.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-21)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-23) : (A) comme aujourd'hui.** Aucune remarque.
+>
+> **Rien à changer** : les formes proposées restent une liste de choix ; des faits, sans rythme ni point exigé ; la page est tenue par le Préventeur (avec Administrateur et RH) et lue par l'encadrement et les représentants du personnel, pas par le profil Agent ; la revue de direction ne la reprend pas.
 
 ---
 
-## 🟠 Question 37 — Communication : quels sujets proposer, faut-il un rythme, que signaler, qui voit la page ?
+## ✅ Question 37 — Communication : quels sujets proposer, faut-il un rythme, que signaler, qui voit la page ?
 
 **Contexte.** ISO 45001 (§ 7.4) demande de déterminer quoi communiquer en santé et sécurité, quand, à qui (en interne, aux entreprises extérieures et aux visiteurs, aux autres parties intéressées) et comment, en tenant compte des langues, de l'accessibilité…, de prendre en compte l'avis des parties intéressées extérieures, et d'en garder des traces. Le logiciel a désormais une page **« Communication »** (menu Pilotage) : un **plan de communication** (pour chaque sujet : quoi, interne ou externe, à qui, quand, comment, par qui, adaptations, périmètre, en cours ou arrêté) et les **communications notées** — émises en interne, émises vers l'extérieur, ou reçues de l'extérieur avec la **suite donnée**. La Préparation ISO 45001 la reprend pour l'exigence 7.4 ; la revue de direction reprend les communications avec l'extérieur de sa période (rubrique « Communications avec les parties intéressées », jusqu'ici à remplir à la main).
 
@@ -1118,11 +1123,17 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 **Options.** (A) Comme aujourd'hui : pas de sujet de départ, des faits sans rythme vérifié, les reçues sans suite montrées sur la page seulement, lu par l'encadrement et les représentants. (B) Une liste de sujets de départ (à préciser). (C) Un rythme vérifié, les retards signalés. (D) Les reçues sans suite signalées (délai à préciser). (E) Lu par tous les comptes. Les options se combinent.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-21)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-23) : (A) comme aujourd'hui.** Aucune remarque.
+>
+> **Rien à changer** sur les points 1 à 4 : pas de sujet de départ ; « quand » reste un texte libre, sans rythme vérifié ; une communication reçue sans suite n'est montrée que sur la page ; lue par l'encadrement et les représentants, pas par le profil Agent.
+>
+> **Point 5 (résultats au personnel, § 10.3)** : la réponse ne le tranche pas explicitement. Mis en œuvre le 2026-10-23 dans le même esprit — une case facultative « résultats » sur un sujet du plan, ses communications internes reprises comme un fait par la Préparation ISO 45001, sans rythme ni signal — et soumis au préventeur en **question 40**.
 
 ---
 
-## 🟠 Question 38 — Documents : stocker les fichiers, qui approuve, faut-il une revue ou une durée de conservation ?
+## ✅ Question 38 — Documents : stocker les fichiers, qui approuve, faut-il une revue ou une durée de conservation ?
 
 **Contexte.** ISO 45001 (§ 7.5) demande que les documents du système (procédures, consignes, plans, enregistrements…) soient identifiés, revus et approuvés, disponibles là où il faut, protégés, tenus à jour d'une version à l'autre, conservés le temps voulu, et que les documents d'origine externe (textes, notices, rapports d'organismes) soient identifiés. Le registre des **documents officiels** de la Base documentaire a désormais un **circuit** : brouillon → à approuver (qui l'a soumis, quand) → en vigueur (qui l'a approuvé, quand) → obsolète. « Nouvelle version » prépare la suivante ; quand elle entre en vigueur, la précédente devient obsolète. Chaque document peut avoir une origine (interne ou externe), une date de revue (« À revoir le ») et une durée de conservation. La Préparation ISO 45001 le reprend pour l'exigence 7.5, désormais couverte.
 
@@ -1141,11 +1152,15 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 **Options.** (A) Comme aujourd'hui : liens, approbation notée sans compte désigné, rien d'imposé. (B) Dépôt des fichiers dans le logiciel. (C) Approbation par un compte désigné (à préciser par type). (D) Périodicités de revue ou durées de conservation proposées (à préciser). (E) Obsolètes réservés aux rédacteurs. Les options se combinent.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-21)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-23) : (A) comme aujourd'hui.** Aucune remarque.
+>
+> **Rien à changer** : les fichiers restent rangés par l'organisation (lien) ; l'approbation se note (qui, quand) sans compte désigné ; aucune périodicité de revue ni durée de conservation imposée ; les documents obsolètes restent lisibles.
 
 ---
 
-## 🟠 Question 39 — Achats : quels critères, qui demande, qui donne l'avis, faut-il un avis avant tout achat ?
+## ✅ Question 39 — Achats : quels critères, qui demande, qui donne l'avis, faut-il un avis avant tout achat ?
 
 **Contexte.** ISO 45001 (§ 8.1.4) demande de maîtriser les achats pour qu'ils soient conformes aux exigences de santé et de sécurité : un équipement, un produit, un service acheté ne doit pas introduire un risque qu'on n'a pas examiné. Le logiciel a désormais une page **« Achats et santé-sécurité »** (menu Sécurité & Risques) : une **demande d'achat** (objet, nature, usage, périmètre, demandeur, fournisseur) avec des **critères de santé-sécurité** proposés selon la nature, à cocher « oui », « non » ou « sans objet » ; puis un **avis** (favorable, favorable avec réserves, défavorable : qui, quand, réserves ou motif) ; puis la **suite** (achetée, abandonnée) avec un rappel de ce qui suit l'achat (ajouter le produit au registre des produits chimiques, prévoir les vérifications périodiques…). La Préparation ISO 45001 la reprend pour l'exigence 8.1.4, désormais couverte.
 
@@ -1165,7 +1180,29 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 **Options.** (A) Comme aujourd'hui : des critères proposés, un avis libre, un achat sans avis dit sans être bloqué, demandé par le Manager. (B) Des critères exigés (à préciser). (C) Les agents demandent aussi. (D) Un avis exigé (pour tout achat, ou au-delà d'un montant ou pour certaines natures : à préciser). (E) Les réserves deviennent des actions au Plan d'actions. (F) Un équipement nouveau ouvre une fiche de changement. Les options se combinent.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-21)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-23) : (A) comme aujourd'hui.** Aucune remarque.
+>
+> **Rien à changer** : des critères proposés selon la nature, à compléter ; un avis libre (un critère « non » n'interdit rien) ; un achat sans avis est dit, pas bloqué ; le Manager demande, le Préventeur (avec Administrateur et RH) donne l'avis ; les réserves ne deviennent pas des actions d'office.
+
+---
+
+## 🟠 Question 40 — Résultats au personnel : un sujet « résultats » du plan de communication suffit-il ?
+
+**Contexte.** ISO 45001 (§ 10.3, amélioration continue) demande notamment de **communiquer les résultats pertinents de l'amélioration continue aux travailleurs** et, s'il y en a, à leurs représentants. C'était le dernier point « en partie » de cette exigence ; la question 37 (point 5) le posait, et sa réponse (« comme aujourd'hui ») ne le tranchait pas explicitement.
+
+**Ce que fait le logiciel aujourd'hui, en attendant.** Depuis le 2026-10-23, un sujet du **plan de communication** (page « Communication ») peut être marqué d'une case facultative « Porte sur les résultats de la démarche santé-sécurité » : pastille « Résultats » au plan, colonne de l'export, mention à l'impression. Les **communications internes** notées pour ces sujets sont reprises par la **Préparation ISO 45001** en 10.3, comme un fait (« 2 communications des résultats au personnel, la plus récente le 15/01/2026 », ou « aucun sujet « résultats » au plan de communication »). **Rien n'est exigé ni signalé** : pas de rythme ; faute de communication, l'état de l'exigence ne change pas (comme la question 31 : des faits, on lit les dates soi-même). Le public est celui qu'on écrit (tous les agents, les membres de la F3SCT…) ; les communications vers l'extérieur et celles reçues ne comptent pas. Sur les données de test : aucun sujet marqué.
+
+**Les questions.**
+1. **Suffisant ?** — une communication notée sous un sujet « résultats » vous semble-t-elle une trace suffisante pour un auditeur ?
+2. **Rythme** — faut-il signaler, dans la Préparation ISO 45001, l'absence de communication des résultats depuis plus d'un an (ou une autre durée) ?
+3. **Représentants** — faut-il distinguer la communication aux représentants du personnel de celle à tout le personnel ?
+4. **Revue de direction** — doit-elle reprendre les communications des résultats de sa période ?
+
+**Options.** (A) Comme aujourd'hui : une case facultative, un fait, sans rythme. (B) Un signal au-delà d'une durée (à préciser). (C) Distinguer le personnel et ses représentants. (D) Reprise par la revue de direction. Les options se combinent.
+
+> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-23)._
 
 ---
 

@@ -1,6 +1,6 @@
 // Communication santé-sécurité (ISO 45001 § 7.4, 2026-10-21) : composant, page (plan, communications émises et reçues,
 // contrôles, filtres, export, impression, suppression, lecture seule, périmètre, mots du secteur), droits, menu, serveur,
-// Préparation ISO 45001, Revue de direction.
+// Préparation ISO 45001, Revue de direction ; résultats au personnel (§ 10.3, 2026-10-23).
 //   RACINE=<dossier> node test-communication.js
 const H = require('./harnais.js');
 const { check, fin } = H.bilan();
@@ -153,7 +153,7 @@ const ids = (p, tb) => [...p.d.querySelectorAll(`#${tb} tr[data-id]`)].map(r => 
   check('… un plan : « Des enregistrements », sujets, communications, reçues sans suite', etat74(pp).etat === 'pret' && /2 sujets au plan de communication \(1 interne, 1 externe\)/.test(faits(pp, '7.4')) && /3 communications notées, la plus récente le 02\/04\/2026/.test(faits(pp, '7.4')) && /1 communication reçue de l'extérieur, 1 sans suite notée/.test(faits(pp, '7.4')), faits(pp, '7.4').slice(0, 400));
   pp = await H.page('preparation-iso.html', PREV, { vigie_hse_news: J([{ id:'n1', titre:'x' }]) });
   check('… un Flash Info sans plan : « Des enregistrements » (comme avant)', etat74(pp).etat === 'pret' && /aucun sujet au plan/.test(faits(pp, '7.4')) && /1 Flash Info/.test(faits(pp, '7.4')));
-  check('… couverture : 25 couvertes, 2 en partie (documents et achats compris)', Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'couverte').length === 25 && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'partielle').length === 2);
+  check('… couverture : 26 couvertes, 1 en partie (documents, achats et résultats au personnel compris)', Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'couverte').length === 26 && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'partielle').length === 1);
   const lp = pp.w.VigiePreparation.evaluer(Object.assign({}, pp.w.VigieStore, { complet: (c) => c !== CLE }), pp.w.VigieDates.aujourdhui()).find(x => x.clause === '7.4');
   check('… registre partiel pour ce compte : « Non calculé »', lp.etat === 'partiel');
 
@@ -169,6 +169,47 @@ const ids = (p, tb) => [...p.d.querySelectorAll(`#${tb} tr[data-id]`)].map(r => 
   const ce = revue.chiffres && revue.chiffres.communicationsExternes;
   check('… photographiées avec la revue', ce && ce.emises === 1 && ce.recues === 1 && ce.sansSuite === 1 && ce.liste.length === 2, ce);
   check('… revue antérieure : rien ; registre partiel : non repris, et dit', rd.w.communicationsDeLaRevue({}) === '' && (rd.w.VigieStore.complet = () => false, rd.w.communicationsDuJour('2026-01-01', '2026-12-31') === null) && /Non repris/.test(rd.w.communicationsDeLaRevue({ communicationsExternes: null })));
+
+  // ---------- 9. Résultats au personnel (ISO 45001 § 10.3) ----------
+  const LR = [{ id:'r1', registre:'sujet', sujet:'Bilan de l\'année', sens:'interne', public:'Tous les agents', resultats:true },
+    { id:'r2', registre:'sujet', sujet:'Ancien bilan', sens:'interne', public:'Tous les agents', resultats:true, statut:'arrete' },
+    { id:'r3', registre:'sujet', sujet:'Consignes', sens:'interne', public:'Tous les agents' },
+    { id:'u1', registre:'trace', date: AN + '-01-15', sens:'interne', sujetId:'r1', objet:'Bilan présenté' },
+    { id:'u2', registre:'trace', date:'2024-02-01', sens:'interne', sujetId:'r2', objet:'Bilan 2023' },
+    { id:'u3', registre:'trace', date: AN + '-02-01', sens:'externe', sujetId:'r1', objet:'Bilan à l\'assureur' },
+    { id:'u4', registre:'trace', date: AN + '-03-01', sens:'interne', sujetId:'r3', objet:'Consignes' },
+    { id:'u5', registre:'trace', date: AN + '-03-02', sens:'recue', sujetId:'r1', objet:'Question' }];
+  const rr = C.resultatsAuPersonnel(LR, AN);
+  check('résultats au personnel : sujets « résultats » en cours, communications internes (sujet arrêté compris), de l\'année, la plus récente', rr.sujets === 1 && rr.traces === 2 && rr.annee === 1 && rr.derniere === AN + '-01-15' && C.surResultats(LR[0]) && !C.surResultats(LR[2]) && !C.surResultats({ resultats:'oui' }), rr);
+  check('… rien : zéros', J(C.resultatsAuPersonnel([], AN)) === J({ sujets:0, traces:0, annee:0, derniere:'' }) && J(C.resultatsAuPersonnel(null, AN)) === J({ sujets:0, traces:0, annee:0, derniere:'' }));
+  p = await H.page('communication.html', PREV, {});
+  p.$('btnNouveauSujet').click();
+  check('page : case « résultats » au nouveau sujet, décochée', !!p.$('cResultats') && !p.$('cResultats').checked && !p.$('cResultats').disabled);
+  p.$('cSujet').value = 'Résultats de l\'année'; p.$('cPublic').value = 'Tous les agents'; p.$('cResultats').checked = true;
+  p.ev(p.$('ficheForm'), 'submit');
+  const xr = (p.lire(CLE) || [])[0] || {};
+  check('… cochée : enregistrée (resultats: true), pastille « Résultats » au plan', xr.resultats === true && /Résultats/.test((p.d.querySelector('#tbPlan tr[data-id] td:nth-child(2)') || {}).textContent || ''));
+  p = await H.page('communication.html', PREV, { [CLE]: J(LR) }, '?ouvrir=r1');
+  check('… rouvert : cochée ; pastille pour r1, pas pour r3', p.$('cResultats').checked && /Résultats/.test(p.d.querySelector('#tbPlan tr[data-id="r1"] td:nth-child(2)').textContent) && !/Résultats/.test(p.d.querySelector('#tbPlan tr[data-id="r3"] td:nth-child(2)').textContent));
+  p.$('btnExport').click();
+  const plr = (p.ecrits[0] || {}).wb ? H.XLSX.utils.sheet_to_json(p.ecrits[0].wb.Sheets['Plan']) : [];
+  check('… export : colonne « Résultats (§ 10.3) »', plr.find(r => r['Identifiant'] === 'r1')['Résultats (§ 10.3)'] === 'Oui' && !plr.find(r => r['Identifiant'] === 'r3')['Résultats (§ 10.3)']);
+  p.$('btnImprimer').click();
+  check('… impression : « (résultats, § 10.3) » après le sujet', /Bilan de l'année \(résultats, § 10\.3\)/.test(p.$('com-impression').textContent) && !/Consignes \(résultats/.test(p.$('com-impression').textContent));
+  p = await H.page('communication.html', PREV, { [CLE]: J(LR) }, '?ouvrir=r1');
+  p.$('cResultats').checked = false; p.ev(p.$('ficheForm'), 'submit');
+  check('… décochée : le champ disparaît', !('resultats' in (p.lire(CLE) || []).find(z => z.id === 'r1')) && !p.erreurs.length, p.erreurs);
+  const pmr = await H.page('communication.html', MAN, { [CLE]: J(LR) }, '?ouvrir=r1');
+  check('… lecture seule (Manager) : case figée', pmr.$('cResultats').checked && pmr.$('cResultats').disabled);
+  const etat103 = (pp) => pp.w.VigiePreparation.evaluer(pp.w.VigieStore, pp.w.VigieDates.aujourdhui()).find(x => x.clause === '10.3');
+  pp = await H.page('preparation-iso.html', PREV, {});
+  check('préparation 10.3, rien : couverte, lien Communication, plus de « Manque », « aucun sujet « résultats » »', etat103(pp).etat === 'rien' && pp.w.VigiePreparation.COUVERTURE['10.3'].c === 'couverte' && !!pp.d.querySelector('tr[data-clause="10.3"] a[href="communication.html"]') && !/Manque/.test(faits(pp, '10.3')) && /aucun sujet « résultats » au plan de communication/.test(faits(pp, '10.3')));
+  pp = await H.page('preparation-iso.html', PREV, { [CLE]: J(LR) });
+  check('… des communications des résultats, sans action faite : « Des enregistrements », compte, la plus récente', etat103(pp).etat === 'pret' && new RegExp('2 communications des résultats au personnel, la plus récente le 15/01/' + AN).test(faits(pp, '10.3')) && /aucune action faite/.test(faits(pp, '10.3')));
+  pp = await H.page('preparation-iso.html', PREV, { [CLE]: J(LR.filter(x => x.registre === 'sujet')), vigie_hse_actions: J([{ id:'a1', titre:'x', statut:'Fait', dateRealisation: AJD }]) });
+  check('… une action faite, un sujet « résultats » sans communication : dit, sans jugement', etat103(pp).etat === 'pret' && /1 action faite/.test(faits(pp, '10.3')) && /aucune communication notée pour les sujets « résultats »/.test(faits(pp, '10.3')), faits(pp, '10.3'));
+  const lp3 = pp.w.VigiePreparation.evaluer(Object.assign({}, pp.w.VigieStore, { complet: (c) => c !== CLE }), pp.w.VigieDates.aujourdhui()).find(x => x.clause === '10.3');
+  check('… registre de communication partiel pour ce compte : « Non calculé »', lp3.etat === 'partiel');
 
   fin();
 })().catch(e => { console.error(e); process.exit(2); });

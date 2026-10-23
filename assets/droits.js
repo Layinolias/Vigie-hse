@@ -45,7 +45,7 @@
     mod("changements", "Sécurité & Risques", "Gestion des changements", STD),
     // Achats et santé-sécurité (ISO 45001 § 8.1.4, 2026-10-21) : avant un achat, les critères de santé-sécurité, l'avis,
     // la suite. Le Manager demande (il enregistre une demande, que le serveur n'accepte qu'en ajout) ; le Préventeur (avec
-    // Administrateur et RH) examine et donne l'avis ; les représentants du personnel lisent — question 39.
+    // Administrateur et RH) examine et donne l'avis ; les représentants du personnel lisent — question 39 (confirmé le 2026-10-23).
     mod("achats", "Sécurité & Risques", "Achats et santé-sécurité", [["consulter", "Consulter"], ["demander", "Demander un achat"], ["gerer", "Gérer (avis et suite)"]]),
     mod("actions", "Suivi", "Plan d'actions", STD),
     mod("sante-visites", "Suivi", "Santé & Visites", STD),
@@ -76,11 +76,11 @@
     mod("contexte", "Pilotage", "Contexte et enjeux", STD),
     // Engagement de la direction (ISO 45001 § 5.1, 2026-10-21) : les traces de l'engagement — visites, messages, décisions
     // sur les moyens… Comme le contexte : tenu par le Préventeur (avec Administrateur et RH), lu par le Manager et les
-    // représentants du personnel — question 36.
+    // représentants du personnel — question 36 (confirmé le 2026-10-23).
     mod("engagement-direction", "Pilotage", "Engagement de la direction", STD),
     // Communication (ISO 45001 § 7.4, 2026-10-21) : le plan de communication et les communications notées, émises et
     // reçues. Comme l'engagement de la direction : tenu par le Préventeur (avec Administrateur et RH), lu par le Manager
-    // et les représentants du personnel — question 37.
+    // et les représentants du personnel — question 37 (confirmé le 2026-10-23).
     mod("communication", "Pilotage", "Communication", STD),
     mod("reporting", "Pilotage", "Indicateurs & Reporting", [["consulter", "Consulter"]]),
     // Objectifs santé-sécurité (ISO 45001 § 6.2, 2026-10-13) : fixer, suivre, clore. Question 24 (2026-10-14) : fixés par le HSE

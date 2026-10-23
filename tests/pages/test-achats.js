@@ -153,7 +153,7 @@ const ids = (p) => [...p.d.querySelectorAll('#tbDemandes tr[data-id]')].map(r =>
   check('… des demandes : avis, à examiner, achat sans avis', etat(pp).etat === 'pret' && /3 demandes d'achat \(2 avec un avis, 0 à examiner\)/.test(faits(pp)) && /1 achat noté sans avis de santé-sécurité/.test(faits(pp)) && /aucune intervention d'entreprise extérieure/.test(faits(pp)), faits(pp).slice(0, 400));
   pp = await H.page('preparation-iso.html', PREV, { vigie_hse_interventions_ee: J([{ id:'e1' }]) });
   check('… une intervention d\'entreprise extérieure sans achat : « Des enregistrements » (comme avant)', etat(pp).etat === 'pret' && /1 intervention d'entreprise extérieure/.test(faits(pp)));
-  check('… couverture : 25 couvertes, 2 en partie', Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'couverte').length === 25 && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'partielle').length === 2);
+  check('… couverture : 26 couvertes, 1 en partie (résultats au personnel compris)', Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'couverte').length === 26 && Object.values(pp.w.VigiePreparation.COUVERTURE).filter(c => c.c === 'partielle').length === 1);
   const lp = pp.w.VigiePreparation.evaluer(Object.assign({}, pp.w.VigieStore, { complet: (c) => c !== CLE }), pp.w.VigieDates.aujourdhui()).find(x => x.clause === '8.1.4');
   check('… registre partiel pour ce compte : « Non calculé »', lp.etat === 'partiel');
 

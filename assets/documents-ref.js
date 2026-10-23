@@ -14,7 +14,7 @@
        précédente), remplacePar, dateObsolete, auteur, dateCreation }
 
    Des faits, sans jugement : aucune périodicité de revue ni durée de conservation n'est imposée, l'approbation se note
-   (qui, quand) sans compte désigné — question 38 au préventeur.
+   (qui, quand) sans compte désigné — question 38 : comme aujourd'hui, réponse du préventeur du 2026-10-23.
 ============================================================================ */
 (function (racine) {
   "use strict";

@@ -96,6 +96,7 @@
   table.reg td.long{ white-space:normal; min-width:160px; max-width:340px; }
   table.reg tr.retire td{ opacity:.6; }
   .coche-filtre{ display:flex; gap:7px; align-items:center; font-size:12.5px; color:var(--text-muted); cursor:pointer; }
+  .form-grid .coche-filtre{ display:flex; margin:0; font-size:12.5px; } .form-grid .coche-filtre input{ width:auto; flex-shrink:0; }
   .lien-lettre{ display:inline-block; margin-top:5px; font-size:12px; }
   .points-coches{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr)); gap:6px 18px; }
   .coche-point{ display:flex; gap:8px; align-items:flex-start; font-size:12.8px; line-height:1.45; cursor:pointer; }
@@ -230,7 +231,7 @@
         </div>
       </div>
 
-      <p class="footnote">Des faits, sans jugement : « quand » est un texte libre, aucun rythme n'est vérifié et aucun sujet n'est exigé (question 37 posée au préventeur) ; la page dit la dernière communication de chaque sujet et les communications reçues sans suite notée. D'autres canaux vivent ailleurs : le Flash Info et la veille au <a href="dashboard.html">tableau de bord</a>, les réponses du <a href="registre-sst.html">Registre SST</a>, le <a href="dialogue-social.html">Dialogue social</a>, la <a href="politique-sante-securite.html">politique</a> et sa prise de connaissance.</p>
+      <p class="footnote">Des faits, sans jugement : « quand » est un texte libre, aucun rythme n'est vérifié et aucun sujet n'est exigé (question 37 : comme aujourd'hui, réponse du préventeur) ; la page dit la dernière communication de chaque sujet et les communications reçues sans suite notée. Un sujet marqué « résultats » porte sur les résultats de la démarche : ses communications internes montrent, dans la Préparation ISO 45001, qu'ils sont portés à la connaissance du personnel (§ 10.3, question 40 posée au préventeur). D'autres canaux vivent ailleurs : le Flash Info et la veille au <a href="dashboard.html">tableau de bord</a>, les réponses du <a href="registre-sst.html">Registre SST</a>, le <a href="dialogue-social.html">Dialogue social</a>, la <a href="politique-sante-securite.html">politique</a> et sa prise de connaissance.</p>
     </div>
   </div>
 </div>
@@ -319,7 +320,7 @@
       .sort((a, b) => (VC.actif(b) - VC.actif(a)) || ((a.sens === "externe") - (b.sens === "externe")) || fr(a.sujet, b.sujet));
     $("tbPlan").innerHTML = plan.length ? plan.map(x => { const d = VC.derniere(l, x.id); return `<tr data-id="${esc(x.id)}"${VC.actif(x) ? "" : ` class="retire"`}>
         <td class="long"><b>${esc(x.sujet)}</b>${x.adaptations ? `<span class="ref">Adaptations : ${esc(x.adaptations)}</span>` : ""}${x.service ? `<span class="ref">${esc(x.service)}</span>` : ""}</td>
-        <td><span class="chip neutre">${sensSujet(x)}</span>${VC.actif(x) ? "" : ` <span class="chip neutre">Arrêté</span>`}</td>
+        <td><span class="chip neutre">${sensSujet(x)}</span>${VC.surResultats(x) ? ` <span class="chip neutre" title="Résultats de la démarche (ISO 45001 § 10.3)">Résultats</span>` : ""}${VC.actif(x) ? "" : ` <span class="chip neutre">Arrêté</span>`}</td>
         <td class="long">${esc(x.public || "—")}</td>
         <td class="long">${esc(x.quand || "—")}</td>
         <td class="long">${esc(x.canal || "—")}</td>
@@ -364,12 +365,12 @@
     const j = ajd(), l = tout(), parId = {};
     VC.sujets(l).forEach(x => { parId[x.id] = x; });
     const plan = VC.sujets(l).sort((a, b) => fr(a.sujet, b.sujet)).map(x => ({ "Identifiant": x.id, "Quoi": x.sujet, "Sens": sensSujet(x), "À qui": x.public || "", "Quand": x.quand || "", "Comment": x.canal || "",
-      "Par qui": x.responsable || "", "Adaptations": x.adaptations || "", "Périmètre": perimetre(x), "Statut": VC.actif(x) ? "En cours" : "Arrêté", "Dernière communication": dateFr(VC.derniere(l, x.id)) }));
+      "Par qui": x.responsable || "", "Adaptations": x.adaptations || "", "Périmètre": perimetre(x), "Statut": VC.actif(x) ? "En cours" : "Arrêté", "Résultats (§ 10.3)": VC.surResultats(x) ? "Oui" : "", "Dernière communication": dateFr(VC.derniere(l, x.id)) }));
     const comms = VC.triees(l).map(t => ({ "Identifiant": t.id, "Date": dateFr(t.date), "Sens": VC.libelleSens(t.sens) || "Émise en interne", "Sujet du plan": t.sujetId && parId[t.sujetId] ? parId[t.sujetId].sujet : "",
       "Ce qui a été communiqué ou reçu": t.objet || "", "À qui / de qui": t.public || "", "Comment": t.canal || "", "Par qui / reçue par": t.qui || "", "Suite donnée": VC.recue(t) ? (t.suite || "") : "",
       "Périmètre": perimetre(t), "Preuve": t.preuve || "", "Enregistré par": t.auteur || "" }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(plan, { header: ["Identifiant", "Quoi", "Sens", "À qui", "Quand", "Comment", "Par qui", "Adaptations", "Périmètre", "Statut", "Dernière communication"] }), "Plan");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(plan, { header: ["Identifiant", "Quoi", "Sens", "À qui", "Quand", "Comment", "Par qui", "Adaptations", "Périmètre", "Statut", "Résultats (§ 10.3)", "Dernière communication"] }), "Plan");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(comms, { header: ["Identifiant", "Date", "Sens", "Sujet du plan", "Ce qui a été communiqué ou reçu", "À qui / de qui", "Comment", "Par qui / reçue par", "Suite donnée", "Périmètre", "Preuve", "Enregistré par"] }), "Communications");
     XLSX.writeFile(wb, `communication_${j}.xlsx`);
   });
@@ -414,6 +415,7 @@
           <div class="span2">${champ("cAdaptations", "Adaptations", "adaptations", 200, "Langues, pictogrammes, lecture à voix haute, accessibilité…")}</div>
           <div><label for="cService">Périmètre</label><select id="cService"${dis}>${optionsService(courant.service || "")}</select></div>
           <div><label for="cStatut">Statut</label><select id="cStatut"${dis}><option value="">En cours</option><option value="arrete"${courant.statut === "arrete" ? " selected" : ""}>Arrêté</option></select></div>
+          <div class="span3"><label class="coche-filtre" for="cResultats"><input type="checkbox" id="cResultats"${VC.surResultats(courant) ? " checked" : ""}${dis}> Porte sur les résultats de la démarche santé-sécurité, à faire connaître au personnel et à ses représentants (ISO 45001 § 10.3)</label></div>
         </div>
         ${x ? `<div class="sec"><h4>Communications notées pour ce sujet</h4>
           ${liees.length ? `<div class="table-panel"><table class="reg" style="min-width:0;"><tbody>${liees.map(t => `<tr><td class="mono">${esc(dateFr(t.date))}</td><td class="long">${esc(t.objet || "")}</td><td class="long">${esc(t.public || "")}</td><td><button type="button" class="act-edit" data-trace-liee="${esc(t.id)}">Ouvrir</button></td></tr>`).join("")}</tbody></table></div>` : `<p class="vide">Aucune communication notée pour ce sujet.</p>`}
@@ -465,7 +467,7 @@
   const val = (id) => $(id) ? $(id).value.trim() : "";
 
   // Relit le formulaire dans l'enregistrement : les champs facultatifs vides ne sont pas gardés.
-  const F_SUJET = ["quand", "canal", "responsable", "adaptations", "statut", "service"];
+  const F_SUJET = ["quand", "canal", "responsable", "adaptations", "statut", "service", "resultats"];
   const F_TRACE = ["sujetId", "canal", "qui", "suite", "preuve", "service"];
   function sauver(x, facultatifs, prefixe){
     facultatifs.forEach(k => { if (!x[k]) delete x[k]; });
@@ -483,7 +485,7 @@
     if (!peutGerer || !courant) return null;
     if (sorte === "sujet"){
       const x = Object.assign({}, courant, { registre: "sujet", sujet: val("cSujet"), sens: val("cSens") === "externe" ? "externe" : "interne", public: val("cPublic"), quand: val("cQuand"),
-        canal: val("cCanal"), responsable: val("cResponsable"), adaptations: val("cAdaptations"), service: val("cService"), statut: val("cStatut") === "arrete" ? "arrete" : "" });
+        canal: val("cCanal"), responsable: val("cResponsable"), adaptations: val("cAdaptations"), service: val("cService"), statut: val("cStatut") === "arrete" ? "arrete" : "", resultats: $("cResultats") && $("cResultats").checked ? true : "" });
       if (!x.sujet){ alert("Indiquez quoi communiquer."); return null; }
       if (!x.public){ alert("Indiquez à qui."); return null; }
       if (!voitTout && !services.includes(x.service)){ alert("Choisissez un de vos services."); return null; }
@@ -580,7 +582,7 @@
       <h1>Communication santé-sécurité</h1>
       <p class="pi-meta">Édité le ${esc(dateFr(j))} · ${s.sujets} sujet${s.sujets > 1 ? "s" : ""} au plan (${s.internes} interne${s.internes > 1 ? "s" : ""}, ${s.externes} externe${s.externes > 1 ? "s" : ""}) · ${s.traces} communication${s.traces > 1 ? "s" : ""} notée${s.traces > 1 ? "s" : ""}${s.recues ? `, dont ${s.recues} reçue${s.recues > 1 ? "s" : ""} de l'extérieur (${s.recuesSansSuite} sans suite notée)` : ""}</p>
       <h2>Plan de communication (ISO 45001, § 7.4)</h2>
-      ${plan.length ? `<table><thead><tr><th>Quoi</th><th>Sens</th><th>À qui</th><th>Quand</th><th>Comment</th><th>Par qui</th><th>Adaptations</th><th>Périmètre</th><th>Dernière communication</th></tr></thead><tbody>${plan.map(x => `<tr><td>${esc(x.sujet)}</td><td>${sensSujet(x)}</td><td>${esc(x.public || "")}</td><td>${esc(x.quand || "")}</td><td>${esc(x.canal || "")}</td><td>${esc(x.responsable || "")}</td><td>${esc(x.adaptations || "")}</td><td>${esc(perimetre(x))}</td><td>${esc(dateFr(VC.derniere(l, x.id)) || "—")}</td></tr>`).join("")}</tbody></table>` : "<p>Aucun sujet en cours au plan de communication.</p>"}
+      ${plan.length ? `<table><thead><tr><th>Quoi</th><th>Sens</th><th>À qui</th><th>Quand</th><th>Comment</th><th>Par qui</th><th>Adaptations</th><th>Périmètre</th><th>Dernière communication</th></tr></thead><tbody>${plan.map(x => `<tr><td>${esc(x.sujet)}${VC.surResultats(x) ? " (résultats, § 10.3)" : ""}</td><td>${sensSujet(x)}</td><td>${esc(x.public || "")}</td><td>${esc(x.quand || "")}</td><td>${esc(x.canal || "")}</td><td>${esc(x.responsable || "")}</td><td>${esc(x.adaptations || "")}</td><td>${esc(perimetre(x))}</td><td>${esc(dateFr(VC.derniere(l, x.id)) || "—")}</td></tr>`).join("")}</tbody></table>` : "<p>Aucun sujet en cours au plan de communication.</p>"}
       <h2>Communications</h2>
       ${comms.length ? `<table><thead><tr><th>Date</th><th>Sens</th><th>Sujet du plan</th><th>Ce qui a été communiqué ou reçu</th><th>À qui / de qui</th><th>Comment</th><th>Par qui</th><th>Suite donnée</th><th>Preuve</th></tr></thead><tbody>${comms.map(t => `<tr><td>${esc(dateFr(t.date))}</td><td>${esc(VC.libelleSens(t.sens) || "Émise en interne")}</td><td>${esc(t.sujetId && parId[t.sujetId] ? parId[t.sujetId].sujet : "")}</td><td>${esc(t.objet || "")}</td><td>${esc(t.public || "")}</td><td>${esc(t.canal || "")}</td><td>${esc(t.qui || "")}</td><td>${VC.recue(t) ? esc(t.suite || "Sans suite notée") : ""}</td><td>${esc(t.preuve || "")}</td></tr>`).join("")}</tbody></table>` : "<p>Aucune communication notée.</p>"}`;
     document.body.appendChild(bloc);

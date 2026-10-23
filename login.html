@@ -127,6 +127,8 @@
 <script src="assets/marque.js"></script>
 <script src="assets/organisation.js"></script>
 <script src="assets/droits.js"></script>
+<script src="assets/dates-locales.js"></script>
+<script src="assets/demo.js"></script>
 <script>
   VigieOrga.preparer();   // textes [data-mots] dits avec les mots du secteur (assets/organisation.js)
   const SESSION_KEY = "vigie_hse_session";
@@ -239,7 +241,8 @@
         droits: r.droits,
         compte: { libelle: r.libelle, pastille: r.pastille },
       }));
-      location.href = "dashboard.html";
+      // site de démonstration : les registres des modules sans fichier Excel de démonstration (assets/demo.js)
+      VigieDemo.charger().then(() => { location.href = "dashboard.html"; });
     } else if (account && account.active === false){
       errorBox.textContent = "Ce compte a été désactivé. Contactez un administrateur.";
       errorBox.classList.add("show");

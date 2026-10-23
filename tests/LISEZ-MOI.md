@@ -75,7 +75,7 @@ node tests/avant-livraison.js
 
 ## Tests des pages (`tests/pages/`)
 
-Les tests jsdom des modules (une page, ses contrôles, ses droits, son export, ce que la Préparation ISO 45001 en lit) : 24 tests, 1 128 contrôles au 2026-10-23, une quarantaine de secondes. Ils vivaient dans le scratchpad de session et s'y effaçaient au nettoyage des fichiers temporaires de Windows (encore le 2026-10-21) ; ils sont dans le dépôt depuis ce jour, hors du paquet comme les tests de livraison.
+Les tests jsdom des modules (une page, ses contrôles, ses droits, son export, ce que la Préparation ISO 45001 en lit) : 25 tests, 1 157 contrôles au 2026-10-23, une quarantaine de secondes. Ils vivaient dans le scratchpad de session et s'y effaçaient au nettoyage des fichiers temporaires de Windows (encore le 2026-10-21) ; ils sont dans le dépôt depuis ce jour, hors du paquet comme les tests de livraison.
 
 ```
 node tests/pages/suite.js                    tous, trois à la fois

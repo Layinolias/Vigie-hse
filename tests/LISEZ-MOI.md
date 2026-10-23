@@ -15,7 +15,7 @@ node tests/avant-livraison.js
 
 - `npm install` installe jsdom (exécution des pages), une fois. `tests/node_modules/` n'est pas suivi par git.
 - Node.js 22.5 ou plus, comme le serveur. Sous Windows : `tar.exe` et `cmd.exe` du système, `git` (`C:\Program Files\Git\cmd\git.exe` s'il n'est pas dans le PATH).
-- `avant-livraison.js` lance les quatre tests dans l'ordre et donne un bilan.
+- `avant-livraison.js` lance les cinq tests dans l'ordre et donne un bilan.
   - Sans argument, la mise à jour est essayée depuis chaque paquet du tableau de `LIVRAISON-POSTE.md` qui n'a pas été remplacé ; on peut aussi donner les commits.
   - `--brouillon` : paquet d'essai avec les fichiers non commités (le vrai paquet exige un dépôt propre). Il s'appelle toujours `VIGIE-HSE-<date>-brouillon.zip`, même sur un dépôt propre : un essai ne remplace jamais le paquet du jour (avant le 2026-10-15, un essai sur un dépôt propre l'écrasait). À supprimer après l'essai.
 - Chaque test se lance aussi seul. `--garder` garde son dossier de travail, pris dans le dossier temporaire du système et effacé sinon.
@@ -63,6 +63,15 @@ node tests/avant-livraison.js
 - un mot de passe changé ferme les sessions ouvertes avec l'ancien, sauf celle de qui le change ; la même liste renvoyée avec le même mot de passe ne ferme rien ;
 - un compte qui ne peut qu'ajouter (signalements et leurs photos, prises de connaissance de la politique, Registre SST) signe ses ajouts du nom de sa session, quoi qu'envoie la page ; « Anonyme » reste possible au Registre SST ; une prise de connaissance au nom d'un autre est refusée ; qui gère le registre garde l'auteur qu'il saisit ;
 - serveur de démonstration : les comptes de démonstration inscrits comme avant, mais un compte nouveau demande aussi 12 caractères.
+
+**`test-copie-sauvegardes.js`** — la copie des sauvegardes hors du disque (2026-10-23), avec un vrai dossier de copie qu'on « débranche » :
+- réglée avant le lancement, la sauvegarde du démarrage y est recopiée à l'identique, sans fichier provisoire laissé ;
+- l'administrateur lit l'état et règle le dossier ; un agent rien (403), sans session non plus (401), ni sans l'en-tête `X-Vigie` ;
+- refusés : chemin relatif, dossier absent, le dossier des sauvegardes lui-même, un fichier — sans rien changer au réglage ;
+- dossier débranché : la sauvegarde est prise, la copie notée en échec avec son motif en clair ; après un redémarrage, le tableau de bord de l'administrateur en avertit (pas celui d'un agent, qui ne reçoit rien) ; rebranché, la copie reprend, l'avertissement disparaît, et seules les dernières restent (comme dans le dossier des sauvegardes) ;
+- Administration → Sauvegardes (ouverte par le lien du tableau de bord) : état affiché, refus du serveur montré en clair, autre dossier enregistré et noté au journal des modifications, champ vidé = copie arrêtée ;
+- `VIGIE_SAUVEGARDES_COPIE` l'emporte : la page ne peut plus le changer ;
+- « Restaurer une sauvegarde » propose les copies que le dossier des sauvegardes n'a plus.
 
 ## Tests des pages (`tests/pages/`)
 

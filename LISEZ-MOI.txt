@@ -66,8 +66,12 @@ Pour arrêter : fermer la fenêtre noire. Pour relancer : double-cliquer à nouv
     - vigie.db        : toutes vos données (un seul fichier) ;
     - sauvegardes\    : une copie complète chaque jour (les 14 dernières), et une copie avant chaque
                         nouvelle version de l'application.
-  Ces copies sont sur le même disque : copiez de temps en temps le dossier « sauvegardes » sur une
-  clé USB ou un disque externe, pour ne rien perdre si l'ordinateur tombe en panne.
+  Ces copies sont sur le même disque : si le disque tombe en panne, elles disparaissent avec vos
+  données. Pour l'éviter, branchez une clé USB ou un disque externe que vous laissez en place (ou
+  utilisez un dossier partagé du réseau), créez-y un dossier, puis dans VIGIE HSE :
+  Administration → Sauvegardes, indiquez ce dossier et cliquez sur « Enregistrer », puis sur
+  « Sauvegarder et copier maintenant » pour l'essayer. Chaque sauvegarde y est ensuite recopiée.
+  Si la copie échoue (clé débranchée…), le tableau de bord de l'administrateur le signale.
 
 
 8. INSTALLER UNE NOUVELLE VERSION
@@ -93,6 +97,12 @@ Pour arrêter : fermer la fenêtre noire. Pour relancer : double-cliquer à nouv
     consultations des données de santé) gardent leurs lignes, avec une ligne qui dit la restauration.
   - Relancer VIGIE HSE : chacun s'y reconnecte (les sessions ouvertes au moment de la sauvegarde
     ne reviennent pas).
+  - La liste comprend aussi les copies faites sur la clé ou le disque externe (section 7) que le
+    dossier « sauvegardes » n'a plus : branchez-le avant de lancer l'outil.
+  - Après une panne du disque, sur un nouvel ordinateur : installer VIGIE HSE, le lancer une fois
+    puis fermer la fenêtre noire, recopier les fichiers « vigie-….db » de la clé dans le dossier
+    C:\Users\<votre nom>\VIGIE HSE\sauvegardes\, puis double-cliquer sur
+    « Restaurer une sauvegarde.bat ».
 
 
 10. CONFIDENTIALITÉ

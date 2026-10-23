@@ -18,6 +18,8 @@
 // Sauvegardes (serveur/sauvegardes.js) : VIGIE_SAUVEGARDES (dossier, serveur/donnees/sauvegardes par défaut),
 // VIGIE_SAUVEGARDE_HEURES (24 ; 0 les désactive), VIGIE_SAUVEGARDES_GARDER (14). À chaque nouvelle version de
 // l'application (empreinte de ses fichiers), une copie de la base est prise avant qu'elle n'y écrive.
+// VIGIE_SAUVEGARDES_COPIE : second dossier, sur un autre disque, où chaque sauvegarde est recopiée — sinon réglé
+// dans Administration → Sauvegardes, depuis ce poste seulement (seule cette variable vaut sur le réseau).
 // VIGIE_DEMO=0 : les fichiers de démonstration (DATATEST/) ne sont pas servis — les pages, qui les importent
 // d'elles-mêmes quand elles les trouvent, restent vides (poste d'un utilisateur avec ses propres données) ; et au
 // premier lancement, l'écran de connexion fait créer le compte administrateur au lieu des comptes de démonstration.
@@ -38,6 +40,7 @@ const Anonymisation = require('./anonymisation.js');
 const Perimetre = require('./perimetre.js');
 const Lecture = require('./lecture.js');
 const Sauvegardes = require('./sauvegardes.js');
+let copie = null;   // copie des sauvegardes hors du disque (Sauvegardes.copieHorsDisque), posée au démarrage
 const Consultations = require('./consultations.js');   // qui a reçu quels registres de santé, et quand
 const Marque = require('../assets/marque.js');   // marque blanche : seul réglage (avec le secteur) transmis avant la connexion
 const Poste = require('./poste-commun.js');   // repère « base en service », lu par l'outil de restauration
@@ -132,6 +135,8 @@ function injection(session, chemin){
     // masquée) : une page qui fait des totaux sur l'organisation ne les calcule pas dessus (VigieStore.complet)
     etat.partielles = Lecture.partielles(tout, d);
     etat.droits = droits.resume(session.page);
+    // l'échec de la copie des sauvegardes hors du disque : à l'administrateur seul (son tableau de bord l'avertit)
+    if (copie && Consultations.peutLire(session.page)){ const e = copie.etat(); if (e.dossier && e.echec) etat.sauvegardes = { echec: e.echec }; }
   }
   else {
     etat.premierLancement = comptes.aucun();
@@ -236,6 +241,32 @@ async function api(req, res, chemin){
     if (!session || !Consultations.peutLire(session.page)) return repondre(res, 403, { erreur: "réservé à l'administrateur" });
     const depuis = new URL(req.url, 'http://x').searchParams.get('depuis');
     return repondre(res, 200, { jours: Consultations.JOURS, lignes: Consultations.lister(base, /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z)?$/.test(depuis || '') ? depuis : '') });
+  }
+
+  // sauvegardes et leur copie hors du disque : l'administrateur seul (Administration → Sauvegardes) ; le dossier de la
+  // copie ne se règle que depuis ce poste, et jamais sur un serveur ouvert au réseau (VIGIE_SAUVEGARDES_COPIE)
+  if (chemin.startsWith('/api/sauvegardes')){
+    if (!session || !Consultations.peutLire(session.page)) return repondre(res, 403, { erreur: "réservé à l'administrateur" });
+    const reglable = !RESEAU && depuisCePoste(req);
+    const reponse = () => Object.assign(copie.etat(), { reglable, sauvegardes: DOSSIER_SAUVEGARDES, heures: HEURES_SAUVEGARDE, garder: GARDER_SAUVEGARDES });
+    if (chemin === '/api/sauvegardes' && req.method === 'GET') return repondre(res, 200, reponse());
+    if (chemin === '/api/sauvegardes' && req.method === 'POST'){
+      if (!reglable) return repondre(res, 403, { erreur: RESEAU ? 'serveur ouvert au réseau : le dossier se règle sur le serveur (VIGIE_SAUVEGARDES_COPIE)' : 'à régler depuis le poste du serveur' });
+      let d; try { d = JSON.parse(await lireCorps(req, 4096)).dossier; } catch(e){ return repondre(res, 400, { erreur: 'requête illisible' }); }
+      const r = copie.regler(d);
+      if (r.refus) return repondre(res, 400, { erreur: r.refus });
+      journal('Copie des sauvegardes réglée par', session.page.user);
+      return repondre(res, 200, reponse());
+    }
+    // une sauvegarde maintenant, et sa copie : pour essayer le dossier choisi sans attendre la prochaine
+    if (chemin === '/api/sauvegardes/copier' && req.method === 'POST'){
+      if (!copie.dossier()) return repondre(res, 400, { erreur: 'aucun dossier de copie réglé' });
+      let f; try { f = Sauvegardes.sauvegarder(base, DOSSIER_SAUVEGARDES, GARDER_SAUVEGARDES); journal('Sauvegarde : ' + f + ' (demandée par ' + session.page.user + ')'); }
+      catch(e){ journal('SAUVEGARDE ÉCHOUÉE : ' + e.message); return repondre(res, 500, { erreur: 'sauvegarde impossible : ' + e.message }); }
+      await copie.copier(f);
+      return repondre(res, 200, reponse());
+    }
+    return repondre(res, 405, { erreur: 'méthode' });
   }
 
   if (chemin === '/api/effacer' && req.method === 'POST'){
@@ -385,11 +416,12 @@ Sauvegardes.avantMiseAJour(base, { dossier: DOSSIER_SAUVEGARDES, fichierVersion:
 const repris = comptes.reprendreAncienneBase();
 const refus = refusReseau();
 if (refus){ console.error('VIGIE HSE — ouverture au réseau refusée : ' + refus); base.fermer(); process.exit(1); }
+const HEURES_SAUVEGARDE = process.env.VIGIE_SAUVEGARDE_HEURES === undefined ? 24 : Number(process.env.VIGIE_SAUVEGARDE_HEURES);
+const GARDER_SAUVEGARDES = Number(process.env.VIGIE_SAUVEGARDES_GARDER) || 14;
+copie = Sauvegardes.copieHorsDisque({ fichierEtat: path.join(path.dirname(BASE), 'copie-sauvegardes.json'),
+  dossierServeur: process.env.VIGIE_SAUVEGARDES_COPIE || '', dossierSauvegardes: DOSSIER_SAUVEGARDES, garder: GARDER_SAUVEGARDES, journal });
 const arreterSauvegardes = Sauvegardes.planifier(base, {
-  dossier: DOSSIER_SAUVEGARDES,
-  heures: process.env.VIGIE_SAUVEGARDE_HEURES === undefined ? 24 : Number(process.env.VIGIE_SAUVEGARDE_HEURES),
-  garder: Number(process.env.VIGIE_SAUVEGARDES_GARDER) || 14,
-  journal });
+  dossier: DOSSIER_SAUVEGARDES, heures: HEURES_SAUVEGARDE, garder: GARDER_SAUVEGARDES, journal, apres: f => copie.copier(f) });
 const arreterPurge = Consultations.planifierPurge(base, journal);
 // tant que ce serveur tourne, restaurer.js refuse de toucher à la base (quels que soient protocole, adresse, port) —
 // posé une fois l'écoute réussie : un second serveur refusé (port déjà pris) n'écrase pas celui du premier

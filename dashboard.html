@@ -496,6 +496,7 @@
     <div class="content">
       <div class="panel politique-rappel" id="politiqueRappel" style="display:none;"></div>
       <div class="panel politique-rappel" id="duerpRappel" style="display:none;"></div>
+      <div class="panel politique-rappel" id="sauvegardeRappel" style="display:none; border-left-color:var(--danger);"></div>
       <section class="kpi-row kpi-row-compact">
         <div class="panel kpi">
           <div class="kpi-top"><div class="kpi-icon blue"><svg class="icon"><use href="#i-activity"/></svg></div></div>
@@ -770,6 +771,15 @@
           $("duerpRappel").innerHTML = `<svg class="icon"><use href="#i-alert-triangle"/></svg><p><b>Document unique à mettre à jour</b> : ${chg.length} changement${chg.length > 1 ? "s le demandent" : " le demande"} — ${chg.slice(0, 3).map(c => "« " + esc(c.titre || "") + " »").join(", ")}${chg.length > 3 ? "…" : ""}.</p><a class="btn btn-ghost" href="changements.html?attention=duerp">Voir</a>`;
           $("duerpRappel").style.display = "";
         }
+      }
+    } catch(e){}
+    // Copie des sauvegardes hors du disque en échec (mode serveur) : le serveur ne la transmet qu'à l'administrateur
+    try {
+      const echec = window.__VIGIE_SERVEUR__ && window.__VIGIE_SERVEUR__.sauvegardes && window.__VIGIE_SERVEUR__.sauvegardes.echec;
+      const q = echec ? new Date(echec.quand) : null;
+      if (q && !isNaN(q)){
+        $("sauvegardeRappel").innerHTML = `<svg class="icon" style="color:var(--danger);"><use href="#i-alert-triangle"/></svg><p><b>Copie des sauvegardes hors du disque : échec le ${esc(q.toLocaleDateString("fr-FR"))} à ${esc(q.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }))}</b> — ${esc(echec.message || "")}. Tant qu'elle échoue, une panne du disque emporterait les données et leurs sauvegardes.</p><a class="btn btn-ghost" href="administration.html#sauvegardes">Voir</a>`;
+        $("sauvegardeRappel").style.display = "";
       }
     } catch(e){}
     // Signalements (question 20) : à traiter pour qui les traite (ses services), sinon ses propres signalements

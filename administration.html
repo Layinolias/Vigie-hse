@@ -201,6 +201,7 @@
         <button class="admin-tab" data-tab="audit"><svg class="icon"><use href="#i-history"/></svg> Journal des modifications</button>
         <button class="admin-tab" data-tab="personne"><svg class="icon"><use href="#i-key"/></svg> Données d'une personne</button>
         <button class="admin-tab" data-tab="consult"><svg class="icon"><use href="#i-shield-check"/></svg> Consultations</button>
+        <button class="admin-tab" data-tab="sauv"><svg class="icon"><use href="#i-download"/></svg> Sauvegardes</button>
       </div>
 
       <!-- ===================== A. UTILISATEURS ===================== -->
@@ -503,6 +504,29 @@
         </div>
       </section>
 
+      <!-- ===================== G. SAUVEGARDES ET COPIE HORS DU DISQUE ===================== -->
+      <section class="tab-panel" id="tab-sauv">
+        <div class="panel section-block" style="padding:20px;">
+          <div class="panel-head">
+            <h3 class="panel-title">Sauvegardes</h3>
+            <span class="panel-note" id="sauvNote"></span>
+          </div>
+          <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px; max-width:78ch;">Le serveur prend régulièrement une copie complète des données, sur le même disque que la base : elle protège d'une erreur de saisie ou d'une base abîmée, <b>pas d'une panne du disque</b>. Choisissez ici un second dossier, sur un autre support — clé USB ou disque externe laissés branchés, dossier partagé du réseau : chaque sauvegarde y est recopiée, et les plus anciennes y sont retirées de la même façon. Si la copie échoue (clé débranchée, partage absent), votre tableau de bord vous en avertit.</p>
+          <div id="sauvHorsServeur" hidden style="font-size:13px; color:var(--text-muted); padding:12px 14px; border:1px dashed var(--border); border-radius:var(--r-sm);">Les sauvegardes sont prises par le serveur <span data-marque="nom">VIGIE HSE</span> : elles n'existent pas quand les données sont gardées dans ce navigateur.</div>
+          <div id="sauvServeur" hidden>
+            <p id="sauvPlan" style="font-size:13px; line-height:1.6; margin:0 0 14px; max-width:78ch;"></p>
+            <div class="field-grid" style="max-width:820px; grid-template-columns:1fr auto auto; align-items:end; margin-bottom:8px;">
+              <div class="f"><label for="sauvDossier">Dossier de la copie hors du disque</label><input type="text" id="sauvDossier" placeholder="Par exemple E:\Sauvegardes VIGIE" spellcheck="false" autocomplete="off"></div>
+              <div class="f"><button type="button" class="btn btn-primary" id="sauvEnregistrer">Enregistrer</button></div>
+              <div class="f"><button type="button" class="btn btn-ghost" id="sauvCopier"><svg class="icon"><use href="#i-download"/></svg> Sauvegarder et copier maintenant</button></div>
+            </div>
+            <p id="sauvReglage" style="font-size:12px; color:var(--text-muted); margin:0 0 14px;"></p>
+            <div id="sauvEtat" style="font-size:13px; line-height:1.6; max-width:78ch;"></div>
+            <p style="font-size:12px; color:var(--text-muted); line-height:1.6; margin:14px 0 0; max-width:78ch;"><b>Après une panne du disque</b> : sur le nouveau poste, lancez une première fois l'application puis fermez-la, recopiez les fichiers <span class="mono">vigie-….db</span> de la copie dans son dossier des sauvegardes, et lancez « Restaurer une sauvegarde » (guide LISEZ-MOI, section 9). Tant que ce réglage existe, la restauration propose aussi les copies que le dossier des sauvegardes n'a plus.</p>
+          </div>
+        </div>
+      </section>
+
       <div class="panel section-block" style="padding:20px; margin-top:18px;">
         <div class="panel-head">
           <h3 class="panel-title" id="stockTitre">Stockage de ce navigateur</h3>
@@ -645,6 +669,70 @@
         XLSX.writeFile(wb, "consultations-donnees-sante_" + VigieDates.aujourdhui() + ".xlsx");
         logAudit("Administration", "Extraction", "Export du journal des consultations des données de santé : " + l.length + " ligne(s)");
       });
+    }
+  }
+  // ---------- Sauvegardes et leur copie hors du disque (tenues par le serveur, serveur/sauvegardes.js) ----------
+  const sauvQuand = (iso) => { const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString("fr-FR") + " à " + d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }); };
+  let sauvVu = null;
+  function sauvAppel(chemin, corps){
+    const api = (window.__VIGIE_SERVEUR__ && window.__VIGIE_SERVEUR__.api) || "/api/";
+    const options = corps === undefined ? { credentials: "same-origin", cache: "no-store" }
+      : { method: "POST", credentials: "same-origin", cache: "no-store", headers: { "Content-Type": "application/json", "X-Vigie": "1" }, body: JSON.stringify(corps) };
+    return fetch(api + chemin, options).then(r => r.json().catch(() => ({})).then(d => r.ok ? d : Promise.reject(new Error(d.erreur || "erreur " + r.status))));
+  }
+  function sauvMessage(texte, erreur){
+    $("sauvNote").textContent = texte || "";
+    $("sauvNote").style.color = erreur ? "var(--danger)" : "";
+  }
+  function sauvAfficher(e){
+    sauvVu = e;
+    $("sauvPlan").innerHTML = e.heures > 0
+      ? `Une sauvegarde toutes les <b>${esc(e.heures)} h</b> dans <span class="mono">${esc(e.sauvegardes)}</span> ; les ${esc(e.garder)} plus récentes sont gardées.`
+      : `Les sauvegardes planifiées sont désactivées sur ce serveur : rien n'est recopié tant qu'elles le restent (« Sauvegarder et copier maintenant » reste possible).`;
+    $("sauvDossier").value = e.dossier || "";
+    const modifiable = e.reglable && e.source !== "serveur";
+    $("sauvDossier").disabled = !modifiable; $("sauvEnregistrer").disabled = !modifiable;
+    $("sauvCopier").disabled = !e.dossier;
+    $("sauvReglage").textContent = e.source === "serveur" ? "Réglé sur le serveur (variable VIGIE_SAUVEGARDES_COPIE) : il ne se change pas d'ici."
+      : !e.reglable ? "Ce dossier ne se règle que sur le poste où tourne le serveur, à cette adresse-là — sur un serveur ouvert au réseau, par la variable VIGIE_SAUVEGARDES_COPIE."
+      : "Un chemin complet, vers un dossier qui existe. Vider le champ puis « Enregistrer » arrête la copie.";
+    const l = [];
+    if (!e.dossier) l.push(`<span class="chip manager">Aucune copie hors du disque</span> Une panne du disque emporterait les données et leurs sauvegardes.`);
+    else {
+      if (e.memeDisque) l.push(`<span class="chip manager">Même disque</span> Ce dossier est sur le même disque que les sauvegardes : il ne protège pas d'une panne du disque.`);
+      if (e.echec) l.push(`<span class="chip active-no">Échec</span> Dernière copie tentée le ${esc(sauvQuand(e.echec.quand))} : ${esc(e.echec.message)}.`);
+      if (e.derniere) l.push(`<span class="chip active-yes">Réussie</span> Dernière copie réussie le ${esc(sauvQuand(e.derniere.quand))} (<span class="mono">${esc(e.derniere.fichier)}</span>).`);
+      if (!e.echec && !e.derniere) l.push(`Pas encore de copie dans ce dossier : la prochaine sauvegarde y sera recopiée — ou « Sauvegarder et copier maintenant ».`);
+    }
+    $("sauvEtat").innerHTML = l.map(x => `<p style="margin:0 0 6px;">${x}</p>`).join("");
+  }
+  function sauvCharger(){
+    sauvMessage("Chargement…");
+    sauvAppel("sauvegardes").then(e => { sauvMessage(""); sauvAfficher(e); })
+      .catch(err => { sauvMessage("L'état des sauvegardes n'a pas pu être lu : " + err.message, true); });
+  }
+  {
+    const serveur = VigieStore.mode && VigieStore.mode() === "serveur";
+    $("sauvServeur").hidden = !serveur; $("sauvHorsServeur").hidden = serveur;
+    if (serveur){
+      document.querySelector('[data-tab="sauv"]').addEventListener("click", sauvCharger);
+      $("sauvEnregistrer").addEventListener("click", () => {
+        const dossier = $("sauvDossier").value.trim();
+        if (sauvVu && dossier === (sauvVu.dossier || "")) return;
+        $("sauvEnregistrer").disabled = true; sauvMessage("Vérification du dossier…");
+        sauvAppel("sauvegardes", { dossier }).then(e => {
+          sauvAfficher(e);
+          sauvMessage(dossier ? "Dossier enregistré." : "Copie hors du disque arrêtée.");
+          logAudit("Administration", "Modification", dossier ? "Copie des sauvegardes hors du disque : " + e.dossier : "Copie des sauvegardes hors du disque arrêtée");
+        }).catch(err => { $("sauvEnregistrer").disabled = false; sauvMessage("Non enregistré : " + err.message + ".", true); });
+      });
+      $("sauvCopier").addEventListener("click", () => {
+        $("sauvCopier").disabled = true; sauvMessage("Sauvegarde et copie en cours…");
+        sauvAppel("sauvegardes/copier", {}).then(e => { sauvAfficher(e); sauvMessage(e.echec && !(e.derniere && e.derniere.quand > e.echec.quand) ? "La copie a échoué." : "Sauvegarde copiée.", !!e.echec); })
+          .catch(err => { $("sauvCopier").disabled = false; sauvMessage(err.message, true); });
+      });
+      // lien du tableau de bord (copie échouée) : administration.html#sauvegardes
+      if (location.hash === "#sauvegardes") document.querySelector('[data-tab="sauv"]').click();
     }
   }
   $("persForm").addEventListener("submit", (e) => {

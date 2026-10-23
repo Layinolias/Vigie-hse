@@ -30,6 +30,7 @@ function remplir(n, auditIds){
     const ecrire = (cle, valeur) => { const t = b.lireTout()[cle]; b.ecrire(cle, valeur, t ? t.revision : 0); };
     ecrire('vigie_hse_dataset', JSON.stringify(l));
     ecrire('vigie_hse_users', JSON.stringify([{ id: 'u1', email: 'admin@verchamps.fr', profils: ['p-admin'] }]));
+    b.ouvrirSession('session-essai-' + n, 'u1', Date.now() + 8 * 3600000);   // une session en cours, copiée avec la base
     ecrire('vigie_hse_audit_log', JSON.stringify((auditIds || []).map(id => ({ id, timestamp: new Date().toISOString(), utilisateur: 'admin', module: 'Test', type: 'Modification', description: id }))));
   } finally { b.fermer(); }
 }
@@ -96,6 +97,7 @@ function processusVivant(){ return spawn(process.execPath, ['-e', 'setTimeout(()
         const audit = JSON.parse(b.lire('vigie_hse_audit_log') || '[]');
         verif('journaux reportés : la ligne postérieure à la copie reprise, la restauration inscrite', audit.some(x => x.id === 'a-3') && audit.some(x => x.type === 'Restauration'), audit.map(x => x.id));
         verif('… et la consultation de données de santé reprise', b.consultations('', 1e9).length >= 1);
+        verif('… les sessions de la copie fermées : chacun se reconnecte', !b.lireSession('session-essai-5') && /chacun s'y reconnecte/.test(r.sortie));
       } finally { b.fermer(); } }
 
     // 5. VIGIE HSE redémarre sur la base remise en place

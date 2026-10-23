@@ -16,6 +16,7 @@
 //   ouvrirSession(empreinteJeton, idCompte, expire) / lireSession(empreinteJeton) / prolongerSession(…, expire)
 //   fermerSession(empreinteJeton) / purgerSessions(maintenant)
 //   fermerSessionsCompte(idCompte, sauf) : toutes ses sessions, sauf celle dont l'empreinte de jeton est « sauf »
+//   fermerToutesSessions()             : toutes, tous comptes (après une restauration : chacun se reconnecte)
 // Consultations des données de santé (serveur/consultations.js) — jamais transmises aux pages :
 //   noterConsultation(compte, page, registres) / consultations(depuisIso, limite) / purgerConsultations(avantIso)
 //   reprendreConsultations(lignes) — restauration : ajoute celles postérieures à la dernière ligne de la base
@@ -64,6 +65,7 @@ function ouvrir(fichier){
     fermerSessionsCompte: db.prepare('DELETE FROM sessions WHERE compte = ?'),
     fermerAutresSessions: db.prepare('DELETE FROM sessions WHERE compte = ? AND jeton <> ?'),
     purgerSessions: db.prepare('DELETE FROM sessions WHERE expire < ?'),
+    fermerToutesSessions: db.prepare('DELETE FROM sessions'),
     purgerHistorique: db.prepare('DELETE FROM historique WHERE cle = ?'),
     noterConsultation: db.prepare('INSERT INTO consultations (quand, compte, page, registres) VALUES (?, ?, ?, ?)'),
     derniereConsultation: db.prepare('SELECT MAX(quand) AS quand FROM consultations'),
@@ -137,6 +139,7 @@ function ouvrir(fichier){
     fermerSession: jeton => { q.fermerSession.run(jeton); },
     fermerSessionsCompte: (compte, sauf) => { if (sauf) q.fermerAutresSessions.run(compte, sauf); else q.fermerSessionsCompte.run(compte); },
     purgerSessions: t => { q.purgerSessions.run(t); },
+    fermerToutesSessions: () => { q.fermerToutesSessions.run(); },
     // journal des consultations des données de santé (serveur/consultations.js) : registres = JSON
     noterConsultation: (compte, page, registres) => { q.noterConsultation.run(maintenant(), compte, page, JSON.stringify(registres)); },
     consultations: (depuis, limite) => q.consultations.all(depuis || '', limite).map(l => Object.assign({}, l, { registres: JSON.parse(l.registres) })),

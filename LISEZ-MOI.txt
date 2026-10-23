@@ -91,7 +91,8 @@ Pour arrêter : fermer la fenêtre noire. Pour relancer : double-cliquer à nouv
   - Attention : tout ce qui a été saisi après la date de la sauvegarde disparaît, et les comptes
     et mots de passe reviennent eux aussi à cette date. Seuls les journaux (modifications,
     consultations des données de santé) gardent leurs lignes, avec une ligne qui dit la restauration.
-  - Relancer VIGIE HSE.
+  - Relancer VIGIE HSE : chacun s'y reconnecte (les sessions ouvertes au moment de la sauvegarde
+    ne reviennent pas).
 
 
 10. CONFIDENTIALITÉ

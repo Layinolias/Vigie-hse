@@ -11,7 +11,9 @@
 //   5. les données actuelles sont d'abord mises de côté (sauvegardes\vigie-avant-restauration-….db, les
 //      5 dernières gardées) : une restauration se défait avec ce même outil ;
 //   6. la copie remplace vigie.db, sans fichier -wal ni -shm résiduel, puis la base remise en place est
-//      vérifiée à son tour.
+//      vérifiée à son tour ;
+//   7. les sessions de la copie sont fermées : une session fermée depuis (déconnexion, mot de passe changé) ne se
+//      rouvre pas — chacun se reconnecte.
 //
 // Mêmes variables que serveur/lancer-poste.js : VIGIE_DOSSIER, VIGIE_BASE, VIGIE_SAUVEGARDES, PORT.
 'use strict';
@@ -147,11 +149,13 @@ function mettreDeCote(){
   fs.renameSync(temporaire, BASE);
   const apres = examiner(BASE);
   if (!apres.ok) fin(1, 'La base remise en place ne se lit pas (' + apres.raison + ').' + (deCote ? '\nVos données d\'avant sont dans : ' + deCote : ''));
+  try { const b = ouvrir(BASE); try { b.fermerToutesSessions(); } finally { b.fermer(); } }
+  catch(e){ console.log('\n  Attention : les sessions de la sauvegarde n\'ont pas pu être fermées (' + e.message + ').'); }
   let repris = null;
   try { repris = reporterJournaux(deCote, choisie); } catch(e){ console.log('\n  Attention : les journaux postérieurs à la sauvegarde n\'ont pas pu être repris (' + e.message + ').'); }
 
   fin(0, '  C\'est fait : vos données sont revenues au ' + date(choisie.quand) + ' (' + contenu(apres) + ').' +
     (deCote ? '\n  Celles d\'avant sont gardées dans : ' + deCote : '') +
     (repris ? '\n  Repris depuis la sauvegarde : ' + repris.audit + ' ligne(s) du journal des modifications, ' + repris.consultations + ' consultation(s) de données de santé — ces journaux ne reviennent pas en arrière.' : '') +
-    '\n  Relancez VIGIE HSE (« Lancer VIGIE HSE.bat »).');
+    '\n  Relancez VIGIE HSE (« Lancer VIGIE HSE.bat ») : chacun s\'y reconnecte.');
 })();

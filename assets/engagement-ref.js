@@ -12,7 +12,7 @@
        lien), auteur, dateCreation, modifiePar, dateMaj }
 
    Des faits, sans jugement (comme la Préparation ISO 45001, question 31) : aucun rythme n'est imposé, aucun point
-   n'est exigé ; la page dit combien de traces chaque point a, et la plus récente — question 36 au préventeur.
+   n'est exigé ; la page dit combien de traces chaque point a, et la plus récente — question 36 : comme aujourd'hui, réponse du préventeur du 2026-10-23.
 ============================================================================ */
 (function (racine) {
   "use strict";

@@ -8,7 +8,8 @@
 
    Un registre, une clé (vigie_hse_communication), deux sortes d'enregistrements :
      un sujet du plan : { id, registre:"sujet", sujet (quoi), sens: "interne"|"externe", public (à qui), quand,
-       canal (comment), responsable (par qui), adaptations (langues, pictogrammes, accessibilité…), statut (absent :
+       canal (comment), responsable (par qui), adaptations (langues, pictogrammes, accessibilité…), resultats (true : porte sur les résultats de la
+       démarche, § 10.3), statut (absent :
        en cours ; "arrete"), service (absent : toute l'organisation), auteur, dateCreation, modifiePar, dateMaj }
      une communication notée : { id, registre:"trace", date, sens: "interne"|"externe"|"recue", sujetId (sujet du plan,
        facultatif), objet, public (à qui, ou de qui pour une communication reçue), canal, qui (par qui, ou reçue par),
@@ -16,7 +17,9 @@
 
    Des faits, sans jugement : « quand » est un texte libre, aucun rythme n'est vérifié, aucun sujet n'est exigé ;
    la page dit la dernière communication de chaque sujet, et les communications reçues sans suite notée —
-   question 37 au préventeur.
+   question 37 : comme aujourd'hui, réponse du préventeur du 2026-10-23.
+   Les résultats au personnel (§ 10.3) : un sujet du plan peut porter sur les résultats de la démarche ; ses
+   communications internes en sont la trace, reprise comme un fait (sans rythme) — question 40 au préventeur.
 ============================================================================ */
 (function (racine) {
   "use strict";
@@ -45,6 +48,7 @@
   const triees = (l) => traces(l).slice().sort((a, b) => b.date.localeCompare(a.date) || String(b.dateCreation || "").localeCompare(String(a.dateCreation || "")));
   const tracesDe = (l, sujetId) => triees(l).filter(t => t.sujetId === sujetId);
   const derniere = (l, sujetId) => { const t = tracesDe(l, sujetId)[0]; return t ? t.date : ""; };
+  const surResultats = (s) => !!s && s.resultats === true;
 
   // Le compte : sujets en cours (internes, externes), arrêtés, communications (de l'année), reçues et sans suite,
   // sujets en cours sans communication notée
@@ -64,6 +68,18 @@
       derniere: t.map(x => x.date).sort().pop() || "",
     };
   }
+  // Les résultats de la démarche portés à la connaissance du personnel (§ 10.3) : les communications internes des
+  // sujets « résultats » — un sujet arrêté garde ses communications passées
+  function resultatsAuPersonnel(l, annee) {
+    const s = sujets(l).filter(surResultats), ids = new Set(s.map(x => x.id)), an = String(annee || "");
+    const t = traces(l).filter(x => x.sens !== "externe" && !recue(x) && ids.has(x.sujetId));
+    return {
+      sujets: s.filter(actif).length,
+      traces: t.length,
+      annee: an ? t.filter(x => x.date.slice(0, 4) === an).length : 0,
+      derniere: t.map(x => x.date).sort().pop() || "",
+    };
+  }
   // Les communications d'une période (bornes comprises), la plus ancienne d'abord
   const pourPeriode = (l, debut, fin) => traces(l).filter(t => t.date >= debut && t.date <= fin).sort((a, b) => a.date.localeCompare(b.date));
   // Pour la revue de direction (§ 9.3) : les communications avec l'extérieur de la période, émises et reçues
@@ -80,6 +96,6 @@
   racine.VigieCommunication = {
     CLE: CLE, SENS_SUJET: SENS_SUJET, SENS_TRACE: SENS_TRACE, libelleSens: libelleSens, PUBLICS: PUBLICS, QUAND: QUAND, CANAUX: CANAUX,
     sujets: sujets, traces: traces, actif: actif, recue: recue, sansSuite: sansSuite, triees: triees, tracesDe: tracesDe, derniere: derniere,
-    synthese: synthese, pourPeriode: pourPeriode, pourRevue: pourRevue,
+    surResultats: surResultats, resultatsAuPersonnel: resultatsAuPersonnel, synthese: synthese, pourPeriode: pourPeriode, pourRevue: pourRevue,
   };
 })(typeof window !== "undefined" ? window : this);

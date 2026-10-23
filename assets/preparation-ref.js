@@ -53,7 +53,7 @@
     "9.3": { c: "couverte", pages: [P("revue-direction.html", "Revue de direction")] },
     "10.1": { c: "hors", pages: [], manque: "la démarche dans son ensemble" },
     "10.2": { c: "couverte", pages: [P("signalements.html", "Signalements"), P("registre-at-mp.html", "Registre AT/MP"), P("accident-analyse.html", "Analyse d'accident"), P("plan-actions.html", "Plan d'actions")] },
-    "10.3": { c: "partielle", pages: [P("plan-actions.html", "Plan d'actions"), P("reporting.html", "Indicateurs & Reporting"), P("revue-direction.html", "Revue de direction")], manque: "la communication des résultats au personnel" },
+    "10.3": { c: "couverte", pages: [P("plan-actions.html", "Plan d'actions"), P("reporting.html", "Indicateurs & Reporting"), P("revue-direction.html", "Revue de direction"), P("communication.html", "Communication")] },
   };
   const LIBELLES_COUVERTURE = { couverte: "Couverte", partielle: "En partie", hors: "Hors outil" };
   const LIBELLES = { pret: "Des enregistrements", areprendre: "Des points à reprendre", rien: "Aucun enregistrement", hors: "Hors outil", partiel: "Non calculé" };
@@ -240,12 +240,17 @@
         return [I.paAVerifier ? "areprendre" : "pret", [pl(I.sigTotal, "signalement", "signalements"), pl(I.atTotal, "accident ou maladie", "accidents ou maladies"), pl(I.paEfficaces, "action jugée efficace", "actions jugées efficaces")]
           .concat(I.paAVerifier ? [pl(I.paAVerifier, "action faite dont l'efficacité est à vérifier", "actions faites dont l'efficacité est à vérifier")] : [])];
       } },
-      "10.3": { cles: [K.actions, K.objectifs], f: () => {
-        if (!I || !I.paFait) return ["rien", ["aucune action faite"]];
-        return ["pret", [pl(I.paFait, "action faite", "actions faites") + ", " + pl(I.paEfficaces, "jugée efficace", "jugées efficaces"), pl(lire(K.objectifs).filter(o => o && o.id).length, "objectif", "objectifs")]];
+      "10.3": { cles: [K.actions, K.objectifs, K.communication], f: () => {
+        // les résultats portés à la connaissance du personnel : les communications internes des sujets « résultats »
+        // du plan de communication, un fait sans rythme (questions 37 et 40)
+        const r = VCo.resultatsAuPersonnel(lire(K.communication), aujourdhui.slice(0, 4));
+        const res = r.traces ? pl(r.traces, "communication des résultats au personnel", "communications des résultats au personnel") + ", la plus récente le " + dateFr(r.derniere)
+          : r.sujets ? "aucune communication notée pour les sujets « résultats » du plan de communication" : "aucun sujet « résultats » au plan de communication";
+        if (!I || !I.paFait) return [r.traces ? "pret" : "rien", ["aucune action faite", res]];
+        return ["pret", [pl(I.paFait, "action faite", "actions faites") + ", " + pl(I.paEfficaces, "jugée efficace", "jugées efficaces"), pl(lire(K.objectifs).filter(o => o && o.id).length, "objectif", "objectifs"), res]];
       } },
     };
-    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.1": VE, "5.2": VP, "7.4": VCo, "7.5": VD, "8.1.4": VAc, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
+    const MODULES = { "4.1": VX, "4.2": VX, "4.3": VX && VO, "5.1": VE, "5.2": VP, "7.4": VCo, "7.5": VD, "8.1.4": VAc, "10.3": VCo, "5.3": VR, "6.1.1": VX, "6.1.2": VC, "6.1.3": VK, "8.1.2": VM, "8.1.3": VC, "9.1.2": VK, "9.2": VA };
     const audits = VA ? lire(K.audits) : [], cv = VA && complet([K.audits]) ? VA.couverture(audits, actions, aujourdhui) : [];
     const clauses = VA ? VA.CLAUSES : Object.keys(COUVERTURE).map(c => [c, c]);
     return clauses.map(([clause, nom]) => {

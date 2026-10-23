@@ -13,7 +13,7 @@
        dateSuite, noteSuite, auteur, dateCreation, modifiePar, dateMaj }
 
    Les critères sont des propositions, pas une liste réglementaire : chacun en ajoute, en marque « sans objet », et
-   l'avis reste libre (un critère « non » n'interdit rien) — question 39 au préventeur.
+   l'avis reste libre (un critère « non » n'interdit rien) — question 39 : comme aujourd'hui, réponse du préventeur du 2026-10-23.
 ============================================================================ */
 (function (racine) {
   "use strict";
@@ -21,7 +21,7 @@
   const CLE = "vigie_hse_achats";
   const NATURES = ["Équipement de travail (machine, outil, appareil)", "Produit chimique", "Équipement de protection individuelle (EPI)",
     "Véhicule ou engin", "Mobilier, poste de travail", "Prestation ou sous-traitance", "Autre"];
-  // Critères proposés : communs à toute demande, puis selon la nature (propositions à valider — question 39)
+  // Critères proposés : communs à toute demande, puis selon la nature (propositions, confirmées par le préventeur — question 39)
   const COMMUNS = ["Les futurs utilisateurs ont été consultés", "Les risques à l'usage ont été examinés (document unique)",
     "La formation ou l'habilitation nécessaire est identifiée"];
   const PAR_NATURE = {

@@ -205,6 +205,10 @@ Ajouté le 2026-09-23 : la page le demandait depuis sa création, mais il n'avai
 
 ---
 
+## Fichier 13 — `13-DEMO-modules.json` (écrit à la main le 2026-10-23, pas par Gemini)
+
+Les modules construits après les fichiers 1 à 12 n'ont pas d'import Excel de démonstration. Leurs données sont dans un seul fichier JSON, une clé de stockage par registre, chargé à la connexion par `assets/demo.js` (ajout des seuls identifiants absents). Une histoire, cohérente avec les fichiers Excel : presque-accidents (Espaces Verts, Voirie, cuisine centrale…), l'analyse en arbre des causes de l'accident n° 22 (`dtst-atmp-22`, chute dans le hall de l'hôtel de ville), les actions qui en sortent, puis le pilotage (politique, objectifs, conformité, audit interne, revue de direction, rôles, contexte, communication, engagement de la direction). Dates relatives (`"J-12"`, `"J+30"`, `"J-3T08:55"`, `{A}` / `{A-1}` pour l'année) : la démonstration reste d'actualité. Pour en ajouter : respecter le modèle de données de la clé (`ETAT-DU-PROJET.md` §8), un identifiant `…-demo-…` fixe, et relancer `node tests/pages/test-demo.js`.
+
 ## Livraison attendue
 
 - 10 fichiers `.xlsx` nommés comme indiqué, un fichier par lien de téléchargement (le Fichier 10 contient 2 onglets dans le même fichier).

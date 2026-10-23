@@ -4,7 +4,7 @@
 
 ## 🔗 Version cliquable en ligne
 
-Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 257 points au 2026-10-23 :
+Depuis le 2026-09-15, ces points existent aussi sur une page où l'on coche vraiment (persistant, y compris depuis le téléphone), avec un champ de note par point pour signaler ce qui coince directement à l'endroit concerné — 258 points au 2026-10-23 :
 
 **https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf**
 
@@ -25,6 +25,7 @@ Ce fichier-ci reste la version de référence (diff dans l'historique du dépôt
 - [ ] La grille des modules est complète et lisible : 24 cartes, dans l'ordre du menu latéral (de « Registre AT/MP » à « Administration »), chacune avec son icône.
 - [ ] Le bouton "Accéder à la démonstration" mène bien à l'écran de connexion.
 - [ ] Le bouton "Réinitialiser les données de démonstration" fonctionne (demande confirmation, puis redirige vers la connexion).
+- [ ] **Données de démonstration des modules récents** : dans une fenêtre privée, se connecter sur le site en ligne en `admin@verchamps.fr` : le tableau de bord montre le rappel de la politique à lire et trois Flash Info ; Signalements liste 6 presque-accidents (dont 1 en retard), Objectifs 3 objectifs, Conformité réglementaire 5 exigences, Audit interne 2 audits, Revue de direction une revue validée de février ; Analyse d'accident (après avoir ouvert le Registre AT/MP) : l'accident de Camille Girard du 22/01 analysé en arbre des causes. Les dates sont celles des jours précédents (« il y a 3 jours »…). Se déconnecter et se reconnecter : rien n'est en double.
 - [ ] Basculer le thème du système (clair/sombre) et recharger la page : les couleurs suivent bien.
 
 ## 2. Connexion

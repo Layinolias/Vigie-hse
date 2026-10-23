@@ -33,6 +33,7 @@
 const http = require('http'), https = require('https'), fs = require('fs'), path = require('path');
 const { ouvrir } = require('./base-sqlite.js');
 const Comptes = require('./comptes.js');
+const crypto = require('crypto');
 const Anonymisation = require('./anonymisation.js');
 const Perimetre = require('./perimetre.js');
 const Lecture = require('./lecture.js');
@@ -75,7 +76,7 @@ const journal = (...m) => console.log(new Date().toLocaleString('fr-FR') + ' ' +
 const droits = require('./droits.js');   // droits d'écriture par registre, appliqués ici
 
 // Aucune page ne s'affiche dans le cadre d'un autre site (clic détourné) ; aucun lien sortant ne révèle
-// l'adresse du serveur. La politique reste courte : les pages ont leurs scripts dans le HTML même.
+// l'adresse du serveur. Les scripts : voir politiqueScripts, ajoutée à chaque page servie.
 const ENTETES = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
   'Content-Security-Policy': "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'", 'Referrer-Policy': 'same-origin' };
 function repondre(res, statut, corps, type, entetes){
@@ -84,6 +85,15 @@ function repondre(res, statut, corps, type, entetes){
   res.end(type ? corps : JSON.stringify(corps));
 }
 const texte = (res, statut, t, entetes) => repondre(res, statut, t, 'text/plain; charset=utf-8', entetes);
+// Une page n'exécute que ses propres scripts : ceux d'assets/ et ceux qu'elle porte, chacun par son empreinte — un
+// script glissé dans une donnée affichée ne s'exécute pas. L'empreinte se calcule sur la page telle que servie (état
+// injecté compris), fins de ligne CRLF lues comme LF, comme le fait le navigateur. Les pages n'ont aucun « onclick=… ».
+function politiqueScripts(page){
+  const empreintes = new Set();
+  for (const m of page.matchAll(/<script>([\s\S]*?)<\/script>/gi))
+    empreintes.add("'sha256-" + crypto.createHash('sha256').update(m[1].replace(/\r\n?/g, '\n'), 'utf8').digest('base64') + "'");
+  return ENTETES['Content-Security-Policy'] + "; script-src 'self' " + [...empreintes].join(' ');
+}
 
 function jetonDe(req){
   const c = String(req.headers.cookie || '').split(';').map(x => x.trim()).find(x => x.startsWith(COOKIE + '='));
@@ -155,15 +165,22 @@ function signerJournal(avant, valeur, utilisateur){
 // Un dépôt au Registre SST peut rester « Anonyme », comme la page le propose. Une prise de connaissance porte l'identifiant
 // du compte (assets/politique-ref.js, idLecture) : un autre est refusé, il empêcherait ce compte d'enregistrer la sienne.
 // Le Registre AT/MP n'a pas de champ auteur : qui déclare est inscrit au journal d'audit, signé (signerJournal).
+// Une photo ajoutée vise un signalement nouveau (la page écrit les photos juste avant lui) ou un des siens, jamais celui
+// d'un autre (lire : la lecture d'un registre du serveur).
 const SIGNES = new Set(['vigie_hse_signalements', 'vigie_hse_signalements_photos', 'vigie_hse_politique_lectures', 'vigie_hse_rsst']);
-function signerAjouts(cle, avant, valeur, utilisateur){
-  let l, connus;
+function signerAjouts(cle, avant, valeur, utilisateur, lire){
+  let l, connus, signalements = null;
   try { l = JSON.parse(valeur); connus = new Set((JSON.parse(avant || '[]') || []).map(r => r && String(r.id))); } catch(e){ return { valeur }; }
   if (!Array.isArray(l)) return { valeur };
   let change = false;
   for (const r of l){
     if (!r || typeof r !== 'object' || connus.has(String(r.id))) continue;
-    if (cle === 'vigie_hse_politique_lectures' && r.id !== 'lu-' + r.versionId + '-' + utilisateur) return { refus: true };
+    if (cle === 'vigie_hse_politique_lectures' && r.id !== 'lu-' + r.versionId + '-' + utilisateur) return { refus: 'prise de connaissance au nom d\'un autre' };
+    if (cle === 'vigie_hse_signalements_photos'){
+      if (!signalements){ try { signalements = JSON.parse(lire('vigie_hse_signalements') || '[]'); } catch(e){} if (!Array.isArray(signalements)) signalements = []; }
+      const s = signalements.find(x => x && String(x.id) === String(r.signalementId));
+      if (s && s.auteur !== utilisateur) return { refus: 'photo sur le signalement d\'un autre' };
+    }
     if (cle === 'vigie_hse_rsst' && r.auteur === 'Anonyme') continue;
     if (r.auteur !== utilisateur){ r.auteur = utilisateur; change = true; }
   }
@@ -187,10 +204,10 @@ async function api(req, res, chemin){
   if (chemin === '/api/connexion' && req.method === 'POST'){
     const corps = await lireCorps(req, TAILLE_CONNEXION);
     let d = {}; try { d = JSON.parse(corps) || {}; } catch(e){}
-    const r = comptes.connecter(d.identifiant, d.motDePasse);
+    const r = await comptes.connecter(d.identifiant, d.motDePasse, req.socket.remoteAddress);
     if (!r.ok){
       journal('connexion refusée :', String(d.identifiant || '').slice(0, 60), '(' + r.erreur + ')');
-      return repondre(res, r.erreur === 'attente' ? 429 : 401, { ok: false, erreur: r.erreur, secondes: r.secondes });
+      return repondre(res, r.erreur === 'attente' ? 429 : r.erreur === 'occupe' ? 503 : 401, { ok: false, erreur: r.erreur, secondes: r.secondes });
     }
     journal('connexion :', r.session.user);
     return repondre(res, 200, { ok: true, session: r.session }, null, { 'Set-Cookie': poserCookie(r.jeton) });
@@ -252,9 +269,9 @@ async function api(req, res, chemin){
     }
     if (session && cle === CLE_AUDIT && valeur !== null) valeur = signerJournal(base.lire(cle), valeur, session.page.user);
     if (session && valeur !== null && SIGNES.has(cle) && droits.niveau(session.page, cle) === 'ajout'){
-      const s = signerAjouts(cle, base.lire(cle), valeur, session.page.user);
+      const s = signerAjouts(cle, base.lire(cle), valeur, session.page.user, k => base.lire(k));
       if (s.refus){
-        journal('écriture refusée (prise de connaissance au nom d\'un autre) :', cle, 'par', session.page.user);
+        journal('écriture refusée (' + s.refus + ') :', cle, 'par', session.page.user);
         return repondre(res, 403, { erreur: 'droits insuffisants' });
       }
       valeur = s.valeur;
@@ -299,6 +316,9 @@ function fichier(req, res, chemin){
   const type = TYPES[path.extname(f).toLowerCase()];
   if (!type) return texte(res, 404, '404');
   const html = path.extname(f).toLowerCase() === '.html';
+  // sans session, hors des pages : assets/ seulement (ce que demandent la vitrine et l'écran de connexion) ; un export
+  // ou une note rangés par erreur dans le dossier de l'application ne sortent pas
+  if (!html && segments[0] !== 'assets' && !comptes.session(jetonDe(req))) return texte(res, 404, '404');
   let session = null;
   const entetes = {};
   if (html){
@@ -316,7 +336,8 @@ function fichier(req, res, chemin){
     if (html){
       const page = data.toString('utf8'), balise = '<script src="assets/stockage.js"></script>';
       // lue à chaque page : on voit toujours la dernière version enregistrée par quiconque
-      return repondre(res, 200, page.includes(balise) ? page.replace(balise, injection(session, chemin) + balise) : page, type, entetes);
+      const corps = page.includes(balise) ? page.replace(balise, injection(session, chemin) + balise) : page;
+      return repondre(res, 200, corps, type, Object.assign({ 'Content-Security-Policy': politiqueScripts(corps) }, entetes));
     }
     repondre(res, 200, data, type);
   });

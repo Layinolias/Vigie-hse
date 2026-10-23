@@ -96,6 +96,11 @@ const connecte = async (port, pot) => (await H.requete(port, 'GET', '/api/donnee
     const stPh = await ajouter(potAgent2, 'vigie_hse_signalements_photos', { id: 'sph-essai-1', signalementId: 'sig-essai-1', auteur: ADMIN[0], data: '' });
     verif('signalement et photo ajoutés au nom d\'un autre : signés du nom de l\'agent',
       stSig === 200 && stPh === 200 && (await stocke('vigie_hse_signalements', 'sig-essai-1') || {}).auteur === agent.username && (await stocke('vigie_hse_signalements_photos', 'sph-essai-1') || {}).auteur === agent.username, { stSig, stPh });
+    const stSigA = await ajouter(potA, 'vigie_hse_signalements', { id: 'sig-admin-1', date: '2026-10-18', description: 'Celui de l\'administrateur', auteur: ADMIN[0] });
+    const stPhAutre = await ajouter(potAgent2, 'vigie_hse_signalements_photos', { id: 'sph-essai-2', signalementId: 'sig-admin-1', data: '' });
+    const stPhNeuf = await ajouter(potAgent2, 'vigie_hse_signalements_photos', { id: 'sph-essai-3', signalementId: 'sig-a-venir', data: '' });
+    verif('photo : sur le signalement d\'un autre refusée (403) ; sur un signalement à venir (la page écrit les photos d\'abord) acceptée',
+      stSigA === 200 && stPhAutre === 403 && stPhNeuf === 200 && !(await stocke('vigie_hse_signalements_photos', 'sph-essai-2')), { stSigA, stPhAutre, stPhNeuf });
     const stLuAutre = await ajouter(potAgent2, 'vigie_hse_politique_lectures', { id: 'lu-pol-1-' + ADMIN[0], versionId: 'pol-1', auteur: ADMIN[0], le: '2026-10-18' });
     const stLu = await ajouter(potAgent2, 'vigie_hse_politique_lectures', { id: 'lu-pol-1-' + agent.username, versionId: 'pol-1', auteur: ADMIN[0], le: '2026-10-18' });
     verif('prise de connaissance : au nom d\'un autre refusée (403) ; la sienne signée de son nom',
@@ -106,6 +111,21 @@ const connecte = async (port, pot) => (await H.requete(port, 'GET', '/api/donnee
       stSst === 200 && stAno === 200 && (await stocke('vigie_hse_rsst', 'rsst-essai-1') || {}).auteur === agent.username && (await stocke('vigie_hse_rsst', 'rsst-essai-2') || {}).auteur === 'Anonyme', { stSst, stAno });
     const stAdm = await ajouter(potA, 'vigie_hse_rsst', { id: 'rsst-import-1', date: '2026-10-18', observation: 'Import', auteur: 'Durand Paul' });
     verif('qui gère le registre (droits complets) garde l\'auteur qu\'il saisit ou importe', stAdm === 200 && (await stocke('vigie_hse_rsst', 'rsst-import-1') || {}).auteur === 'Durand Paul', stAdm);
+
+    // ---------- 3. une page n'exécute que ses scripts ; hors assets/, rien sans session ----------
+    const empreinte = s => "'sha256-" + require('crypto').createHash('sha256').update(s.replace(/\r\n?/g, '\n'), 'utf8').digest('base64') + "'";
+    const csp = async (page, pot) => { const r = await H.requete(PORT_POSTE, 'GET', '/' + page, { pot }); return { r, c: String(r.entetes['content-security-policy'] || '') }; };
+    const { r: pg, c: c1 } = await csp('dashboard.html', potA), { r: lg, c: c2 } = await csp('login.html', H.nouveauPot());
+    const scripts = [...pg.texte.matchAll(/<script>([\s\S]*?)<\/script>/gi)].map(m => empreinte(m[1]));
+    verif('CSP : script-src \'self\' et l\'empreinte de chaque script de la page (état injecté compris), sans unsafe-inline ; l\'écran de connexion aussi',
+      pg.statut === 200 && /; script-src 'self' 'sha256-/.test(c1) && scripts.length > 2 && scripts.every(h => c1.includes(h)) && !/unsafe-inline/.test(c1) && /frame-ancestors 'none'/.test(c1)
+      && lg.statut === 200 && /script-src 'self' 'sha256-/.test(c2) && [...lg.texte.matchAll(/<script>([\s\S]*?)<\/script>/gi)].every(m => c2.includes(empreinte(m[1]))), c1.slice(0, 160));
+    const gestionnaires = H.pages(path.resolve(__dirname, '..')).filter(p => /\son[a-z]+="/i.test(require('fs').readFileSync(path.resolve(__dirname, '..', p), 'utf8')));
+    verif('aucune page n\'a de gestionnaire en ligne (« onclick=… ») : la CSP les bloquerait', gestionnaires.length === 0, gestionnaires);
+    const sans = await H.requete(PORT_POSTE, 'GET', '/Documentation/ETAT-DU-PROJET.md'), avec = await H.requete(PORT_POSTE, 'GET', '/Documentation/ETAT-DU-PROJET.md', { pot: potA });
+    const asset = await H.requete(PORT_POSTE, 'GET', '/assets/stockage.js');
+    verif('fichiers hors assets/ : 404 sans session, servis avec ; assets/ servis sans session (vitrine, connexion)',
+      sans.statut === 404 && avec.statut === 200 && asset.statut === 200, { sans: sans.statut, avec: avec.statut, asset: asset.statut });
     await srv.arreter(); srv = null;
 
     // ---------- serveur de démonstration : rien ne change ----------
@@ -117,6 +137,31 @@ const connecte = async (port, pot) => (await H.requete(port, 'GET', '/api/donnee
     c = await lireComptes(PORT_DEMO, potD);
     const stDemo = await ecrireComptes(PORT_DEMO, potD, c.liste.concat([Object.assign({ password: '1234' }, agent)]), c.revision);
     verif('… mais un compte nouveau y demande aussi 12 caractères', stDemo === 403, stDemo);
+
+    // ---------- 4. connexion : pause par adresse et identifiant, plafond par adresse, calculs bornés ----------
+    const Base = require('../serveur/base-sqlite.js'), Comptes = require('../serveur/comptes.js');
+    const b = Base.ouvrir(path.join(D, 'unitaire.db')), MDPU = 'Unitaire-essai-2026';
+    try {
+      b.remplacer('vigie_hse_users', JSON.stringify([{ id: 'u1', username: 'cible', email: 'cible@exemple.fr', profils: ['p-agent'], services: ['*'], active: true }]));
+      b.poserEmpreinte('u1', Comptes.hacher(MDPU));
+      const cpt = Comptes.creer(b);
+      for (let i = 0; i < Comptes.ESSAIS_MAX; i++) await cpt.connecter('cible', 'faux', '10.0.0.5');
+      const rA = await cpt.connecter('cible', MDPU, '10.0.0.5'), rB = await cpt.connecter('cible', MDPU, '10.0.0.6');
+      verif('5 échecs depuis une adresse : pause pour elle seule (même le bon mot de passe y attend) ; depuis une autre, le compte se connecte',
+        rA.erreur === 'attente' && rA.secondes > 0 && rB.ok === true, { rA, rB: rB.ok || rB });
+      for (let i = 0; i < Comptes.ESSAIS_ADRESSE; i++) await cpt.connecter('inconnu-' + i, 'faux', '10.0.0.7');
+      const rC = await cpt.connecter('cible', MDPU, '10.0.0.7');
+      let rL; for (let i = 0; i < Comptes.ESSAIS_ADRESSE; i++) rL = await cpt.connecter('autre-' + i, 'faux', '127.0.0.1');
+      const rL2 = await cpt.connecter('cible', MDPU, '127.0.0.1');
+      verif('30 échecs d\'une adresse du réseau sur des identifiants différents : pause pour elle ; ce poste (127.0.0.1, tous ses utilisateurs) n\'a pas ce plafond',
+        rC.erreur === 'attente' && rL.erreur === 'invalide' && rL2.ok === true, { rC, rL, rL2: rL2.ok || rL2 });
+      let tic = 0; const minuteur = setInterval(() => tic++, 5);
+      const salve = await Promise.all(Array.from({ length: 60 }, (_, i) => cpt.connecter('salve-' + i, 'faux', '127.0.0.1')));
+      clearInterval(minuteur);
+      const occupes = salve.filter(r => r.erreur === 'occupe').length;
+      verif('60 essais simultanés : deux calculs à la fois, 50 en attente, 8 « occupé » ; le serveur reste libre pendant le calcul',
+        occupes === 8 && salve.filter(r => r.erreur === 'invalide').length === 52 && tic > 10, { occupes, tic });
+    } finally { b.fermer(); }
   } catch(e){
     verif('exécution sans exception', false, e.stack || String(e));
   } finally {

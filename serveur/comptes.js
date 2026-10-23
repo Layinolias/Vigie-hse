@@ -16,7 +16,14 @@ const VigieDroits = require('../assets/droits.js');   // profils et catalogue de
 const CLE_COMPTES = 'vigie_hse_users';
 const CLE_PROFILS = 'vigie_hse_profils';
 const DUREE_SESSION = 8 * 3600 * 1000;       // sans activité pendant 8 h, il faut se reconnecter
-const ESSAIS_MAX = 5, PAUSE = 5 * 60 * 1000; // 5 échecs de suite sur un identifiant : 5 min de pause
+// 5 échecs de suite sur un identifiant depuis une adresse : 5 min de pause pour cette adresse seule (un tiers ne peut
+// plus bloquer un compte qu'il connaît en se trompant exprès) ; une adresse du réseau : 30 échecs au plus en 15 min,
+// tous identifiants confondus (essais en série sur beaucoup de comptes)
+const ESSAIS_MAX = 5, PAUSE = 5 * 60 * 1000;
+const ESSAIS_ADRESSE = 30, FENETRE = 15 * 60 * 1000;
+// le calcul d'une empreinte est volontairement coûteux : à la connexion, il tourne hors de la boucle du serveur
+// (crypto.scrypt), deux à la fois au plus — les autres attendent leur tour, au-delà de 50 en attente : « occupé »
+const CALCULS_MAX = 2, ATTENTE_MAX = 50;
 const SCRYPT = { N: 16384, r: 8, p: 1 };
 const MDP_MIN = 12;   // longueur minimale d'un mot de passe choisi (création, changement) — même seuil dans login.html et administration.html
 // les comptes de démonstration (mots de passe publiés dans le dépôt)
@@ -35,6 +42,15 @@ function verifier(motDePasse, empreinte){
   const calcule = crypto.scryptSync(String(motDePasse), Buffer.from(sel, 'base64'), attendu.length, { N: +N, r: +r, p: +p });
   return crypto.timingSafeEqual(calcule, attendu);
 }
+// la même vérification, sans bloquer le serveur pendant le calcul
+function verifierAsync(motDePasse, empreinte){
+  const [algo, N, r, p, sel, h] = String(empreinte || '').split('$');
+  if (algo !== 'scrypt' || !sel || !h) return Promise.resolve(false);
+  const attendu = Buffer.from(h, 'base64');
+  return new Promise(ok => crypto.scrypt(String(motDePasse), Buffer.from(sel, 'base64'), attendu.length, { N: +N, r: +r, p: +p },
+    (err, calcule) => ok(!err && crypto.timingSafeEqual(calcule, attendu))));
+}
+const BOUCLE = ['127.0.0.1', '::1', '::ffff:127.0.0.1'];   // ce poste : tous ses utilisateurs ont la même adresse
 const EMPREINTE_LEURRE = hacher(crypto.randomBytes(12).toString('hex'));   // même durée de calcul pour un identifiant inconnu
 const empreinteJeton = jeton => crypto.createHash('sha256').update(String(jeton)).digest('hex');
 
@@ -50,7 +66,16 @@ function sessionDePage(u, profils){
 
 // options.demo : serveur de démonstration (VIGIE_DEMO) — les comptes de démonstration y gardent leur mot de passe court
 function creer(base, options = {}){
-  const echecs = new Map();   // identifiant → { n, jusqua }
+  const echecs = new Map();      // « adresse|identifiant » → { n, jusqua }
+  const parAdresse = new Map();  // adresse du réseau → { debut, n }
+  let calculs = 0; const file = [];
+  // f() en limitant les calculs simultanés ; null si la file d'attente est pleine
+  function calculer(f){
+    const lancer = () => f().finally(() => { const suivant = file.shift(); if (suivant) suivant(); else calculs--; });
+    if (calculs < CALCULS_MAX){ calculs++; return lancer(); }
+    if (file.length >= ATTENTE_MAX) return Promise.resolve(null);
+    return new Promise(ok => file.push(ok)).then(lancer);
+  }
 
   function comptes(){
     try { const l = JSON.parse(base.lire(CLE_COMPTES) || '[]'); return Array.isArray(l) ? l : []; }
@@ -127,20 +152,39 @@ function creer(base, options = {}){
     return comptes().find(u => u && (String(u.username || '').toLowerCase() === id || String(u.email || '').toLowerCase() === id)) || null;
   }
 
-  function connecter(identifiant, motDePasse){
-    const cle = String(identifiant || '').trim().toLowerCase();
-    const maintenant = Date.now(), e = echecs.get(cle);
-    if (e && e.jusqua > maintenant) return { ok: false, erreur: 'attente', secondes: Math.ceil((e.jusqua - maintenant) / 1000) };
+  // une pause en cours pour cette adresse et cet identifiant, ou pour cette adresse : la fin de l'attente, sinon 0
+  function enPause(paire, adresse, maintenant){
+    const e = echecs.get(paire), a = BOUCLE.includes(adresse) ? null : parAdresse.get(adresse);
+    if (e && e.jusqua > maintenant) return e.jusqua;
+    if (a && maintenant - a.debut < FENETRE && a.n >= ESSAIS_ADRESSE) return a.debut + FENETRE;
+    return 0;
+  }
+  // adresse : celle de la requête (req.socket.remoteAddress)
+  async function connecter(identifiant, motDePasse, adresse){
+    const cle = String(identifiant || '').trim().toLowerCase(), ad = String(adresse || ''), paire = ad + '|' + cle;
+    const attente = fin => ({ ok: false, erreur: 'attente', secondes: Math.ceil((fin - Date.now()) / 1000) });
+    let fin = enPause(paire, ad, Date.now());
+    if (fin) return attente(fin);
     const u = trouver(cle);
     const empreinte = u && u.id != null ? base.empreinte(String(u.id)) : null;
-    const bon = verifier(motDePasse, empreinte || EMPREINTE_LEURRE) && !!empreinte;
-    if (!bon){
-      const n = (e && !e.jusqua ? e.n : 0) + 1;   // une pause écoulée repart de zéro
+    const v = await calculer(() => verifierAsync(motDePasse, empreinte || EMPREINTE_LEURRE));
+    if (v === null) return { ok: false, erreur: 'occupe' };
+    // des essais lancés ensemble : ceux qui finissent après la pause n'apprennent rien, même le bon
+    const maintenant = Date.now();
+    fin = enPause(paire, ad, maintenant);
+    if (fin) return attente(fin);
+    if (!(v && !!empreinte)){
+      const e = echecs.get(paire), n = (e && !e.jusqua ? e.n : 0) + 1;   // une pause écoulée repart de zéro
       if (echecs.size > 10000) echecs.clear();      // des identifiants inventés en masse ne remplissent pas la mémoire
-      echecs.set(cle, n >= ESSAIS_MAX ? { n: 0, jusqua: maintenant + PAUSE } : { n, jusqua: 0 });
+      echecs.set(paire, n >= ESSAIS_MAX ? { n: 0, jusqua: maintenant + PAUSE } : { n, jusqua: 0 });
+      if (!BOUCLE.includes(ad)){
+        if (parAdresse.size > 10000) parAdresse.clear();
+        const a = parAdresse.get(ad);
+        parAdresse.set(ad, a && maintenant - a.debut < FENETRE ? { debut: a.debut, n: a.n + 1 } : { debut: maintenant, n: 1 });
+      }
       return { ok: false, erreur: 'invalide' };
     }
-    echecs.delete(cle);
+    echecs.delete(paire);
     if (u.active === false) return { ok: false, erreur: 'desactive' };   // dit seulement à qui a le bon mot de passe
     const jeton = crypto.randomBytes(32).toString('base64url');
     base.purgerSessions(maintenant);
@@ -175,4 +219,4 @@ function creer(base, options = {}){
   return { CLE_COMPTES, CLE_PROFILS, MDP_MIN, gardeAdmin, aucun: () => comptes().length === 0, epurer, nouveaux, tropCourts, apresEcriture, reprendreAncienneBase, connecter, session, deconnecter, demoActive, demoActifs };
 }
 
-module.exports = { creer, hacher, verifier };
+module.exports = { creer, hacher, verifier, verifierAsync, ESSAIS_MAX, ESSAIS_ADRESSE };

@@ -21,6 +21,7 @@ const etapes = [
   ['Mise à jour depuis ' + (commits.join(', ') || '(aucun paquet)'), ['test-mise-a-jour.js'].concat(commits)],
   ['Paquet', ['test-paquet.js'].concat(brouillon ? ['--brouillon'] : [])],
   ['Restauration', ['test-restauration.js']],
+  ['Copie des sauvegardes hors du disque', ['test-copie-sauvegardes.js']],
   ['Sécurité des comptes', ['test-securite.js']],
 ].filter(e => e[1].length > 1 || e[1][0] !== 'test-mise-a-jour.js');
 

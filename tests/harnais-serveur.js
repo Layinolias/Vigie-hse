@@ -141,7 +141,7 @@ function classeXhr(w, pot, activite){
 // Ouvre une page servie par le serveur (état injecté selon le cookie du pot), exécute ses scripts dans l'ordre du
 // document, puis attend que la page ait fini d'écrire. → { statut, w, erreurs, alertes, externes, navigation(), fermer() }
 async function ouvrirPage(port, page, { pot, calme = 600, maxi = 15000 } = {}){
-  const rep = await requete(port, 'GET', '/' + page, { pot });
+  const rep = await requete(port, 'GET', '/' + page.split('#')[0], { pot });   // l'ancre reste à la page (location.hash)
   if (rep.statut !== 200) return { statut: rep.statut, entetes: rep.entetes, erreurs: [], fermer: () => {} };
   const erreurs = [], alertes = [], externes = [];
   let navigation = false;
@@ -160,7 +160,7 @@ async function ouvrirPage(port, page, { pot, calme = 600, maxi = 15000 } = {}){
     const url = new w.URL(String(u && u.url || u), w.location.href);
     if (url.origin !== new w.URL(origine).origin){ externes.push(url.href); throw new w.TypeError('hors réseau'); }
     activite.dernier = Date.now(); activite.fetch++;
-    const r = await requete(port, (o && o.method) || 'GET', url.pathname + url.search, { pot });
+    const r = await requete(port, (o && o.method) || 'GET', url.pathname + url.search, { pot, corps: o && o.body != null ? String(o.body) : null, entetes: Object.assign({}, o && o.headers) });
     activite.dernier = Date.now();
     const b = r.corps;
     return { ok: r.statut >= 200 && r.statut < 300, status: r.statut,

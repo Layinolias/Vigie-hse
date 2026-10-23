@@ -15,7 +15,8 @@
 //   7. les sessions de la copie sont fermées : une session fermée depuis (déconnexion, mot de passe changé) ne se
 //      rouvre pas — chacun se reconnecte.
 //
-// Mêmes variables que serveur/lancer-poste.js : VIGIE_DOSSIER, VIGIE_BASE, VIGIE_SAUVEGARDES, PORT.
+// Mêmes variables que serveur/lancer-poste.js : VIGIE_DOSSIER, VIGIE_BASE, VIGIE_SAUVEGARDES, PORT ; et
+// VIGIE_SAUVEGARDES_COPIE (la copie hors du disque, sinon celle réglée dans Administration → Sauvegardes).
 'use strict';
 const path = require('path'), fs = require('fs');
 const Poste = require('./poste-commun.js');   // mêmes dossiers, même contrôle de Node que le lanceur ; repère « base en service »
@@ -32,6 +33,10 @@ const SORTES = [
   { dossier: SAUVEGARDES, motif: /^vigie-avant-restauration-.+\.db$/, libelle: 'vos données juste avant une restauration' },
   { dossier: path.dirname(BASE), motif: /^sauvegarde-avant-effacement-.+\.db$/, libelle: 'avant « Réinitialiser les données »' },
 ];
+// la copie hors du disque (Administration → Sauvegardes, ou VIGIE_SAUVEGARDES_COPIE) : ses copies que le dossier des
+// sauvegardes n'a plus (effacées, disque remplacé) — branchez la clé ou le disque avant de lancer
+const COPIE = process.env.VIGIE_SAUVEGARDES_COPIE || (() => { try { return JSON.parse(fs.readFileSync(path.join(path.dirname(BASE), 'copie-sauvegardes.json'), 'utf8')).dossier || ''; } catch(e){ return ''; } })();
+if (COPIE) SORTES.push({ dossier: COPIE, motif: SORTES[0].motif, libelle: 'copie hors du disque', secours: true });
 const NOMS = { vigie_hse_dataset: 'accident(s)', vigie_hse_visites: 'suivi(s) médical(aux)', vigie_hse_actions: 'action(s)',
   vigie_hse_duerp_dataset: 'ligne(s) du document unique', vigie_hse_users: 'compte(s)' };
 
@@ -65,7 +70,10 @@ function copies(){
   for (const s of SORTES){
     let fichiers = [];
     try { fichiers = fs.readdirSync(s.dossier).filter(f => s.motif.test(f)); } catch(e){}
-    for (const f of fichiers){ const chemin = path.join(s.dossier, f); l.push({ chemin, nom: f, libelle: s.libelle, quand: fs.statSync(chemin).mtime }); }
+    for (const f of fichiers){
+      if (s.secours && l.some(x => x.nom === f)) continue;   // déjà dans le dossier des sauvegardes
+      const chemin = path.join(s.dossier, f); l.push({ chemin, nom: f, libelle: s.libelle, quand: fs.statSync(chemin).mtime });
+    }
   }
   return l.sort((a, b) => b.quand - a.quand);
 }

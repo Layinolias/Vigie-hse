@@ -69,7 +69,7 @@ C'est un cahier de liaison dans les deux sens : il y **répond aux questions** c
 | 37 | Communication : quels sujets proposer au départ, faut-il un rythme vérifié, signaler une communication reçue restée sans suite, qui voit la page ? | Communication (construit le 2026-10-21, ISO 45001 § 7.4) | ✅ Répondu le 2026-10-23 — comme aujourd'hui ; point 5 (résultats au personnel) mis en œuvre, question 40 |
 | 38 | Documents : faut-il stocker les fichiers dans le logiciel, qui approuve, faut-il exiger l'approbation, proposer une périodicité de revue ou une durée de conservation ? | Base documentaire, circuit des documents (construit le 2026-10-21, ISO 45001 § 7.5) | ✅ Répondu le 2026-10-23 — comme aujourd'hui, rien à changer |
 | 39 | Achats : quels critères proposer par nature d'achat, qui demande et qui donne l'avis, faut-il un avis avant tout achat, et que faire d'un avis défavorable ? | Achats et santé-sécurité (construit le 2026-10-21, ISO 45001 § 8.1.4) | ✅ Répondu le 2026-10-23 — comme aujourd'hui, rien à changer |
-| 40 | Résultats au personnel : un sujet « résultats » du plan de communication suffit-il à montrer que les résultats sont portés à la connaissance du personnel ? Faut-il un rythme, distinguer les représentants, une reprise par la revue de direction ? | Communication et Préparation ISO 45001 (construit le 2026-10-23, ISO 45001 § 10.3) | 🟠 En attente |
+| 40 | Résultats au personnel : un sujet « résultats » du plan de communication suffit-il à montrer que les résultats sont portés à la connaissance du personnel ? Faut-il un rythme, distinguer les représentants, une reprise par la revue de direction ? | Communication et Préparation ISO 45001 (construit le 2026-10-23, ISO 45001 § 10.3) | ✅ Répondu le 2026-10-24 — comme aujourd'hui, rien à changer |
 
 ---
 
@@ -1188,7 +1188,7 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 ---
 
-## 🟠 Question 40 — Résultats au personnel : un sujet « résultats » du plan de communication suffit-il ?
+## ✅ Question 40 — Résultats au personnel : un sujet « résultats » du plan de communication suffit-il ?
 
 **Contexte.** ISO 45001 (§ 10.3, amélioration continue) demande notamment de **communiquer les résultats pertinents de l'amélioration continue aux travailleurs** et, s'il y en a, à leurs représentants. C'était le dernier point « en partie » de cette exigence ; la question 37 (point 5) le posait, et sa réponse (« comme aujourd'hui ») ne le tranchait pas explicitement.
 
@@ -1202,7 +1202,11 @@ L'état du jour est l'un de : « des enregistrements », « des points à repren
 
 **Options.** (A) Comme aujourd'hui : une case facultative, un fait, sans rythme. (B) Un signal au-delà d'une durée (à préciser). (C) Distinguer le personnel et ses représentants. (D) Reprise par la revue de direction. Les options se combinent.
 
-> _En attente de la réponse du préventeur (posée sur le Cahier le 2026-10-23)._
+### Décision
+
+> **Réponse du préventeur (Cahier, 2026-10-24) : (A) comme aujourd'hui.** Aucune remarque.
+>
+> **Rien à changer** : un sujet du plan de communication marqué « résultats » suffit ; ses communications internes en sont la trace, reprise comme un fait par la Préparation ISO 45001 (§ 10.3 couverte) ; pas de rythme ni de signal, pas de distinction entre le personnel et ses représentants, pas de reprise particulière par la revue de direction (elle reprend déjà les communications avec l'extérieur de sa période).
 
 ---
 

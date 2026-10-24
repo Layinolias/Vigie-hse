@@ -2,7 +2,9 @@
 
 Pour présenter le logiciel à un professionnel de la prévention qui ne le connaît pas (dernier point de la sortie V1.0, `PLAN-VERSIONS-V1.md`). Une seule histoire, du terrain jusqu'à la direction : un presque-accident signalé, l'action qui en sort, l'accident analysé, les chiffres, puis la préparation ISO 45001.
 
-> Document rédigé avec l'assistance de Claude (Anthropic) ; le logiciel est développé avec Claude Code. Personnes, lieux et faits de la démonstration sont fictifs.
+> Document rédigé avec l'aide d'une IA (Claude, d'Anthropic) et relu par le porteur du projet, qui en reste responsable ; le logiciel est développé avec un assistant de programmation à base d'IA (Claude Code). Mention faite par transparence, dans l'esprit du règlement (UE) 2024/1689. Personnes, lieux et faits de la démonstration sont fictifs.
+>
+> Version en ligne (document partageable) : https://claude.ai/artifact/7EyoBruBNfSuQLybduW2yU — présentation de 8 diapositives pour ouvrir et conclure : https://claude.ai/artifact/5nyp91zdqtqjj2Fsnb5m2U
 
 ## Avant la démonstration (10 minutes, le jour même)
 

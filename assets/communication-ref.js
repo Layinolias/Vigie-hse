@@ -19,7 +19,7 @@
    la page dit la dernière communication de chaque sujet, et les communications reçues sans suite notée —
    question 37 : comme aujourd'hui, réponse du préventeur du 2026-10-23.
    Les résultats au personnel (§ 10.3) : un sujet du plan peut porter sur les résultats de la démarche ; ses
-   communications internes en sont la trace, reprise comme un fait (sans rythme) — question 40 au préventeur.
+   communications internes en sont la trace, reprise comme un fait (sans rythme) — question 40 : comme aujourd'hui, réponse du préventeur du 2026-10-24.
 ============================================================================ */
 (function (racine) {
   "use strict";

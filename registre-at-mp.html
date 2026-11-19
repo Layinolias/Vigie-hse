@@ -737,9 +737,15 @@
     const circonstances = String(pick(["circonstances"])).trim();
     if (!dateAT && !nom && !circonstances) return null;
 
-    const joursVal = Number(pick(["nb jours arret total","jours d arret","jours"])) || 0;
-    const arretRaw = normKey(pick(["avec ou sans arret","avec sans arret","arret"]));
-    const arret = arretRaw.includes("avec");
+    // Jours d'arrêt lus d'abord : un nombre de jours renseigné vaut arrêt, quoi que dise la colonne « Avec ou sans
+    // arrêt » (absente, vide, mal écrite ou contradictoire). Avant le 2026-11-19, les jours n'étaient gardés que si
+    // cette colonne contenait « avec » : un fichier sans elle perdait tous ses jours d'arrêt.
+    const joursTexte = String(pick(["nb jours arret total","nombre de jours d arret","nombre jours arret","nb jours d arret","nb jours arret","jours d arret","jours arret","duree de l arret","duree arret","jours"])).replace(",", ".");
+    const joursVal = Math.max(0, Math.round(parseFloat(joursTexte)) || 0);   // « 12 », « 12 j », « 12,0 »
+    const arretRaw = normKey(pick(["avec ou sans arret","avec sans arret","arret de travail","arret"]));
+    const arretLu = /\bavec\b|^(oui|o|x|1|vrai|true)$/.test(arretRaw) ? true : null;
+    const arret = joursVal > 0 || arretLu === true;
+    const arretCorrige = joursVal > 0 && /\bsans\b|^(non|n|0|faux|false)$/.test(arretRaw);   // « sans arrêt » mais des jours : signalé
 
     const idRaw = String(pick(["id"])).trim();
     const dateNaissance = parseDateValue(pick(["date de naissance"]));
@@ -782,6 +788,7 @@
       mpAvisMedecinTravail: String(pick(["avis medecin du travail","avis medecin travail"])).trim(),
       mpAvisConseilMedical: String(pick(["avis conseil medical"])).trim(),
       mpDecisionCollectivite: String(pick(["decision de la collectivite","decision collectivite"])).trim(),
+      _arretCorrige: arretCorrige,   // lu par l'import pour son compte rendu, jamais enregistré
     };
   }
 
@@ -801,10 +808,12 @@
           e.target.value = "";
           return;
         }
-        let added = 0, updated = 0, skipped = 0;
+        let added = 0, updated = 0, skipped = 0, arretsCorriges = 0;
         rawRows.forEach(raw => {
           const rec = mapImportedRow(raw);
           if (!rec){ skipped++; return; }
+          if (rec._arretCorrige) arretsCorriges++;
+          delete rec._arretCorrige;
           const idx = rec.id ? DATASET.findIndex(d => d.id === rec.id) : -1;
           if (idx >= 0){ DATASET[idx] = rec; updated++; }
           else { rec.id = rec.id || genId(); DATASET.push(rec); added++; }
@@ -815,7 +824,8 @@
         if (added === 0 && updated === 0){
           alert(`Aucune ligne n'a pu être importée (${skipped} ignorée(s)). Vérifiez que le fichier contient bien les colonnes attendues (Date AT, Nom, Circonstances…).`);
         } else {
-          alert(`Import terminé — ${added} ligne(s) ajoutée(s), ${updated} mise(s) à jour, ${skipped} ignorée(s).`);
+          alert(`Import terminé — ${added} ligne(s) ajoutée(s), ${updated} mise(s) à jour, ${skipped} ignorée(s).` +
+            (arretsCorriges ? `\n\n${arretsCorriges} ligne(s) notée(s) « sans arrêt » portaient pourtant des jours d'arrêt : elles sont comptées avec arrêt. Vérifiez-les dans le fichier source.` : ""));
         }
       } catch (err){
         alert("Le fichier n'a pas pu être lu. Vérifiez qu'il s'agit bien d'un fichier Excel (.xlsx).");
@@ -884,6 +894,7 @@
     rawRows.forEach((raw, i) => {
       const rec = mapImportedRow(raw);
       if (!rec) return;
+      delete rec._arretCorrige;
       rec.id = "dtst-atmp-" + (i + 1);
       if (!full.some(d => d.id === rec.id)){ full.push(rec); changed = true; }
     });

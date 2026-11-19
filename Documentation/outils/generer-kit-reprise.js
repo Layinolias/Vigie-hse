@@ -82,11 +82,14 @@ const MODULES = [
     note:"À charger en tout premier : les colonnes « Service » des autres fichiers doivent reprendre exactement ces libellés. L'import ajoute les valeurs manquantes et n'en retire jamais ; la colonne « Définition » ne sert qu'aux familles de risque." },
   { fichier:'01-agents', nom:'Agents (Gestion RH)', page:'gestion-rh.html', exp:'btnExportAgents', imp:'importAgentsFile', ou:'Gestion RH → onglet Agents → Importer .xlsx',
     source:{ stock:{ vigie_hse_agents: [
-      { id:'ag-1', nom:'Leroy', prenom:'Anne', collectivite:'Ville', service:'Voirie & Réseaux', managerId:'', dateEntree:'2012-01-09', actif:true },
-      { id:'ag-2', nom:'Durand', prenom:'Paul', collectivite:'Ville', service:'Voirie & Réseaux', managerId:'ag-1', dateEntree:'2019-09-02', actif:true },
-      { id:'ag-3', nom:'Petit', prenom:'Luc', collectivite:'Agglomération', service:'Collecte & Propreté', managerId:'', dateEntree:'2021-04-12', actif:false } ] } },
+      { id:'ag-1', nom:'Leroy', prenom:'Anne', civilite:'Madame', dateNaissance:'1975-03-18', collectivite:'Ville', service:'Voirie & Réseaux', managerId:'', dateEntree:'2012-01-09', statut:'Titulaire (FPT)', actif:true,
+        categorie:'Catégorie B', filiere:'Filière technique', cadreEmploi:'Techniciens territoriaux', grade:'Technicien' },
+      { id:'ag-2', nom:'Durand', prenom:'Paul', civilite:'Monsieur', dateNaissance:'1988-11-02', collectivite:'Ville', service:'Voirie & Réseaux', managerId:'ag-1', dateEntree:'2019-09-02', statut:'Titulaire (FPT)', actif:true,
+        categorie:'Catégorie C', filiere:'Filière technique', cadreEmploi:'Adjoints techniques territoriaux', grade:'Adjt tech' },
+      { id:'ag-3', nom:'Petit', prenom:'Luc', civilite:'Monsieur', dateNaissance:'1995-06-30', collectivite:'Agglomération', service:'Collecte & Propreté', managerId:'', dateEntree:'2021-04-12', statut:'CONT - Remplaçant', actif:false,
+        categorie:'Catégorie C', filiere:'Filière technique', cadreEmploi:'Adjoints techniques territoriaux', grade:'Adjt tech' } ] } },
     compter:{ Agents: w => lireStock(w, 'vigie_hse_agents').length },
-    note:"À charger juste après les référentiels : les autres modules peuvent ensuite proposer ces agents dans leurs formulaires. Le responsable se désigne par son « Nom Prénom » ; il peut figurer plus bas dans le fichier." },
+    note:"À charger juste après les référentiels : les autres modules peuvent ensuite proposer ces agents dans leurs formulaires. Le responsable se désigne par son « Nom Prénom » ; il peut figurer plus bas dans le fichier. Colonnes de la fiche agent de référence (DATATEST/fiche agents completer .ods) : civilité, date de naissance, catégorie, filière, cadre d'emploi et grade sont reprises par la recherche d'agent des formulaires." },
   { fichier:'02-heures-travaillees', nom:'Heures travaillées (Gestion RH)', page:'gestion-rh.html', exp:'btnExportHeures', imp:'importHeuresFile', ou:'Gestion RH → onglet Heures travaillées → Importer .xlsx',
     source:{ stock:{ vigie_hse_heures_travaillees: [
       { id:'h1', periode:'2026-01', collectivite:'Ville', service:'Voirie & Réseaux', heures:12450 },
@@ -187,7 +190,8 @@ async function importerDans(m, feuilles, ordre, prerequis){
   if (m.onglet){ const t = B.w.document.querySelector('[data-tab="' + m.onglet + '"]'); if (t) t.click(); }
   const input = B.w.document.getElementById(m.imp);
   const buf = XLSX.write(classeur(feuilles, ordre), { type:'array', bookType:'xlsx' });
-  Object.defineProperty(input, 'files', { configurable:true, value:[new B.w.File([buf], 'import.xlsx')] });
+  // un fichier qui sait donner ses octets (le File de jsdom 24 n'a pas arrayBuffer(), que les pages appellent)
+  Object.defineProperty(input, 'files', { configurable:true, value:[{ name:'import.xlsx', size: buf.byteLength, arrayBuffer: () => Promise.resolve(buf) }] });
   input.dispatchEvent(new B.w.Event('change', { bubbles:true }));
   await sleep(350);
   const comptes = {}; for (const [sn, f] of Object.entries(m.compter)) comptes[sn] = f(B.w) - ((m.base && m.base[sn]) || 0);

@@ -15,6 +15,7 @@ const AGENTS = [
   { id:'ag3', nom:'MARTINEZ', prenom:'Léa', collectivite:'Ville', service:V, actif:false },
   { id:'ag4', nom:'Élise', prenom:'Martine', collectivite:'Ville', service:P, actif:true },
 ];
+const J = JSON.stringify;
 const STOCK = { vigie_hse_agents: JSON.stringify(AGENTS) };
 const props = p => [...p.d.querySelectorAll('.vr-liste li[data-i]')].map(li => li.textContent);
 const taper = (p, id, v) => { p.$(id).value = v; p.ev(p.$(id), 'input'); };
@@ -91,7 +92,7 @@ const touche = (p, id, key) => p.$(id).dispatchEvent(new p.w.KeyboardEvent('keyd
   check('… sa modification garde la date de naissance et la civilité', agA.grade === 'Agent de maîtrise' && agA.dateNaissance === '1980-06-15' && agA.civilite === 'Monsieur', agA);
   ga.$('btnExportAgents').click();
   const entA = XLSX.utils.sheet_to_json(ga.ecrits[0].wb.Sheets[ga.ecrits[0].wb.SheetNames[0]], { header:1 })[0];
-  check('… son export n\'a ni date de naissance ni civilité',!entA.includes('Date de naissance') && !entA.includes('Civilité') && entA.includes('Grade'), entA);
+  check('… son export n\'a ni date de naissance ni civilité',!entA.includes('Date de Naissance') && !entA.some(c => /civilit/i.test(c)) && entA.includes('grade'), entA);
 
   // ----- Gestion RH : la fiche agent porte l'identité -----
   const g = await H.page('gestion-rh.html', RH, STOCK);
@@ -105,12 +106,16 @@ const touche = (p, id, key) => p.$(id).dispatchEvent(new p.w.KeyboardEvent('keyd
   g.$('btnExportAgents').click();
   const ws = g.ecrits.length ? g.ecrits[g.ecrits.length - 1].wb.Sheets[g.ecrits[g.ecrits.length - 1].wb.SheetNames[0]] : null;
   const ent = ws ? XLSX.utils.sheet_to_json(ws, { header:1 })[0] : [];
-  check('export : les six colonnes d\'identité', ['Civilité', 'Date de naissance', 'Catégorie', 'Filière', "Cadre d'emploi", 'Grade'].every(c => ent.includes(c)), ent);
-  // import : colonnes de l'export et noms de la base du préventeur (« Libellé catégorie (actuel) »…)
+  // la fiche agent de référence (DATATEST/fiche agents completer .ods, 2026-11-19) : mêmes colonnes, même ordre, mêmes noms
+  const REF = XLSX.utils.sheet_to_json(XLSX.read(require('fs').readFileSync(H.ROOT + 'DATATEST/fiche agents completer .ods')).Sheets['Agents'], { header:1 })[0];
+  check('export : les colonnes de la fiche de référence, dans son ordre et sous ses noms (' + REF.length + ')', ent.join('|') === REF.join('|'), [ent, REF]);
+  const ligneAg1 = XLSX.utils.sheet_to_json(ws)[0] || {};
+  check('… valeurs exportées (civilité vide, naissance, Actif « Oui », grade)', ligneAg1['Date de Naissance'] === '1980-06-15' && ligneAg1['Actif'] === 'Oui' && ligneAg1['grade'] === 'Adjt tech Pal 2Cl' && ligneAg1['Libellé cadre emploi (actuel)'] === 'Adjoints techniques territoriaux', ligneAg1);
+  // import : la fiche de référence, valeurs écrites en minuscules et sans accents
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-    ['Nom', 'Prénom', 'Service', 'Civilité', 'Date de naissance', 'Libellé catégorie (actuel)', 'Libellé filière (actuel)', "Cadre d'emploi", 'Grade'],
-    ['DURAND', 'Lucie', P, 'Madame', '01/09/1990', 'Catégorie B', 'Filière administrative', 'Rédacteurs Territoriaux', 'Rédacteur'],
+    REF,
+    ['madame', 'DURAND', 'Lucie', '01/09/1990', 'Ville', P, '', '', '', '', 'Oui', 'categorie b', 'filiere administrative', 'redacteurs territoriaux', 'Rédacteur'],
   ]), 'Agents');
   const buf = XLSX.write(wb, { type:'array', bookType:'xlsx' });
   Object.defineProperty(g.$('importAgentsFile'), 'files', { value:[{ arrayBuffer: async () => buf }], configurable:true });
@@ -121,6 +126,27 @@ const touche = (p, id, key) => p.$(id).dispatchEvent(new p.w.KeyboardEvent('keyd
     && ag2.cadreEmploi === 'Rédacteurs Territoriaux' && ag2.grade === 'Rédacteur', ag2);
   ag1 = g.lire('vigie_hse_agents').find(a => a.id === 'ag1');
   check('… un agent absent du fichier n\'est pas touché', ag1.grade === 'Adjt tech Pal 2Cl');
+  // aller-retour : l'export se réimporte tel quel
+  g.$('btnExportAgents').click();
+  const wbAR = g.ecrits[g.ecrits.length - 1].wb;
+  const avantAR = J(g.lire('vigie_hse_agents').map(a => [a.id, a.civilite, a.dateNaissance, a.categorie, a.filiere, a.cadreEmploi, a.grade, a.actif].map(v => v === undefined ? '' : v)));
+  const bufAR = XLSX.write(wbAR, { type:'array', bookType:'xlsx' });
+  Object.defineProperty(g.$('importAgentsFile'), 'files', { value:[{ arrayBuffer: async () => bufAR }], configurable:true });
+  g.ev(g.$('importAgentsFile'), 'change');
+  await new Promise(r => setTimeout(r, 80));
+  check('aller-retour : export réimporté sans rien changer ni ajouter', J(g.lire('vigie_hse_agents').map(a => [a.id, a.civilite, a.dateNaissance, a.categorie, a.filiere, a.cadreEmploi, a.grade, a.actif].map(v => v === undefined ? '' : v))) === avantAR);
+  // civilités abrégées
+  const wbC = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wbC, XLSX.utils.aoa_to_sheet([['Nom', 'Prénom', 'Libelle civilité (madame ou monsieur)'], ['MARTIN', 'Jean', 'M.'], ['Élise', 'Martine', 'Mme']]), 'Agents');
+  const bufC = XLSX.write(wbC, { type:'array', bookType:'xlsx' });
+  Object.defineProperty(g.$('importAgentsFile'), 'files', { value:[{ arrayBuffer: async () => bufC }], configurable:true });
+  g.ev(g.$('importAgentsFile'), 'change');
+  await new Promise(r => setTimeout(r, 80));
+  const civs = g.lire('vigie_hse_agents').filter(a => a.id === 'ag1' || a.id === 'ag4').map(a => a.civilite).join();
+  check('« M. » → Monsieur, « Mme » → Madame', civs === 'Monsieur,Madame', civs);
+  // formulaire : l'ordre de la fiche de référence
+  const ordre = [...g.d.querySelectorAll('#agentForm .form-grid > div')].map(d => (d.querySelector('input,select') || {}).id);
+  check('formulaire dans l\'ordre de la fiche de référence', ordre.join() === 'agFCivilite,agFNom,agFPrenom,agFDateNaissance,agFCollectivite,agFService,agFManager,agFDateEntree,agFPoste,agFStatut,agFActif,agFCategorie,agFFiliere,agFCadreEmploi,agFGrade', ordre);
   check('gestion-rh sans erreur JS', !g.erreurs.length, g.erreurs);
 
   // ----- la déclaration reprend ce qui vient d'être importé -----

@@ -164,6 +164,12 @@ Trace des problèmes concrets remontés en test manuel, pour garder — dans le 
 - **Cause** : le serveur envoyait à ce compte le registre réduit **sans aucune date** (seulement `dateMois` et `annee`), or la page ne garde que les enregistrements qui ont une `dateAT` : tout était écarté, et en démonstration la page rechargeait alors les fichiers de démonstration. Côté pages, les droits ne tenaient pas compte de l'anonymisation.
 - **Corrigé** : 2026-11-19 — le serveur transmet la date ramenée au 1er du mois (`AAAA-MM-01`, le jour exact reste au serveur : question 16), affichée « mars 2026 » ; `VigieDroits.pour()` plafonne un compte anonymisé (`PLAFOND_ANONYME` : Registre AT/MP en déclaration seule, aucun accès à Dossiers AT/MP, Analyse d'accident, Santé & Visites). Vérifié : test 24/24, suite des pages 28/28, sécurité 26/26.
 
+### Registre AT/MP : les jours d'arrêt d'un fichier importé disparaissaient si la colonne « Avec ou sans arrêt » manquait ou était mal écrite
+- **Où** : `registre-at-mp.html`, import Excel (`mapImportedRow`). **Remonté** : 2026-11-19, par le préventeur : les jours d'arrêt de son fichier ne s'affichaient qu'après y avoir ajouté une colonne « avec / sans arrêt » correcte.
+- **Constaté** (reproduit par `tests/pages/test-import-atmp-arret.js`, 10 contrôles en échec sur l'ancien code) : sans cette colonne, ou avec une valeur vide ou illisible, chaque accident arrivait « sans arrêt » avec 0 jour, même avec 12 jours dans le fichier ; total des jours, TG et graphiques à zéro.
+- **Cause** : l'arrêt n'était retenu que si la colonne contenait le mot « avec », et les jours n'étaient gardés que pour un arrêt (`joursArret: arret ? joursVal : 0`). Les jours dépendaient donc de cette colonne.
+- **Corrigé** : 2026-11-19 — les jours sont lus d'abord : un nombre de jours renseigné vaut arrêt, quoi que dise la colonne ; « Avec… », « Oui » ou « X » sans jours restent un arrêt en cours (0 j). Une ligne notée « Sans arrêt » qui porte des jours est comptée avec arrêt et signalée dans le compte rendu de l'import. Lus aussi : « 7 j », « 2,0 », et d'autres en-têtes (« Nombre de jours d'arrêt », « Durée de l'arrêt »…). Vérifié : test 16/16, suite des pages 30/30.
+
 ## Ouverts / reportés (pas des bugs à corriger maintenant)
 
 - **Présentation à un professionnel HSE externe** — toujours en recherche (checklist §7, 2026-09-15). Ne dépend pas du code ; c'est le dernier point du gel `v1.0.0` dans `PLAN-VERSIONS-V1.md`.

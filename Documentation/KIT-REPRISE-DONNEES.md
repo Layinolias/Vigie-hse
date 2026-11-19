@@ -1,6 +1,6 @@
 # Kit de reprise des données
 
-> Fichier **généré** par `Documentation/outils/generer-kit-reprise.js` — ne pas l'éditer à la main, relancer le générateur. Dernière génération : 2026-10-13.
+> Fichier **généré** par `Documentation/outils/generer-kit-reprise.js` — ne pas l'éditer à la main, relancer le générateur. Dernière génération : 2026-11-19.
 
 Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes (registres Excel, historique des accidents, suivi des visites…) se chargent par les imports de chaque module. Le dossier `KIT-REPRISE/` contient un modèle Excel par module importable et un mode d'emploi (`00-mode-d-emploi.xlsx`).
 
@@ -12,7 +12,7 @@ Pour mettre en service VIGIE HSE chez un nouveau client, ses données existantes
 |---|---|---|---|---|
 | Avant | *saisie à l'écran* | Comptes utilisateurs | Administration → Utilisateurs | Créés un par un, avec leur mot de passe et leurs profils de droits. |
 | 00 | `00-referentiels.xlsx` | Référentiels (services, familles de risque, listes) | Administration → Référentiels → Importer .xlsx | À charger en tout premier : les colonnes « Service » des autres fichiers doivent reprendre exactement ces libellés. L'import ajoute les valeurs manquantes et n'en retire jamais ; la colonne « Définition » ne sert qu'aux familles de risque. |
-| 01 | `01-agents.xlsx` | Agents (Gestion RH) | Gestion RH → onglet Agents → Importer .xlsx | À charger juste après les référentiels : les autres modules peuvent ensuite proposer ces agents dans leurs formulaires. Le responsable se désigne par son « Nom Prénom » ; il peut figurer plus bas dans le fichier. |
+| 01 | `01-agents.xlsx` | Agents (Gestion RH) | Gestion RH → onglet Agents → Importer .xlsx | À charger juste après les référentiels : les autres modules peuvent ensuite proposer ces agents dans leurs formulaires. Le responsable se désigne par son « Nom Prénom » ; il peut figurer plus bas dans le fichier. Colonnes de la fiche agent de référence (DATATEST/fiche agents completer .ods) : civilité, date de naissance, catégorie, filière, cadre d'emploi et grade sont reprises par la recherche d'agent des formulaires. |
 | 02 | `02-heures-travaillees.xlsx` | Heures travaillées (Gestion RH) | Gestion RH → onglet Heures travaillées → Importer .xlsx | Un total par mois, collectivité et service (pas un pointage individuel). Alimente le taux de fréquence et de gravité « réels ». Une ligne déjà présente pour le même mois, la même collectivité et le même service est ignorée. |
 | 03 | `03-registre-at-mp.xlsx` | Registre AT/MP | Registre AT/MP → Importer .xlsx | L'historique des accidents du travail et maladies professionnelles. À charger avant les dossiers et les analyses d'accident, qui s'y rattachent. |
 | 04 | `04-dossiers-atmp-citis.xlsx` | Dossiers AT/MP & CITIS | Dossiers AT/MP & CITIS → Importer .xlsx | Chaque ligne se rattache à un accident déjà présent dans le Registre AT/MP, par sa colonne « ID AT/MP » ou, à défaut, par « Nom » + « Date AT ». |
@@ -46,7 +46,7 @@ Le détail complet (format, valeurs acceptées, remarques) est dans la feuille �
 - **`00-referentiels.xlsx`** — Référentiels (services, familles de risque, listes) : obligatoires « Liste », « Valeur » ; listes : « Liste » (une valeur inconnue fait refuser la ligne).
 - **`01-agents.xlsx`** — Agents (Gestion RH) : obligatoires « Nom » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »).
 - **`02-heures-travaillees.xlsx`** — Heures travaillées (Gestion RH) : obligatoires « Période », « Service », « Heures » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »).
-- **`03-registre-at-mp.xlsx`** — Registre AT/MP : au moins une de « date AT », « Nom », « Circonstances » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »), « Avec ou sans arret » (une valeur inconnue est remplacée par « Sans Arrêt »).
+- **`03-registre-at-mp.xlsx`** — Registre AT/MP : au moins une de « date AT », « Nom », « Circonstances » ; listes : « Collectivité » (une valeur inconnue est remplacée par « Ville »).
 - **`04-dossiers-atmp-citis.xlsx`** — Dossiers AT/MP & CITIS : obligatoires Arretes › « Type ».
 - **`05-analyses-accident.xlsx`** — Analyses d'accident : obligatoires Actions › « Action », Faits › « Fait », Ishikawa › « Catégorie », Ishikawa › « Cause » ; listes : « Type » (une valeur inconnue est remplacée par « Fait »), « Catégorie » (une valeur inconnue fait refuser la ligne).
 - **`06-document-unique.xlsx`** — Document Unique (DUERP) : au moins une de « Risques », « Taches » ; listes : « Collectivite » (une valeur inconnue est remplacée par « Ville »).

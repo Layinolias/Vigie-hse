@@ -211,8 +211,10 @@
           <form id="agentForm">
             <input type="hidden" id="agFId">
             <div class="form-grid">
+              <div class="ag-prive"><label for="agFCivilite">Civilité</label><select id="agFCivilite"></select></div>
               <div><label for="agFNom">Nom</label><input type="text" id="agFNom" required placeholder="ex. DURAND"></div>
               <div><label for="agFPrenom">Prénom</label><input type="text" id="agFPrenom" required placeholder="ex. Marie"></div>
+              <div class="ag-prive"><label for="agFDateNaissance">Date de naissance</label><input type="date" id="agFDateNaissance"></div>
               <div><label for="agFCollectivite" data-org-libelle>Collectivité</label>
                 <select id="agFCollectivite" required data-org="saisie"></select>
               </div>
@@ -221,13 +223,11 @@
               <div><label for="agFDateEntree">Date d'entrée</label><input type="date" id="agFDateEntree"></div>
               <div><label for="agFPoste">Poste (pénibilité)</label><select id="agFPoste"></select></div>
               <div><label for="agFStatut">Statut</label><select id="agFStatut"></select></div>
-              <div class="ag-prive"><label for="agFCivilite">Civilité</label><select id="agFCivilite"></select></div>
-              <div class="ag-prive"><label for="agFDateNaissance">Date de naissance</label><input type="date" id="agFDateNaissance"></div>
+              <div><label for="agFActif" style="display:flex;align-items:center;gap:8px;margin-top:22px;" data-mots><input type="checkbox" id="agFActif" checked style="width:16px;height:16px;"> Agent actif</label></div>
               <div><label for="agFCategorie">Catégorie</label><select id="agFCategorie"></select></div>
               <div><label for="agFFiliere">Filière</label><select id="agFFiliere"></select></div>
               <div><label for="agFCadreEmploi">Cadre d'emploi</label><select id="agFCadreEmploi"></select></div>
               <div><label for="agFGrade">Grade</label><input type="text" id="agFGrade" list="agDlGrade" autocomplete="off" placeholder="ex. Adjt tech"><datalist id="agDlGrade"></datalist></div>
-              <div><label for="agFActif" style="display:flex;align-items:center;gap:8px;margin-top:22px;" data-mots><input type="checkbox" id="agFActif" checked style="width:16px;height:16px;"> Agent actif</label></div>
             </div>
             <div class="form-actions">
               <button type="submit" class="btn btn-primary" data-mots>Enregistrer l'agent</button>
@@ -631,20 +631,35 @@
   $("agentPanelActions").innerHTML = (canGestionRhWrite ? `<button type="button" class="btn btn-ghost" id="btnImportAgents"><svg class="icon"><use href="#i-upload"/></svg> Importer .xlsx</button><input type="file" id="importAgentsFile" accept=".xlsx,.xls,.ods,.csv" style="display:none"><button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button><button type="button" class="btn btn-primary" id="btnNewAgent"><svg class="icon"><use href="#i-plus"/></svg> ${VigieOrga.mots("Nouvel agent")}</button>` : `<button type="button" class="btn btn-ghost" id="btnExportAgents"><svg class="icon"><use href="#i-download"/></svg> Exporter .xlsx</button>`);
   if (canGestionRhWrite){ $("btnNewAgent").addEventListener("click", () => openAgentForm(null)); }
   VigieImpression.brancher("btnExportAgents");
+  // Colonnes, ordre et noms de la fiche agent de référence (DATATEST/fiche agents completer .ods, 2026-11-19) :
+  // un export se réimporte tel quel. Compte anonymisé : ni civilité ni date de naissance (données privées).
+  const COLONNES_AGENT = [
+    ["Libelle civilité (madame ou monsieur)", a => a.civilite || "", true], ["Nom", a => a.nom], ["Prénom", a => a.prenom],
+    ["Date de Naissance", a => a.dateNaissance || "", true], [null, a => VigieOrga.de(a)], ["Service", a => a.service],
+    ["Responsable", a => a.managerId ? agentName(a.managerId) : ""], ["Date d'entrée", a => a.dateEntree || ""],
+    ["Poste", a => intitulePoste(a.posteId)], ["Statut", a => a.statut || ""], ["Actif", a => a.actif !== false ? "Oui" : "Non"],
+    ["Libellé catégorie (actuel)", a => a.categorie || ""], ["Libellé filière (actuel)", a => a.filiere || ""],
+    ["Libellé cadre emploi (actuel)", a => a.cadreEmploi || ""], ["grade", a => a.grade || ""],
+  ];
   $("btnExportAgents").addEventListener("click", () => {
-    const rows = AGENTS.map(a => ({ "Nom":a.nom, "Prénom":a.prenom, [VigieOrga.libelle()]:VigieOrga.de(a), "Service":a.service, "Responsable":a.managerId ? agentName(a.managerId) : "", "Date d'entrée":a.dateEntree||"", "Poste":intitulePoste(a.posteId), "Statut":a.statut||"", ...(PRIVE_MASQUE ? {} : { "Civilité":a.civilite||"", "Date de naissance":a.dateNaissance||"" }), "Catégorie":a.categorie||"", "Filière":a.filiere||"", "Cadre d'emploi":a.cadreEmploi||"", "Grade":a.grade||"", "Actif":a.actif !== false ? "Oui" : "Non" }));
+    const cols = COLONNES_AGENT.filter(c => !(c[2] && PRIVE_MASQUE)).map(c => [c[0] || VigieOrga.libelle(), c[1]]);
+    const rows = AGENTS.map(a => Object.fromEntries(cols.map(([t, f]) => [t, f(a)])));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Nom", "Prénom", VigieOrga.libelle(), "Service", "Responsable", "Date d'entrée", "Poste", "Statut", ...(PRIVE_MASQUE ? [] : ["Civilité", "Date de naissance"]), "Catégorie", "Filière", "Cadre d'emploi", "Grade", "Actif"] }), VigieOrga.mots("Agents"));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: cols.map(c => c[0]) }), VigieOrga.mots("Agents"));
     XLSX.writeFile(wb, `gestion-rh-agents_${VigieDates.aujourdhui()}.xlsx`);
   });
 
   // ---------- Import des agents (2026-09-23 : premier fichier d'une reprise de données) ----------
-  // Mêmes colonnes que l'export. Un agent existant est reconnu à son nom + prénom (+ service si le
+  // Mêmes colonnes que l'export (fiche agent de référence : DATATEST/fiche agents completer .ods). Un agent existant est reconnu à son nom + prénom (+ service si le
   // fichier en donne un) et mis à jour ; une colonne absente du fichier ne change rien. Le
   // responsable est rattaché par son nom, en second passage (il peut figurer plus bas dans le
   // fichier), avec le même garde-fou anti-boucle que l'organigramme.
   function normImp(s){ return String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
   function champsImp(raw){ const n = {}; Object.keys(raw).forEach(k => { n[normImp(k)] = raw[k]; }); return n; }
+  // Une valeur importée prend l'écriture de la liste quand elle y figure aux majuscules et accents près
+  // (« madame » → « Madame », « categorie c » → « Catégorie C ») ; sinon elle est gardée telle quelle.
+  const selonListe = (v, liste) => { const t = String(v == null ? "" : v).trim(); return (liste || []).find(x => normImp(x) === normImp(t)) || t; };
+  const civiliteImp = v => { const t = normImp(v); return /^(mme|mad|madame)$/.test(t) ? "Madame" : /^(m|mr|monsieur)$/.test(t) ? "Monsieur" : selonListe(v, VigieRoster.LISTES.civilites); };
   const dateImp = v => VigieDates.depuisImport(v) || String(v == null ? "" : v).trim();   // texte JJ/MM/AAAA lu à la française ; autre texte gardé tel quel
   const collectiviteImp = v => VigieOrga.reconnaitre(v);
   // colonne « Collectivité », ou celle qui porte le mot choisi dans Administration (« Site », « Usine »…)
@@ -680,12 +695,13 @@
             if (intitule && !p) postesInconnus++;
           }
           if (n["statut"] !== undefined) rec.statut = String(n["statut"]).trim();
-          if (n["civilite"] !== undefined && !PRIVE_MASQUE) rec.civilite = String(n["civilite"]).trim();
-          if (n["date de naissance"] !== undefined && !PRIVE_MASQUE) rec.dateNaissance = dateImp(n["date de naissance"]);
           const colImp = (...noms) => noms.map(x => n[x]).find(v => v !== undefined);
-          [["categorie", ["categorie", "libelle categorie actuel", "libelle categorie"]], ["filiere", ["filiere", "libelle filiere actuel", "libelle filiere"]],
-           ["cadreEmploi", ["cadre d emploi", "cadre emploi", "libelle cadre emploi actuel", "libelle cadre emploi"]], ["grade", ["grade", "libelle grade actuel", "libelle grade"]]]
-            .forEach(([champ, noms]) => { const v = colImp(...noms); if (v !== undefined) rec[champ] = String(v).trim(); });
+          const civ = colImp("libelle civilite madame ou monsieur", "libelle civilite", "civilite");
+          if (civ !== undefined && !PRIVE_MASQUE) rec.civilite = civiliteImp(civ);
+          if (n["date de naissance"] !== undefined && !PRIVE_MASQUE) rec.dateNaissance = dateImp(n["date de naissance"]);
+          [["categorie", ["libelle categorie actuel", "libelle categorie", "categorie"], "categories"], ["filiere", ["libelle filiere actuel", "libelle filiere", "filiere"], "filieres"],
+           ["cadreEmploi", ["libelle cadre emploi actuel", "libelle cadre emploi", "cadre d emploi", "cadre emploi"], "cadresEmploi"], ["grade", ["grade", "libelle grade actuel", "libelle grade"], "grades"]]
+            .forEach(([champ, noms, liste]) => { const v = colImp(...noms); if (v !== undefined) rec[champ] = selonListe(v, VigieRoster.LISTES[liste]); });
           if (n["actif"] !== undefined) rec.actif = !/^(non|0|false|inactif|n)$/i.test(String(n["actif"]).trim());
           if (trouve){ AGENTS[AGENTS.indexOf(trouve)] = rec; updated++; } else { AGENTS.push(rec); added++; }
           if (n["responsable"] !== undefined) aRattacher.push([rec.id, String(n["responsable"]).trim()]);

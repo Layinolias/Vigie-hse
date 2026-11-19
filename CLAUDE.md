@@ -31,6 +31,7 @@ L'application est à la **racine du dépôt** : les pages `.html`, `assets/`, `s
 
 - **Poste de pilotage** (regroupe tous les accès) : https://claude.ai/code/artifact/e3b695a5-af0c-4c05-ac92-dd2dd38fce88
 - **Cahier du préventeur** (questions/réponses métier + dépôt d'idées du collègue) : https://claude.ai/code/artifact/91200911-53e2-4f96-ae48-9f8b874fdc40 — procédure de lecture des réponses en tête de `Documentation/QUESTIONS-METIER-EN-ATTENTE.md`.
+- **Carnet de recette** (retours de test du préventeur, synthèses avec questions, suivi des bugs) : https://claude.ai/artifact/EVGEKmjbrZFvhwRR7fUN75 — usage, champs et procédure dans `Documentation/CARNET-RECETTE.md` ; synthèse seulement quand l'utilisateur la demande.
 - **Checklist QA V1** (269 points à cocher, version cliquable de `Documentation/CHECKLIST-QA-V1.md`) : https://claude.ai/artifact/NJNe2DQgKFo3gvDfrtYPaf — génération du tableau `ITEMS` : parser les `- [ ]` du `.md`, un id stable `s{section}-{slug}-{n}`, si besoin de le régénérer sans historique.
 
 Le poste de pilotage affiche des chiffres relevés dans le dépôt (modules faits, questions en attente, points de test) : les rafraîchir quand ils ont bougé.

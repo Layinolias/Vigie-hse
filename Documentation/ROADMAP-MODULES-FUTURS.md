@@ -71,7 +71,7 @@ Pour le contexte général du projet (stack, architecture, comment tester), voir
 
 | # | Module | Statut |
 |---|---|---|
-| 1 | Veille réglementaire | ✅ Fait — `administration.html` (onglet Veille réglementaire), affiché sur `dashboard.html` |
+| 1 | Veille réglementaire | ✅ Fait — module `actualites.html` (Flash info et actualités, depuis le 2026-11-19 ; avant : onglet d'Administration), affiché sur `dashboard.html` |
 | 2 | Inspection / Audit | ✅ Fait — `inspection-audit.html`, alimente le Plan d'Actions |
 | 3 | Plan d'Actions (hub transverse) | ✅ Fait — agrège désormais DUERP + Inspection/Audit |
 | 4 | Gestion des produits chimiques | ✅ Fait — `produits-chimiques.html` |
@@ -143,7 +143,7 @@ Le distingo actuel "Ville / Agglomération" est une **structure à 2 niveaux sp�
 ### Ce qui doit devenir générique — contenu éditorial et branding
 
 - ~~Le widget météo de `index.html` est câblé en dur sur une ville fixe~~ — **fait** : il utilise désormais la géolocalisation du navigateur du visiteur (repli sur la localisation IP si refusé), donc déjà générique par construction, pas besoin de configuration par client sur ce point.
-- **✅ Fait le 2026-10-06** : chaque actualité porte un secteur (tous / collectivité territoriale / entreprise privée, choisi dans Administration → Veille réglementaire) et le tableau de bord n'affiche que celles du secteur réglé — en entreprise, seules les deux actualités INRS des sept d'origine restent ; aucune actualité « privé » n'a été inventée, le client ajoute les siennes. Constat d'origine : le panneau "Actualités du secteur HSE" est actuellement composé de 7 actus **orientées fonction publique territoriale** (DUERP collectivités, plan santé fonction publique, arrêts maladie agents territoriaux). Un client privé aurait besoin d'un jeu d'actus différent (actualité Code du travail générale, jurisprudence CSE/CSSCT, actualité INRS — déjà pertinente pour les deux mondes). Prévoir soit deux jeux de contenu (profil "collectivité" / profil "entreprise"), soit un contenu recentré sur ce qui est commun (INRS, veille légale générale) complété par un module éditable par client (rejoint le module 1 "Veille réglementaire" du backlog fonctionnel).
+- **✅ Fait le 2026-10-06** : chaque actualité porte un secteur (tous / collectivité territoriale / entreprise privée, choisi dans Administration → Veille réglementaire, aujourd'hui dans le module Flash info et actualités) et le tableau de bord n'affiche que celles du secteur réglé — en entreprise, seules les deux actualités INRS des sept d'origine restent ; aucune actualité « privé » n'a été inventée, le client ajoute les siennes. Constat d'origine : le panneau "Actualités du secteur HSE" est actuellement composé de 7 actus **orientées fonction publique territoriale** (DUERP collectivités, plan santé fonction publique, arrêts maladie agents territoriaux). Un client privé aurait besoin d'un jeu d'actus différent (actualité Code du travail générale, jurisprudence CSE/CSSCT, actualité INRS — déjà pertinente pour les deux mondes). Prévoir soit deux jeux de contenu (profil "collectivité" / profil "entreprise"), soit un contenu recentré sur ce qui est commun (INRS, veille légale générale) complété par un module éditable par client (rejoint le module 1 "Veille réglementaire" du backlog fonctionnel).
 - Nom "VIGIE HSE", palette, logo : à traiter en **marque blanche** — un nom/logo/palette par client, pas un branding figé.
 
 ### Chantiers techniques structurants
@@ -269,6 +269,8 @@ Chaque nouveau module métier construit *avant* ce jalon (voir liste 1-14 ci-des
 ## 1. Veille réglementaire — ✅ Fait (version légère)
 
 **Note d'origine :** "veille réglementaire :" *(note laissée vide par l'utilisateur — objectif à préciser)*
+
+**✅ Fait le 2026-11-19 — module « Flash info et actualités »** (`actualites.html`, `assets/actualites-ref.js`, PR Layinolias/Vigie-hse#53) : la gestion du flash info interne et des actualités du secteur HSE sort d'Administration pour devenir un module à part (droits « consulter » pour tous, « gérer » pour Administrateur, RH et Préventeur) ; le tableau de bord peut masquer le panneau des actualités du secteur (réglage `vigie_hse_actualites_reglages`) ; les flash info anciens s'archivent, à la main ou d'office après un nombre de jours réglable, et restent lisibles dans l'onglet Archives.
 
 **Livré le 2026-09-13 (version légère, option 1 du plan ci-dessous) :** le panneau "Actualités du secteur HSE" (`dashboard.html`) est maintenant piloté depuis un vrai CRUD dans `administration.html` (nouvel onglet "Veille réglementaire", clé `vigie_hse_veille`), avec exactement les champs prévus : titre, source, date, résumé, url, + catégorie (Loi / Réglementation, Jurisprudence, Norme / Référentiel, Actu métier) et statut (À lire / Lu / Archivé). Le statut "Archivé" masque l'actu du cockpit public sans la supprimer. Seed initial = les 7 mêmes actus réelles qu'avant (dates converties au format ISO), avec le même pattern "seed une seule fois" que Flash Info (`stored === null`, pas `always-merge`) — l'admin peut vider la liste sans qu'elle se re-remplisse toute seule.
 

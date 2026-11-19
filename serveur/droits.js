@@ -40,8 +40,9 @@ const GERER = module => regle(module, 'gerer');
 // réservée à l'administration (test-droits-differentiel.js vérifie qu'aucun n'est oublié).
 const REGLES = {
   // Administration
-  users: GERER('administration'), referentials: GERER('administration'), news: GERER('administration'),
-  veille: GERER('administration'), profils: GERER('administration'),
+  users: GERER('administration'), referentials: GERER('administration'), profils: GERER('administration'),
+  // Flash info et actualités (2026-11-19) : sortis d'Administration
+  news: GERER('actualites'), veille: GERER('actualites'), actualites_reglages: GERER('actualites'),
   audit_log: regle('administration', 'gerer', 'tous'),
   // Registre AT/MP : l'ajout (déclarer) ne modifie ni ne retire rien
   dataset: regle('atmp', 'gerer', 'declarer'), rh_log: regle('atmp', 'gerer', 'tous'),

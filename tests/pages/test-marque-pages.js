@@ -36,7 +36,7 @@ function texteVisible(d){
 
 (async () => {
   const pages = fs.readdirSync(RACINE).filter(x => x.endsWith('.html')).sort();
-  check(pages.length + ' pages à vérifier', pages.length === 40, pages.length);
+  check(pages.length + ' pages à vérifier', pages.length === 41, pages.length);   // 41 depuis « Flash info et actualités » (2026-11-19)
   let defauts = 0, avecMarque = 0;
   for (const page of pages){
     // marque d'origine : la page n'est pas touchée

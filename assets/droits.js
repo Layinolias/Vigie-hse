@@ -70,6 +70,10 @@
     // Rôles de prévention (ISO 45001 § 5.3, 2026-10-18) : les rôles sont communiqués à tous — lu par tous les profils
     // préréglés —, tenu par le Préventeur (avec Administrateur et RH) ; confirmé par le préventeur (question 33, 2026-10-21).
     mod("roles-prevention", "Ressources", "Rôles de prévention", STD),
+    // Flash info et actualités (2026-11-19, demande de l'utilisateur) : les flash info internes, leurs archives et les actualités
+    // du secteur HSE, sortis d'Administration. Lus (archives comprises) par tous les profils préréglés, tenus par Administrateur,
+    // RH et Préventeur ; le tableau de bord les affiche à tous, quel que soit ce droit.
+    mod("actualites", "Ressources", "Flash info et actualités", STD),
     mod("dialogue-social", "Ressources", "Dialogue social", [["consulter", "Consulter"], ["participer", "Participer (représentant)"], ["direction", "Direction (répondre, clôturer)"]]),
     // Contexte et enjeux (ISO 45001 § 4.1, 4.2 et 6.1.1, 2026-10-15) : lu par le Manager et les représentants du personnel,
     // tenu par le Préventeur (avec Administrateur et RH) — question 30, réponse du 2026-10-16.
@@ -124,15 +128,15 @@
     { id: "p-manager", nom: "Manager", libelle: "Manager", pastille: "MANAGER", droits: {
       atmp: "consulter", rsst: "auteurs", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter", "audit-interne": "consulter", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter", communication: "consulter", achats: "demander" } },
+      documentation: "consulter", "sante-visites": "consulter", "plans-urgence": "consulter", signalements: "traiter", objectifs: "consulter", conformite: "consulter", programme: "consulter", "audit-interne": "consulter", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter", communication: "consulter", achats: "demander", actualites: "consulter" } },
     { id: "p-agent", nom: "Agent", libelle: "Compte Agent", pastille: "AG", droits: {
       atmp: "consulter", rsst: "deposer", duerp: "consulter", actions: "consulter", verifications: "consulter",
       inspections: "consulter", produits: "consulter", formations: "consulter", epi: "consulter",
-      documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", "roles-prevention": "consulter" } },
+      documentation: "consulter", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", "roles-prevention": "consulter", actualites: "consulter" } },
     { id: "p-preventeur", nom: "Préventeur", libelle: "Préventeur", pastille: "PRÉVENTEUR", droits: {
-      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer", "roles-prevention": "gerer", changements: "gerer", contexte: "gerer", "engagement-direction": "gerer", communication: "gerer", achats: "gerer", "preparation-iso": "consulter" } },
+      atmp: "declarer", "atmp-admin": "gerer", "accident-analyse": "gerer", urgences: "gerer", "sante-visites": "consulter", objectifs: "gerer", conformite: "gerer", programme: "gerer", "audit-interne": "gerer", politique: "gerer", "roles-prevention": "gerer", changements: "gerer", contexte: "gerer", "engagement-direction": "gerer", communication: "gerer", achats: "gerer", "preparation-iso": "consulter", actualites: "gerer" } },
     { id: "p-representant", nom: "Représentant du personnel", libelle: "Représentant du personnel", pastille: "REPRÉSENTANT", droits: {
-      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter", communication: "consulter", achats: "consulter" } }
+      "dialogue-social": "participer", "plans-urgence": "consulter", signalements: "signaler", politique: "consulter", "roles-prevention": "consulter", changements: "consulter", contexte: "consulter", "engagement-direction": "consulter", communication: "consulter", achats: "consulter", actualites: "consulter" } }
   ];
   var PREREGLE_PAR_ID = {};
   PREREGLES.forEach(function (p) { PREREGLE_PAR_ID[p.id] = p; });

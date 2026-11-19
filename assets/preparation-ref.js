@@ -40,7 +40,7 @@
     "7.1": { c: "hors", pages: [], manque: "relève du budget et des moyens de l'organisation" },
     "7.2": { c: "couverte", pages: [P("formation-habilitation.html", "Formation / Habilitation")] },
     "7.3": { c: "couverte", pages: [P("accueil-poste.html", "Accueil au poste"), P("base-documentaire.html", "Base documentaire")] },
-    "7.4": { c: "couverte", pages: [P("communication.html", "Communication"), P("dashboard.html", "Flash Info et veille"), P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social")] },
+    "7.4": { c: "couverte", pages: [P("communication.html", "Communication"), P("actualites.html", "Flash info et actualités"), P("registre-sst.html", "Registre SST"), P("dialogue-social.html", "Dialogue social")] },
     "7.5": { c: "couverte", pages: [P("base-documentaire.html", "Base documentaire")] },
     "8.1.1": { c: "couverte", pages: [P("verifications-periodiques.html", "Vérifications périodiques"), P("inspection-audit.html", "Inspection / Audit"), P("produits-chimiques.html", "Produits chimiques")] },
     "8.1.2": { c: "partielle", pages: [P("document-unique.html", "Document unique"), P("plan-actions.html", "Plan d'actions"), P("epi-dotation.html", "EPI & Dotation")], manque: "les mesures déjà en place au Document unique ne sont pas rangées par niveau (seules les actions du Plan d'actions le sont)" },

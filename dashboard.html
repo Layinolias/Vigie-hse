@@ -399,6 +399,7 @@
 <script src="assets/signalements-ref.js"></script>
 <script src="assets/politique-ref.js"></script>
 <script src="assets/changements-ref.js"></script>
+<script src="assets/actualites-ref.js"></script>
 <script>
   (function(){
     try {
@@ -532,11 +533,11 @@
 
       <div class="cockpit-top">
         <div class="panel news-panel">
-          <div class="news-head"><svg class="icon"><use href="#i-megaphone"/></svg><h3 class="section-title">Flash Info interne</h3><span class="section-note" style="margin-left:auto;">Publié par l'Administration</span></div>
+          <div class="news-head"><svg class="icon"><use href="#i-megaphone"/></svg><h3 class="section-title">Flash Info interne</h3><a class="section-note" id="newsLien" href="actualites.html" style="margin-left:auto;">Flash info et actualités</a></div>
           <div class="news-grid" id="newsGrid"></div>
         </div>
 
-        <div class="panel news-panel" style="margin-top:18px;">
+        <div class="panel news-panel" id="sectorNewsPanel" style="margin-top:18px;">
           <div class="news-head"><svg class="icon" style="color:var(--accent-blue);"><use href="#i-globe"/></svg><h3 class="section-title">Actualités du secteur HSE</h3><span class="section-note" style="margin-left:auto;">Veille réglementaire &amp; métier</span></div>
           <div class="news-grid" id="sectorNewsGrid"></div>
         </div>
@@ -989,17 +990,15 @@
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
-  // ---------- Flash Info / Newsletter HSE ----------
-  const NEWS_KEY = "vigie_hse_news";
-  function defaultNews(){
-    return [];
-  }
-  function loadNews(){
-    let stored = null;
-    try { const raw = VigieStore.getItem(NEWS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    if (stored === null){ stored = defaultNews(); try { VigieStore.setItem(NEWS_KEY, JSON.stringify(stored)); } catch(e){} }
-    return stored;
-  }
+  // ---------- Flash Info interne et actualités du secteur HSE (module « Flash info et actualités », assets/actualites-ref.js) ----------
+  const VA = VigieActualites;
+  function lireListe(cle){ try { const raw = VigieStore.getItem(cle); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) return p; } } catch(e){} return null; }
+  let NEWS_STOCK = lireListe(VA.CLE_FLASH);
+  if (NEWS_STOCK === null){ NEWS_STOCK = []; try { VigieStore.setItem(VA.CLE_FLASH, "[]"); } catch(e){} }
+  let ACTU_REGLAGES = VA.reglages(null);
+  try { ACTU_REGLAGES = VA.reglages(JSON.parse(VigieStore.getItem(VA.CLE_REGLAGES) || "null")); } catch(e){}
+  // le lien vers le module, pour qui y a accès
+  if (!D.peut("actualites", "consulter")) $("newsLien").replaceWith(Object.assign(document.createElement("span"), { className: "section-note", style: "margin-left:auto;", textContent: "Flash info et actualités" }));
   function fmtDateFr(iso){ if (!iso) return ""; const [y,m,d] = String(iso).split("-"); return (y && m && d) ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(iso); }
   // Fond de l'en-tête des cartes actu : la vraie image envoyée par l'admin si elle existe,
   // sinon un dégradé (parmi la palette de tokens) choisi de façon stable via un hash du titre.
@@ -1016,12 +1015,13 @@
     for (let i = 0; i < seed.length; i++){ h = (h * 31 + seed.charCodeAt(i)) >>> 0; }
     return `background-image:${NEWS_HEAD_GRADIENTS[h % NEWS_HEAD_GRADIENTS.length]}`;
   }
-  const NEWS = loadNews().slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
+  // les flash info publiés : sans les archivés (à la main, ou d'office après le délai réglé dans le module)
+  const NEWS = VA.flashPublies(NEWS_STOCK, ACTU_REGLAGES, VigieDates.aujourdhui());
   $("newsGrid").innerHTML = NEWS.length === 0
     ? `<div class="empty-hint">Aucune actualité publiée pour le moment.</div>`
     : NEWS.slice(0,6).map(n => `
       <div class="news-card">
-        <div class="news-card-head" style="${esc(newsHeadBg(n.titre, n.image))}">
+        <div class="news-card-head" style="${esc(newsHeadBg(String(n.titre || ""), n.image))}">
           <div class="news-title">${esc(n.titre)}</div>
         </div>
         <div class="news-body">
@@ -1030,44 +1030,28 @@
         </div>
       </div>`).join("");
 
-  // ---------- Actualités du secteur HSE (veille réglementaire, éditée dans Administration) ----------
-  const VEILLE_KEY = "vigie_hse_veille";
-  function defaultVeille(){
-    return [
-      { id:"v-1", secteur:"collectivite", titre:"DUERP en collectivité territoriale : ce qui change vraiment en 2026", source:"Inforisque", date:"2026-05-04", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sanctions renforcées depuis le 27 juin 2026 (loi de lutte contre les fraudes sociales et fiscales) ; le DUERP doit désormais intégrer plus explicitement les risques psychosociaux, le télétravail et les conditions de travail extrêmes.", url:"https://inforisque.fr/actualite-du-risque/article-13007-2026-05-04-DUERP-collectivite-territoriale-change-vraiment-2026.html" },
-      { id:"v-2", secteur:"collectivite", titre:"Nouveau plan santé au travail dans la fonction publique : cap sur 2026", source:"Weka", date:"2026-06-01", categorie:"Actu métier", statut:"À lire", resume:"Élaboration d'ici l'été 2026 d'un nouveau plan santé au travail, qui succède au plan 2022-2025 et se recentre sur les TMS, les RPS, l'usure professionnelle et le maintien en emploi.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/nouveau-plan-sante-au-travail-dans-la-fonction-publique-cap-sur-2026-210605/" },
-      { id:"v-3", secteur:"collectivite", titre:"Arrêts maladie : la réforme s'applique-t-elle aux agents territoriaux ?", source:"Weka", date:"2026-09-01", categorie:"Loi / Réglementation", statut:"À lire", resume:"Le décret n° 2026-498 du 12 juin 2026 plafonne la durée des arrêts de travail : 31 jours maximum en première prescription, 62 jours en prolongation.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/arrets-maladie-la-reforme-des-arrets-de-travail-au-1er-septembre-2026-s-applique-t-elle-aux-agents-territoriaux-215658/" },
-      { id:"v-4", secteur:"collectivite", titre:"La DGAFP prépare le Plan Santé au Travail dans la fonction publique 2026-2030", source:"Préventica", date:"2026-02-13", categorie:"Actu métier", statut:"À lire", resume:"Prise de parole institutionnelle sur les priorités du futur plan pluriannuel de santé au travail pour l'ensemble des agents publics.", url:"https://www.preventica.com/magazine/actualites/la-dgafp-prepare-le-plan-sante-au-travail-dans-la-fonction-publique-2026-2030-13022026" },
-      { id:"v-5", secteur:"tous", titre:"Bulletin d'actualité juridique — janvier 2026", source:"INRS", date:"2026-01-15", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sélection mensuelle des textes officiels parus en prévention des risques professionnels, en France et en Europe.", url:"https://www.inrs.fr/actualites/bulletin-juridique-janvier-2026.html" },
-      { id:"v-6", secteur:"tous", titre:"Travail & Sécurité n°879 — mars 2026", source:"INRS", date:"2026-03-01", categorie:"Actu métier", statut:"À lire", resume:"Nouveau numéro de la revue technique de référence de l'INRS sur la santé et la sécurité au travail.", url:"https://www.inrs.fr/actualites/TS-879-mars-2026.html" },
-      { id:"v-7", secteur:"collectivite", titre:"Santé et sécurité au travail — ressources officielles", source:"Portail de la Fonction publique", date:"2026-01-01", categorie:"Norme / Référentiel", statut:"À lire", resume:"Page de référence du portail officiel de la fonction publique sur les obligations et ressources en santé-sécurité au travail des agents publics.", url:"https://www.fonction-publique.gouv.fr/etre-agent-public/mon-quotidien-au-travail/sante-et-securite-au-travail" },
-    ];
+  // Actualités du secteur HSE : seulement si le module les fait afficher ; celles du secteur choisi dans Administration
+  // (ou « tous ») : un client privé ne reçoit pas celles de la fonction publique
+  let VEILLE_STOCK = lireListe(VA.CLE_VEILLE);
+  if (VEILLE_STOCK === null){ VEILLE_STOCK = VA.veilleDefaut(); try { VigieStore.setItem(VA.CLE_VEILLE, JSON.stringify(VEILLE_STOCK)); } catch(e){} }
+  if (!ACTU_REGLAGES.afficherVeille){
+    $("sectorNewsPanel").style.display = "none";
+  } else {
+    const SECTOR_NEWS = VA.veilleAffichee(VEILLE_STOCK, VigieOrga.concerne);
+    $("sectorNewsGrid").innerHTML = SECTOR_NEWS.length === 0
+      ? `<p style="color:var(--text-faint); padding:8px 0;">Aucune actualité pour le moment.</p>`
+      : SECTOR_NEWS.map(n => `
+      <div class="news-card external">
+        <div class="news-card-head" style="${esc(newsHeadBg(String(n.titre || "") + String(n.source || "")))}">
+          <div class="news-source">${esc(n.source)} · ${fmtDateFr(n.date)}</div>
+          <div class="news-title">${esc(n.titre)}</div>
+        </div>
+        <div class="news-body">
+          <div class="news-text">${esc(n.resume)}</div>
+          ${safeUrl(n.url) ? `<a class="news-link" href="${esc(safeUrl(n.url))}" target="_blank" rel="noopener noreferrer">Lire l'article <svg class="icon"><use href="#i-external-link"/></svg></a>` : ""}
+        </div>
+      </div>`).join("");
   }
-  // secteur d'une actualité : celui qu'elle porte ; à défaut (enregistrée avant le 2026-10-06), celui de
-  // l'actualité d'origine du même identifiant, sinon « tous »
-  function secteurDe(v){ return v.secteur || (defaultVeille().find(d => d.id === v.id) || {}).secteur || "tous"; }
-  function loadVeille(){
-    let stored = null;
-    try { const raw = VigieStore.getItem(VEILLE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    if (stored === null){ stored = defaultVeille(); try { VigieStore.setItem(VEILLE_KEY, JSON.stringify(stored)); } catch(e){} }
-    return stored;
-  }
-  // seules les actualités du secteur choisi dans Administration (ou « tous ») : un client privé ne reçoit pas
-  // celles de la fonction publique
-  const SECTOR_NEWS = loadVeille().filter(n => n.statut !== "Archivé" && VigieOrga.concerne(secteurDe(n))).sort((a,b) => (b.date||"").localeCompare(a.date||""));
-  $("sectorNewsGrid").innerHTML = SECTOR_NEWS.length === 0
-    ? `<p style="color:var(--text-faint); padding:8px 0;">Aucune actualité pour le moment.</p>`
-    : SECTOR_NEWS.map(n => `
-    <div class="news-card external">
-      <div class="news-card-head" style="${esc(newsHeadBg(n.titre + n.source))}">
-        <div class="news-source">${esc(n.source)} · ${fmtDateFr(n.date)}</div>
-        <div class="news-title">${esc(n.titre)}</div>
-      </div>
-      <div class="news-body">
-        <div class="news-text">${esc(n.resume)}</div>
-        ${safeUrl(n.url) ? `<a class="news-link" href="${esc(safeUrl(n.url))}" target="_blank" rel="noopener noreferrer">Lire l'article <svg class="icon"><use href="#i-external-link"/></svg></a>` : ""}
-      </div>
-    </div>`).join("");
 
   // ---------- Derniers AT / MP (RGPD : colonnes personnelles réservées RH/Admin) ----------
   function fmtDateMini(iso){ if (!iso) return "—"; const [y,m,d] = String(iso).split("-"); return (y && m && d) ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(iso); }

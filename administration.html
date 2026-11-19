@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Administration</title>
-<meta name="description" content="Panneau d'administration VIGIE HSE — utilisateurs, référentiels, flash info et journal des modifications.">
+<meta name="description" content="Panneau d'administration VIGIE HSE — utilisateurs, profils, référentiels et journal des modifications.">
 <script src="assets/stockage.js"></script>
 <script src="assets/marque.js"></script>
 <script src="assets/droits.js"></script>
@@ -116,17 +116,6 @@
   .org-suppr{ margin:0 0 14px; padding:12px 14px; border:1px solid rgba(var(--danger-rgb, 220,120,120),.45); border-radius:var(--r-sm); background:var(--bg-2); font-size:12.5px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
   .org-suppr[hidden], #orgPanel [hidden]{ display:none !important; }   /* .f impose display:flex : hidden doit l'emporter */
 
-  .news-admin-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; margin-bottom:20px; }
-  .news-admin-card{ border:1px solid var(--border); border-radius:var(--r-md); padding:13px 14px; background:var(--bg-2); display:flex; flex-direction:column; gap:6px; }
-  .news-admin-card img{ width:100%; height:80px; object-fit:cover; border-radius:8px; }
-  .news-admin-title{ font-size:13px; font-weight:600; }
-  .news-admin-text{ font-size:11.5px; color:var(--text-muted); line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-  .news-admin-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:6px; }
-  .news-admin-date{ font-size:10.5px; color:var(--text-faint); }
-  .news-admin-actions{ display:flex; gap:8px; }
-  .news-admin-actions button{ background:none; border:none; cursor:pointer; font-size:11.5px; font-weight:600; padding:0; }
-  .act-edit-btn{ color:var(--accent); } .act-edit-btn:hover{ text-decoration:underline; }
-  .act-del-btn{ color:var(--danger); } .act-del-btn:hover{ text-decoration:underline; }
 
   .banner{ display:none; align-items:center; gap:8px; margin-bottom:16px; padding:11px 14px; border-radius:var(--r-sm); background:var(--success-bg); color:var(--success); font-size:12.5px; font-weight:500; }
   .banner.show{ display:flex; }
@@ -182,7 +171,7 @@
           <div class="page-summary-icon"><svg class="icon"><use href="#i-settings"/></svg></div>
           <div class="page-summary-text">
             <h1>Administration</h1>
-            <p title="Utilisateurs & accès, référentiels de l'application, flash info et journal des modifications.">Utilisateurs &amp; accès, référentiels de l'application, flash info et journal des modifications.</p>
+            <p title="Utilisateurs & accès, référentiels de l'application et journal des modifications. Le flash info et les actualités du secteur HSE ont leur module : Flash info et actualités.">Utilisateurs &amp; accès, référentiels de l'application et journal des modifications. Le flash info et les actualités du secteur HSE ont leur module : <a href="actualites.html">Flash info et actualités</a>.</p>
           </div>
         </div>
       </header>
@@ -196,8 +185,6 @@
         <button class="admin-tab active" data-tab="users"><svg class="icon"><use href="#i-users"/></svg> Utilisateurs</button>
         <button class="admin-tab" data-tab="profils"><svg class="icon"><use href="#i-key"/></svg> Profils</button>
         <button class="admin-tab" data-tab="ref"><svg class="icon"><use href="#i-list"/></svg> Référentiels</button>
-        <button class="admin-tab" data-tab="news"><svg class="icon"><use href="#i-megaphone"/></svg> Flash Info</button>
-        <button class="admin-tab" data-tab="veille"><svg class="icon"><use href="#i-search"/></svg> Veille réglementaire</button>
         <button class="admin-tab" data-tab="audit"><svg class="icon"><use href="#i-history"/></svg> Journal des modifications</button>
         <button class="admin-tab" data-tab="personne"><svg class="icon"><use href="#i-key"/></svg> Données d'une personne</button>
         <button class="admin-tab" data-tab="consult"><svg class="icon"><use href="#i-shield-check"/></svg> Consultations</button>
@@ -356,78 +343,6 @@
             </select>
           </div>
           <div id="refEditorHost"></div>
-        </div>
-      </section>
-
-      <!-- ===================== C. FLASH INFO ===================== -->
-      <section class="tab-panel" id="tab-news">
-        <div class="banner" id="newsBanner"></div>
-        <div class="panel section-block" style="padding:20px;">
-          <div class="panel-head"><h3 class="panel-title">Actualités publiées</h3><span class="panel-note" data-mots>Visibles sur le Cockpit de tous les agents</span></div>
-          <div class="news-admin-grid" id="newsAdminGrid"></div>
-        </div>
-        <div class="panel section-block" style="padding:20px;">
-          <div class="panel-head"><h3 class="panel-title" id="newsFormTitle">Publier une actualité</h3></div>
-          <form id="newsForm">
-            <input type="hidden" id="nId" value="">
-            <div class="field-grid">
-              <div class="f span2"><label for="nTitre">Titre</label><input type="text" id="nTitre" required autocomplete="off" placeholder="ex. Vigilance canicule — rappel EPI"></div>
-              <div class="f"><label for="nDate">Date</label><input type="date" id="nDate" required></div>
-              <div class="f span3"><label for="nTexte">Message</label><textarea id="nTexte" required placeholder="Message de prévention…"></textarea></div>
-              <div class="f span2"><label for="nImage">Image (facultatif)</label><input type="file" id="nImage" accept="image/*"></div>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:16px;">
-              <button type="submit" class="btn btn-primary" id="newsSubmitBtn">Publier</button>
-              <button type="button" class="btn btn-ghost" id="newsCancelBtn" style="display:none;">Annuler la modification</button>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      <!-- ===================== C-bis. VEILLE RÉGLEMENTAIRE ===================== -->
-      <section class="tab-panel" id="tab-veille">
-        <div class="banner" id="veilleBanner"></div>
-        <div class="panel section-block" style="padding:20px;">
-          <div class="panel-head"><h3 class="panel-title">Actualités du secteur HSE</h3><span class="panel-note">Visibles sur le Cockpit, sauf statut "Archivé" et sauf celles d'un autre secteur que celui choisi dans Organisation</span></div>
-          <div class="table-wrap">
-            <table class="admin">
-              <thead><tr><th>Titre</th><th>Source</th><th>Date</th><th>Catégorie</th><th>Secteur</th><th>Statut</th><th></th></tr></thead>
-              <tbody id="veilleBody"></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="panel section-block" style="padding:20px;">
-          <div class="panel-head"><h3 class="panel-title" id="veilleFormTitle">Ajouter une actualité</h3></div>
-          <form id="veilleForm">
-            <input type="hidden" id="vId" value="">
-            <div class="field-grid">
-              <div class="f span2"><label for="vTitre">Titre</label><input type="text" id="vTitre" required autocomplete="off" placeholder="ex. DUERP en collectivité territoriale : ce qui change en 2026" data-mots></div>
-              <div class="f"><label for="vSource">Source</label><input type="text" id="vSource" required autocomplete="off" placeholder="ex. INRS, Weka, Inforisque…"></div>
-              <div class="f"><label for="vDate">Date</label><input type="date" id="vDate" required></div>
-              <div class="f"><label for="vCategorie">Catégorie</label>
-                <select id="vCategorie">
-                  <option value="Loi / Réglementation">Loi / Réglementation</option>
-                  <option value="Jurisprudence">Jurisprudence</option>
-                  <option value="Norme / Référentiel">Norme / Référentiel</option>
-                  <option value="Actu métier">Actu métier</option>
-                </select>
-              </div>
-              <div class="f"><label for="vStatut">Statut</label>
-                <select id="vStatut">
-                  <option value="À lire">À lire</option>
-                  <option value="Lu">Lu</option>
-                  <option value="Archivé">Archivé</option>
-                </select>
-              </div>
-              <div class="f"><label for="vSecteur">Secteur concerné</label><select id="vSecteur"></select></div>
-              <div class="f span3"><label for="vResume">Résumé</label><textarea id="vResume" required placeholder="Résumé court de l'actualité…"></textarea></div>
-              <div class="f span3"><label for="vUrl">Lien vers l'article</label><input type="text" id="vUrl" placeholder="https://…"></div>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:16px;">
-              <button type="submit" class="btn btn-primary" id="veilleSubmitBtn">Ajouter</button>
-              <button type="button" class="btn btn-ghost" id="veilleCancelBtn" style="display:none;">Annuler la modification</button>
-            </div>
-          </form>
         </div>
       </section>
 
@@ -1716,260 +1631,7 @@
   renderOrg();
   renderRefEditor();
 
-  // ===================================================================
-  // C. FLASH INFO
-  // ===================================================================
-  const NEWS_KEY = "vigie_hse_news";
-  function defaultNews(){
-    return [];
-  }
-  function loadNews(){
-    let stored = null;
-    try { const raw = VigieStore.getItem(NEWS_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    if (stored === null){ stored = defaultNews(); saveNews(stored); }
-    return stored;
-  }
-  function saveNews(n){ try { VigieStore.setItem(NEWS_KEY, JSON.stringify(n)); } catch(e){} }
-  let NEWS = loadNews();
-  function fmtDateFr(iso){ if (!iso) return ""; const [y,m,d] = String(iso).split("-"); return (y && m && d) ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(iso); }
-
-  function renderNewsAdmin(){
-    const grid = $("newsAdminGrid");
-    const sorted = NEWS.slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
-    grid.innerHTML = sorted.length === 0
-      ? `<div class="empty-hint">Aucune actualité publiée.</div>`
-      : sorted.map(n => `
-        <div class="news-admin-card" data-id="${esc(n.id)}">
-          ${n.image ? `<img src="${esc(n.image)}" alt="">` : ``}
-          <div class="news-admin-title">${esc(n.titre)}</div>
-          <div class="news-admin-text">${esc(n.texte)}</div>
-          <div class="news-admin-foot">
-            <span class="news-admin-date">${fmtDateFr(n.date)}</span>
-            <div class="news-admin-actions">
-              <button type="button" class="act-edit-btn" data-id="${esc(n.id)}">Modifier</button>
-              <button type="button" class="act-del-btn" data-id="${esc(n.id)}">Supprimer</button>
-            </div>
-          </div>
-        </div>`).join("");
-  }
-  renderNewsAdmin();
-  $("nDate").value = VigieDates.aujourdhui();
-
-  let editingNewsId = null;
-  $("newsAdminGrid").addEventListener("click", (e) => {
-    const editBtn = e.target.closest(".act-edit-btn");
-    const delBtn = e.target.closest(".act-del-btn");
-    if (editBtn){
-      const n = NEWS.find(x => x.id === editBtn.dataset.id);
-      if (!n) return;
-      editingNewsId = n.id;
-      $("nId").value = n.id;
-      $("nTitre").value = n.titre;
-      $("nTexte").value = n.texte;
-      $("nDate").value = n.date;
-      $("newsFormTitle").textContent = "Modifier l'actualité";
-      $("newsSubmitBtn").textContent = "Enregistrer les modifications";
-      $("newsCancelBtn").style.display = "";
-      window.scrollTo({ top: document.body.scrollHeight, behavior:"smooth" });
-    }
-    if (delBtn){
-      const n = NEWS.find(x => x.id === delBtn.dataset.id);
-      if (!n) return;
-      if (confirm(`Supprimer l'actualité « ${n.titre} » ?`)){
-        NEWS = NEWS.filter(x => x.id !== n.id);
-        saveNews(NEWS);
-        logAudit("Flash Info", "Suppression", `Actualité supprimée : ${n.titre}`);
-        renderNewsAdmin();
-        flashBanner($("newsBanner"), "Actualité supprimée.");
-      }
-    }
-  });
-  $("newsCancelBtn").addEventListener("click", () => {
-    editingNewsId = null;
-    $("newsForm").reset();
-    $("nId").value = "";
-    $("nDate").value = VigieDates.aujourdhui();
-    $("newsFormTitle").textContent = "Publier une actualité";
-    $("newsSubmitBtn").textContent = "Publier";
-    $("newsCancelBtn").style.display = "none";
-  });
-
-  function readImageFile(file){
-    return new Promise((resolve) => {
-      if (!file){ resolve(""); return; }
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => resolve("");
-      reader.readAsDataURL(file);
-    });
-  }
-
-  $("newsForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const titre = $("nTitre").value.trim();
-    const texte = $("nTexte").value.trim();
-    const date = $("nDate").value;
-    const file = $("nImage").files[0];
-    const imageDataUrl = file ? await readImageFile(file) : "";
-
-    if (editingNewsId){
-      const n = NEWS.find(x => x.id === editingNewsId);
-      if (n){
-        n.titre = titre; n.texte = texte; n.date = date;
-        if (imageDataUrl) n.image = imageDataUrl;
-        saveNews(NEWS);
-        logAudit("Flash Info", "Modification", `Actualité modifiée : ${titre}`);
-        flashBanner($("newsBanner"), "Actualité mise à jour.");
-      }
-      editingNewsId = null;
-      $("nId").value = "";
-      $("newsFormTitle").textContent = "Publier une actualité";
-      $("newsSubmitBtn").textContent = "Publier";
-      $("newsCancelBtn").style.display = "none";
-    } else {
-      const item = { id: genId("n"), titre, texte, date, image: imageDataUrl, auteur: session.user || "Administrateur" };
-      NEWS.push(item);
-      saveNews(NEWS);
-      logAudit("Flash Info", "Création", `Actualité publiée : ${titre}`);
-      flashBanner($("newsBanner"), "Actualité publiée sur le Cockpit.");
-    }
-    renderNewsAdmin();
-    e.target.reset();
-    $("nDate").value = VigieDates.aujourdhui();
-  });
-
-  // ===================================================================
-  // C-bis. VEILLE RÉGLEMENTAIRE
-  // ===================================================================
-  const VEILLE_KEY = "vigie_hse_veille";
-  function defaultVeille(){
-    return [
-      { id:"v-1", secteur:"collectivite", titre:"DUERP en collectivité territoriale : ce qui change vraiment en 2026", source:"Inforisque", date:"2026-05-04", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sanctions renforcées depuis le 27 juin 2026 (loi de lutte contre les fraudes sociales et fiscales) ; le DUERP doit désormais intégrer plus explicitement les risques psychosociaux, le télétravail et les conditions de travail extrêmes.", url:"https://inforisque.fr/actualite-du-risque/article-13007-2026-05-04-DUERP-collectivite-territoriale-change-vraiment-2026.html" },
-      { id:"v-2", secteur:"collectivite", titre:"Nouveau plan santé au travail dans la fonction publique : cap sur 2026", source:"Weka", date:"2026-06-01", categorie:"Actu métier", statut:"À lire", resume:"Élaboration d'ici l'été 2026 d'un nouveau plan santé au travail, qui succède au plan 2022-2025 et se recentre sur les TMS, les RPS, l'usure professionnelle et le maintien en emploi.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/nouveau-plan-sante-au-travail-dans-la-fonction-publique-cap-sur-2026-210605/" },
-      { id:"v-3", secteur:"collectivite", titre:"Arrêts maladie : la réforme s'applique-t-elle aux agents territoriaux ?", source:"Weka", date:"2026-09-01", categorie:"Loi / Réglementation", statut:"À lire", resume:"Le décret n° 2026-498 du 12 juin 2026 plafonne la durée des arrêts de travail : 31 jours maximum en première prescription, 62 jours en prolongation.", url:"https://www.weka.fr/actualite/sante-et-securite-au-travail/article/arrets-maladie-la-reforme-des-arrets-de-travail-au-1er-septembre-2026-s-applique-t-elle-aux-agents-territoriaux-215658/" },
-      { id:"v-4", secteur:"collectivite", titre:"La DGAFP prépare le Plan Santé au Travail dans la fonction publique 2026-2030", source:"Préventica", date:"2026-02-13", categorie:"Actu métier", statut:"À lire", resume:"Prise de parole institutionnelle sur les priorités du futur plan pluriannuel de santé au travail pour l'ensemble des agents publics.", url:"https://www.preventica.com/magazine/actualites/la-dgafp-prepare-le-plan-sante-au-travail-dans-la-fonction-publique-2026-2030-13022026" },
-      { id:"v-5", secteur:"tous", titre:"Bulletin d'actualité juridique — janvier 2026", source:"INRS", date:"2026-01-15", categorie:"Loi / Réglementation", statut:"À lire", resume:"Sélection mensuelle des textes officiels parus en prévention des risques professionnels, en France et en Europe.", url:"https://www.inrs.fr/actualites/bulletin-juridique-janvier-2026.html" },
-      { id:"v-6", secteur:"tous", titre:"Travail & Sécurité n°879 — mars 2026", source:"INRS", date:"2026-03-01", categorie:"Actu métier", statut:"À lire", resume:"Nouveau numéro de la revue technique de référence de l'INRS sur la santé et la sécurité au travail.", url:"https://www.inrs.fr/actualites/TS-879-mars-2026.html" },
-      { id:"v-7", secteur:"collectivite", titre:"Santé et sécurité au travail — ressources officielles", source:"Portail de la Fonction publique", date:"2026-01-01", categorie:"Norme / Référentiel", statut:"À lire", resume:"Page de référence du portail officiel de la fonction publique sur les obligations et ressources en santé-sécurité au travail des agents publics.", url:"https://www.fonction-publique.gouv.fr/etre-agent-public/mon-quotidien-au-travail/sante-et-securite-au-travail" },
-    ];
-  }
-  // secteur d'une actualité : celui qu'elle porte ; à défaut (enregistrée avant le 2026-10-06), celui de
-  // l'actualité d'origine du même identifiant, sinon « tous »
-  function secteurDe(v){ return v.secteur || (defaultVeille().find(d => d.id === v.id) || {}).secteur || "tous"; }
-  function loadVeille(){
-    let stored = null;
-    try { const raw = VigieStore.getItem(VEILLE_KEY); if (raw){ const p = JSON.parse(raw); if (Array.isArray(p)) stored = p; } } catch(e){}
-    if (stored === null){ stored = defaultVeille(); saveVeille(stored); }
-    return stored;
-  }
-  function saveVeille(v){ try { VigieStore.setItem(VEILLE_KEY, JSON.stringify(v)); } catch(e){} }
-  let VEILLE = loadVeille();
-  const veilleStatutCls = { "À lire":"ag", "Lu":"active-yes", "Archivé":"active-no" };
-  const libelleSecteur = (s) => s === "tous" ? "Tous les secteurs" : ((VigieOrga.SECTEURS[s] || {}).nom || s);
-  $("vSecteur").innerHTML = ["tous"].concat(Object.keys(VigieOrga.SECTEURS))
-    .map(s => `<option value="${esc(s)}">${esc(libelleSecteur(s))}</option>`).join("");
-
-  function renderVeille(){
-    const tbody = $("veilleBody");
-    const sorted = VEILLE.slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
-    tbody.innerHTML = sorted.length === 0
-      ? `<tr><td colspan="7" style="text-align:center;color:var(--text-faint);padding:20px;">Aucune actualité.</td></tr>`
-      : sorted.map(v => `
-        <tr data-id="${esc(v.id)}">
-          <td class="wrap">${esc(v.titre)}</td>
-          <td>${esc(v.source)}</td>
-          <td class="mono">${fmtDateFr(v.date)}</td>
-          <td>${esc(v.categorie)}</td>
-          <td>${esc(libelleSecteur(secteurDe(v)))}</td>
-          <td><span class="chip ${veilleStatutCls[v.statut] || ''}">${esc(v.statut)}</span></td>
-          <td>
-            <button type="button" class="btn btn-ghost btn-sm act-edit-veille" data-id="${esc(v.id)}">Modifier</button>
-            <button type="button" class="btn btn-danger btn-sm act-del-veille" data-id="${esc(v.id)}">Supprimer</button>
-          </td>
-        </tr>`).join("");
-  }
-  renderVeille();
-  $("vDate").value = VigieDates.aujourdhui();
-
-  let editingVeilleId = null;
-  $("veilleBody").addEventListener("click", (e) => {
-    const editBtn = e.target.closest(".act-edit-veille");
-    const delBtn = e.target.closest(".act-del-veille");
-    if (editBtn){
-      const v = VEILLE.find(x => x.id === editBtn.dataset.id);
-      if (!v) return;
-      editingVeilleId = v.id;
-      $("vId").value = v.id;
-      $("vTitre").value = v.titre;
-      $("vSource").value = v.source;
-      $("vDate").value = v.date;
-      $("vCategorie").value = v.categorie;
-      $("vStatut").value = v.statut;
-      $("vSecteur").value = secteurDe(v);
-      $("vResume").value = v.resume;
-      $("vUrl").value = v.url || "";
-      $("veilleFormTitle").textContent = "Modifier l'actualité";
-      $("veilleSubmitBtn").textContent = "Enregistrer les modifications";
-      $("veilleCancelBtn").style.display = "";
-      window.scrollTo({ top: document.body.scrollHeight, behavior:"smooth" });
-    }
-    if (delBtn){
-      const v = VEILLE.find(x => x.id === delBtn.dataset.id);
-      if (!v) return;
-      if (confirm(`Supprimer l'actualité « ${v.titre} » ?`)){
-        VEILLE = VEILLE.filter(x => x.id !== v.id);
-        saveVeille(VEILLE);
-        logAudit("Veille réglementaire", "Suppression", `Actualité supprimée : ${v.titre}`);
-        renderVeille();
-        flashBanner($("veilleBanner"), "Actualité supprimée.");
-      }
-    }
-  });
-  $("veilleCancelBtn").addEventListener("click", () => {
-    editingVeilleId = null;
-    $("veilleForm").reset();
-    $("vId").value = "";
-    $("vDate").value = VigieDates.aujourdhui();
-    $("veilleFormTitle").textContent = "Ajouter une actualité";
-    $("veilleSubmitBtn").textContent = "Ajouter";
-    $("veilleCancelBtn").style.display = "none";
-  });
-  $("veilleForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const titre = $("vTitre").value.trim();
-    const source = $("vSource").value.trim();
-    const date = $("vDate").value;
-    const categorie = $("vCategorie").value;
-    const statut = $("vStatut").value;
-    const secteur = $("vSecteur").value;
-    const resume = $("vResume").value.trim();
-    const url = $("vUrl").value.trim();
-
-    if (editingVeilleId){
-      const v = VEILLE.find(x => x.id === editingVeilleId);
-      if (v){
-        v.titre = titre; v.source = source; v.date = date; v.categorie = categorie;
-        v.statut = statut; v.secteur = secteur; v.resume = resume; v.url = url;
-        saveVeille(VEILLE);
-        logAudit("Veille réglementaire", "Modification", `Actualité modifiée : ${titre}`);
-        flashBanner($("veilleBanner"), "Actualité mise à jour.");
-      }
-      editingVeilleId = null;
-      $("vId").value = "";
-      $("veilleFormTitle").textContent = "Ajouter une actualité";
-      $("veilleSubmitBtn").textContent = "Ajouter";
-      $("veilleCancelBtn").style.display = "none";
-    } else {
-      const item = { id: genId("v"), titre, source, date, categorie, statut, secteur, resume, url };
-      VEILLE.push(item);
-      saveVeille(VEILLE);
-      logAudit("Veille réglementaire", "Création", `Actualité ajoutée : ${titre}`);
-      flashBanner($("veilleBanner"), "Actualité ajoutée.");
-    }
-    renderVeille();
-    e.target.reset();
-    $("vDate").value = VigieDates.aujourdhui();
-  });
+  // C. Flash info et veille réglementaire : module « Flash info et actualités » (actualites.html) depuis le 2026-11-19.
 
   // ===================================================================
   // D. JOURNAL DES MODIFICATIONS

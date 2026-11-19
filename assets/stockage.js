@@ -88,6 +88,7 @@
     vigie_hse_rh_log:             { nature:"journal",    sensible:true,  module:"Registre AT/MP" },
     vigie_hse_sidebar_locked:     { nature:"preference", sensible:false, module:"Menu latéral" },
     vigie_hse_weather_location:   { nature:"preference", sensible:false, module:"Météo du tableau de bord" },
+    vigie_hse_options_tableaux:   { nature:"preference", sensible:false, module:"Options des tableaux (colonnes, graphiques — par compte)" },
   };
 
   // Navigateur qui refuse tout stockage (cookies bloqués, certaines navigations privées) : avant,

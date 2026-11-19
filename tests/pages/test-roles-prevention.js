@@ -40,9 +40,15 @@ const J = (o) => JSON.stringify(o);
   p.$('cRole').value = 'Assistant de prévention'; p.ev(p.$('ficheForm'), 'submit');
   check('sans personne : refusé', /la personne/.test(p.alertes.pop() || '') && !(p.lire(CLE) || []).length);
   // choisir dans Gestion RH
-  check('Gestion RH : les agents proposés', p.$('cAgent').options.length === 3 && /DURAND Lucie/.test(p.$('cAgent').options[1].text) && /MARTIN Jean/.test(p.$('cAgent').options[2].text));
-  p.$('cAgent').value = 'ag1'; p.ev(p.$('cAgent'), 'change');
-  check('… choisi : le nom rempli', p.$('cPersonne').value === 'Jean MARTIN');
+  // la personne se cherche dans Gestion RH en tapant son nom (2026-11-19)
+  p.$('cPersonne').value = 'mar'; p.ev(p.$('cPersonne'), 'input');
+  const props = () => [...p.d.querySelectorAll('.vr-liste li[data-i]')].map(li => li.textContent);
+  check('Gestion RH : « mar » propose MARTIN Jean seul', props().length === 1 && /MARTIN Jean/.test(props()[0]), props());
+  p.$('cPersonne').value = ''; p.ev(p.$('cPersonne'), 'input');
+  check('… champ vidé : plus de proposition', p.d.querySelector('.vr-liste').hidden);
+  p.$('cPersonne').value = 'jean'; p.ev(p.$('cPersonne'), 'input');
+  p.d.querySelector('.vr-liste li[data-i="0"]').dispatchEvent(new p.w.MouseEvent('mousedown', { bubbles:true, cancelable:true }));
+  check('… choisi : « Prénom Nom » rempli, liste fermée', p.$('cPersonne').value === 'Jean MARTIN' && p.d.querySelector('.vr-liste').hidden);
   p.$('cDesigneLe').value = '2025-03-01'; p.$('cFinLe').value = '2025-01-01'; p.ev(p.$('ficheForm'), 'submit');
   check('fin avant la désignation : refusée', /précéder la désignation/.test(p.alertes.pop() || '') && !(p.lire(CLE) || []).length);
   p.$('cFinLe').value = '';
@@ -54,7 +60,7 @@ const J = (o) => JSON.stringify(o);
     && a1.designeLe === '2025-03-01' && a1.designePar === 'Le Maire' && a1.formationLe === '2025-02-15' && a1.contact === '01 23 45 67 89' && !('service' in a1) && !('finLe' in a1) && a1.auteur === 'PREV1' && /^role-/.test(a1.id), a1);
   check('… journal : création', (p.lire('vigie_hse_audit_log') || []).some(x => x.module === 'Rôles de prévention' && x.type === 'Création' && /Assistant de prévention/.test(x.description)));
   check('… la fiche se rouvre : « En fonction », lien vers la lettre (http seulement)', /En fonction/.test(p.$('fiche').textContent) && (p.d.querySelector('#fiche a.lien-lettre') || {}).href === 'https://intranet.example/lettre-ap.pdf'
-    && p.$('cAgent').value === 'ag1');
+    && p.$('cPersonne').value === 'Jean MARTIN' && p.$('cPersonne').dataset.vrRecherche === '1');
   // nom retapé : n'est plus la fiche RH
   p.$('cPersonne').value = 'Jean Martin-Durand'; p.ev(p.$('ficheForm'), 'submit');
   a1 = p.lire(CLE)[0];
@@ -113,7 +119,7 @@ const J = (o) => JSON.stringify(o);
   const pa = await H.page('roles-prevention.html', AG, { [CLE]: J(ROLES) });
   check('agent : la page, les 3 rôles, pas d\'ajout', !pa.erreurs.length && pa.d.querySelectorAll('#tbRoles tr[data-id]').length === 3 && !pa.$('btnNouveau') && pa.$('actRoles').innerHTML === '');
   pa.ev(pa.d.querySelector('[data-ouvrir="x1"]'), 'click');
-  check('… fiche en lecture : champs désactivés, ni Enregistrer ni Supprimer, pas de choix RH', pa.$('cRole').disabled && pa.$('cMission').disabled && !pa.d.querySelector('#ficheForm button[type="submit"]') && !pa.$('btnSupprimer') && !pa.$('cAgent'));
+  check('… fiche en lecture : champs désactivés, ni Enregistrer ni Supprimer, pas de choix RH', pa.$('cRole').disabled && pa.$('cMission').disabled && !pa.d.querySelector('#ficheForm button[type="submit"]') && !pa.$('btnSupprimer') && !pa.$('cPersonne').dataset.vrRecherche);
   const pm = await H.page('roles-prevention.html', MAN, { [CLE]: J(ROLES) });
   check('manager limité à Voirie : toute l\'organisation et son service, pas les autres', J([...pm.d.querySelectorAll('#tbRoles tr[data-id]')].map(r => r.dataset.id).sort()) === J(['x1', 'x2']));
   const pr = await H.page('roles-prevention.html', REP, { [CLE]: J(ROLES) });

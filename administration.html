@@ -348,11 +348,10 @@
           <div class="f" style="max-width:360px; margin-bottom:16px;">
             <label for="refSelect">Liste à modifier</label>
             <select id="refSelect">
-              <option value="risquesATMP">Risques (Registre AT/MP)</option>
+              <option value="risqueFamillesDUERP">Familles de risque (Document Unique, Registre AT/MP)</option>
               <option value="sieges">Sièges de lésion</option>
               <option value="natures">Natures de lésion</option>
               <option value="statutsRH">Statuts RH</option>
-              <option value="risqueFamillesDUERP">Familles de risque (Document Unique)</option>
               <option value="typesAccueil">Types d'accueil au poste</option>
             </select>
           </div>
@@ -904,8 +903,9 @@
   }
   let REF = loadReferentials();
   const REF_LABELS = {
-    risquesATMP:"Risques (Registre AT/MP)", sieges:"Sièges de lésion", natures:"Natures de lésion", statutsRH:"Statuts RH",
-    risqueFamillesDUERP:"Familles de risque (Document Unique)",
+    // « Risques (Registre AT/MP) » retirée le 2026-11-19 : la déclaration AT/MP choisit dans les familles de risque.
+    risqueFamillesDUERP:"Familles de risque (Document Unique, Registre AT/MP)",
+    sieges:"Sièges de lésion", natures:"Natures de lésion", statutsRH:"Statuts RH",
     typesAccueil:"Types d'accueil au poste",
   };
   // Listes de services : une par entrée de l'organisation, désignée « svc:<nom> » dans l'éditeur de listes
@@ -1478,6 +1478,7 @@
       // un fichier d'avant l'organisation configurable (« Services — Ville », « servicesAgglo ») va dans l'entrée
       // que Ville ou Agglomération est devenue, si elle existe encore
       const parNom = {}; Object.entries(REF_LABELS).forEach(([cle, lib]) => { parNom[refNorm(lib)] = cle; parNom[refNorm(cle)] = cle; });
+      parNom[refNorm("Familles de risque (Document Unique)")] = "risqueFamillesDUERP";   // libellé d'avant le 2026-11-19 (kit de reprise, anciens exports)
       [["Ville", "servicesVille"], ["Agglomération", "servicesAgglo"]].forEach(([ancien, tech]) => { const a = VigieOrga.actuel(ancien); if (a){ parNom[refNorm("Services — " + ancien)] = SVC + a; parNom[refNorm(tech)] = SVC + a; } });
       VigieOrga.noms().forEach(nom => { parNom[refNorm("Services — " + nom)] = SVC + nom; });
       let added = 0, deja = 0, skipped = 0;

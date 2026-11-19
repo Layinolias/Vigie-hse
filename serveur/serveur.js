@@ -287,6 +287,7 @@ async function api(req, res, chemin){
     // ses seuls ajouts, greffés sur le registre complet
     if (session) valeur = Lecture.ecriture(session.page, cle, base.lire(cle), valeur);
     if (anonyme && Anonymisation.PROJETEES[cle] && valeur !== null) valeur = Anonymisation.grefferAjouts(base.lire(cle), valeur);
+    if (anonyme && Anonymisation.MASQUES[cle] && valeur !== null) valeur = Anonymisation.remettreMasques(cle, base.lire(cle), valeur);
     // compte limité à certains services : sa part, greffée sur le registre complet
     if (session && Perimetre.limite(session.page)) valeur = Perimetre.greffer(base.lire(cle), valeur, session.page.services);
     // ni les comptes ni les profils ne peuvent laisser l'application sans administrateur actif (comptes.gardeAdmin)

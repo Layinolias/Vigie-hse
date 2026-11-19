@@ -356,8 +356,7 @@
           <div class="span2"><label for="cRole">Rôle</label><input type="text" id="cRole" list="cRolesListe" value="${esc(courant.role || "")}" maxlength="150" placeholder="Choisir dans la liste ou saisir"${dis}>
             <datalist id="cRolesListe">${VR.suggestions(VigieOrga.secteur()).map(s => `<option value="${esc(M(s))}"></option>`).join("")}</datalist></div>
           <div><label for="cService">Périmètre</label><select id="cService"${dis}>${optsService}</select></div>
-          ${peutGerer ? `<div><label for="cAgent">Choisir dans Gestion RH</label><select id="cAgent"><option value="">— Saisie libre —</option></select></div>` : ""}
-          <div><label for="cPersonne">Personne</label><input type="text" id="cPersonne" value="${esc(courant.personne || "")}" maxlength="150" placeholder="Prénom et nom"${dis}></div>
+          <div><label for="cPersonne">Personne</label><input type="text" id="cPersonne" value="${esc(courant.personne || "")}" maxlength="150" placeholder="${peutGerer ? "Tapez pour chercher dans Gestion RH" : "Prénom et nom"}"${dis}></div>
           <div><label for="cContact">Contact professionnel</label><input type="text" id="cContact" value="${esc(courant.contact || "")}" maxlength="150" placeholder="Téléphone ou courriel"${dis}></div>
           <div class="span3"><label for="cMission">Mission</label><textarea id="cMission" placeholder="Ce que la personne fait dans ce rôle, et le temps qu'elle y consacre"${dis}>${esc(courant.mission || "")}</textarea></div>
           <div><label for="cDesigneLe">Désigné le</label><input type="date" id="cDesigneLe" value="${esc(courant.designeLe || "")}"${dis}></div>
@@ -373,11 +372,11 @@
           ${r ? `<button type="button" class="act-del" id="btnSupprimer" style="margin-left:auto;">Supprimer</button>` : ""}
         </div>` : ""}
       </form>`;
-    if (peutGerer) VigieRoster.bindAgentPicker($("cAgent"), services, (a) => {
+    // la personne se cherche dans Gestion RH en tapant son nom (assets/roster.js) ; saisie libre possible
+    if (peutGerer) VigieRoster.bindAgentSearch($("cPersonne"), services, (a) => {
       nomChoisi = [a.prenom, a.nom].filter(Boolean).join(" ").trim();
       $("cPersonne").value = nomChoisi; courant.agentId = a.id;
-    });
-    if (peutGerer && courant.agentId && [...$("cAgent").options].some(o => o.value === courant.agentId)) $("cAgent").value = courant.agentId;
+    }, { format: a => [a.prenom, a.nom].filter(Boolean).join(" ").trim() });
     $("fiche").style.display = "";
     $("fiche").scrollIntoView({ behavior:"smooth", block:"start" });
   }

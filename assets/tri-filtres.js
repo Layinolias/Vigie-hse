@@ -309,8 +309,11 @@
       headRowEl = headRow;
       var ths = headRow.children;
       for (var i = 0; i < ths.length && i < cols.length; i++) {
+        // Un en-tête qui porte data-key désigne sa colonne (ordre choisi par le compte,
+        // assets/options-tableau.js) ; sans data-key, la position dans `columns` fait foi.
+        var dk = ths[i].getAttribute && ths[i].getAttribute("data-key");
         (function (col, th) {
-          if (col.noFilter) return;
+          if (!col || col.noFilter) return;
           th.innerHTML = "";
           var wrap = document.createElement("div");
           wrap.className = "vt-th";
@@ -343,9 +346,19 @@
           wrap.appendChild(lab);
           wrap.appendChild(btn);
           th.appendChild(wrap);
-        })(cols[i], ths[i]);
+        })(dk ? byKey[dk] : cols[i], ths[i]);
       }
       refreshBtns();
+    }
+
+    // Oublier le tri et le filtre d'une colonne (colonne masquée par le compte : un filtre
+    // invisible continuerait de retirer des lignes sans que rien ne le montre).
+    function oublier(key) {
+      var change = false;
+      if (state.filters[key]) { delete state.filters[key]; change = true; }
+      if (state.sortKey === key) { state.sortKey = null; state.sortDir = 0; change = true; }
+      if (change) { closePop(); refreshBtns(); }
+      return change;
     }
 
     function apply(rows) {
@@ -379,6 +392,7 @@
       decorate: decorate,
       apply: apply,
       reset: reset,
+      oublier: oublier,
       activeFilterCount: activeFilterCount,
       close: closePop
     };

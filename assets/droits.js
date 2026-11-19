@@ -304,9 +304,24 @@
   // ---- côté page : ce que la session ouverte a le droit de faire ------------------------------------------
   // session.droits (posé à la connexion) ; sinon — session ouverte avant la mise à jour, harnais — résolu à la volée
   // depuis son rôle et ses permissions de module.
+  // Compte anonymisé (Administration, question 16) : le serveur ne lui transmet aucune donnée de santé — registre
+  // AT/MP réduit (sans identité, au mois près), dossiers, analyses et suivi médical retirés — et ne le laisse au plus
+  // qu'AJOUTER une déclaration (serveur/anonymisation.js, serveur/droits.js). Ses écrans suivent : pas de page de
+  // santé vide, pas de bouton « Modifier » refusé à l'enregistrement, la vue réduite du Registre AT/MP (2026-11-19).
+  var PLAFOND_ANONYME = { atmp: "declarer", "atmp-admin": "aucun", "accident-analyse": "aucun", "sante-visites": "aucun" };
+  function plafonner(droits) {
+    var d = {};
+    Object.keys(droits || {}).forEach(function (m) { d[m] = droits[m]; });
+    Object.keys(PLAFOND_ANONYME).forEach(function (m) {
+      if (rang(m, niveauDe(d, m)) > rang(m, PLAFOND_ANONYME[m])) d[m] = PLAFOND_ANONYME[m];
+    });
+    return d;
+  }
+
   function pour(session) {
     var r = (session && session.droits && typeof session.droits === "object") ? null : resoudre(session || {}, null);
     var droits = r ? r.droits : session.droits;
+    if (session && session.anonymise === true) droits = plafonner(droits);
     var compte = (session && session.compte) || {};
     return {
       droits: droits,

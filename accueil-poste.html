@@ -262,8 +262,7 @@
           <form id="accueilForm">
             <input type="hidden" id="fId">
             <div class="form-grid">
-              <div id="fAgentPickerWrap"><label for="fAgentPicker" data-mots>Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
-              <div><label for="fNom">Nom</label><input type="text" id="fNom" required></div>
+              <div><label for="fNom">Nom</label><input type="text" id="fNom" required placeholder="Tapez pour chercher dans Gestion RH"></div>
               <div><label for="fPrenom">Prénom</label><input type="text" id="fPrenom" required></div>
               <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
                 <select id="fCollectiviteForm" required data-org="saisie"></select>
@@ -855,7 +854,7 @@
     fillFormServiceOptions(VigieOrga.premier());
     $("fCollectiviteForm").addEventListener("change", (e) => fillFormServiceOptions(e.target.value));
     // Sélecteur d'agent (roster canonique, module Gestion RH) : pré-remplit l'identité, saisie libre possible.
-    VigieRoster.bindAgentPicker($("fAgentPicker"), myServices, (a) => {
+    VigieRoster.bindAgentSearch($("fNom"), myServices, (a) => {
       $("fNom").value = a.nom;
       $("fPrenom").value = a.prenom;
       $("fCollectiviteForm").value = VigieOrga.de(a);
@@ -869,7 +868,6 @@
       // Le modèle ne se choisit qu'à la création : à l'édition, les points de l'accueil sont déjà copiés.
       $("fModeleWrap").style.display = rec ? "none" : "";
       $("fModeleHint").style.display = rec ? "none" : "";
-      $("fAgentPickerWrap").style.display = rec ? "none" : "";
       $("fModele").innerHTML = TPL.map(t => `<option value="${esc(t.id)}">${esc(t.nom)} (${t.points.length} points)</option>`).join("");
       if (rec){
         $("fNom").value = rec.nom; $("fPrenom").value = rec.prenom;

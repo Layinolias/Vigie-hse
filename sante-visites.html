@@ -263,8 +263,7 @@
         <form id="visiteForm">
           <input type="hidden" id="fId">
           <div class="form-grid">
-            <div><label for="fAgentPicker" data-mots>Choisir un agent (roster Gestion RH, optionnel)</label><select id="fAgentPicker"><option value="">— Saisie libre —</option></select></div>
-            <div><label for="fNom">Nom</label><input type="text" id="fNom" required></div>
+            <div><label for="fNom">Nom</label><input type="text" id="fNom" required placeholder="Tapez pour chercher dans Gestion RH"></div>
             <div><label for="fPrenom">Prénom</label><input type="text" id="fPrenom" required></div>
             <div><label for="fCollectiviteForm" data-org-libelle>Collectivité</label>
               <select id="fCollectiviteForm" required data-org="saisie"></select>
@@ -693,7 +692,7 @@
 
     // ---------- Sélecteur d'agent (roster canonique, module Gestion RH) ----------
     // Additif : pré-remplit nom/prénom/collectivité/service (agents de vos services), saisie libre possible.
-    VigieRoster.bindAgentPicker($("fAgentPicker"), myServices, (a) => {
+    VigieRoster.bindAgentSearch($("fNom"), myServices, (a) => {
       $("fNom").value = a.nom;
       $("fPrenom").value = a.prenom;
       $("fCollectiviteForm").value = VigieOrga.de(a);

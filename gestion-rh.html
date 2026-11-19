@@ -10,6 +10,7 @@
 <script src="assets/icones.js"></script>
 <script src="assets/menu-lateral.js"></script>
 <script src="assets/organisation.js"></script>
+<script src="assets/roster.js"></script>
 <script src="assets/fiches-utiles.js"></script>
 <script src="assets/xlsx.full.min.js"></script>
 <script src="assets/import-fichier.js"></script>
@@ -220,6 +221,12 @@
               <div><label for="agFDateEntree">Date d'entrée</label><input type="date" id="agFDateEntree"></div>
               <div><label for="agFPoste">Poste (pénibilité)</label><select id="agFPoste"></select></div>
               <div><label for="agFStatut">Statut</label><select id="agFStatut"></select></div>
+              <div class="ag-prive"><label for="agFCivilite">Civilité</label><select id="agFCivilite"></select></div>
+              <div class="ag-prive"><label for="agFDateNaissance">Date de naissance</label><input type="date" id="agFDateNaissance"></div>
+              <div><label for="agFCategorie">Catégorie</label><select id="agFCategorie"></select></div>
+              <div><label for="agFFiliere">Filière</label><select id="agFFiliere"></select></div>
+              <div><label for="agFCadreEmploi">Cadre d'emploi</label><select id="agFCadreEmploi"></select></div>
+              <div><label for="agFGrade">Grade</label><input type="text" id="agFGrade" list="agDlGrade" autocomplete="off" placeholder="ex. Adjt tech"><datalist id="agDlGrade"></datalist></div>
               <div><label for="agFActif" style="display:flex;align-items:center;gap:8px;margin-top:22px;" data-mots><input type="checkbox" id="agFActif" checked style="width:16px;height:16px;"> Agent actif</label></div>
             </div>
             <div class="form-actions">
@@ -405,6 +412,14 @@
     const postes = lirePostes().filter(p => p.actif !== false || p.id === selectedId).sort((a, b) => String(a.intitule).localeCompare(String(b.intitule), 'fr'));
     return `<option value="">— Non renseigné</option>` + postes.map(p => `<option value="${esc(p.id)}" ${p.id === selectedId ? 'selected' : ''}>${esc(p.intitule)}${p.service ? ' — ' + esc(p.service) : ''}</option>`).join("");
   }
+  // Identité reprise par les formulaires qui demandent un agent (2026-11-19) : listes partagées avec la déclaration AT/MP.
+  const PRIVE_MASQUE = !!(session && session.anonymise);
+  const IDENTITE = [["civilite", "agFCivilite", "civilites"], ["categorie", "agFCategorie", "categories"], ["filiere", "agFFiliere", "filieres"], ["cadreEmploi", "agFCadreEmploi", "cadresEmploi"]];
+  function optionsListe(valeurs, selected){
+    const liste = valeurs.slice();
+    if (selected && !liste.includes(selected)) liste.push(selected);
+    return `<option value="">— Non renseigné</option>` + liste.map(v => `<option value="${esc(v)}" ${v === selected ? 'selected' : ''}>${esc(v)}</option>`).join("");
+  }
   function optionsStatut(selected){
     const liste = (REF.statutsRH || []).slice();
     if (selected && !liste.includes(selected)) liste.push(selected);
@@ -536,6 +551,12 @@
     $("agFManager").innerHTML = fillManagerOptions(rec ? rec.id : null, rec ? rec.managerId : "");
     $("agFPoste").innerHTML = optionsPoste(rec ? rec.posteId || "" : "");
     $("agFStatut").innerHTML = optionsStatut(rec ? rec.statut || "" : "");
+    IDENTITE.forEach(([champ, idChamp, liste]) => { $(idChamp).innerHTML = optionsListe(VigieRoster.LISTES[liste], rec ? rec[champ] || "" : ""); });
+    $("agDlGrade").innerHTML = VigieRoster.LISTES.grades.map(g => `<option value="${esc(g)}">`).join("");
+    $("agFDateNaissance").value = rec ? rec.dateNaissance || "" : "";
+    // compte anonymisé : ni civilité ni date de naissance (données privées, ni reçues du serveur ni affichées)
+    document.querySelectorAll("#agentForm .ag-prive").forEach(el => { el.hidden = PRIVE_MASQUE; });
+    $("agFGrade").value = rec ? rec.grade || "" : "";
     if (rec){
       $("agentFormTitle").textContent = VigieOrga.mots("Modifier l'agent");
       $("agFId").value = rec.id;
@@ -571,6 +592,12 @@
       dateEntree: $("agFDateEntree").value || "",
       posteId: $("agFPoste").value || "",
       statut: $("agFStatut").value || "",
+      civilite: PRIVE_MASQUE ? (AGENTS.find(a => a.id === id) || {}).civilite || "" : $("agFCivilite").value || "",
+      dateNaissance: PRIVE_MASQUE ? (AGENTS.find(a => a.id === id) || {}).dateNaissance || "" : $("agFDateNaissance").value || "",
+      categorie: $("agFCategorie").value || "",
+      filiere: $("agFFiliere").value || "",
+      cadreEmploi: $("agFCadreEmploi").value || "",
+      grade: $("agFGrade").value.trim(),
       actif: $("agFActif").checked,
       auteur: (session && session.user) || "—",
       dateCreation: id ? (AGENTS.find(a => a.id === id) || {}).dateCreation || VigieDates.aujourdhui() : VigieDates.aujourdhui(),
@@ -605,9 +632,9 @@
   if (canGestionRhWrite){ $("btnNewAgent").addEventListener("click", () => openAgentForm(null)); }
   VigieImpression.brancher("btnExportAgents");
   $("btnExportAgents").addEventListener("click", () => {
-    const rows = AGENTS.map(a => ({ "Nom":a.nom, "Prénom":a.prenom, [VigieOrga.libelle()]:VigieOrga.de(a), "Service":a.service, "Responsable":a.managerId ? agentName(a.managerId) : "", "Date d'entrée":a.dateEntree||"", "Poste":intitulePoste(a.posteId), "Statut":a.statut||"", "Actif":a.actif !== false ? "Oui" : "Non" }));
+    const rows = AGENTS.map(a => ({ "Nom":a.nom, "Prénom":a.prenom, [VigieOrga.libelle()]:VigieOrga.de(a), "Service":a.service, "Responsable":a.managerId ? agentName(a.managerId) : "", "Date d'entrée":a.dateEntree||"", "Poste":intitulePoste(a.posteId), "Statut":a.statut||"", ...(PRIVE_MASQUE ? {} : { "Civilité":a.civilite||"", "Date de naissance":a.dateNaissance||"" }), "Catégorie":a.categorie||"", "Filière":a.filiere||"", "Cadre d'emploi":a.cadreEmploi||"", "Grade":a.grade||"", "Actif":a.actif !== false ? "Oui" : "Non" }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Nom", "Prénom", VigieOrga.libelle(), "Service", "Responsable", "Date d'entrée", "Poste", "Statut", "Actif"] }), VigieOrga.mots("Agents"));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows, { header: ["Nom", "Prénom", VigieOrga.libelle(), "Service", "Responsable", "Date d'entrée", "Poste", "Statut", ...(PRIVE_MASQUE ? [] : ["Civilité", "Date de naissance"]), "Catégorie", "Filière", "Cadre d'emploi", "Grade", "Actif"] }), VigieOrga.mots("Agents"));
     XLSX.writeFile(wb, `gestion-rh-agents_${VigieDates.aujourdhui()}.xlsx`);
   });
 
@@ -653,6 +680,12 @@
             if (intitule && !p) postesInconnus++;
           }
           if (n["statut"] !== undefined) rec.statut = String(n["statut"]).trim();
+          if (n["civilite"] !== undefined && !PRIVE_MASQUE) rec.civilite = String(n["civilite"]).trim();
+          if (n["date de naissance"] !== undefined && !PRIVE_MASQUE) rec.dateNaissance = dateImp(n["date de naissance"]);
+          const colImp = (...noms) => noms.map(x => n[x]).find(v => v !== undefined);
+          [["categorie", ["categorie", "libelle categorie actuel", "libelle categorie"]], ["filiere", ["filiere", "libelle filiere actuel", "libelle filiere"]],
+           ["cadreEmploi", ["cadre d emploi", "cadre emploi", "libelle cadre emploi actuel", "libelle cadre emploi"]], ["grade", ["grade", "libelle grade actuel", "libelle grade"]]]
+            .forEach(([champ, noms]) => { const v = colImp(...noms); if (v !== undefined) rec[champ] = String(v).trim(); });
           if (n["actif"] !== undefined) rec.actif = !/^(non|0|false|inactif|n)$/i.test(String(n["actif"]).trim());
           if (trouve){ AGENTS[AGENTS.indexOf(trouve)] = rec; updated++; } else { AGENTS.push(rec); added++; }
           if (n["responsable"] !== undefined) aRattacher.push([rec.id, String(n["responsable"]).trim()]);
